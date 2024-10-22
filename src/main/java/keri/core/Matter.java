@@ -9,6 +9,7 @@ import keri.core.Codex.DigiCodex;
 import keri.core.Codex.NumCodex;
 import keri.core.Codex.BexCodex;
 import keri.core.Codex.SmallVarRawSizeCodex;
+import keri.core.args.MatterArgs;
 import keri.core.Codex.LargeVarRawSizeCodex;
 
 public class Matter {
@@ -147,7 +148,6 @@ public class Matter {
     public LargeVarRawSizeCodex largeVrzDex = new LargeVarRawSizeCodex();
     
 
-
     public Matter(MatterArgs args) {
         // TODO: Implement Matter constructor
     }
@@ -182,8 +182,6 @@ public class Matter {
         return digiDex.has(this._code);
     }
 
-
-
     static class Sizage {
         public Integer hs;
         public Integer ss;
@@ -197,23 +195,4 @@ public class Matter {
             this.ls = ls;
         }
     }
-
-    public class MatterArgs {
-        byte[] raw;
-        String code;
-        byte[] qb64b;
-        String qb64;
-        byte[] qb2;
-        Integer rize;
-
-        public MatterArgs(byte[] raw, String code, byte[] qb64b, String qb64, byte[] qb2) {
-            this.raw = raw;
-            this.code = code;
-            this.qb64b = qb64b;
-            this.qb64 = qb64;
-            this.qb2 = qb2;
-        }
-    }
-
-    
 }

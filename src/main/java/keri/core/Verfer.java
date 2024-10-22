@@ -1,6 +1,8 @@
 package keri.core;
 import java.util.Arrays;
 
+import keri.core.args.MatterArgs;
+
 public class Verfer extends Matter {
     private final Verifier verifier;
 

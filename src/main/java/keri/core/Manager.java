@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import keri.core.Salter.Tier;
-import keri.core.Signer.SignerArgs;
 
 public class Manager {
 
@@ -108,6 +107,9 @@ public class Manager {
 
         public Salter salter;
         private String _stem;
+
+        public SaltyCreator(String salt, Tier tier, String stem) {
+        }
 
         @Override
         public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) {

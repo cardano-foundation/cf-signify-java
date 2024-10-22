@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation "com.goterl:lazysodium-java:5.1.4"
     implementation "net.java.dev.jna:jna:5.15.0"
+    implementation 'org.projectlombok:lombok:1.18.28'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
