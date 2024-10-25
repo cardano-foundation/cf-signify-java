@@ -2,9 +2,13 @@ package keri.core.args;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 @Builder
 @AllArgsConstructor
+@Getter
+@Setter
 public class SignerArgs {
     byte[] raw;
     String code;
@@ -22,6 +26,5 @@ public class SignerArgs {
                 .qb2(qb2)
                 .build();
     }
-
 
 }
