@@ -5,6 +5,7 @@ import com.goterl.lazysodium.SodiumJava;
 import com.goterl.lazysodium.interfaces.Sign;
 
 import keri.core.Codex.MatterCodex;
+import keri.core.Codex.IndexerCodex;
 import keri.core.args.MatterArgs;
 import keri.core.args.SignerArgs;
 import keri.core.exceptions.EmptyMaterialError;
@@ -68,7 +69,6 @@ public class Signer extends Matter {
         if (!lazySodium.cryptoSignDetached(sig, ser, ser.length, seedAndPub)) {
             throw new Exception("Signing failed");
         }
-
         if (index == null) {
             return new Cigar(MatterArgs.builder()
                 .raw(sig)
@@ -79,16 +79,16 @@ public class Signer extends Matter {
             if (only) {
                 ondex = null;
                 code = (index <= 63) ? 
-                    Codex.IndexerCodex.Ed25519_Crt_Sig : 
-                    Codex.IndexerCodex.Ed25519_Big_Crt_Sig;
+                    IndexerCodex.Ed25519_Crt_Sig.getValue() :
+                    IndexerCodex.Ed25519_Big_Crt_Sig.getValue();
             } else {
                 if (ondex == null) {
                     ondex = index;
                 }
                 // TODO: Implement Indexer
                 code = (ondex.equals(index) && index <= 63) ? 
-                    Codex.IndexerCodex.Ed25519_Sig : 
-                    Codex.IndexerCodex.Ed25519_Big_Sig;
+                    IndexerCodex.Ed25519_Sig.getValue() :
+                    IndexerCodex.Ed25519_Big_Sig.getValue();
             }
 
             // TODO: Implement Siger

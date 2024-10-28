@@ -23,7 +23,7 @@ public class Codex {
         private static final Map<String, BexCodex> bexCodexFieldMap =
             Arrays.stream(BexCodex.values())
                 .collect(Collectors.toMap(BexCodex::getValue, Function.identity()));
-            
+
         BexCodex(String value) {
             this.value = value;
         }
@@ -33,8 +33,8 @@ public class Codex {
         }
     }
 
-   @Getter
-   public enum DigiCodex {
+    @Getter
+    public enum DigiCodex {
         Blake3_256("E"), // Blake3 256 bit digest self-addressing derivation.
         Blake2b_256("F"), // Blake2b 256 bit digest self-addressing derivation.
         Blake2s_256("G"), // Blake2s 256 bit digest self-addressing derivation.
@@ -49,7 +49,7 @@ public class Codex {
         private static final Map<String, DigiCodex> digiCodexFieldMap =
             Arrays.stream(DigiCodex.values())
                 .collect(Collectors.toMap(DigiCodex::getValue, Function.identity()));
-            
+
         DigiCodex(String value) {
             this.value = value;
         }
@@ -58,7 +58,7 @@ public class Codex {
             return digiCodexFieldMap.containsKey(value);
         }
     }
-    
+
     @Getter
     public enum SmallVarRawSizeCodex {
         Lead0("4"), // First Selector Character for all ls == 0 codes
@@ -69,7 +69,7 @@ public class Codex {
         private static final Map<String, SmallVarRawSizeCodex> smallVarRawSizeCodexFieldMap =
             Arrays.stream(SmallVarRawSizeCodex.values())
                 .collect(Collectors.toMap(SmallVarRawSizeCodex::getValue, Function.identity()));
-            
+
         SmallVarRawSizeCodex(String value) {
             this.value = value;
         }
@@ -93,7 +93,7 @@ public class Codex {
         private static final Map<String, LargeVarRawSizeCodex> largeVarRawSizeCodexFieldMap =
             Arrays.stream(LargeVarRawSizeCodex.values())
                 .collect(Collectors.toMap(LargeVarRawSizeCodex::getValue, Function.identity()));
-            
+
         LargeVarRawSizeCodex(String value) {
             this.value = value;
         }
@@ -140,7 +140,7 @@ public class Codex {
         private static final Map<String, MatterCodex> matterCodexFieldMap =
             Arrays.stream(MatterCodex.values())
                 .collect(Collectors.toMap(MatterCodex::getValue, Function.identity()));
-            
+
         MatterCodex(String value) {
             this.value = value;
         }
@@ -165,7 +165,7 @@ public class Codex {
         private static final Map<String, NonTransCodex> nonTransCodexFieldMap =
             Arrays.stream(NonTransCodex.values())
                 .collect(Collectors.toMap(NonTransCodex::getValue, Function.identity()));
-            
+
         NonTransCodex(String value) {
             this.value = value;
         }
@@ -186,13 +186,127 @@ public class Codex {
         private static final Map<String, NumCodex> numCodexFieldMap =
             Arrays.stream(NumCodex.values())
                 .collect(Collectors.toMap(NumCodex::getValue, Function.identity()));
-            
+
         NumCodex(String value) {
             this.value = value;
         }
 
         static boolean has(String value) {
             return numCodexFieldMap.containsKey(value);
+        }
+    }
+
+    @Getter
+    public enum IndexerCodex {
+        Ed25519_Sig("A"),             // Ed25519 sig appears same in both lists if any
+        Ed25519_Crt_Sig("B"),         // Ed25519 sig appears in current list only
+        ECDSA_256k1_Sig("C"),         // ECDSA secp256k1 sig appears same in both lists if any
+        ECDSA_256k1_Crt_Sig("D"),     // ECDSA secp256k1 sig appears in current list
+        ECDSA_256r1_Sig("E"),         // ECDSA secp256r1 sig appears same in both lists if any
+        ECDSA_256r1_Crt_Sig("F"),     // ECDSA secp256r1 sig appears in current list
+        Ed448_Sig("0A"),              // Ed448 signature appears in both lists
+        Ed448_Crt_Sig("0B"),          // Ed448 signature appears in current list only
+        Ed25519_Big_Sig("2A"),        // Ed25519 sig appears in both lists
+        Ed25519_Big_Crt_Sig("2B"),    // Ed25519 sig appears in current list only
+        ECDSA_256k1_Big_Sig("2C"),    // ECDSA secp256k1 sig appears in both lists
+        ECDSA_256k1_Big_Crt_Sig("2D"), // ECDSA secp256k1 sig appears in current list only
+        ECDSA_256r1_Big_Sig("2E"),    // ECDSA secp256r1 sig appears in both lists
+        ECDSA_256r1_Big_Crt_Sig("2F"), // ECDSA secp256r1 sig appears in current list only
+        Ed448_Big_Sig("3A"),          // Ed448 signature appears in both lists
+        Ed448_Big_Crt_Sig("3B");      // Ed448 signature appears in current list only
+
+        private final String value;
+        private static final Map<String, IndexerCodex> indexerCodexFieldMap =
+            Arrays.stream(IndexerCodex.values())
+                .collect(Collectors.toMap(IndexerCodex::getValue, Function.identity()));
+
+        IndexerCodex(String value) {
+            this.value = value;
+        }
+
+        static boolean has(String value) {
+            return indexerCodexFieldMap.containsKey(value);
+        }
+    }
+
+    @Getter
+    public enum IndexedSigCodex {
+        Ed25519_Sig("A"),             // Ed25519 sig appears same in both lists if any
+        Ed25519_Crt_Sig("B"),         // Ed25519 sig appears in current list only
+        ECDSA_256k1_Sig("C"),         // ECDSA secp256k1 sig appears same in both lists if any
+        ECDSA_256k1_Crt_Sig("D"),     // ECDSA secp256k1 sig appears in current list
+        ECDSA_256r1_Sig("E"),         // ECDSA secp256r1 sig appears same in both lists if any
+        ECDSA_256r1_Crt_Sig("F"),     // ECDSA secp256r1 sig appears in current list
+        Ed448_Sig("0A"),              // Ed448 signature appears in both lists
+        Ed448_Crt_Sig("0B"),          // Ed448 signature appears in current list only
+        Ed25519_Big_Sig("2A"),        // Ed25519 sig appears in both lists
+        Ed25519_Big_Crt_Sig("2B"),    // Ed25519 sig appears in current list only
+        ECDSA_256k1_Big_Sig("2C"),    // ECDSA secp256k1 sig appears in both lists
+        ECDSA_256k1_Big_Crt_Sig("2D"), // ECDSA secp256k1 sig appears in current list only
+        ECDSA_256r1_Big_Sig("2E"),    // ECDSA secp256r1 sig appears in both lists
+        ECDSA_256r1_Big_Crt_Sig("2F"), // ECDSA secp256r1 sig appears in current list only
+        Ed448_Big_Sig("3A"),          // Ed448 signature appears in both lists
+        Ed448_Big_Crt_Sig("3B");      // Ed448 signature appears in current list only
+
+        private final String value;
+        private static final Map<String, IndexedSigCodex> indexedSigCodexFieldMap =
+            Arrays.stream(IndexedSigCodex.values())
+                .collect(Collectors.toMap(IndexedSigCodex::getValue, Function.identity()));
+
+        IndexedSigCodex(String value) {
+            this.value = value;
+        }
+
+        static boolean has(String value) {
+            return indexedSigCodexFieldMap.containsKey(value);
+        }
+    }
+
+    @Getter
+    public enum IndexedCurrentSigCodex {
+        Ed25519_Crt_Sig("B"),         // Ed25519 sig appears in current list only
+        ECDSA_256k1_Crt_Sig("D"),     // ECDSA secp256k1 sig appears in current list only
+        ECDSA_256r1_Crt_Sig("F"),     // ECDSA secp256r1 sig appears in current list
+        Ed448_Crt_Sig("0B"),          // Ed448 signature appears in current list only
+        Ed25519_Big_Crt_Sig("2B"),    // Ed25519 sig appears in current list only
+        ECDSA_256k1_Big_Crt_Sig("2D"), // ECDSA secp256k1 sig appears in current list only
+        ECDSA_256r1_Big_Crt_Sig("2F"), // ECDSA secp256r1 sig appears in current list only
+        Ed448_Big_Crt_Sig("3B");      // Ed448 signature appears in current list only
+
+        private final String value;
+        private static final Map<String, IndexedCurrentSigCodex> indexedCurrentSigCodexFieldMap =
+            Arrays.stream(IndexedCurrentSigCodex.values())
+                .collect(Collectors.toMap(IndexedCurrentSigCodex::getValue, Function.identity()));
+
+        IndexedCurrentSigCodex(String value) {
+            this.value = value;
+        }
+
+        static boolean has(String value) {
+            return indexedCurrentSigCodexFieldMap.containsKey(value);
+        }
+    }
+
+    @Getter
+    public enum IndexedBothSigCodex {
+        Ed25519_Sig("A"),          // Ed25519 sig appears same in both lists if any
+        ECDSA_256k1_Sig("C"),      // ECDSA secp256k1 sig appears same in both lists if any
+        Ed448_Sig("0A"),           // Ed448 signature appears in both lists
+        Ed25519_Big_Sig("2A"),     // Ed25519 sig appears in both lists
+        ECDSA_256k1_Big_Sig("2C"), // ECDSA secp256k1 sig appears in both lists
+        Ed448_Big_Sig("3A");       // Ed448 signature appears in both lists
+
+        private final String value;
+        private static final Map<String, IndexedBothSigCodex> indexedBothSigCodexFieldMap =
+            Arrays.stream(IndexedBothSigCodex.values())
+                .collect(Collectors.toMap(IndexedBothSigCodex::getValue, Function.identity()));
+
+        IndexedBothSigCodex(String value) {
+            this.value = value;
+        }
+
+        static boolean has(String value) {
+            return indexedBothSigCodexFieldMap.containsKey(value);
         }
     }
 }

@@ -257,9 +257,9 @@ public class Matter {
     public static int getRawSize(String code) {
         final Sizage sizage = sizes.get(code);
         final Integer cs = sizage.hs + sizage.ss;
-        if (sizage == null || sizage.fs == null) {
+        if (sizage == null || sizage.fs == null || sizage.fs == -1) {
             throw new RuntimeException("Non-fixed raw size code " + code + ".");
         }
-        return (int) Math.floor(((sizage.fs - cs) * 3) / 4) - sizage.ls;
+        return (int) Math.floor(((sizage.fs - cs) * 3.0) / 4.0) - sizage.ls;
     }
 }
