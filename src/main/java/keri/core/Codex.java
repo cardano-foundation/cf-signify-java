@@ -53,7 +53,7 @@ public class Codex {
         public final String Lead2_Big = "9"; // First Selector Character for all ls == 2 codes
     }
 
-    static class MatterCodex extends Codex {
+    public static class MatterCodex extends Codex {
         public final String Ed25519_Seed = "A"; // Ed25519 256 bit random seed for private key
         public final String Ed25519N = "B"; // Ed25519 verification key non-transferable, basic derivation.
         public final String X25519 = "C"; // X25519 public encryption key, converted from Ed25519 or Ed25519N.

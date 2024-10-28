@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 import keri.core.Salter.Tier;
+import keri.core.args.SignerArgs;
 import keri.core.args.SalterArgs;
 
 public class Manager {
+    private final Codex.MatterCodex mtrDex = new Codex.MatterCodex();
 
     enum Algos {
         randy,
@@ -56,7 +58,7 @@ public class Manager {
             this.signers = signers;
 
             if(paths != null && signers.size() != paths.size()) {
-                throw new IllegalArgumentException("'If paths are provided, they must be the same length as signers'");
+                throw new IllegalArgumentException("If paths are provided, they must be the same length as signers");
             }
            
             this.paths = paths;
@@ -81,9 +83,42 @@ public class Manager {
 
     public class RandyCreator implements Creator {
         @Override
-        public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) {
-            // TODO: Implement RandyCreator create
-            return null;
+        public Keys create(
+            List<String> codes,
+            int count,
+            String code,
+            boolean transferable,
+            int pidx,
+            int ridx,
+            int kidx,
+            boolean temp) {
+            List<Signer> signers = new ArrayList<>();
+
+            if (codes == null) {
+                code = (code != null) ? code : mtrDex.Ed25519_Seed;
+                codes = Collections.nCopies(count, code);
+            }
+
+            codes.forEach(c -> signers.add(
+                new Signer(
+                    SignerArgs.builder()
+                        .code(c)
+                        .transferable(transferable)
+                        .build())));
+
+            return new Keys(signers, null);
+        }
+
+        public Keys create() {
+            return create(null, 1, mtrDex.Ed25519_Seed, true, 0, 0, 0, false);
+        }
+
+        public Keys create(List<String> codes, int count) {
+            return create(codes, count, mtrDex.Ed25519_Seed, true, 0, 0, 0, false);
+        }
+
+        public Keys create(List<String> codes) {
+            return create(codes, 1, mtrDex.Ed25519_Seed, true, 0, 0, 0, false);
         }
 
         @Override
@@ -130,7 +165,7 @@ public class Manager {
 
                 // Previous definition of path
                 // let path = this.stem + pidx.toString(16) + ridx.toString(16) + (kidx+idx).toString(16)
-                String path = this.stem.isEmpty() 
+                String path = this.stem.isEmpty()
                                         ? Integer.toString(pidx, 16)
                                         : this.stem + Integer.toString(ridx, 16) + Integer.toString(kidx + idx, 16);
                 paths.add(path);
@@ -138,7 +173,7 @@ public class Manager {
                 Signer signer = this.salter.signer(code_, transferable, path, this.tier(), temp);
                 signers.add(signer);
             }
-            
+
             return new Keys(signers, paths);
         }
 

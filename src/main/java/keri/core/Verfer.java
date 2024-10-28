@@ -6,7 +6,7 @@ import keri.core.args.MatterArgs;
 public class Verfer extends Matter {
     private final Verifier verifier;
 
-    public Verfer(MatterArgs args) throws Exception {
+    public Verfer(MatterArgs args) {
         super(args);
 
         if (Arrays.asList(mtrDex.Ed25519N, mtrDex.Ed25519).contains(this.getCode())) {
