@@ -6,6 +6,7 @@ import java.util.List;
 
 import keri.core.Salter.Tier;
 import keri.core.args.SignerArgs;
+import keri.core.args.SalterArgs;
 
 public class Manager {
     private final Codex.MatterCodex mtrDex = new Codex.MatterCodex();
@@ -139,15 +140,41 @@ public class Manager {
     public class SaltyCreator implements Creator {
 
         public Salter salter;
-        private String _stem;
+        private String stem;
 
         public SaltyCreator(String salt, Tier tier, String stem) {
+            SalterArgs salterArgs = SalterArgs.builder()
+                    .qb64(salt)
+                    .tier(tier)
+                    .build();
+            this.salter = new Salter(salterArgs);
+            this.stem = stem == null ? "" : stem;
         }
 
         @Override
         public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) {
-            // TODO: Implement SaltyCreator create
-            return null;
+            List<Signer> signers = new ArrayList<>();
+            List<String> paths = new ArrayList<>();
+
+            if(codes == null || codes.size() == 0) {
+                codes = Collections.nCopies(count, code);
+            }
+
+            for(int idx = 0; idx < codes.size(); idx++) {
+                String code_ = codes.get(idx);
+
+                // Previous definition of path
+                // let path = this.stem + pidx.toString(16) + ridx.toString(16) + (kidx+idx).toString(16)
+                String path = this.stem.isEmpty()
+                                        ? Integer.toString(pidx, 16)
+                                        : this.stem + Integer.toString(ridx, 16) + Integer.toString(kidx + idx, 16);
+                paths.add(path);
+
+                Signer signer = this.salter.signer(code_, transferable, path, this.tier(), temp);
+                signers.add(signer);
+            }
+
+            return new Keys(signers, paths);
         }
 
         @Override
@@ -157,7 +184,7 @@ public class Manager {
 
         @Override
         public String stem() {
-            return this._stem;
+            return this.stem;
         }
 
         @Override
