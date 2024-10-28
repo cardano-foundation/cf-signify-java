@@ -1,5 +1,6 @@
 package keri.core.args;
 
+import keri.core.Codex;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,12 +11,16 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SignerArgs {
-    byte[] raw;
-    String code;
-    byte[] qb64b;
-    String qb64;
-    byte[] qb2;
-    Boolean transferable;
+    private static final Codex.MatterCodex mtrDex = new Codex.MatterCodex();
+    
+    private byte[] raw;
+    @Builder.Default
+    private String code = mtrDex.Ed25519_Seed;
+    private byte[] qb64b;
+    private String qb64;
+    private byte[] qb2;
+    @Builder.Default
+    private Boolean transferable = true;
 
     public MatterArgs toMatterArgs() {
         return MatterArgs.builder()
@@ -26,5 +31,4 @@ public class SignerArgs {
                 .qb2(qb2)
                 .build();
     }
-
 }

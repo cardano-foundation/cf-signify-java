@@ -57,7 +57,7 @@ public class Manager {
             this.signers = signers;
 
             if(paths != null && signers.size() != paths.size()) {
-                throw new IllegalArgumentException("'If paths are provided, they must be the same length as signers'");
+                throw new IllegalArgumentException("If paths are provided, they must be the same length as signers");
             }
            
             this.paths = paths;
