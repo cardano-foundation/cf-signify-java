@@ -1,21 +1,21 @@
 package keri.core.args;
 
-import keri.core.Codex;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import keri.core.Codex.MatterCodex;
 
 @Builder
 @AllArgsConstructor
 @Getter
 @Setter
 public class SignerArgs {
-    private static final Codex.MatterCodex mtrDex = new Codex.MatterCodex();
     
     private byte[] raw;
     @Builder.Default
-    private String code = mtrDex.Ed25519_Seed;
+    private String code = MatterCodex.Ed25519_Seed.getValue();
     private byte[] qb64b;
     private String qb64;
     private byte[] qb2;

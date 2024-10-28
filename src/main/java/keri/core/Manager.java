@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import keri.core.Codex.MatterCodex;
 import keri.core.Salter.Tier;
 import keri.core.args.SignerArgs;
 import keri.core.args.SalterArgs;
 
 public class Manager {
-    private final Codex.MatterCodex mtrDex = new Codex.MatterCodex();
 
     enum Algos {
         randy,
@@ -95,7 +95,7 @@ public class Manager {
             List<Signer> signers = new ArrayList<>();
 
             if (codes == null) {
-                code = (code != null) ? code : mtrDex.Ed25519_Seed;
+                code = (code != null) ? code : MatterCodex.Ed25519_Seed.getValue();
                 codes = Collections.nCopies(count, code);
             }
 
@@ -110,15 +110,15 @@ public class Manager {
         }
 
         public Keys create() {
-            return create(null, 1, mtrDex.Ed25519_Seed, true, 0, 0, 0, false);
+            return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
         public Keys create(List<String> codes, int count) {
-            return create(codes, count, mtrDex.Ed25519_Seed, true, 0, 0, 0, false);
+            return create(codes, count, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
         public Keys create(List<String> codes) {
-            return create(codes, 1, mtrDex.Ed25519_Seed, true, 0, 0, 0, false);
+            return create(codes, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
         @Override

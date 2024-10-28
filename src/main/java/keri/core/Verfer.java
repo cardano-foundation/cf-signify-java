@@ -1,6 +1,6 @@
 package keri.core;
-import java.util.Arrays;
 
+import keri.core.Codex.MatterCodex;
 import keri.core.args.MatterArgs;
 
 public class Verfer extends Matter {
@@ -9,12 +9,14 @@ public class Verfer extends Matter {
     public Verfer(MatterArgs args) {
         super(args);
 
-        if (Arrays.asList(mtrDex.Ed25519N, mtrDex.Ed25519).contains(this.getCode())) {
-            this.verifier = this::_ed25519;
-        } else if (Arrays.asList(mtrDex.ECDSA_256r1N, mtrDex.ECDSA_256r1).contains(this.getCode())) {
-            this.verifier = this::_secp256r1;
-        } else {
-            throw new RuntimeException("Unsupported code = " + this.getCode() + " for verifier.");
+        MatterCodex codex = MatterCodex.fromValue(this.getCode());
+        switch (codex) {
+            case Ed25519N:
+            case Ed25519:
+                this.verifier = this::_ed25519;
+                break;
+            default:
+                throw new RuntimeException("Unsupported code = " + this.getCode() + " for verifier.");
         }
     }
 
@@ -25,11 +27,6 @@ public class Verfer extends Matter {
     private boolean _ed25519(byte[] sig, byte[] ser, byte[] key) throws Exception {
         // TODO: Implement ed25519 verification
         // should use lazysodium
-        return false;
-    }
-
-    private boolean _secp256r1(byte[] sig, byte[] ser, byte[] key) throws Exception {
-        // TODO: Implement secp256r1 verification
         return false;
     }
 

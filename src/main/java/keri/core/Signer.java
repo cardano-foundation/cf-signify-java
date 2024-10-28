@@ -3,6 +3,8 @@ package keri.core;
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
 import com.goterl.lazysodium.interfaces.Sign;
+
+import keri.core.Codex.MatterCodex;
 import keri.core.args.MatterArgs;
 import keri.core.args.SignerArgs;
 import keri.core.exceptions.EmptyMaterialError;
@@ -12,14 +14,13 @@ import java.util.Arrays;
 
 public class Signer extends Matter {
     private static final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
-    private static final Codex.MatterCodex mtrDex = new Codex.MatterCodex();
     private final SignerFunction _sign;
     private final Verfer _verfer;
 
     public Signer(SignerArgs args) {
         super(initializeArgs(args));
 
-        if (mtrDex.Ed25519_Seed.equals(this.getCode())) {
+        if (MatterCodex.Ed25519_Seed.getValue().equals(this.getCode())) {
             this._sign = this::_ed25519;
             byte[] publicKey = new byte[Sign.PUBLICKEYBYTES];
             byte[] secretKey = new byte[Sign.SECRETKEYBYTES];
@@ -27,7 +28,7 @@ public class Signer extends Matter {
 
             _verfer = new Verfer(MatterArgs.builder()
                 .raw(publicKey)
-                .code(args.getTransferable() ? mtrDex.Ed25519 : mtrDex.Ed25519N)
+                .code(args.getTransferable() ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
                 .build());
         } else {
             throw new IllegalArgumentException("Unsupported signer code = " + this.getCode());
@@ -40,7 +41,7 @@ public class Signer extends Matter {
                 throw new EmptyMaterialError("Empty material, need raw, qb64, qb64b, or qb2.");
             }
         } catch (EmptyMaterialError e) {
-            if (mtrDex.Ed25519_Seed.equals(args.getCode())) {
+            if (MatterCodex.Ed25519_Seed.getValue().equals(args.getCode())) {
                 byte[] raw = new byte[Sign.SEEDBYTES];
                 new SecureRandom().nextBytes(raw);
                 args.setRaw(raw);
@@ -71,7 +72,7 @@ public class Signer extends Matter {
         if (index == null) {
             return new Cigar(MatterArgs.builder()
                 .raw(sig)
-                .code(mtrDex.Ed25519_Sig)
+                .code(MatterCodex.Ed25519_Sig.getValue())
                 .build(), verfer);
         } else {
             String code;
