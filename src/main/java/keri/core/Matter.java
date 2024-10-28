@@ -195,4 +195,13 @@ public class Matter {
             this.ls = ls;
         }
     }
+
+    public static int getRawSize(String code) {
+        final Sizage sizage = sizes.get(code);
+        final Integer cs = sizage.hs + sizage.ss;
+        if (sizage == null || sizage.fs == null) {
+            throw new RuntimeException("Non-fixed raw size code " + code + ".");
+        }
+        return (int) Math.floor(((sizage.fs - cs) * 3) / 4) - sizage.ls;
+    }
 }
