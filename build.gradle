@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'io.qameta.allure' version '2.11.2'
 }
 
 group = 'org.example'
@@ -16,10 +17,59 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation group: 'org.json', name: 'json', version: '20090211'
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation("org.testng:testng:7.7.0")
 }
 
-test {
-    useJUnitPlatform()
+allure {
+    version = '2.13.6'
+}
+
+// JUnit Tests (unit tests)
+tasks.test {
+    useJUnitPlatform()  // Use JUnit 5 platform
+    finalizedBy 'allureReport'
+}
+
+// Separate task for TestNG tests (E2E tests)
+tasks.register('testNG', Test) {
+    useTestNG()  // Use TestNG for E2E tests
+    testLogging {
+        events "passed", "failed", "skipped"
+    }
+    finalizedBy 'allureReport'
+}
+
+
+// Custom Allure report task for unit tests
+tasks.register('allureUnitTestReport') {
+    doLast {
+        copy {
+            from "$buildDir/allure-results" // Default results dir
+            into "$buildDir/allure-results/unitTest"
+        }
+        javaexec {
+            main = 'io.qameta.allure.cli.AllureCommand'
+            classpath = configurations.allure
+            args = ['generate', "$buildDir/allure-results/unitTest", '-o', "$buildDir/reports/allure-report/unitTest"]
+        }
+    }
+}
+
+// Custom Allure report task for E2E tests
+tasks.register('allureE2ETestReport') {
+    doLast {
+        copy {
+            from "$buildDir/allure-results" // Default results dir
+            into "$buildDir/allure-results/e2eTest"
+        }
+        javaexec {
+            main = 'io.qameta.allure.cli.AllureCommand'
+            classpath = configurations.allure
+            args = ['generate', "$buildDir/allure-results/e2eTest", '-o', "$buildDir/reports/allure-report/e2eTest"]
+        }
+    }
 }

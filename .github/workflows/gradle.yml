@@ -1,0 +1,75 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - master  # or any branch you want to run tests on
+  push:
+    branches:
+      - master
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '21'  # specify the Java version you're using
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+      - name: Generate Allure Report for Unit Tests
+        run: ./gradlew allureReport
+
+      - name: Upload Unit Test Reports (Allure)
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-unit-test-report
+          path: build/reports/allure-report/allureReport
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v2
+
+        # Step to install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Run Docker Compose (Spin up services)
+        run: docker-compose up -d  # Ensure your docker-compose.yml is correctly set up
+
+      - name: Run E2E Tests
+        run: ./gradlew testNG # Assuming your e2e tests are under e2eTest task
+
+      - name: Generate Allure Report for Unit Tests
+        run: ./gradlew allureReport
+
+      - name: Upload Unit Test Reports (Allure)
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-e2e-test-report
+          path: build/reports/allure-report/allureReport
