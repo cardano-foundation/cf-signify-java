@@ -3,10 +3,10 @@ name: CI Pipeline
 on:
   pull_request:
     branches:
-      - master  # or any branch you want to run tests on
+      - main  # or any branch you want to run tests on
   push:
     branches:
-      - master
+      - main
 
 jobs:
   unit-tests:
