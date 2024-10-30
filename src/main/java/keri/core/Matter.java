@@ -1,6 +1,5 @@
 package keri.core;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
@@ -185,12 +184,12 @@ public class Matter {
                 }
             } else {
                 final Sizage sizage = sizes.get(args.getCode());
-                if (sizage == null || sizage.fs == null || sizage.fs != -1) {
+                if (sizage == null || sizage.fs == null || sizage.fs == -1) {
                     // invalid
                     throw new RuntimeException("Unsupported variable size code=" + args.getCode());
                 }
 
-                args.setRize(Matter.getRawSize(firstCodeChar));
+                args.setRize(Matter.getRawSize(args.getCode()));
             }
 
             args.setRaw(Arrays.copyOfRange(args.getRaw(), 0, args.getRize())); // copy only exact size from raw stream
@@ -302,14 +301,15 @@ public class Matter {
         qb64 = qb64.substring(0, sizage.fs);
         final int ps = cs % 4;
         final int pbs = 2 * (ps == 0 ? sizage.ls : ps);
-        ByteBuffer raw;
+        byte[] raw;
 
         if (ps != 0) {
             final String base = "A".repeat(ps) +
                     qb64.substring(cs);
 
             final byte[] paw = CoreUtil.decodeBase64Url(base);
-            final int pi = ByteBuffer.wrap(paw, 0, ps).getInt();
+            // new byte array with the two first elements of paw
+            final int pi = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, ps));
             final int mask = pi & (1 << pbs - 1);
             if (mask != 0) {
                 // masked pad bits non-zero
@@ -317,11 +317,11 @@ public class Matter {
                         (pi & ((1 << pbs) - 1)),
                         qb64.charAt(cs)));
             }
-            raw = ByteBuffer.wrap(paw, ps, paw.length - ps);
+            raw = Arrays.copyOfRange(paw, ps, paw.length);
         } else {
             final String base = qb64.substring(cs);
             final byte[] paw = CoreUtil.decodeBase64Url(base);
-            final int li = ByteBuffer.wrap(paw, 0, sizage.ls).getInt();
+            final int li = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, sizage.ls));
             if (li != 0) {
                 if (li == 1) {
                     throw new IllegalStateException(String.format("Non zeroed lead byte = 0x%02x", li));
@@ -329,12 +329,12 @@ public class Matter {
                     throw new IllegalStateException(String.format("Non zeroed lead bytes = 0x%04x", li));
                 }
             }
-            raw = ByteBuffer.wrap(paw, sizage.ls, paw.length - sizage.ls);
+            raw = Arrays.copyOfRange(paw, sizage.ls, paw.length);
         }
 
         this._code = hard; // hard only
         this._size = size;
-        this._raw = raw.array(); // ensure bytes so immutable and for crypto ops
+        this._raw = raw; // ensure bytes so immutable and for crypto ops
     }
 
     private void _bexfil(byte[] qb2) {
@@ -349,10 +349,10 @@ public class Matter {
         final int ps = (3 - (raw.length % 3)) % 3;
         final Sizage sizage = sizes.get(code);
 
-        if (sizage != null && sizage.fs != null) {
+        if (sizage != null && sizage.fs == null) {
             // Variable size code, NOT SUPPORTED
             final int cs = sizage.hs + sizage.ss;
-            if (cs % 4 != 0) {
+            if (cs % 4 == 1) {
                 throw new RuntimeException("Whole code size not multiple of 4 for variable length material. cs=" + cs);
             }
 
