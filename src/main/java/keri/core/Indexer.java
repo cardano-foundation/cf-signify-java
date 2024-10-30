@@ -12,6 +12,7 @@ import java.util.Map;
 public class Indexer {
 
     static Map<String, Xizage> sizes = new HashMap<>();
+
     static {
         sizes.put("A", new Xizage(1, 1, 0, 88, 0));
         sizes.put("B", new Xizage(1, 1, 0, 88, 0));
@@ -38,6 +39,7 @@ public class Indexer {
     }
 
     static Map<String, Integer> hards = new HashMap<>();
+
     static {
         hards.put("A", 1);
         hards.put("B", 1);
@@ -120,7 +122,7 @@ public class Indexer {
         if (raw != null) {
             if (code == null) {
                 throw new
-                    EmptyMaterialError("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
+                        EmptyMaterialError("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
             }
 
             if (!sizes.containsKey(code)) {
@@ -183,7 +185,7 @@ public class Indexer {
     }
 
     private void _bexfil(byte[] qb2) {
-        throw new RuntimeException("qb2 not yet supported: "  + Arrays.toString(qb2));
+        throw new RuntimeException("qb2 not yet supported: " + Arrays.toString(qb2));
     }
 
     public static int getRawSize(String code) {
@@ -201,7 +203,7 @@ public class Indexer {
     public byte[] getRaw() {
         return this._raw;
     }
-    
+
     public Integer getIndex() {
         return this._index;
     }

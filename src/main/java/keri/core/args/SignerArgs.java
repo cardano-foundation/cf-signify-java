@@ -21,14 +21,4 @@ public class SignerArgs {
     private byte[] qb2;
     @Builder.Default
     private Boolean transferable = true;
-
-    public MatterArgs toMatterArgs() {
-        return MatterArgs.builder()
-                .raw(raw)
-                .code(code)
-                .qb64b(qb64b)
-                .qb64(qb64)
-                .qb2(qb2)
-                .build();
-    }
 }

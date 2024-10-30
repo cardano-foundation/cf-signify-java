@@ -4,18 +4,18 @@ import keri.core.args.IndexerArgs;
 import keri.core.Codex.IndexedSigCodex;
 
 /**
-     Siger is subclass of Indexer, indexed signature material,
-     Adds .verfer property which is instance of Verfer that provides
-     associated signature verifier.
-
-     See Indexer for inherited attributes and properties:
-
-     Attributes:
-
-     Properties:
-     .verfer is Verfer object instance
-
-     Methods:
+ * Siger is subclass of Indexer, indexed signature material,
+ * Adds .verfer property which is instance of Verfer that provides
+ * associated signature verifier.
+ * <p>
+ * See Indexer for inherited attributes and properties:
+ * <p>
+ * Attributes:
+ * <p>
+ * Properties:
+ * .verfer is Verfer object instance
+ * <p>
+ * Methods:
  **/
 
 public class Siger extends Indexer {

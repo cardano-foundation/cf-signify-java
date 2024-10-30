@@ -23,10 +23,6 @@ public class Verfer extends Matter {
         }
     }
 
-    public boolean verify(byte[] sig, byte[] ser) throws Exception {
-        return this.verifier.verify(sig, ser, this.getRaw());
-    }
-
     private boolean _ed25519(byte[] sig, byte[] ser, byte[] key) throws Exception {
         try {
             return lazySodium.cryptoSignVerifyDetached(sig, ser, ser.length, key);

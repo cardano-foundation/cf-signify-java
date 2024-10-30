@@ -9,6 +9,7 @@ import keri.core.Codex.NonTransCodex;
 import keri.core.Codex.DigiCodex;
 import keri.core.Codex.SmallVarRawSizeCodex;
 import keri.core.args.MatterArgs;
+import keri.core.exceptions.EmptyMaterialError;
 import keri.core.util.CoreUtil;
 import keri.core.Codex.LargeVarRawSizeCodex;
 
@@ -209,7 +210,7 @@ public class Matter {
         } else if (args.getQb2() != null) {
             this._bexfil(args.getQb2());
         } else {
-            throw new RuntimeException("EmptyMaterialError");
+            throw new EmptyMaterialError("EmptyMaterialError");
         }
     }
 

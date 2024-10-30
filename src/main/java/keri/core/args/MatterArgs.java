@@ -16,9 +16,4 @@ public class MatterArgs {
     String qb64;
     byte[] qb2;
     Integer rize;
-
-    public MatterArgs(byte[] raw, String code) {
-        this.raw = raw;
-        this.code = code;
-    }
 }

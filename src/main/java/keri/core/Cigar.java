@@ -5,10 +5,6 @@ import keri.core.args.MatterArgs;
 public class Cigar extends Matter {
     private Verfer _verfer;
 
-    public Cigar(MatterArgs args) {
-        this(args, null);
-    }
-
     public Cigar(MatterArgs args, Verfer verfer) {
         super(args);
         this._verfer = verfer;

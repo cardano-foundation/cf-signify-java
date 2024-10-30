@@ -2,17 +2,17 @@ package keri.core;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
-import com.goterl.lazysodium.interfaces.Sign;
+import com.goterl.lazysodium.exceptions.SodiumException;
 
+import com.goterl.lazysodium.utils.Key;
+import com.goterl.lazysodium.utils.KeyPair;
 import keri.core.Codex.MatterCodex;
 import keri.core.Codex.IndexerCodex;
 import keri.core.args.IndexerArgs;
 import keri.core.args.MatterArgs;
 import keri.core.args.SignerArgs;
-import keri.core.exceptions.EmptyMaterialError;
 
-import java.security.SecureRandom;
-import java.util.Arrays;
+import java.nio.ByteBuffer;
 
 public class Signer extends Matter {
     private static final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
@@ -24,35 +24,41 @@ public class Signer extends Matter {
 
         if (MatterCodex.Ed25519_Seed.getValue().equals(this.getCode())) {
             this._sign = this::_ed25519;
-            byte[] publicKey = new byte[Sign.PUBLICKEYBYTES];
-            byte[] secretKey = new byte[Sign.SECRETKEYBYTES];
-            lazySodium.cryptoSignSeedKeypair(publicKey, secretKey, this.getRaw());
-
-            _verfer = new Verfer(MatterArgs.builder()
-                .raw(publicKey)
-                .code(args.getTransferable() ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
-                .build());
+            try {
+                final KeyPair keypair = lazySodium.cryptoSignSeedKeypair(this.getRaw());
+                this._verfer = new Verfer(MatterArgs.builder()
+                        .raw(keypair.getPublicKey().getAsBytes())
+                        .code(args.getTransferable() ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
+                        .build());
+            } catch (SodiumException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             throw new IllegalArgumentException("Unsupported signer code = " + this.getCode());
         }
     }
 
     private static MatterArgs initializeArgs(SignerArgs args) {
-        try {
-            if (args.getRaw() == null && args.getCode() == null && args.getQb64() == null && args.getQb64b() == null && args.getQb2() == null) {
-                throw new EmptyMaterialError("Empty material");
-            }
-        } catch (EmptyMaterialError e) {
+        if (args.getRaw() == null && args.getQb64() == null
+                && args.getQb64b() == null && args.getQb2() == null) {
             if (MatterCodex.Ed25519_Seed.getValue().equals(args.getCode())) {
-                byte[] raw = new byte[Sign.SEEDBYTES];
-                new SecureRandom().nextBytes(raw);
-//                byte[] raw = lazySodium.randomBytesBuf(Sign.SEEDBYTES);
-                args.setRaw(raw);
+                final byte[] salt = lazySodium.randomBytesBuf(32); // crypto_sign_SEEDBYTES
+                return MatterArgs.builder()
+                        .raw(salt)
+                        .code(args.getCode())
+                        .build();
             } else {
                 throw new IllegalArgumentException("Unsupported signer code = " + args.getCode());
             }
         }
-        return args.toMatterArgs();
+
+        return MatterArgs.builder()
+                .raw(args.getRaw())
+                .code(args.getCode())
+                .qb64b(args.getQb64b())
+                .qb64(args.getQb64())
+                .qb2(args.getQb2())
+                .build();
     }
 
     public Verfer getVerfer() {
@@ -64,37 +70,41 @@ public class Signer extends Matter {
     }
 
     private Object _ed25519(byte[] ser, byte[] seed, Verfer verfer, Integer index, boolean only, Integer ondex) throws Exception {
-        byte[] seedAndPub = Arrays.copyOf(seed, seed.length + verfer.getRaw().length);
-        System.arraycopy(verfer.getRaw(), 0, seedAndPub, seed.length, verfer.getRaw().length);
-        
-        byte[] sig = new byte[Sign.BYTES];
-        if (!lazySodium.cryptoSignDetached(sig, ser, ser.length, seedAndPub)) {
-            throw new IllegalArgumentException();
-        }
+        ByteBuffer buffer = ByteBuffer.allocate(seed.length + verfer.getRaw().length);
+        buffer.put(seed);
+        buffer.put(verfer.getRaw());
+
+        final String sig = lazySodium.cryptoSignDetached(new String(ser), Key.fromBytes(buffer.array()));
         if (index == null) {
             return new Cigar(MatterArgs.builder()
-                .raw(sig)
-                .code(MatterCodex.Ed25519_Sig.getValue())
-                .build(), verfer);
+                    .raw(sig.getBytes())
+                    .code(MatterCodex.Ed25519_Sig.getValue())
+                    .build(),
+                    verfer);
         } else {
             String code;
             if (only) {
                 ondex = null;
-                code = (index <= 63) ? 
-                    IndexerCodex.Ed25519_Crt_Sig.getValue() :
-                    IndexerCodex.Ed25519_Big_Crt_Sig.getValue();
+                code = (index <= 63) ?
+                        IndexerCodex.Ed25519_Crt_Sig.getValue() :
+                        IndexerCodex.Ed25519_Big_Crt_Sig.getValue();
             } else {
                 if (ondex == null) {
                     ondex = index;
                 }
                 code = (ondex.equals(index) && index <= 63) ?
-                    IndexerCodex.Ed25519_Sig.getValue() :
-                    IndexerCodex.Ed25519_Big_Sig.getValue();
+                        IndexerCodex.Ed25519_Sig.getValue() :
+                        IndexerCodex.Ed25519_Big_Sig.getValue();
             }
 
             return new Siger(
-                new IndexerArgs(sig, code, index, ondex, null, null, null),
-                verfer
+                    IndexerArgs.builder()
+                            .raw(sig.getBytes())
+                            .code(code)
+                            .index(index)
+                            .ondex(ondex)
+                            .build(),
+                    verfer
             );
         }
     }

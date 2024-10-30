@@ -57,10 +57,10 @@ public class Manager {
         public Keys(List<Signer> signers, List<String> paths) {
             this.signers = signers;
 
-            if(paths != null && signers.size() != paths.size()) {
+            if (paths != null && signers.size() != paths.size()) {
                 throw new IllegalArgumentException("If paths are provided, they must be the same length as signers");
             }
-           
+
             this.paths = paths;
         }
 
@@ -76,22 +76,25 @@ public class Manager {
 
     interface Creator {
         Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp);
+
         String salt();
+
         String stem();
+
         Tier tier();
     }
 
     public class RandyCreator implements Creator {
         @Override
         public Keys create(
-            List<String> codes,
-            int count,
-            String code,
-            boolean transferable,
-            int pidx,
-            int ridx,
-            int kidx,
-            boolean temp) {
+                List<String> codes,
+                int count,
+                String code,
+                boolean transferable,
+                int pidx,
+                int ridx,
+                int kidx,
+                boolean temp) {
             List<Signer> signers = new ArrayList<>();
 
             if (codes == null) {
@@ -100,11 +103,11 @@ public class Manager {
             }
 
             codes.forEach(c -> signers.add(
-                new Signer(
-                    SignerArgs.builder()
-                        .code(c)
-                        .transferable(transferable)
-                        .build())));
+                    new Signer(
+                            SignerArgs.builder()
+                                    .code(c)
+                                    .transferable(transferable)
+                                    .build())));
 
             return new Keys(signers, null);
         }
@@ -156,18 +159,18 @@ public class Manager {
             List<Signer> signers = new ArrayList<>();
             List<String> paths = new ArrayList<>();
 
-            if(codes == null || codes.size() == 0) {
+            if (codes == null || codes.isEmpty()) {
                 codes = Collections.nCopies(count, code);
             }
 
-            for(int idx = 0; idx < codes.size(); idx++) {
+            for (int idx = 0; idx < codes.size(); idx++) {
                 String code_ = codes.get(idx);
 
                 // Previous definition of path
                 // let path = this.stem + pidx.toString(16) + ridx.toString(16) + (kidx+idx).toString(16)
                 String path = this.stem.isEmpty()
-                                        ? Integer.toString(pidx, 16)
-                                        : this.stem + Integer.toString(ridx, 16) + Integer.toString(kidx + idx, 16);
+                        ? Integer.toString(pidx, 16)
+                        : this.stem + Integer.toString(ridx, 16) + Integer.toString(kidx + idx, 16);
                 paths.add(path);
 
                 Signer signer = this.salter.signer(code_, transferable, path, this.tier(), temp);

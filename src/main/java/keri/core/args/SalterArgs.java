@@ -20,15 +20,4 @@ public class SalterArgs {
     byte[] qb64b;
     String qb64;
     byte[] qb2;
-
-    public MatterArgs toMatterArgs() {
-        return MatterArgs.builder()
-                .raw(raw)
-                .code(code)
-                .qb64b(qb64b)
-                .qb64(qb64)
-                .qb2(qb2)
-                .build();
-    }
-
 }
