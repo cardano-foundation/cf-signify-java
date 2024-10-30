@@ -1,7 +1,11 @@
 package keri.core;
 
 import keri.core.args.IndexerArgs;
+import keri.core.exceptions.EmptyMaterialError;
+import keri.core.Codex.IndexedBothSigCodex;
 
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,14 +109,81 @@ public class Indexer {
     private byte[] _raw = new byte[0];
 
     public Indexer(IndexerArgs args) {
-        int index = -1;
-        if (args.getRaw() != null) {
+        byte[] raw = args.getRaw();
+        String code = args.getCode();
+        Integer index = args.getIndex();
+        Integer ondex = args.getOndex();
+        String qb64 = args.getQb64();
+        byte[] qb64b = args.getQb64b();
+        byte[] qb2 = args.getQb2();
 
+        if (raw != null) {
+            if (code == null) {
+                throw new
+                    EmptyMaterialError("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
+            }
+
+            if (!sizes.containsKey(code)) {
+                throw new RuntimeException("Unsupported code=" + code + ".");
+            }
+
+            Xizage xizage = sizes.get(code);
+            int os = xizage.os;
+            Integer fs = xizage.fs;
+            int cs = xizage.hs + xizage.ss;
+            int ms = xizage.ss - xizage.os;
+
+            if (index == null || index < 0 || index > Math.pow(64, ms) - 1) {
+                throw new RuntimeException("Invalid index=" + index + " for code=" + code + ".");
+            }
+
+            if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, os) - 1)) {
+                throw new RuntimeException("Invalid ondex=" + ondex + " for code=" + code + ".");
+            }
+
+            if (IndexedBothSigCodex.has(code) && ondex != null) {
+                throw new RuntimeException("Non None ondex=" + ondex + " for code=" + code + ".");
+            }
+
+            if (IndexedBothSigCodex.has(code)) {
+                if (ondex == null) {
+                    ondex = index;
+                } else {
+                    if (!ondex.equals(index) && os == 0) {
+                        throw new RuntimeException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
+                    }
+                }
+            }
+
+            if (fs == null) {
+                throw new RuntimeException("Variable length unsupported");
+            }
+
+            int rawsize = (int) Math.floor(((fs - cs) * 3.0) / 4.0);
+            raw = Arrays.copyOf(raw, rawsize);
+
+            if (raw.length != rawsize) {
+                throw new RuntimeException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
+            }
+
+            this._code = code;
+            this._index = index;
+            this._ondex = ondex;
+            this._raw = raw;
+        } else if (qb64b != null) {
+            String qb64Str = Base64.getUrlEncoder().withoutPadding().encodeToString(qb64b);
+            this._exfil(qb64Str);
+        } else if (qb64 != null) {
+            this._exfil(qb64);
+        } else if (qb2 != null) {
+            this._bexfil(qb2);
+        } else {
+            throw new EmptyMaterialError("Improper initialization need either (raw and code and index) or qb64b or qb64 or qb2.");
         }
     }
 
-    private static void bexfil(byte[] qb2) {
-        throw new RuntimeException("qb2 not yet supported: "  + qb2);
+    private void _bexfil(byte[] qb2) {
+        throw new RuntimeException("qb2 not yet supported: "  + Arrays.toString(qb2));
     }
 
     public static int getRawSize(String code) {
@@ -140,8 +211,7 @@ public class Indexer {
     }
 
     public String getQb64() {
-        // TODO: Implement getQb64
-        return "";
+        return this._infil();
     }
 
     public byte[] getQb64b() {
@@ -149,12 +219,12 @@ public class Indexer {
         return new byte[0];
     }
 
-    private static String infil() {
+    private String _infil() {
         // TODO: Implement infil logic
         return "";
     }
 
-    private static void exfil(String qb64) {
+    private void _exfil(String qb64) {
         // TODO: Implement exfil logic
         if (qb64.isEmpty()) {
             throw new RuntimeException("Empty Material");

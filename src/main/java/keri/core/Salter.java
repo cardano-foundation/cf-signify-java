@@ -1,15 +1,51 @@
 package keri.core;
 
+import com.goterl.lazysodium.LazySodiumJava;
+import com.goterl.lazysodium.SodiumJava;
+import com.goterl.lazysodium.interfaces.Sign;
+import com.sun.jna.NativeLong;
+import keri.core.args.MatterArgs;
 import keri.core.args.SalterArgs;
 import keri.core.args.SignerArgs;
+import com.goterl.lazysodium.interfaces.PwHash.Alg;
+import keri.core.exceptions.EmptyMaterialError;
+import keri.core.Codex.MatterCodex;
+import lombok.Getter;
+
+import java.security.SecureRandom;
 
 public class Salter extends Matter {
+    private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
 
+    @Getter
     public Tier tier;
 
     public Salter(SalterArgs args) {
-        super(args.toMatterArgs());
-        // TODO Auto-generated constructor stub
+        super(initializeArgs(args));
+
+        if (!this.getCode().equals(MatterCodex.Salt_128.getValue())) {
+            throw new RuntimeException("Invalid code for Salter, only Salt_128 accepted");
+        }
+
+        this.tier = args.getTier() != null ? args.getTier() : Tier.low;
+    }
+
+    private static MatterArgs initializeArgs(SalterArgs args) {
+        try {
+            if (args.getRaw() == null && args.getCode() == null && args.getQb64() == null && args.getQb64b() == null && args.getQb2() == null) {
+                throw new EmptyMaterialError("Empty material");
+            }
+        } catch (EmptyMaterialError e) {
+            if (MatterCodex.Salt_128.getValue().equals(args.getCode())) {
+                byte[] salt = new byte[Sign.SEEDBYTES];
+                new SecureRandom().nextBytes(salt);
+//                byte[] salt = lazySodium.randomBytesBuf(Sign.SEEDBYTES);
+                args.setRaw(salt);
+            } else {
+                throw new IllegalArgumentException("Invalid code for Salter, only Salt_128 accepted");
+            }
+        }
+        return args.toMatterArgs();
     }
 
     public enum Tier {
@@ -18,17 +54,14 @@ public class Salter extends Matter {
         high
     }
 
-    public Tier getTier() {
-        return this.tier;
-    }
-
     private byte[] stretch(int size, String path, Tier tier, boolean temp) {
+        tier = tier == null ? this.tier : tier;
         int opslimit, memlimit;
 
         // Harcoded values based on keripy
         if(temp) {
-            opslimit = 1;
-            memlimit = 8192;
+            opslimit = 1; //libsodium.crypto_pwhash_OPSLIMIT_MIN
+            memlimit = 8192; //libsodium.crypto_pwhash_MEMLIMIT_MIN
         } else {
             switch(tier) {
                 case Tier.low:
@@ -47,20 +80,24 @@ public class Salter extends Matter {
                     throw new RuntimeException("Unsupported security tier = " + tier + ".");
             }
         }
-        
-        // TODO: find method crypto_pwhash from libsodium java
-        /*
-         * // crypto_pwhash from libsodim tyscript
-         * return libsodium.crypto_pwhash(
-            size,
+
+        return this.cryptoPwHash(size, path.getBytes(), opslimit, memlimit);
+    }
+
+    public byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) {
+        byte[] stretch = new byte[size];
+        boolean success = lazySodium.cryptoPwHash(
+            stretch,
+            stretch.length,
             path,
-            this.raw,
+            path.length,
+            this.getRaw(),
             opslimit,
-            memlimit,
-            libsodium.crypto_pwhash_ALG_ARGON2ID13
+            new NativeLong(memlimit),
+            Alg.PWHASH_ALG_ARGON2ID13
         );
-         */
-        return null;
+
+        return success ? stretch : null;
     }
 
     public Signer signer(String code, boolean transferable, String path, Tier tier, boolean temp) {
