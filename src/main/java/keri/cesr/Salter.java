@@ -1,11 +1,11 @@
-package keri.core;
+package keri.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
 import com.sun.jna.NativeLong;
-import keri.core.args.MatterArgs;
-import keri.core.args.SalterArgs;
-import keri.core.args.SignerArgs;
+import keri.cesr.args.MatterArgs;
+import keri.cesr.args.SalterArgs;
+import keri.cesr.args.SignerArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
 import lombok.Getter;
 

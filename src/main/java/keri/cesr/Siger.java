@@ -1,7 +1,7 @@
-package keri.core;
+package keri.cesr;
 
-import keri.core.args.IndexerArgs;
-import keri.core.Codex.IndexedSigCodex;
+import keri.cesr.args.IndexerArgs;
+import keri.cesr.Codex.IndexedSigCodex;
 
 /**
  * Siger is subclass of Indexer, indexed signature material,

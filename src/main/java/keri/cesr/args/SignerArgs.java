@@ -1,11 +1,11 @@
-package keri.core.args;
+package keri.cesr.args;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import keri.core.Codex.MatterCodex;
+import keri.cesr.Codex.MatterCodex;
 
 @Builder
 @AllArgsConstructor

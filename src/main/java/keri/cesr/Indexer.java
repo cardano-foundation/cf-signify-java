@@ -1,10 +1,10 @@
-package keri.core;
+package keri.cesr;
 
-import keri.core.args.IndexerArgs;
-import keri.core.exceptions.EmptyMaterialError;
-import keri.core.Codex.IndexedBothSigCodex;
-import keri.core.Codex.IndexedCurrentSigCodex;
-import keri.core.util.CoreUtil;
+import keri.cesr.args.IndexerArgs;
+import keri.cesr.exceptions.EmptyMaterialError;
+import keri.cesr.Codex.IndexedBothSigCodex;
+import keri.cesr.Codex.IndexedCurrentSigCodex;
+import keri.cesr.util.CoreUtil;
 
 import java.util.Arrays;
 import java.util.Base64;

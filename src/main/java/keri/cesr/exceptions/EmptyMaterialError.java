@@ -1,4 +1,4 @@
-package keri.core.exceptions;
+package keri.cesr.exceptions;
 
 public class EmptyMaterialError extends RuntimeException {
     private final String message;

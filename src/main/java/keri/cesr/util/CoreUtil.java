@@ -1,4 +1,4 @@
-package keri.core.util;
+package keri.cesr.util;
 
 import java.util.HashMap;
 import java.util.Map;

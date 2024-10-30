@@ -1,4 +1,4 @@
-package keri.core;
+package keri.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
@@ -6,11 +6,11 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 
 import com.goterl.lazysodium.utils.Key;
 import com.goterl.lazysodium.utils.KeyPair;
-import keri.core.Codex.MatterCodex;
-import keri.core.Codex.IndexerCodex;
-import keri.core.args.IndexerArgs;
-import keri.core.args.MatterArgs;
-import keri.core.args.SignerArgs;
+import keri.cesr.Codex.MatterCodex;
+import keri.cesr.Codex.IndexerCodex;
+import keri.cesr.args.IndexerArgs;
+import keri.cesr.args.MatterArgs;
+import keri.cesr.args.SignerArgs;
 
 import java.nio.ByteBuffer;
 

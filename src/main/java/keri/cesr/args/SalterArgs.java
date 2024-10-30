@@ -1,21 +1,22 @@
-package keri.core.args;
+package keri.cesr.args;
 
+import keri.cesr.Salter.Tier;
+import keri.cesr.Codex.MatterCodex;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import keri.core.Codex.IndexerCodex;
 
 @Builder
 @AllArgsConstructor
 @Getter
 @Setter
-public class IndexerArgs {
+public class SalterArgs {
     byte[] raw;
     @Builder.Default
-    String code = IndexerCodex.Ed25519_Sig.getValue();
-    Integer index;
-    Integer ondex;
+    String code = MatterCodex.Salt_128.getValue();
+    @Builder.Default
+    Tier tier = Tier.low;
     byte[] qb64b;
     String qb64;
     byte[] qb2;

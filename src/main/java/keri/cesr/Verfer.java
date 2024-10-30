@@ -1,9 +1,9 @@
-package keri.core;
+package keri.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
-import keri.core.Codex.MatterCodex;
-import keri.core.args.MatterArgs;
+import keri.cesr.Codex.MatterCodex;
+import keri.cesr.args.MatterArgs;
 
 public class Verfer extends Matter {
     private final Verifier verifier;

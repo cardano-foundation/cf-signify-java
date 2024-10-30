@@ -1,16 +1,16 @@
-package keri.core;
+package keri.cesr;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 
-import keri.core.Codex.NonTransCodex;
-import keri.core.Codex.DigiCodex;
-import keri.core.Codex.SmallVarRawSizeCodex;
-import keri.core.args.MatterArgs;
-import keri.core.exceptions.EmptyMaterialError;
-import keri.core.util.CoreUtil;
-import keri.core.Codex.LargeVarRawSizeCodex;
+import keri.cesr.Codex.NonTransCodex;
+import keri.cesr.Codex.DigiCodex;
+import keri.cesr.Codex.SmallVarRawSizeCodex;
+import keri.cesr.args.MatterArgs;
+import keri.cesr.exceptions.EmptyMaterialError;
+import keri.cesr.util.CoreUtil;
+import keri.cesr.Codex.LargeVarRawSizeCodex;
 
 public class Matter {
 

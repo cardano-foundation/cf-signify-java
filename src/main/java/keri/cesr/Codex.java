@@ -1,4 +1,4 @@
-package keri.core;
+package keri.cesr;
 
 import java.util.Map;
 

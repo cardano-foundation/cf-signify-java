@@ -1,6 +1,6 @@
-package keri.core;
+package keri.cesr;
 
-import keri.core.args.MatterArgs;
+import keri.cesr.args.MatterArgs;
 
 public class Cigar extends Matter {
     private Verfer _verfer;

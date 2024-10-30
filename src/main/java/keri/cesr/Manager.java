@@ -1,13 +1,13 @@
-package keri.core;
+package keri.cesr;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import keri.core.Codex.MatterCodex;
-import keri.core.Salter.Tier;
-import keri.core.args.SignerArgs;
-import keri.core.args.SalterArgs;
+import keri.cesr.Codex.MatterCodex;
+import keri.cesr.Salter.Tier;
+import keri.cesr.args.SignerArgs;
+import keri.cesr.args.SalterArgs;
 
 public class Manager {
 

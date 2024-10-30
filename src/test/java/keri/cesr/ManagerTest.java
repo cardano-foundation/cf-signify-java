@@ -1,10 +1,10 @@
-package keri.core;
+package keri.cesr;
 
-import keri.core.args.SalterArgs;
+import keri.cesr.args.SalterArgs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import keri.core.Codex.MatterCodex;
+import keri.cesr.Codex.MatterCodex;
 
 import static org.junit.jupiter.api.Assertions.*;
 
