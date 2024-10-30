@@ -11,7 +11,7 @@ import keri.core.args.SalterArgs;
 
 public class Manager {
 
-    enum Algos {
+    public enum Algos {
         randy,
         salty,
         group,
@@ -145,6 +145,10 @@ public class Manager {
         public Salter salter;
         private String stem;
 
+        public SaltyCreator() {
+            this(null, null, null);
+        }
+
         public SaltyCreator(String salt, Tier tier, String stem) {
             SalterArgs salterArgs = SalterArgs.builder()
                     .qb64(salt)
@@ -180,6 +184,10 @@ public class Manager {
             return new Keys(signers, paths);
         }
 
+        public Keys create() {
+            return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
+        }
+
         @Override
         public String salt() {
             return this.salter.getQb64();
@@ -193,6 +201,59 @@ public class Manager {
         @Override
         public Tier tier() {
             return this.salter.getTier();
+        }
+    }
+
+    public class Creatory {
+        private MakeCreator makeCreator;
+
+        public Creatory() {
+            this(Algos.salty);
+        }
+
+        public Creatory(Algos algo) {
+            switch (algo) {
+                case randy:
+                    this.makeCreator = this::makeRandy;
+                    break;
+                case salty:
+                    this.makeCreator = this::makeSalty;
+                    break;
+                default:
+                    throw new RuntimeException("Unsupported algo: " + algo);
+            }
+        }
+
+        private Creator makeRandy(Object... objects) {
+            return new RandyCreator();
+        }
+
+        Creator make(Object... args) {
+            String salt = null, stem = null;
+            Tier tier = null;
+            if (args.length >= 1) {
+                salt = (String) args[0];
+            }
+            if (args.length >= 2) {
+                tier = (Tier) args[1];
+            }
+            if (args.length >= 3) {
+                stem = (String) args[2];
+            }
+            return this.makeCreator.make(salt, tier, stem);
+        }
+
+        Creator makeRandy() {
+            return new RandyCreator();
+        }
+
+        Creator makeSalty(String salt, Tier tier, String stem) {
+            return new SaltyCreator(salt, tier, stem);
+        }
+
+        @FunctionalInterface
+        interface MakeCreator {
+            Creator make(String salt, Tier tier, String stem);
         }
     }
 
