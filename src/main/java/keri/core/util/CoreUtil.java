@@ -3,9 +3,11 @@ package keri.core.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Base64;
+import java.util.stream.Collectors;
+
 public class CoreUtil {
 
-    public static final Map<Integer, String> b64ChrByIdx = new HashMap<Integer, String>() {{
+    public static final Map<Integer, String> b64ChrByIdx = new HashMap<>() {{
         put(0, "A");
         put(1, "B");
         put(2, "C");
@@ -72,6 +74,10 @@ public class CoreUtil {
         put(63, "_");
     }};
 
+    public static final Map<String, Integer> b64IdxByChr = b64ChrByIdx.entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
     public static String intToB64(int i, int l) {
         StringBuilder out = new StringBuilder();
         while (l != 0) {
@@ -113,9 +119,24 @@ public class CoreUtil {
 
     public static int readInt(byte[] array) {
         int value = 0;
-        for (int i = 0; i < array.length; i++) {
-            value = value * 256 + (array[i] & 0xFF);
+        for (byte b : array) {
+            value = value * 256 + (b & 0xFF);
         }
         return value;
+    }
+
+    public static int b64ToInt(String s) {
+        if (s.isEmpty()) {
+            throw new IllegalArgumentException("Empty string, conversion undefined.");
+        }
+
+        int i = 0;
+        String[] rev = new StringBuilder(s).reverse().toString().split("");
+        for (int e = 0; e < rev.length; e++) {
+            String c = rev[e];
+            i |= b64IdxByChr.get(c) * (1 << (e * 6));
+        }
+
+        return i;
     }
 }

@@ -3,6 +3,8 @@ package keri.core;
 import keri.core.args.IndexerArgs;
 import keri.core.exceptions.EmptyMaterialError;
 import keri.core.Codex.IndexedBothSigCodex;
+import keri.core.Codex.IndexedCurrentSigCodex;
+import keri.core.util.CoreUtil;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -217,20 +219,139 @@ public class Indexer {
     }
 
     public byte[] getQb64b() {
-        // TODO: Implement getQb64b
-        return new byte[0];
+        return this.getQb64().getBytes();
     }
 
     private String _infil() {
-        // TODO: Implement infil logic
-        return "";
+        String code = this.getCode();
+        Integer index = this.getIndex();
+        Integer ondex = this.getOndex();
+        byte[] raw = this.getRaw();
+
+        int ps = (3 - (raw.length % 3)) % 3;
+        Xizage xizage = sizes.get(code);
+        int cs = xizage.hs + xizage.ss;
+        int ms = xizage.ss - xizage.os;
+
+        if (index < 0 || index > Math.pow(64, ms) - 1) {
+            throw new RuntimeException("Invalid index=" + index + " for code=" + code + ".");
+        }
+
+        if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, xizage.os) - 1)) {
+            throw new RuntimeException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
+        }
+
+        String both = code + CoreUtil.intToB64(index, ms) + CoreUtil.intToB64(ondex == null ? 0 : ondex, xizage.os);
+
+        if (both.length() != cs) {
+            throw new RuntimeException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
+        }
+
+        if (cs % 4 != ps - xizage.ls) {
+            throw new RuntimeException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
+        }
+
+        byte[] bytes = new byte[ps + raw.length];
+        for (int i = 0; i < ps; i++) {
+            bytes[i] = 0;
+        }
+        System.arraycopy(raw, 0, bytes, ps, raw.length);
+
+        String full = both + CoreUtil.encodeBase64Url(bytes).substring(ps - xizage.ls);
+        if (full.length() != xizage.fs) {
+            throw new RuntimeException("Invalid code=" + both + " for raw size=" + raw.length + ".");
+        }
+
+        return full;
     }
 
     private void _exfil(String qb64) {
-        // TODO: Implement exfil logic
         if (qb64.isEmpty()) {
             throw new RuntimeException("Empty Material");
         }
+
+        char first = qb64.charAt(0);
+        if (!hards.containsKey(String.valueOf(first))) {
+            throw new RuntimeException("Unexpected code " + first);
+        }
+
+        int hs = hards.get(String.valueOf(first));
+        if (qb64.length() < hs) {
+            throw new RuntimeException("Need " + (hs - qb64.length()) + " more characters.");
+        }
+
+        String hard = qb64.substring(0, hs);
+        if (!sizes.containsKey(hard)) {
+            throw new RuntimeException("Unsupported code " + hard);
+        }
+
+        Xizage xizage = sizes.get(hard);
+        int cs = xizage.hs + xizage.ss; // both hard + soft code size
+        int ms = xizage.ss - xizage.os;
+
+        if (qb64.length() < cs) {
+            throw new RuntimeException("Need " + (cs - qb64.length()) + " more characters.");
+        }
+
+        String sindex = qb64.substring(hs, hs + ms);
+        int index = CoreUtil.b64ToInt(sindex);
+
+        String sondex = qb64.substring(hs + ms, hs + ms + xizage.os);
+        Integer ondex;
+        if (IndexedCurrentSigCodex.has(hard)) {
+            ondex = xizage.os != 0 ? CoreUtil.b64ToInt(sondex) : null;
+            if (ondex != null && ondex != 0) {
+                throw new RuntimeException("Invalid ondex=" + ondex + " for code=" + hard + ".");
+            } else {
+                ondex = null;
+            }
+        } else {
+            ondex = xizage.os != 0 ? CoreUtil.b64ToInt(sondex) : index;
+        }
+
+        if (xizage.fs == null) {
+            throw new RuntimeException("variable length not supported");
+        }
+
+        if (qb64.length() < xizage.fs) {
+            throw new RuntimeException("Need " + (xizage.fs - qb64.length()) + " more chars.");
+        }
+
+        qb64 = qb64.substring(0, xizage.fs);
+        int ps = cs % 4;
+        int pbs = 2 * ps != 0 ? ps : xizage.ls;
+        byte[] raw;
+        if (ps != 0) {
+            String base = "A".repeat(ps) + qb64.substring(cs);
+            byte[] paw = CoreUtil.decodeBase64Url(base); // decode base to leave prepadded raw
+            int pi = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, ps)); // prepad as int
+            if ((pi & (1 << pbs) - 1) != 0) {
+                // masked pad bits non-zero
+                throw new RuntimeException("Non zeroed prepad bits = " + Integer.toBinaryString(pi & (1 << pbs) - 1) + " in " + qb64.charAt(cs) + ".");
+            }
+            raw = Arrays.copyOfRange(paw, ps, paw.length); // strip off ps prepad paw bytes
+        } else {
+            String base = qb64.substring(cs);
+            byte[] paw = CoreUtil.decodeBase64Url(base);
+            int li = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, xizage.ls));
+            if (li != 0) {
+                if (li == 1) {
+                    throw new RuntimeException("Non zeroed lead byte = 0x" + String.format("%02x", li) + ".");
+                } else {
+                    throw new RuntimeException("Non zeroed lead bytes = 0x" + String.format("%04x", li));
+                }
+            }
+            raw = Arrays.copyOfRange(paw, xizage.ls, paw.length);
+        }
+
+        if (raw.length != Math.floor(((qb64.length() - cs) * 3.0) / 4.0)) {
+            throw new RuntimeException("Improperly qualified material = " + qb64);
+        }
+
+        this._code = hard;
+        this._index = index;
+        this._ondex = ondex;
+        this._raw = raw; // must be bytes for crypto opts and immutable not bytearray
     }
 
     static class Xizage {
