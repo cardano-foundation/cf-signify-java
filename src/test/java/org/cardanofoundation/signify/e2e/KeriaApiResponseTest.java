@@ -1,4 +1,4 @@
-package e2e;
+package org.cardanofoundation.signify.e2e;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.json.JSONObject;
