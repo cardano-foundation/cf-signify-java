@@ -6,6 +6,7 @@ import com.goterl.lazysodium.interfaces.Sign;
 
 import keri.core.Codex.MatterCodex;
 import keri.core.Codex.IndexerCodex;
+import keri.core.args.IndexerArgs;
 import keri.core.args.MatterArgs;
 import keri.core.args.SignerArgs;
 import keri.core.exceptions.EmptyMaterialError;
@@ -39,12 +40,13 @@ public class Signer extends Matter {
     private static MatterArgs initializeArgs(SignerArgs args) {
         try {
             if (args.getRaw() == null && args.getCode() == null && args.getQb64() == null && args.getQb64b() == null && args.getQb2() == null) {
-                throw new EmptyMaterialError("Empty material, need raw, qb64, qb64b, or qb2.");
+                throw new EmptyMaterialError("Empty material");
             }
         } catch (EmptyMaterialError e) {
             if (MatterCodex.Ed25519_Seed.getValue().equals(args.getCode())) {
                 byte[] raw = new byte[Sign.SEEDBYTES];
                 new SecureRandom().nextBytes(raw);
+//                byte[] raw = lazySodium.randomBytesBuf(Sign.SEEDBYTES);
                 args.setRaw(raw);
             } else {
                 throw new IllegalArgumentException("Unsupported signer code = " + args.getCode());
@@ -67,7 +69,7 @@ public class Signer extends Matter {
         
         byte[] sig = new byte[Sign.BYTES];
         if (!lazySodium.cryptoSignDetached(sig, ser, ser.length, seedAndPub)) {
-            throw new Exception("Signing failed");
+            throw new IllegalArgumentException();
         }
         if (index == null) {
             return new Cigar(MatterArgs.builder()
@@ -85,19 +87,15 @@ public class Signer extends Matter {
                 if (ondex == null) {
                     ondex = index;
                 }
-                // TODO: Implement Indexer
-                code = (ondex.equals(index) && index <= 63) ? 
+                code = (ondex.equals(index) && index <= 63) ?
                     IndexerCodex.Ed25519_Sig.getValue() :
                     IndexerCodex.Ed25519_Big_Sig.getValue();
             }
 
-            // TODO: Implement Siger
-            return new Siger(SigerArgs.builder()
-                .raw(sig)
-                .code(code)
-                .index(index)
-                .ondex(ondex)
-                .build(), verfer);
+            return new Siger(
+                new IndexerArgs(sig, code, index, ondex, null, null, null),
+                verfer
+            );
         }
     }
 

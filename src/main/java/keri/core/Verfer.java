@@ -1,10 +1,13 @@
 package keri.core;
 
+import com.goterl.lazysodium.LazySodiumJava;
+import com.goterl.lazysodium.SodiumJava;
 import keri.core.Codex.MatterCodex;
 import keri.core.args.MatterArgs;
 
 public class Verfer extends Matter {
     private final Verifier verifier;
+    private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
 
     public Verfer(MatterArgs args) {
         super(args);
@@ -25,9 +28,11 @@ public class Verfer extends Matter {
     }
 
     private boolean _ed25519(byte[] sig, byte[] ser, byte[] key) throws Exception {
-        // TODO: Implement ed25519 verification
-        // should use lazysodium
-        return false;
+        try {
+            return lazySodium.cryptoSignVerifyDetached(sig, ser, ser.length, key);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
 
     @FunctionalInterface
