@@ -1,4 +1,4 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
@@ -6,11 +6,11 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 
 import com.goterl.lazysodium.utils.Key;
 import com.goterl.lazysodium.utils.KeyPair;
-import keri.cesr.Codex.MatterCodex;
-import keri.cesr.Codex.IndexerCodex;
-import keri.cesr.args.IndexerArgs;
-import keri.cesr.args.MatterArgs;
-import keri.cesr.args.SignerArgs;
+import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.Codex.IndexerCodex;
+import org.cardanofoundation.signify.cesr.args.IndexerArgs;
+import org.cardanofoundation.signify.cesr.args.MatterArgs;
+import org.cardanofoundation.signify.cesr.args.SignerArgs;
 
 import java.nio.ByteBuffer;
 

@@ -1,4 +1,4 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
 import java.util.Map;
 

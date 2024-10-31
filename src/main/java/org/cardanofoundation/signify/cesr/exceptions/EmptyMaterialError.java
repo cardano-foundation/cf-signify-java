@@ -1,4 +1,4 @@
-package keri.cesr.exceptions;
+package org.cardanofoundation.signify.cesr.exceptions;
 
 public class EmptyMaterialError extends RuntimeException {
     private final String message;

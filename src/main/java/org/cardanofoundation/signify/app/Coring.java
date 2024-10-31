@@ -1,9 +1,9 @@
-package keri.app;
+package org.cardanofoundation.signify.app;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
-import keri.cesr.Salter;
-import keri.cesr.args.SalterArgs;
+import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.cesr.args.SalterArgs;
 
 public class Coring {
     private static final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());

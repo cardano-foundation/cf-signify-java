@@ -1,10 +1,10 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
-import keri.cesr.args.IndexerArgs;
-import keri.cesr.exceptions.EmptyMaterialError;
-import keri.cesr.Codex.IndexedBothSigCodex;
-import keri.cesr.Codex.IndexedCurrentSigCodex;
-import keri.cesr.util.CoreUtil;
+import org.cardanofoundation.signify.cesr.args.IndexerArgs;
+import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
+import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
+import org.cardanofoundation.signify.cesr.Codex.IndexedCurrentSigCodex;
+import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.util.Arrays;
 import java.util.Base64;

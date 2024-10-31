@@ -1,6 +1,6 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
-import keri.cesr.args.MatterArgs;
+import org.cardanofoundation.signify.cesr.args.MatterArgs;
 
 public class Cigar extends Matter {
     private Verfer _verfer;

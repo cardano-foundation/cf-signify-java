@@ -1,11 +1,11 @@
-package keri.cesr.args;
+package org.cardanofoundation.signify.cesr.args;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import keri.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
 @Builder
 @AllArgsConstructor

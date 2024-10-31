@@ -1,13 +1,13 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import keri.cesr.Codex.MatterCodex;
-import keri.cesr.Salter.Tier;
-import keri.cesr.args.SignerArgs;
-import keri.cesr.args.SalterArgs;
+import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.Salter.Tier;
+import org.cardanofoundation.signify.cesr.args.SignerArgs;
+import org.cardanofoundation.signify.cesr.args.SalterArgs;
 
 public class Manager {
 

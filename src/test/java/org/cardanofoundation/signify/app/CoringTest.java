@@ -1,4 +1,4 @@
-package keri.app;
+package org.cardanofoundation.signify.app;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,7 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
-import keri.cesr.args.IndexerArgs;
-import keri.cesr.Codex.IndexedSigCodex;
+import org.cardanofoundation.signify.cesr.args.IndexerArgs;
+import org.cardanofoundation.signify.cesr.Codex.IndexedSigCodex;
 
 /**
  * Siger is subclass of Indexer, indexed signature material,

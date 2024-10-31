@@ -1,10 +1,10 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
-import keri.cesr.args.SalterArgs;
+import org.cardanofoundation.signify.cesr.args.SalterArgs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import keri.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
 import static org.junit.jupiter.api.Assertions.*;
 

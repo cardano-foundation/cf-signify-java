@@ -1,9 +1,9 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
-import keri.cesr.Codex.MatterCodex;
-import keri.cesr.args.MatterArgs;
+import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.args.MatterArgs;
 
 public class Verfer extends Matter {
     private final Verifier verifier;

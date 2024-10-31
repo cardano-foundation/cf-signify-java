@@ -1,16 +1,16 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 
-import keri.cesr.Codex.NonTransCodex;
-import keri.cesr.Codex.DigiCodex;
-import keri.cesr.Codex.SmallVarRawSizeCodex;
-import keri.cesr.args.MatterArgs;
-import keri.cesr.exceptions.EmptyMaterialError;
-import keri.cesr.util.CoreUtil;
-import keri.cesr.Codex.LargeVarRawSizeCodex;
+import org.cardanofoundation.signify.cesr.Codex.NonTransCodex;
+import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
+import org.cardanofoundation.signify.cesr.Codex.SmallVarRawSizeCodex;
+import org.cardanofoundation.signify.cesr.args.MatterArgs;
+import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
+import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import org.cardanofoundation.signify.cesr.Codex.LargeVarRawSizeCodex;
 
 public class Matter {
 

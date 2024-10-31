@@ -1,11 +1,11 @@
-package keri.cesr;
+package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
 import com.sun.jna.NativeLong;
-import keri.cesr.args.MatterArgs;
-import keri.cesr.args.SalterArgs;
-import keri.cesr.args.SignerArgs;
+import org.cardanofoundation.signify.cesr.args.MatterArgs;
+import org.cardanofoundation.signify.cesr.args.SalterArgs;
+import org.cardanofoundation.signify.cesr.args.SignerArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
 import lombok.Getter;
 
