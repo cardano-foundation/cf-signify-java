@@ -23,12 +23,8 @@ public class Verfer extends Matter {
         }
     }
 
-    private boolean _ed25519(byte[] sig, byte[] ser, byte[] key) throws Exception {
-        try {
-            return lazySodium.cryptoSignVerifyDetached(sig, ser, ser.length, key);
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
+    private boolean _ed25519(byte[] sig, byte[] ser, byte[] key) {
+        return lazySodium.cryptoSignVerifyDetached(sig, ser, ser.length, key);
     }
 
     @FunctionalInterface
