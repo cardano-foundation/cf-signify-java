@@ -50,7 +50,7 @@ public class Manager {
         boolean temp = false;
     }
 
-    class Keys {
+    public class Keys {
         private List<Signer> signers;
         private List<String> paths;
 
