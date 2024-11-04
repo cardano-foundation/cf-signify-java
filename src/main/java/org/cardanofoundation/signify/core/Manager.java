@@ -17,7 +17,6 @@ public class Manager {
         randy,
         salty,
         group,
-        extern
     }
 
     class PubLot {
