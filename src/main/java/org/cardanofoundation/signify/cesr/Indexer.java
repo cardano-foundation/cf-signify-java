@@ -191,9 +191,6 @@ public class Indexer {
 
     public static int getRawSize(String code) {
         final Xizage xizage = sizes.get(code);
-        if (xizage.fs == null) {
-            throw new RuntimeException();
-        }
         return (int) Math.floor(((xizage.fs - (xizage.hs + xizage.ss)) * 3.0) / 4.0) - xizage.ls;
     }
 
