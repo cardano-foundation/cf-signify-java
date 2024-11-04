@@ -1,11 +1,13 @@
-package org.cardanofoundation.signify.cesr;
+package org.cardanofoundation.signify.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
+import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.SignerArgs;
 import org.cardanofoundation.signify.cesr.args.SalterArgs;
 

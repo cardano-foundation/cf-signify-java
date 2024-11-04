@@ -1,5 +1,6 @@
-package org.cardanofoundation.signify.cesr;
+package org.cardanofoundation.signify.core;
 
+import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.SalterArgs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
