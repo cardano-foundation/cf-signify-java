@@ -40,22 +40,20 @@ public class Salter extends Matter {
             opslimit = 1; //libsodium.crypto_pwhash_OPSLIMIT_MIN
             memlimit = 8192; //libsodium.crypto_pwhash_MEMLIMIT_MIN
         } else {
-            switch (tier) {
-                case Tier.low:
+            memlimit = switch (tier) {
+                case Tier.low -> {
                     opslimit = 2; // libsodium.crypto_pwhash_OPSLIMIT_INTERACTIVE
-                    memlimit = 67108864; // libsodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
-                    break;
-                case Tier.med:
+                    yield 67108864;
+                }
+                case Tier.med -> {
                     opslimit = 3; // libsodium.crypto_pwhash_OPSLIMIT_MODERATE
-                    memlimit = 268435456; // libsodium.crypto_pwhash_MEMLIMIT_MODERATE
-                    break;
-                case Tier.high:
+                    yield 268435456;
+                }
+                case Tier.high -> {
                     opslimit = 4; // libsodium.crypto_pwhash_OPSLIMIT_SENSITIVE
-                    memlimit = 1073741824; // libsodium.crypto_pwhash_MEMLIMIT_SENSITIVE
-                    break;
-                default:
-                    throw new RuntimeException("Unsupported security tier = " + tier + ".");
-            }
+                    yield 1073741824;
+                }
+            };
         }
 
         return this.cryptoPwHash(size, path.getBytes(), opslimit, memlimit);

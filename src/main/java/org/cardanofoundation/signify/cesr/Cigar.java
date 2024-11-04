@@ -1,20 +1,16 @@
 package org.cardanofoundation.signify.cesr;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.cardanofoundation.signify.cesr.args.MatterArgs;
 
+@Getter
+@Setter
 public class Cigar extends Matter {
-    private Verfer _verfer;
+    private Verfer verfer;
 
     public Cigar(MatterArgs args, Verfer verfer) {
         super(args);
-        this._verfer = verfer;
-    }
-
-    public Verfer getVerfer() {
-        return _verfer;
-    }
-
-    public void setVerfer(Verfer verfer) {
-        this._verfer = verfer;
+        this.verfer = verfer;
     }
 }

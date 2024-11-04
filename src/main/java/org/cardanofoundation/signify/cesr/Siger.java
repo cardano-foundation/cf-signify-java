@@ -1,5 +1,7 @@
 package org.cardanofoundation.signify.cesr;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.cardanofoundation.signify.cesr.args.IndexerArgs;
 import org.cardanofoundation.signify.cesr.Codex.IndexedSigCodex;
 
@@ -18,8 +20,10 @@ import org.cardanofoundation.signify.cesr.Codex.IndexedSigCodex;
  * Methods:
  **/
 
+@Getter
+@Setter
 public class Siger extends Indexer {
-    private Verfer _verfer;
+    private Verfer verfer;
 
     public Siger(IndexerArgs args, Verfer verfer) {
         super(args);
@@ -27,14 +31,6 @@ public class Siger extends Indexer {
         if (!IndexedSigCodex.has(this.getCode())) {
             throw new RuntimeException("Invalid code = " + this.getCode() + " for Siger.");
         }
-        this._verfer = verfer;
+        this.verfer = verfer;
     }
-
-    public Verfer getVerfer() {
-        return this._verfer;
-    }
-
-    public void setVerfer(Verfer verfer) {
-        this._verfer = verfer;
-    }
-} 
+}
