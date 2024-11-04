@@ -175,8 +175,7 @@ public class Indexer {
             this._ondex = ondex;
             this._raw = raw;
         } else if (qb64b != null) {
-            String qb64Str = Base64.getUrlEncoder().withoutPadding().encodeToString(qb64b);
-            this._exfil(qb64Str);
+            this._exfil(new String(qb64b));
         } else if (qb64 != null) {
             this._exfil(qb64);
         } else if (qb2 != null) {
