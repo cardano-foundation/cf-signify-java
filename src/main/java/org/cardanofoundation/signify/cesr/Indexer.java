@@ -1,13 +1,12 @@
 package org.cardanofoundation.signify.cesr;
 
-import org.cardanofoundation.signify.cesr.args.IndexerArgs;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
 import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
 import org.cardanofoundation.signify.cesr.Codex.IndexedCurrentSigCodex;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,77 +111,76 @@ public class Indexer {
     private Integer _ondex;
     private byte[] _raw = new byte[0];
 
-    public Indexer(IndexerArgs args) {
-        byte[] raw = args.getRaw();
+    public Indexer(RawArgs args, Integer index, Integer ondex) {
         String code = args.getCode();
-        Integer index = args.getIndex();
-        Integer ondex = args.getOndex();
-        String qb64 = args.getQb64();
-        byte[] qb64b = args.getQb64b();
-        byte[] qb2 = args.getQb2();
+        byte[] raw = args.getRaw();
 
-        if (raw != null) {
-            if (code == null) {
-                throw new
-                        EmptyMaterialError("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
-            }
+        index = index == null ? 0 : index;
 
-            if (!sizes.containsKey(code)) {
-                throw new RuntimeException("Unsupported code=" + code + ".");
-            }
+        if (code == null) {
+            throw new
+                    EmptyMaterialError("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
+        }
 
-            Xizage xizage = sizes.get(code);
-            int os = xizage.os;
-            Integer fs = xizage.fs;
-            int cs = xizage.hs + xizage.ss;
-            int ms = xizage.ss - xizage.os;
+        if (!sizes.containsKey(code)) {
+            throw new RuntimeException("Unsupported code=" + code + ".");
+        }
 
-            if (index == null || index < 0 || index > Math.pow(64, ms) - 1) {
-                throw new RuntimeException("Invalid index=" + index + " for code=" + code + ".");
-            }
+        Xizage xizage = sizes.get(code);
+        int os = xizage.os;
+        Integer fs = xizage.fs;
+        int cs = xizage.hs + xizage.ss;
+        int ms = xizage.ss - xizage.os;
 
-            if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, os) - 1)) {
-                throw new RuntimeException("Invalid ondex=" + ondex + " for code=" + code + ".");
-            }
+        if (index < 0 || index > Math.pow(64, ms) - 1) {
+            throw new RuntimeException("Invalid index=" + index + " for code=" + code + ".");
+        }
 
-            if (IndexedBothSigCodex.has(code) && ondex != null) {
-                throw new RuntimeException("Non None ondex=" + ondex + " for code=" + code + ".");
-            }
+        if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, os) - 1)) {
+            throw new RuntimeException("Invalid ondex=" + ondex + " for code=" + code + ".");
+        }
 
-            if (IndexedBothSigCodex.has(code)) {
-                if (ondex == null) {
-                    ondex = index;
-                } else {
-                    if (!ondex.equals(index) && os == 0) {
-                        throw new RuntimeException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
-                    }
+        if (IndexedBothSigCodex.has(code) && ondex != null) {
+            throw new RuntimeException("Non None ondex=" + ondex + " for code=" + code + ".");
+        }
+
+        if (IndexedBothSigCodex.has(code)) {
+            if (ondex == null) {
+                ondex = index;
+            } else {
+                if (!ondex.equals(index) && os == 0) {
+                    throw new RuntimeException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
                 }
             }
-
-            if (fs == null) {
-                throw new RuntimeException("Variable length unsupported");
-            }
-
-            int rawsize = (int) Math.floor(((fs - cs) * 3.0) / 4.0);
-            raw = Arrays.copyOf(raw, rawsize);
-
-            if (raw.length != rawsize) {
-                throw new RuntimeException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
-            }
-
-            this._code = code;
-            this._index = index;
-            this._ondex = ondex;
-            this._raw = raw;
-        } else if (qb64b != null) {
-            this._exfil(new String(qb64b));
-        } else if (qb64 != null) {
-            this._exfil(qb64);
-        } else if (qb2 != null) {
-            this._bexfil(qb2);
-        } else {
-            throw new EmptyMaterialError("Improper initialization need either (raw and code and index) or qb64b or qb64 or qb2.");
         }
+
+        if (fs == null) {
+            throw new RuntimeException("Variable length unsupported");
+        }
+
+        int rawsize = (int) Math.floor(((fs - cs) * 3.0) / 4.0);
+        raw = Arrays.copyOf(raw, rawsize);
+
+        if (raw.length != rawsize) {
+            throw new RuntimeException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
+        }
+
+        this._code = code;
+        this._index = index;
+        this._ondex = ondex;
+        this._raw = raw;
+    }
+
+    public Indexer(RawArgs rawArgs) {
+        this(rawArgs, null, null);
+    }
+
+    public Indexer(String qb64) {
+        this._exfil(qb64);
+    }
+
+    public Indexer(byte[] qb2) {
+        this._bexfil(qb2);
     }
 
     private void _bexfil(byte[] qb2) {

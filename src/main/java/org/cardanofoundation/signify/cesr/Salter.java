@@ -3,26 +3,30 @@ package org.cardanofoundation.signify.cesr;
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.SodiumJava;
 import com.sun.jna.NativeLong;
-import org.cardanofoundation.signify.cesr.args.MatterArgs;
-import org.cardanofoundation.signify.cesr.args.SalterArgs;
-import org.cardanofoundation.signify.cesr.args.SignerArgs;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
 import lombok.Getter;
 
 public class Salter extends Matter {
-
     @Getter
     public Tier tier;
-    private static final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
 
-    public Salter(SalterArgs args) {
-        super(initializeArgs(args));
+    private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
 
-        if (!Codex.MatterCodex.Salt_128.getValue().equals(this.getCode())) {
-            throw new IllegalArgumentException("invalid code for Salter, only Salt_128 accepted");
-        }
+    public Salter(RawArgs args) {
+        this(args, Tier.low);
+    }
 
-        this.tier = args.getTier() != null ? args.getTier() : Tier.low;
+    public Salter(String qb64) {
+        this(qb64, Tier.low);
+    }
+
+    public Salter(RawArgs args, Tier tier) {
+        super(RawArgs.generateSalt128Raw(args));
+    }
+
+    public Salter(String qb64, Tier tier) {
+        super(qb64);
     }
 
     public enum Tier {
@@ -79,39 +83,13 @@ public class Salter extends Matter {
         return stretch;
     }
 
-    private static MatterArgs initializeArgs(SalterArgs salterArgs) {
-        if (salterArgs.getRaw() == null && salterArgs.getQb64() == null
-                && salterArgs.getQb64b() == null && salterArgs.getQb2() == null) {
-            if (Codex.MatterCodex.Salt_128.getValue().equals(salterArgs.getCode())) {
-                final byte[] salt = lazySodium.randomBytesBuf(16); // crypto_pwhash_SALTBYTES
-                return MatterArgs.builder()
-                        .raw(salt)
-                        .code(salterArgs.getCode())
-                        .build();
-            } else {
-                throw new IllegalArgumentException("invalid code for Salter, only Salt_128 accepted");
-            }
-        }
-
-        return MatterArgs.builder()
-                .raw(salterArgs.getRaw())
-                .code(salterArgs.getCode())
-                .qb64b(salterArgs.getQb64b())
-                .qb64(salterArgs.getQb64())
-                .qb2(salterArgs.getQb2())
-                .build();
-    }
-
     public Signer signer(String code, boolean transferable, String path, Tier tier, boolean temp) {
         final byte[] seed = this.stretch(Matter.getRawSize(code), path, tier, temp);
-
-        SignerArgs signerArgs = SignerArgs.builder()
+        RawArgs rawArgs = RawArgs.builder()
                 .raw(seed)
                 .code(code)
-                .transferable(transferable)
                 .build();
-
-        return new Signer(signerArgs);
+        return new Signer(rawArgs, transferable);
     }
 
 }

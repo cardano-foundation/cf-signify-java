@@ -8,8 +8,7 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.args.SignerArgs;
-import org.cardanofoundation.signify.cesr.args.SalterArgs;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 
 public class Manager {
 
@@ -103,12 +102,14 @@ public class Manager {
                 codes = Collections.nCopies(count, code);
             }
 
-            codes.forEach(c -> signers.add(
-                    new Signer(
-                            SignerArgs.builder()
-                                    .code(c)
-                                    .transferable(transferable)
-                                    .build())));
+            codes.forEach(c -> {
+                RawArgs rawArgs = RawArgs.builder()
+                        .code(c)
+                        .build();
+
+                Signer signer = new Signer(rawArgs, transferable);
+                signers.add(signer);
+            });
 
             return new Keys(signers, null);
         }
@@ -147,15 +148,15 @@ public class Manager {
         private String stem;
 
         public SaltyCreator() {
-            this(null, null, null);
+            RawArgs rawArgs = RawArgs.builder()
+                    .code(MatterCodex.Salt_128.getValue())
+                    .build();
+            this.salter = new Salter(rawArgs, Tier.low);
+            this.stem = "";
         }
 
         public SaltyCreator(String salt, Tier tier, String stem) {
-            SalterArgs salterArgs = SalterArgs.builder()
-                    .qb64(salt)
-                    .tier(tier)
-                    .build();
-            this.salter = new Salter(salterArgs);
+            this.salter = new Salter(salt, tier);
             this.stem = stem == null ? "" : stem;
         }
 
