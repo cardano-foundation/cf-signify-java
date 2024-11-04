@@ -65,7 +65,8 @@ public class Signer extends Matter {
         return _verfer;
     }
 
-    public Object sign(byte[] ser, Integer index, boolean only, Integer ondex) throws Exception {
+    public Object sign(byte[] ser, Integer index, Boolean only, Integer ondex) throws Exception {
+        only = only != null && only;
         return _sign.sign(ser, this.getRaw(), this.getVerfer(), index, only, ondex);
     }
 

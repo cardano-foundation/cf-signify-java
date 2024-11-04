@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
 @Builder
 @AllArgsConstructor
@@ -11,7 +12,8 @@ import lombok.Setter;
 @Setter
 public class MatterArgs {
     byte[] raw;
-    String code;
+    @Builder.Default
+    String code = MatterCodex.Ed25519N.getValue();
     byte[] qb64b;
     String qb64;
     byte[] qb2;

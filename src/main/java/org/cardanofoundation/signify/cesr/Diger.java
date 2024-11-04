@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 
 /**
  * Diger is subset of Matter and is used to verify the digest of serialization
- * It uses  .raw : as digest
+ * It uses .raw: as digest
  * .code as digest algorithm
  */
 public class Diger extends Matter {

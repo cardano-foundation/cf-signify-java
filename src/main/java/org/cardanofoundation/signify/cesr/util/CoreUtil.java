@@ -1,11 +1,140 @@
 package org.cardanofoundation.signify.cesr.util;
 
+import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
 public class CoreUtil {
+    @Getter
+    public enum Serials {
+        JSON("JSON");
+
+        private final String value;
+        Serials(String value) {
+            this.value = value;
+        }
+    }
+
+    @Getter
+    public enum Ident {
+        KERI("KERI"),
+        ACDC("ACDC");
+
+        private final String value;
+        Ident(String value) {
+            this.value = value;
+        }
+    }
+
+    @Getter
+    public static class Version {
+        public int major;
+        public int minor;
+
+        public Version(Integer major, Integer minor) {
+            this.major = major;
+            this.minor = minor;
+        }
+
+        public Version() {
+            this.major = 1;
+            this.minor = 0;
+        }
+    }
+
+    @Getter
+    public enum Ilks {
+        ICP("icp"),
+        ROT("rot"),
+        IXN("ixn"),
+        DIP("dip"),
+        DRT("drt"),
+        RCT("rct"),
+        VRC("vrc"),
+        RPY("rpy"),
+        EXN("exn"),
+        VCP("vcp"),
+        ISS("iss"),
+        REV("rev");
+
+        private final String value;
+        Ilks(String value) {
+            this.value = value;
+        }
+    }
+
+    // const version_pattern = 'KERI(?P<major>[0-9a-f])(?P<minor>[0-9a-f])
+    // (?P<kind>[A-Z]{4})(?P<size>[0-9a-f]{6})'
+    // const version_pattern1 = `KERI\(\?P<major>\[0\-9a\-f\]\)\(\?P<minor>\[0\-9a\-f\]\)\
+    // (\?P<kind>\[A\-Z\]\{4\}\)\(\?P<size>\[0\-9a\-f\]\{6\}\)_`
+
+    private static final String VEREX = "KERI([0-9a-zA-Z][0-9a-zA-Z])([0-9a-zA-Z][0-9a-zA-Z])([A-Z]{4})([0-9a-zA-Z]{4})";
+
+    // Regex pattern matching
+
+    /**
+     * @description This function is used to deversify the version
+     * Here we will use regex to validate and extract serialization kind,size and version
+     * @param {string} versionString   version string
+     * @return {Object}  containing protocol (KERI or ACDC), kind of serialization like cbor, json, mgpk
+     *                    version = version of object, size = raw size integer
+     */
+    public static DeversifyResult deversify(String versionString) {
+        Pattern pattern = Pattern.compile(VEREX);
+        Matcher matcher = pattern.matcher(versionString);
+
+        if (matcher.find()) {
+            String protoStr = matcher.group(1);
+            int major = Integer.parseInt(matcher.group(2));
+            int minor = Integer.parseInt(matcher.group(3));
+            String kindStr = matcher.group(4);
+            String size = matcher.group(5);
+
+            Version version = new Version(major, minor);
+
+            Serials kind;
+            try {
+                kind = Serials.valueOf(kindStr);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid serialization kind = " + kindStr);
+            }
+
+            Ident ident;
+            try {
+                ident = Ident.valueOf(protoStr);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid protocol identifier = " + protoStr);
+            }
+
+            return new DeversifyResult(ident, kind, version, size);
+        }
+        throw new RuntimeException("Invalid version string = " + versionString);
+    }
+
+    public record DeversifyResult(
+        Ident ident,
+        Serials kind,
+        Version version,
+        String string
+    ) {}
+
+    public static String versify(Ident ident, Version version, Serials kind, int size) {
+        ident = ident == null ? Ident.KERI : ident;
+        version = version == null ? new Version() : version;
+        kind = kind == null ? Serials.JSON : kind;
+
+        return String.format("%s%s%s%s%s_",
+            ident,
+            Integer.toHexString(version.getMajor()),
+            Integer.toHexString(version.getMinor()),
+            kind,
+            String.format("%06x", size)
+        );
+    }
 
     public static final Map<Integer, String> b64ChrByIdx = new HashMap<>() {{
         put(0, "A");
