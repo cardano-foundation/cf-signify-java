@@ -61,7 +61,7 @@ public class Salter extends Matter {
         return this.cryptoPwHash(size, path.getBytes(), opslimit, memlimit);
     }
 
-    public byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) {
+    private byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) {
         byte[] stretch = new byte[size];
         boolean success = lazySodium.cryptoPwHash(
                 stretch,
@@ -74,7 +74,11 @@ public class Salter extends Matter {
                 Alg.PWHASH_ALG_ARGON2ID13
         );
 
-        return success ? stretch : null;
+        if (!success) {
+            throw new RuntimeException("CryptoPwHash failed");
+        }
+
+        return stretch;
     }
 
     private static MatterArgs initializeArgs(SalterArgs salterArgs) {
