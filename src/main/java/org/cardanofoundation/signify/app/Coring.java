@@ -7,9 +7,9 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 
 public class Coring {
-    private static final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
 
     public static String randomPasscode() {
+        final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
         final byte[] raw = lazySodium.randomBytesBuf(16);
         RawArgs args = RawArgs.builder()
                 .raw(raw)
