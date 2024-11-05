@@ -18,7 +18,7 @@ public class Verfer extends Matter {
                 this.verifier = this::_ed25519;
                 break;
             default:
-                throw new RuntimeException("Unsupported code = " + this.getCode() + " for verifier.");
+                throw new UnsupportedOperationException("Unsupported code = " + this.getCode() + " for verifier.");
         }
     }
 

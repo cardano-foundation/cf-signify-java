@@ -33,7 +33,7 @@ public class Signer extends Matter {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new IllegalArgumentException("Unsupported signer code = " + this.getCode());
+            throw new UnsupportedOperationException("Unsupported signer code = " + this.getCode());
         }
     }
 

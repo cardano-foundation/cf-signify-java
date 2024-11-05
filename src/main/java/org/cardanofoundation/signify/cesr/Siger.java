@@ -29,7 +29,7 @@ public class Siger extends Indexer {
         super(rawArgs, index, ondex);
 
         if (!IndexedSigCodex.has(this.getCode())) {
-            throw new RuntimeException("Invalid code = " + this.getCode() + " for Siger.");
+            throw new IllegalArgumentException("Invalid code = " + this.getCode() + " for Siger.");
         }
         this.verfer = verfer;
     }

@@ -123,7 +123,7 @@ public class Indexer {
         }
 
         if (!sizes.containsKey(code)) {
-            throw new RuntimeException("Unsupported code=" + code + ".");
+            throw new IllegalArgumentException("Unsupported code=" + code + ".");
         }
 
         Xizage xizage = sizes.get(code);
@@ -133,15 +133,15 @@ public class Indexer {
         int ms = xizage.ss - xizage.os;
 
         if (index < 0 || index > Math.pow(64, ms) - 1) {
-            throw new RuntimeException("Invalid index=" + index + " for code=" + code + ".");
+            throw new IllegalArgumentException("Invalid index=" + index + " for code=" + code + ".");
         }
 
         if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, os) - 1)) {
-            throw new RuntimeException("Invalid ondex=" + ondex + " for code=" + code + ".");
+            throw new IllegalArgumentException("Invalid ondex=" + ondex + " for code=" + code + ".");
         }
 
         if (IndexedBothSigCodex.has(code) && ondex != null) {
-            throw new RuntimeException("Non None ondex=" + ondex + " for code=" + code + ".");
+            throw new IllegalArgumentException("Non None ondex=" + ondex + " for code=" + code + ".");
         }
 
         if (IndexedBothSigCodex.has(code)) {
@@ -149,20 +149,20 @@ public class Indexer {
                 ondex = index;
             } else {
                 if (!ondex.equals(index) && os == 0) {
-                    throw new RuntimeException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
+                    throw new IllegalArgumentException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
                 }
             }
         }
 
         if (fs == null) {
-            throw new RuntimeException("Variable length unsupported");
+            throw new IllegalArgumentException("Variable length unsupported");
         }
 
         int rawsize = (int) Math.floor(((fs - cs) * 3.0) / 4.0);
         raw = Arrays.copyOf(raw, rawsize);
 
         if (raw.length != rawsize) {
-            throw new RuntimeException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
+            throw new IllegalArgumentException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
         }
 
         this._code = code;
@@ -184,7 +184,7 @@ public class Indexer {
     }
 
     private void _bexfil(byte[] qb2) {
-        throw new RuntimeException("qb2 not yet supported: " + Arrays.toString(qb2));
+        throw new UnsupportedOperationException("qb2 not yet supported: " + Arrays.toString(qb2));
     }
 
     public static int getRawSize(String code) {
@@ -228,21 +228,21 @@ public class Indexer {
         int ms = xizage.ss - xizage.os;
 
         if (index < 0 || index > Math.pow(64, ms) - 1) {
-            throw new RuntimeException("Invalid index=" + index + " for code=" + code + ".");
+            throw new IllegalArgumentException("Invalid index=" + index + " for code=" + code + ".");
         }
 
         if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, xizage.os) - 1)) {
-            throw new RuntimeException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
+            throw new IllegalArgumentException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
         }
 
         String both = code + CoreUtil.intToB64(index, ms) + CoreUtil.intToB64(ondex == null ? 0 : ondex, xizage.os);
 
         if (both.length() != cs) {
-            throw new RuntimeException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
+            throw new IllegalArgumentException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
         }
 
         if (cs % 4 != ps - xizage.ls) {
-            throw new RuntimeException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
+            throw new IllegalArgumentException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
         }
 
         byte[] bytes = new byte[ps + raw.length];
@@ -253,7 +253,7 @@ public class Indexer {
 
         String full = both + CoreUtil.encodeBase64Url(bytes).substring(ps - xizage.ls);
         if (full.length() != xizage.fs) {
-            throw new RuntimeException("Invalid code=" + both + " for raw size=" + raw.length + ".");
+            throw new IllegalArgumentException("Invalid code=" + both + " for raw size=" + raw.length + ".");
         }
 
         return full;
@@ -261,22 +261,22 @@ public class Indexer {
 
     private void _exfil(String qb64) {
         if (qb64.isEmpty()) {
-            throw new RuntimeException("Empty Material");
+            throw new EmptyMaterialError("Empty Material");
         }
 
         char first = qb64.charAt(0);
         if (!hards.containsKey(String.valueOf(first))) {
-            throw new RuntimeException("Unexpected code " + first);
+            throw new IllegalArgumentException("Unexpected code " + first);
         }
 
         int hs = hards.get(String.valueOf(first));
         if (qb64.length() < hs) {
-            throw new RuntimeException("Need " + (hs - qb64.length()) + " more characters.");
+            throw new IllegalArgumentException("Need " + (hs - qb64.length()) + " more characters.");
         }
 
         String hard = qb64.substring(0, hs);
         if (!sizes.containsKey(hard)) {
-            throw new RuntimeException("Unsupported code " + hard);
+            throw new UnsupportedOperationException("Unsupported code " + hard);
         }
 
         Xizage xizage = sizes.get(hard);
@@ -284,7 +284,7 @@ public class Indexer {
         int ms = xizage.ss - xizage.os;
 
         if (qb64.length() < cs) {
-            throw new RuntimeException("Need " + (cs - qb64.length()) + " more characters.");
+            throw new IllegalArgumentException("Need " + (cs - qb64.length()) + " more characters.");
         }
 
         String sindex = qb64.substring(hs, hs + ms);
@@ -295,7 +295,7 @@ public class Indexer {
         if (IndexedCurrentSigCodex.has(hard)) {
             ondex = xizage.os != 0 ? CoreUtil.b64ToInt(sondex) : null;
             if (ondex != null && ondex != 0) {
-                throw new RuntimeException("Invalid ondex=" + ondex + " for code=" + hard + ".");
+                throw new IllegalArgumentException("Invalid ondex=" + ondex + " for code=" + hard + ".");
             } else {
                 ondex = null;
             }
@@ -304,11 +304,11 @@ public class Indexer {
         }
 
         if (xizage.fs == null) {
-            throw new RuntimeException("variable length not supported");
+            throw new IllegalArgumentException("variable length not supported");
         }
 
         if (qb64.length() < xizage.fs) {
-            throw new RuntimeException("Need " + (xizage.fs - qb64.length()) + " more chars.");
+            throw new IllegalArgumentException("Need " + (xizage.fs - qb64.length()) + " more chars.");
         }
 
         qb64 = qb64.substring(0, xizage.fs);
@@ -321,7 +321,7 @@ public class Indexer {
             int pi = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, ps)); // prepad as int
             if ((pi & (1 << pbs) - 1) != 0) {
                 // masked pad bits non-zero
-                throw new RuntimeException("Non zeroed prepad bits = " + Integer.toBinaryString(pi & (1 << pbs) - 1) + " in " + qb64.charAt(cs) + ".");
+                throw new IllegalArgumentException("Non zeroed prepad bits = " + Integer.toBinaryString(pi & (1 << pbs) - 1) + " in " + qb64.charAt(cs) + ".");
             }
             raw = Arrays.copyOfRange(paw, ps, paw.length); // strip off ps prepad paw bytes
         } else {
@@ -330,16 +330,16 @@ public class Indexer {
             int li = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, xizage.ls));
             if (li != 0) {
                 if (li == 1) {
-                    throw new RuntimeException("Non zeroed lead byte = 0x" + String.format("%02x", li) + ".");
+                    throw new IllegalArgumentException("Non zeroed lead byte = 0x" + String.format("%02x", li) + ".");
                 } else {
-                    throw new RuntimeException("Non zeroed lead bytes = 0x" + String.format("%04x", li));
+                    throw new IllegalArgumentException("Non zeroed lead bytes = 0x" + String.format("%04x", li));
                 }
             }
             raw = Arrays.copyOfRange(paw, xizage.ls, paw.length);
         }
 
         if (raw.length != Math.floor(((qb64.length() - cs) * 3.0) / 4.0)) {
-            throw new RuntimeException("Improperly qualified material = " + qb64);
+            throw new IllegalArgumentException("Improperly qualified material = " + qb64);
         }
 
         this._code = hard;

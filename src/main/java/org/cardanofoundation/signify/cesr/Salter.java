@@ -76,7 +76,7 @@ public class Salter extends Matter {
         );
 
         if (!success) {
-            throw new RuntimeException("Failed to stretch salt using given path");
+            throw new IllegalArgumentException("Failed to stretch salt using given path");
         }
 
         return stretch;

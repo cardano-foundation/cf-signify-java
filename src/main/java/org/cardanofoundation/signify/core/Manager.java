@@ -102,14 +102,14 @@ public class Manager {
                 codes = Collections.nCopies(count, code);
             }
 
-            codes.forEach(c -> {
+            for (String c : codes) {
                 RawArgs rawArgs = RawArgs.builder()
                         .code(c)
                         .build();
 
                 Signer signer = new Signer(rawArgs, transferable);
                 signers.add(signer);
-            });
+            }
 
             return new Keys(signers, null);
         }
@@ -222,7 +222,7 @@ public class Manager {
                     this.makeCreator = this::makeSalty;
                     break;
                 default:
-                    throw new RuntimeException("Unsupported algo: " + algo);
+                    throw new UnsupportedOperationException("Unsupported algo: " + algo);
             }
         }
 
