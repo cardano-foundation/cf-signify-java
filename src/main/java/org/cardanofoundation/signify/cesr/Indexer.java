@@ -117,11 +117,6 @@ public class Indexer {
 
         index = index == null ? 0 : index;
 
-        if (code == null) {
-            throw new
-                    EmptyMaterialError("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
-        }
-
         if (!sizes.containsKey(code)) {
             throw new IllegalArgumentException("Unsupported code=" + code + ".");
         }

@@ -1,10 +1,7 @@
 package org.cardanofoundation.signify.cesr.args;
 
 import com.goterl.lazysodium.LazySodiumJava;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 
@@ -14,6 +11,8 @@ import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 @Setter
 public class RawArgs {
     byte[] raw;
+
+    @NonNull
     String code;
 
     public static RawArgs generateSalt128Raw(RawArgs rawArgs) {
