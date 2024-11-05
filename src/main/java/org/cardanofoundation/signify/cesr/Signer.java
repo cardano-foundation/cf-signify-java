@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
-import com.goterl.lazysodium.SodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 
 import com.goterl.lazysodium.utils.Key;
@@ -15,7 +14,7 @@ import java.nio.ByteBuffer;
 
 @Getter
 public class Signer extends Matter {
-    private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
+    private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
     private final SignerFunction sign;
     private final Verfer verfer;
 

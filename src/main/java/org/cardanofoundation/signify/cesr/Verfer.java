@@ -1,13 +1,12 @@
 package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
-import com.goterl.lazysodium.SodiumJava;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 
 public class Verfer extends Matter {
     private final Verifier verifier;
-    private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
+    private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
 
     public Verfer(RawArgs args) {
         super(args);

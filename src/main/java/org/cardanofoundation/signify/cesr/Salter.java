@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
-import com.goterl.lazysodium.SodiumJava;
 import com.sun.jna.NativeLong;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
@@ -11,7 +10,7 @@ public class Salter extends Matter {
     @Getter
     public Tier tier;
 
-    private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
+    private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
 
     public Salter(RawArgs args) {
         this(args, Tier.low);
@@ -77,7 +76,7 @@ public class Salter extends Matter {
         );
 
         if (!success) {
-            throw new RuntimeException("CryptoPwHash failed");
+            throw new RuntimeException("Failed to stretch salt using given path");
         }
 
         return stretch;
