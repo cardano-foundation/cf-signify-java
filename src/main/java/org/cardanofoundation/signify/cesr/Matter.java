@@ -142,7 +142,7 @@ public class Matter {
 
     public Matter(RawArgs args, Integer rize) {
         int size = -1;
-        if (args.getCode() == null || args.getCode().isEmpty()) {
+        if (args.getCode().isEmpty()) {
             throw new RuntimeException("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
         }
 

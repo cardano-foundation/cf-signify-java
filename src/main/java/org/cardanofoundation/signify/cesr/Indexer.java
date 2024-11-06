@@ -95,15 +95,10 @@ public class Indexer {
         hards.put("y", 1);
         hards.put("z", 1);
         hards.put("0", 2);
-        hards.put("1", 4);
-        hards.put("2", 4);
-        hards.put("3", 4);
+        hards.put("1", 2);
+        hards.put("2", 2);
+        hards.put("3", 2);
         hards.put("4", 2);
-        hards.put("5", 2);
-        hards.put("6", 2);
-        hards.put("7", 4);
-        hards.put("8", 4);
-        hards.put("9", 4);
     }
 
     private String _code = "";
@@ -135,7 +130,7 @@ public class Indexer {
             throw new IllegalArgumentException("Invalid ondex=" + ondex + " for code=" + code + ".");
         }
 
-        if (IndexedBothSigCodex.has(code) && ondex != null) {
+        if (IndexedCurrentSigCodex.has(code) && ondex != null) {
             throw new IllegalArgumentException("Non None ondex=" + ondex + " for code=" + code + ".");
         }
 
@@ -154,11 +149,11 @@ public class Indexer {
         }
 
         int rawsize = (int) Math.floor(((fs - cs) * 3.0) / 4.0);
-        raw = Arrays.copyOf(raw, rawsize);
-
-        if (raw.length != rawsize) {
+        if (raw.length < rawsize) {
             throw new IllegalArgumentException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
         }
+
+        raw = Arrays.copyOf(raw, rawsize);
 
         this._code = code;
         this._index = index;
@@ -254,7 +249,7 @@ public class Indexer {
         return full;
     }
 
-    private void _exfil(String qb64) {
+    public void _exfil(String qb64) {
         if (qb64.isEmpty()) {
             throw new EmptyMaterialError("Empty Material");
         }
@@ -350,12 +345,12 @@ public class Indexer {
         public Integer fs;
         public Integer ls;
 
-        public Xizage(Integer hs, Integer ss, Integer os, Integer ls, Integer fs) {
+        public Xizage(Integer hs, Integer ss, Integer os, Integer fs, Integer ls) {
             this.hs = hs;
             this.ss = ss;
             this.os = os;
-            this.ls = ls;
             this.fs = fs;
+            this.ls = ls;
         }
     }
 }

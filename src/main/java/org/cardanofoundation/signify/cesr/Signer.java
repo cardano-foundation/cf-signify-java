@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.cesr;
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 
+import com.goterl.lazysodium.utils.HexMessageEncoder;
 import com.goterl.lazysodium.utils.Key;
 import com.goterl.lazysodium.utils.KeyPair;
 import lombok.Getter;
@@ -17,6 +18,10 @@ public class Signer extends Matter {
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
     private final SignerFunction sign;
     private final Verfer verfer;
+
+    public Signer(RawArgs args) {
+        this(args, true);
+    }
 
     public Signer(RawArgs args, boolean transferable) {
         super(RawArgs.generateEd25519SeedRaw(args));
@@ -37,19 +42,24 @@ public class Signer extends Matter {
         }
     }
 
-    public Object sign(byte[] ser, Integer index, boolean only, Integer ondex) throws Exception {
+    public Object sign(byte[] ser) throws SodiumException {
+        return sign.sign(ser, this.getRaw(), this.getVerfer(), null, false, null);
+    }
+
+    public Object sign(byte[] ser, Integer index, boolean only, Integer ondex) throws SodiumException{
         return sign.sign(ser, this.getRaw(), this.getVerfer(), index, only, ondex);
     }
 
-    private Object _ed25519(byte[] ser, byte[] seed, Verfer verfer, Integer index, boolean only, Integer ondex) throws Exception {
+    private Object _ed25519(byte[] ser, byte[] seed, Verfer verfer, Integer index, boolean only, Integer ondex) throws SodiumException {
         ByteBuffer buffer = ByteBuffer.allocate(seed.length + verfer.getRaw().length);
         buffer.put(seed);
         buffer.put(verfer.getRaw());
 
-        final String sig = lazySodium.cryptoSignDetached(new String(ser), Key.fromBytes(buffer.array()));
+        final String sigEncoded = lazySodium.cryptoSignDetached(new String(ser), Key.fromBytes(buffer.array()));
+        final byte[] sig = new HexMessageEncoder().decode(sigEncoded);
         if (index == null) {
             return new Cigar(RawArgs.builder()
-                    .raw(sig.getBytes())
+                    .raw(sig)
                     .code(MatterCodex.Ed25519_Sig.getValue())
                     .build(),
                     verfer);
@@ -70,7 +80,7 @@ public class Signer extends Matter {
             }
 
             RawArgs rawArgs = RawArgs.builder()
-                    .raw(sig.getBytes())
+                    .raw(sig)
                     .code(code)
                     .build();
 
@@ -80,6 +90,6 @@ public class Signer extends Matter {
 
     @FunctionalInterface
     interface SignerFunction {
-        Object sign(byte[] ser, byte[] seed, Verfer verfer, Integer index, boolean only, Integer ondex) throws Exception;
+        Object sign(byte[] ser, byte[] seed, Verfer verfer, Integer index, boolean only, Integer ondex) throws SodiumException;
     }
 }

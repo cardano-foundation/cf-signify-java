@@ -22,10 +22,12 @@ public class Salter extends Matter {
 
     public Salter(RawArgs args, Tier tier) {
         super(RawArgs.generateSalt128Raw(args));
+        this.tier = tier == null ? Tier.low : tier;
     }
 
     public Salter(String qb64, Tier tier) {
         super(qb64);
+        this.tier = tier == null ? Tier.low : tier;
     }
 
     public enum Tier {
@@ -80,6 +82,10 @@ public class Salter extends Matter {
         }
 
         return stretch;
+    }
+
+    public Signer signer() {
+        return this.signer(Codex.MatterCodex.Ed25519_Seed.getValue(), true, "", null, false);
     }
 
     public Signer signer(String code, boolean transferable, String path, Tier tier, boolean temp) {

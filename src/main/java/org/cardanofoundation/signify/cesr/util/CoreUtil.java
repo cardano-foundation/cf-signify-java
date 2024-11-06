@@ -86,7 +86,7 @@ public class CoreUtil {
             if (i == 0) {
                 break;
             }
-        }   
+        }
 
         int x = l - out.length();
         for (int j = 0; j < x; j++) {
@@ -96,14 +96,18 @@ public class CoreUtil {
         return out.toString();
     }
 
+    public static byte[] intToB64b(int i, int l) {
+        return intToB64(i, l).getBytes();
+    }
+
     public static String encodeBase64Url(byte[] buffer) {
-        if(buffer == null) {
+        if (buffer == null) {
             throw new IllegalArgumentException("`buffer` must be a byte array.");
         }
         String base64 = Base64.getEncoder().encodeToString(buffer);
         return base64.replace('+', '-')
-                    .replace('/', '_')
-                    .replace("=", "");
+                .replace('/', '_')
+                .replace("=", "");
     }
 
     public static byte[] decodeBase64Url(String input) {
