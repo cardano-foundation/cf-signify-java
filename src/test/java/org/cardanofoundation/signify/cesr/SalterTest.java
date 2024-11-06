@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.cesr;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class SalterTest {
 
     @Test
     @DisplayName("Salter.signer Should return a Signer")
-    void shouldReturnASigner() {
+    void shouldReturnASigner() throws SodiumException {
         Salter salter = new Salter("0ACSTo66vU2CA-j4usUIAEm2");
         Signer signer = salter.signer();
         assertNotNull(signer);

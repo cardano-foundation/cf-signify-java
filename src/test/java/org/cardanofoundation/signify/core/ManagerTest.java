@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.core;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.Matter;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
@@ -17,7 +18,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of random signers")
-    void testRandyCreator() {
+    void testRandyCreator() throws SodiumException {
         Manager manager = new Manager();
         Manager.RandyCreator randy = manager.new RandyCreator();
 
@@ -54,7 +55,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of salty signers")
-    void testSaltyCreator() {
+    void testSaltyCreator() throws SodiumException {
         Manager manager = new Manager();
         Manager.SaltyCreator salty = manager.new SaltyCreator();
 

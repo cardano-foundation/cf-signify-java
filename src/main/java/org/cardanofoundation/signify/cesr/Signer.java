@@ -19,24 +19,20 @@ public class Signer extends Matter {
     private final SignerFunction sign;
     private final Verfer verfer;
 
-    public Signer(RawArgs args) {
+    public Signer(RawArgs args) throws SodiumException {
         this(args, true);
     }
 
-    public Signer(RawArgs args, boolean transferable) {
+    public Signer(RawArgs args, boolean transferable) throws SodiumException {
         super(RawArgs.generateEd25519SeedRaw(args));
 
         if (MatterCodex.Ed25519_Seed.getValue().equals(this.getCode())) {
             this.sign = this::_ed25519;
-            try {
-                final KeyPair keypair = lazySodium.cryptoSignSeedKeypair(this.getRaw());
-                this.verfer = new Verfer(RawArgs.builder()
-                        .raw(keypair.getPublicKey().getAsBytes())
-                        .code(transferable ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
-                        .build());
-            } catch (SodiumException e) {
-                throw new RuntimeException(e);
-            }
+            final KeyPair keypair = lazySodium.cryptoSignSeedKeypair(this.getRaw());
+            this.verfer = new Verfer(RawArgs.builder()
+                    .raw(keypair.getPublicKey().getAsBytes())
+                    .code(transferable ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
+                    .build());
         } else {
             throw new UnsupportedOperationException("Unsupported signer code = " + this.getCode());
         }

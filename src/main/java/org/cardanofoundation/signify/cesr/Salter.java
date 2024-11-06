@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import com.sun.jna.NativeLong;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
@@ -84,11 +85,11 @@ public class Salter extends Matter {
         return stretch;
     }
 
-    public Signer signer() {
+    public Signer signer() throws SodiumException {
         return this.signer(Codex.MatterCodex.Ed25519_Seed.getValue(), true, "", null, false);
     }
 
-    public Signer signer(String code, boolean transferable, String path, Tier tier, boolean temp) {
+    public Signer signer(String code, boolean transferable, String path, Tier tier, boolean temp) throws SodiumException {
         final byte[] seed = this.stretch(Matter.getRawSize(code), path, tier, temp);
         RawArgs rawArgs = RawArgs.builder()
                 .raw(seed)

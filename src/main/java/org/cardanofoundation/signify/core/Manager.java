@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
@@ -75,7 +76,7 @@ public class Manager {
     }
 
     interface Creator {
-        Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp);
+        Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException;
 
         String salt();
 
@@ -94,7 +95,7 @@ public class Manager {
                 int pidx,
                 int ridx,
                 int kidx,
-                boolean temp) {
+                boolean temp) throws SodiumException {
             List<Signer> signers = new ArrayList<>();
 
             if (codes == null) {
@@ -114,15 +115,15 @@ public class Manager {
             return new Keys(signers, null);
         }
 
-        public Keys create() {
+        public Keys create() throws SodiumException {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes, int count) {
+        public Keys create(List<String> codes, int count) throws SodiumException {
             return create(codes, count, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes) {
+        public Keys create(List<String> codes) throws SodiumException {
             return create(codes, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
@@ -161,7 +162,7 @@ public class Manager {
         }
 
         @Override
-        public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) {
+        public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException {
             List<Signer> signers = new ArrayList<>();
             List<String> paths = new ArrayList<>();
 
@@ -186,7 +187,7 @@ public class Manager {
             return new Keys(signers, paths);
         }
 
-        public Keys create() {
+        public Keys create() throws SodiumException {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
