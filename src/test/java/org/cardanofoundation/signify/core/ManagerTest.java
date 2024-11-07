@@ -1,6 +1,9 @@
-package org.cardanofoundation.signify.cesr;
+package org.cardanofoundation.signify.core;
 
-import org.cardanofoundation.signify.cesr.args.SalterArgs;
+import com.goterl.lazysodium.exceptions.SodiumException;
+import org.cardanofoundation.signify.cesr.Matter;
+import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +18,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of random signers")
-    void testRandyCreator() {
+    void testRandyCreator() throws SodiumException {
         Manager manager = new Manager();
         Manager.RandyCreator randy = manager.new RandyCreator();
 
@@ -52,7 +55,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of salty signers")
-    void testSaltyCreator() {
+    void testSaltyCreator() throws SodiumException {
         Manager manager = new Manager();
         Manager.SaltyCreator salty = manager.new SaltyCreator();
 
@@ -77,7 +80,13 @@ class ManagerTest {
         });
 
         final String raw = "0123456789abcdef";
-        final Salter salter = new Salter(SalterArgs.builder().raw(raw.getBytes()).build());
+
+        final RawArgs rawArgs = RawArgs.builder()
+                                        .code(MatterCodex.Salt_128.getValue())
+                                        .raw(raw.getBytes())
+                                        .build();
+
+        final Salter salter = new Salter(rawArgs);
         final String salt = salter.getQb64();
         assertEquals(salter.getQb64(), "0AAwMTIzNDU2Nzg5YWJjZGVm");
         salty = manager.new SaltyCreator(salt, null, null);
@@ -109,7 +118,12 @@ class ManagerTest {
         Manager manager = new Manager();
 
         final String raw = "0123456789abcdef";
-        final Salter salter = new Salter(SalterArgs.builder().raw(raw.getBytes()).build());
+        final RawArgs rawArgs = RawArgs.builder()
+                .code(MatterCodex.Salt_128.getValue())
+                .raw(raw.getBytes())
+                .build();
+
+        final Salter salter = new Salter(rawArgs);
         final String salt = salter.getQb64();
 
         Manager.Creator creator = manager.new Creatory(Manager.Algos.salty).make(salt);

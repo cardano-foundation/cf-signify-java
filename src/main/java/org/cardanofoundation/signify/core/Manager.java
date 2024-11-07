@@ -1,13 +1,15 @@
-package org.cardanofoundation.signify.cesr;
+package org.cardanofoundation.signify.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
-import org.cardanofoundation.signify.cesr.args.SignerArgs;
-import org.cardanofoundation.signify.cesr.args.SalterArgs;
+import org.cardanofoundation.signify.cesr.Signer;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 
 public class Manager {
 
@@ -15,7 +17,6 @@ public class Manager {
         randy,
         salty,
         group,
-        extern
     }
 
     class PubLot {
@@ -75,7 +76,7 @@ public class Manager {
     }
 
     interface Creator {
-        Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp);
+        Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException;
 
         String salt();
 
@@ -94,7 +95,7 @@ public class Manager {
                 int pidx,
                 int ridx,
                 int kidx,
-                boolean temp) {
+                boolean temp) throws SodiumException {
             List<Signer> signers = new ArrayList<>();
 
             if (codes == null) {
@@ -102,25 +103,27 @@ public class Manager {
                 codes = Collections.nCopies(count, code);
             }
 
-            codes.forEach(c -> signers.add(
-                    new Signer(
-                            SignerArgs.builder()
-                                    .code(c)
-                                    .transferable(transferable)
-                                    .build())));
+            for (String c : codes) {
+                RawArgs rawArgs = RawArgs.builder()
+                        .code(c)
+                        .build();
+
+                Signer signer = new Signer(rawArgs, transferable);
+                signers.add(signer);
+            }
 
             return new Keys(signers, null);
         }
 
-        public Keys create() {
+        public Keys create() throws SodiumException {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes, int count) {
+        public Keys create(List<String> codes, int count) throws SodiumException {
             return create(codes, count, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes) {
+        public Keys create(List<String> codes) throws SodiumException {
             return create(codes, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
@@ -146,20 +149,20 @@ public class Manager {
         private String stem;
 
         public SaltyCreator() {
-            this(null, null, null);
+            RawArgs rawArgs = RawArgs.builder()
+                    .code(MatterCodex.Salt_128.getValue())
+                    .build();
+            this.salter = new Salter(rawArgs, Tier.low);
+            this.stem = "";
         }
 
         public SaltyCreator(String salt, Tier tier, String stem) {
-            SalterArgs salterArgs = SalterArgs.builder()
-                    .qb64(salt)
-                    .tier(tier)
-                    .build();
-            this.salter = new Salter(salterArgs);
+            this.salter = new Salter(salt, tier);
             this.stem = stem == null ? "" : stem;
         }
 
         @Override
-        public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) {
+        public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException {
             List<Signer> signers = new ArrayList<>();
             List<String> paths = new ArrayList<>();
 
@@ -184,7 +187,7 @@ public class Manager {
             return new Keys(signers, paths);
         }
 
-        public Keys create() {
+        public Keys create() throws SodiumException {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
@@ -220,7 +223,7 @@ public class Manager {
                     this.makeCreator = this::makeSalty;
                     break;
                 default:
-                    throw new RuntimeException("Unsupported algo: " + algo);
+                    throw new UnsupportedOperationException("Unsupported algo: " + algo);
             }
         }
 
