@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.NonTransCodex;
 import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
 import org.cardanofoundation.signify.cesr.Codex.SmallVarRawSizeCodex;
@@ -12,6 +14,7 @@ import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.Codex.LargeVarRawSizeCodex;
 
+@Getter
 public class Matter {
 
     static Map<String, Sizage> sizes = new HashMap<>();
@@ -136,9 +139,9 @@ public class Matter {
         hards.put("9", 4);
     }
 
-    private String _code = "";
-    private Integer _size = -1;
-    private byte[] _raw = new byte[0];
+    private String code = "";
+    private Integer size = -1;
+    private byte[] raw = new byte[0];
 
     public Matter(MatterArgs args) {
         int size = -1;
@@ -165,11 +168,11 @@ public class Matter {
                     if (size <= Math.pow(64, 2) - 1) {
                         final int hs = 2;
                         final String s = SmallVarRawSizeCodex.fromLsIndex(ls).getValue();
-                        this._code = s + args.getCode().charAt(1);
+                        this.code = s + args.getCode().charAt(1);
                     } else if (size <= Math.pow(64, 4) - 1) {
                         final int hs = 4;
                         final String s = LargeVarRawSizeCodex.fromLsIndex(ls).getValue();
-                        this._code = s + "AAAA".substring(0, hs - 2) + args.getCode().charAt(1);
+                        this.code = s + "AAAA".substring(0, hs - 2) + args.getCode().charAt(1);
                     } else {
                         throw new RuntimeException("Unsupported raw size for code=" + args.getCode());
                     }
@@ -177,7 +180,7 @@ public class Matter {
                     if (size <= Math.pow(64, 4) - 1) {
                         final int hs = 4;
                         final String s = LargeVarRawSizeCodex.fromLsIndex(ls).getValue();
-                        this._code = s + args.getCode().substring(1, hs);
+                        this.code = s + args.getCode().substring(1, hs);
                     } else {
                         throw new RuntimeException("Unsupported raw size for code=" + args.getCode());
                     }
@@ -199,9 +202,9 @@ public class Matter {
                 throw new RuntimeException("Not enougth raw bytes for code=" + args.getCode() + " expected " + args.getRize() + " got " + args.getRaw().length + ".");
             }
 
-            this._code = args.getCode();
-            this._size = size;
-            this._raw = args.getRaw();
+            this.code = args.getCode();
+            this.size = size;
+            this.raw = args.getRaw();
         } else if (args.getQb64() != null) {
             this._exfil(args.getQb64());
         } else if (args.getQb64b() != null) {
@@ -213,18 +216,6 @@ public class Matter {
         }
     }
 
-    public String getCode() {
-        return this._code;
-    }
-
-    public Integer getSize() {
-        return this._size;
-    }
-
-    public byte[] getRaw() {
-        return this._raw;
-    }
-
     public String getQb64() {
         return this._infil();
     }
@@ -234,25 +225,19 @@ public class Matter {
     }
 
     public boolean isTransferable() {
-        return !NonTransCodex.has(this._code);
+        return !NonTransCodex.has(this.code);
     }
 
     public boolean isDigestible() {
-        return DigiCodex.has(this._code);
+        return DigiCodex.has(this.code);
     }
 
+    @AllArgsConstructor
     static class Sizage {
         public Integer hs;
         public Integer ss;
         public Integer ls;
         public Integer fs;
-
-        public Sizage(Integer hs, Integer ss, Integer fs, Integer ls) {
-            this.hs = hs;
-            this.ss = ss;
-            this.fs = fs;
-            this.ls = ls;
-        }
     }
 
     public static int getRawSize(String code) {
@@ -304,8 +289,10 @@ public class Matter {
         byte[] raw;
 
         if (ps != 0) {
-            final String base = "A".repeat(ps) +
-                    qb64.substring(cs);
+            String base = "A".repeat(ps);
+            if (qb64.length() > cs) {
+                base += qb64.substring(cs);
+            }
 
             final byte[] paw = CoreUtil.decodeBase64Url(base);
             // new byte array with the two first elements of paw
@@ -317,7 +304,11 @@ public class Matter {
                         (pi & ((1 << pbs) - 1)),
                         qb64.charAt(cs)));
             }
-            raw = Arrays.copyOfRange(paw, ps, paw.length);
+            if (ps >= paw.length) {
+                raw = new byte[0];
+            } else {
+                raw = Arrays.copyOfRange(paw, ps, paw.length);
+            }
         } else {
             final String base = qb64.substring(cs);
             final byte[] paw = CoreUtil.decodeBase64Url(base);
@@ -332,9 +323,9 @@ public class Matter {
             raw = Arrays.copyOfRange(paw, sizage.ls, paw.length);
         }
 
-        this._code = hard; // hard only
-        this._size = size;
-        this._raw = raw; // ensure bytes so immutable and for crypto ops
+        this.code = hard; // hard only
+        this.size = size;
+        this.raw = raw; // ensure bytes so immutable and for crypto ops
     }
 
     private void _bexfil(byte[] qb2) {
@@ -362,7 +353,7 @@ public class Matter {
 
             final String both = code + CoreUtil.intToB64(size, sizage.ss);
             if (both.length() % 4 != ps - sizage.ls) {
-                throw new RuntimeException("Invalid code=" + both + " for converted raw pad size=" + ps + ", " + raw.length + ".");
+                throw new RuntimeException("Invalid code= " + both + " for converted raw pad size= " + ps + ", " + raw.length + ".");
             }
 
             final byte[] bytes = new byte[sizage.ls + raw.length];

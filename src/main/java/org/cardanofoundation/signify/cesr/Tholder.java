@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 
 @Getter
 public class Tholder {
-    private boolean _weighted = false;
-    private Object _thold;
-    private int _size = 0;
-    private CesrNumber _number;
+    private boolean weighted = false;
+    private Object thold;
+    private int size = 0;
+    private CesrNumber number;
     private Function<List<Integer>, Boolean> _satisfy;
 
     public Tholder(Object thold, Object limen, Object sith) {
@@ -32,28 +32,16 @@ public class Tholder {
         }
     }
 
-    public boolean getWeighted() {
-        return this._weighted;
-    }
-
-    public Object getThold() {
-        return this._thold;
-    }
-
-    public int getSize() {
-        return this._size;
-    }
-
     public byte[] getLimen() {
-        return _number != null ? _number.getQb64b() : null;
+        return number != null ? number.getQb64b() : null;
     }
 
     public String getSith() {
-        if (_weighted) {
+        if (weighted) {
             //TODO find mathjs replacement
             return "";
         } else {
-            return Integer.toHexString((Integer) _thold);
+            return Integer.toHexString((Integer) thold);
         }
     }
 
@@ -62,7 +50,7 @@ public class Tholder {
     }
 
     public Integer getNum() {
-        return _weighted ? null : (Integer) _thold;
+        return weighted ? null : (Integer) thold;
     }
 
     private void _processThold(Object thold) {
@@ -158,11 +146,11 @@ public class Tholder {
         if (thold < 0) {
             throw new IllegalArgumentException("Non-positive int threshold = " + thold);
         }
-        this._thold = thold;
-        this._weighted = false;
-        this._size = thold; // used to verify that keys list size is at least size
+        this.thold = thold;
+        this.weighted = false;
+        this.size = thold; // used to verify that keys list size is at least size
         this._satisfy = this::_satisfyNumeric;
-        this._number = new CesrNumber(MatterArgs.builder().build(), BigInteger.valueOf(thold), null);
+        this.number = new CesrNumber(MatterArgs.builder().build(), BigInteger.valueOf(thold), null);
     }
 
     private void _processWeighted(List<List<Fraction>> thold) {
@@ -177,9 +165,9 @@ public class Tholder {
             }
         }
 
-        this._thold = thold;
-        this._weighted = true;
-        this._size = thold.stream()
+        this.thold = thold;
+        this.weighted = true;
+        this.size = thold.stream()
             .mapToInt(List::size)
             .sum();
         this._satisfy = this::_satisfyWeighted;
@@ -198,7 +186,7 @@ public class Tholder {
     }
 
     private boolean _satisfyNumeric(List<Integer> indices) {
-        return (Integer) _thold > 0 && indices.size() >= (Integer) _thold; // at least one
+        return (Integer) thold > 0 && indices.size() >= (Integer) thold; // at least one
     }
 
     private boolean _satisfyWeighted(List<Integer> indices) {
@@ -207,10 +195,10 @@ public class Tholder {
         }
 
         @SuppressWarnings("unchecked")
-        List<List<Fraction>> weightedThold = (List<List<Fraction>>) _thold;
+        List<List<Fraction>> weightedThold = (List<List<Fraction>>) thold;
         
         Set<Integer> indexes = new TreeSet<>(indices);
-        boolean[] sats = new boolean[_size];
+        boolean[] sats = new boolean[size];
         indexes.forEach(idx -> sats[idx] = true);
 
         int wio = 0;

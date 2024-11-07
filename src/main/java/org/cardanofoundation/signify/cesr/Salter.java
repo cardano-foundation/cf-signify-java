@@ -9,9 +9,8 @@ import org.cardanofoundation.signify.cesr.args.SignerArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
 import lombok.Getter;
 
+@Getter
 public class Salter extends Matter {
-
-    @Getter
     public Tier tier;
     private static final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
 

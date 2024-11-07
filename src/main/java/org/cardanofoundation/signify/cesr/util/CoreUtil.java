@@ -115,13 +115,6 @@ public class CoreUtil {
         throw new RuntimeException("Invalid version string = " + versionString);
     }
 
-    public record DeversifyResult(
-        Ident ident,
-        Serials kind,
-        Version version,
-        String string
-    ) {}
-
     public static String versify(Ident ident, Version version, Serials kind, int size) {
         ident = ident == null ? Ident.KERI : ident;
         version = version == null ? new Version() : version;
@@ -268,4 +261,11 @@ public class CoreUtil {
 
         return i;
     }
+
+    public record DeversifyResult(
+        Ident ident,
+        Serials kind,
+        Version version,
+        String string
+    ) {}
 }

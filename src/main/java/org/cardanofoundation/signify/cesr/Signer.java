@@ -6,6 +6,7 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 
 import com.goterl.lazysodium.utils.Key;
 import com.goterl.lazysodium.utils.KeyPair;
+import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.IndexerCodex;
 import org.cardanofoundation.signify.cesr.args.IndexerArgs;
@@ -14,10 +15,11 @@ import org.cardanofoundation.signify.cesr.args.SignerArgs;
 
 import java.nio.ByteBuffer;
 
+@Getter
 public class Signer extends Matter {
     private static final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
     private final SignerFunction _sign;
-    private final Verfer _verfer;
+    private final Verfer verfer;
 
     public Signer(SignerArgs args) {
         super(initializeArgs(args));
@@ -26,7 +28,7 @@ public class Signer extends Matter {
             this._sign = this::_ed25519;
             try {
                 final KeyPair keypair = lazySodium.cryptoSignSeedKeypair(this.getRaw());
-                this._verfer = new Verfer(MatterArgs.builder()
+                this.verfer = new Verfer(MatterArgs.builder()
                         .raw(keypair.getPublicKey().getAsBytes())
                         .code(args.getTransferable() ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
                         .build());
@@ -59,10 +61,6 @@ public class Signer extends Matter {
                 .qb64(args.getQb64())
                 .qb2(args.getQb2())
                 .build();
-    }
-
-    public Verfer getVerfer() {
-        return _verfer;
     }
 
     public Object sign(byte[] ser, Integer index, Boolean only, Integer ondex) throws Exception {

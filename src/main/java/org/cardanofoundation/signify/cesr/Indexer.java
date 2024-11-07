@@ -1,5 +1,7 @@
 package org.cardanofoundation.signify.cesr;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.IndexerArgs;
 import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
 import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
@@ -11,6 +13,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class Indexer {
 
     static Map<String, Xizage> sizes = new HashMap<>();
@@ -107,10 +110,10 @@ public class Indexer {
         hards.put("9", 4);
     }
 
-    private String _code = "";
-    private Integer _index = -1;
-    private Integer _ondex;
-    private byte[] _raw = new byte[0];
+    private String code = "";
+    private Integer index = -1;
+    private Integer ondex;
+    private byte[] raw = new byte[0];
 
     public Indexer(IndexerArgs args) {
         byte[] raw = args.getRaw();
@@ -170,10 +173,10 @@ public class Indexer {
                 throw new RuntimeException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
             }
 
-            this._code = code;
-            this._index = index;
-            this._ondex = ondex;
-            this._raw = raw;
+            this.code = code;
+            this.index = index;
+            this.ondex = ondex;
+            this.raw = raw;
         } else if (qb64b != null) {
             String qb64Str = Base64.getUrlEncoder().withoutPadding().encodeToString(qb64b);
             this._exfil(qb64Str);
@@ -196,22 +199,6 @@ public class Indexer {
             throw new RuntimeException();
         }
         return (int) Math.floor(((xizage.fs - (xizage.hs + xizage.ss)) * 3.0) / 4.0) - xizage.ls;
-    }
-
-    public String getCode() {
-        return this._code;
-    }
-
-    public byte[] getRaw() {
-        return this._raw;
-    }
-
-    public Integer getIndex() {
-        return this._index;
-    }
-
-    public Integer getOndex() {
-        return this._ondex;
     }
 
     public String getQb64() {
@@ -348,25 +335,18 @@ public class Indexer {
             throw new RuntimeException("Improperly qualified material = " + qb64);
         }
 
-        this._code = hard;
-        this._index = index;
-        this._ondex = ondex;
-        this._raw = raw; // must be bytes for crypto opts and immutable not bytearray
+        this.code = hard;
+        this.index = index;
+        this.ondex = ondex;
+        this.raw = raw; // must be bytes for crypto opts and immutable not bytearray
     }
 
+    @AllArgsConstructor
     static class Xizage {
         public Integer hs;
         public Integer ss;
         public Integer os;
         public Integer fs;
         public Integer ls;
-
-        public Xizage(Integer hs, Integer ss, Integer os, Integer ls, Integer fs) {
-            this.hs = hs;
-            this.ss = ss;
-            this.os = os;
-            this.ls = ls;
-            this.fs = fs;
-        }
     }
 }

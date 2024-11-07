@@ -10,60 +10,46 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.DeversifyResult;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Getter
 public class Serder {
-    private Serials _kind;
-    private String _raw = "";
-    private Map<String, Object> _ked;
-    private Ident _ident = Ident.KERI;
-    private int _size = 0;
-    private Version _version = new Version();
-    private final String _code;
+    private Serials kind;
+    private String raw = "";
+    private Map<String, Object> ked;
+    private Ident ident = Ident.KERI;
+    private int size = 0;
+    private Version version = new Version();
+    private final String code;
 
     public Serder(Map<String, Object> ked, Serials kind, String code) {
-        this._code = code != null ? code : MatterCodex.Blake3_256.getValue();
-        this._kind = kind != null ? kind : Serials.JSON;
+        this.code = code != null ? code : MatterCodex.Blake3_256.getValue();
+        this.kind = kind != null ? kind : Serials.JSON;
         setKed(ked);
     }
 
     public void setKed(Map<String, Object> ked) {
-        ExhaleResult result = _exhale(ked, this._kind);
+        ExhaleResult result = _exhale(ked, this.kind);
         int size = result.raw.length();
-        this._raw = result.raw;
-        this._ident = result.ident;
-        this._ked = result.kd;
-        this._kind = result.kind;
-        this._size = size;
-        this._version = result.version;
+        this.raw = result.raw;
+        this.ident = result.ident;
+        this.ked = result.kd;
+        this.kind = result.kind;
+        this.size = size;
+        this.version = result.version;
     }
 
     public String getPre() {
-        return (String) this._ked.get("i");
-    }
-
-    public Map<String, Object> getKed() {
-        return this._ked;
-    }
-
-    public String getCode() {
-        return this._code;
-    }
-
-    public String getRaw() {
-        return this._raw;
+        return (String) this.ked.get("i");
     }
 
     public CesrNumber getSner() {
-        return new CesrNumber(null, null, (String) this._ked.get("s"));
-    }
-
-    public Serials getKind() {
-        return this._kind;
+        return new CesrNumber(null, null, (String) this.ked.get("s"));
     }
 
     public int getSn() {
@@ -74,24 +60,12 @@ public class Serder {
         return sizeify(ked, kind);
     }
 
-    public Ident getIdent() {
-        return this._ident;
-    }
-
-    public int getSize() {
-        return this._size;
-    }
-
-    public Version getVersion() {
-        return this._version;
-    }
-
     @SuppressWarnings("unchecked")
     public List<Verfer> getVerfers() {
         List<String> keys;
-        if (this._ked.containsKey("k")) {
+        if (this.ked.containsKey("k")) {
             // establishment event
-            keys = (List<String>) this._ked.get("k");
+            keys = (List<String>) this.ked.get("k");
         } else {
             // non-establishment event
             keys = new ArrayList<>();
@@ -107,9 +81,9 @@ public class Serder {
     @SuppressWarnings("unchecked")
     public List<Diger> getDigers() {
         List<String> keys;
-        if (this._ked.containsKey("n")) {
+        if (this.ked.containsKey("n")) {
             // establishment event
-            keys = (List<String>) this._ked.get("n");
+            keys = (List<String>) this.ked.get("n");
         } else {
             // non-establishment event
             keys = new ArrayList<>();
@@ -124,11 +98,7 @@ public class Serder {
 
     public static String dumps(Map<String, Object> ked, Serials kind) {
         if (kind == Serials.JSON) {
-            try {
-                return new ObjectMapper().writeValueAsString(ked);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Error serializing ked to JSON", e);
-            }
+            return Utils.jsonStringify(ked);
         } else {
             throw new RuntimeException("unsupported event encoding");
         }
@@ -153,7 +123,7 @@ public class Serder {
         }
 
         String raw = dumps(ked, kind);
-        int size = raw.getBytes().length;
+        int size = raw.getBytes(StandardCharsets.UTF_8).length;
 
         ked.put("v", CoreUtil.versify(ident, version, kind, size));
 
