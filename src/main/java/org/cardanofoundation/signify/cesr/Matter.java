@@ -8,7 +8,16 @@ import org.cardanofoundation.signify.cesr.Codex.NonTransCodex;
 import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
 import org.cardanofoundation.signify.cesr.Codex.SmallVarRawSizeCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ConversionException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCountCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedOpCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeSizeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarRawSizeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarSizeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.Codex.LargeVarRawSizeCodex;
 
@@ -143,7 +152,7 @@ public class Matter {
     public Matter(RawArgs args, Integer rize) {
         int size = -1;
         if (args.getCode().isEmpty()) {
-            throw new RuntimeException("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
+            throw new EmptyMaterialException("Improper initialization need either (raw and code) or qb64b or qb64 or qb2.");
         }
 
         String firstCodeChar = args.getCode().substring(0, 1);
@@ -151,7 +160,7 @@ public class Matter {
         if (SmallVarRawSizeCodex.has(firstCodeChar) || LargeVarRawSizeCodex.has(firstCodeChar)) {
             if (rize != null) {
                 if (rize < 0) {
-                    throw new RuntimeException("missing var raw size for code=" + args.getCode());
+                    throw new InvalidVarRawSizeException("Missing var raw size for code=" + args.getCode());
                 }
             } else {
                 size = args.getRaw().length;
@@ -170,7 +179,7 @@ public class Matter {
                     final String s = LargeVarRawSizeCodex.fromLsIndex(ls).getValue();
                     this._code = s + "AAAA".substring(0, hs - 2) + args.getCode().charAt(1);
                 } else {
-                    throw new RuntimeException("Unsupported raw size for code=" + args.getCode());
+                    throw new InvalidVarRawSizeException("Unsupported raw size for code=" + args.getCode());
                 }
             } else {
                 if (size <= Math.pow(64, 4) - 1) {
@@ -178,14 +187,14 @@ public class Matter {
                     final String s = LargeVarRawSizeCodex.fromLsIndex(ls).getValue();
                     this._code = s + args.getCode().substring(1, hs);
                 } else {
-                    throw new RuntimeException("Unsupported raw size for code=" + args.getCode());
+                    throw new InvalidVarRawSizeException("Unsupported raw size for code=" + args.getCode());
                 }
             }
         } else {
             final Sizage sizage = sizes.get(args.getCode());
             if (sizage == null || sizage.fs == null || sizage.fs == -1) {
                 // invalid
-                throw new RuntimeException("Unsupported variable size code=" + args.getCode());
+                throw new InvalidVarSizeException("Unsupported variable size code=" + args.getCode());
             }
 
             rize = Matter.getRawSize(args.getCode());
@@ -195,7 +204,7 @@ public class Matter {
 
         if (args.getRaw().length != rize) {
             // forbids shorter
-            throw new RuntimeException("Not enougth raw bytes for code=" + args.getCode() + " expected " + rize + " got " + args.getRaw().length + ".");
+            throw new RawMaterialException("Not enougth raw bytes for code=" + args.getCode() + " expected " + rize + " got " + args.getRaw().length + ".");
         }
 
         this._code = args.getCode();
@@ -261,29 +270,35 @@ public class Matter {
         final Sizage sizage = sizes.get(code);
         final Integer cs = sizage.hs + sizage.ss;
         if (sizage.fs == null || sizage.fs == -1) {
-            throw new IllegalArgumentException("Non-fixed raw size code " + code + ".");
+            throw new InvalidCodeSizeException("Non-fixed raw size code " + code);
         }
         return (int) Math.floor(((sizage.fs - cs) * 3.0) / 4.0) - sizage.ls;
     }
 
     private void _exfil(String qb64) {
         if (qb64.isEmpty()) {
-            throw new EmptyMaterialError("Empty Material");
+            throw new ShortageException("Empty Material");
         }
 
         final String first = qb64.substring(0, 1);
         if (!Matter.hards.containsKey(first)) {
-            throw new IllegalArgumentException("Unexpected code " + first);
+            if (first == "-") {
+                throw new UnexpectedCountCodeException("Unexpected count code start while extracing Matter.");
+            } else if (first == "_") {
+                throw new UnexpectedOpCodeException("Unexpected opcode code start while extracing Matter.");
+            } else {
+                throw new UnexpectedCodeException("Unsupported code start char=" + first);
+            }
         }
 
         final Integer hs = Matter.hards.get(first);
-        if (qb64.length() < hs) {
-            throw new IllegalArgumentException("Shortage Error");
+        if (qb64.length() < hs) { // need more bytes
+            throw new ShortageException("Need " + (hs - qb64.length()) + " more characters.");
         }
 
         final String hard = qb64.substring(0, hs);
         if (!Matter.sizes.containsKey(hard)) {
-            throw new IllegalArgumentException("Unsupported code " + hard);
+            throw new UnexpectedCodeException("Unsupported code=" + hard);
         }
 
         final Sizage sizage = Matter.sizes.get(hard);
@@ -291,13 +306,13 @@ public class Matter {
         int size = -1;
         if (sizage.fs == -1) {
             // variable size code, NOT SUPPORTED
-            throw new IllegalArgumentException("Variable size codes not supported yet");
+            throw new UnexpectedCodeException("Variable size codes not supported yet");
         } else {
             size = sizage.fs;
         }
 
         if (qb64.length() < sizage.fs) {
-            throw new IllegalArgumentException("Need " + (size - qb64.length()) + " more chars.");
+            throw new ShortageException("Need " + (sizage.fs - qb64.length()) + " more chars.");
         }
 
         qb64 = qb64.substring(0, sizage.fs);
@@ -315,8 +330,8 @@ public class Matter {
             final int mask = pi & (1 << pbs - 1);
             if (mask != 0) {
                 // masked pad bits non-zero
-                throw new IllegalStateException(String.format("Non zeroed prepad bits = %06d in %s",
-                        (pi & ((1 << pbs) - 1)),
+                throw new ConversionException(String.format("Non zeroed prepad bits = %06d in %s",
+                        mask,
                         qb64.charAt(cs)));
             }
             raw = Arrays.copyOfRange(paw, ps, paw.length);
@@ -326,9 +341,9 @@ public class Matter {
             final int li = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, sizage.ls));
             if (li != 0) {
                 if (li == 1) {
-                    throw new IllegalStateException(String.format("Non zeroed lead byte = 0x%02x", li));
+                    throw new ConversionException(String.format("Non zeroed lead byte = 0x%02x", li));
                 } else {
-                    throw new IllegalStateException(String.format("Non zeroed lead bytes = 0x%04x", li));
+                    throw new ConversionException(String.format("Non zeroed lead bytes = 0x%04x", li));
                 }
             }
             raw = Arrays.copyOfRange(paw, sizage.ls, paw.length);
@@ -355,16 +370,16 @@ public class Matter {
             // Variable size code, NOT SUPPORTED
             final int cs = sizage.hs + sizage.ss;
             if (cs % 4 == 1) {
-                throw new IllegalArgumentException("Whole code size not multiple of 4 for variable length material. cs=" + cs);
+                throw new InvalidCodeSizeException("Whole code size not multiple of 4 for variable length material. cs=" + cs);
             }
 
             if (size < 0 || size > Math.pow(64, sizage.ss) - 1) {
-                throw new IllegalArgumentException("Invalid size=" + size + " for code=" + code + ".");
+                throw new InvalidCodeSizeException("Invalid size=" + size + " for code=" + code + ".");
             }
 
             final String both = code + CoreUtil.intToB64(size, sizage.ss);
             if (both.length() % 4 != ps - sizage.ls) {
-                throw new IllegalArgumentException("Invalid code=" + both + " for converted raw pad size=" + ps + ", " + raw.length + ".");
+                throw new InvalidCodeSizeException("Invalid code=" + both + " for converted raw pad size=" + ps + ", " + raw.length + ".");
             }
 
             final byte[] bytes = new byte[sizage.ls + raw.length];
@@ -382,7 +397,7 @@ public class Matter {
             final int cs = both.length();
             if (cs % 4 != ps - sizage.ls) {
                 // adjusted pad given lead bytes
-                throw new IllegalArgumentException("Invalid code=" + both + " for converted raw pad size=" + ps + ", " + raw.length + ".");
+                throw new InvalidCodeSizeException("Invalid code=" + both + " for converted raw pad size=" + ps + ", " + raw.length + ".");
             }
             // prepad, convert, and replace upfront
             // when fixed and ls != 0 then cs % 4 is zero and ps==ls
