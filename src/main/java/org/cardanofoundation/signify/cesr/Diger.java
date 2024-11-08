@@ -1,62 +1,44 @@
 package org.cardanofoundation.signify.cesr;
 
-import org.cardanofoundation.signify.cesr.args.MatterArgs;
+import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.function.BiFunction;
 
 /**
  * Diger is subset of Matter and is used to verify the digest of serialization
  * It uses .raw: as digest
  * .code as digest algorithm
  */
+@Getter
 public class Diger extends Matter {
-    private final BiFunction<byte[], byte[], Boolean> _verify;
+    private Verify verify;
 
-    public Diger(MatterArgs args, byte[] ser) {
-        super(initializeArgs(args, ser));
+    public Diger(RawArgs args, byte[] ser) {
+        super(RawArgs.generateBlake3256SeedRaw(args, ser));
 
         if (this.getCode().equals(MatterCodex.Blake3_256.getValue())) {
-            this._verify = this::blake3_256;
+            this.verify = this::blake3_256;
         } else {
-            throw new IllegalArgumentException("Unsupported code = " + this.getCode() + " for digester.");
+            throw new UnsupportedOperationException("Unsupported code = " + this.getCode() + " for digester.");
         }
     }
 
-    private static MatterArgs initializeArgs(MatterArgs digerArgs, byte[] ser) {
-        if (digerArgs.getRaw() == null && digerArgs.getQb64() == null
-                && digerArgs.getQb64b() == null && digerArgs.getQb2() == null) {
-            if (digerArgs.getCode() == null) {
-                digerArgs.setCode(MatterCodex.Blake3_256.getValue());
-            }
-
-            if (digerArgs.getCode().equals(MatterCodex.Blake3_256.getValue())) {
-                //TODO Implement Blake3
-//                const dig = Buffer.from(
-//                    blake3.create({ dkLen: 32 }).update(ser).digest()
-//                );
-                byte[] dig = new byte[0];
-                return MatterArgs.builder()
-                        .raw(dig)
-                        .code(digerArgs.getCode())
-                        .build();
-            } else {
-                throw new IllegalArgumentException("Unsupported code = " + digerArgs.getCode() + " for digester.");
-            }
-        }
-
-        return MatterArgs.builder()
-                .raw(digerArgs.getRaw())
-                .code(digerArgs.getCode())
-                .qb64b(digerArgs.getQb64b())
-                .qb64(digerArgs.getQb64())
-                .qb2(digerArgs.getQb2())
-                .build();
+    public Diger(String qb64) {
+        super(qb64);
     }
 
+    /**
+     *
+     * @param ser  serialization bytes
+     * @description  This method will return true if digest of bytes serialization ser matches .raw
+     * using .raw as reference digest for ._verify digest algorithm determined
+    by .code
+     */
     public boolean verify(byte[] ser) {
-        return this._verify.apply(ser, this.getRaw());
+        return verify.verify(ser, this.getRaw());
     }
 
     public boolean compare(byte[] ser, byte[] dig, Diger diger) {
@@ -64,7 +46,7 @@ public class Diger extends Matter {
             if (Arrays.equals(dig, this.getQb64b())) {
                 return true;
             }
-            diger = new Diger(MatterArgs.builder().qb64b(dig).build(), null);
+            diger = new Diger(new String(dig, StandardCharsets.UTF_8));
         } else if (diger != null) {
             if (Arrays.equals(diger.getQb64b(), this.getQb64b())) {
                 return true;
@@ -84,5 +66,10 @@ public class Diger extends Matter {
         //TODO Implement Blake3
         byte[] digest = new byte[0];
         return Arrays.toString(digest).equals(Arrays.toString(dig));
+    }
+
+    @FunctionalInterface
+    public interface Verify {
+        boolean verify(byte[] ser, byte[] raw);
     }
 }

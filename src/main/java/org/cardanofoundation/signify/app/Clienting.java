@@ -123,7 +123,7 @@ public class Clienting {
         public Mono<State> state() {
             String caid = controller != null ? controller.getPre() : null;
             if (caid == null) {
-                return Mono.error(new IllegalStateException("Controller not initialized"));
+                return Mono.error(new IllegalArgumentException("Controller not initialized"));
             }
 
             return webClient
@@ -133,7 +133,7 @@ public class Clienting {
                 .onStatus(
                     status -> status.value() == 404,
                     response -> Mono.error(
-                        new IllegalStateException("agent does not exist for controller " + caid)
+                        new IllegalArgumentException("Agent does not exist for controller " + caid)
                     )
                 )
                 .bodyToMono(Map.class)
@@ -166,7 +166,7 @@ public class Clienting {
                     // Create agent representing the AID of KERIA cloud agent
                     this.agent = new Agent(state.getAgent());
                     if (!this.agent.getAnchor().equals(this.controller.getPre())) {
-                        return Mono.error(new IllegalStateException(
+                        return Mono.error(new IllegalArgumentException(
                             "commitment to controller AID missing in agent inception event"
                         ));
                     }
@@ -203,7 +203,7 @@ public class Clienting {
          * Approve the delegation of the client AID to the KERIA agent
          * @return Mono<String> A promise to the result of the approval
          */
-        public Mono<String> approveDelegation() {
+        public Mono<Object> approveDelegation() {
             if (this.agent == null) {
                 return Mono.error(new IllegalStateException("Agent not initialized"));
             }
@@ -220,7 +220,7 @@ public class Clienting {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(data)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(Object.class);
         }
     }
 }

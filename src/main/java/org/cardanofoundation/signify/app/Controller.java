@@ -6,9 +6,9 @@ import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
-import org.cardanofoundation.signify.cesr.args.MatterArgs;
-import org.cardanofoundation.signify.cesr.args.SalterArgs;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.core.Manager;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -40,10 +40,7 @@ public class Controller {
         this.tier = tier;
         this.ridx = ridx;
 
-        this.salter = new Salter(SalterArgs.builder()
-            .qb64(this.bran)
-            .tier(this.tier)
-            .build());
+        this.salter = new Salter(this.bran, this.tier);
 
         Manager.SaltyCreator creator = new Manager().new SaltyCreator(
                 this.salter.getQb64(),
@@ -51,36 +48,42 @@ public class Controller {
                 this.stem
         );
 
-        this.signer = new LinkedList<>(creator
-            .create(
-                null,
-                1,
-                MatterCodex.Ed25519_Seed.getValue(),
-                true,
-                0,
-                this.ridx,
-                0,
-                false
-            ).getSigners()).pop();
+        try {
+            this.signer = new LinkedList<>(creator
+                .create(
+                    null,
+                    1,
+                    MatterCodex.Ed25519_Seed.getValue(),
+                    true,
+                    0,
+                    this.ridx,
+                    0,
+                    false
+                ).getSigners()).pop();
 
-        this.nsigner = new LinkedList<>(creator
-            .create(
-                null,
-                1,
-                MatterCodex.Ed25519_Seed.getValue(),
-                true,
-                0,
-                this.ridx + 1,
-                0,
-                false
-            ).getSigners()).pop();
+            this.nsigner = new LinkedList<>(creator
+                .create(
+                    null,
+                    1,
+                    MatterCodex.Ed25519_Seed.getValue(),
+                    true,
+                    0,
+                    this.ridx + 1,
+                    0,
+                    false
+                ).getSigners()).pop();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create keys");
+        }
 
         this.keys = List.of(this.signer.getVerfer().getQb64());
+
+        RawArgs rawArgs = RawArgs.builder()
+            .code(MatterCodex.Blake3_256.getValue())
+            .build();
         this.ndigs = List.of(
-            new Diger(
-                MatterArgs.builder().code(MatterCodex.Blake3_256.getValue()).build(),
-                this.nsigner.getVerfer().getQb64b()
-            ).getQb64()
+            new Diger(rawArgs, this.nsigner.getVerfer().getQb64b())
+                .getQb64()
         );
 
         Map<String, Object> stateMap = Utils.toMap(state);
@@ -108,9 +111,7 @@ public class Controller {
     public EventResult getEvent() throws Exception {
         Siger siger = (Siger) this.signer.sign(
             this.serder.getRaw().getBytes(),
-            0,
-            null,
-            null);
+            0);
         return new EventResult(this.serder, siger);
     }
 

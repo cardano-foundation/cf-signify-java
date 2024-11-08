@@ -1,10 +1,8 @@
 package org.cardanofoundation.signify.cesr;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.MatterArgs;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
@@ -49,7 +47,7 @@ public class Serder {
     }
 
     public CesrNumber getSner() {
-        return new CesrNumber(null, null, (String) this.ked.get("s"));
+        return new CesrNumber(RawArgs.builder().build(), null, (String) this.ked.get("s"));
     }
 
     public int getSn() {
@@ -73,7 +71,7 @@ public class Serder {
         // create a new Verfer for each key
         List<Verfer> verfers = new ArrayList<>();
         for (String key : keys) {
-            verfers.add(new Verfer(MatterArgs.builder().qb64(key).build()));
+            verfers.add(new Verfer(key));
         }
         return verfers;
     }
@@ -91,7 +89,7 @@ public class Serder {
         // create a new Diger for each key
         List<Diger> digers = new ArrayList<>();
         for (String key : keys) {
-            digers.add(new Diger(MatterArgs.builder().qb64(key).build(), null));
+            digers.add(new Diger(key));
         }
         return digers;
     }

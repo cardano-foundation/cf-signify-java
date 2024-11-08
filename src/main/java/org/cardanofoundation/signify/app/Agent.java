@@ -5,8 +5,10 @@ import org.cardanofoundation.signify.cesr.Diger;
 import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.Verfer;
 import org.cardanofoundation.signify.cesr.CesrNumber;
-import org.cardanofoundation.signify.cesr.args.MatterArgs;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
+import org.cardanofoundation.signify.cesr.util.Utils;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -31,25 +33,26 @@ public class Agent {
         this.state = null;
         this.sn = BigInteger.ZERO;
         this.said = "";
-        this.parse(agent);
+        this.parse((Agent) agent);
     }
 
-    @SuppressWarnings("unchecked")
-    private void parse(Object agent) {
-        Object[] result = this.event(agent);
-        Map<String, Object> state = (Map<String, Object>) result[0];
-        Verfer verfer = (Verfer) result[1];
+    private void parse(Agent agent) {
+        EventResult result = this.event(agent);
+        Map<String, Object> state = Utils.toMap(result.state);
+        Verfer verfer = result.verfer;
 
-        this.sn = new CesrNumber(null, null, (String) state.get("s")).getNum();
+        this.sn = new CesrNumber(
+            RawArgs.builder().build(), null, (String) state.get("s")
+        ).getNum();
         this.said = (String) state.get("d");
 
         if (!Ilks.DIP.getValue().equals(state.get("et"))) {
-            throw new IllegalStateException("invalid inception event type " + state.get("et"));
+            throw new IllegalArgumentException("invalid inception event type " + state.get("et"));
         }
 
         this.pre = (String) state.get("i");
         if (!state.containsKey("di")) {
-            throw new IllegalStateException("no anchor to controller AID");
+            throw new IllegalArgumentException("no anchor to controller AID");
         }
 
         this.anchor = (String) state.get("di");
@@ -58,45 +61,37 @@ public class Agent {
         this.state = state;
     }
 
-    @SuppressWarnings("unchecked")
-    private Object[] event(Object evt) {
-        Map<String, Object> event = (Map<String, Object>) evt;
-        List<String> keys = (List<String>) event.get("k");
-        List<String> nextKeys = (List<String>) event.get("n");
+    private EventResult event(Object evt) {
+        Map<String, Object> event = Utils.toMap(evt);
+        List<String> keys = Utils.toList(event.get("k"));
+        List<String> nextKeys = Utils.toList(event.get("n"));
 
         if (keys.size() != 1) {
-            throw new IllegalStateException("agent inception event can only have one key");
+            throw new IllegalArgumentException("agent inception event can only have one key");
         }
 
-        Verfer verfer = new Verfer(
-            MatterArgs.builder()
-                .qb64(keys.getFirst())
-                .build()
-        );
+        Verfer verfer = new Verfer(keys.getFirst());
 
         if (nextKeys.size() != 1) {
-            throw new IllegalStateException("agent inception event can only have one next key");
+            throw new IllegalArgumentException("agent inception event can only have one next key");
         }
 
-        Diger diger = new Diger(
-            MatterArgs.builder()
-                .qb64(nextKeys.getFirst())
-                .build(),
-            null
-        );
+        Diger diger = new Diger(nextKeys.getFirst());
 
         Tholder tholder = new Tholder(null, null, event.get("kt"));
         if (tholder.getNum() != 1) {
-            throw new IllegalStateException("invalid threshold " + tholder.getNum() + ", must be 1");
+            throw new IllegalArgumentException("invalid threshold " + tholder.getNum() + ", must be 1");
         }
 
         Tholder ntholder = new Tholder(null, null, event.get("nt"));
         if (ntholder.getNum() != 1) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                 "invalid next threshold " + ntholder.getNum() + ", must be 1"
             );
         }
 
-        return new Object[]{event, verfer, diger};
+        return new EventResult(event, verfer, diger);
     }
+
+    private record EventResult(Object state, Verfer verfer, Diger diger) {}
 }

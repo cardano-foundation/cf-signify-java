@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Utils {
     public static boolean isLessThan(BigInteger a, Number b) {
@@ -51,5 +50,18 @@ public class Utils {
         }
 
         return map;
+    }
+
+    public static List<String> toList(Object obj) {
+        return switch (obj) {
+            case String s -> List.of(s);
+            case Object[] arr -> Arrays.stream(arr)
+                .map(String::valueOf)
+                .toList();
+            case Collection<?> col -> col.stream()
+                .map(String::valueOf)
+                .toList();
+            case null, default -> Collections.emptyList();
+        };
     }
 }

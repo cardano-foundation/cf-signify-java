@@ -3,9 +3,10 @@ package org.cardanofoundation.signify.cesr;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.apache.commons.math3.fraction.Fraction;
-import org.cardanofoundation.signify.cesr.args.MatterArgs;
 import org.cardanofoundation.signify.cesr.Codex.BexCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -64,16 +65,13 @@ public class Tholder {
     }
 
     private void _processLimen(String limen) {
-        Matter matter = new Matter(MatterArgs.builder().qb64(limen).build());
+        Matter matter = new Matter(limen);
         if (NumCodex.has(matter.getCode())) {
-            CesrNumber number = new CesrNumber(
-                MatterArgs.builder()
-                    .raw(matter.getRaw())
-                    .code(matter.getCode())
-                    .build(),
-                null,
-                null
-            );
+            RawArgs args = RawArgs.builder()
+                .raw(matter.getRaw())
+                .code(matter.getCode())
+                .build();
+            CesrNumber number = new CesrNumber(args, null, null);
             _processUnweighted(number.getNum().intValue());
         } else if (BexCodex.has(matter.getCode())) {
             // TODO: Implement Bexter
@@ -84,54 +82,52 @@ public class Tholder {
 
     @SuppressWarnings("unchecked")
     private void _processSith(Object sith) {
-        if (sith instanceof Integer) {
-            this._processUnweighted((Integer) sith);
-        } else if (sith instanceof String sithStr) {
-            if (!sithStr.contains("[")) {
-                this._processUnweighted(Integer.parseInt(sithStr, 16));
-            } else {
+        if (sith instanceof Number) {
+            this._processUnweighted(((Number) sith).intValue());
+        } else if (sith instanceof String sithStr && !sithStr.contains("[")) {
+            this._processUnweighted(Integer.parseInt(sithStr, 16));
+        } else {
+            List<Object> _sith;
+            if (sith instanceof String sithStr) {
                 try {
-                    List<Object> _sith = new ObjectMapper().readValue(sithStr, List.class);
-                    processSithList(_sith);
+                    _sith = new ObjectMapper().readValue(sithStr, List.class);
                 } catch (Exception e) {
                     throw new RuntimeException("Error parsing sith string", e);
                 }
-            }
-        } else if (sith instanceof List) {
-            List<Object> _sith = (List<Object>) sith;
-            processSithList(_sith);
-        }
-    }
-
-    private void processSithList(List<Object> _sith) {
-        if (_sith.isEmpty()) {
-            throw new RuntimeException("Empty weight list");
-        }
-
-        boolean hasNonStrings = _sith.stream()
-            .anyMatch(x -> !(x instanceof String));
-
-        if (hasNonStrings) {
-            _sith = Collections.singletonList(_sith);
-        }
-
-        for (Object c : _sith) {
-            if (!(c instanceof List<?> clause)) {
-                continue;
+            } else {
+                _sith = Collections.singletonList(Utils.toList(sith));
             }
 
-            boolean hasNonStringWeights = clause.stream()
-                .anyMatch(x -> !(x instanceof String));
-
-            if (hasNonStringWeights) {
-                throw new RuntimeException(
-                    "Invalid sith, some weights in clause are non string"
-                );
+            if (_sith.isEmpty()) {
+                throw new IllegalArgumentException("Empty weight list");
             }
-        }
 
-        List<List<Fraction>> thold = this._processClauses(_sith);
-        this._processWeighted(thold);
+            List<Boolean> mask = _sith.stream()
+                .map(x -> !(x instanceof String))
+                .toList();
+
+            if (!mask.isEmpty() && mask.stream().anyMatch(x -> x)) {
+                _sith = List.of(_sith);
+            }
+
+            for (Object c : _sith) {
+                if (!(c instanceof List<?> clause)) {
+                    continue;
+                }
+                List<Boolean> clauseMask = clause.stream()
+                    .map(x -> x instanceof String)
+                    .toList();
+
+                if (!clauseMask.isEmpty() && !clauseMask.stream().allMatch(x -> x)) {
+                    throw new IllegalArgumentException(
+                        "Invalid sith, some weights in clause " + clauseMask + " are non string"
+                    );
+                }
+            }
+
+            List<List<Fraction>> thold = this._processClauses(_sith);
+            this._processWeighted(thold);
+        }
     }
 
     private List<List<Fraction>> _processClauses(List<Object> sith) {
@@ -150,7 +146,7 @@ public class Tholder {
         this.weighted = false;
         this.size = thold; // used to verify that keys list size is at least size
         this._satisfy = this::_satisfyNumeric;
-        this.number = new CesrNumber(MatterArgs.builder().build(), BigInteger.valueOf(thold), null);
+        this.number = new CesrNumber(RawArgs.builder().build(), BigInteger.valueOf(thold), null);
     }
 
     private void _processWeighted(List<List<Fraction>> thold) {
