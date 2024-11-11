@@ -19,6 +19,14 @@ public class Signer extends Matter {
     private final SignerFunction sign;
     private final Verfer verfer;
 
+
+    public Signer() throws SodiumException {
+        this(RawArgs.builder()
+                .code(Codex.MatterCodex.Ed25519_Seed.getValue())
+                .build(), 
+            true);
+    }
+
     public Signer(RawArgs args) throws SodiumException {
         this(args, true);
     }

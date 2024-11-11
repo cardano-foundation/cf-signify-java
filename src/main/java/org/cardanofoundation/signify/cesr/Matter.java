@@ -200,12 +200,12 @@ public class Matter {
             rize = Matter.getRawSize(args.getCode());
         }
 
-        args.setRaw(Arrays.copyOfRange(args.getRaw(), 0, rize)); // copy only exact size from raw stream
-
-        if (args.getRaw().length != rize) {
+        if (args.getRaw().length < rize) {
             // forbids shorter
             throw new RawMaterialException("Not enougth raw bytes for code=" + args.getCode() + " expected " + rize + " got " + args.getRaw().length + ".");
         }
+
+        args.setRaw(Arrays.copyOfRange(args.getRaw(), 0, rize)); // copy only exact size from raw stream
 
         this._code = args.getCode();
         this._size = size;
@@ -220,8 +220,16 @@ public class Matter {
         this._exfil(qb64);
     }
 
-    public Matter(byte[] qb2) {
-        this._bexfil(qb2);
+    public Matter(byte[] qb64b) {
+        this(qb64b, false);
+    }
+
+    public Matter(byte[] bytes, boolean isQb2) {
+        if (isQb2) {
+            this._bexfil(bytes);
+        } else {  // qb64b
+            this._exfil(new String(bytes));
+        }
     }
 
     public String getCode() {
@@ -275,16 +283,16 @@ public class Matter {
         return (int) Math.floor(((sizage.fs - cs) * 3.0) / 4.0) - sizage.ls;
     }
 
-    private void _exfil(String qb64) {
+    public void _exfil(String qb64) {
         if (qb64.isEmpty()) {
             throw new ShortageException("Empty Material");
         }
 
         final String first = qb64.substring(0, 1);
         if (!Matter.hards.containsKey(first)) {
-            if (first == "-") {
+            if (first.equals("-")) {
                 throw new UnexpectedCountCodeException("Unexpected count code start while extracing Matter.");
-            } else if (first == "_") {
+            } else if (first.equals("_")) {
                 throw new UnexpectedOpCodeException("Unexpected opcode code start while extracing Matter.");
             } else {
                 throw new UnexpectedCodeException("Unsupported code start char=" + first);
