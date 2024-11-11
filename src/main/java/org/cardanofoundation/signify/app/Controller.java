@@ -8,6 +8,7 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 
 import java.util.ArrayList;
