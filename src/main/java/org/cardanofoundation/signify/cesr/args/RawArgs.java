@@ -5,10 +5,13 @@ import lombok.*;
 import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 import org.cardanofoundation.signify.cesr.Matter;
+import org.cardanofoundation.signify.cesr.Prefixer;
+import org.cardanofoundation.signify.cesr.Prefixer.DeriveResult;
 import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 @Builder
 @AllArgsConstructor
@@ -17,7 +20,7 @@ import java.math.BigInteger;
 public class RawArgs {
     byte[] raw;
 
-    @NonNull
+//    @NonNull
     String code;
 
     public static RawArgs generateSalt128Raw(RawArgs rawArgs) {
@@ -70,8 +73,8 @@ public class RawArgs {
         BigInteger _num;
 
         if (rawArgs.getRaw() == null) {
-            if (num instanceof BigInteger) {
-                _num = (BigInteger) num;
+            if (num instanceof Number) {
+                _num = BigInteger.valueOf(((Number) num).longValue());
             } else if (numh != null) {
                 _num = new BigInteger(numh, 16);
             } else {
@@ -98,5 +101,22 @@ public class RawArgs {
         }
 
         return rawArgs;
+    }
+
+    public static RawArgs generatePrefixerRaw(RawArgs args, Map<String, Object> ked) {
+        if (args.getRaw() == null) {
+            if (ked == null || (args.getCode() == null && !ked.containsKey("i"))) {
+                throw new EmptyMaterialError("Empty material");
+            }
+
+            if (args.getCode() == null) {
+                args.setCode(Codex.MatterCodex.Ed25519N.getValue());
+            }
+
+            DeriveResult deriveResult = Prefixer.derive(ked, args.getCode());
+            args.setRaw(deriveResult.raw());
+            args.setCode(deriveResult.code());
+        }
+        return args;
     }
 }

@@ -325,12 +325,19 @@ public class Indexer {
         this.raw = raw; // must be bytes for crypto opts and immutable not bytearray
     }
 
-    @AllArgsConstructor
     static class Xizage {
         public Integer hs;
         public Integer ss;
         public Integer os;
         public Integer fs;
         public Integer ls;
+
+        public Xizage(Integer hs, Integer ss, Integer os, Integer fs, Integer ls) {
+            this.hs = hs;
+            this.ss = ss;
+            this.os = os;
+            this.fs = fs;
+            this.ls = ls;
+        }
     }
 }

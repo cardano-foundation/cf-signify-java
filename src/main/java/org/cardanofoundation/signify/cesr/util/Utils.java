@@ -7,23 +7,51 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class Utils {
-    public static boolean isLessThan(BigInteger a, Number b) {
-        BigInteger newb = BigInteger.valueOf((long) b);
-        return a.compareTo(newb) <= 0;
+    public static boolean isLessThan(BigInteger a, double b) {
+        BigInteger maxValue = BigInteger.valueOf((long) b);
+        if (b > Long.MAX_VALUE) {
+            String hexString = Double.toHexString(b).replace("0x1.0p", "");
+            maxValue = new BigInteger("2").pow(Integer.parseInt(hexString));
+        }
+        return a.compareTo(maxValue) <= 0;
     }
 
     public static byte[] intToBytes(BigInteger value, int size) {
-        byte[] bytes = new byte[size];
-        byte[] valueBytes = value.toByteArray();
-        int start = Math.max(0, valueBytes.length - size);
-        for (int i = 0; i < size; i++) {
-            bytes[i] = (i + start < valueBytes.length) ? valueBytes[i + start] : 0;
+        if (value.signum() < 0) {
+            throw new IllegalArgumentException("Value must be non-negative");
         }
-        return bytes;
+
+        byte[] result = new byte[size];
+        byte[] valueBytes = value.toByteArray();
+
+        // Remove leading zero byte if present (BigInteger's sign byte)
+        if (valueBytes.length > 1 && valueBytes[0] == 0) {
+            byte[] tmp = new byte[valueBytes.length - 1];
+            System.arraycopy(valueBytes, 1, tmp, 0, tmp.length);
+            valueBytes = tmp;
+        }
+
+        if (valueBytes.length > size) {
+            throw new IllegalArgumentException(
+                String.format("Value too large: needs %d bytes, but size is limited to %d",
+                    valueBytes.length, size)
+            );
+        }
+        // Copy to result array, padding with leading zeros if necessary
+        int offset = size - valueBytes.length;
+        System.arraycopy(valueBytes, 0, result, offset, valueBytes.length);
+
+        return result;
     }
 
-    public static BigInteger bytesToInt(byte[] ar) {
-        return new BigInteger(1, ar);
+    public static BigInteger bytesToInt(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return BigInteger.ZERO;
+        }
+        // Ensure positive number by adding a leading zero byte
+        byte[] positiveBytes = new byte[bytes.length + 1];
+        System.arraycopy(bytes, 0, positiveBytes, 1, bytes.length);
+        return new BigInteger(positiveBytes);
     }
 
     public static String jsonStringify(Object obj) {
