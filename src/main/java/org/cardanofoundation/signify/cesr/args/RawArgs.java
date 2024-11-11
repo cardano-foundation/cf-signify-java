@@ -2,16 +2,18 @@ package org.cardanofoundation.signify.cesr.args;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import lombok.*;
-import org.cardanofoundation.signify.cesr.Codex;
-import org.cardanofoundation.signify.cesr.LazySodiumInstance;
-import org.cardanofoundation.signify.cesr.Matter;
-import org.cardanofoundation.signify.cesr.Prefixer;
-import org.cardanofoundation.signify.cesr.Prefixer.DeriveResult;
+import org.cardanofoundation.signify.cesr.*;
+import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
+import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
+import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
+
+import static org.cardanofoundation.signify.cesr.Prefixer.derive;
 
 @Builder
 @AllArgsConstructor
@@ -110,12 +112,36 @@ public class RawArgs {
             }
 
             if (args.getCode() == null) {
-                args.setCode(Codex.MatterCodex.Ed25519N.getValue());
+                args.setCode(MatterCodex.Ed25519N.getValue());
             }
 
-            DeriveResult deriveResult = Prefixer.derive(ked, args.getCode());
+            Prefixer.DeriveResult deriveResult = derive(ked, args.getCode());
             args.setRaw(deriveResult.raw());
             args.setCode(deriveResult.code());
+        }
+        return args;
+    }
+
+    public static RawArgs generateSaiderRaw(RawArgs args, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
+        if (args.getRaw() == null) {
+            if (sad == null || !sad.containsKey(label)) {
+                throw new EmptyMaterialError("Empty material");
+            }
+
+            String code = args.getCode();
+            if (code == null) {
+                code = MatterCodex.Blake3_256.getValue();
+            }
+
+            if (!DigiCodex.has(code)) {
+                throw new IllegalArgumentException("Unsupported digest code = " + code);
+            }
+
+            Map<String, Object> sadCopy = new HashMap<>(sad);
+
+            Saider.DeriveResult result = Saider.derive(sadCopy, code, kind, label);
+            args.setRaw(result.raw());
+            args.setCode(code);
         }
         return args;
     }
