@@ -259,6 +259,4 @@ public class Manager {
             Creator make(String salt, Tier tier, String stem);
         }
     }
-
-    // TODO: Implement remaining creator classes
 }

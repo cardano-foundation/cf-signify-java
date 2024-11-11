@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.cesr;
 
+import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
@@ -11,6 +12,7 @@ import java.util.Map;
 public class Saider extends Matter {
     private static final String Dummy = "#";
 
+    @Getter
     public enum Ids {
         d("d");
 
@@ -21,11 +23,11 @@ public class Saider extends Matter {
     }
 
     private static class Digestage {
-        public DigestDeriver klas;
+        public Deriver klas;
         public Integer size;
         public Integer length;
 
-        public Digestage(DigestDeriver klas, Integer size, Integer length) {
+        public Digestage(Deriver klas, Integer size, Integer length) {
             this.klas = klas;
             this.size = size == null ? 0 : size;
             this.length = length == null ? 0 : length;
@@ -68,6 +70,8 @@ public class Saider extends Matter {
         CoreUtil.Serials kind,
         String label
     ) {
+        code = code == null ? Codex.MatterCodex.Blake3_256.getValue() : code;
+        label = label == null ? Ids.d.getValue() : label;
         if (!Codex.DigiCodex.has(code) || !Digests.containsKey(code)) {
             throw new IllegalArgumentException("Unsupported digest code = " + code);
         }
@@ -88,13 +92,10 @@ public class Saider extends Matter {
         }
 
         Map<String, Object> ser = new HashMap<>(sadCopy);
-
         Digestage digestage = Digests.get(code);
 
-        String cpa = serialize(ser, kind);
-
-        // Apply the digest function
-        byte[] raw = digestage.klas.derive();;
+        byte[] cpa = serialize(ser, kind).getBytes();
+        byte[] raw = deriveBlake3_256(cpa, digestage.size, digestage.length);
 
         return new DeriveResult(raw, sadCopy);
     }
@@ -113,9 +114,26 @@ public class Saider extends Matter {
         return Serder.dumps(sad, kind);
     }
 
-    // TODO implement saidify logic
     public static SaidifyResult saidify(Map<String, Object> sad, String code, CoreUtil.Serials kind, String label) {
-        return new SaidifyResult(null, null);
+        if (!sad.containsKey(label)) {
+            throw new IllegalArgumentException("Missing id field labeled = " + label + " in sad.");
+        }
+
+        DeriveResult deriveResult = derive(sad, code, kind, label);
+        Saider saider = new Saider(
+            RawArgs.builder()
+                .raw(deriveResult.raw())
+                .code(code)
+                .build(),
+            null,
+            kind,
+            label
+        );
+
+        Map<String, Object> updatedSad = deriveResult.sad();
+        updatedSad.put(label, saider.getQb64());
+
+        return new SaidifyResult(saider, updatedSad);
     }
 
     public static SaidifyResult saidify(Map<String, Object> sad) {
@@ -127,7 +145,7 @@ public class Saider extends Matter {
     public record DeriveResult (byte[] raw, Map<String, Object> sad) {}
 
     @FunctionalInterface
-    public interface DigestDeriver {
+    public interface Deriver {
         byte[] derive(byte[] ser, int digestSize, int length);
     }
 

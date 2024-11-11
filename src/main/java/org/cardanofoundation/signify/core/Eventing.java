@@ -22,6 +22,7 @@ public class Eventing {
     public static Serder interact(InteractArgs args) {
         return new Serder(null, null, null);
     }
+
     public static Serder incept(InceptArgs args) {
         String vs = versify(
             Ident.KERI,

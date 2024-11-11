@@ -96,7 +96,7 @@ public class Controller {
                 .nsith("1")
                 .ndigs(this.ndigs)
                 .code(MatterCodex.Blake3_256.getValue())
-                .toad("0")
+                .toad(0)
                 .wits(new ArrayList<>())
                 .build();
             this.serder = Eventing.incept(args);
