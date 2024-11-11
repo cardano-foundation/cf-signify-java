@@ -74,4 +74,13 @@ class SalterTest {
         assertArrayEquals(stretchTierHigh, expectedStretchTierHigh);
     }
 
+    @Test
+    @DisplayName("Salter.signer Should return a Signer")
+    void shouldReturnASigner() throws SodiumException {
+        Salter salter = new Salter("0ACSTo66vU2CA-j4usUIAEm2");
+        Signer signer = salter.signer();
+        assertNotNull(signer);
+        assertEquals(signer.getVerfer().getQb64(), "DD28x2a4KCZ8f6OAcA856jAD1chNOo4pT8ICxyzJUJhj");
+    }
+
 }

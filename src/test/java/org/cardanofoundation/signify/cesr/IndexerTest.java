@@ -45,6 +45,9 @@ class IndexerTest {
             }
         });
 
+        assertThrows(ShortageException.class, () -> new Indexer(""));
+        assertThrows(Exception.class, () -> new Indexer(RawArgs.builder().build()));
+
         byte[] sig = new byte[]{
                 -103, -46, 60, 57, 36, 36, 48, -97, 107, -5, 24, -96, -116, 64, 114, 18, 50, 46, 107, -78, -57, 31,
                 112, 14, 39, 109, -113, 64, -86, -91, -116, -56, 110, -123, -56, 33, -10, 113, -111, 112, -87, -20,
