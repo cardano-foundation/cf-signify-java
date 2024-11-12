@@ -5,6 +5,7 @@ import lombok.*;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -26,7 +27,10 @@ public class RawArgs {
     String code;
 
     public static RawArgs generateSalt128Raw(RawArgs rawArgs) {
-        if (Codex.MatterCodex.Salt_128.getValue().equals(rawArgs.getCode())) {
+        if (rawArgs.getCode() == null) {
+            rawArgs.setCode(Codex.MatterCodex.Salt_128.getValue());
+        }
+        if (MatterCodex.Salt_128.getValue().equals(rawArgs.getCode())) {
             if (rawArgs.getRaw() == null) {
                 LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
                 final byte[] salt = lazySodium.randomBytesBuf(16); // crypto_pwhash_SALTBYTES
@@ -40,7 +44,7 @@ public class RawArgs {
     }
 
     public static RawArgs generateEd25519SeedRaw(RawArgs rawArgs) {
-        if (Codex.MatterCodex.Ed25519_Seed.getValue().equals(rawArgs.getCode())) {
+        if (MatterCodex.Ed25519_Seed.getValue().equals(rawArgs.getCode())) {
             if (rawArgs.getRaw() == null) {
                 LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
                 final byte[] salt = lazySodium.randomBytesBuf(32); // crypto_pwhash_SALTBYTES
@@ -57,8 +61,11 @@ public class RawArgs {
         if (ser == null) {
             throw new EmptyMaterialError("Empty material");
         }
+        if (rawArgs.getCode() == null) {
+            rawArgs.setCode(MatterCodex.Blake3_256.getValue());
+        }
 
-        if (Codex.MatterCodex.Blake3_256.getValue().equals(rawArgs.getCode())) {
+        if (MatterCodex.Blake3_256.getValue().equals(rawArgs.getCode())) {
             if (rawArgs.getRaw() == null) {
                 // TODO implement Blake3
                 final byte[] dig = new byte[0];
@@ -85,16 +92,16 @@ public class RawArgs {
 
             if (Utils.isLessThan(_num, Math.pow(256, 2) - 1)) {
                 // make short version of code
-                rawArgs.setCode(Codex.NumCodex.Short.getValue());
+                rawArgs.setCode(NumCodex.Short.getValue());
             } else if (Utils.isLessThan(_num, Math.pow(256, 4) - 1)) {
                 // make long version of code
-                rawArgs.setCode(Codex.NumCodex.Long.getValue());
+                rawArgs.setCode(NumCodex.Long.getValue());
             } else if (Utils.isLessThan(_num, Math.pow(256, 8) - 1)) {
                 // make big version of code
-                rawArgs.setCode(Codex.NumCodex.Big.getValue());
+                rawArgs.setCode(NumCodex.Big.getValue());
             } else if (Utils.isLessThan(_num, Math.pow(256, 16) - 1)) {
                 // make huge version of code
-                rawArgs.setCode(Codex.NumCodex.Huge.getValue());
+                rawArgs.setCode(NumCodex.Huge.getValue());
             } else {
                 throw new IllegalArgumentException("Invalid num = " + num + ", too large to encode.");
             }

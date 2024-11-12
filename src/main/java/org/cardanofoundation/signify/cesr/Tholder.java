@@ -46,8 +46,8 @@ public class Tholder {
         }
     }
 
-    public String getJson() throws Exception{
-        return new ObjectMapper().writeValueAsString(this.getSith());
+    public String getJson() {
+        return Utils.jsonStringify(this.getSith());
     }
 
     public Integer getNum() {

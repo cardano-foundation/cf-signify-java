@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.cesr.util;
 import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Base64;
@@ -44,6 +45,19 @@ public class CoreUtil {
             this.major = 1;
             this.minor = 0;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Version version = (Version) o;
+            return major == version.major && minor == version.minor;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(major, minor);
+        }
     }
 
     @Getter
@@ -71,10 +85,7 @@ public class CoreUtil {
     // (?P<kind>[A-Z]{4})(?P<size>[0-9a-f]{6})'
     // const version_pattern1 = `KERI\(\?P<major>\[0\-9a\-f\]\)\(\?P<minor>\[0\-9a\-f\]\)\
     // (\?P<kind>\[A\-Z\]\{4\}\)\(\?P<size>\[0\-9a\-f\]\{6\}\)_`
-
-    private static final String VEREX = "KERI([0-9a-zA-Z][0-9a-zA-Z])([0-9a-zA-Z][0-9a-zA-Z])([A-Z]{4})([0-9a-zA-Z]{4})";
-
-    // Regex pattern matching
+    private static final String VEREX = "(KERI|ACDC)([0-9a-f])([0-9a-f])([A-Z]{4})([0-9a-f]{6})_";
 
     /**
      * @description This function is used to deversify the version
@@ -88,14 +99,18 @@ public class CoreUtil {
         Matcher matcher = pattern.matcher(versionString);
 
         if (matcher.find()) {
-            String protoStr = matcher.group(1);
-            int major = Integer.parseInt(matcher.group(2));
-            int minor = Integer.parseInt(matcher.group(3));
-            String kindStr = matcher.group(4);
-            String size = matcher.group(5);
+            String protoStr = matcher.group(1);    // KERI or ACDC
+            String majorStr = matcher.group(2);    // major version
+            String minorStr = matcher.group(3);    // minor version
+            String kindStr = matcher.group(4);     // serialization kind
+            String size = matcher.group(5);        // size
 
-            Version version = new Version(major, minor);
+            Version version = new Version(
+                Integer.parseInt(majorStr, 16),
+                Integer.parseInt(minorStr, 16)
+            );
 
+            // Validate serialization kind
             Serials kind;
             try {
                 kind = Serials.valueOf(kindStr);
@@ -103,16 +118,17 @@ public class CoreUtil {
                 throw new IllegalArgumentException("Invalid serialization kind = " + kindStr);
             }
 
-            Ident ident;
+            // Validate protocol identifier
+            Ident proto;
             try {
-                ident = Ident.valueOf(protoStr);
+                proto = Ident.valueOf(protoStr);
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Invalid protocol identifier = " + protoStr);
             }
 
-            return new DeversifyResult(ident, kind, version, size);
+            return new DeversifyResult(proto, kind, version, size);
         }
-        throw new RuntimeException("Invalid version string = " + versionString);
+        throw new IllegalArgumentException("Invalid version string = " + versionString);
     }
 
     public static String versify(Ident ident, Version version, Serials kind, int size) {
