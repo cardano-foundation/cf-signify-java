@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 
+import java.math.BigInteger;
 import java.util.*;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
@@ -30,7 +31,7 @@ public class Eventing {
             args.getKind() != null ? args.getKind() : Serials.JSON,
             0);
         String ilk = args.getDelpre() == null ? Ilks.ICP.getValue() : Ilks.DIP.getValue();
-        CesrNumber sner = new CesrNumber(RawArgs.builder().build(), 0L, null);
+        CesrNumber sner = new CesrNumber(RawArgs.builder().build(), BigInteger.ZERO, null);
 
         if (args.getIsith() == null) {
             args.setIsith(Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0)));
@@ -69,7 +70,7 @@ public class Eventing {
             args.setToad(wits.isEmpty() ? 0 : ample(wits.size()));
         }
 
-        CesrNumber toader = new CesrNumber(RawArgs.builder().build(), args.getToad(), null);
+        CesrNumber toader = new CesrNumber(RawArgs.builder().build(), BigInteger.valueOf(args.getToad()), null);
         if (!wits.isEmpty()) {
             if (toader.getNum().intValue() < 1 || toader.getNum().intValue() > wits.size()) {
                 throw new IllegalArgumentException("Invalid toad = " + toader.getNum() + " for wits = " + wits);
@@ -113,8 +114,7 @@ public class Eventing {
                 );
             }
         } else {
-            RawArgs rawArgs = RawArgs.builder().code(args.getCode()).build();
-            prefixer = new Prefixer(rawArgs, ked);
+            prefixer = new Prefixer(ked);
             if (args.getDelpre() != null && !prefixer.isDigestible()) {
                 throw new IllegalArgumentException(
                     "Invalid derivation code = " + prefixer.getCode() + " for delegation. Must be digestive"

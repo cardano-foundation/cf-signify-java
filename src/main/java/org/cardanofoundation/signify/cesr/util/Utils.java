@@ -7,15 +7,6 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class Utils {
-    public static boolean isLessThan(BigInteger a, double b) {
-        BigInteger maxValue = BigInteger.valueOf((long) b);
-        if (b > Long.MAX_VALUE) {
-            String hexString = Double.toHexString(b).replace("0x1.0p", "");
-            maxValue = new BigInteger("2").pow(Integer.parseInt(hexString));
-        }
-        return a.compareTo(maxValue) <= 0;
-    }
-
     public static byte[] intToBytes(BigInteger value, int size) {
         if (value.signum() < 0) {
             throw new IllegalArgumentException("Value must be non-negative");

@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.cesr;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -63,8 +64,7 @@ public class Diger extends Matter {
     }
 
     private boolean blake3_256(byte[] ser, byte[] dig) {
-        //TODO Implement Blake3
-        byte[] digest = new byte[0];
+        byte[] digest = CoreUtil.blake3_256(ser, 32);
         return Arrays.toString(digest).equals(Arrays.toString(dig));
     }
 

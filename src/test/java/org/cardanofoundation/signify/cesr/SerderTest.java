@@ -41,7 +41,7 @@ class SerderTest {
             85, (byte)156, 2, (byte)156, (byte)155, 8, 72, 117
         };
 
-        Salter salter = new Salter(RawArgs.builder().raw(raw).build());
+        Salter salter = new Salter(RawArgs.builder().code(MatterCodex.Salt_128.getValue()).raw(raw).build());
 
         Signer skp0 = salter.signer(
             MatterCodex.Ed25519_Seed.getValue(),
@@ -93,9 +93,6 @@ class SerderTest {
         );
 
         Prefixer aid0 = new Prefixer(
-            RawArgs.builder()
-                .code(MatterCodex.Ed25519.getValue())
-                .build(),
             ked0
         );
         assertEquals(MatterCodex.Ed25519.getValue(), aid0.getCode());
@@ -106,9 +103,6 @@ class SerderTest {
         );
 
         aid0 = new Prefixer(
-            RawArgs.builder()
-                .code(MatterCodex.Blake3_256.getValue())
-                .build(),
             ked0
         );
         assertEquals(

@@ -30,8 +30,7 @@ class PrefixerTest {
             RawArgs.builder()
                 .raw(verkey)
                 .code(MatterCodex.Ed25519.getValue())
-                .build(),
-            null
+                .build()
         );
 
         assertEquals(MatterCodex.Ed25519.getValue(), prefixer.getCode());
@@ -55,8 +54,7 @@ class PrefixerTest {
             RawArgs.builder()
                 .raw(verkey)
                 .code(MatterCodex.Ed25519.getValue())
-                .build(),
-            null
+                .build()
         ).getQb64());
         String nxt = "";
         int toad = 0;
@@ -76,9 +74,7 @@ class PrefixerTest {
         ked.put("c", cnfg);                       // list of config ordered mappings may be empty
 
         prefixer = new Prefixer(
-            RawArgs.builder()
-                .code(MatterCodex.Blake3_256.getValue())
-                .build(),
+            MatterCodex.Blake3_256.getValue(),
             ked
         );
 

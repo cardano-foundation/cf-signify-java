@@ -251,18 +251,12 @@ public class Matter {
         return DigiCodex.has(this.code);
     }
 
+    @AllArgsConstructor
     static class Sizage {
         public Integer hs;
         public Integer ss;
-        public Integer ls;
         public Integer fs;
-
-        public Sizage(Integer hs, Integer ss, Integer fs, Integer ls) {
-            this.hs = hs;
-            this.ss = ss;
-            this.fs = fs;
-            this.ls = ls;
-        }
+        public Integer ls;
     }
 
     public static int getRawSize(String code) {

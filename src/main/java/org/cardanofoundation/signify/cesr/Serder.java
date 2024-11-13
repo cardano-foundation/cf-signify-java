@@ -25,6 +25,10 @@ public class Serder {
     private Version version = new Version();
     private final String code;
 
+    public Serder(Map<String, Object> ked) {
+        this(ked, null, null);
+    }
+
     public Serder(Map<String, Object> ked, Serials kind, String code) {
         this.code = code != null ? code : MatterCodex.Blake3_256.getValue();
         this.kind = kind != null ? kind : Serials.JSON;

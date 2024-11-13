@@ -10,10 +10,58 @@ import java.util.*;
 public class Prefixer extends Matter{
     private static final String Dummy = "#";
     private Verify _verify;
+    private Derive _derive;
 
-    public Prefixer(RawArgs args, Map<String, Object> ked) {
-        super(RawArgs.generatePrefixerRaw(args, ked));
+    public Prefixer(RawArgs args) {
+        super(args);
+        setVerifyFunction();
+    }
 
+    public Prefixer(String qb64) {
+        super(qb64);
+        setVerifyFunction();
+    }
+
+    public Prefixer(String code, Map<String, Object> ked) {
+        super(getRawArgs(code, ked));
+        this._derive = getDerive(code, ked);
+        setVerifyFunction();
+    }
+
+    public Prefixer(Map<String, Object> ked) {
+        this(null, ked);
+    }
+
+    private static Derive getDerive(String code, Map<String, Object> ked) {
+        if(code == null && ked != null && ked.containsKey("i")){
+            Matter matterTemp = new Matter(ked.get("i").toString());
+            code = matterTemp.getCode();
+        }
+
+        Derive _derive;
+        if(MatterCodex.Ed25519N.getValue().equals(code)){
+            _derive = Prefixer::_deriveEd25519N;
+        } else if(MatterCodex.Ed25519.getValue().equals(code)){
+            _derive = Prefixer::_deriveEd25519;
+        } else if(MatterCodex.Blake3_256.getValue().equals(code)){
+            _derive = Prefixer::_deriveBlake3_256;
+        } else {
+            throw new IllegalArgumentException("Unsupported code = " + code + " for prefixer.");
+        }
+
+        return _derive;
+    }
+
+    private static RawArgs getRawArgs(String code, Map<String, Object> ked) {
+        Derive _derive = getDerive(code, ked);
+        DeriveResult deriveResult = _derive.derive(ked);
+        return RawArgs.builder()
+            .raw(deriveResult.raw)
+            .code(deriveResult.code)
+            .build();
+    }
+
+    private void setVerifyFunction() {
         if (MatterCodex.Ed25519N.getValue().equals(this.getCode())) {
             this._verify = this::_verifyEd25519N;
         } else if (MatterCodex.Ed25519.getValue().equals(this.getCode())) {
@@ -22,29 +70,6 @@ public class Prefixer extends Matter{
             this._verify = this::_verifyBlake3_256;
         } else {
             throw new IllegalArgumentException("Unsupported code = " + this.getCode() + " for prefixer.");
-        }
-    }
-
-    public Prefixer(String qb64) {
-        super(qb64);
-    }
-
-    public Prefixer(Map<String, Object> ked) {
-        super(ked.get("i").toString());
-    }
-
-    public static DeriveResult derive(Map<String, Object> ked, String code) {
-        if (ked.get("i") != CoreUtil.Ilks.ICP.getValue()) {
-            throw new IllegalArgumentException("Non-incepting ilk " + ked.get("i") + "for prefix derivation");
-        }
-        if (MatterCodex.Ed25519N.getValue().equals(code)) {
-            return _deriveEd25519N(ked);
-        } else if (MatterCodex.Ed25519.getValue().equals(code)) {
-            return _deriveEd25519(ked);
-        } else if (MatterCodex.Blake3_256.getValue().equals(code)) {
-            return _deriveBlake3_256(ked);
-        } else {
-            throw new IllegalArgumentException("Unsupported code = " + code + " for prefixer.");
         }
     }
 
@@ -154,8 +179,7 @@ public class Prefixer extends Matter{
 
         String raw = Serder.sizeify(kd, null).raw();
 
-        //TODO implement blake3
-        byte[] dig = new byte[0];
+        byte[] dig = CoreUtil.blake3_256(raw.getBytes(), 32);
         return new DeriveResult(dig, MatterCodex.Blake3_256.getValue());
     }
 
@@ -237,6 +261,11 @@ public class Prefixer extends Matter{
     @FunctionalInterface
     private interface Verify {
         boolean verify(Map<String, Object> ked, String pre, boolean prefixed);
+    }
+
+    @FunctionalInterface
+    private interface Derive {
+        DeriveResult derive(Map<String, Object> ked);
     }
 
     public record DeriveResult (byte[] raw, String code) {}
