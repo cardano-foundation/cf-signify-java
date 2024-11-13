@@ -146,7 +146,7 @@ public class Tholder {
         this.weighted = false;
         this.size = thold; // used to verify that keys list size is at least size
         this._satisfy = this::_satisfyNumeric;
-        this.number = new CesrNumber(RawArgs.builder().build(), BigInteger.valueOf(thold), null);
+        this.number = new CesrNumber(BigInteger.valueOf(thold));
     }
 
     private void _processWeighted(List<List<Fraction>> thold) {

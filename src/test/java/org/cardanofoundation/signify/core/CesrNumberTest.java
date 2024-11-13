@@ -16,15 +16,15 @@ class CesrNumberTest {
         assertEquals(BigInteger.ZERO, n.getNum());
         assertEquals("0", n.getNumh());
 
-        n = new CesrNumber(RawArgs.builder().build(), 0L, null);
+        n = new CesrNumber(RawArgs.builder().build(), BigInteger.ZERO, null);
         assertEquals(BigInteger.ZERO, n.getNum());
         assertEquals("0", n.getNumh());
 
-        n = new CesrNumber(RawArgs.builder().build(), 1L, null);
+        n = new CesrNumber(RawArgs.builder().build(), BigInteger.ONE, null);
         assertEquals(BigInteger.ONE, n.getNum());
         assertEquals("1", n.getNumh());
 
-        n = new CesrNumber(RawArgs.builder().build(), 15L, null);
+        n = new CesrNumber(RawArgs.builder().build(), BigInteger.valueOf(15), null);
         assertEquals(BigInteger.valueOf(15), n.getNum());
         assertEquals("f", n.getNumh());
 

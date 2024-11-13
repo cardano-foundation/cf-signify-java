@@ -44,7 +44,7 @@ public class SignerTest {
         assertFalse(result);
         assertArrayEquals(siger.getRaw(), cigar.getRaw());
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(UnsupportedOperationException.class, () -> {
             new Signer(RawArgs.builder().code(Codex.MatterCodex.Ed25519N.getValue()).build());
         });
 
@@ -185,7 +185,7 @@ public class SignerTest {
         assertTrue(result);
 
         // use invalid code not SEED type code
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(UnsupportedOperationException.class, () -> {
             new Signer(RawArgs.builder().raw(seed).code(Codex.MatterCodex.Ed25519N.getValue()).build());
         });
     }

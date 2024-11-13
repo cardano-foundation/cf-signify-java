@@ -5,8 +5,7 @@ import lombok.*;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.Codex.NumCodex;
-import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
+import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
@@ -14,23 +13,18 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.cardanofoundation.signify.cesr.Prefixer.derive;
-
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class RawArgs {
     byte[] raw;
 
-//    @NonNull
     String code;
 
     public static RawArgs generateSalt128Raw(RawArgs rawArgs) {
-        if (rawArgs.getCode() == null) {
-            rawArgs.setCode(Codex.MatterCodex.Salt_128.getValue());
-        }
-        if (MatterCodex.Salt_128.getValue().equals(rawArgs.getCode())) {
+        if (Codex.MatterCodex.Salt_128.getValue().equals(rawArgs.getCode())) {
             if (rawArgs.getRaw() == null) {
                 LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
                 final byte[] salt = lazySodium.randomBytesBuf(16); // crypto_pwhash_SALTBYTES
@@ -59,7 +53,7 @@ public class RawArgs {
 
     public static RawArgs generateBlake3256SeedRaw(RawArgs rawArgs, byte[] ser) {
         if (ser == null) {
-            throw new EmptyMaterialError("Empty material");
+            throw new EmptyMaterialException("Empty material");
         }
         if (rawArgs.getCode() == null) {
             rawArgs.setCode(MatterCodex.Blake3_256.getValue());
@@ -67,9 +61,7 @@ public class RawArgs {
 
         if (MatterCodex.Blake3_256.getValue().equals(rawArgs.getCode())) {
             if (rawArgs.getRaw() == null) {
-                // TODO implement Blake3
-                final byte[] dig = new byte[0];
-                rawArgs.setRaw(dig);
+                rawArgs.setRaw(CoreUtil.blake3_256(ser, 32));
             }
         } else {
             throw new UnsupportedOperationException("Unsupported code = " + rawArgs.getCode() + " for digester.");
@@ -78,30 +70,32 @@ public class RawArgs {
         return rawArgs;
     }
 
-    public static RawArgs generateNumDexRaw(RawArgs rawArgs, Object num, String numh) {
+    public static RawArgs generateNumDexRaw(RawArgs rawArgs, BigInteger num, String numh) {
         BigInteger _num;
 
         if (rawArgs.getRaw() == null) {
-            if (num instanceof Number) {
-                _num = BigInteger.valueOf(((Number) num).longValue());
+            if (num != null) {
+                _num = num;
             } else if (numh != null) {
                 _num = new BigInteger(numh, 16);
             } else {
                 _num = BigInteger.ZERO;
             }
 
-            if (Utils.isLessThan(_num, Math.pow(256, 2) - 1)) {
+
+            BigInteger number256 = BigInteger.valueOf(256);
+            if (_num.compareTo(number256.pow(2).subtract(BigInteger.ONE)) <= 0) {
                 // make short version of code
-                rawArgs.setCode(NumCodex.Short.getValue());
-            } else if (Utils.isLessThan(_num, Math.pow(256, 4) - 1)) {
+                rawArgs.setCode(Codex.NumCodex.Short.getValue());
+            } else if (_num.compareTo(number256.pow(4).subtract(BigInteger.ONE)) <= 0) {
                 // make long version of code
-                rawArgs.setCode(NumCodex.Long.getValue());
-            } else if (Utils.isLessThan(_num, Math.pow(256, 8) - 1)) {
+                rawArgs.setCode(Codex.NumCodex.Long.getValue());
+            } else if (_num.compareTo(number256.pow(8).subtract(BigInteger.ONE)) <= 0) {
                 // make big version of code
-                rawArgs.setCode(NumCodex.Big.getValue());
-            } else if (Utils.isLessThan(_num, Math.pow(256, 16) - 1)) {
+                rawArgs.setCode(Codex.NumCodex.Big.getValue());
+            } else if (_num.compareTo(number256.pow(16).subtract(BigInteger.ONE)) <= 0) {
                 // make huge version of code
-                rawArgs.setCode(NumCodex.Huge.getValue());
+                rawArgs.setCode(Codex.NumCodex.Huge.getValue());
             } else {
                 throw new IllegalArgumentException("Invalid num = " + num + ", too large to encode.");
             }
@@ -112,27 +106,11 @@ public class RawArgs {
         return rawArgs;
     }
 
-    public static RawArgs generatePrefixerRaw(RawArgs args, Map<String, Object> ked) {
-        if (args.getRaw() == null) {
-            if (ked == null || (args.getCode() == null && !ked.containsKey("i"))) {
-                throw new EmptyMaterialError("Empty material");
-            }
-
-            if (args.getCode() == null) {
-                args.setCode(MatterCodex.Ed25519N.getValue());
-            }
-
-            Prefixer.DeriveResult deriveResult = derive(ked, args.getCode());
-            args.setRaw(deriveResult.raw());
-            args.setCode(deriveResult.code());
-        }
-        return args;
-    }
 
     public static RawArgs generateSaiderRaw(RawArgs args, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
         if (args.getRaw() == null) {
             if (sad == null || !sad.containsKey(label)) {
-                throw new EmptyMaterialError("Empty material");
+                throw new EmptyMaterialException("Empty material");
             }
 
             String code = args.getCode();

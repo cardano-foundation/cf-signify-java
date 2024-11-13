@@ -28,6 +28,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "org.springframework:spring-webflux:${webfluxVersion}"
     implementation 'org.slf4j:slf4j-simple:2.0.7'
+    implementation "io.github.rctcwyvrn:blake3:1.3"
 
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'

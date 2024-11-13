@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.cesr.*;
@@ -34,7 +35,7 @@ public class Controller {
     private List<String> keys;
     public List<String> ndigs;
 
-    public Controller(String bran, Tier tier, Integer ridx, Object state) {
+    public Controller(String bran, Tier tier, Integer ridx, Object state) throws SodiumException {
         ridx = ridx == null ? 0 : ridx;
         this.bran = MatterCodex.Salt_128.getValue() + "A" + bran.substring(0, 21); // qb64 salt for seed
         this.stem = "signify:controller";
@@ -49,33 +50,29 @@ public class Controller {
                 this.stem
         );
 
-        try {
-            this.signer = new LinkedList<>(creator
-                .create(
-                    null,
-                    1,
-                    MatterCodex.Ed25519_Seed.getValue(),
-                    true,
-                    0,
-                    this.ridx,
-                    0,
-                    false
-                ).getSigners()).pop();
+        this.signer = new LinkedList<>(creator
+            .create(
+                null,
+                1,
+                MatterCodex.Ed25519_Seed.getValue(),
+                true,
+                0,
+                this.ridx,
+                0,
+                false
+            ).getSigners()).pop();
 
-            this.nsigner = new LinkedList<>(creator
-                .create(
-                    null,
-                    1,
-                    MatterCodex.Ed25519_Seed.getValue(),
-                    true,
-                    0,
-                    this.ridx + 1,
-                    0,
-                    false
-                ).getSigners()).pop();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create keys");
-        }
+        this.nsigner = new LinkedList<>(creator
+            .create(
+                null,
+                1,
+                MatterCodex.Ed25519_Seed.getValue(),
+                true,
+                0,
+                this.ridx + 1,
+                0,
+                false
+            ).getSigners()).pop();
 
         this.keys = List.of(this.signer.getVerfer().getQb64());
 
@@ -101,7 +98,7 @@ public class Controller {
                 .build();
             this.serder = Eventing.incept(args);
         } else {
-            this.serder = new Serder(ee, null, null);
+            this.serder = new Serder(ee);
         }
     }
 

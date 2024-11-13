@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.cesr.util;
 
+import io.github.rctcwyvrn.blake3.Blake3;
 import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +60,8 @@ public class CoreUtil {
             return Objects.hash(major, minor);
         }
     }
+
+    public static final Version Versionage = new Version();
 
     @Getter
     public enum Ilks {
@@ -133,7 +136,7 @@ public class CoreUtil {
 
     public static String versify(Ident ident, Version version, Serials kind, int size) {
         ident = ident == null ? Ident.KERI : ident;
-        version = version == null ? new Version() : version;
+        version = version == null ? Versionage : version;
         kind = kind == null ? Serials.JSON : kind;
 
         return String.format("%s%s%s%s%s_",
@@ -288,4 +291,11 @@ public class CoreUtil {
         Version version,
         String string
     ) {}
+
+
+    public static byte[] blake3_256(byte[] ser, int hashLen) {
+        Blake3 blake3 = Blake3.newInstance();
+        blake3.update(ser);
+        return blake3.digest(hashLen);
+    }
 }

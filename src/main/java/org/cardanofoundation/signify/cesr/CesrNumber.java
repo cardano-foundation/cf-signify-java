@@ -9,7 +9,16 @@ import java.math.BigInteger;
 
 @Getter
 public class CesrNumber extends Matter {
-    public CesrNumber(RawArgs args, Object num, String numh) {
+
+    public CesrNumber(BigInteger num) {
+        this(new RawArgs(), num, null);
+    }
+
+    public CesrNumber(String numh) {
+        this(new RawArgs(), null, numh);
+    }
+
+    public CesrNumber(RawArgs args, BigInteger num, String numh) {
         super(RawArgs.generateNumDexRaw(args, num, numh));
 
         if (!NumCodex.has(this.getCode())) {
