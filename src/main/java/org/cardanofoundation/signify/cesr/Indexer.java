@@ -1,12 +1,17 @@
 package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.cardanofoundation.signify.cesr.exceptions.EmptyMaterialError;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ConversionException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCountCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedOpCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarIndexException;
+import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
 import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
 import org.cardanofoundation.signify.cesr.Codex.IndexedCurrentSigCodex;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -116,7 +121,7 @@ public class Indexer {
         index = index == null ? 0 : index;
 
         if (!sizes.containsKey(code)) {
-            throw new IllegalArgumentException("Unsupported code=" + code + ".");
+            throw new UnexpectedCodeException("Unsupported code=" + code + ".");
         }
 
         Xizage xizage = sizes.get(code);
@@ -126,15 +131,15 @@ public class Indexer {
         int ms = xizage.ss - xizage.os;
 
         if (index < 0 || index > Math.pow(64, ms) - 1) {
-            throw new IllegalArgumentException("Invalid index=" + index + " for code=" + code + ".");
+            throw new InvalidVarIndexException("Invalid index=" + index + " for code=" + code + ".");
         }
 
         if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, os) - 1)) {
-            throw new IllegalArgumentException("Invalid ondex=" + ondex + " for code=" + code + ".");
+            throw new InvalidVarIndexException("Invalid ondex=" + ondex + " for code=" + code + ".");
         }
 
         if (IndexedCurrentSigCodex.has(code) && ondex != null) {
-            throw new IllegalArgumentException("Non None ondex=" + ondex + " for code=" + code + ".");
+            throw new InvalidVarIndexException("Non None ondex=" + ondex + " for code=" + code + ".");
         }
 
         if (IndexedBothSigCodex.has(code)) {
@@ -142,18 +147,18 @@ public class Indexer {
                 ondex = index;
             } else {
                 if (!ondex.equals(index) && os == 0) {
-                    throw new IllegalArgumentException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
+                    throw new InvalidVarIndexException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
                 }
             }
         }
 
         if (fs == null) {
-            throw new IllegalArgumentException("Variable length unsupported");
+            throw new UnsupportedOperationException("Variable length unsupported");
         }
 
         int rawsize = (int) Math.floor(((fs - cs) * 3.0) / 4.0);
         if (raw.length < rawsize) {
-            throw new IllegalArgumentException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
+            throw new RawMaterialException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
         }
 
         raw = Arrays.copyOf(raw, rawsize);
@@ -238,22 +243,28 @@ public class Indexer {
 
     public void _exfil(String qb64) {
         if (qb64.isEmpty()) {
-            throw new EmptyMaterialError("Empty Material");
+            throw new ShortageException("Empty Material");
         }
 
         char first = qb64.charAt(0);
         if (!hards.containsKey(String.valueOf(first))) {
-            throw new IllegalArgumentException("Unexpected code " + first);
+            if (first == '-') {
+                throw new UnexpectedCountCodeException("Unexpected count code start while extracing Indexer");
+            } else if (first == '_') {
+                throw new UnexpectedOpCodeException("Unexpected op code start while extracing Indexer");
+            } else {
+                throw new UnexpectedCodeException("Unsupported code start char=" + first);
+            }
         }
 
         int hs = hards.get(String.valueOf(first));
         if (qb64.length() < hs) {
-            throw new IllegalArgumentException("Need " + (hs - qb64.length()) + " more characters.");
+            throw new ShortageException("Need " + (hs - qb64.length()) + " more characters.");
         }
 
         String hard = qb64.substring(0, hs);
         if (!sizes.containsKey(hard)) {
-            throw new UnsupportedOperationException("Unsupported code " + hard);
+            throw new UnexpectedCodeException("Unsupported code " + hard);
         }
 
         Xizage xizage = sizes.get(hard);
@@ -261,7 +272,7 @@ public class Indexer {
         int ms = xizage.ss - xizage.os;
 
         if (qb64.length() < cs) {
-            throw new IllegalArgumentException("Need " + (cs - qb64.length()) + " more characters.");
+            throw new ShortageException("Need " + (cs - qb64.length()) + " more characters.");
         }
 
         String sindex = qb64.substring(hs, hs + ms);
@@ -285,7 +296,7 @@ public class Indexer {
         }
 
         if (qb64.length() < xizage.fs) {
-            throw new IllegalArgumentException("Need " + (xizage.fs - qb64.length()) + " more chars.");
+            throw new ShortageException("Need " + (xizage.fs - qb64.length()) + " more chars.");
         }
 
         qb64 = qb64.substring(0, xizage.fs);
@@ -298,7 +309,7 @@ public class Indexer {
             int pi = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, ps)); // prepad as int
             if ((pi & (1 << pbs) - 1) != 0) {
                 // masked pad bits non-zero
-                throw new IllegalArgumentException("Non zeroed prepad bits = " + Integer.toBinaryString(pi & (1 << pbs) - 1) + " in " + qb64.charAt(cs) + ".");
+                throw new ConversionException("Non zeroed prepad bits = " + Integer.toBinaryString(pi & (1 << pbs) - 1) + " in " + qb64.charAt(cs) + ".");
             }
             raw = Arrays.copyOfRange(paw, ps, paw.length); // strip off ps prepad paw bytes
         } else {
@@ -307,16 +318,16 @@ public class Indexer {
             int li = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, xizage.ls));
             if (li != 0) {
                 if (li == 1) {
-                    throw new IllegalArgumentException("Non zeroed lead byte = 0x" + String.format("%02x", li) + ".");
+                    throw new ConversionException("Non zeroed lead byte = 0x" + String.format("%02x", li) + ".");
                 } else {
-                    throw new IllegalArgumentException("Non zeroed lead bytes = 0x" + String.format("%04x", li));
+                    throw new ConversionException("Non zeroed lead bytes = 0x" + String.format("%04x", li));
                 }
             }
             raw = Arrays.copyOfRange(paw, xizage.ls, paw.length);
         }
 
         if (raw.length != Math.floor(((qb64.length() - cs) * 3.0) / 4.0)) {
-            throw new IllegalArgumentException("Improperly qualified material = " + qb64);
+            throw new ConversionException("Improperly qualified material = " + qb64);
         }
 
         this.code = hard;

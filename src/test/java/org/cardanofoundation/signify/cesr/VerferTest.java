@@ -1,8 +1,6 @@
 package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
-import com.goterl.lazysodium.interfaces.MessageEncoder;
-import com.goterl.lazysodium.utils.Base64MessageEncoder;
 import com.goterl.lazysodium.utils.HexMessageEncoder;
 import com.goterl.lazysodium.utils.Key;
 import com.goterl.lazysodium.utils.KeyPair;
@@ -12,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import com.goterl.lazysodium.LazySodiumJava;
 
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -13,6 +13,14 @@ public class Salter extends Matter {
 
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
 
+
+    public Salter() {
+        this(RawArgs.builder()
+                .code(Codex.MatterCodex.Salt_128.getValue())
+                .build(), 
+            Tier.low);
+    }
+
     public Salter(RawArgs args) {
         this(args, Tier.low);
     }
@@ -37,7 +45,7 @@ public class Salter extends Matter {
         high
     }
 
-    private byte[] stretch(int size, String path, Tier tier, boolean temp) {
+    public byte[] stretch(int size, String path, Tier tier, boolean temp) {
         tier = tier == null ? this.tier : tier;
         int opslimit, memlimit;
 
