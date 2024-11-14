@@ -292,7 +292,6 @@ public class CoreUtil {
         String string
     ) {}
 
-
     public static byte[] blake3_256(byte[] ser, int hashLen) {
         Blake3 blake3 = Blake3.newInstance();
         blake3.update(ser);

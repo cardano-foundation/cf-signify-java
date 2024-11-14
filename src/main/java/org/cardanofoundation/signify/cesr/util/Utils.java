@@ -7,6 +7,8 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class Utils {
+    public static final int CRYPTO_BOX_SEAL_BYTES = 48;
+
     public static byte[] intToBytes(BigInteger value, int size) {
         if (value.signum() < 0) {
             throw new IllegalArgumentException("Value must be non-negative");

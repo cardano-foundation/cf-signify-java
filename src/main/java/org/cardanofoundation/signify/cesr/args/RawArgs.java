@@ -4,7 +4,6 @@ import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.*;
 import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
@@ -13,9 +12,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Builder
 @AllArgsConstructor
@@ -136,7 +133,7 @@ public class RawArgs {
         if (args.getCode() == null) {
             args.setCode(MatterCodex.X25519.getValue());
         }
-        if (args.getRaw() != null && verkey != null) {
+        if (args.getRaw() == null && verkey != null) {
             Verfer verfer = new Verfer(verkey);
             List<String> validCodes = List.of(
                 MatterCodex.Ed25519N.getValue(),
@@ -146,7 +143,7 @@ public class RawArgs {
                 throw new UnsupportedOperationException("Unsupported verkey derivation code = " + verfer.getCode());
             }
             LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
-            byte[] raw = new byte[0];
+            byte[] raw = new byte[32];
             boolean success = lazySodium.convertPublicKeyEd25519ToCurve25519(raw, verfer.getRaw());
             if (!success) {
                 throw new SodiumException("Failed to convert public key ed25519 to Curve25519");
@@ -172,7 +169,7 @@ public class RawArgs {
                 .array();
 
             LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
-            byte[] raw = new byte[0];
+            byte[] raw = new byte[32];
             boolean success = lazySodium.convertSecretKeyEd25519ToCurve25519(raw, sigKey);
             if (!success) {
                 throw new SodiumException("Failed to convert secret key ed25519 to Curve25519");

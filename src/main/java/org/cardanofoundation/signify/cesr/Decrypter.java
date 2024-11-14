@@ -6,6 +6,8 @@ import com.goterl.lazysodium.utils.Key;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 
+import static org.cardanofoundation.signify.cesr.util.Utils.CRYPTO_BOX_SEAL_BYTES;
+
 public class Decrypter extends Matter {
     private DecrypterFunction decrypter;
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
@@ -13,6 +15,10 @@ public class Decrypter extends Matter {
     public Decrypter(RawArgs args, byte[] seed) throws SodiumException {
         super(RawArgs.generateDecrypterRaw(args, seed));
         setDecrypter();
+    }
+
+    public Decrypter(RawArgs args) throws SodiumException {
+        this(args, null);
     }
 
     private void setDecrypter() {
@@ -35,9 +41,13 @@ public class Decrypter extends Matter {
         return decrypter.decrypt(cipher, this.getRaw(), transferable != null && transferable);
     }
 
+    public Object decrypt(byte[] ser, Cipher cipher) throws SodiumException {
+        return decrypt(ser, cipher, false);
+    }
+
     private Object _x25519(Cipher cipher, byte[] priKey, Boolean transferable) throws SodiumException {
         Key pubKey = lazySodium.cryptoScalarMultBase(Key.fromBytes(priKey));
-        byte[] plain = new byte[0];
+        byte[] plain = new byte[cipher.getRaw().length - CRYPTO_BOX_SEAL_BYTES];
         boolean success = lazySodium.cryptoBoxSealOpen(
             plain,
             cipher.getRaw(),

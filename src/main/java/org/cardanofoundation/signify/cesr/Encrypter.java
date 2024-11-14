@@ -2,9 +2,14 @@ package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import com.goterl.lazysodium.utils.KeyPair;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+
+import java.util.Arrays;
+
+import static org.cardanofoundation.signify.cesr.util.Utils.CRYPTO_BOX_SEAL_BYTES;
 
 public class Encrypter extends Matter {
     private EncrypterFunction encrypter;
@@ -13,6 +18,10 @@ public class Encrypter extends Matter {
     public Encrypter(RawArgs args, byte[] verkey) throws SodiumException {
         super(RawArgs.generateEncrypterRaw(args, verkey));
         setEncrypter();
+    }
+
+    public Encrypter(RawArgs args) throws SodiumException {
+        this(args, null);
     }
 
     public Encrypter(String qb64) {
@@ -26,6 +35,19 @@ public class Encrypter extends Matter {
         } else {
             throw new UnsupportedOperationException("Unsupported encrypter code = " + this.getCode());
         }
+    }
+
+    public boolean verifySeed(byte[] seed) throws SodiumException {
+        Signer signer = new Signer(seed);
+        KeyPair keypair = lazySodium.cryptoSignSeedKeypair(signer.getRaw());
+
+        byte[] pubKey = new byte[32];
+        boolean success = lazySodium.convertPublicKeyEd25519ToCurve25519(pubKey, keypair.getPublicKey().getAsBytes());
+        if (!success) {
+            throw new SodiumException("Failed to convert public key ed25519 to Curve25519");
+        }
+
+        return Arrays.equals(pubKey, this.getRaw());
     }
 
     public Cipher encrypt(byte[] ser, Matter matter) throws SodiumException {
@@ -47,8 +69,12 @@ public class Encrypter extends Matter {
         return encrypter.encrypt(matter.getQb64().getBytes(), this.getRaw(), code);
     }
 
+    public Cipher encrypt(byte[] ser) throws SodiumException {
+        return encrypt(ser, null);
+    }
+
     private Cipher _x25519(byte[] ser, byte[] pubKey, String code) throws SodiumException {
-        byte[] raw = new byte[0];
+        byte[] raw = new byte[ser.length + CRYPTO_BOX_SEAL_BYTES];
         boolean success = lazySodium.cryptoBoxSeal(raw, ser, ser.length, pubKey);
         if (!success) {
             throw new SodiumException("Fail to crypto box seal");
