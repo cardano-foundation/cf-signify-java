@@ -18,6 +18,11 @@ public class Verfer extends Matter {
         setVerifier();
     }
 
+    public Verfer(byte[] qb64b) {
+        super(qb64b);
+        setVerifier();
+    }
+
     private void setVerifier() {
         MatterCodex codex = MatterCodex.fromValue(this.getCode());
         switch (codex) {
