@@ -84,7 +84,7 @@ class SerderTest {
         ked0.put("c", new ArrayList<>());
         ked0.put("a", new ArrayList<>());
 
-        Serder serder = new Serder(ked0, null, null);
+        Serder serder = new Serder(ked0);
         assertEquals(
             "{\"v\":\"KERI10JSON0000d3_\",\"t\":\"icp\",\"d\":\"\",\"i\":\"\",\"s\":\"0\"," +
             "\"kt\":\"1\",\"k\":[\"DAUDqkmn-hqlQKD8W-FAEa5JUvJC2I9yarEem-AAEg3e\"],\"nt\":\"1\"," +
@@ -92,9 +92,8 @@ class SerderTest {
             serder.getRaw()
         );
 
-        Prefixer aid0 = new Prefixer(
-            ked0
-        );
+        Prefixer aid0 = new Prefixer(MatterCodex.Ed25519.getValue(), ked0);
+
         assertEquals(MatterCodex.Ed25519.getValue(), aid0.getCode());
         assertEquals(skp0.getVerfer().getQb64(), aid0.getQb64());
         assertEquals(
@@ -102,9 +101,7 @@ class SerderTest {
             skp0.getVerfer().getQb64()
         );
 
-        aid0 = new Prefixer(
-            ked0
-        );
+        aid0 = new Prefixer(MatterCodex.Blake3_256.getValue(), ked0);
         assertEquals(
             "ECHOi6qRaswNpvytpCtpvEh2cB2aLAwVHBLFinno3YVW",
             aid0.getQb64()
@@ -114,7 +111,7 @@ class SerderTest {
         attr.put("n", "Lenksjö");
         ked0.put("a", attr);
 
-        Serder serder1 = new Serder(ked0, null, null);
+        Serder serder1 = new Serder(ked0);
         assertEquals("KERI10JSON000139_", serder1.getKed().get("v"));
     }
 }

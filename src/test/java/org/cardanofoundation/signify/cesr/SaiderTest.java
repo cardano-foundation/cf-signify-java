@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SaiderTest {
 
@@ -47,8 +46,7 @@ class SaiderTest {
         sad4.put("r", "logs/processor");
         sad4.put("a", attributes);
 
-        Saider saider = new Saider(RawArgs.builder().build(), sad4, null, null);  // default version string code, kind, and label
-
+        Saider saider = new Saider(sad4);  // default version string code, kind, and label
         assertEquals(code, saider.getCode());
         assertEquals(
             "ELzewBpZHSENRP-sL_G_2Ji4YDdNkns9AzFzufleJqdw",

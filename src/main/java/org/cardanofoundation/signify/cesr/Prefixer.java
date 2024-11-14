@@ -143,7 +143,7 @@ public class Prefixer extends Matter{
             throw new IllegalArgumentException("Error extracting public key: " + e.getMessage(), e);
         }
 
-        if (MatterCodex.Ed25519.getValue().equals(verfer.getCode())) {
+        if (!MatterCodex.Ed25519.getValue().equals(verfer.getCode())) {
             throw new IllegalArgumentException(
                 "Mismatch derivation code = " + verfer.getCode()
             );
@@ -153,8 +153,6 @@ public class Prefixer extends Matter{
     }
 
     public static DeriveResult _deriveBlake3_256(Map<String, Object> ked) {
-        Map<String, Object> kd = new LinkedHashMap<>(ked);
-
         String ilk = (String) ked.get("t");
         List<String> validIlks = Arrays.asList(
             CoreUtil.Ilks.ICP.getValue(),
@@ -174,10 +172,10 @@ public class Prefixer extends Matter{
         }
 
         String dummyValue = String.join("", Collections.nCopies(size.fs, Dummy));
-        kd.put("i", dummyValue);
-        kd.put("d", ked.get("i"));
+        ked.put("i", dummyValue);
+        ked.put("d", ked.get("i"));
 
-        String raw = Serder.sizeify(kd, null).raw();
+        String raw = Serder.sizeify(ked, null).raw();
 
         byte[] dig = CoreUtil.blake3_256(raw.getBytes(), 32);
         return new DeriveResult(dig, MatterCodex.Blake3_256.getValue());

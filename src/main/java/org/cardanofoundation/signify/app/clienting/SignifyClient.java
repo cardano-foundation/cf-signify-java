@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.Agent;
 import org.cardanofoundation.signify.app.Controller;
-import org.cardanofoundation.signify.cesr.Authing;
+import org.cardanofoundation.signify.cesr.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.springframework.http.MediaType;
@@ -26,7 +26,7 @@ public class SignifyClient {
     private String bran;
     private int pidx;
     private Agent agent;
-    private Authing.Authenticater authn;
+    private Authenticater authn;
     private Keeping.KeyManager manager;
     private Salter.Tier tier;
     private String bootUrl;
@@ -176,7 +176,7 @@ public class SignifyClient {
                     this.externalModules
             );
 
-            this.authn = new Authing.Authenticater(
+            this.authn = new Authenticater(
                     this.controller.getSigner(),
                     this.agent.getVerfer()
             );

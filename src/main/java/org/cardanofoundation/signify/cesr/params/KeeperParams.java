@@ -1,6 +1,10 @@
 package org.cardanofoundation.signify.cesr.params;
 
-import java.util.HashMap;
+import lombok.experimental.SuperBuilder;
 
-public class KeeperParams extends HashMap<String, Object> {
+import java.util.Map;
+
+@SuperBuilder
+public class KeeperParams {
+    Map<String, Object> paramsMap;
 }

@@ -32,36 +32,67 @@ public class Saider extends Matter {
             this.size = size == null ? 0 : size;
             this.length = length == null ? 0 : length;
         }
+
+        public Digestage(Deriver klas) {
+            this(klas, null, null);
+        }
     }
 
     private static final Map<String, Digestage> Digests = Map.of(
         Codex.MatterCodex.Blake3_256.getValue(),
-        new Digestage(
-            Saider::deriveBlake3_256,
-            null,
-            null
-        )
+        new Digestage(Saider::deriveBlake3_256)
     );
 
-    private static byte[] deriveBlake3_256(byte[] ser, int digestSize, int length) {
-        // TODO implement blake3 logic
-        return new byte[0];
-    }
-
-    public Saider(RawArgs args, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
-        super(RawArgs.generateSaiderRaw(args, sad, kind, label));
+    public Saider(RawArgs rawArgs) {
+        super(rawArgs);
 
         if (!this.isDigestible()) {
             throw new IllegalArgumentException("Unsupported digest code = " + this.getCode());
         }
     }
 
-    public Saider(String qb64) {
-        super(qb64);
+
+    public Saider(Map<String, Object> sad) {
+        this(new RawArgs(), sad, null, Ids.d.getValue());
     }
 
-    public Saider(Map<String, Object> sad, String label) {
-        super(sad.get(label == null ? Saider.Ids.d.getValue() : label).toString());
+    public Saider(RawArgs rawArgs, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
+        super(getRawArgs(rawArgs, sad, kind, label));
+
+        if (!this.isDigestible()) {
+            throw new IllegalArgumentException("Unsupported digest code = " + this.getCode());
+        }
+    }
+
+    private static RawArgs getRawArgs(RawArgs rawArgs, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
+        if(rawArgs.getCode() == null){
+            if(sad.containsKey(label) && !sad.get(label).toString().isEmpty()){
+                Matter matterTemp = new Matter(sad.get(label).toString());
+                rawArgs.setCode(matterTemp.getCode());
+            } else {
+                rawArgs.setCode(Codex.MatterCodex.Blake3_256.getValue());
+            }
+        }
+
+        if(!Codex.DigiCodex.has(rawArgs.getCode())) {
+            throw new UnsupportedOperationException("Unsupported digest code = " + rawArgs.getCode());
+        }
+
+        DeriveResult deriveResult = derive(sad, rawArgs.getCode(), kind, label);
+        rawArgs.setRaw(deriveResult.raw());
+        return rawArgs;
+    }
+
+    public Saider(String qb64) {
+        super(qb64);
+
+        if (!this.isDigestible()) {
+            throw new IllegalArgumentException("Unsupported digest code = " + this.getCode());
+        }
+    }
+
+    private static byte[] deriveBlake3_256(byte[] ser, int digestSize, int length) {
+        return CoreUtil.blake3_256(ser, 32);
     }
 
     public static DeriveResult derive(
@@ -70,34 +101,29 @@ public class Saider extends Matter {
         CoreUtil.Serials kind,
         String label
     ) {
-        code = code == null ? Codex.MatterCodex.Blake3_256.getValue() : code;
-        label = label == null ? Ids.d.getValue() : label;
         if (!Codex.DigiCodex.has(code) || !Digests.containsKey(code)) {
             throw new IllegalArgumentException("Unsupported digest code = " + code);
         }
-
-        Map<String, Object> sadCopy = new HashMap<>(sad);
 
         Sizage size = Matter.sizes.get(code);
         if (size == null) {
             throw new IllegalArgumentException("Unknown size for code: " + code);
         }
         String dummyValue = String.join("", Collections.nCopies(size.fs, Dummy));
-        sadCopy.put(label, dummyValue);
+        sad.put(label, dummyValue);
 
-        if (sadCopy.containsKey("v")) {
-            Serder.ExhaleResult sizeResult = Serder.sizeify(sadCopy, kind);
+        if (sad.containsKey("v")) {
+            Serder.ExhaleResult sizeResult = Serder.sizeify(sad, kind);
             kind = sizeResult.kind();
-            sadCopy = sizeResult.kd();
+            sad = sizeResult.kd();
         }
 
-        Map<String, Object> ser = new HashMap<>(sadCopy);
         Digestage digestage = Digests.get(code);
 
-        byte[] cpa = serialize(ser, kind).getBytes();
-        byte[] raw = deriveBlake3_256(cpa, digestage.size, digestage.length);
+        String cpa = serialize(sad, kind);
+        byte[] raw = digestage.klas.derive(cpa.getBytes(), digestage.size, digestage.length);
 
-        return new DeriveResult(raw, sadCopy);
+        return new DeriveResult(raw, sad);
     }
 
     private static String serialize(Map<String, Object> sad, Serials kind) {
@@ -134,6 +160,36 @@ public class Saider extends Matter {
         updatedSad.put(label, saider.getQb64());
 
         return new SaidifyResult(saider, updatedSad);
+    }
+
+    public boolean verify(Map<String, Object> sad, boolean prefixed, boolean versioned, CoreUtil.Serials kind, String label) {
+        try {
+            DeriveResult deriveResult = derive(sad, this.getCode(), kind, label);
+            Map<String, Object> dsad = deriveResult.sad();
+            Saider saider = new Saider(RawArgs.builder()
+                .raw(deriveResult.raw())
+                .code(this.getCode())
+                .build()
+            );
+    
+            if(!this.getQb64().equals(saider.getQb64())) {
+                return false;
+            }
+    
+            if(versioned && sad.containsKey("v") ) {
+                if(!sad.get("v").toString().equals(dsad.get("v").toString())) {
+                    return false;
+                }
+            }
+    
+            if(prefixed && sad.containsKey(label) && !sad.get(label).toString().equals(this.getQb64())) {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
     }
 
     public static SaidifyResult saidify(Map<String, Object> sad) {

@@ -112,31 +112,6 @@ public class RawArgs {
         return rawArgs;
     }
 
-    public static RawArgs generateSaiderRaw(RawArgs args, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
-        label = label == null ? Saider.Ids.d.getValue() : label;
-        if (args.getRaw() == null) {
-            if (sad == null || !sad.containsKey(label)) {
-                throw new EmptyMaterialException("Empty material");
-            }
-
-            String code = args.getCode();
-            if (code == null) {
-                code = MatterCodex.Blake3_256.getValue();
-            }
-
-            if (!DigiCodex.has(code)) {
-                throw new UnsupportedOperationException("Unsupported digest code = " + code);
-            }
-
-            Map<String, Object> sadCopy = new HashMap<>(sad);
-
-            Saider.DeriveResult result = Saider.derive(sadCopy, code, kind, label);
-            args.setRaw(result.raw());
-            args.setCode(code);
-        }
-        return args;
-    }
-
     public static RawArgs generateCipherRaw(RawArgs args) {
         if (args.getRaw() != null && args.getCode() == null) {
             if (args.getRaw().length == Matter.getRawSize(MatterCodex.X25519_Cipher_Salt.getValue())) {
