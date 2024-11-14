@@ -16,9 +16,8 @@ import java.nio.ByteBuffer;
 @Getter
 public class Signer extends Matter {
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
-    private final SignerFunction sign;
-    private final Verfer verfer;
-
+    private SignerFunction sign;
+    private Verfer verfer;
 
     public Signer() throws SodiumException {
         this(RawArgs.builder()
@@ -33,14 +32,26 @@ public class Signer extends Matter {
 
     public Signer(RawArgs args, boolean transferable) throws SodiumException {
         super(RawArgs.generateEd25519SeedRaw(args));
+        setSignAndVerfer(transferable);
+    }
 
+    public Signer(byte[] qb64b) throws SodiumException {
+        this(qb64b, true);
+    }
+
+    public Signer(byte[] qb64b, boolean transferable) throws SodiumException {
+        super(qb64b);
+        setSignAndVerfer(transferable);
+    }
+
+    private void setSignAndVerfer(boolean transferable) throws SodiumException{
         if (MatterCodex.Ed25519_Seed.getValue().equals(this.getCode())) {
             this.sign = this::_ed25519;
             final KeyPair keypair = lazySodium.cryptoSignSeedKeypair(this.getRaw());
             this.verfer = new Verfer(RawArgs.builder()
-                    .raw(keypair.getPublicKey().getAsBytes())
-                    .code(transferable ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
-                    .build());
+                .raw(keypair.getPublicKey().getAsBytes())
+                .code(transferable ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
+                .build());
         } else {
             throw new UnsupportedOperationException("Unsupported signer code = " + this.getCode());
         }

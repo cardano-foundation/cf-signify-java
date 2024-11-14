@@ -61,7 +61,7 @@ public class Saider extends Matter {
     }
 
     public Saider(Map<String, Object> sad, String label) {
-        super(sad.get(label).toString());
+        super(sad.get(label == null ? Saider.Ids.d.getValue() : label).toString());
     }
 
     public static DeriveResult derive(
