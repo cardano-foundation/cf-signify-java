@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.cesr.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
@@ -33,6 +34,17 @@ public class Utils {
         System.arraycopy(valueBytes, 0, result, offset, valueBytes.length);
 
         return result;
+    }
+
+    public static byte[] intToBytes(int value, int length) {
+        byte[] byteArray = new byte[length]; // Assuming a 4-byte integer (32 bits)
+    
+        for (int index = byteArray.length - 1; index >= 0; index--) {
+            byte byteValue = (byte) (value & 0xff);
+            byteArray[index] = byteValue;
+            value = (value - byteValue) / 256;
+        }
+        return byteArray;
     }
 
     public static BigInteger bytesToInt(byte[] bytes) {

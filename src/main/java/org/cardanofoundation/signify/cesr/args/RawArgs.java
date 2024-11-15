@@ -8,6 +8,7 @@ import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
@@ -84,26 +85,32 @@ public class RawArgs {
             if (num != null) {
                 _num = num;
             } else if (numh != null) {
-                _num = new BigInteger(numh, 16);
+                _num = numh.isEmpty() ? BigInteger.ZERO : new BigInteger(numh, 16);
             } else {
                 _num = BigInteger.ZERO;
             }
 
-            BigInteger number256 = BigInteger.valueOf(256);
-            if (_num.compareTo(number256.pow(2).subtract(BigInteger.ONE)) <= 0) {
-                // make short version of code
-                rawArgs.setCode(NumCodex.Short.getValue());
-            } else if (_num.compareTo(number256.pow(4).subtract(BigInteger.ONE)) <= 0) {
-                // make long version of code
-                rawArgs.setCode(NumCodex.Long.getValue());
-            } else if (_num.compareTo(number256.pow(8).subtract(BigInteger.ONE)) <= 0) {
-                // make big version of code
-                rawArgs.setCode(NumCodex.Big.getValue());
-            } else if (_num.compareTo(number256.pow(16).subtract(BigInteger.ONE)) <= 0) {
-                // make huge version of code
-                rawArgs.setCode(NumCodex.Huge.getValue());
-            } else {
-                throw new IllegalArgumentException("Invalid num = " + num + ", too large to encode.");
+            if(rawArgs.getCode() == null) {
+                BigInteger number256 = BigInteger.valueOf(256);
+                if (_num.compareTo(BigInteger.ZERO) < 0) {
+                    throw new InvalidValueException("Invalid num = " + num + ", must be non-negative.");
+                }
+
+                if (_num.compareTo(number256.pow(2).subtract(BigInteger.ONE)) <= 0) {
+                    // make short version of code
+                    rawArgs.setCode(NumCodex.Short.getValue());
+                } else if (_num.compareTo(number256.pow(4).subtract(BigInteger.ONE)) <= 0) {
+                    // make long version of code
+                    rawArgs.setCode(NumCodex.Long.getValue());
+                } else if (_num.compareTo(number256.pow(8).subtract(BigInteger.ONE)) <= 0) {
+                    // make big version of code
+                    rawArgs.setCode(NumCodex.Big.getValue());
+                } else if (_num.compareTo(number256.pow(16).subtract(BigInteger.ONE)) <= 0) {
+                    // make huge version of code
+                    rawArgs.setCode(NumCodex.Huge.getValue());
+                } else {
+                    throw new InvalidValueException("Invalid num = " + num + ", too large to encode.");
+                }
             }
 
             rawArgs.setRaw(Utils.intToBytes(_num, Matter.getRawSize(rawArgs.getCode())));
