@@ -25,6 +25,9 @@ public class Eventing {
     }
 
     public static Serder incept(InceptArgs args) {
+        if (args.getIntive() == null) {
+            args.setIntive(false);
+        }
         String vs = versify(
             Ident.KERI,
             args.getVersion() != null ? args.getVersion() : new CoreUtil.Version(),
@@ -114,7 +117,7 @@ public class Eventing {
                 );
             }
         } else {
-            prefixer = new Prefixer(ked);
+            prefixer = new Prefixer(args.getCode(), ked);
             if (args.getDelpre() != null && !prefixer.isDigestible()) {
                 throw new IllegalArgumentException(
                     "Invalid derivation code = " + prefixer.getCode() + " for delegation. Must be digestive"

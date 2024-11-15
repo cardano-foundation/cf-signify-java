@@ -27,6 +27,10 @@ public class Diger extends Matter {
         }
     }
 
+    public Diger(RawArgs args) {
+        this(args, null);
+    }
+
     public Diger(String qb64) {
         super(qb64);
     }

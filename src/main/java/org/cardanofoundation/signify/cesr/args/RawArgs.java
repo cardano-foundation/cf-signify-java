@@ -56,7 +56,7 @@ public class RawArgs {
     }
 
     public static RawArgs generateBlake3256SeedRaw(RawArgs rawArgs, byte[] ser) {
-        if (ser == null) {
+        if (rawArgs.getRaw() == null && ser == null) {
             throw new EmptyMaterialException("Empty material");
         }
         if (rawArgs.getCode() == null) {
