@@ -1,14 +1,17 @@
 package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -16,12 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ClientingTest {
     private MockWebServer mockWebServer;
-    private final String url = "http://127.0.0.1:3901";
+    private String url = "http://127.0.0.1:3901";
     private String bootUrl = "http://127.0.0.1:3903";
     private final String bran = "0123456789abcdefghijk";
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -31,6 +33,31 @@ public class ClientingTest {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         bootUrl = mockWebServer.url("/").toString().replaceAll("/$", "");
+        url = mockWebServer.url("/").toString().replaceAll("/$", "");
+
+        mockWebServer.setDispatcher(new Dispatcher() {
+            @NotNull
+            @Override
+            public MockResponse dispatch(RecordedRequest request) {
+                String requestUrl = request.getRequestUrl().toString();
+
+                // Handle /agent endpoints
+                if (requestUrl.startsWith(url + "/agent")) {
+                    return mockConnect();
+                }
+                // Handle /boot endpoint
+                else if (requestUrl.equals(bootUrl + "/boot")) {
+                    return new MockResponse()
+                        .setResponseCode(202)
+                        .setBody("");
+                }
+                // Handle all other endpoints
+                else {
+                    // TODO add default mock response
+                    throw new IllegalArgumentException("Unsupported request URL: ");
+                }
+            }
+        });
     }
 
     @AfterEach
@@ -214,7 +241,8 @@ public class ClientingTest {
     }
 
     @Test
-    void testBoot() throws Exception {
+    @DisplayName("SignifyClient initialization")
+    void testSignifyClientInitialization() throws Exception {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> new SignifyClient(url, "short", Tier.low, bootUrl, null)
@@ -251,10 +279,6 @@ public class ClientingTest {
         assertEquals(expectedSerderRaw, client.getController().getSerder().getRaw());
         assertEquals("0", client.getController().getSerder().getKed().get("s"));
 
-        mockWebServer.enqueue(new MockResponse()
-            .setResponseCode(202)
-            .setBody(""));
-
         client.boot();
 
         RecordedRequest request = mockWebServer.takeRequest();
@@ -276,6 +300,70 @@ public class ClientingTest {
             objectMapper.readTree(expectedRequestBody),
             objectMapper.readTree(request.getBody().readUtf8())
         );
+
+        client.connect();
+
+        // Verify the state HTTP request
+        RecordedRequest stateRequest = mockWebServer.takeRequest();
+        assertEquals("GET", stateRequest.getMethod());
+        assertTrue(stateRequest.getPath().startsWith("/agent"));  // Should contain the controller ID
+//        assertEquals("application/json", stateRequest.getHeader("Content-Type"));
+
+        // Validate agent
+        assertEquals(
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getPre()
+        );
+        assertEquals(
+            "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+            client.getAgent().getAnchor()
+        );
+        assertEquals(
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getSaid()
+        );
+        assertEquals("0", client.getAgent().getState().get("s"));
+        assertEquals(
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getState().get("d")
+        );
+
+        // Validate approve delegation
+        assertEquals("1", client.getController().getSerder().getKed().get("s"));
+        assertEquals("ixn", client.getController().getSerder().getKed().get("t"));
+
+//        @SuppressWarnings("unchecked")
+//        List<Map<String, String>> actions = (List<Map<String, String>>) client.getController().getSerder().getKed().get("a");
+//        assertEquals(
+//            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+//            actions.get(0).get("i")
+//        );
+//        assertEquals(
+//            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+//            actions.get(0).get("d")
+//        );
+//        assertEquals("0", actions.get(0).get("s"));
+//
+//        // Validate data
+//        Object[] data = client.getData();
+//        assertEquals(url, data.get(0));
+//        assertEquals(bran, data.get(1));
+//
+//        // Validate service instances
+//        assertTrue(client.identifiers() instanceof Identifiers);
+//        assertTrue(client.operations() instanceof Operations);
+//        assertTrue(client.keyEvents() instanceof KeyEvents);
+//        assertTrue(client.keyStates() instanceof KeyStates);
+//        assertTrue(client.credentials() instanceof Credentials);
+//        assertTrue(client.registries() instanceof Registries);
+//        assertTrue(client.schemas() instanceof Schemas);
+//        assertTrue(client.challenges() instanceof Challenges);
+//        assertTrue(client.contacts() instanceof Contacts);
+//        assertTrue(client.notifications() instanceof Notifications);
+//        assertTrue(client.escrows() instanceof Escrows);
+//        assertTrue(client.oobis() instanceof Oobis);
+//        assertTrue(client.exchanges() instanceof Exchanges);
+//        assertTrue(client.groups() instanceof Groups);
     }
 
     @Test
@@ -306,6 +394,5 @@ public class ClientingTest {
 
         System.out.printf(obj.writeValueAsString(data));
     }
-
 
 }

@@ -51,9 +51,12 @@ public class Saider extends Matter {
         }
     }
 
-
     public Saider(Map<String, Object> sad) {
         this(new RawArgs(), sad, null, Ids.d.getValue());
+    }
+
+    public Saider(RawArgs rawArgs, Map<String, Object> sad) {
+        this(rawArgs, sad, null, Ids.d.getValue());
     }
 
     public Saider(RawArgs rawArgs, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
@@ -163,6 +166,10 @@ public class Saider extends Matter {
         updatedSad.put(label, saider.getQb64());
 
         return new SaidifyResult(saider, updatedSad);
+    }
+
+    public boolean verify(Map<String, Object> sad) {
+        return verify(sad, false, false, null, Ids.d.getValue());
     }
 
     public boolean verify(Map<String, Object> sad, boolean prefixed, boolean versioned, CoreUtil.Serials kind, String label) {

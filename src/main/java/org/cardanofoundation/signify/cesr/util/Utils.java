@@ -1,9 +1,8 @@
 package org.cardanofoundation.signify.cesr.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -72,17 +71,12 @@ public class Utils {
             return Map.of();
         }
 
-        Map<String, Object> map = new HashMap<>();
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            try {
-                map.put(field.getName(), field.get(obj));
-            } catch (Exception e) {
-                throw new RuntimeException("Unable to create map form object");
-            }
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Unable to create map from object", e);
         }
-
-        return map;
     }
 
     public static List<String> toList(Object obj) {

@@ -62,12 +62,11 @@ public class Serder {
         return sizeify(ked, kind);
     }
 
-    @SuppressWarnings("unchecked")
     public List<Verfer> getVerfers() {
         List<String> keys;
         if (this.ked.containsKey("k")) {
             // establishment event
-            keys = (List<String>) this.ked.get("k");
+            keys = Utils.toList(this.ked.get("k"));
         } else {
             // non-establishment event
             keys = new ArrayList<>();
@@ -80,12 +79,11 @@ public class Serder {
         return verfers;
     }
 
-    @SuppressWarnings("unchecked")
     public List<Diger> getDigers() {
         List<String> keys;
         if (this.ked.containsKey("n")) {
             // establishment event
-            keys = (List<String>) this.ked.get("n");
+            keys = Utils.toList(this.ked.get("n"));
         } else {
             // non-establishment event
             keys = new ArrayList<>();

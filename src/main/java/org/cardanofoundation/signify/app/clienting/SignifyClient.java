@@ -8,6 +8,7 @@ import org.cardanofoundation.signify.app.Agent;
 import org.cardanofoundation.signify.app.Controller;
 import org.cardanofoundation.signify.cesr.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
+import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -48,7 +49,7 @@ public class SignifyClient {
             String bran,
             Salter.Tier tier,
             String bootUrl,
-            List<Keeping.ExternalModule> externalModules
+            List<ExternalModule> externalModules
     ) throws SodiumException {
         tier = tier != null ? tier : Salter.Tier.low;
         this.url = url;
@@ -88,13 +89,13 @@ public class SignifyClient {
             data.put("tier", controller.tier);
 
             webClient
-                    .post()
-                    .uri(bootUrl + "/boot")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(objectMapper.writeValueAsString(data))
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
+                .post()
+                .uri(bootUrl + "/boot")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(objectMapper.writeValueAsString(data))
+                .retrieve()
+                .toBodilessEntity()
+                .block();
         } catch (Exception e) {
             throw new RuntimeException("Failed to boot client" + e.getMessage());
         }
@@ -104,21 +105,22 @@ public class SignifyClient {
      * Get state of the agent and the client
      */
     @SuppressWarnings("unchecked")
-    public Mono<State> state() {
-        String caid = controller != null ? controller.getPre() : null;
-        if (caid == null) {
-            return Mono.error(new IllegalArgumentException("Controller not initialized"));
-        }
+    public State state() {
+        try {
+            String caid = controller != null ? controller.getPre() : null;
+            if (caid == null) {
+                throw new IllegalArgumentException("Controller not initialized");
+            }
 
-        return webClient
+            return webClient
                 .get()
                 .uri(url + "/agent/" + caid)
                 .retrieve()
                 .onStatus(
-                        status -> status.value() == 404,
-                        response -> Mono.error(
-                                new IllegalArgumentException("Agent does not exist for controller " + caid)
-                        )
+                    status -> status.value() == 404,
+                    response -> Mono.error(
+                        new IllegalArgumentException("Agent does not exist for controller " + caid)
+                    )
                 )
                 .bodyToMono(Map.class)
                 .map(data -> {
@@ -128,63 +130,55 @@ public class SignifyClient {
                     state.setRidx((Integer) data.getOrDefault("ridx", 0));
                     state.setPidx((Integer) data.getOrDefault("pidx", 0));
                     return state;
-                });
+                })
+                .block();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get client state " + e.getMessage());
+        }
     }
 
     /**
      * Connect to a KERIA agent
      */
-    public Mono<Void> connect() {
-        return state()
-                .flatMap(state -> {
-                    this.pidx = state.getPidx();
-                    // Create controller representing the local client AID
-                    try {
-                        this.controller = new Controller(
-                                this.bran,
-                                this.tier,
-                                0,
-                                state.getController()
-                        );
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    this.controller.setRidx(state.getRidx() != null ? state.getRidx() : 0);
-                    // Create agent representing the AID of KERIA cloud agent
-                    this.agent = new Agent(state.getAgent());
-                    if (!this.agent.getAnchor().equals(this.controller.getPre())) {
-                        return Mono.error(new IllegalArgumentException(
-                                "commitment to controller AID missing in agent inception event"
-                        ));
-                    }
-
-                    // Check if delegation approval is needed
-                    if (this.controller.getSerder().getKed().get("s").equals(0)) {
-                        return this.approveDelegation()
-                                .then(Mono.defer(this::finalizeConnection));
-                    }
-
-                    return finalizeConnection();
-                });
-    }
-
-    private Mono<Void> finalizeConnection() {
-        try {
-            this.manager = new Keeping.KeyManager(
-                    this.controller.getSalter(),
-                    this.externalModules
-            );
-
-            this.authn = new Authenticater(
-                    this.controller.getSigner(),
-                    this.agent.getVerfer()
-            );
-
-            return Mono.empty();
-        } catch (Exception e) {
-            return Mono.error(e);
+    public void connect() throws Exception {
+        State state = state(); // Wait for state to complete
+        if (state == null) {
+            throw new RuntimeException("State not initialized");
         }
+        this.pidx = state.getPidx();
+
+        // Create controller representing the local client AID
+        this.controller = new Controller(
+            this.bran,
+            this.tier,
+            0,
+            state.getController()
+        );
+        this.controller.setRidx(state.getRidx() != null ? state.getRidx() : 0);
+
+        // Create agent representing the AID of KERIA cloud agent
+        this.agent = new Agent(state.getAgent());
+        
+        // Check anchor matches controller pre
+        if (!this.agent.getAnchor().equals(this.controller.getPre())) {
+            throw new IllegalArgumentException(
+                "commitment to controller AID missing in agent inception event"
+            );
+        }
+
+        if (this.controller.getSerder().getKed().get("s").equals("0")) {
+            approveDelegation().block(); // Wait for approval to complete
+        }
+
+        this.manager = new Keeping.KeyManager(
+            this.controller.getSalter(),
+            this.externalModules
+        );
+
+        this.authn = new Authenticater(
+            this.controller.getSigner(),
+            this.agent.getVerfer()
+        );
     }
 
     /**

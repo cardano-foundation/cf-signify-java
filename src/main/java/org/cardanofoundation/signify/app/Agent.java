@@ -33,10 +33,10 @@ public class Agent {
         this.state = null;
         this.sn = BigInteger.ZERO;
         this.said = "";
-        this.parse((Agent) agent);
+        this.parse(agent);
     }
 
-    private void parse(Agent agent) {
+    private void parse(Object agent) {
         EventResult result = this.event(agent);
         Map<String, Object> state = Utils.toMap(result.state);
         Verfer verfer = result.verfer;
