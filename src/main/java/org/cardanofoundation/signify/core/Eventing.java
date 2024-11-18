@@ -20,6 +20,7 @@ import java.util.*;
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
 
 public class Eventing {
+    //TODO implement function
     public static Serder interact(InteractArgs args) {
         return new Serder(null, null, null);
     }
@@ -34,7 +35,7 @@ public class Eventing {
             args.getKind() != null ? args.getKind() : Serials.JSON,
             0);
         String ilk = args.getDelpre() == null ? Ilks.ICP.getValue() : Ilks.DIP.getValue();
-        CesrNumber sner = new CesrNumber(RawArgs.builder().build(), BigInteger.ZERO, null);
+        CesrNumber sner = new CesrNumber(BigInteger.ZERO);
 
         if (args.getIsith() == null) {
             args.setIsith(Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0)));
@@ -132,7 +133,7 @@ public class Eventing {
             ked = Saider.saidify(ked).sad();
         }
 
-        return new Serder(ked, null, null);
+        return new Serder(ked);
     }
 
     public static int ample(int n) {

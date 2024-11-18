@@ -7,7 +7,10 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
 import java.util.List;
 
 @Builder
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class InceptArgs {
     List<String> keys;
     Object isith;
