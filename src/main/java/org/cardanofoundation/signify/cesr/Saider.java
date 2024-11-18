@@ -6,7 +6,7 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Saider extends Matter {
@@ -78,7 +78,7 @@ public class Saider extends Matter {
             throw new UnsupportedOperationException("Unsupported digest code = " + rawArgs.getCode());
         }
 
-        DeriveResult deriveResult = derive(sad, rawArgs.getCode(), kind, label);
+        DeriveResult deriveResult = derive(new LinkedHashMap<>(sad), rawArgs.getCode(), kind, label);
         rawArgs.setRaw(deriveResult.raw());
         return rawArgs;
     }
@@ -101,6 +101,7 @@ public class Saider extends Matter {
         CoreUtil.Serials kind,
         String label
     ) {
+        sad = new LinkedHashMap<>(sad);
         if (!Codex.DigiCodex.has(code) || !Digests.containsKey(code)) {
             throw new IllegalArgumentException("Unsupported digest code = " + code);
         }
@@ -118,9 +119,11 @@ public class Saider extends Matter {
             sad = sizeResult.kd();
         }
 
+        Map<String, Object> ser = new LinkedHashMap<>(sad);
+
         Digestage digestage = Digests.get(code);
 
-        String cpa = serialize(sad, kind);
+        String cpa = serialize(ser, kind);
         byte[] raw = digestage.klas.derive(cpa.getBytes(), digestage.size, digestage.length);
 
         return new DeriveResult(raw, sad);
