@@ -114,4 +114,6 @@ class SerderTest {
         Serder serder1 = new Serder(ked0);
         assertEquals("KERI10JSON000139_", serder1.getKed().get("v"));
     }
+
+
 }
