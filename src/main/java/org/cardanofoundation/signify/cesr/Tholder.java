@@ -6,6 +6,7 @@ import org.apache.commons.math3.fraction.Fraction;
 import org.cardanofoundation.signify.cesr.Codex.BexCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
@@ -29,7 +30,7 @@ public class Tholder {
         } else if (sith != null) {
             _processSith(sith);
         } else {
-            throw new RuntimeException("Missing threshold expression");
+            throw new EmptyMaterialException("Missing threshold expression");
         }
     }
 
@@ -37,12 +38,28 @@ public class Tholder {
         return number != null ? number.getQb64b() : null;
     }
 
-    public String getSith() {
-        if (weighted) {
-            //TODO find mathjs replacement
-            return "";
+    @SuppressWarnings("unchecked")
+    public Object getSith() {
+        if (this.weighted) {
+            List<List<String>> sith = new ArrayList<>();
+            for (List<Fraction> clause : (List<List<Fraction>>) thold) {
+                List<String> clauseStr = new ArrayList<>();
+                for (Fraction f : clause) {
+                    if (0 < f.doubleValue() && f.doubleValue() < 1) { // fraction ratio
+                        clauseStr.add(fractionToString(f));
+                    } else { // fraction decimal
+                        if (f.getDenominator() == 1) {
+                            clauseStr.add("" + f.intValue());
+                        } else {
+                            clauseStr.add("" + f.doubleValue());
+                        }
+                    }
+                }
+                sith.add(clauseStr);
+            }
+            return sith;
         } else {
-            return Integer.toHexString((Integer) thold);
+            return Integer.toHexString((Integer) this.thold);
         }
     }
 
@@ -68,9 +85,9 @@ public class Tholder {
         Matter matter = new Matter(limen);
         if (NumCodex.has(matter.getCode())) {
             RawArgs args = RawArgs.builder()
-                .raw(matter.getRaw())
-                .code(matter.getCode())
-                .build();
+                    .raw(matter.getRaw())
+                    .code(matter.getCode())
+                    .build();
             CesrNumber number = new CesrNumber(args, null, null);
             _processUnweighted(number.getNum().intValue());
         } else if (BexCodex.has(matter.getCode())) {
@@ -88,25 +105,25 @@ public class Tholder {
             this._processUnweighted(Integer.parseInt(sithStr, 16));
         } else {
             List<Object> _sith;
-            if (sith instanceof String sithStr) {
+            if (sith instanceof String sithStr) { // json of weighted sith from cli
                 try {
-                    _sith = new ObjectMapper().readValue(sithStr, List.class);
+                    _sith = new ObjectMapper().readValue(sithStr, List.class); // deserialize
                 } catch (Exception e) {
                     throw new RuntimeException("Error parsing sith string", e);
                 }
             } else {
-                _sith = Collections.singletonList(Utils.toList(sith));
+                _sith = (List<Object>) sith;
             }
 
-            if (_sith.isEmpty()) {
+            if (sith == null || _sith.isEmpty()) {
                 throw new IllegalArgumentException("Empty weight list");
             }
 
             List<Boolean> mask = _sith.stream()
-                .map(x -> !(x instanceof String))
-                .toList();
+                    .map(x -> !(x instanceof String))
+                    .toList();
 
-            if (!mask.isEmpty() && mask.stream().anyMatch(x -> x)) {
+            if (!mask.isEmpty() && mask.stream().noneMatch(x -> x)) {
                 _sith = List.of(_sith);
             }
 
@@ -115,12 +132,12 @@ public class Tholder {
                     continue;
                 }
                 List<Boolean> clauseMask = clause.stream()
-                    .map(x -> x instanceof String)
-                    .toList();
+                        .map(x -> x instanceof String)
+                        .toList();
 
                 if (!clauseMask.isEmpty() && !clauseMask.stream().allMatch(x -> x)) {
                     throw new IllegalArgumentException(
-                        "Invalid sith, some weights in clause " + clauseMask + " are non string"
+                            "Invalid sith, some weights in clause " + clauseMask + " are non string"
                     );
                 }
             }
@@ -132,10 +149,10 @@ public class Tholder {
 
     private List<List<Fraction>> _processClauses(List<Object> sith) {
         return sith.stream()
-            .map(clause -> ((List<?>) clause).stream()
-                .map(w -> weight(w.toString()))
-                .collect(Collectors.toList()))
-            .collect(Collectors.toList());
+                .map(clause -> ((List<?>) clause).stream()
+                        .map(w -> weight(w.toString()))
+                        .collect(Collectors.toList()))
+                .collect(Collectors.toList());
     }
 
     private void _processUnweighted(int thold) {
@@ -152,11 +169,11 @@ public class Tholder {
     private void _processWeighted(List<List<Fraction>> thold) {
         for (List<Fraction> clause : thold) {
             double sum = clause.stream()
-                .mapToDouble(Fraction::doubleValue)
-                .sum();
+                    .mapToDouble(Fraction::doubleValue)
+                    .sum();
             if (sum < 1) {
                 throw new IllegalArgumentException(
-                    "Invalid sith clause: " + thold + " all clause weight sums must be >= 1"
+                        "Invalid sith clause: " + thold + " all clause weight sums must be >= 1"
                 );
             }
         }
@@ -164,8 +181,8 @@ public class Tholder {
         this.thold = thold;
         this.weighted = true;
         this.size = thold.stream()
-            .mapToInt(List::size)
-            .sum();
+                .mapToInt(List::size)
+                .sum();
         this._satisfy = this::_satisfyWeighted;
     }
 
@@ -173,8 +190,8 @@ public class Tholder {
         String[] parts = w.split("/");
         if (parts.length == 2) {
             return new Fraction(
-                Integer.parseInt(parts[0]),
-                Integer.parseInt(parts[1])
+                    Integer.parseInt(parts[0]),
+                    Integer.parseInt(parts[1])
             );
         } else {
             return new Fraction(Integer.parseInt(w));
@@ -182,7 +199,7 @@ public class Tholder {
     }
 
     private boolean _satisfyNumeric(List<Integer> indices) {
-        return (Integer) thold > 0 && indices.size() >= (Integer) thold; // at least one
+        return (Integer) this.thold > 0 && indices.size() >= (Integer) this.thold; // at least one
     }
 
     private boolean _satisfyWeighted(List<Integer> indices) {
@@ -192,7 +209,7 @@ public class Tholder {
 
         @SuppressWarnings("unchecked")
         List<List<Fraction>> weightedThold = (List<List<Fraction>>) thold;
-        
+
         Set<Integer> indexes = new TreeSet<>(indices);
         boolean[] sats = new boolean[size];
         indexes.forEach(idx -> sats[idx] = true);
@@ -218,5 +235,15 @@ public class Tholder {
         return _satisfy.apply(indices);
     }
 
-    //TODO find mathjs replacement
+    private String fractionToString(Fraction f) {
+        String str;
+        if (f.getDenominator() == 1) {
+            str = Integer.toString(f.getNumerator());
+        } else if (f.getNumerator() == 0) {
+            str = "0";
+        } else {
+            str = f.getNumerator() + "/" + f.getDenominator();
+        }
+        return str;
+    }
 }
