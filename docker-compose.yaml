@@ -1,0 +1,49 @@
+services:
+  keria:
+    image: ${KERIA_IMAGE:-weboftrust/keria}:${KERIA_IMAGE_TAG:-0.2.0-dev3}
+    environment:
+      - KERI_AGENT_CORS=1
+      - KERI_URL=http://keria:3902
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=UTF-8
+    volumes:
+      - ./config/keria.json:/keria/config/keri/cf/keria.json
+    entrypoint:
+      [
+        'keria',
+        'start',
+        '--config-dir',
+        '/keria/config',
+        '--config-file',
+        'keria',
+        '--name',
+        'agent',
+      ]
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', 'http://keria:3902/spec.yaml']
+      interval: 2s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    ports:
+      - 3901:3901
+      - 3902:3902
+      - 3903:3903
+
+  witness-demo:
+    image: weboftrust/keri-witness-demo:1.1.0
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=UTF-8
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:5642/oobi']
+      interval: 2s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    volumes:
+      - ./config/witness-demo:/keripy/scripts/keri/cf/main
+    ports:
+      - 5642:5642
+      - 5643:5643
+      - 5644:5644
