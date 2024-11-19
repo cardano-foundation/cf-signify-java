@@ -81,6 +81,9 @@ public class Saider extends Matter {
             throw new UnsupportedOperationException("Unsupported digest code = " + rawArgs.getCode());
         }
 
+        if (sad == null) {
+            sad = new LinkedHashMap<>();
+        }
         DeriveResult deriveResult = derive(new LinkedHashMap<>(sad), rawArgs.getCode(), kind, label);
         rawArgs.setRaw(deriveResult.raw());
         return rawArgs;

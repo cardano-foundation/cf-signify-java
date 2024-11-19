@@ -9,11 +9,12 @@ import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
+
+import static org.cardanofoundation.signify.cesr.util.Utils.intToBytes;
 
 @Builder
 @AllArgsConstructor
@@ -43,6 +44,9 @@ public class RawArgs {
     }
 
     public static RawArgs generateEd25519SeedRaw(RawArgs rawArgs) {
+        if (rawArgs.getCode() == null) {
+            rawArgs.setCode(MatterCodex.Ed25519_Seed.getValue());
+        }
         if (MatterCodex.Ed25519_Seed.getValue().equals(rawArgs.getCode())) {
             if (rawArgs.getRaw() == null) {
                 LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
@@ -110,7 +114,7 @@ public class RawArgs {
                 }
             }
 
-            rawArgs.setRaw(Utils.intToBytes(_num, Matter.getRawSize(rawArgs.getCode())));
+            rawArgs.setRaw(intToBytes(_num, Matter.getRawSize(rawArgs.getCode())));
         }
 
         return rawArgs;
@@ -181,6 +185,25 @@ public class RawArgs {
             if (!success) {
                 throw new SodiumException("Failed to convert secret key ed25519 to Curve25519");
             }
+            args.setRaw(raw);
+        }
+
+        return args;
+    }
+
+    public static RawArgs generateSeqnerRaw(RawArgs args, BigInteger sn, String snh) {
+        if (args.getCode() == null) {
+            args.setCode(MatterCodex.Salt_128.getValue());
+        }
+        if (args.getRaw() == null) {
+            if (sn == null) {
+                if (snh == null) {
+                    sn = BigInteger.ZERO;
+                } else {
+                    sn = new BigInteger(snh, 16);
+                }
+            }
+            byte[] raw = intToBytes(sn, Matter.getRawSize(MatterCodex.Salt_128.getValue()));
             args.setRaw(raw);
         }
 

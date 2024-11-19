@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @Builder
@@ -16,7 +17,7 @@ import java.util.List;
 public class InteractArgs {
     String pre;
     String dig;
-    int sn;
+    BigInteger sn;
     List<Object> data;
     Version version;
     Serials kind;

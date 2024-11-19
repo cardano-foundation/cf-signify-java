@@ -186,7 +186,7 @@ public class SignifyClient {
      *
      * @return Mono<String> A promise to the result of the approval
      */
-    public Mono<Object> approveDelegation() {
+    public Mono<Object> approveDelegation() throws SodiumException {
         if (this.agent == null) {
             return Mono.error(new IllegalStateException("Agent not initialized"));
         }

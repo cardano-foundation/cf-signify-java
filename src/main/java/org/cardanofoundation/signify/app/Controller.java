@@ -7,15 +7,15 @@ import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
+import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Controller is responsible for managing signing keys for the client and agent.  The client
@@ -119,13 +119,31 @@ public class Controller {
         return new Verfer[]{this.signer.getVerfer()};
     }
 
-    //TODO implement the rest of the functions
-    public Object approveDelegation(Agent agent) {
-        return null;
+    public Object approveDelegation(Agent agent) throws SodiumException {
+        Seqner seqner = new Seqner(agent.getSn());
+
+        Map<String, String> anchor = new LinkedHashMap<>();
+        anchor.put("i", agent.getPre());
+        anchor.put("s", seqner.getSnh());
+        anchor.put("d", agent.getSaid());
+
+        String currentSn = (String) serder.getKed().get("s");
+        BigInteger nextSn = new CesrNumber(new RawArgs(), null, currentSn).getNum().add(BigInteger.ONE);
+
+        serder = Eventing.interact(InteractArgs.builder()
+            .pre(serder.getPre())
+            .dig((String) serder.getKed().get("d"))
+            .sn(nextSn)
+            .data(Collections.singletonList(anchor))
+            .version(new CoreUtil.Version())
+            .kind(CoreUtil.Serials.JSON)
+            .build());
+
+        Siger sig = (Siger) signer.sign(serder.getRaw().getBytes(), 0);
+        return new String[] { sig.getQb64() };
     }
 
-    public void derive() {}
-
+    //TODO implement the rest of the functions
     public void rotate() {}
 
     public void recrypt() {}
