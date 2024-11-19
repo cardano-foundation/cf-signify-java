@@ -61,7 +61,6 @@ class SerderTest {
             true
         );
 
-        // TODO test after implement blake3
         Diger ndiger = new Diger(
             RawArgs.builder().build(),
             skp1.getVerfer().getQb64b());

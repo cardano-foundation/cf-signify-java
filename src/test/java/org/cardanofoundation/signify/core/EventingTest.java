@@ -16,7 +16,6 @@ public class EventingTest {
 
     @Test
     void inceptShouldCreateInceptionEvents() throws Exception {
-        // Create initial seed
         byte[] seed = new byte[] {
             (byte)159, 123, (byte)168, (byte)167, (byte)168, 67, 57, (byte)150, 
             38, (byte)250, (byte)177, (byte)153, (byte)235, (byte)170,
@@ -25,31 +24,28 @@ public class EventingTest {
             41, 126, (byte)147
         };
 
-        // Test non-transferable signer
-        Signer signer0 = new Signer(seed, false); // non transferable
+        Signer signer0 = new Signer(RawArgs.builder().raw(seed).build(), false); // original signing keypair non transferable
         assertEquals(MatterCodex.Ed25519_Seed.getValue(), signer0.getCode());
         assertEquals(MatterCodex.Ed25519N.getValue(), signer0.getVerfer().getCode());
         
         List<String> keys0 = List.of(signer0.getVerfer().getQb64());
-        
-        // Create inception event with default empty next keys
         InceptArgs inceptArgs = InceptArgs.builder()
             .keys(keys0)
             .build();
-        Serder serder = Eventing.incept(inceptArgs);
+        Serder serder = Eventing.incept(inceptArgs); // default nxt is empty so abandoned
             
         assertEquals(
             "BFs8BBx86uytIM0D2BhsE5rrqVIT8ef8mflpNceHo4XH",
             serder.getKed().get("i")
         );
-        assertTrue(((List<?>)serder.getKed().get("n")).isEmpty());
-        assertEquals(
-            "{\"v\":\"KERI10JSON0000fd_\",\"t\":\"icp\",\"d\":\"EMW0zK3bagYPO6gx3w7Ua90f-I7x5kGIaI4X" +
-            "eq9W8_As\",\"i\":\"BFs8BBx86uytIM0D2BhsE5rrqVIT8ef8mflpNceHo4XH\",\"s\":\"0\",\"kt\":\"1" +
-            "\",\"k\":[\"BFs8BBx86uytIM0D2BhsE5rrqVIT8ef8mflpNceHo4XH\"],\"nt\":\"0\",\"n\":[],\"bt\":" +
-            "\"0\",\"b\":[],\"c\":[],\"a\":[]}",
-            serder.getRaw()
-        );
+        assertTrue((Utils.toList(serder.getKed().get("n"))).isEmpty());
+        String expectedRaw = """
+            {"v":"KERI10JSON0000fd_","t":"icp",\
+            "d":"EMW0zK3bagYPO6gx3w7Ua90f-I7x5kGIaI4Xeq9W8_As",\
+            "i":"BFs8BBx86uytIM0D2BhsE5rrqVIT8ef8mflpNceHo4XH","s":"0",\
+            "kt":"1","k":["BFs8BBx86uytIM0D2BhsE5rrqVIT8ef8mflpNceHo4XH"],\
+            "nt":"0","n":[],"bt":"0","b":[],"c":[],"a":[]}""";
+        assertEquals(expectedRaw, serder.getRaw());
 
         Saider saider = new Saider(
             RawArgs.builder()

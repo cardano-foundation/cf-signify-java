@@ -1,11 +1,7 @@
 package org.cardanofoundation.signify.core;
 
-import org.cardanofoundation.signify.cesr.CesrNumber;
+import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.Prefixer;
-import org.cardanofoundation.signify.cesr.Saider;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
@@ -15,14 +11,43 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
 
 public class Eventing {
-    //TODO implement function
     public static Serder interact(InteractArgs args) {
-        return new Serder(null, null, null);
+        String vs = versify(
+            Ident.KERI, 
+            args.getVersion(), 
+            args.getKind(), 
+            0
+        );
+        String ilk = Ilks.IXN.getValue();
+        CesrNumber sner = new CesrNumber(args.getSn());
+
+        if (sner.getNum().compareTo(BigInteger.ONE) < 0) {
+            throw new IllegalArgumentException("Invalid sn = " + sner.getNumh() + "for ixn.");
+        }
+
+        List<Object> data = args.getData();
+        if (data == null) {
+            data = new ArrayList<>();
+        }
+
+        Map<String, Object> ked = new LinkedHashMap<>();
+        ked.put("v", vs);
+        ked.put("t", ilk);
+        ked.put("d", "");
+        ked.put("i", args.getPre());
+        ked.put("s", sner.getNumh());
+        ked.put("p", args.getDig());
+        ked.put("a", data);
+
+        Saider.SaidifyResult result = Saider.saidify(ked);
+
+        return new Serder(result.sad());
     }
 
     public static Serder incept(InceptArgs args) {
@@ -134,6 +159,19 @@ public class Eventing {
         }
 
         return new Serder(ked);
+    }
+
+    // TODO implement function
+    public static byte[] messagize(
+        Serder serder,
+        List<Siger> sigers,
+        Object seal,
+        List<Cigar> wigers,
+        List<Cigar> cigars,
+        boolean pipelined
+    ) {
+        byte[] msg = serder.getRaw().getBytes(StandardCharsets.UTF_8);
+        return msg;
     }
 
     public static int ample(int n) {
