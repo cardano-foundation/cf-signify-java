@@ -5,12 +5,32 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.Agent;
+import org.cardanofoundation.signify.app.Aiding.Identifier;
+import org.cardanofoundation.signify.app.Contacting.Challenges;
+import org.cardanofoundation.signify.app.Contacting.Contacts;
 import org.cardanofoundation.signify.app.Controller;
+import org.cardanofoundation.signify.app.Coring.KeyEvents;
+import org.cardanofoundation.signify.app.Coring.KeyStates;
+import org.cardanofoundation.signify.app.Coring.Oobis;
+import org.cardanofoundation.signify.app.Coring.Operations;
+import org.cardanofoundation.signify.app.Credentialing.Credentials;
+import org.cardanofoundation.signify.app.Credentialing.Ipex;
+import org.cardanofoundation.signify.app.Credentialing.Registries;
+import org.cardanofoundation.signify.app.Credentialing.Schemas;
+import org.cardanofoundation.signify.app.Delegating.Delegations;
+import org.cardanofoundation.signify.app.Escrowing.Escrows;
+import org.cardanofoundation.signify.app.Exchanging.Exchanges;
+import org.cardanofoundation.signify.app.Grouping.Groups;
+import org.cardanofoundation.signify.app.Notifying.Notifications;
 import org.cardanofoundation.signify.cesr.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
+import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -18,7 +38,7 @@ import java.util.*;
 
 @Getter
 @Setter
-public class SignifyClient {
+public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private final WebClient webClient = WebClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,11 +65,11 @@ public class SignifyClient {
      * @param externalModules list of external modules to load
      */
     public SignifyClient(
-            String url,
-            String bran,
-            Salter.Tier tier,
-            String bootUrl,
-            List<ExternalModule> externalModules
+        String url,
+        String bran,
+        Salter.Tier tier,
+        String bootUrl,
+        List<ExternalModule> externalModules
     ) throws SodiumException {
         tier = tier != null ? tier : Salter.Tier.low;
         this.url = url;
@@ -97,7 +117,7 @@ public class SignifyClient {
                 .toBodilessEntity()
                 .block();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to boot client" + e.getMessage());
+            throw new RuntimeException("Failed to boot client " + e.getMessage());
         }
     }
 
@@ -158,7 +178,7 @@ public class SignifyClient {
 
         // Create agent representing the AID of KERIA cloud agent
         this.agent = new Agent(state.getAgent());
-        
+
         // Check anchor matches controller pre
         if (!this.agent.getAnchor().equals(this.controller.getPre())) {
             throw new IllegalArgumentException(
@@ -181,6 +201,17 @@ public class SignifyClient {
         );
     }
 
+    @Override
+    public Mono<ResponseEntity<String>> fetch(
+        String pathname,
+        String method,
+        Object body,
+        HttpHeaders headers
+    ) {
+        // TODO implement fetch
+        return null;
+    }
+
     /**
      * Approve the delegation of the client AID to the KERIA agent
      *
@@ -198,11 +229,156 @@ public class SignifyClient {
         data.put("sigs", sigs);
 
         return webClient
-                .put()
-                .uri(this.url + "/agent/" + this.controller.getPre() + "?type=ixn")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(data)
-                .retrieve()
-                .bodyToMono(Object.class);
+            .put()
+            .uri(this.url + "/agent/" + this.controller.getPre() + "?type=ixn")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(data)
+            .retrieve()
+            .bodyToMono(Object.class);
     }
+
+    /**
+     * Get identifiers resource
+     *
+     * @return {Identifier}
+     */
+    public Identifier getIdentifier() {
+        return new Identifier(this);
+    }
+
+    /**
+     * Get OOBIs resource
+     *
+     * @return {Oobis}
+     */
+    public Oobis getOobis() {
+        return new Oobis(this);
+    }
+
+    /**
+     * Get operations resource
+     *
+     * @return {Operations}
+     */
+    public Operations getOperations() {
+        return new Operations(this);
+    }
+
+    /**
+     * Get keyEvents resource
+     *
+     * @return {KeyEvents}
+     */
+    public KeyEvents getKeyEvents() {
+        return new KeyEvents(this);
+    }
+
+    /**
+     * Get keyEvents resource
+     *
+     * @return {KeyStates}
+     */
+    public KeyStates getKeyStates() {
+        return new KeyStates(this);
+    }
+
+    /**
+     * Get credentials resource
+     *
+     * @return {Credentials}
+     */
+    public Credentials getCredentials() {
+        return new Credentials(this);
+    }
+
+    /**
+     * Get IPEX resource
+     *
+     * @return {Ipex}
+     */
+    public Ipex getIpex() {
+        return new Ipex(this);
+    }
+
+    /**
+     * Get registries resource
+     *
+     * @return {Registries}
+     */
+    public Registries getRegistries() {
+        return new Registries(this);
+    }
+
+    /**
+     * Get schemas resource
+     *
+     * @return {Schemas}
+     */
+    public Schemas getSchemas() {
+        return new Schemas(this);
+    }
+
+    /**
+     * Get challenges resource
+     *
+     * @return {Challenges}
+     */
+    public Challenges getChallenges() {
+        return new Challenges(this);
+    }
+
+    /**
+     * Get contacts resource
+     *
+     * @return {Contacts}
+     */
+    public Contacts getContacts() {
+        return new Contacts(this);
+    }
+
+    /**
+     * Get notifications resource
+     *
+     * @return {Notifications}
+     */
+    public Notifications getNotifications() {
+        return new Notifications(this);
+    }
+
+    /**
+     * Get escrows resource
+     *
+     * @return {Escrows}
+     */
+    public Escrows getEscrows() {
+        return new Escrows(this);
+    }
+
+    /**
+     * Get groups resource
+     *
+     * @return {Groups}
+     */
+    public Groups getGroups() {
+        return new Groups(this);
+    }
+
+    /**
+     * Get exchange resource
+     *
+     * @return {Exchanges}
+     */
+    public Exchanges getExchanges() {
+        return new Exchanges(this);
+    }
+
+    /**
+     * Get delegations resource
+     *
+     * @return {Delegations}
+     */
+    public Delegations getDelegations() {
+        return new Delegations(this);
+    }
+
 }

@@ -130,14 +130,16 @@ public class Controller {
         String currentSn = (String) serder.getKed().get("s");
         BigInteger nextSn = new CesrNumber(new RawArgs(), null, currentSn).getNum().add(BigInteger.ONE);
 
-        serder = Eventing.interact(InteractArgs.builder()
-            .pre(serder.getPre())
-            .dig((String) serder.getKed().get("d"))
-            .sn(nextSn)
-            .data(Collections.singletonList(anchor))
-            .version(new CoreUtil.Version())
-            .kind(CoreUtil.Serials.JSON)
-            .build());
+        serder = Eventing.interact(
+            InteractArgs.builder()
+                .pre(serder.getPre())
+                .dig((String) serder.getKed().get("d"))
+                .sn(nextSn)
+                .data(Collections.singletonList(anchor))
+                .version(new CoreUtil.Version())
+                .kind(CoreUtil.Serials.JSON)
+                .build()
+        );
 
         Siger sig = (Siger) signer.sign(serder.getRaw().getBytes(), 0);
         return new String[] { sig.getQb64() };

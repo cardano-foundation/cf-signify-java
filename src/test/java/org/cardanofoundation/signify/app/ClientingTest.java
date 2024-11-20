@@ -8,6 +8,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -306,7 +307,7 @@ public class ClientingTest {
         // Verify the state HTTP request
         RecordedRequest stateRequest = mockWebServer.takeRequest();
         assertEquals("GET", stateRequest.getMethod());
-        assertTrue(stateRequest.getPath().startsWith("/agent"));  // Should contain the controller ID
+        assertTrue(stateRequest.getPath().startsWith("/agent"));
 //        assertEquals("application/json", stateRequest.getHeader("Content-Type"));
 
         // Validate agent
@@ -332,38 +333,39 @@ public class ClientingTest {
         assertEquals("1", client.getController().getSerder().getKed().get("s"));
         assertEquals("ixn", client.getController().getSerder().getKed().get("t"));
 
-//        @SuppressWarnings("unchecked")
-//        List<Map<String, String>> actions = (List<Map<String, String>>) client.getController().getSerder().getKed().get("a");
-//        assertEquals(
-//            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-//            actions.get(0).get("i")
-//        );
-//        assertEquals(
-//            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-//            actions.get(0).get("d")
-//        );
-//        assertEquals("0", actions.get(0).get("s"));
-//
-//        // Validate data
-//        Object[] data = client.getData();
-//        assertEquals(url, data.get(0));
-//        assertEquals(bran, data.get(1));
-//
-//        // Validate service instances
-//        assertTrue(client.identifiers() instanceof Identifiers);
-//        assertTrue(client.operations() instanceof Operations);
-//        assertTrue(client.keyEvents() instanceof KeyEvents);
-//        assertTrue(client.keyStates() instanceof KeyStates);
-//        assertTrue(client.credentials() instanceof Credentials);
-//        assertTrue(client.registries() instanceof Registries);
-//        assertTrue(client.schemas() instanceof Schemas);
-//        assertTrue(client.challenges() instanceof Challenges);
-//        assertTrue(client.contacts() instanceof Contacts);
-//        assertTrue(client.notifications() instanceof Notifications);
-//        assertTrue(client.escrows() instanceof Escrows);
-//        assertTrue(client.oobis() instanceof Oobis);
-//        assertTrue(client.exchanges() instanceof Exchanges);
-//        assertTrue(client.groups() instanceof Groups);
+        @SuppressWarnings("unchecked")
+        List<Object> actions = (List<Object>) client.getController().getSerder().getKed().get("a");
+        Map<String, Object> actionMap = Utils.toMap(actions.getFirst());
+        assertEquals(
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            actionMap.get("i")
+        );
+        assertEquals(
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            actionMap.get("d")
+        );
+        assertEquals("0", actionMap.get("s"));
+
+        // Validate data
+        Object[] data = client.getData();
+        assertEquals(url, data[0]);
+        assertEquals(bran, data[1]);
+
+        // Validate service instances
+        assertInstanceOf(Aiding.Identifier.class, client.getIdentifier());
+        assertInstanceOf(Coring.Operations.class, client.getOperations());
+        assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
+        assertInstanceOf(Coring.KeyStates.class, client.getKeyStates());
+        assertInstanceOf(Credentialing.Credentials.class, client.getCredentials());
+        assertInstanceOf(Credentialing.Registries.class, client.getRegistries());
+        assertInstanceOf(Credentialing.Schemas.class, client.getSchemas());
+        assertInstanceOf(Contacting.Challenges.class, client.getChallenges());
+        assertInstanceOf(Contacting.Contacts.class, client.getContacts());
+        assertInstanceOf(Notifying.Notifications.class, client.getNotifications());
+        assertInstanceOf(Escrowing.Escrows.class, client.getEscrows());
+        assertInstanceOf(Coring.Oobis.class, client.getOobis());
+        assertInstanceOf(Exchanging.Exchanges.class, client.getExchanges());
+        assertInstanceOf(Grouping.Groups.class, client.getGroups());
     }
 
     @Test
