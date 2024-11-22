@@ -28,6 +28,8 @@ import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +76,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         tier = tier != null ? tier : Salter.Tier.low;
         this.url = url;
         if (bran.length() < 21) {
-            throw new IllegalArgumentException("bran must be 21 characters");
+            throw new InvalidValueException("bran must be 21 characters");
         }
         this.bran = bran;
         this.pidx = 0;
@@ -98,7 +100,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         try {
             Controller.EventResult eventData = controller != null ? controller.getEvent() : null;
             if (eventData == null) {
-                throw new RuntimeException("Error getting event data");
+                throw new ExtractionException("Error getting event data");
             }
 
             Map<String, Object> data = new LinkedHashMap<>();
@@ -125,7 +127,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * Get state of the agent and the client
      */
     @SuppressWarnings("unchecked")
-    public State state() {
+    public Mono<State> state() {
         try {
             String caid = controller != null ? controller.getPre() : null;
             if (caid == null) {
@@ -150,8 +152,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
                     state.setRidx((Integer) data.getOrDefault("ridx", 0));
                     state.setPidx((Integer) data.getOrDefault("pidx", 0));
                     return state;
-                })
-                .block();
+                });
         } catch (Exception e) {
             throw new RuntimeException("Failed to get client state " + e.getMessage());
         }
@@ -161,7 +162,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * Connect to a KERIA agent
      */
     public void connect() throws Exception {
-        State state = state(); // Wait for state to complete
+        State state = state().block(); // Wait for state to complete
         if (state == null) {
             throw new RuntimeException("State not initialized");
         }
@@ -219,7 +220,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      */
     public Mono<Object> approveDelegation() throws SodiumException {
         if (this.agent == null) {
-            return Mono.error(new IllegalStateException("Agent not initialized"));
+            return Mono.error(new RuntimeException("Agent not initialized"));
         }
 
         Object sigs = this.controller.approveDelegation(this.agent);

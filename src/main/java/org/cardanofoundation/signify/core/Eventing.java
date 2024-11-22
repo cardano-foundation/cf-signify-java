@@ -5,6 +5,8 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
@@ -28,7 +30,7 @@ public class Eventing {
         CesrNumber sner = new CesrNumber(args.getSn());
 
         if (sner.getNum().compareTo(BigInteger.ONE) < 0) {
-            throw new IllegalArgumentException("Invalid sn = " + sner.getNumh() + "for ixn.");
+            throw new InvalidValueException("Invalid sn = " + sner.getNumh() + "for ixn.");
         }
 
         List<Object> data = args.getData();
@@ -68,10 +70,10 @@ public class Eventing {
 
         Tholder tholder = new Tholder(null, null, args.getIsith());
         if (tholder.getNum() != null && tholder.getNum() < 1) {
-            throw new IllegalArgumentException("Invalid sith = " + tholder.getNum() + " less than 1.");
+            throw new InvalidValueException("Invalid sith = " + tholder.getNum() + " less than 1.");
         }
         if (tholder.getSize() > args.getKeys().size()) {
-            throw new IllegalArgumentException("Invalid sith = " + tholder.getNum() + " for keys " + args.getKeys());
+            throw new InvalidValueException("Invalid sith = " + tholder.getNum() + " for keys " + args.getKeys());
         }
 
         if (args.getNdigs() == null) {
@@ -84,15 +86,15 @@ public class Eventing {
 
         Tholder ntholder = new Tholder(null, null, args.getNsith());
         if (ntholder.getNum() != null && ntholder.getNum() < 0) {
-            throw new IllegalArgumentException("Invalid nsith = " + ntholder.getNum() + " less than 0.");
+            throw new InvalidValueException("Invalid nsith = " + ntholder.getNum() + " less than 0.");
         }
         if (ntholder.getSize() > args.getKeys().size()) {
-            throw new IllegalArgumentException("Invalid nsith = " + ntholder.getNum() + " for keys " + args.getNdigs());
+            throw new InvalidValueException("Invalid nsith = " + ntholder.getNum() + " for keys " + args.getNdigs());
         }
 
         List<String> wits = args.getWits() != null ? args.getWits() : new ArrayList<>();
         if (new HashSet<>(wits).size() != wits.size()) {
-            throw new IllegalArgumentException("Invalid wits = " + wits + ", has duplicates.");
+            throw new InvalidValueException("Invalid wits = " + wits + ", has duplicates.");
         }
 
         if (args.getToad() == null) {
@@ -102,10 +104,10 @@ public class Eventing {
         CesrNumber toader = new CesrNumber(RawArgs.builder().build(), BigInteger.valueOf(args.getToad()), null);
         if (!wits.isEmpty()) {
             if (toader.getNum().intValue() < 1 || toader.getNum().intValue() > wits.size()) {
-                throw new IllegalArgumentException("Invalid toad = " + toader.getNum() + " for wits = " + wits);
+                throw new InvalidValueException("Invalid toad = " + toader.getNum() + " for wits = " + wits);
             }
         } else if (toader.getNum().intValue() != 0) {
-            throw new IllegalArgumentException("Invalid toad = " + toader.getNum() + " for wits = " + wits);
+            throw new InvalidValueException("Invalid toad = " + toader.getNum() + " for wits = " + wits);
         }
 
         List<String> cnfg = args.getCnfg() != null ? args.getCnfg() : new ArrayList<>();
@@ -138,14 +140,14 @@ public class Eventing {
         if (args.getDelpre() == null && args.getCode() == null && args.getKeys().size() == 1) {
             prefixer = new Prefixer(args.getKeys().getFirst());
             if (prefixer.isDigestible()) {
-                throw new IllegalArgumentException(
+                throw new InvalidCodeException(
                     "Invalid code, digestive=" + prefixer.getCode() + ", must be derived from ked."
                 );
             }
         } else {
             prefixer = new Prefixer(args.getCode(), ked);
             if (args.getDelpre() != null && !prefixer.isDigestible()) {
-                throw new IllegalArgumentException(
+                throw new InvalidCodeException(
                     "Invalid derivation code = " + prefixer.getCode() + " for delegation. Must be digestive"
                 );
             }
@@ -214,7 +216,7 @@ public class Eventing {
             int m2 = Math.max(0, n - f);
 
             if (m2 < m1 && n > 0) {
-                throw new IllegalArgumentException(
+                throw new InvalidValueException(
                     String.format("Invalid f=%d is too big for n=%d.", f, n)
                 );
             }

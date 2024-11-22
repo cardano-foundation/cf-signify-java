@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.cesr;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.validation.ValidationException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
@@ -27,7 +27,7 @@ public class CesrNumber extends Matter {
         super(RawArgs.generateNumDexRaw(args, num, numh));
 
         if (!NumCodex.has(this.getCode())) {
-            throw new ValidationException("Invalid code " + this.getCode() + " for Number");
+            throw new InvalidCodeException("Invalid code " + this.getCode() + " for Number");
         }
     }
 

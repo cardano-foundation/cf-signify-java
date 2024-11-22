@@ -2,12 +2,15 @@ package org.cardanofoundation.signify.cesr;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public class Saider extends Matter {
     private static final String Dummy = "#";
@@ -47,7 +50,7 @@ public class Saider extends Matter {
         super(rawArgs);
 
         if (!this.isDigestible()) {
-            throw new IllegalArgumentException("Unsupported digest code = " + this.getCode());
+            throw new UnexpectedCodeException("Unsupported digest code = " + this.getCode());
         }
     }
 
@@ -63,7 +66,7 @@ public class Saider extends Matter {
         super(getRawArgs(rawArgs, sad, kind, label));
 
         if (!this.isDigestible()) {
-            throw new IllegalArgumentException("Unsupported digest code = " + this.getCode());
+            throw new UnexpectedCodeException("Unsupported digest code = " + this.getCode());
         }
     }
 
@@ -78,7 +81,7 @@ public class Saider extends Matter {
         }
 
         if(!Codex.DigiCodex.has(rawArgs.getCode())) {
-            throw new UnsupportedOperationException("Unsupported digest code = " + rawArgs.getCode());
+            throw new UnexpectedCodeException("Unsupported digest code = " + rawArgs.getCode());
         }
 
         if (sad == null) {
@@ -93,7 +96,7 @@ public class Saider extends Matter {
         super(qb64);
 
         if (!this.isDigestible()) {
-            throw new IllegalArgumentException("Unsupported digest code = " + this.getCode());
+            throw new UnexpectedCodeException("Unsupported digest code = " + this.getCode());
         }
     }
 
@@ -109,12 +112,12 @@ public class Saider extends Matter {
     ) {
         sad = new LinkedHashMap<>(sad);
         if (!Codex.DigiCodex.has(code) || !Digests.containsKey(code)) {
-            throw new IllegalArgumentException("Unsupported digest code = " + code);
+            throw new UnexpectedCodeException("Unsupported digest code = " + code);
         }
 
         Sizage size = Matter.sizes.get(code);
         if (size == null) {
-            throw new IllegalArgumentException("Unknown size for code: " + code);
+            throw new InvalidSizeException("Unknown size for code: " + code);
         }
         String dummyValue = String.join("", Collections.nCopies(size.fs, Dummy));
         sad.put(label, dummyValue);
@@ -151,7 +154,7 @@ public class Saider extends Matter {
 
     public static SaidifyResult saidify(Map<String, Object> sad, String code, CoreUtil.Serials kind, String label) {
         if (!sad.containsKey(label)) {
-            throw new IllegalArgumentException("Missing id field labeled = " + label + " in sad.");
+            throw new NoSuchElementException("Missing id field labeled = " + label + " in sad.");
         }
 
         DeriveResult deriveResult = derive(sad, code, kind, label);

@@ -2,6 +2,9 @@ package org.cardanofoundation.signify.cesr.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -11,7 +14,7 @@ public class Utils {
 
     public static byte[] intToBytes(BigInteger value, int size) {
         if (value.signum() < 0) {
-            throw new IllegalArgumentException("Value must be non-negative");
+            throw new InvalidValueException("Value must be non-negative");
         }
 
         byte[] result = new byte[size];
@@ -25,7 +28,7 @@ public class Utils {
         }
 
         if (valueBytes.length > size) {
-            throw new IllegalArgumentException(
+            throw new InvalidSizeException(
                 String.format("Value too large: needs %d bytes, but size is limited to %d",
                     valueBytes.length, size)
             );
@@ -62,7 +65,7 @@ public class Utils {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (Exception e) {
-            throw new RuntimeException("Error while stringify");
+            throw new SerializeException("Error while stringify");
         }
     }
 
@@ -73,9 +76,9 @@ public class Utils {
 
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Unable to create map from object", e);
+            return mapper.convertValue(obj, new TypeReference<>() {});
+        } catch (Exception e) {
+            throw new SerializeException("Unable to create map from object");
         }
     }
 

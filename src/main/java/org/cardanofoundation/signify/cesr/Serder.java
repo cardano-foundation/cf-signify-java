@@ -3,6 +3,8 @@ package org.cardanofoundation.signify.cesr;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.VersionException;
+import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
@@ -14,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Getter
 public class Serder {
@@ -100,13 +103,13 @@ public class Serder {
         if (kind == Serials.JSON) {
             return Utils.jsonStringify(ked);
         } else {
-            throw new RuntimeException("unsupported event encoding");
+            throw new SerializeException("unsupported event encoding");
         }
     }
 
     public static ExhaleResult sizeify(Map<String, Object> ked, Serials kind) {
         if (!ked.containsKey("v")) {
-            throw new RuntimeException("Missing or empty version string");
+            throw new NoSuchElementException("Missing or empty version string");
         }
 
         DeversifyResult deversifyResult = CoreUtil.deversify((String) ked.get("v"));
@@ -115,7 +118,7 @@ public class Serder {
         Version version = deversifyResult.version();
 
         if (!version.equals(new Version())) {
-            throw new RuntimeException("unsupported version " + version);
+            throw new VersionException("unsupported version " + version);
         }
 
         if (kind == null) {

@@ -6,7 +6,10 @@ import lombok.*;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
@@ -37,7 +40,7 @@ public class RawArgs {
                 rawArgs.setRaw(salt);
             }
         } else {
-            throw new IllegalArgumentException("invalid code for Salter, only Salt_128 accepted");
+            throw new InvalidCodeException("invalid code for Salter, only Salt_128 accepted");
         }
 
         return rawArgs;
@@ -54,7 +57,7 @@ public class RawArgs {
                 rawArgs.setRaw(salt);
             }
         } else {
-            throw new UnsupportedOperationException("Unsupported signer code = " + rawArgs.getCode());
+            throw new UnexpectedCodeException("Unsupported signer code = " + rawArgs.getCode());
         }
 
         return rawArgs;
@@ -73,7 +76,7 @@ public class RawArgs {
                 rawArgs.setRaw(CoreUtil.blake3_256(ser, 32));
             }
         } else {
-            throw new UnsupportedOperationException("Unsupported code = " + rawArgs.getCode() + " for digester.");
+            throw new UnexpectedCodeException("Unsupported code = " + rawArgs.getCode() + " for digester.");
         }
 
         return rawArgs;
@@ -126,6 +129,10 @@ public class RawArgs {
                 args.setCode(MatterCodex.X25519_Cipher_Salt.getValue());
             } else if (args.getRaw().length == Matter.getRawSize(MatterCodex.X25519_Cipher_Seed.getValue())) {
                 args.setCode(MatterCodex.X25519_Cipher_Salt.getValue());
+            } else {
+                throw new InvalidSizeException(
+                    "Unsupported fixed raw size " + args.getRaw().length + " for " + args.getCode()
+                );
             }
         }
 
@@ -134,7 +141,7 @@ public class RawArgs {
             MatterCodex.X25519_Cipher_Seed.getValue()
         );
         if (!validCodes.contains(args.getCode())) {
-            throw new UnsupportedOperationException("Unsupported Cipher code = " + args.getCode());
+            throw new UnexpectedCodeException("Unsupported Cipher code = " + args.getCode());
         }
 
         return args;
@@ -151,7 +158,7 @@ public class RawArgs {
                 MatterCodex.Ed25519.getValue()
             );
             if (!validCodes.contains(verfer.getCode())) {
-                throw new UnsupportedOperationException("Unsupported verkey derivation code = " + verfer.getCode());
+                throw new UnexpectedCodeException("Unsupported verkey derivation code = " + verfer.getCode());
             }
             LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
             byte[] raw = new byte[32];
@@ -171,7 +178,7 @@ public class RawArgs {
         if (seed != null) {
             Signer signer = new Signer(seed);
             if (!signer.getCode().equals(MatterCodex.Ed25519_Seed.getValue())) {
-                throw new UnsupportedOperationException("Unsupported signing seed derivation code " + signer.getCode());
+                throw new UnexpectedCodeException("Unsupported signing seed derivation code " + signer.getCode());
             }
 
             byte[] sigKey = ByteBuffer.allocate(signer.getRaw().length + signer.getVerfer().getRaw().length)

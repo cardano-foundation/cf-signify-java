@@ -8,6 +8,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -244,8 +245,8 @@ public class ClientingTest {
     @Test
     @DisplayName("SignifyClient initialization")
     void testSignifyClientInitialization() throws Exception {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
+        InvalidValueException exception = assertThrows(
+            InvalidValueException.class,
             () -> new SignifyClient(url, "short", Tier.low, bootUrl, null)
         );
         assertEquals("bran must be 21 characters", exception.getMessage());
@@ -394,7 +395,8 @@ public class ClientingTest {
         data.put("pidx", 1);
         data.put("tier", Salter.Tier.low);
 
-        System.out.printf(obj.writeValueAsString(data));
+        String expectedData = "{\"icp\":{\"v\":\"KERI10JSON00012b_\",\"t\":\"icp\",\"d\":\"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose\",\"i\":\"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose\",\"s\":\"0\",\"kt\":\"1\",\"k\":[\"DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc\"],\"nt\":\"1\",\"n\":[\"EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL\"],\"bt\":\"0\",\"b\":[],\"c\":[],\"a\":[]},\"sig\":\"AACJwsJ0mvb4VgxD87H4jIsiT1QtlzznUy9zrX3lGdd48jjQRTv8FxlJ8ClDsGtkvK4Eekg5p-oPYiPvK_1eTXEG\",\"stem\":\"signify:controller\",\"pidx\":1,\"tier\":\"low\"}";
+        assertEquals(obj.writeValueAsString(data), expectedData);
     }
 
 }

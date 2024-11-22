@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Saider.DeriveResult;
-import org.cardanofoundation.signify.cesr.Saider.SaidifyResult;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;

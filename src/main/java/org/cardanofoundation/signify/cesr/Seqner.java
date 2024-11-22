@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
@@ -12,7 +13,7 @@ public class Seqner extends Matter {
         super(RawArgs.generateSeqnerRaw(args, sn, snh));
 
         if (!MatterCodex.Salt_128.getValue().equals(this.getCode())) {
-            throw new IllegalArgumentException("Invalid code =  " + this.getCode() + "for Seqner.");
+            throw new InvalidCodeException("Invalid code =  " + this.getCode() + "for Seqner.");
         }
     }
 

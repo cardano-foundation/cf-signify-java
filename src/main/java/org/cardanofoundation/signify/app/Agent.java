@@ -6,12 +6,15 @@ import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.Verfer;
 import org.cardanofoundation.signify.cesr.CesrNumber;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.IlkException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Agent is a custodial entity that can be used in conjunction with a local Client to establish the
@@ -47,12 +50,12 @@ public class Agent {
         this.said = (String) state.get("d");
 
         if (!Ilks.DIP.getValue().equals(state.get("et"))) {
-            throw new IllegalArgumentException("invalid inception event type " + state.get("et"));
+            throw new IlkException("invalid inception event type " + state.get("et"));
         }
 
         this.pre = (String) state.get("i");
         if (!state.containsKey("di")) {
-            throw new IllegalArgumentException("no anchor to controller AID");
+            throw new NoSuchElementException("no anchor to controller AID");
         }
 
         this.anchor = (String) state.get("di");
@@ -80,12 +83,12 @@ public class Agent {
 
         Tholder tholder = new Tholder(null, null, event.get("kt"));
         if (tholder.getNum() != 1) {
-            throw new IllegalArgumentException("invalid threshold " + tholder.getNum() + ", must be 1");
+            throw new InvalidValueException("invalid threshold " + tholder.getNum() + ", must be 1");
         }
 
         Tholder ntholder = new Tholder(null, null, event.get("nt"));
         if (ntholder.getNum() != 1) {
-            throw new IllegalArgumentException(
+            throw new InvalidValueException(
                 "invalid next threshold " + ntholder.getNum() + ", must be 1"
             );
         }

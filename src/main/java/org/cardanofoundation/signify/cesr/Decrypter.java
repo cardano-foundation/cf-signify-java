@@ -4,6 +4,7 @@ import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.utils.Key;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 
 import static org.cardanofoundation.signify.cesr.util.Utils.CRYPTO_BOX_SEAL_BYTES;
@@ -25,7 +26,7 @@ public class Decrypter extends Matter {
         if (this.getCode().equals(Codex.MatterCodex.X25519_Private.getValue())) {
             this.decrypter = this::_x25519;
         } else {
-            throw new UnsupportedOperationException("Unsupported decrypter code = " + this.getCode());
+            throw new UnexpectedCodeException("Unsupported decrypter code = " + this.getCode());
         }
     }
 
@@ -63,7 +64,7 @@ public class Decrypter extends Matter {
         } else if (cipher.getCode().equals(Codex.MatterCodex.X25519_Cipher_Seed.getValue())) {
             return new Signer(plain, transferable != null && transferable);
         } else {
-            throw new UnsupportedOperationException("Unsupported cipher text code = " + cipher.getCode());
+            throw new UnexpectedCodeException("Unsupported cipher text code = " + cipher.getCode());
         }
     }
 

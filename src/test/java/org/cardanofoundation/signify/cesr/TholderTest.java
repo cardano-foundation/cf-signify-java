@@ -1,14 +1,12 @@
 package org.cardanofoundation.signify.cesr;
 
 import org.apache.commons.math3.fraction.Fraction;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +22,7 @@ class TholderTest {
 
     @Test
     @DisplayName("should hold thresholds")
+    @SuppressWarnings("unchecked")
     void shouldHoldThresholds() {
         Tholder tholder = new Tholder(null, null, "b");
         assertEquals(11, tholder.getThold());
@@ -56,7 +55,7 @@ class TholderTest {
         assertTrue(tholder.satisfy(Arrays.asList(1, 2)));
         assertTrue(tholder.satisfy(Arrays.asList(1, 2, 3, 4)));
 
-        assertThrows(IllegalArgumentException.class, () -> new Tholder(null, null, -1));
+        assertThrows(InvalidValueException.class, () -> new Tholder(null, null, -1));
 
         // Test invalid nested thresholds
         List<String> invalidNested1 = Arrays.asList("1/2", "1/2", Arrays.asList("1/3", "1/3", "1/3").toString());

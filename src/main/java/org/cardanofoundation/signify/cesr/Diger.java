@@ -3,6 +3,8 @@ package org.cardanofoundation.signify.cesr;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -23,7 +25,7 @@ public class Diger extends Matter {
         if (this.getCode().equals(MatterCodex.Blake3_256.getValue())) {
             this.verify = this::blake3_256;
         } else {
-            throw new UnsupportedOperationException("Unsupported code = " + this.getCode() + " for digester.");
+            throw new UnexpectedCodeException("Unsupported code = " + this.getCode() + " for digester.");
         }
     }
 
@@ -57,7 +59,7 @@ public class Diger extends Matter {
                 return true;
             }
         } else {
-            throw new IllegalArgumentException("Both dig and diger may not be null.");
+            throw new EmptyMaterialException("Both dig and diger may not be null.");
         }
 
         if (diger.getCode().equals(this.getCode())) {

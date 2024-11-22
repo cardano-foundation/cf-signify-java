@@ -44,10 +44,10 @@ public class Controller {
 
         this.salter = new Salter(this.bran, this.tier);
 
-        Manager.SaltyCreator creator = new Manager().new SaltyCreator(
-                this.salter.getQb64(),
-                this.tier,
-                this.stem
+        Manager.SaltyCreator creator = new Manager.SaltyCreator(
+            this.salter.getQb64(),
+            this.tier,
+            this.stem
         );
 
         this.signer = new LinkedList<>(creator

@@ -10,6 +10,7 @@ import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.IndexerCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 
 import java.nio.ByteBuffer;
 
@@ -53,7 +54,7 @@ public class Signer extends Matter {
                 .code(transferable ? MatterCodex.Ed25519.getValue() : MatterCodex.Ed25519N.getValue())
                 .build());
         } else {
-            throw new UnsupportedOperationException("Unsupported signer code = " + this.getCode());
+            throw new UnexpectedCodeException("Unsupported signer code = " + this.getCode());
         }
     }
 

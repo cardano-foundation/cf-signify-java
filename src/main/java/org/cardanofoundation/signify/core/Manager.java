@@ -5,11 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
+import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
 
 public class Manager {
 
@@ -19,20 +21,20 @@ public class Manager {
         group,
     }
 
-    class PubLot {
+    static class PubLot {
         List<String> pubs = new ArrayList<>(); // list qb64 public keys.
         int ridx = 0; // index of rotation (est event) that uses public key set
         int kidx = 0; // index of key in sequence of public keys
         String dt = ""; // datetime ISO8601 when key set created
     }
 
-    class PreSit {
+    static class PreSit {
         PubLot old = new PubLot(); //previous publot
         PubLot new_ = new PubLot(); //newly current publot
         PubLot nxt = new PubLot(); //next public publot
     }
 
-    class PrePrm {
+    static class PrePrm {
         int pidx = 0; // prefix index for this keypair sequence
         Algos algo = Algos.salty; // salty default uses indices and salt to create new key pairs
         String salt = ""; // empty salt used for salty algo
@@ -40,18 +42,19 @@ public class Manager {
         String tier = ""; // security tier for stretch index salty algo
     }
 
-    class PubSet {
+    static class PubSet {
         List<String> pubs = new ArrayList<>(); // list qb64 public keys.
     }
 
-    class PubPath {
+    static class PubPath {
         String path = "";
         String code = "";
         String tier = Tier.high.name();
         boolean temp = false;
     }
 
-    public class Keys {
+    @Getter
+    public static class Keys {
         private List<Signer> signers;
         private List<String> paths;
 
@@ -59,18 +62,10 @@ public class Manager {
             this.signers = signers;
 
             if (paths != null && signers.size() != paths.size()) {
-                throw new IllegalArgumentException("If paths are provided, they must be the same length as signers");
+                throw new InvalidSizeException("If paths are provided, they must be the same length as signers");
             }
 
             this.paths = paths;
-        }
-
-        public List<String> getPaths() {
-            return this.paths;
-        }
-
-        public List<Signer> getSigners() {
-            return this.signers;
         }
 
     }
@@ -85,7 +80,7 @@ public class Manager {
         Tier tier();
     }
 
-    public class RandyCreator implements Creator {
+    public static class RandyCreator implements Creator {
         @Override
         public Keys create(
                 List<String> codes,
@@ -143,7 +138,7 @@ public class Manager {
         }
     }
 
-    public class SaltyCreator implements Creator {
+    public static class SaltyCreator implements Creator {
 
         public Salter salter;
         private String stem;
@@ -207,8 +202,8 @@ public class Manager {
         }
     }
 
-    public class Creatory {
-        private MakeCreator makeCreator;
+    public static class Creatory {
+        private final MakeCreator makeCreator;
 
         public Creatory() {
             this(Algos.salty);

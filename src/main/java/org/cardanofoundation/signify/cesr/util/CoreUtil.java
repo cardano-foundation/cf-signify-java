@@ -2,6 +2,11 @@ package org.cardanofoundation.signify.cesr.util;
 
 import io.github.rctcwyvrn.blake3.Blake3;
 import lombok.Getter;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.KindException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ProtocolException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.VersionException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -117,21 +122,21 @@ public class CoreUtil {
             Serials kind;
             try {
                 kind = Serials.valueOf(kindStr);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid serialization kind = " + kindStr);
+            } catch (Exception e) {
+                throw new KindException("Invalid serialization kind = " + kindStr);
             }
 
             // Validate protocol identifier
             Ident proto;
             try {
                 proto = Ident.valueOf(protoStr);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid protocol identifier = " + protoStr);
+            } catch (Exception e) {
+                throw new ProtocolException("Invalid protocol identifier = " + protoStr);
             }
 
             return new DeversifyResult(proto, kind, version, size);
         }
-        throw new IllegalArgumentException("Invalid version string = " + versionString);
+        throw new VersionException("Invalid version string = " + versionString);
     }
 
     public static String versify(Ident ident, Version version, Serials kind, int size) {
@@ -243,7 +248,7 @@ public class CoreUtil {
 
     public static String encodeBase64Url(byte[] buffer) {
         if (buffer == null) {
-            throw new IllegalArgumentException("`buffer` must be a byte array.");
+            throw new InvalidValueException("`buffer` must be a byte array.");
         }
         String base64 = Base64.getEncoder().encodeToString(buffer);
         return base64.replace('+', '-')
@@ -253,7 +258,7 @@ public class CoreUtil {
 
     public static byte[] decodeBase64Url(String input) {
         if (input == null) {
-            throw new IllegalArgumentException("`input` must be a string.");
+            throw new InvalidValueException("`input` must be a string.");
         }
 
         int n = input.length() % 4;
@@ -272,7 +277,7 @@ public class CoreUtil {
 
     public static int b64ToInt(String s) {
         if (s.isEmpty()) {
-            throw new IllegalArgumentException("Empty string, conversion undefined.");
+            throw new InvalidValueException("Empty string, conversion undefined.");
         }
 
         int i = 0;

@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.core;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.cesr.Matter;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +18,7 @@ class ManagerTest {
     @Test
     @DisplayName("should create sets of random signers")
     void testRandyCreator() throws SodiumException {
-        Manager manager = new Manager();
-        Manager.RandyCreator randy = manager.new RandyCreator();
+        Manager.RandyCreator randy = new Manager.RandyCreator();
 
         // test default arguments
         Manager.Keys keys = randy.create();
@@ -57,7 +55,7 @@ class ManagerTest {
     @DisplayName("should create sets of salty signers")
     void testSaltyCreator() throws SodiumException {
         Manager manager = new Manager();
-        Manager.SaltyCreator salty = manager.new SaltyCreator();
+        Manager.SaltyCreator salty = new Manager.SaltyCreator();
 
         // Test default arguments
         assertEquals(salty.salter.getCode(), MatterCodex.Salt_128.getValue());
@@ -89,7 +87,7 @@ class ManagerTest {
         final Salter salter = new Salter(rawArgs);
         final String salt = salter.getQb64();
         assertEquals(salter.getQb64(), "0AAwMTIzNDU2Nzg5YWJjZGVm");
-        salty = manager.new SaltyCreator(salt, null, null);
+        salty = new Manager.SaltyCreator(salt, null, null);
         assertEquals(salty.salter.getCode(), MatterCodex.Salt_128.getValue());
         assertArrayEquals(salty.salter.getRaw(), raw.getBytes());
         assertEquals(salty.salter.getQb64(), salt);
@@ -126,15 +124,15 @@ class ManagerTest {
         final Salter salter = new Salter(rawArgs);
         final String salt = salter.getQb64();
 
-        Manager.Creator creator = manager.new Creatory(Manager.Algos.salty).make(salt);
+        Manager.Creator creator = new Manager.Creatory(Manager.Algos.salty).make(salt);
         assertInstanceOf(Manager.SaltyCreator.class, creator);
         assertEquals(((Manager.SaltyCreator) creator).salter.getQb64(), salt);
 
-        creator = manager.new Creatory().make(salt);
+        creator = new Manager.Creatory().make(salt);
         assertInstanceOf(Manager.SaltyCreator.class, creator);
         assertEquals(((Manager.SaltyCreator) creator).salter.getQb64(), salt);
 
-        creator = manager.new Creatory(Manager.Algos.randy).make(salt);
+        creator = new Manager.Creatory(Manager.Algos.randy).make(salt);
         assertInstanceOf(Manager.RandyCreator.class, creator);
     }
 }

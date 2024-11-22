@@ -6,6 +6,7 @@ import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageExceptio
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCountCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedOpCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeSizeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarIndexException;
 import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
 import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
@@ -210,21 +211,21 @@ public class Indexer {
         int ms = xizage.ss - xizage.os;
 
         if (index < 0 || index > Math.pow(64, ms) - 1) {
-            throw new IllegalArgumentException("Invalid index=" + index + " for code=" + code + ".");
+            throw new InvalidVarIndexException("Invalid index=" + index + " for code=" + code + ".");
         }
 
         if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, xizage.os) - 1)) {
-            throw new IllegalArgumentException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
+            throw new InvalidVarIndexException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
         }
 
         String both = code + CoreUtil.intToB64(index, ms) + CoreUtil.intToB64(ondex == null ? 0 : ondex, xizage.os);
 
         if (both.length() != cs) {
-            throw new IllegalArgumentException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
+            throw new InvalidCodeSizeException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
         }
 
         if (cs % 4 != ps - xizage.ls) {
-            throw new IllegalArgumentException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
+            throw new InvalidCodeSizeException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
         }
 
         byte[] bytes = new byte[ps + raw.length];
@@ -235,7 +236,7 @@ public class Indexer {
 
         String full = both + CoreUtil.encodeBase64Url(bytes).substring(ps - xizage.ls);
         if (full.length() != xizage.fs) {
-            throw new IllegalArgumentException("Invalid code=" + both + " for raw size=" + raw.length + ".");
+            throw new InvalidCodeSizeException("Invalid code=" + both + " for raw size=" + raw.length + ".");
         }
 
         return full;

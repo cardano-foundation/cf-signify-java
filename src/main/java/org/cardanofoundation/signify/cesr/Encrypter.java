@@ -4,6 +4,7 @@ import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.utils.KeyPair;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
@@ -33,7 +34,7 @@ public class Encrypter extends Matter {
         if (this.getCode().equals(Codex.MatterCodex.X25519.getValue())) {
             this.encrypter = this::_x25519;
         } else {
-            throw new UnsupportedOperationException("Unsupported encrypter code = " + this.getCode());
+            throw new UnexpectedCodeException("Unsupported encrypter code = " + this.getCode());
         }
     }
 

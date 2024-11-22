@@ -7,6 +7,9 @@ import org.cardanofoundation.signify.cesr.Codex.BexCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
@@ -93,7 +96,7 @@ public class Tholder {
         } else if (BexCodex.has(matter.getCode())) {
             // TODO: Implement Bexter
         } else {
-            throw new IllegalArgumentException("Invalid code for limen=" + matter.getCode());
+            throw new InvalidCodeException("Invalid code for limen=" + matter.getCode());
         }
     }
 
@@ -109,14 +112,14 @@ public class Tholder {
                 try {
                     _sith = new ObjectMapper().readValue(sithStr, List.class); // deserialize
                 } catch (Exception e) {
-                    throw new RuntimeException("Error parsing sith string", e);
+                    throw new SerializeException("Error parsing sith string");
                 }
             } else {
                 _sith = (List<Object>) sith;
             }
 
             if (sith == null || _sith.isEmpty()) {
-                throw new IllegalArgumentException("Empty weight list");
+                throw new InvalidValueException("Empty weight list");
             }
 
             List<Boolean> mask = _sith.stream()
@@ -136,7 +139,7 @@ public class Tholder {
                         .toList();
 
                 if (!clauseMask.isEmpty() && !clauseMask.stream().allMatch(x -> x)) {
-                    throw new IllegalArgumentException(
+                    throw new InvalidValueException(
                             "Invalid sith, some weights in clause " + clauseMask + " are non string"
                     );
                 }
@@ -157,7 +160,7 @@ public class Tholder {
 
     private void _processUnweighted(int thold) {
         if (thold < 0) {
-            throw new IllegalArgumentException("Non-positive int threshold = " + thold);
+            throw new InvalidValueException("Non-positive int threshold = " + thold);
         }
         this.thold = thold;
         this.weighted = false;
@@ -172,7 +175,7 @@ public class Tholder {
                     .mapToDouble(Fraction::doubleValue)
                     .sum();
             if (sum < 1) {
-                throw new IllegalArgumentException(
+                throw new InvalidValueException(
                         "Invalid sith clause: " + thold + " all clause weight sums must be >= 1"
                 );
             }

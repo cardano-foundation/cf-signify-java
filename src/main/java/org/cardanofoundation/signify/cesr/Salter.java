@@ -48,7 +48,7 @@ public class Salter extends Matter {
         high
     }
 
-    public byte[] stretch(int size, String path, Tier tier, boolean temp) {
+    public byte[] stretch(int size, String path, Tier tier, boolean temp) throws SodiumException {
         tier = tier == null ? this.tier : tier;
         int opslimit, memlimit;
 
@@ -76,7 +76,7 @@ public class Salter extends Matter {
         return this.cryptoPwHash(size, path.getBytes(), opslimit, memlimit);
     }
 
-    private byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) {
+    private byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) throws SodiumException {
         byte[] stretch = new byte[size];
         boolean success = lazySodium.cryptoPwHash(
                 stretch,
@@ -90,7 +90,7 @@ public class Salter extends Matter {
         );
 
         if (!success) {
-            throw new IllegalArgumentException("Failed to stretch salt using given path");
+            throw new SodiumException("Failed to stretch salt using given path");
         }
 
         return stretch;

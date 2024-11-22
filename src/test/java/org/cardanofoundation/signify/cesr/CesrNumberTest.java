@@ -3,16 +3,16 @@ package org.cardanofoundation.signify.cesr;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.validation.ValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CesrNumberTest {
 
@@ -60,7 +60,7 @@ class CesrNumberTest {
                 .build(), null, null));
 
         // when code provided does not dynamically size code
-        assertThrows(ValidationException.class, 
+        assertThrows(InvalidCodeException.class,
             () -> new CesrNumber(RawArgs.builder()
                 .code(MatterCodex.Ed25519.getValue())
                 .build(), BigInteger.valueOf(256 * 256), null));

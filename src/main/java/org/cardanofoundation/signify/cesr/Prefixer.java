@@ -1,6 +1,11 @@
 package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.IlkException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -46,7 +51,7 @@ public class Prefixer extends Matter{
         } else if(MatterCodex.Blake3_256.getValue().equals(code)){
             _derive = Prefixer::_deriveBlake3_256;
         } else {
-            throw new IllegalArgumentException("Unsupported code = " + code + " for prefixer.");
+            throw new UnexpectedCodeException("Unsupported code = " + code + " for prefixer.");
         }
 
         return _derive;
@@ -69,13 +74,13 @@ public class Prefixer extends Matter{
         } else if (MatterCodex.Blake3_256.getValue().equals(this.getCode())) {
             this._verify = this::_verifyBlake3_256;
         } else {
-            throw new IllegalArgumentException("Unsupported code = " + this.getCode() + " for prefixer.");
+            throw new UnexpectedCodeException("Unsupported code = " + this.getCode() + " for prefixer.");
         }
     }
 
     public boolean verify(Map<String, Object> ked, Boolean prefixed) {
         if (ked.get("i") != CoreUtil.Ilks.ICP.getValue()) {
-            throw new IllegalArgumentException("Non-incepting ilk " + ked.get("i") + " for prefix derivation");
+            throw new IlkException("Non-incepting ilk " + ked.get("i") + " for prefix derivation");
         }
         prefixed = prefixed != null && prefixed;
         return _verify.verify(ked, this.getQb64(), prefixed);
@@ -94,11 +99,11 @@ public class Prefixer extends Matter{
         try {
             verfer = new Verfer(keys.getFirst());
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error extracting public key: " + e.getMessage(), e);
+            throw new ExtractionException("Error extracting public key: " + e.getMessage());
         }
 
         if (!MatterCodex.Ed25519N.getValue().equals(verfer.getCode())) {
-            throw new IllegalArgumentException(
+            throw new UnexpectedCodeException(
                 "Mismatch derivation code = " + verfer.getCode()
             );
         }
@@ -140,11 +145,11 @@ public class Prefixer extends Matter{
         try {
             verfer = new Verfer(keys.getFirst());
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error extracting public key: " + e.getMessage(), e);
+            throw new ExtractionException("Error extracting public key: " + e.getMessage());
         }
 
         if (!MatterCodex.Ed25519.getValue().equals(verfer.getCode())) {
-            throw new IllegalArgumentException(
+            throw new InvalidCodeException(
                 "Mismatch derivation code = " + verfer.getCode()
             );
         }
@@ -161,12 +166,12 @@ public class Prefixer extends Matter{
         );
 
         if (!validIlks.contains(ilk)) {
-            throw new IllegalArgumentException("Invalid ilk = " + ilk + " to derive pre.");
+            throw new IlkException("Invalid ilk = " + ilk + " to derive pre.");
         }
 
         Sizage size = Matter.sizes.get(MatterCodex.Blake3_256.getValue());
         if (size == null || size.fs == null) {
-            throw new IllegalArgumentException(
+            throw new InvalidSizeException(
                 "Invalid size configuration for " + MatterCodex.Blake3_256.getValue()
             );
         }

@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.cesr;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.params.SaltyParams;
 import org.cardanofoundation.signify.core.Manager;
@@ -136,11 +137,11 @@ public class Keeping {
 
             if (bran != null) {
                 this.bran = MatterCodex.Salt_128.getValue() + "A" + bran.substring(0, 21);
-                this.creator = new Manager().new SaltyCreator(this.bran, this.tier, this.stem);
+                this.creator = new Manager.SaltyCreator(this.bran, this.tier, this.stem);
                 this.sxlt = this.encrypter.encrypt(this.creator.salt().getBytes(), null).getQb64();
             } else if (sxlt == null) {
                 this.bran = null;
-                this.creator = new Manager().new SaltyCreator(null, this.tier, this.stem);
+                this.creator = new Manager.SaltyCreator(null, this.tier, this.stem);
                 this.sxlt = this.encrypter.encrypt(this.creator.salt().getBytes(), null).getQb64();
             } else {
                 this.bran = null;
@@ -149,19 +150,19 @@ public class Keeping {
                 Object decrypted = this.decrypter.decrypt(null, ciph, null);
 
                 if (ciph.getCode().equals(MatterCodex.X25519_Cipher_Salt.getValue())) {
-                    this.creator = new Manager().new SaltyCreator(
+                    this.creator = new Manager.SaltyCreator(
                         ((Salter) decrypted).getQb64(),
                         tier,
                         this.stem
                     );
                 } else if (ciph.getCode().equals(MatterCodex.X25519_Cipher_Seed.getValue())) {
-                    this.creator = new Manager().new SaltyCreator(
+                    this.creator = new Manager.SaltyCreator(
                         ((Signer) decrypted).getQb64(),
                         tier,
                         this.stem
                     );
                 } else {
-                    throw new IllegalArgumentException("Unsupported cipher text code = " + ciph.getCode());
+                    throw new UnexpectedCodeException("Unsupported cipher text code = " + ciph.getCode());
                 }
             }
 

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.cesr.Codex.IndexedSigCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.validation.ValidationException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
 
 /**
  * Siger is subclass of Indexer, indexed signature material,
@@ -30,7 +30,7 @@ public class Siger extends Indexer {
         super(rawArgs, index, ondex);
 
         if (!IndexedSigCodex.has(this.getCode())) {
-            throw new ValidationException("Invalid code = " + this.getCode() + " for Siger.");
+            throw new InvalidCodeException("Invalid code = " + this.getCode() + " for Siger.");
         }
         this.verfer = verfer;
     }
