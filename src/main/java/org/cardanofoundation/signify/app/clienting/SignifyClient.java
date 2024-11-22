@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import lombok.Setter;
+
 import org.cardanofoundation.signify.app.Agent;
 import org.cardanofoundation.signify.app.Aiding.Identifier;
 import org.cardanofoundation.signify.app.Contacting.Challenges;
@@ -25,7 +26,9 @@ import org.cardanofoundation.signify.app.Notifying.Notifications;
 import org.cardanofoundation.signify.cesr.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.springframework.http.HttpMethod;
 import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
@@ -33,9 +36,12 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueExcept
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Getter
@@ -111,13 +117,13 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             data.put("tier", controller.tier);
 
             webClient
-                .post()
-                .uri(bootUrl + "/boot")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(data))
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+                    .post()
+                    .uri(bootUrl + "/boot")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(data))
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
         } catch (Exception e) {
             throw new RuntimeException("Failed to boot client " + e.getMessage());
         }
@@ -170,10 +176,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         // Create controller representing the local client AID
         this.controller = new Controller(
-            this.bran,
-            this.tier,
-            0,
-            state.getController()
+                this.bran,
+                this.tier,
+                0,
+                state.getController()
         );
         this.controller.setRidx(state.getRidx() != null ? state.getRidx() : 0);
 
@@ -202,16 +208,86 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         );
     }
 
-    @Override
-    public Mono<ResponseEntity<String>> fetch(
-        String pathname,
-        String method,
-        Object body,
-        HttpHeaders headers
-    ) {
-        // TODO implement fetch
-        return null;
+
+    /**
+     * Fetch a resource from the KERIA agent
+     *
+     * @param path         Path to the resource
+     * @param method       HTTP method
+     * @param data         Data to be sent in the body of the resource
+     * @param extraHeaders Optional extra headers to be sent with the request
+     * @return A Mono of ClientResponse
+     */
+    public ResponseEntity<String> fetch(
+            String path,
+            String method,
+            Object data,
+            HttpHeaders extraHeaders
+    ) throws SodiumException {
+        Map<String, String> headers = new HashMap<>();
+        Map<String, String> signedHeaders = new HashMap<>();
+        Map<String, String> finalHeaders = new HashMap<>();
+        headers.put("Signify-Resource", this.controller.getPre());
+        headers.put("Signify-Timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put("Content-Type", "application/json");
+
+        Object _body = method.equals("GET") ? null : Utils.jsonStringify(data);
+        if (this.getAuthn() != null) {
+            signedHeaders = this.authn.sign(headers,
+                    method,
+                    path.split("\\?")[0],
+                    null
+            );
+        } else {
+            throw new IllegalStateException("Client needs to call connect first");
+        }
+
+        finalHeaders.putAll(signedHeaders);
+
+        if (extraHeaders != null) {
+            finalHeaders.putAll(extraHeaders.toSingleValueMap());
+        }
+
+
+        WebClient.RequestBodySpec requestBodySpec = webClient
+                .method(HttpMethod.valueOf(method.toUpperCase()))
+                .uri(url + path)
+                .headers(httpHeaders -> finalHeaders.forEach((key, value) -> httpHeaders.add(key, value.toString())));
+
+        if (!HttpMethod.GET.name().equalsIgnoreCase(method)) {
+            requestBodySpec.bodyValue(_body == null ? "" : _body);
+        }
+
+        return requestBodySpec
+                .retrieve()
+                .onStatus(
+                        status -> !status.is2xxSuccessful(),
+                        response -> response.bodyToMono(String.class).flatMap(error -> {
+                            String message = String.format("HTTP %s %s - %d - %s",
+                                    method, path, response.statusCode().value(), error);
+                            return Mono.error(new RuntimeException(message));
+                        })
+                )
+                .toEntity(String.class)
+                .flatMap(response -> {
+                    Map<String, String> responseHeaders = response.getHeaders().toSingleValueMap();
+                    boolean isSameAgent = this.agent != null && this.agent.getPre().equals(responseHeaders.get("signify-resource"));
+                    if (!isSameAgent) {
+                        return Mono.error(new RuntimeException("Message from a different remote agent"));
+                    }
+
+                    boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
+                    // TODO check if the verification is correct, just return the response body for now
+//                    if (verification) {
+//                        return Mono.just(response.getBody());
+//                    } else {
+//                        return Mono.error(new RuntimeException("Response verification failed"));
+//                    }
+                    return Mono.just(response);
+                })
+                .block();
     }
+
 
     /**
      * Approve the delegation of the client AID to the KERIA agent
@@ -220,7 +296,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      */
     public Mono<Object> approveDelegation() throws SodiumException {
         if (this.agent == null) {
-            return Mono.error(new RuntimeException("Agent not initialized"));
+            return Mono.error(new IllegalStateException("Agent not initialized"));
         }
 
         Object sigs = this.controller.approveDelegation(this.agent);
@@ -381,5 +457,4 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     public Delegations getDelegations() {
         return new Delegations(this);
     }
-
 }

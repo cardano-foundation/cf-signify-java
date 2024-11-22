@@ -1,9 +1,11 @@
 package org.cardanofoundation.signify.app;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
 import org.cardanofoundation.signify.core.Httping;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -31,29 +33,29 @@ public class Aiding {
          * @param end   End index of list of notifications, defaults to 24
          * @return A Mono containing the list response
          */
-        public Mono<IdentifierListResponse> list(Integer start, Integer end) {
+        public Mono<IdentifierListResponse> list(Integer start, Integer end) throws SodiumException {
             HttpHeaders extraHeaders = new HttpHeaders();
             extraHeaders.add("Range", String.format("aids=%d-%d", start, end));
 
-            return client.fetch(
+            ResponseEntity<String> response = client.fetch(
                 "/identifiers",
                 "GET",
                 null,
                 extraHeaders
-            ).flatMap(response -> {
-                String contentRange = response.getHeaders().getFirst("content-range");
-                Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
+            );
 
-                return Mono.just(new IdentifierListResponse(
+            String contentRange = response.getHeaders().getFirst("content-range");
+            Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
+
+            return Mono.just(new IdentifierListResponse(
                     range.start(),
                     range.end(),
                     range.total(),
                     response.getBody()
-                ));
-            });
+            ));
         }
 
-        public Mono<IdentifierListResponse> list() {
+        public Mono<IdentifierListResponse> list() throws SodiumException {
             return list(0, 24);
         }
 
