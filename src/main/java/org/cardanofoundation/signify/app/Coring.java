@@ -24,20 +24,6 @@ public class Coring {
     }
 
     @Getter
-    public static class Oobis {
-        public final SignifyClient client;
-
-        /**
-         * Oobis
-         * @param client {SignifyClient}
-         */
-        public Oobis(SignifyClient client) {
-            this.client = client;
-        }
-        // others functions
-    }
-
-    @Getter
     public static class KeyEvents {
         public final SignifyClient client;
 

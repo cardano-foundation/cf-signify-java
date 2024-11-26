@@ -13,7 +13,7 @@ import java.util.List;
 
 public class Operations {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    public OperationsDeps client;
+    private final OperationsDeps client;
 
     public Operations(OperationsDeps client) {
         this.client = client;

@@ -12,7 +12,6 @@ import org.cardanofoundation.signify.app.clienting.Contacting.Contacts;
 import org.cardanofoundation.signify.app.Controller;
 import org.cardanofoundation.signify.app.Coring.KeyEvents;
 import org.cardanofoundation.signify.app.Coring.KeyStates;
-import org.cardanofoundation.signify.app.Coring.Oobis;
 import org.cardanofoundation.signify.app.Credentialing.Credentials;
 import org.cardanofoundation.signify.app.Credentialing.Ipex;
 import org.cardanofoundation.signify.app.Credentialing.Registries;
