@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.deps;
+package org.cardanofoundation.signify.app.clienting.deps;
 
 import org.cardanofoundation.signify.cesr.Keeping;
 

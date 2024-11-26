@@ -6,6 +6,7 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Authenticater;
 import org.cardanofoundation.signify.cesr.Salter;

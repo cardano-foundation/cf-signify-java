@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.core;
+package org.cardanofoundation.signify.app.clienting;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

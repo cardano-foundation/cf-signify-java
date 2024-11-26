@@ -7,6 +7,7 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Authenticater;
 import org.cardanofoundation.signify.cesr.Salter;
@@ -15,7 +16,7 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueExcept
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.core.Operations;
+import org.cardanofoundation.signify.app.clienting.Operations;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

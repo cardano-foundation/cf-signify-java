@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.core;
+package org.cardanofoundation.signify.app.clienting;
 
 import lombok.*;
 
@@ -22,7 +22,7 @@ public class Operation<T> {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    static class Metadata<V> {
+    public static class Metadata<V> {
         Operation<V> depends;
         Map<String, Object> properties;
     }

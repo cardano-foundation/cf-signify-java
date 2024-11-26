@@ -2,7 +2,7 @@ package org.cardanofoundation.signify.app;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
+import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.core.Httping;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;

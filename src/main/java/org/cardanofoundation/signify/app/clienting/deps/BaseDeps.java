@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.deps;
+package org.cardanofoundation.signify.app.clienting.deps;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.springframework.http.HttpHeaders;

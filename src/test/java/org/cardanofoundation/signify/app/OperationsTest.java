@@ -1,8 +1,10 @@
-package org.cardanofoundation.signify.core;
+package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.clienting.Operation;
+import org.cardanofoundation.signify.app.clienting.Operations;
+import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
