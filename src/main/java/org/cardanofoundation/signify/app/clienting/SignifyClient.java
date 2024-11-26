@@ -36,20 +36,17 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueExcept
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Getter
 @Setter
 public class SignifyClient implements IdentifierDeps, OperationsDeps {
+    private static final String DEFAULT_BOOT_URL = "http://localhost:3000";  // adjust default as needed
     private final WebClient webClient = WebClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
-
     private Controller controller;
     private String url;
     private String bran;
@@ -61,8 +58,6 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private String bootUrl;
     private List<Keeping.ExternalModule> externalModules;
 
-    private static final String DEFAULT_BOOT_URL = "http://localhost:3000";  // adjust default as needed
-
     /**
      * SignifyClient constructor
      *
@@ -73,11 +68,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @param externalModules list of external modules to load
      */
     public SignifyClient(
-        String url,
-        String bran,
-        Salter.Tier tier,
-        String bootUrl,
-        List<ExternalModule> externalModules
+            String url,
+            String bran,
+            Salter.Tier tier,
+            String bootUrl,
+            List<ExternalModule> externalModules
     ) throws SodiumException {
         tier = tier != null ? tier : Salter.Tier.low;
         this.url = url;
@@ -141,24 +136,24 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             }
 
             return webClient
-                .get()
-                .uri(url + "/agent/" + caid)
-                .retrieve()
-                .onStatus(
-                    status -> status.value() == 404,
-                    response -> Mono.error(
-                        new IllegalArgumentException("Agent does not exist for controller " + caid)
+                    .get()
+                    .uri(url + "/agent/" + caid)
+                    .retrieve()
+                    .onStatus(
+                            status -> status.value() == 404,
+                            response -> Mono.error(
+                                    new IllegalArgumentException("Agent does not exist for controller " + caid)
+                            )
                     )
-                )
-                .bodyToMono(Map.class)
-                .map(data -> {
-                    State state = new State();
-                    state.setAgent(data.getOrDefault("agent", null));
-                    state.setController(data.getOrDefault("controller", null));
-                    state.setRidx((Integer) data.getOrDefault("ridx", 0));
-                    state.setPidx((Integer) data.getOrDefault("pidx", 0));
-                    return state;
-                });
+                    .bodyToMono(Map.class)
+                    .map(data -> {
+                        State state = new State();
+                        state.setAgent(data.getOrDefault("agent", null));
+                        state.setController(data.getOrDefault("controller", null));
+                        state.setRidx((Integer) data.getOrDefault("ridx", 0));
+                        state.setPidx((Integer) data.getOrDefault("pidx", 0));
+                        return state;
+                    });
         } catch (Exception e) {
             throw new RuntimeException("Failed to get client state " + e.getMessage());
         }
@@ -189,7 +184,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         // Check anchor matches controller pre
         if (!this.agent.getAnchor().equals(this.controller.getPre())) {
             throw new IllegalArgumentException(
-                "commitment to controller AID missing in agent inception event"
+                    "commitment to controller AID missing in agent inception event"
             );
         }
 
@@ -198,13 +193,13 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
 
         this.manager = new Keeping.KeyManager(
-            this.controller.getSalter(),
-            this.externalModules
+                this.controller.getSalter(),
+                this.externalModules
         );
 
         this.authn = new Authenticater(
-            this.controller.getSigner(),
-            this.agent.getVerfer()
+                this.controller.getSigner(),
+                this.agent.getVerfer()
         );
     }
 
@@ -252,7 +247,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         WebClient.RequestBodySpec requestBodySpec = webClient
                 .method(HttpMethod.valueOf(method.toUpperCase()))
                 .uri(url + path)
-                .headers(httpHeaders -> finalHeaders.forEach((key, value) -> httpHeaders.add(key, value.toString())));
+                .headers(httpHeaders -> finalHeaders.forEach(httpHeaders::add));
 
         if (!HttpMethod.GET.name().equalsIgnoreCase(method)) {
             requestBodySpec.bodyValue(_body == null ? "" : _body);
@@ -306,12 +301,12 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         data.put("sigs", sigs);
 
         return webClient
-            .put()
-            .uri(this.url + "/agent/" + this.controller.getPre() + "?type=ixn")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(data)
-            .retrieve()
-            .bodyToMono(Object.class);
+                .put()
+                .uri(this.url + "/agent/" + this.controller.getPre() + "?type=ixn")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(data)
+                .retrieve()
+                .bodyToMono(Object.class);
     }
 
     /**

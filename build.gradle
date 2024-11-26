@@ -22,6 +22,7 @@ def slf4jVersion = '2.0.7'
 def blake3Version = '1.3'
 def testngVersion = '7.7.0'
 def jsonVersion = '20240303'
+def mockitoVersion = '5.5.0'
 
 dependencies {
     implementation "com.goterl:lazysodium-java:${lazysodiumVersion}"
@@ -40,6 +41,7 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebVersion}"
     testImplementation("org.testng:testng:${testngVersion}")
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
 }
 
 allure {
