@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.cesr;
 
 import lombok.Getter;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.core.Httping.SiginputArgs;
 import org.cardanofoundation.signify.end.Signage;
@@ -11,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 
 @Getter
 public class Authenticater {
@@ -32,10 +31,10 @@ public class Authenticater {
     }
 
     public boolean verify(Map<String, String> headers, String method, String path) {
-        String siginput = headers.get(Httping.HEADER_SIG_INPUT.toLowerCase());
+        String sigInput = headers.get(Httping.HEADER_SIG_INPUT.toLowerCase());
 
         final String signature = headers.get("signature");
-        List<Httping.Inputage> inputs = Httping.desiginput(siginput);
+        List<Httping.Inputage> inputs = Httping.desiginput(sigInput);
         inputs = inputs.stream().filter(input -> input.getName().equals("signify")).toList();
 
         if (inputs.isEmpty()) {
@@ -44,7 +43,7 @@ public class Authenticater {
 
         inputs.forEach(input -> {
             List<String> items = new ArrayList<>();
-            ((List<String>) input.getFields()).forEach(field -> {
+            (Utils.toList(input.getFields())).forEach(field -> {
                 if (field.startsWith("@")) {
                     if (field.equals("@method")) {
                         items.add("\"" + field + "\": " + method);
@@ -60,7 +59,7 @@ public class Authenticater {
             });
 
             List<String> values = new ArrayList<>();
-            values.add("(" + String.join(" ", (List<String>) input.getFields()) + ")");
+            values.add("(" + String.join(" ", Utils.toList(input.getFields())) + ")");
             values.add("created=" + input.getCreated());
             if (input.getExpires() != null) {
                 values.add("expires=" + input.getExpires());
@@ -92,7 +91,12 @@ public class Authenticater {
         return true;
     }
 
-    public Map<String, String> sign(Map<String, String> headers, String method, String path, List<String> fields) throws SodiumException {
+    public Map<String, String> sign(
+        Map<String, String> headers,
+        String method,
+        String path,
+        List<String> fields
+    ) throws SodiumException {
         if (fields == null) {
             fields = DEFAULT_FIELDS;
         }

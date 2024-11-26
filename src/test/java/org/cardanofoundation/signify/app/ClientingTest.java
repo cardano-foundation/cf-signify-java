@@ -15,6 +15,7 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueExcept
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
+import org.cardanofoundation.signify.core.Operations;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,13 +78,12 @@ public class ClientingTest {
         });
     }
 
-
     @AfterEach
     void tearDown() throws Exception {
         mockWebServer.shutdown();
     }
 
-    private static final String MOCK_CONNECT = """
+    static final String MOCK_CONNECT = """
         {
             "agent": {
                 "vn": [1, 0],
@@ -154,7 +154,7 @@ public class ClientingTest {
             "pidx": 0
         }""";
 
-    private static final String MOCK_GET_AID = """
+    static final String MOCK_GET_AID = """
         {
             "name": "aid1",
             "prefix": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
@@ -197,7 +197,7 @@ public class ClientingTest {
             "windexes": []
         }""";
 
-    private static final String MOCK_CREDENTIAL = """
+    static final String MOCK_CREDENTIAL = """
         {
             "sad": {
                 "v": "ACDC10JSON000197_",
@@ -410,7 +410,7 @@ public class ClientingTest {
 
         // Validate service instances
         assertInstanceOf(Aiding.Identifier.class, client.getIdentifier());
-        assertInstanceOf(Coring.Operations.class, client.getOperations());
+        assertInstanceOf(Operations.class, client.getOperations());
         assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
         assertInstanceOf(Coring.KeyStates.class, client.getKeyStates());
         assertInstanceOf(Credentialing.Credentials.class, client.getCredentials());

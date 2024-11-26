@@ -41,6 +41,7 @@ public class Operations {
         client.fetch(path, method, null, null);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws SodiumException, JsonProcessingException {
         int minSleep = options == null || options.getMinSleep() == null ? 10 : options.getMinSleep();
         int maxSleep = options == null || options.getMaxSleep() == null ? 10000 : options.getMaxSleep();
@@ -73,8 +74,6 @@ public class Operations {
                 Thread.currentThread().interrupt(); // Preserve interrupt status
             }
         }
-
-
     }
 
     @Getter

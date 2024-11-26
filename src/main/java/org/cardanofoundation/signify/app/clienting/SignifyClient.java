@@ -13,7 +13,6 @@ import org.cardanofoundation.signify.app.Controller;
 import org.cardanofoundation.signify.app.Coring.KeyEvents;
 import org.cardanofoundation.signify.app.Coring.KeyStates;
 import org.cardanofoundation.signify.app.Coring.Oobis;
-import org.cardanofoundation.signify.app.Coring.Operations;
 import org.cardanofoundation.signify.app.Credentialing.Credentials;
 import org.cardanofoundation.signify.app.Credentialing.Ipex;
 import org.cardanofoundation.signify.app.Credentialing.Registries;
@@ -28,6 +27,7 @@ import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.core.Operations;
 import org.springframework.http.HttpMethod;
 import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
@@ -203,7 +203,6 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         );
     }
 
-
     /**
      * Fetch a resource from the KERIA agent
      *
@@ -220,7 +219,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             HttpHeaders extraHeaders
     ) throws SodiumException {
         Map<String, String> headers = new HashMap<>();
-        Map<String, String> signedHeaders = new HashMap<>();
+        Map<String, String> signedHeaders;
         Map<String, String> finalHeaders = new HashMap<>();
         headers.put("Signify-Resource", this.controller.getPre());
         headers.put("Signify-Timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
