@@ -166,21 +166,21 @@ public class Matter {
                     throw new InvalidVarRawSizeException("Missing var raw size for code=" + args.getCode());
                 }
             } else {
-                size = args.getRaw().length;
+                rize = args.getRaw().length;
             }
 
-            final int ls = (3 - (size % 3)) % 3;
-            size = (int) Math.floor((double) (size + ls) / 3);
+            final int ls = (3 - (rize % 3)) % 3;
+            size = (int) Math.floor((double) (rize + ls) / 3);
 
             if (SmallVarRawSizeCodex.has(firstCodeChar)) {
                 if (size <= Math.pow(64, 2) - 1) {
                     final int hs = 2;
                     final String s = SmallVarRawSizeCodex.fromLsIndex(ls).getValue();
-                    this.code = s + args.getCode().charAt(1);
+                    args.setCode(s + args.getCode().charAt(1));
                 } else if (size <= Math.pow(64, 4) - 1) {
                     final int hs = 4;
                     final String s = LargeVarRawSizeCodex.fromLsIndex(ls).getValue();
-                    this.code = s + "AAAA".substring(0, hs - 2) + args.getCode().charAt(1);
+                    args.setCode(s + "AAAA".substring(0, hs - 2) + args.getCode().charAt(1));
                 } else {
                     throw new InvalidVarRawSizeException("Unsupported raw size for code=" + args.getCode());
                 }
@@ -188,7 +188,7 @@ public class Matter {
                 if (size <= Math.pow(64, 4) - 1) {
                     final int hs = 4;
                     final String s = LargeVarRawSizeCodex.fromLsIndex(ls).getValue();
-                    this.code = s + args.getCode().substring(1, hs);
+                    args.setCode(s + args.getCode().substring(1, hs));
                 } else {
                     throw new InvalidVarRawSizeException("Unsupported raw size for code=" + args.getCode());
                 }
@@ -411,5 +411,10 @@ public class Matter {
             }
             return both + CoreUtil.encodeBase64Url(bytes).substring(cs % 4);
         }
+    }
+
+    public String getBoth() {
+        Sizage sizage = sizes.get(this.getCode());
+        return this.code + CoreUtil.intToB64(this.size, sizage.ss);
     }
 }
