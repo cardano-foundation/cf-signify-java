@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.core;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 
 import java.util.List;
 
@@ -65,7 +65,7 @@ public class States {
         private final List<String> ndigs;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class HabState {
         private final String name;
@@ -77,11 +77,21 @@ public class States {
         private final RandyState randyState;
         private final GroupState groupState;
 
-        public Object getStateByAlgo(Manager.Algos algo) {
+        public boolean containsKey(String algo) {
             return switch (algo) {
-                case salty -> saltyState;
-                case randy -> randyState;
-                case group -> groupState;
+                case "salty" -> saltyState != null;
+                case "randy" -> randyState != null;
+                case "group" -> groupState != null;
+                default -> throw new InvalidValueException("Unexpected value: " + algo);
+            };
+        }
+
+        public Object get(String algo) {
+            return switch (algo) {
+                case "salty" -> saltyState;
+                case "randy" -> randyState;
+                case "group" -> groupState;
+                default -> throw new InvalidValueException("Unexpected value: " + algo);
             };
         }
     }

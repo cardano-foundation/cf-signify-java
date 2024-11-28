@@ -191,8 +191,8 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
 
         this.manager = new Keeping.KeyManager(
-                this.controller.getSalter(),
-                this.externalModules
+            this.controller.getSalter(),
+            this.externalModules
         );
 
         this.authn = new Authenticater(

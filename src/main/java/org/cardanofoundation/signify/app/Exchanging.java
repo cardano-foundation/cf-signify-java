@@ -1,22 +1,26 @@
 package org.cardanofoundation.signify.app;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.CounterCodex;
-import org.cardanofoundation.signify.cesr.Counter;
-import org.cardanofoundation.signify.cesr.Pather;
-import org.cardanofoundation.signify.cesr.Saider;
-import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.args.CounterArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import org.cardanofoundation.signify.core.States.HabState;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class Exchanging {
     @Getter
@@ -30,7 +34,137 @@ public class Exchanging {
         public Exchanges(SignifyClient client) {
             this.client = client;
         }
-        // others functions
+
+        /**
+         * Create exn message
+         *
+         * @param sender    the sender state
+         * @param route     the route
+         * @param payload   the payload
+         * @param embeds    the embeds
+         * @param recipient the recipient
+         * @param datetime  optional datetime
+         * @param dig       optional digest
+         * @return array containing [Serder, signatures, attachment]
+         */
+        public ExchangeMessageResult createExchangeMessage(
+            HabState sender,
+            String route,
+            Map<String, Object> payload,
+            Map<String, List<Object>> embeds,
+            String recipient,
+            String datetime,
+            String dig
+        ) throws InterruptedException, ExecutionException, SodiumException {
+
+            Keeper<? extends KeeperParams> keeper = client.getManager().get(sender);
+            ExchangeResult result = exchange(
+                route,
+                payload,
+                sender.getPrefix(),
+                recipient,
+                datetime,
+                dig,
+                null,
+                embeds
+            );
+
+            Serder exn = result.serder();
+            String end = new String(result.end());
+
+            CompletableFuture<Keeping.SignResult> sigs = keeper.sign(exn.getRaw().getBytes(), null, null ,null);
+            return new ExchangeMessageResult(exn, sigs.get().signatures(), end);
+        }
+
+        /**
+         * Send exn messages to list of recipients
+         *
+         * @param name       the name
+         * @param topic      the topic
+         * @param sender     the sender state
+         * @param route      the route
+         * @param payload    the payload
+         * @param embeds     the embeds
+         * @param recipients the recipients
+         * @return response from server
+         */
+        public Object send(
+            String name,
+            String topic,
+            HabState sender,
+            String route,
+            Map<String, Object> payload,
+            Map<String, List<Object>> embeds,
+            List<String> recipients
+        ) throws SodiumException, ExecutionException, InterruptedException {
+
+            for (String recipient : recipients) {
+                ExchangeMessageResult result = createExchangeMessage(
+                    sender,
+                    route,
+                    payload,
+                    embeds,
+                    recipient,
+                    null,
+                    null
+                );
+
+                return sendFromEvents(
+                    name,
+                    topic,
+                    result.exn,
+                    result.sigs,
+                    result.atc,
+                    recipients
+                );
+            }
+            return null;
+        }
+
+        /**
+         * Send exn message to list of recipients
+         *
+         * @param name       the name
+         * @param topic      the topic
+         * @param exn        the exchange message
+         * @param sigs       the signatures
+         * @param atc        the attachment
+         * @param recipients the recipients
+         * @return response from server
+         */
+        public Object sendFromEvents(
+            String name,
+            String topic,
+            Serder exn,
+            List<String> sigs,
+            String atc,
+            List<String> recipients
+        ) throws SodiumException {
+
+            String path = String.format("/identifiers/%s/exchanges", name);
+            String method = "POST";
+            Map<String, Object> data = Map.of(
+                "tpc", topic,
+                "exn", exn.getKed(),
+                "sigs", sigs,
+                "atc", atc,
+                "rec", recipients
+            );
+
+            return client.fetch(path, method, data, null);
+        }
+
+        /**
+         * Get exn message by said
+         *
+         * @param said The said of the exn message
+         * @return The exn message
+         */
+        public Object get(String said) throws Exception {
+            String path = String.format("/exchanges/%s", said);
+            String method = "GET";
+            return client.fetch(path, method, null, null);
+        }
     }
 
     public static ExchangeResult exchange(
@@ -41,7 +175,7 @@ public class Exchanging {
         String date,
         String dig,
         Map<String, Object> modifiers,
-        Map<String, Object> embeds
+        Map<String, List<Object>> embeds
     ) {
         String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         String ilk = CoreUtil.Ilks.EXN.getValue();
@@ -51,16 +185,16 @@ public class Exchanging {
                 .format(Instant.now()) + "000+00:00";
         String p = dig != null ? dig : "";
         Map<String, Object> q = modifiers != null ? modifiers : new HashMap<>();
-        Map<String, Object> ems = embeds != null ? embeds : new HashMap<>();
+        Map<String, List<Object>> ems = embeds != null ? embeds : new HashMap<>();
 
         Map<String, Object> e = new HashMap<>();
         StringBuilder end = new StringBuilder();
 
-        for (Map.Entry<String, Object> entry : ems.entrySet()) {
+        for (Map.Entry<String, List<Object>> entry : ems.entrySet()) {
             String key = entry.getKey();
-            Object[] value = (Object[]) entry.getValue();
-            Serder serder = (Serder) value[0];
-            String atc = (String) value[1];
+            List<Object> value = entry.getValue();
+            Serder serder = (Serder) value.get(0);
+            String atc = (String) value.get(1);
             e.put(key, serder.getKed());
 
             if (atc == null) {
@@ -110,6 +244,8 @@ public class Exchanging {
         return new ExchangeResult(exn, end.toString().getBytes());
     }
 
-    public record ExchangeResult(Serder serder, byte[] end) {
-    }
+    public record ExchangeResult(Serder serder, byte[] end) {}
+
+    public record ExchangeMessageResult(Serder exn, List<String> sigs, String atc) {}
+
 }
