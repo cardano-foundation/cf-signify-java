@@ -3,15 +3,13 @@ package org.cardanofoundation.signify.app;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.Contacting;
-import org.cardanofoundation.signify.app.clienting.Oobis;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.*;
+import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.app.clienting.Operations;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -136,7 +134,7 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(bran, data[1]);
 
         // Validate service instances
-        assertInstanceOf(Aiding.Identifier.class, client.getIdentifier());
+        assertInstanceOf(Identifier.class, client.getIdentifier());
         assertInstanceOf(Operations.class, client.getOperations());
         assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
         assertInstanceOf(Coring.KeyStates.class, client.getKeyStates());

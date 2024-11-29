@@ -21,10 +21,10 @@ import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
 public class Eventing {
     public static Serder interact(InteractArgs args) {
         String vs = versify(
-            Ident.KERI, 
-            args.getVersion(), 
-            args.getKind(), 
-            0
+                Ident.KERI,
+                args.getVersion(),
+                args.getKind(),
+                0
         );
         String ilk = Ilks.IXN.getValue();
         CesrNumber sner = new CesrNumber(args.getSn());
@@ -57,10 +57,10 @@ public class Eventing {
             args.setIntive(false);
         }
         String vs = versify(
-            Ident.KERI,
-            args.getVersion() != null ? args.getVersion() : new CoreUtil.Version(),
-            args.getKind() != null ? args.getKind() : Serials.JSON,
-            0);
+                Ident.KERI,
+                args.getVersion() != null ? args.getVersion() : new CoreUtil.Version(),
+                args.getKind() != null ? args.getKind() : Serials.JSON,
+                0);
         String ilk = args.getDelpre() == null ? Ilks.ICP.getValue() : Ilks.DIP.getValue();
         CesrNumber sner = new CesrNumber(BigInteger.ZERO);
 
@@ -141,14 +141,14 @@ public class Eventing {
             prefixer = new Prefixer(args.getKeys().getFirst());
             if (prefixer.isDigestible()) {
                 throw new InvalidCodeException(
-                    "Invalid code, digestive=" + prefixer.getCode() + ", must be derived from ked."
+                        "Invalid code, digestive=" + prefixer.getCode() + ", must be derived from ked."
                 );
             }
         } else {
             prefixer = new Prefixer(args.getCode(), ked);
             if (args.getDelpre() != null && !prefixer.isDigestible()) {
                 throw new InvalidCodeException(
-                    "Invalid derivation code = " + prefixer.getCode() + " for delegation. Must be digestive"
+                        "Invalid derivation code = " + prefixer.getCode() + " for delegation. Must be digestive"
                 );
             }
         }
@@ -165,12 +165,12 @@ public class Eventing {
 
     // TODO implement function
     public static byte[] messagize(
-        Serder serder,
-        List<Siger> sigers,
-        Object seal,
-        List<Cigar> wigers,
-        List<Cigar> cigars,
-        boolean pipelined
+            Serder serder,
+            List<Siger> sigers,
+            Object seal,
+            List<Cigar> wigers,
+            List<Cigar> cigars,
+            boolean pipelined
     ) {
         byte[] msg = serder.getRaw().getBytes(StandardCharsets.UTF_8);
         return msg;
@@ -192,22 +192,22 @@ public class Eventing {
             if (weak) {
                 // try both fs to see which one has lowest m
                 return Math.min(
-                    n,
-                    Math.min(
-                        (int) Math.ceil((n + f1 + 1) / 2.0),
-                        (int) Math.ceil((n + f2 + 1) / 2.0)
-                    )
+                        n,
+                        Math.min(
+                                (int) Math.ceil((n + f1 + 1) / 2.0),
+                                (int) Math.ceil((n + f2 + 1) / 2.0)
+                        )
                 );
             } else {
                 return Math.min(
-                    n,
-                    Math.max(
-                        0,
+                        n,
                         Math.max(
-                            n - f1,
-                            (int) Math.ceil((n + f1 + 1) / 2.0)
+                                0,
+                                Math.max(
+                                        n - f1,
+                                        (int) Math.ceil((n + f1 + 1) / 2.0)
+                                )
                         )
-                    )
                 );
             }
         } else {
@@ -217,7 +217,7 @@ public class Eventing {
 
             if (m2 < m1 && n > 0) {
                 throw new InvalidValueException(
-                    String.format("Invalid f=%d is too big for n=%d.", f, n)
+                        String.format("Invalid f=%d is too big for n=%d.", f, n)
                 );
             }
 
@@ -229,4 +229,38 @@ public class Eventing {
         }
     }
 
-} 
+    public static Serder reply(
+            String route,
+            Object data,
+            String stamp,
+            CoreUtil.Version version,
+            CoreUtil.Serials kind
+    ) {
+        if (route == null) {
+            route = "";
+        }
+        if (kind == null) {
+            kind = CoreUtil.Serials.JSON;
+        }
+        String vs = CoreUtil.versify(Ident.KERI, version, kind, 0);
+        if (data == null) {
+            data = new HashMap<>();
+        }
+        Map<String, Object> _sad = new LinkedHashMap<>();
+        _sad.put("v", vs);
+        _sad.put("t", Ilks.RPY.getValue());
+        _sad.put("d", "");
+        _sad.put("dt", stamp != null ? stamp : new Date().toInstant().toString().replace("Z", "000+00:00"));
+        _sad.put("r", route);
+        _sad.put("a", data);
+
+        Saider.SaidifyResult result = Saider.saidify(_sad);
+        Map<String, Object> sad = result.sad();
+        Saider saider = new Saider(sad.get("d").toString());
+
+        if (!saider.verify(sad, true, true, kind, "d")) {
+            throw new InvalidValueException("Invalid said = " + saider.getQb64() + " for reply msg=" + sad);
+        }
+        return new Serder(sad);
+    }
+}

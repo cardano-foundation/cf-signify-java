@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.cardanofoundation.signify.app.Agent;
-import org.cardanofoundation.signify.app.Aiding.Identifier;
 import org.cardanofoundation.signify.app.clienting.Contacting.Challenges;
 import org.cardanofoundation.signify.app.clienting.Contacting.Contacts;
 import org.cardanofoundation.signify.app.Controller;
@@ -21,6 +20,7 @@ import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
+import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
 import org.cardanofoundation.signify.cesr.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
