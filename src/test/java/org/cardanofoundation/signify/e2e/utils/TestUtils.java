@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
@@ -16,7 +17,6 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.app.Coring.randomPasscode;
-import static org.cardanofoundation.signify.app.clienting.AbortSignal.timeout;
 
 public class TestUtils {
 
@@ -147,14 +147,13 @@ public class TestUtils {
     }
 
     public static String[] getOrCreateIdentifier(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
-//        Object id;
+        Object id;
         States.HabState identfier;
-        ResolveEnv.EnvironmentConfig env;
+        ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
         try {
             identfier = client.getIdentifier().get(name);
-            String id = identfier.getPrefix();
+            id = identfier.getPrefix();
         } catch (SodiumException e) {
-            env = ResolveEnv.resolveEnvironment(null);
             if (kargs == null) {
                 kargs = new CreateIdentifierArgs();
                 kargs.setToad(env.witnessIds().size());
@@ -163,11 +162,27 @@ public class TestUtils {
             EventResult result = client.getIdentifier().create(name, kargs);
             Operation op = (Operation) result.op(); // Đợi kết quả của `result.op()`
             op = waitOperation(client, op).join(); // Chờ kết quả từ `waitOperation`
-            Object id = op.getResponse();
-
-
+            id = op.getResponse();
+            String eid = null;
+            if (client.getAgent() != null && client.getAgent().getPre() != null) {
+                eid = client.getAgent().getPre();
+            } else {
+                throw new IllegalStateException("Agent or pre is null");
+            }
+            if (!hasEndRole(client, name, "agent", eid)) {
+                EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
+                Operation<?> ops = (Operation<?>) result.op();
+                op = waitOperation(client, op).join();
+                System.out.println("identifiers.addEndRole: " + op);
+            }
         }
-        return null;
+
+            SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
+            String[] results = new String[] {
+                    id.toString(), oobi.getOobis().toString()
+            };
+//            Pair<String, String> results = Pair.of(String.valueOf(id), String.valueOf(oobi.get(String.valueOf(0), null)));
+        return results;
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) {

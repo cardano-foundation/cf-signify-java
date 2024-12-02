@@ -37,6 +37,9 @@ dependencies {
     implementation "io.github.rctcwyvrn:blake3:${blake3Version}"
     implementation "org.json:json:${jsonVersion}"
 
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebVersion}"
