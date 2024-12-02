@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
@@ -73,12 +72,12 @@ public class TestUtils {
 
     public static Aid createAid(SignifyClient client, String name) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
         // TO-DO
-        String[] result = getOrCreateIdentifier(client, name, null);
-        if (result != null) {
-            String prefix = result[0];
-            String oobi = result[1];
-            return new Aid(name, prefix, oobi);
-        }
+//        String[] result = getOrCreateIdentifiers(client, name);
+//        if (result != null) {
+//            String prefix = result[0];
+//            String oobi = result[1];
+//            return new Aid(name, prefix, oobi);
+//        }
         return null;
     }
 
@@ -146,43 +145,92 @@ public class TestUtils {
         return client;
     }
 
-    public static String[] getOrCreateIdentifier(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
-        Object id;
-        States.HabState identfier;
-        ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-        try {
-            identfier = client.getIdentifier().get(name);
-            id = identfier.getPrefix();
-        } catch (SodiumException e) {
-            if (kargs == null) {
-                kargs = new CreateIdentifierArgs();
+    public static String[] getOrCreateIdentifier(SignifyClient client, String name) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
+//        Object id;
+//        States.HabState identfier;
+//        ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
+//        CreateIdentifierArgs kargs = null;
+//        try {
+//            identfier = client.getIdentifier().get(name);
+//            id = identfier.getPrefix();
+//        } catch (SodiumException e) {
+//            if (kargs == null) {
+//                kargs = new CreateIdentifierArgs();
+//                kargs.setToad(env.witnessIds().size());
+//                kargs.setWits(env.witnessIds());
+//            }
+//            EventResult result = client.getIdentifier().create(name, kargs);
+//            Operation op = (Operation) result.op(); // Đợi kết quả của `result.op()`
+//            op = waitOperation(client, op).join(); // Chờ kết quả từ `waitOperation`
+//            id = op.getResponse();
+//            String eid = null;
+//            if (client.getAgent() != null && client.getAgent().getPre() != null) {
+//                eid = client.getAgent().getPre();
+//            } else {
+//                throw new IllegalStateException("Agent or pre is null");
+//            }
+//            if (!hasEndRole(client, name, "agent", eid)) {
+//                EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
+//                Operation<?> ops = (Operation<?>) result.op();
+//                op = waitOperation(client, op).join();
+//                System.out.println("identifiers.addEndRole: " + op);
+//            }
+//        }
+//
+//            SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
+//            String[] results = new String[] {
+//                    id.toString(), oobi.getOobis().toString()
+//            };
+//            Pair<String, String> results = Pair.of(String.valueOf(id), String.valueOf(oobi.get(String.valueOf(0), null)));
+        return null;
+    }
+
+    public static CompletableFuture<String[]> getOrCreateIdentifiers(SignifyClient client, String name) {
+        return CompletableFuture.supplyAsync(() -> {
+            String id = null;
+
+            try {
+                States.HabState identifier = client.getIdentifier().get(name);
+                id = identifier.getPrefix();
+            } catch (Exception e) {
+                // Tạo mới identifier nếu không tồn tại
+                CreateIdentifierArgs kargs = new CreateIdentifierArgs();
+                ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
+
                 kargs.setToad(env.witnessIds().size());
                 kargs.setWits(env.witnessIds());
-            }
-            EventResult result = client.getIdentifier().create(name, kargs);
-            Operation op = (Operation) result.op(); // Đợi kết quả của `result.op()`
-            op = waitOperation(client, op).join(); // Chờ kết quả từ `waitOperation`
-            id = op.getResponse();
-            String eid = null;
-            if (client.getAgent() != null && client.getAgent().getPre() != null) {
-                eid = client.getAgent().getPre();
-            } else {
-                throw new IllegalStateException("Agent or pre is null");
-            }
-            if (!hasEndRole(client, name, "agent", eid)) {
-                EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
-                Operation<?> ops = (Operation<?>) result.op();
-                op = waitOperation(client, op).join();
-                System.out.println("identifiers.addEndRole: " + op);
-            }
-        }
 
-            SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
-            String[] results = new String[] {
-                    id.toString(), oobi.getOobis().toString()
-            };
-//            Pair<String, String> results = Pair.of(String.valueOf(id), String.valueOf(oobi.get(String.valueOf(0), null)));
-        return results;
+                try {
+                    EventResult result = client.getIdentifier().create(name, kargs);
+                    Operation op = (Operation) result.op();
+                    op = waitOperation(client, op).get();
+                    id = op.getResponse().getClass().getName(); // Giả định "i" là ID được trả về
+                } catch (Exception createException) {
+                    throw new RuntimeException("Failed to create identifier", createException);
+                }
+            }
+
+            // Lấy EndRole
+            String eid = client.getAgent().getPre();
+            try {
+                if (!hasEndRole(client, name, "agent", eid)) {
+                    EventResult result = client.getIdentifier().addEndRole(name, "agent", eid, null);
+                    Class<?> op = result.op().getClass();
+                    op = waitOperation(client, op).get().getClass();
+                    System.out.println("identifiers.addEndRole: " + op);
+                }
+            } catch (Exception endRoleException) {
+                throw new RuntimeException("Failed to add end role", endRoleException);
+            }
+
+            // Lấy OOBI
+            try {
+                SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
+                return new String[]{id, String.valueOf(oobi.getOobis().getClass())};
+            } catch (Exception oobiException) {
+                throw new RuntimeException("Failed to fetch OOBI", oobiException);
+            }
+        });
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) {

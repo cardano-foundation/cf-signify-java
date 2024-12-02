@@ -4,14 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-
-public class SinglesigDIP {
+class SinglesigDIP {
     static SignifyClient client1, client2;
     static String contact1_id;
     static String name1_id;
@@ -29,27 +30,16 @@ public class SinglesigDIP {
         }
     }
 
-    @BeforeAll
-    public static void getIdentifier() {
-        try {
-            String[] clients = TestUtils.getOrCreateIdentifier(client1, "name1", null);
-            name1_id = clients[0];
-            name1_oobi = clients[1];
-        } catch (ExecutionException | InterruptedException | SodiumException | JsonProcessingException e) {
-            e.printStackTrace();
-        }
+    @BeforeEach
+    public void getIdentifier() throws ExecutionException, InterruptedException {
+        CompletableFuture<String[]> clients = TestUtils.getOrCreateIdentifiers(client1, "name1");
+        name1_id = clients.get()[0];
     }
-
-    @BeforeAll
-    public static void getContact() {
+    @BeforeEach
+    public  void getContact() {
     }
 
     @Test
     public void testSinglesigDIP() {
-        System.out.println("test1: " + client1);
-        System.out.println("test2: " + client2);
-        System.out.println("/////////////////");
-        System.out.println("Name 1: " + name1_id);
-        System.out.println("Name 2: " + name1_oobi);
     }
 }
