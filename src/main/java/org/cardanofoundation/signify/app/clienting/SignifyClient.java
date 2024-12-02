@@ -187,7 +187,8 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
 
         if (this.controller.getSerder().getKed().get("s").equals("0")) {
-            approveDelegation().block(); // Wait for approval to complete
+            this.approveDelegation();
+//            approveDelegation().block(); // Wait for approval to complete
         }
 
         this.manager = new Keeping.KeyManager(

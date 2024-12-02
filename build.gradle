@@ -93,3 +93,8 @@ tasks.register('allureE2ETestReport') {
         }
     }
 }
+
+// Disable the default allureReport task if custom tasks are used
+tasks.named('allureReport') {
+    enabled = false
+}
