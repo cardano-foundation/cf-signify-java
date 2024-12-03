@@ -334,7 +334,6 @@ public class ClientingTest {
         assertEquals("1", client.getController().getSerder().getKed().get("s"));
         assertEquals("ixn", client.getController().getSerder().getKed().get("t"));
 
-        @SuppressWarnings("unchecked")
         List<Object> actions = (List<Object>) client.getController().getSerder().getKed().get("a");
         Map<String, Object> actionMap = Utils.toMap(actions.getFirst());
         assertEquals(
