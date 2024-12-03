@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
@@ -187,7 +188,7 @@ public class TestUtils {
 
     public static CompletableFuture<String[]> getOrCreateIdentifiers(SignifyClient client, String name) {
         return CompletableFuture.supplyAsync(() -> {
-            String id = null;
+            String id;
 
             try {
                 States.HabState identifier = client.getIdentifier().get(name);
@@ -202,9 +203,10 @@ public class TestUtils {
 
                 try {
                     EventResult result = client.getIdentifier().create(name, kargs);
-                    Operation op = (Operation) result.op();
-                    op = waitOperation(client, op).get();
-                    id = op.getResponse().getClass().getName(); // Giả định "i" là ID được trả về
+                    Operation<Map<String, Object>> op = (Operation<Map<String, Object>>) result.op();
+                    Operation<Object> completedOp = waitOperation(client, op).get();
+                    Map<String, Object> response = (Map<String, Object>) completedOp.getResponse();
+                    id = (String) response.get("i");
                 } catch (Exception createException) {
                     throw new RuntimeException("Failed to create identifier", createException);
                 }
@@ -233,9 +235,33 @@ public class TestUtils {
         });
     }
 
-    public static String getOrCreateContact(SignifyClient client, String name, String oobi) {
-        // TO-DO
-        return null;
+    public static CompletableFuture<String> getOrCreateContact(SignifyClient client, String name, String oobi) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
+                if (!list.isEmpty()) {
+                    Contacting.Contact contact = list.get(0);
+                    if (oobi.equals(contact.getOobi())) {
+                        return contact.getId();
+                    }
+                }
+                try {
+                    Operation op = (Operation) client.getOobis().resolve(oobi, name);
+                    op = waitOperation(client, op).get();
+                    if (op.getResponse() instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> response = (Map<String, Object>) op.getResponse();
+                        return (String) response.get("i");
+                    } else {
+                        throw new RuntimeException("Unexpected response format: " + op.getResponse());
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to resolve OOBI and retrieve ID", e);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to get or create contact", e);
+            }
+        });
     }
 
     public static Object getOrIssueCredential() {

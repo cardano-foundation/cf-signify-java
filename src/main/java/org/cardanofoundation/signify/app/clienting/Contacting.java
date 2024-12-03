@@ -7,6 +7,7 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Contacting {
@@ -22,6 +23,14 @@ public class Contacting {
             this.client = client;
         }
         // others functions
+    }
+
+    @Getter
+    public static class Contact {
+        private String alias;
+        private String oobi;
+        private String id;
+        private Map<String, Object> additionalProperties = new HashMap<>();
     }
 
     @Getter
