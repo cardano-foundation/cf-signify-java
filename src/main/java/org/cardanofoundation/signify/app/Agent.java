@@ -30,46 +30,18 @@ public class Agent {
     private final String said;
 
     public Agent(Object agent) {
-        EventResult result = this.event(agent);
-        Map<String, Object> state = Utils.toMap(result.state);
-        Verfer verfer = result.verfer;
-
-        this.sn = new CesrNumber(
-            RawArgs.builder().build(), null, (String) state.get("s")
-        ).getNum();
-        this.said = (String) state.get("d");
-
-        if (!Ilks.DIP.getValue().equals(state.get("et"))) {
-            throw new IlkException("invalid inception event type " + state.get("et"));
-        }
-
-        this.pre = (String) state.get("i");
-        if (!state.containsKey("di")) {
-            throw new NoSuchElementException("no anchor to controller AID");
-        }
-
-        this.anchor = (String) state.get("di");
-
-        this.verfer = verfer;
-        this.state = state;
-    }
-
-    private EventResult event(Object evt) {
-        Map<String, Object> event = Utils.toMap(evt);
+        Map<String, Object> event = Utils.toMap(agent);
         List<String> keys = Utils.toList(event.get("k"));
         List<String> nextKeys = Utils.toList(event.get("n"));
 
         if (keys.size() != 1) {
             throw new IllegalArgumentException("agent inception event can only have one key");
         }
-
         Verfer verfer = new Verfer(keys.getFirst());
 
         if (nextKeys.size() != 1) {
             throw new IllegalArgumentException("agent inception event can only have one next key");
         }
-
-        Diger diger = new Diger(nextKeys.getFirst());
 
         Tholder tholder = new Tholder(null, null, event.get("kt"));
         if (tholder.getNum() != 1) {
@@ -83,8 +55,22 @@ public class Agent {
             );
         }
 
-        return new EventResult(event, verfer, diger);
-    }
+        this.sn = new CesrNumber(
+            RawArgs.builder().build(), null, (String) event.get("s")
+        ).getNum();
+        this.said = (String) event.get("d");
 
-    private record EventResult(Object state, Verfer verfer, Diger diger) {}
+        if (!Ilks.DIP.getValue().equals(event.get("et"))) {
+            throw new IlkException("invalid inception event type " + event.get("et"));
+        }
+
+        this.pre = (String) event.get("i");
+        if (!event.containsKey("di")) {
+            throw new NoSuchElementException("no anchor to controller AID");
+        }
+
+        this.anchor = (String) event.get("di");
+        this.verfer = verfer;
+        this.state = event;
+    }
 }
