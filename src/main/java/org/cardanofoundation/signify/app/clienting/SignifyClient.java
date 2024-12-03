@@ -22,7 +22,7 @@ import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
-import org.cardanofoundation.signify.cesr.Authenticater;
+import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.cesr.Salter;
@@ -55,7 +55,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private String bootUrl;
     private List<Keeping.ExternalModule> externalModules;
 
-    private static final String DEFAULT_BOOT_URL = "http://localhost:3000";  // adjust default as needed
+    private static final String DEFAULT_BOOT_URL = "http://localhost:3903";
 
     /**
      * SignifyClient constructor
@@ -96,66 +96,57 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     /**
      * Boot a KERIA agent
      */
-    public void boot() {
-        try {
-            Controller.EventResult eventData = controller != null ? controller.getEvent() : null;
-            if (eventData == null) {
-                throw new ExtractionException("Error getting event data");
-            }
-
-            Map<String, Object> data = new LinkedHashMap<>();
-            data.put("icp", eventData.evt().getKed());
-            data.put("sig", eventData.sign().getQb64());
-            data.put("stem", controller.stem);
-            data.put("pidx", 1);
-            data.put("tier", controller.tier);
-
-            webClient
-                .post()
-                .uri(bootUrl + "/boot")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(data))
-                .retrieve()
-                .toBodilessEntity()
-                .block();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to boot client " + e.getMessage());
+    public void boot() throws Exception {
+        Controller.EventResult eventData = controller != null ? controller.getEvent() : null;
+        if (eventData == null) {
+            throw new ExtractionException("Error getting event data");
         }
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("icp", eventData.evt().getKed());
+        data.put("sig", eventData.sign().getQb64());
+        data.put("stem", controller.stem);
+        data.put("pidx", 1);
+        data.put("tier", controller.tier);
+
+        webClient
+            .post()
+            .uri(bootUrl + "/boot")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(data))
+            .retrieve()
+            .toBodilessEntity()
+            .block();
     }
 
     /**
      * Get state of the agent and the client
      */
-    @SuppressWarnings("unchecked")
     public Mono<State> state() {
-        try {
-            String caid = controller != null ? controller.getPre() : null;
-            if (caid == null) {
-                throw new IllegalArgumentException("Controller not initialized");
-            }
-
-            return webClient
-                .get()
-                .uri(url + "/agent/" + caid)
-                .retrieve()
-                .onStatus(
-                    status -> status.value() == 404,
-                    response -> Mono.error(
-                        new IllegalArgumentException("Agent does not exist for controller " + caid)
-                    )
-                )
-                .bodyToMono(Map.class)
-                .map(data -> {
-                    State state = new State();
-                    state.setAgent(data.getOrDefault("agent", null));
-                    state.setController(data.getOrDefault("controller", null));
-                    state.setRidx((Integer) data.getOrDefault("ridx", 0));
-                    state.setPidx((Integer) data.getOrDefault("pidx", 0));
-                    return state;
-                });
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get client state " + e.getMessage());
+        String caid = controller != null ? controller.getPre() : null;
+        if (caid == null) {
+            throw new IllegalArgumentException("Controller not initialized");
         }
+
+        return webClient
+            .get()
+            .uri(url + "/agent/" + caid)
+            .retrieve()
+            .onStatus(
+                status -> status.value() == 404,
+                response -> Mono.error(
+                    new IllegalArgumentException("Agent does not exist for controller " + caid)
+                )
+            )
+            .bodyToMono(Map.class)
+            .map(data -> {
+                State state = new State();
+                state.setAgent(data.getOrDefault("agent", null));
+                state.setController(data.getOrDefault("controller", null));
+                state.setRidx((Integer) data.getOrDefault("ridx", 0));
+                state.setPidx((Integer) data.getOrDefault("pidx", 0));
+                return state;
+            });
     }
 
     /**
