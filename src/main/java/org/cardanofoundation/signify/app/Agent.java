@@ -22,24 +22,14 @@ import java.util.NoSuchElementException;
  */
 @Getter
 public class Agent {
-    private String pre;
-    private String anchor;
-    private Verfer verfer;
-    private Map<String, Object> state;
-    private BigInteger sn;
-    private String said;
+    private final String pre;
+    private final String anchor;
+    private final Verfer verfer;
+    private final Map<String, Object> state;
+    private final BigInteger sn;
+    private final String said;
 
     public Agent(Object agent) {
-        this.pre = "";
-        this.anchor = "";
-        this.verfer = null;
-        this.state = null;
-        this.sn = BigInteger.ZERO;
-        this.said = "";
-        this.parse(agent);
-    }
-
-    private void parse(Object agent) {
         EventResult result = this.event(agent);
         Map<String, Object> state = Utils.toMap(result.state);
         Verfer verfer = result.verfer;
