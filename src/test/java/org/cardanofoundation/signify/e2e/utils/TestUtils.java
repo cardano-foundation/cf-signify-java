@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -269,19 +270,23 @@ public class TestUtils {
         return null;
     }
 
-//    public static List<Object> getStates(SignifyClient client, List<String> prefixes) throws ExecutionException, InterruptedException {
-//        List<CompletableFuture<Object[]>> futures = prefixes.stream()
-//                .map(prefix -> CompletableFuture.supplyAsync(() -> client.keyStates().get(prefix)))
-//                .collect(Collectors.toList());
-//
-//        List<Object[]> participantStates = new ArrayList<>();
-//        for (CompletableFuture<Object[]> future : futures) {
-//            participantStates.add(future.get());
-//        }
-//        return participantStates.stream()
-//                .map(stateArray -> stateArray[0])
-//                .collect(Collectors.toList());
-//    }
+    public static List<Object> getStates(SignifyClient client, List<String> prefixes) throws ExecutionException, InterruptedException {
+        // TO-DO
+        List<CompletableFuture<String>> futures = prefixes.stream()
+                .map(prefix -> CompletableFuture.supplyAsync(() -> {
+                    client.getKeyStates();
+                    return Coring.KeyStates.get(prefix);
+                }))
+                .collect(Collectors.toList()).reversed();
+
+        List<String> participantStates = new ArrayList<>();
+        for (CompletableFuture<String> future : futures) {
+            participantStates.add(future.get());
+        }
+        return participantStates.stream()
+                .map(stateArray -> stateArray.charAt(0))
+                .collect(Collectors.toList());
+    }
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) {
         // TO-DO

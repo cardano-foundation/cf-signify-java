@@ -326,7 +326,7 @@ public class Keeping {
                 .map(nsigner ->
                     new Diger(
                         RawArgs.builder()
-                            .code(this.code)
+                            .code(this.dcode)
                             .build(),
                         nsigner.getVerfer().getQb64b()
                     ).getQb64()
