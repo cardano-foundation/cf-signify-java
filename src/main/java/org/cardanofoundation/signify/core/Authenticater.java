@@ -1,7 +1,8 @@
-package org.cardanofoundation.signify.cesr;
+package org.cardanofoundation.signify.core;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.core.Httping;
+import org.cardanofoundation.signify.cesr.Signer;
+import org.cardanofoundation.signify.cesr.Verfer;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class Authenticater {
         this.verfer = verfer;
     }
 
+    // TODO implement in next PR
     public boolean verify() {
         return true;
     }
