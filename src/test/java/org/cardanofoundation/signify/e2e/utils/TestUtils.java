@@ -74,12 +74,13 @@ public class TestUtils {
 
     public static Aid createAid(SignifyClient client, String name) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
         // TO-DO
-//        String[] result = getOrCreateIdentifiers(client, name);
-//        if (result != null) {
-//            String prefix = result[0];
-//            String oobi = result[1];
-//            return new Aid(name, prefix, oobi);
-//        }
+        CompletableFuture<String[]> results = getOrCreateIdentifiers(client, name);
+        if (results != null) {
+            String[] result = results.get();
+            String prefix = result[0];
+            String oobi = result[1];
+            return new Aid(name, prefix, oobi);
+        }
         return null;
     }
 
