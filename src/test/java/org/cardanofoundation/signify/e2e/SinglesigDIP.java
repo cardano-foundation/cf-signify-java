@@ -77,7 +77,7 @@ class SinglesigDIP {
         Map<String, Object> op1 = (Map<String, Object>) result.op();
 
         // Refresh keystate to sn=1
-        String op2 = client2.getKeyStates().query(name1_id, "1", null);
+        Object op2 = client2.getKeyStates().query(name1_id, 1, null);
 
         CompletableFuture<Operation<Object>> opFuture = TestUtils.waitOperation(client2, op);
         CompletableFuture<Operation<Object>> op1Future = TestUtils.waitOperation(client1, op1);
@@ -121,7 +121,7 @@ class SinglesigDIP {
         Assertions.assertEquals(delegate2.getPrefix(), op.get("i"));
 
         // Make sure query with seal is idempotent
-        String ops = client2.getKeyStates().query(name1_id, null, seal.toString());
+        String ops = (String) client2.getKeyStates().query(name1_id, null, seal.toString());
         TestUtils.waitOperation(client2, ops);
     }
 }
