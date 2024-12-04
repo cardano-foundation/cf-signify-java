@@ -283,7 +283,19 @@ public class Identifier {
     }
 
 
-    public InteractionResponse interact(String name, Object data) throws SodiumException, JsonProcessingException {
+    public EventResult interact(String name, Object data) throws SodiumException, ExecutionException, InterruptedException {
+        InteractionResponse interactionResponse = this.createInteract(name, data);
+        ResponseEntity<String> response = this.client.fetch(
+                "/identifiers/" + name + "/events",
+                "POST",
+                interactionResponse.jsondata(),
+                null
+        );
+        return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), CompletableFuture.completedFuture(response));
+
+    }
+
+    public InteractionResponse createInteract(String name, Object data) throws SodiumException, ExecutionException, InterruptedException {
         States.HabState hab = this.get(name);
         String pre = hab.getPrefix();
 
@@ -304,17 +316,13 @@ public class Identifier {
         Serder serder = Eventing.interact(interactArgs);
 
         Keeping.Keeper keeper = this.client.getManager().get(hab);
-        Object sigs = keeper.sign(serder.getRaw().getBytes(), true, null, null);
+        Keeping.SignResult sigs = (Keeping.SignResult) keeper.sign(serder.getRaw().getBytes(), true, null, null).get();
 
         Map<String, Object> jsondata = new HashMap<>();
         jsondata.put("ixn", serder.getKed());
-        jsondata.put("sigs", sigs);
+        jsondata.put("sigs", sigs.signatures());
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams());
-        return new InteractionResponse(serder, sigs, jsondata);
-    }
-
-    public InteractionResponse createInteract(String name, Object data) throws SodiumException {
-        return null;
+        return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
     //TODO implement the rest of the function
 }

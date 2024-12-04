@@ -2,6 +2,8 @@ package org.cardanofoundation.signify.app.clienting.aiding;
 
 import org.cardanofoundation.signify.cesr.Serder;
 
-public record InteractionResponse(Serder serder, Object sigs, Object jsondata) {
+import java.util.List;
+
+public record InteractionResponse(Serder serder, List<String> sigs, Object jsondata) {
 
 }
