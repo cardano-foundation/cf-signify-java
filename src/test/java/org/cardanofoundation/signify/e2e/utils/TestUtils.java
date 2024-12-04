@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import okhttp3.Response;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
@@ -10,6 +11,7 @@ import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
+import org.springframework.http.ResponseEntity;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -89,9 +91,14 @@ public class TestUtils {
         return isoTimestamp.replace("Z", "+00:00");
     }
 
-    public static Object getEndRoles(SignifyClient client, String alias, String role) {
+    public static Object getEndRoles(SignifyClient client, String alias, String role) throws Exception {
         // TO-DO
-        return null;
+        String path = (role != null)
+                ? "/identifiers/" + alias + "/endroles/" + role
+                : "/identifiers/" + alias + "/endroles";
+
+        ResponseEntity<String> response = client.fetch(path, "GET", alias, null);
+        return response.getBody();
     }
 
     public static Object getIssuedCredential() {
@@ -292,8 +299,13 @@ public class TestUtils {
                 .collect(Collectors.toList());
     }
 
-    public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) {
+    public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
         // TO-DO
+        List<Map<String, Object>> list = (List<Map<String, Object>>) getEndRoles(client, alias, role);
+        for (Map<String, Object> i : list) {
+            if (role.equals(i.get("role")) && eid.equals(i.get("eid")))
+                return true;
+        }
         return false;
     }
 
