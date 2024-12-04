@@ -58,7 +58,7 @@ class SinglesigDIP {
     }
 
     @Test
-    public void delegate1a() throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
+    public void delegate1a() throws Exception {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
         EventResult result = client2.getIdentifier().create("delegate1", kargs);

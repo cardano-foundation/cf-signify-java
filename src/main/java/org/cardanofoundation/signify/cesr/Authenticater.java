@@ -115,8 +115,8 @@ public class Authenticater {
 
         headers.putAll(signedHeaders);
 
-        final Map<String, String> markers = new HashMap<>();
-        markers.put("signify", siginputResult.sig().toString());
+        final Map<String, Object> markers = new HashMap<>();
+        markers.put("signify", siginputResult.sig());
         final Signage signage = new Signage(markers, false);
         final Map<String, String> signed = Signage.signature(List.of(signage));
 

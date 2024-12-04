@@ -273,16 +273,19 @@ public class TestUtils {
 
     public static List<Object> getStates(SignifyClient client, List<String> prefixes) throws ExecutionException, InterruptedException {
         // TO-DO
-        List<CompletableFuture<String>> futures = prefixes.stream()
+        List<CompletableFuture<Object>> futures = prefixes.stream()
                 .map(prefix -> CompletableFuture.supplyAsync(() -> {
-//                    client.getKeyStates();
-                    return client.getKeyStates().get(prefix);
+                    try {
+                        return client.getKeyStates().get(prefix);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }))
                 .collect(Collectors.toList()).reversed();
 
         List<String> participantStates = new ArrayList<>();
-        for (CompletableFuture<String> future : futures) {
-            participantStates.add(future.get());
+        for (CompletableFuture<Object> future : futures) {
+            participantStates.add(future.get().toString());
         }
         return participantStates.stream()
                 .map(stateArray -> stateArray.charAt(0))
