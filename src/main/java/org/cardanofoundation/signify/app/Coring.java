@@ -1,19 +1,18 @@
 package org.cardanofoundation.signify.app;
 
 import com.goterl.lazysodium.LazySodiumJava;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Coring {
     private final HttpClient httpClient;
@@ -63,7 +62,7 @@ public class Coring {
         // others functions
 
         // TO-DO
-        public static String get(String pre) {
+        public String get(String pre) {
             String path = "/states?pre=" + pre;
             String data = null;
             String method = "GET";
@@ -80,6 +79,22 @@ public class Coring {
             } else {
                 throw new RuntimeException("Failed to fetch state: " + response.getStatusCode());
             }
+        }
+
+        // TO-DO
+        public String query(String pre, String sn, String anchor) throws SodiumException {
+            String path = "/queries";
+            Map<String, Object> data = new HashMap<>();
+            data.put("pre", pre);
+            if (sn != null) {
+                data.put("sn", sn);
+            }
+            if (anchor != null) {
+                data.put("anchor", anchor);
+            }
+            String method = "POST";
+            ResponseEntity<String> response =  client.fetch(path, method, data, null);
+            return response.getBody();
         }
     }
 }
