@@ -137,7 +137,7 @@ public class ClientingTest extends BaseMockServerTest {
         assertInstanceOf(Identifier.class, client.getIdentifier());
         assertInstanceOf(Operations.class, client.getOperations());
         assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
-        assertInstanceOf(Coring.KeyStates.class, client.getKeyStates());
+        assertInstanceOf(KeyStates.class, client.getKeyStates());
         assertInstanceOf(Credentialing.Credentials.class, client.getCredentials());
         assertInstanceOf(Credentialing.Registries.class, client.getRegistries());
         assertInstanceOf(Credentialing.Schemas.class, client.getSchemas());

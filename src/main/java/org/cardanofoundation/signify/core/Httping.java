@@ -121,7 +121,8 @@ public class Httping {
         Map<String, String> headers = new HashMap<>();
 
         // TODO find the way to serialize the map like in signify-ts
-        headers.put(HEADER_SIG_INPUT, Utils.jsonStringify(sid));
+        String mockSignatureInput = "signify=(\"@method\" \"@path\" \"signify-resource\" \"signify-timestamp\");created=%d;keyid=\"%s\";alg=\"%s\"";
+        headers.put(HEADER_SIG_INPUT, String.format(mockSignatureInput, now, args.keyid, args.alg));
 
         return new SiginputResult(headers, sig);
     }
