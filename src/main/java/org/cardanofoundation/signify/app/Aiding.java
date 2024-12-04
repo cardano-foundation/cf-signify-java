@@ -3,8 +3,12 @@ package org.cardanofoundation.signify.app;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
 import org.cardanofoundation.signify.core.Httping;
-import org.springframework.http.HttpHeaders;
-import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Map;
 
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
 
@@ -29,31 +33,32 @@ public class Aiding {
          *
          * @param start Start index of list of notifications, defaults to 0
          * @param end   End index of list of notifications, defaults to 24
-         * @return A Mono containing the list response
+         * @return A IdentifierListResponse containing the list response
          */
-        public Mono<IdentifierListResponse> list(Integer start, Integer end) {
-            HttpHeaders extraHeaders = new HttpHeaders();
-            extraHeaders.add("Range", String.format("aids=%d-%d", start, end));
+        public IdentifierListResponse list(Integer start, Integer end) throws IOException, InterruptedException {
+            HttpHeaders extraHeaders = HttpHeaders.of(Map.of(
+                "Range", List.of(String.format("aids=%d-%d", start, end))
+            ), (name, value) -> true);
 
-            return client.fetch(
+            HttpResponse<String> response = client.fetch(
                 "/identifiers",
                 "GET",
                 null,
                 extraHeaders
-            ).flatMap(response -> {
-                String contentRange = response.getHeaders().getFirst("content-range");
-                Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
+            );
 
-                return Mono.just(new IdentifierListResponse(
-                    range.start(),
-                    range.end(),
-                    range.total(),
-                    response.getBody()
-                ));
-            });
+            String contentRange = response.headers().firstValue("content-range").orElse("");
+            Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
+
+            return new IdentifierListResponse(
+                range.start(),
+                range.end(),
+                range.total(),
+                response.body()
+            );
         }
 
-        public Mono<IdentifierListResponse> list() {
+        public IdentifierListResponse list() throws IOException, InterruptedException {
             return list(0, 24);
         }
 

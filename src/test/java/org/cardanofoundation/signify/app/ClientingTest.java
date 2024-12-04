@@ -15,7 +15,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -224,21 +223,21 @@ public class ClientingTest {
     MockResponse mockConnect() {
         return new MockResponse()
             .setResponseCode(202)
-            .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .setHeader("Content-Type", "application/json")
             .setBody(MOCK_CONNECT);
     }
 
     MockResponse mockGetAID() {
         return new MockResponse()
             .setResponseCode(202)
-            .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .setHeader("Content-Type", "application/json")
             .setBody(MOCK_GET_AID);
     }
 
     MockResponse mockCredential() {
         return new MockResponse()
             .setResponseCode(202)
-            .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .setHeader("Content-Type", "application/json")
             .setBody(MOCK_CREDENTIAL);
     }
 
