@@ -1,11 +1,11 @@
 package org.cardanofoundation.signify.cesr.deps;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import reactor.core.publisher.Mono;
+
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse;
 
 public interface BaseDeps {
-    Mono<ResponseEntity<String>> fetch(
+    HttpResponse<String> fetch(
         String pathname,
         String method,
         Object body,

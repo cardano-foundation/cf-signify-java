@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app.clienting;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
@@ -30,18 +31,20 @@ import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 @Getter
 @Setter
 public class SignifyClient implements IdentifierDeps, OperationsDeps {
-    private final WebClient webClient = WebClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Controller controller;
@@ -109,51 +112,65 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         data.put("pidx", 1);
         data.put("tier", controller.tier);
 
-        webClient
-            .post()
-            .uri(bootUrl + "/boot")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(objectMapper.writeValueAsString(data))
-            .retrieve()
-            .toBodilessEntity()
-            .block();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(bootUrl + "/boot"))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(data)))
+            .build();
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
+            throw new IOException("Unexpected response code: " + response.statusCode());
+        }
     }
 
     /**
      * Get state of the agent and the client
      */
-    public Mono<State> state() {
+    public State state() throws Exception {
         String caid = controller != null ? controller.getPre() : null;
         if (caid == null) {
             throw new IllegalArgumentException("Controller not initialized");
         }
 
-        return webClient
-            .get()
-            .uri(url + "/agent/" + caid)
-            .retrieve()
-            .onStatus(
-                status -> status.value() == 404,
-                response -> Mono.error(
-                    new IllegalArgumentException("Agent does not exist for controller " + caid)
-                )
-            )
-            .bodyToMono(Map.class)
-            .map(data -> {
-                State state = new State();
-                state.setAgent(data.getOrDefault("agent", null));
-                state.setController(data.getOrDefault("controller", null));
-                state.setRidx((Integer) data.getOrDefault("ridx", 0));
-                state.setPidx((Integer) data.getOrDefault("pidx", 0));
-                return state;
-            });
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(this.url + "/agent/" + caid))
+            .GET()
+            .build();
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            throw new IllegalArgumentException("Agent does not exist for controller " + caid);
+        }
+        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
+            throw new IOException("Unexpected response code: " + response.statusCode());
+        }
+
+        Map<String, Object> data = objectMapper.readValue(
+            response.body(),
+            new TypeReference<>() {
+            }
+        );
+
+        return State.builder()
+            .agent(data.getOrDefault("agent", null))
+            .controller(data.getOrDefault("controller", null))
+            .ridx((Integer) data.getOrDefault("ridx", 0))
+            .pidx((Integer) data.getOrDefault("pidx", 0))
+            .build();
     }
 
     /**
      * Connect to a KERIA agent
      */
     public void connect() throws Exception {
-        State state = state().block(); // Wait for state to complete
+        State state = state();
         if (state == null) {
             throw new RuntimeException("State not initialized");
         }
@@ -179,7 +196,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
 
         if (this.controller.getSerder().getKed().get("s").equals("0")) {
-            approveDelegation().block(); // Wait for approval to complete
+            approveDelegation();
         }
 
         this.manager = new Keeping.KeyManager(
@@ -194,7 +211,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     }
 
     @Override
-    public Mono<ResponseEntity<String>> fetch(
+    public HttpResponse<String> fetch(
         String pathname,
         String method,
         Object body,
@@ -206,12 +223,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
     /**
      * Approve the delegation of the client AID to the KERIA agent
-     *
-     * @return Mono<String> A promise to the result of the approval
      */
-    public Mono<Object> approveDelegation() throws SodiumException {
+    public void approveDelegation() throws Exception {
         if (this.agent == null) {
-            return Mono.error(new RuntimeException("Agent not initialized"));
+            throw new RuntimeException("Agent not initialized");
         }
 
         Object sigs = this.controller.approveDelegation(this.agent);
@@ -220,13 +235,16 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         data.put("ixn", this.controller.getSerder().getKed());
         data.put("sigs", sigs);
 
-        return webClient
-            .put()
-            .uri(this.url + "/agent/" + this.controller.getPre() + "?type=ixn")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(data)
-            .retrieve()
-            .bodyToMono(Object.class);
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(this.url + "/agent/" + this.controller.getPre() + "?type=ixn"))
+            .header("Content-Type", "application/json")
+            .PUT(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(data)))
+            .build();
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        client.send(request, HttpResponse.BodyHandlers.ofString());
+
     }
 
     /**
