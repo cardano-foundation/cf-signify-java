@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.cesr;
 import com.goterl.lazysodium.LazySodiumJava;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 
 public class Verfer extends Matter {
     private Verifier verifier;
@@ -18,6 +19,11 @@ public class Verfer extends Matter {
         setVerifier();
     }
 
+    public Verfer(byte[] qb64b) {
+        super(qb64b);
+        setVerifier();
+    }
+
     private void setVerifier() {
         MatterCodex codex = MatterCodex.fromValue(this.getCode());
         switch (codex) {
@@ -26,7 +32,7 @@ public class Verfer extends Matter {
                 this.verifier = this::_ed25519;
                 break;
             default:
-                throw new UnsupportedOperationException("Unsupported code = " + this.getCode() + " for verifier.");
+                throw new UnexpectedCodeException("Unsupported code = " + this.getCode() + " for verifier.");
         }
     }
 

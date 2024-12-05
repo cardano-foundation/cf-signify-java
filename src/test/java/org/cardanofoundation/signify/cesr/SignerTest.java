@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -44,9 +45,9 @@ public class SignerTest {
         assertFalse(result);
         assertArrayEquals(siger.getRaw(), cigar.getRaw());
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Signer(RawArgs.builder().code(Codex.MatterCodex.Ed25519N.getValue()).build());
-        });
+        assertThrows(UnexpectedCodeException.class, () ->
+            new Signer(RawArgs.builder().code(Codex.MatterCodex.Ed25519N.getValue()).build())
+        );
 
         // Non transferable defaults
         signer = new Signer(RawArgs.builder()
@@ -148,7 +149,7 @@ public class SignerTest {
         assertEquals(siger.getCode(), Codex.IndexerCodex.Ed25519_Crt_Sig.getValue());
         assertEquals(siger.getRaw().length, Indexer.getRawSize(siger.getCode()));
         assertEquals(siger.getIndex(), index);
-        assertEquals(siger.getOndex(), null);
+        assertNull(siger.getOndex());
 
         result = signer.getVerfer().verify(siger.getRaw(), ser.getBytes());
         assertTrue(result);
@@ -158,7 +159,7 @@ public class SignerTest {
         assertEquals(siger.getCode(), Codex.IndexerCodex.Ed25519_Crt_Sig.getValue());
         assertEquals(siger.getRaw().length, Indexer.getRawSize(siger.getCode()));
         assertEquals(siger.getIndex(), index);
-        assertEquals(siger.getOndex(), null);
+        assertNull(siger.getOndex());
 
         result = signer.getVerfer().verify(siger.getRaw(), ser.getBytes());
         assertTrue(result);
@@ -169,7 +170,7 @@ public class SignerTest {
         assertEquals(siger.getCode(), Codex.IndexerCodex.Ed25519_Big_Crt_Sig.getValue());
         assertEquals(siger.getRaw().length, Indexer.getRawSize(siger.getCode()));
         assertEquals(siger.getIndex(), index);
-        assertEquals(siger.getOndex(), null);
+        assertNull(siger.getOndex());
 
         result = signer.getVerfer().verify(siger.getRaw(), ser.getBytes());
         assertTrue(result);
@@ -179,14 +180,14 @@ public class SignerTest {
         assertEquals(siger.getCode(), Codex.IndexerCodex.Ed25519_Big_Crt_Sig.getValue());
         assertEquals(siger.getRaw().length, Indexer.getRawSize(siger.getCode()));
         assertEquals(siger.getIndex(), index);
-        assertEquals(siger.getOndex(), null);
+        assertNull(siger.getOndex());
 
         result = signer.getVerfer().verify(siger.getRaw(), ser.getBytes());
         assertTrue(result);
 
         // use invalid code not SEED type code
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Signer(RawArgs.builder().raw(seed).code(Codex.MatterCodex.Ed25519N.getValue()).build());
-        });
+        assertThrows(UnexpectedCodeException.class, () ->
+            new Signer(RawArgs.builder().raw(seed).code(Codex.MatterCodex.Ed25519N.getValue()).build())
+        );
     }
 }

@@ -6,16 +6,19 @@ import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageExceptio
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCountCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedOpCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeSizeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarIndexException;
 import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
 import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
 import org.cardanofoundation.signify.cesr.Codex.IndexedCurrentSigCodex;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class Indexer {
 
     static Map<String, Xizage> sizes = new HashMap<>();
@@ -107,10 +110,10 @@ public class Indexer {
         hards.put("4", 2);
     }
 
-    private String _code = "";
-    private Integer _index = -1;
-    private Integer _ondex;
-    private byte[] _raw = new byte[0];
+    private String code = "";
+    private Integer index = -1;
+    private Integer ondex;
+    private byte[] raw = new byte[0];
 
     public Indexer(RawArgs args, Integer index, Integer ondex) {
         String code = args.getCode();
@@ -161,10 +164,10 @@ public class Indexer {
 
         raw = Arrays.copyOf(raw, rawsize);
 
-        this._code = code;
-        this._index = index;
-        this._ondex = ondex;
-        this._raw = raw;
+        this.code = code;
+        this.index = index;
+        this.ondex = ondex;
+        this.raw = raw;
     }
 
     public Indexer(RawArgs rawArgs) {
@@ -188,22 +191,6 @@ public class Indexer {
         return (int) Math.floor(((xizage.fs - (xizage.hs + xizage.ss)) * 3.0) / 4.0) - xizage.ls;
     }
 
-    public String getCode() {
-        return this._code;
-    }
-
-    public byte[] getRaw() {
-        return this._raw;
-    }
-
-    public Integer getIndex() {
-        return this._index;
-    }
-
-    public Integer getOndex() {
-        return this._ondex;
-    }
-
     public String getQb64() {
         return this._infil();
     }
@@ -224,21 +211,21 @@ public class Indexer {
         int ms = xizage.ss - xizage.os;
 
         if (index < 0 || index > Math.pow(64, ms) - 1) {
-            throw new IllegalArgumentException("Invalid index=" + index + " for code=" + code + ".");
+            throw new InvalidVarIndexException("Invalid index=" + index + " for code=" + code + ".");
         }
 
         if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, xizage.os) - 1)) {
-            throw new IllegalArgumentException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
+            throw new InvalidVarIndexException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
         }
 
         String both = code + CoreUtil.intToB64(index, ms) + CoreUtil.intToB64(ondex == null ? 0 : ondex, xizage.os);
 
         if (both.length() != cs) {
-            throw new IllegalArgumentException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
+            throw new InvalidCodeSizeException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
         }
 
         if (cs % 4 != ps - xizage.ls) {
-            throw new IllegalArgumentException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
+            throw new InvalidCodeSizeException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
         }
 
         byte[] bytes = new byte[ps + raw.length];
@@ -249,7 +236,7 @@ public class Indexer {
 
         String full = both + CoreUtil.encodeBase64Url(bytes).substring(ps - xizage.ls);
         if (full.length() != xizage.fs) {
-            throw new IllegalArgumentException("Invalid code=" + both + " for raw size=" + raw.length + ".");
+            throw new InvalidCodeSizeException("Invalid code=" + both + " for raw size=" + raw.length + ".");
         }
 
         return full;
@@ -344,10 +331,10 @@ public class Indexer {
             throw new ConversionException("Improperly qualified material = " + qb64);
         }
 
-        this._code = hard;
-        this._index = index;
-        this._ondex = ondex;
-        this._raw = raw; // must be bytes for crypto opts and immutable not bytearray
+        this.code = hard;
+        this.index = index;
+        this.ondex = ondex;
+        this.raw = raw; // must be bytes for crypto opts and immutable not bytearray
     }
 
     static class Xizage {

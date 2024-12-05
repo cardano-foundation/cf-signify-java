@@ -1,11 +1,158 @@
 package org.cardanofoundation.signify.cesr.util;
 
+import lombok.Getter;
+import org.bouncycastle.jcajce.provider.digest.Blake3;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.KindException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ProtocolException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.VersionException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+
+import java.security.DigestException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
 public class CoreUtil {
+    @Getter
+    public enum Serials {
+        JSON("JSON");
+
+        private final String value;
+        Serials(String value) {
+            this.value = value;
+        }
+    }
+
+    @Getter
+    public enum Ident {
+        KERI("KERI"),
+        ACDC("ACDC");
+
+        private final String value;
+        Ident(String value) {
+            this.value = value;
+        }
+    }
+
+    @Getter
+    public static class Version {
+        public int major;
+        public int minor;
+
+        public Version(Integer major, Integer minor) {
+            this.major = major;
+            this.minor = minor;
+        }
+
+        public Version() {
+            this.major = 1;
+            this.minor = 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Version version = (Version) o;
+            return major == version.major && minor == version.minor;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(major, minor);
+        }
+    }
+
+    public static final Version Versionage = new Version();
+
+    @Getter
+    public enum Ilks {
+        ICP("icp"),
+        ROT("rot"),
+        IXN("ixn"),
+        DIP("dip"),
+        DRT("drt"),
+        RCT("rct"),
+        VRC("vrc"),
+        RPY("rpy"),
+        EXN("exn"),
+        VCP("vcp"),
+        ISS("iss"),
+        REV("rev");
+
+        private final String value;
+        Ilks(String value) {
+            this.value = value;
+        }
+    }
+
+    // const version_pattern = 'KERI(?P<major>[0-9a-f])(?P<minor>[0-9a-f])
+    // (?P<kind>[A-Z]{4})(?P<size>[0-9a-f]{6})'
+    // const version_pattern1 = `KERI\(\?P<major>\[0\-9a\-f\]\)\(\?P<minor>\[0\-9a\-f\]\)\
+    // (\?P<kind>\[A\-Z\]\{4\}\)\(\?P<size>\[0\-9a\-f\]\{6\}\)_`
+    private static final String VEREX = "(KERI|ACDC)([0-9a-f])([0-9a-f])([A-Z]{4})([0-9a-f]{6})_";
+
+    /**
+     * @description This function is used to deversify the version
+     * Here we will use regex to validate and extract serialization kind,size and version
+     * @param {string} versionString   version string
+     * @return {Object}  containing protocol (KERI or ACDC), kind of serialization like cbor, json, mgpk
+     *                    version = version of object, size = raw size integer
+     */
+    public static DeversifyResult deversify(String versionString) {
+        Pattern pattern = Pattern.compile(VEREX);
+        Matcher matcher = pattern.matcher(versionString);
+
+        if (matcher.find()) {
+            String protoStr = matcher.group(1);    // KERI or ACDC
+            String majorStr = matcher.group(2);    // major version
+            String minorStr = matcher.group(3);    // minor version
+            String kindStr = matcher.group(4);     // serialization kind
+            String size = matcher.group(5);        // size
+
+            Version version = new Version(
+                Integer.parseInt(majorStr, 16),
+                Integer.parseInt(minorStr, 16)
+            );
+
+            // Validate serialization kind
+            Serials kind;
+            try {
+                kind = Serials.valueOf(kindStr);
+            } catch (Exception e) {
+                throw new KindException("Invalid serialization kind = " + kindStr);
+            }
+
+            // Validate protocol identifier
+            Ident proto;
+            try {
+                proto = Ident.valueOf(protoStr);
+            } catch (Exception e) {
+                throw new ProtocolException("Invalid protocol identifier = " + protoStr);
+            }
+
+            return new DeversifyResult(proto, kind, version, size);
+        }
+        throw new VersionException("Invalid version string = " + versionString);
+    }
+
+    public static String versify(Ident ident, Version version, Serials kind, int size) {
+        ident = ident == null ? Ident.KERI : ident;
+        version = version == null ? Versionage : version;
+        kind = kind == null ? Serials.JSON : kind;
+
+        return String.format("%s%s%s%s%s_",
+            ident,
+            Integer.toHexString(version.getMajor()),
+            Integer.toHexString(version.getMinor()),
+            kind,
+            String.format("%06x", size)
+        );
+    }
 
     public static final Map<Integer, String> b64ChrByIdx = new HashMap<>() {{
         put(0, "A");
@@ -102,7 +249,7 @@ public class CoreUtil {
 
     public static String encodeBase64Url(byte[] buffer) {
         if (buffer == null) {
-            throw new IllegalArgumentException("`buffer` must be a byte array.");
+            throw new InvalidValueException("`buffer` must be a byte array.");
         }
         String base64 = Base64.getEncoder().encodeToString(buffer);
         return base64.replace('+', '-')
@@ -112,7 +259,7 @@ public class CoreUtil {
 
     public static byte[] decodeBase64Url(String input) {
         if (input == null) {
-            throw new IllegalArgumentException("`input` must be a string.");
+            throw new InvalidValueException("`input` must be a string.");
         }
 
         int n = input.length() % 4;
@@ -131,7 +278,7 @@ public class CoreUtil {
 
     public static int b64ToInt(String s) {
         if (s.isEmpty()) {
-            throw new IllegalArgumentException("Empty string, conversion undefined.");
+            throw new InvalidValueException("Empty string, conversion undefined.");
         }
 
         int i = 0;
@@ -142,5 +289,20 @@ public class CoreUtil {
         }
 
         return i;
+    }
+
+    public record DeversifyResult(
+        Ident ident,
+        Serials kind,
+        Version version,
+        String string
+    ) {}
+
+    public static byte[] blake3_256(byte[] ser, int hashLen) throws DigestException {
+        Blake3.Blake3_256 blake3 = new Blake3.Blake3_256();
+        blake3.update(ser);
+        byte[] result = new byte[hashLen];
+        blake3.digest(result, 0, hashLen);
+        return result;
     }
 }

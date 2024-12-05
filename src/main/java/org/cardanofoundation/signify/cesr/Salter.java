@@ -13,7 +13,6 @@ public class Salter extends Matter {
 
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
 
-
     public Salter() {
         this(RawArgs.builder()
                 .code(Codex.MatterCodex.Salt_128.getValue())
@@ -39,13 +38,17 @@ public class Salter extends Matter {
         this.tier = tier == null ? Tier.low : tier;
     }
 
+    public Salter(byte[] qb64b) {
+        super(qb64b);
+    }
+
     public enum Tier {
         low,
         med,
         high
     }
 
-    public byte[] stretch(int size, String path, Tier tier, boolean temp) {
+    public byte[] stretch(int size, String path, Tier tier, boolean temp) throws SodiumException {
         tier = tier == null ? this.tier : tier;
         int opslimit, memlimit;
 
@@ -73,7 +76,7 @@ public class Salter extends Matter {
         return this.cryptoPwHash(size, path.getBytes(), opslimit, memlimit);
     }
 
-    private byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) {
+    private byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) throws SodiumException {
         byte[] stretch = new byte[size];
         boolean success = lazySodium.cryptoPwHash(
                 stretch,
@@ -87,7 +90,7 @@ public class Salter extends Matter {
         );
 
         if (!success) {
-            throw new IllegalArgumentException("Failed to stretch salt using given path");
+            throw new SodiumException("Failed to stretch salt using given path");
         }
 
         return stretch;
@@ -97,7 +100,10 @@ public class Salter extends Matter {
         return this.signer(Codex.MatterCodex.Ed25519_Seed.getValue(), true, "", null, false);
     }
 
-    public Signer signer(String code, boolean transferable, String path, Tier tier, boolean temp) throws SodiumException {
+    public Signer signer(String code, Boolean transferable, String path, Tier tier, Boolean temp) throws SodiumException {
+        transferable = transferable == null || transferable;
+        temp = temp != null && temp;
+        path = path == null ? "" : path;
         final byte[] seed = this.stretch(Matter.getRawSize(code), path, tier, temp);
         RawArgs rawArgs = RawArgs.builder()
                 .raw(seed)

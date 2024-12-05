@@ -26,9 +26,7 @@ class IndexerTest {
         assertEquals(Indexer.sizes.get("A").fs, 88);
         assertEquals(Indexer.sizes.get("A").ls, 0);
 
-        Indexer.sizes.forEach((key, value) -> {
-            assertEquals(Indexer.hards.get(key.substring(0, 1)), value.hs, key + " hs not set");
-        });
+        Indexer.sizes.forEach((key, value) -> assertEquals(Indexer.hards.get(key.substring(0, 1)), value.hs, key + " hs not set"));
 
         Indexer.sizes.forEach((key, value) -> {
             assertTrue(value.hs > 0, key + " hs incorrect");
@@ -119,12 +117,12 @@ class IndexerTest {
 
         final byte[] shortsig = Arrays.copyOf(sig, sig.length - 3);
 
-        assertThrows(RawMaterialException.class, () -> {
+        assertThrows(RawMaterialException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
-                    .raw(shortsig)
-                    .build());
-        });
+                .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
+                .raw(shortsig)
+                .build())
+        );
 
         indexer = new Indexer(qsig64);
         assertEquals(indexer.getCode(), Codex.IndexerCodex.Ed25519_Sig.getValue());
@@ -135,18 +133,14 @@ class IndexerTest {
         assertEquals(indexer.getQb64(), qsig64);
 
         final String badq64sig2 = "AA_Z0jw5JCQwn2v7GKCMQHISMi5rsscfcA4nbY9AqqWMyG6FyCH2cZFwqezPkq8p3sr8f37Xb3wXgh3UPG8igSYJ";
-        assertThrows(ConversionException.class, () -> {
-            new Indexer(badq64sig2);
-        });
+        assertThrows(ConversionException.class, () -> new Indexer(badq64sig2));
 
         final String longqsig64 = qsig64 + "ABCD";
         indexer = new Indexer(longqsig64);
         assertEquals(indexer.getQb64().length(), Indexer.sizes.get(indexer.getCode()).fs);
 
         final String shortqsig64 = qsig64.substring(0, qsig64.length() - 4);
-        assertThrows(ShortageException.class, () -> {
-            new Indexer(shortqsig64);
-        });
+        assertThrows(ShortageException.class, () -> new Indexer(shortqsig64));
 
         qsig64 = "AFCZ0jw5JCQwn2v7GKCMQHISMi5rsscfcA4nbY9AqqWMyG6FyCH2cZFwqezPkq8p3sr8f37Xb3wXgh3UPG8igSYJ";
         qsig2b = CoreUtil.decodeBase64Url(qsig64);
@@ -179,19 +173,19 @@ class IndexerTest {
         assertArrayEquals(indexer.getQb64b(), qsig64.getBytes());
         assertEquals(indexer.getQb64(), qsig64);
 
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
-                    .raw(sig)
-                    .build(), 5, 0);
-        });
+                .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
+                .raw(sig)
+                .build(), 5, 0)
+        );
 
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
-                    .raw(sig)
-                    .build(), 5, 64);
-        });
+                .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
+                .raw(sig)
+                .build(), 5, 64)
+        );
 
         indexer = new Indexer(qsig64);
         assertEquals(indexer.getCode(), Codex.IndexerCodex.Ed25519_Sig.getValue());
@@ -202,20 +196,20 @@ class IndexerTest {
         assertEquals(indexer.getQb64(), qsig64);
 
         // test index too big
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
-                    .raw(sig)
-                    .build(), 65, null);
-        });
+                .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
+                .raw(sig)
+                .build(), 65, null)
+        );
 
         // test negative index
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
-                    .raw(sig)
-                    .build(), -1, null);
-        });
+                .code(Codex.IndexerCodex.Ed25519_Sig.getValue())
+                .raw(sig)
+                .build(), -1, null)
+        );
 
 
         int index = 67;
@@ -299,19 +293,19 @@ class IndexerTest {
         assertArrayEquals(indexer.getQb64b(), qb64b);
         assertEquals(indexer.getQb64(), qb64);
 
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Crt_Sig.getValue())
-                    .raw(sig)
-                    .build(), 3, 3);
-        });
+                .code(Codex.IndexerCodex.Ed25519_Crt_Sig.getValue())
+                .raw(sig)
+                .build(), 3, 3)
+        );
 
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Crt_Sig.getValue())
-                    .raw(sig)
-                    .build(), 3, 5);
-        });
+                .code(Codex.IndexerCodex.Ed25519_Crt_Sig.getValue())
+                .raw(sig)
+                .build(), 3, 5)
+        );
 
         index = 68;
         qb64 = "2BBEAACZ0jw5JCQwn2v7GKCMQHISMi5rsscfcA4nbY9AqqWMyG6FyCH2cZFwqezPkq8p3sr8f37Xb3wXgh3UPG8igSYJ";
@@ -337,19 +331,18 @@ class IndexerTest {
         assertArrayEquals(indexer.getQb64b(), qb64b);
         assertEquals(indexer.getQb64(), qb64);
 
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Big_Crt_Sig.getValue())
-                    .raw(sig)
-                    .build(), 68, 68);
-        });
+                .code(Codex.IndexerCodex.Ed25519_Big_Crt_Sig.getValue())
+                .raw(sig)
+                .build(), 68, 68)
+        );
 
-        assertThrows(InvalidVarIndexException.class, () -> {
+        assertThrows(InvalidVarIndexException.class, () ->
             new Indexer(RawArgs.builder()
-                    .code(Codex.IndexerCodex.Ed25519_Big_Crt_Sig.getValue())
-                    .raw(sig)
-                    .build(), 68, 70);
-        });
-
+                .code(Codex.IndexerCodex.Ed25519_Big_Crt_Sig.getValue())
+                .raw(sig)
+                .build(), 68, 70)
+        );
     }
 }

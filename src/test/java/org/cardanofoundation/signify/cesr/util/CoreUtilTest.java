@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.cesr.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,9 +18,7 @@ class CoreUtilTest {
 
         cs = CoreUtil.intToB64(0, 0);
         assertEquals("", cs);
-        assertThrows(IllegalArgumentException.class, () -> {
-            CoreUtil.b64ToInt("");
-        });
+        assertThrows(InvalidValueException.class, () -> CoreUtil.b64ToInt(""));
 
         byte[] csb = CoreUtil.intToB64b(0, 1);
         assertArrayEquals("A".getBytes(), csb);
