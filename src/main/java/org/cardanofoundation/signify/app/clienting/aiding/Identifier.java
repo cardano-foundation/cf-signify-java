@@ -218,7 +218,12 @@ public class Identifier {
         jsondata.put("proxy", proxy);
         jsondata.put("smids", states != null ? ((List<States.State>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
         jsondata.put("rmids", rstates != null ? ((List<States.State>) rstates).stream().map(States.State::getI).collect(Collectors.toList()) : null);
-        jsondata.put("algo", keeper.getParams());
+
+        // TODO find the best ways, just for testing for now
+        Map<String, Object> aloMap = Utils.toMap(keeper.getParams());
+        aloMap.remove("paramsMap");
+        jsondata.put(algo.getValue(), aloMap);
+
 
         this.client.setPidx(this.client.getPidx() + 1);
         ResponseEntity<String> response = this.client.fetch("/identifiers", "POST", jsondata, null);
