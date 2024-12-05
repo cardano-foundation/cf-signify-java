@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.app.clienting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.Agent;
@@ -40,6 +41,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.DigestException;
 import java.util.*;
 
 @Getter
@@ -106,11 +108,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
 
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("icp", eventData.evt().getKed());
-        data.put("sig", eventData.sign().getQb64());
-        data.put("stem", controller.stem);
-        data.put("pidx", 1);
-        data.put("tier", controller.tier);
+        data.put(SignifyFields.ICP.getValue(), eventData.evt().getKed());
+        data.put(SignifyFields.SIGNATURE.getValue(), eventData.sign().getQb64());
+        data.put(SignifyFields.STEM.getValue(), controller.stem);
+        data.put(SignifyFields.PIDX.getValue(), 1);
+        data.put(SignifyFields.TIER.getValue(), controller.tier);
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(bootUrl + "/boot"))
@@ -159,10 +161,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         );
 
         return State.builder()
-            .agent(data.getOrDefault("agent", null))
-            .controller(data.getOrDefault("controller", null))
-            .ridx((Integer) data.getOrDefault("ridx", 0))
-            .pidx((Integer) data.getOrDefault("pidx", 0))
+            .agent(data.getOrDefault(SignifyFields.AGENT.getValue(), null))
+            .controller(data.getOrDefault(SignifyFields.CONTROLLER.getValue(), null))
+            .ridx((Integer) data.getOrDefault(SignifyFields.RIDX.getValue(), 0))
+            .pidx((Integer) data.getOrDefault(SignifyFields.PIDX.getValue(), 0))
             .build();
     }
 
@@ -232,8 +234,8 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Object sigs = this.controller.approveDelegation(this.agent);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("ixn", this.controller.getSerder().getKed());
-        data.put("sigs", sigs);
+        data.put(SignifyFields.IXN.getValue(), this.controller.getSerder().getKed());
+        data.put(SignifyFields.SIGS.getValue(), sigs);
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(this.url + "/agent/" + this.controller.getPre() + "?type=ixn"))
@@ -389,6 +391,24 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      */
     public Delegations getDelegations() {
         return new Delegations(this);
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum SignifyFields {
+        ICP("icp"),
+        SIGNATURE("sig"),
+        STEM("stem"),
+        PIDX("pidx"),
+        TIER("tier"),
+        AGENT("agent"),
+        CONTROLLER("controller"),
+        RIDX("ridx"),
+        IXN("ixn"),
+        SIGS("sigs")
+        ;
+
+        private final String value;
     }
 
 }
