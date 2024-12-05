@@ -19,7 +19,7 @@ public class Authenticater {
             "@method",
             "@path",
             "signify-resource",
-            Httping.HEADER_SIG_TIME.toLowerCase()
+            Httping.HEADER_SIG_TIME
     );
 
     private final Verfer verfer;
@@ -31,7 +31,7 @@ public class Authenticater {
     }
 
     public boolean verify(Map<String, String> headers, String method, String path) {
-        String sigInput = headers.get(Httping.HEADER_SIG_INPUT.toLowerCase());
+        String sigInput = headers.get(Httping.HEADER_SIG_INPUT);
 
         final String signature = headers.get("signature");
         List<Httping.Inputage> inputs = Httping.desiginput(sigInput);

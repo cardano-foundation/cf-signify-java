@@ -219,9 +219,9 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Map<String, String> headers = new HashMap<>();
         Map<String, String> signedHeaders;
         Map<String, String> finalHeaders = new HashMap<>();
-        headers.put("Signify-Resource", this.controller.getPre());
-        headers.put("Signify-Timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
-        headers.put("Content-Type", "application/json");
+        headers.put("signify-resource", this.controller.getPre());
+        headers.put("signify-timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put("content-type", "application/json");
 
         Object _body = method.equals("GET") ? null : Utils.jsonStringify(data);
         if (this.getAuthn() != null) {

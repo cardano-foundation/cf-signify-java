@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.util.Utils;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 
@@ -21,7 +20,7 @@ public class Httping {
     public static String HEADER_SIG_TIME = normalize("Signify-Timestamp");
 
     public static String normalize(String header) {
-        return header.trim();
+        return header.toLowerCase().trim();
     }
 
     @Getter
@@ -75,7 +74,7 @@ public class Httping {
                 if (!args.headers.containsKey(field)) continue;
 
                 ifields.add(new AbstractMap.SimpleEntry<>(field, new HashMap<>()));
-                String value = normalize(args.headers.get(field).toString());
+                String value = args.headers.get(field);
                 items.add("\"" + field + "\": " + value);
             }
         }
