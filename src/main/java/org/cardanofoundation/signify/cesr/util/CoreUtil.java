@@ -298,15 +298,11 @@ public class CoreUtil {
         String string
     ) {}
 
-    public static byte[] blake3_256(byte[] ser, int hashLen) {
-        try {
-            Blake3.Blake3_256 blake3 = new Blake3.Blake3_256();
-            blake3.update(ser);
-            byte[] result = new byte[hashLen];
-            blake3.digest(result, 0, hashLen);
-            return result;
-        } catch (DigestException e) {
-            throw new RuntimeException("Error computing Blake3-256 digest", e);
-        }
+    public static byte[] blake3_256(byte[] ser, int hashLen) throws DigestException {
+        Blake3.Blake3_256 blake3 = new Blake3.Blake3_256();
+        blake3.update(ser);
+        byte[] result = new byte[hashLen];
+        blake3.digest(result, 0, hashLen);
+        return result;
     }
 }

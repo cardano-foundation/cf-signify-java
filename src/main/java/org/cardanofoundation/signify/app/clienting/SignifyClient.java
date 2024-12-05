@@ -77,7 +77,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Salter.Tier tier,
         String bootUrl,
         List<ExternalModule> externalModules
-    ) throws SodiumException {
+    ) throws SodiumException, DigestException {
         tier = tier != null ? tier : Salter.Tier.low;
         this.url = url;
         if (bran.length() < 21) {

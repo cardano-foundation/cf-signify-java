@@ -6,13 +6,15 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.security.DigestException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DigerTest {
 
     @Test
     @DisplayName("should generate digests")
-    void shouldGenerateDigests() {
+    void shouldGenerateDigests() throws DigestException {
         // Create something to digest and verify
         byte[] ser = "abcdefghijklmnopqrstuvwxyz0123456789".getBytes();
         byte[] digest = CoreUtil.blake3_256(ser, 32);
