@@ -122,9 +122,26 @@ public class TestUtils {
         return null;
     }
 
-    public static Object getOrCreateAID() {
+    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
         // TO-DO
-        return null;
+        try {
+            return client.getIdentifier().get(name);
+        } catch (Exception e) {
+            EventResult result = client.getIdentifier().create(name, kargs);
+            waitOperation(client, result.op());
+
+            States.HabState aid = client.getIdentifier().get(name);
+            if (client.getAgent() == null || client.getAgent().getPre() == null) {
+                throw new IllegalArgumentException("Client, agent, or pre cannot be null");
+            }
+
+            String pre = client.getAgent().getPre();
+            EventResult op = client.getIdentifier().addEndRole(name, "agent", pre, null);
+            waitOperation(client, op.op());
+
+            System.out.println(name + "AID:" + aid.getPrefix());
+            return aid;
+        }
     }
 
     public static List<SignifyClient> getOrCreateClients(int count, List<String> brans) throws ExecutionException, InterruptedException {
@@ -373,8 +390,10 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void resolveOobi(SignifyClient client, String oobi, String alias) {
+    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, JsonProcessingException, InterruptedException {
         // TO-DO
+        Object op = client.getOobis().resolve(oobi, alias);
+        waitOperation(client, op);
     }
 
     public static void waitForCredential(SignifyClient client, String credSAID) {
