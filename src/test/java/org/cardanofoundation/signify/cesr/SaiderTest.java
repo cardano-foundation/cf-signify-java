@@ -10,6 +10,7 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.security.DigestException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ class SaiderTest {
 
     @Test
     @DisplayName("should create Saidified dicts")
-    void shouldCreateSaidifiedDicts() {
+    void shouldCreateSaidifiedDicts() throws DigestException {
         Serials kind = Serials.JSON;
         String code = MatterCodex.Blake3_256.getValue();
 

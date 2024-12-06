@@ -58,7 +58,6 @@ public class Keeping {
         ) throws SodiumException;
     }
 
-    @SuppressWarnings("unchecked")
     public static class KeyManager {
         private final Salter salter;
         private final Map<String, ExternalModuleType> modules = new HashMap<>();
@@ -165,7 +164,7 @@ public class Keeping {
             }
         }
     }
-    
+
     @Getter
     public static class SaltyKeeper implements Keeper<SaltyParams> {
         private final String aeid;
@@ -755,7 +754,7 @@ public class Keeping {
             this.gkeys = states.stream()
                 .map(state -> state.getK().getFirst())
                 .collect(Collectors.toList());
-            
+
             this.gdigs = rstates.stream()
                 .map(state -> state.getN().getFirst())
                 .collect(Collectors.toList());
@@ -781,7 +780,7 @@ public class Keeping {
             int pni = gdigs.indexOf(ndig);
 
             Keeper<?> mkeeper = manager.get(mhab);
-            return mkeeper.sign(ser, indexed != null ? indexed : true, 
+            return mkeeper.sign(ser, indexed != null ? indexed : true,
                 Collections.singletonList(csi), Collections.singletonList(pni));
         }
     }

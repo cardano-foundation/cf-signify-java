@@ -40,7 +40,7 @@ public class Siger extends Indexer {
         super(qb64);
 
         if (!IndexedSigCodex.has(this.getCode())) {
-            throw new ValidationException("Invalid code = " + this.getCode() + " for Siger.");
+            throw new InvalidCodeException("Invalid code = " + this.getCode() + " for Siger.");
         }
     }
 }
