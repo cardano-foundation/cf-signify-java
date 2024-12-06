@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
@@ -12,6 +13,7 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.http.ResponseEntity;
+
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -170,7 +172,7 @@ public class TestUtils {
     }
 
     public static String[] getOrCreateIdentifier(SignifyClient client, String name) throws Exception {
-        Object id;
+        Object id = null;
         CreateIdentifierArgs kargs = null;
         try {
             States.HabState identifier = client.getIdentifier().get(name);
@@ -183,9 +185,18 @@ public class TestUtils {
                 kargs.setWits(env.witnessIds());
             }
             EventResult result = client.getIdentifier().create(name, kargs);
-            Object op = result.op(); // Đợi kết quả của `result.op()`
-//            op = waitOperation(client, op).join(); // Chờ kết quả từ `waitOperation`
-            id = op.getClass();
+            Object op = result.op();
+//            op = waitOperation(client, op);
+            if (op instanceof String) {
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    HashMap<String, Object> map = mapper.readValue((String) op, HashMap.class);
+                    HashMap<String, Object> idMap = (HashMap<String, Object>) map.get("metadata");
+                    id = idMap.get("pre");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
             String eid = null;
             if (client.getAgent() != null && client.getAgent().getPre() != null) {
                 eid = client.getAgent().getPre();
@@ -200,10 +211,10 @@ public class TestUtils {
             }
         }
 
-            SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
-            String[] results = new String[] {
-                    id.toString(), oobi.getOobis().toString()
-            };
+        SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
+        String[] results = new String[]{
+                id != null ? id.toString() : null, oobi.getOobis().toString()
+        };
 //            Pair<String, String> results = Pair.of(String.valueOf(id), String.valueOf(oobi.get(String.valueOf(0), null)));
         return results;
     }
