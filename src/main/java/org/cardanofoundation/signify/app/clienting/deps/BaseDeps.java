@@ -1,16 +1,16 @@
 package org.cardanofoundation.signify.app.clienting.deps;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse;
 
 public interface BaseDeps {
-    ResponseEntity<String> fetch(
+    HttpResponse<String> fetch(
         String pathname,
         String method,
         Object body,
-        HttpHeaders headers
-    ) throws SodiumException;
+        HttpHeaders extraHeaders
+    ) throws SodiumException, InterruptedException, IOException;
 }

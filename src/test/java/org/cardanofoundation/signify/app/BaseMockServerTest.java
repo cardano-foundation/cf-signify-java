@@ -6,17 +6,16 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.cesr.Authenticater;
+import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.core.Httping;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -225,12 +224,10 @@ public class BaseMockServerTest {
         }""";
 
     private MockResponse mockAllRequests(RecordedRequest req) throws SodiumException {
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.set("Signify-Resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
-        headers.set(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
-        headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Signify-Resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
+        headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put("Content-Type", "application/json");
 
         String reqUrl = req.getRequestUrl().toString();
         Salter salter = new Salter("0AAwMTIzNDU2Nzg5YWJjZGVm");
@@ -244,7 +241,7 @@ public class BaseMockServerTest {
 
         Authenticater authn = new Authenticater(signer, signer.getVerfer());
         Map<String, String> signedHeaderMap = authn.sign(
-                headers.toSingleValueMap(),
+                headers,
                 req.getMethod(),
                 reqUrl.split("\\?")[0],
                 null
@@ -266,21 +263,21 @@ public class BaseMockServerTest {
     MockResponse mockConnect() {
         return new MockResponse()
                 .setResponseCode(202)
-                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setHeader("Content-Type", "application/json")
                 .setBody(MOCK_CONNECT);
     }
 
     MockResponse mockGetAID() {
         return new MockResponse()
                 .setResponseCode(202)
-                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setHeader("Content-Type", "application/json")
                 .setBody(MOCK_GET_AID);
     }
 
     MockResponse mockCredential() {
         return new MockResponse()
                 .setResponseCode(202)
-                .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setHeader("Content-Type", "application/json")
                 .setBody(MOCK_CREDENTIAL);
     }
 

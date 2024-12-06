@@ -4,6 +4,7 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.params.GroupParams;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
@@ -18,6 +19,7 @@ import org.cardanofoundation.signify.core.States.State;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
+import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -323,12 +325,18 @@ public class Keeping {
             );
             List<String> digers = nsigners.getSigners().stream()
                 .map(nsigner ->
-                    new Diger(
-                        RawArgs.builder()
-                            .code(this.code)
-                            .build(),
-                        nsigner.getVerfer().getQb64b()
-                    ).getQb64()
+                    {
+                        try {
+                            return new Diger(
+                                RawArgs.builder()
+                                    .code(this.code)
+                                    .build(),
+                                nsigner.getVerfer().getQb64b()
+                            ).getQb64();
+                        } catch (DigestException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 )
                 .collect(Collectors.toList());
 
@@ -372,12 +380,18 @@ public class Keeping {
             );
             List<String> digers = nsigners.getSigners().stream()
                 .map(nsigner ->
-                    new Diger(
-                        RawArgs.builder()
-                            .code(this.code)
-                            .build(),
-                        nsigner.getVerfer().getQb64b()
-                    ).getQb64()
+                    {
+                        try {
+                            return new Diger(
+                                RawArgs.builder()
+                                    .code(this.code)
+                                    .build(),
+                                nsigner.getVerfer().getQb64b()
+                            ).getQb64();
+                        } catch (DigestException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 )
                 .collect(Collectors.toList());
 
@@ -570,12 +584,18 @@ public class Keeping {
 
             List<String> digers = nsigners.getSigners().stream()
                 .map(nsigner ->
-                    new Diger(
-                        RawArgs.builder().
-                            code(this.dcode)
-                            .build(),
-                        nsigner.getVerfer().getQb64b()
-                    ).getQb64()
+                    {
+                        try {
+                            return new Diger(
+                                RawArgs.builder().
+                                    code(this.dcode)
+                                    .build(),
+                                nsigner.getVerfer().getQb64b()
+                            ).getQb64();
+                        } catch (DigestException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 )
                 .collect(Collectors.toList());
 
@@ -629,10 +649,16 @@ public class Keeping {
                 .collect(Collectors.toList());
 
             List<String> digers = nsigners.getSigners().stream()
-                .map(nsigner -> new Diger(
-                    RawArgs.builder().code(this.dcode).build(),
-                    nsigner.getVerfer().getQb64b()
-                ).getQb64())
+                .map(nsigner -> {
+                    try {
+                        return new Diger(
+                            RawArgs.builder().code(this.dcode).build(),
+                            nsigner.getVerfer().getQb64b()
+                        ).getQb64();
+                    } catch (DigestException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .collect(Collectors.toList());
 
             return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
@@ -770,7 +796,7 @@ public class Keeping {
             List<Integer> ondices
         ) throws SodiumException {
             if (mhab.getState() == null) {
-                throw new IllegalStateException("No state in mhab");
+                throw new EmptyMaterialException("No state in mhab");
             }
 
             String key = mhab.getState().getK().getFirst();

@@ -15,6 +15,7 @@ import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 
 import java.math.BigInteger;
+import java.security.DigestException;
 import java.util.*;
 
 /**
@@ -35,7 +36,7 @@ public class Controller {
     private List<String> keys;
     public List<String> ndigs;
 
-    public Controller(String bran, Tier tier, Integer ridx, Object state) throws SodiumException {
+    public Controller(String bran, Tier tier, Integer ridx, Object state) throws SodiumException, DigestException {
         ridx = ridx == null ? 0 : ridx;
         this.bran = MatterCodex.Salt_128.getValue() + "A" + bran.substring(0, 21); // qb64 salt for seed
         this.stem = "signify:controller";
@@ -119,7 +120,7 @@ public class Controller {
         return new Verfer[]{this.signer.getVerfer()};
     }
 
-    public Object approveDelegation(Agent agent) throws SodiumException {
+    public Object approveDelegation(Agent agent) throws SodiumException, DigestException {
         Seqner seqner = new Seqner(agent.getSn());
 
         Map<String, String> anchor = new LinkedHashMap<>();

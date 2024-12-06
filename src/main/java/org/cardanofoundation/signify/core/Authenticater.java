@@ -1,8 +1,10 @@
-package org.cardanofoundation.signify.cesr;
+package org.cardanofoundation.signify.core;
 
 import lombok.Getter;
+import org.cardanofoundation.signify.cesr.Siger;
+import org.cardanofoundation.signify.cesr.Signer;
+import org.cardanofoundation.signify.cesr.Verfer;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.core.Httping.SiginputArgs;
 import org.cardanofoundation.signify.end.Signage;
 

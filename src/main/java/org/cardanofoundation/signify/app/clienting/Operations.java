@@ -1,14 +1,14 @@
 package org.cardanofoundation.signify.app.clienting;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
-import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 public class Operations {
@@ -19,30 +19,27 @@ public class Operations {
         this.client = client;
     }
 
-    public <T> Operation<T> get(String name) throws SodiumException, JsonProcessingException {
+    public <T> Operation<T> get(String name) throws SodiumException, IOException, InterruptedException {
         String path = "/operations/" + name;
         String method = "GET";
-        ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-        });
+        HttpResponse<String> response = client.fetch(path, method, null, null);
+        return objectMapper.readValue(response.body(), new TypeReference<>() {});
     }
 
-    public List<Operation<?>> list(String type) throws SodiumException, JsonProcessingException {
+    public List<Operation<?>> list(String type) throws SodiumException, IOException, InterruptedException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
         String method = "GET";
-        ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-        });
+        HttpResponse<String> response = client.fetch(path, method, null, null);
+        return objectMapper.readValue(response.body(), new TypeReference<>() {});
     }
 
-    public void delete(String name) throws SodiumException {
+    public void delete(String name) throws SodiumException, IOException, InterruptedException {
         String path = "/operations/" + name;
         String method = "DELETE";
         client.fetch(path, method, null, null);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws SodiumException, JsonProcessingException {
+    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws SodiumException, IOException, InterruptedException {
         int minSleep = options == null || options.getMinSleep() == null ? 10 : options.getMinSleep();
         int maxSleep = options == null || options.getMaxSleep() == null ? 10000 : options.getMaxSleep();
         int increaseFactor = options == null || options.getIncreaseFactor() == null ? 50 : options.getIncreaseFactor();

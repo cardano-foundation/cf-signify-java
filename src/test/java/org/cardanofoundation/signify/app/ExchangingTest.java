@@ -14,13 +14,14 @@ import org.junit.jupiter.api.Test;
 import static org.cardanofoundation.signify.app.Exchanging.exchange;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.security.DigestException;
 import java.util.*;
 
 public class ExchangingTest extends BaseMockServerTest {
     
     @Test
     @DisplayName("should create an exchange message with no transposed attachments")
-    public void shouldCreateExchangeMessageWithNoTransposedAttachments() throws SodiumException {
+    public void shouldCreateExchangeMessageWithNoTransposedAttachments() throws SodiumException, DigestException {
         String dt = "2023-08-30T17:22:54.183Z";
         
         Exchanging.ExchangeResult result = exchange(

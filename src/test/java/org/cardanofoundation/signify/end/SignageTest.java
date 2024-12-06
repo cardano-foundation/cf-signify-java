@@ -12,7 +12,6 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("unchecked")
 class SignageTest {
     List<Siger> sigers = new ArrayList<>();
     List<Cigar> cigars = new ArrayList<>();

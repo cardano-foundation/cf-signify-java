@@ -12,6 +12,8 @@ import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.core.States.HabState;
 
+import java.io.IOException;
+import java.security.DigestException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -55,7 +57,7 @@ public class Exchanging {
             String recipient,
             String datetime,
             String dig
-        ) throws InterruptedException, ExecutionException, SodiumException {
+        ) throws InterruptedException, ExecutionException, SodiumException, DigestException {
 
             Keeper<? extends KeeperParams> keeper = client.getManager().get(sender);
             ExchangeResult result = exchange(
@@ -96,7 +98,7 @@ public class Exchanging {
             Map<String, Object> payload,
             Map<String, List<Object>> embeds,
             List<String> recipients
-        ) throws SodiumException, ExecutionException, InterruptedException {
+        ) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
 
             for (String recipient : recipients) {
                 ExchangeMessageResult result = createExchangeMessage(
@@ -139,7 +141,7 @@ public class Exchanging {
             List<String> sigs,
             String atc,
             List<String> recipients
-        ) throws SodiumException {
+        ) throws SodiumException, IOException, InterruptedException {
 
             String path = String.format("/identifiers/%s/exchanges", name);
             String method = "POST";
@@ -176,7 +178,7 @@ public class Exchanging {
         String dig,
         Map<String, Object> modifiers,
         Map<String, List<Object>> embeds
-    ) {
+    ) throws DigestException {
         String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         String ilk = CoreUtil.Ilks.EXN.getValue();
         String dt = date != null ? date :
