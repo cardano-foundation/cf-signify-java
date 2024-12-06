@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.util.Utils;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 
@@ -21,7 +20,7 @@ public class Httping {
     public static String HEADER_SIG_TIME = normalize("Signify-Timestamp");
 
     public static String normalize(String header) {
-        return header.trim();
+        return header.toLowerCase().trim();
     }
 
     @Getter
@@ -75,7 +74,7 @@ public class Httping {
                 if (!args.headers.containsKey(field)) continue;
 
                 ifields.add(new AbstractMap.SimpleEntry<>(field, new HashMap<>()));
-                String value = normalize(args.headers.get(field).toString());
+                String value = args.headers.get(field);
                 items.add("\"" + field + "\": " + value);
             }
         }
@@ -121,7 +120,8 @@ public class Httping {
         Map<String, String> headers = new HashMap<>();
 
         // TODO find the way to serialize the map like in signify-ts
-        headers.put(HEADER_SIG_INPUT, Utils.jsonStringify(sid));
+        String mockSignatureInput = "signify=(\"@method\" \"@path\" \"signify-resource\" \"signify-timestamp\");created=%d;keyid=\"%s\";alg=\"%s\"";
+        headers.put(HEADER_SIG_INPUT, String.format(mockSignatureInput, now, args.keyid, args.alg));
 
         return new SiginputResult(headers, sig);
     }
@@ -133,8 +133,9 @@ public class Httping {
 
     /**
      * Parse start, end and total from HTTP Content-Range header value
+     *
      * @param header HTTP Range header value
-     * @param typ type of range, e.g. "aids"
+     * @param typ    type of range, e.g. "aids"
      * @return object with start, end and total properties
      */
     public static RangeInfo parseRangeHeaders(String header, String typ) {
@@ -144,14 +145,15 @@ public class Httping {
             String[] rng = values[0].split("-");
 
             return new RangeInfo(
-                Integer.parseInt(rng[0]),
-                Integer.parseInt(rng[1]),
-                Integer.parseInt(values[1])
+                    Integer.parseInt(rng[0]),
+                    Integer.parseInt(rng[1]),
+                    Integer.parseInt(values[1])
             );
         } else {
             return new RangeInfo(0, 0, 0);
         }
     }
 
-    public record RangeInfo(int start, int end, int total) {}
+    public record RangeInfo(int start, int end, int total) {
+    }
 }
