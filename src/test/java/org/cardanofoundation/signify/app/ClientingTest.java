@@ -23,8 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -41,17 +39,17 @@ public class ClientingTest extends BaseMockServerTest {
     @DisplayName("SignifyClient initialization")
     void testSignifyClientInitialization() throws Exception {
         InvalidValueException exception = assertThrows(
-                InvalidValueException.class,
-                () -> new SignifyClient(url, "short", Tier.low, bootUrl, null)
+            InvalidValueException.class,
+            () -> new SignifyClient(url, "short", Tier.low, bootUrl, null)
         );
         assertEquals("bran must be 21 characters", exception.getMessage());
 
         SignifyClient client = new SignifyClient(
-                url,
-                bran,
-                Tier.low,
-                bootUrl,
-                null
+            url,
+            bran,
+            Tier.low,
+            bootUrl,
+            null
         );
 
         assertEquals(bran, client.getBran());
@@ -60,19 +58,19 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(Tier.low, client.getTier());
         assertEquals(0, client.getPidx());
         assertEquals(
-                "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
-                client.getController().getPre()
+            "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+            client.getController().getPre()
         );
         assertEquals("signify:controller", client.getController().getStem());
         assertEquals(Tier.low, client.getController().getTier());
 
         String expectedSerderRaw = """
-                {"v":"KERI10JSON00012b_","t":"icp",\
-                "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
-                "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
-                "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
-                "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
-                "bt":"0","b":[],"c":[],"a":[]}""";
+            {"v":"KERI10JSON00012b_","t":"icp",\
+            "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
+            "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
+            "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
+            "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
+            "bt":"0","b":[],"c":[],"a":[]}""";
         assertEquals(expectedSerderRaw, client.getController().getSerder().getRaw());
         assertEquals("0", client.getController().getSerder().getKed().get("s"));
 
@@ -84,18 +82,18 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals("application/json", request.getHeader("Content-Type"));
 
         String expectedRequestBody = """
-                {"icp":{"v":"KERI10JSON00012b_","t":"icp",\
-                "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
-                "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
-                "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
-                "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
-                "bt":"0","b":[],"c":[],"a":[]},\
-                "sig":"AACJwsJ0mvb4VgxD87H4jIsiT1QtlzznUy9zrX3lGdd48jjQRTv8FxlJ8ClDsGtkvK4Eekg5p-oPYiPvK_1eTXEG",\
-                "stem":"signify:controller","pidx":1,"tier":"low"}""";
+            {"icp":{"v":"KERI10JSON00012b_","t":"icp",\
+            "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
+            "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
+            "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
+            "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
+            "bt":"0","b":[],"c":[],"a":[]},\
+            "sig":"AACJwsJ0mvb4VgxD87H4jIsiT1QtlzznUy9zrX3lGdd48jjQRTv8FxlJ8ClDsGtkvK4Eekg5p-oPYiPvK_1eTXEG",\
+            "stem":"signify:controller","pidx":1,"tier":"low"}""";
 
         assertEquals(
-                objectMapper.readTree(expectedRequestBody),
-                objectMapper.readTree(request.getBody().readUtf8())
+            objectMapper.readTree(expectedRequestBody),
+            objectMapper.readTree(request.getBody().readUtf8())
         );
         cleanUpRequest();
 
@@ -109,37 +107,36 @@ public class ClientingTest extends BaseMockServerTest {
 
         // Validate agent
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                client.getAgent().getPre()
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getPre()
         );
         assertEquals(
-                "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
-                client.getAgent().getAnchor()
+            "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+            client.getAgent().getAnchor()
         );
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                client.getAgent().getSaid()
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getSaid()
         );
         assertEquals("0", client.getAgent().getState().get("s"));
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                client.getAgent().getState().get("d")
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getState().get("d")
         );
 
         // Validate approve delegation
         assertEquals("1", client.getController().getSerder().getKed().get("s"));
         assertEquals("ixn", client.getController().getSerder().getKed().get("t"));
 
-        @SuppressWarnings("unchecked")
         List<Object> actions = (List<Object>) client.getController().getSerder().getKed().get("a");
         Map<String, Object> actionMap = Utils.toMap(actions.getFirst());
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                actionMap.get("i")
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            actionMap.get("i")
         );
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                actionMap.get("d")
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            actionMap.get("d")
         );
         assertEquals("0", actionMap.get("s"));
 
@@ -189,7 +186,6 @@ public class ClientingTest extends BaseMockServerTest {
                 "indexed=\"?0\";signify=\"0BDiSoxCv42h2BtGMHy_tpWAqyCgEoFwRa8bQy20mBB2D5Vik4gRp3XwkEHtqy6iy6SUYAytMUDtRbewotAfkCgN\"");
         badAgentHeaders.put("content-type", "application/json");
     }
-
 
     @Test
     public void testJsonObject() throws Exception {

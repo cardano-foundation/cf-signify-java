@@ -133,9 +133,8 @@ public class Httping {
 
     /**
      * Parse start, end and total from HTTP Content-Range header value
-     *
      * @param header HTTP Range header value
-     * @param typ    type of range, e.g. "aids"
+     * @param typ type of range, e.g. "aids"
      * @return object with start, end and total properties
      */
     public static RangeInfo parseRangeHeaders(String header, String typ) {
@@ -145,15 +144,14 @@ public class Httping {
             String[] rng = values[0].split("-");
 
             return new RangeInfo(
-                    Integer.parseInt(rng[0]),
-                    Integer.parseInt(rng[1]),
-                    Integer.parseInt(values[1])
+                Integer.parseInt(rng[0]),
+                Integer.parseInt(rng[1]),
+                Integer.parseInt(values[1])
             );
         } else {
             return new RangeInfo(0, 0, 0);
         }
     }
 
-    public record RangeInfo(int start, int end, int total) {
-    }
+    public record RangeInfo(int start, int end, int total) {}
 }

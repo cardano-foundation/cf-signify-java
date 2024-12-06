@@ -7,6 +7,7 @@ import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
 
 public class Coring {
 
@@ -21,6 +22,34 @@ public class Coring {
 
         // https://github.com/WebOfTrust/signify-ts/issues/242
         return salter.getQb64().substring(2, 23);
+    }
+
+    @Getter
+    public static class Operations {
+        public final OperationsDeps client;
+
+        /**
+         * Operations
+         * @param client {OperationsDeps}
+         */
+        public Operations(OperationsDeps client) {
+            this.client = client;
+        }
+
+    }
+
+    @Getter
+    public static class Oobis {
+        public final SignifyClient client;
+
+        /**
+         * Oobis
+         * @param client {SignifyClient}
+         */
+        public Oobis(SignifyClient client) {
+            this.client = client;
+        }
+        // others functions
     }
 
     @Getter
