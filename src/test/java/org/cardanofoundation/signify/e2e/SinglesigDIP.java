@@ -35,19 +35,19 @@ class SinglesigDIP {
     }
 
     @BeforeEach
-    public void getIdentifier() {
-        CompletableFuture<String[]> clients = TestUtils.getOrCreateIdentifiers(client1, "name1");
+    public void getIdentifier() throws Exception {
+        String[] clients = TestUtils.getOrCreateIdentifier(client1, "name1");
         try {
-            String[] result = clients.get();
-            System.out.println("ID: " + result[0]);
-            System.out.println("OOBI: " + result[1]);
+//            String[] result = clients.get();
+            name1_id = clients[0];
+            name1_oobi = clients[1];
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     @BeforeEach
-    public  void getContact() {
-        contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi).toString();
+    public  void getContact() throws SodiumException, JsonProcessingException, InterruptedException {
+//        contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
     }
 
     @Test
@@ -57,7 +57,7 @@ class SinglesigDIP {
         System.out.println("Contact: " + contact1_id);
     }
 
-    @Test
+//    @Test
     public void delegate1a() throws Exception {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);

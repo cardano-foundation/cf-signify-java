@@ -2,17 +2,16 @@ package org.cardanofoundation.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import okhttp3.Response;
-import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
+import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.http.ResponseEntity;
-
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -66,21 +65,25 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void assertOperations(List<SignifyClient> clients) {
+    public static void assertOperations(List<SignifyClient> clients) throws SodiumException, JsonProcessingException {
         // TO-DO
+        for (SignifyClient client : clients) {
+            List<Operation<?>> operations = client.getOperations().list(null);
+            Assertions.assertEquals(0, operations.size());
+        }
     }
 
     public static void assertNotifications(List<SignifyClient> clients) {
         // TO-DO
     }
 
-    public static Aid createAid(SignifyClient client, String name) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
+    public static Aid createAid(SignifyClient client, String name) throws Exception {
         // TO-DO
-        CompletableFuture<String[]> results = getOrCreateIdentifiers(client, name);
+        String[] results = getOrCreateIdentifier(client, name);
         if (results != null) {
-            String[] result = results.get();
-            String prefix = result[0];
-            String oobi = result[1];
+//            String[] result = results.get();
+            String prefix = results[0];
+            String oobi = results[1];
             return new Aid(name, prefix, oobi);
         }
         return null;
@@ -91,18 +94,29 @@ public class TestUtils {
         return isoTimestamp.replace("Z", "+00:00");
     }
 
-    public static Object getEndRoles(SignifyClient client, String alias, String role) throws Exception {
+    public static ResponseEntity<String> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
         // TO-DO
         String path = (role != null)
                 ? "/identifiers/" + alias + "/endroles/" + role
                 : "/identifiers/" + alias + "/endroles";
 
         ResponseEntity<String> response = client.fetch(path, "GET", alias, null);
-        return response.getBody();
+        return response;
     }
 
-    public static Object getIssuedCredential() {
+    public static Object getIssuedCredential(
+            SignifyClient issuerClient,
+            Aid issuerAid,
+            Aid recipientAid,
+            Map<String, String> issuerRegistry,
+            Object credData,
+            String schema,
+            Object rule,
+            Object source
+    ) {
         // TO-DO
+        Boolean privacy = false;
+//        String credentialList = issuerClient.getCredentials().list();
         return null;
     }
 
@@ -155,122 +169,132 @@ public class TestUtils {
         return client;
     }
 
-    public static String[] getOrCreateIdentifier(SignifyClient client, String name) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
-//        Object id;
-//        States.HabState identfier;
-//        ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-//        CreateIdentifierArgs kargs = null;
-//        try {
-//            identfier = client.getIdentifier().get(name);
-//            id = identfier.getPrefix();
-//        } catch (SodiumException e) {
-//            if (kargs == null) {
-//                kargs = new CreateIdentifierArgs();
-//                kargs.setToad(env.witnessIds().size());
-//                kargs.setWits(env.witnessIds());
-//            }
-//            EventResult result = client.getIdentifier().create(name, kargs);
-//            Operation op = (Operation) result.op(); // Đợi kết quả của `result.op()`
-//            op = waitOperation(client, op).join(); // Chờ kết quả từ `waitOperation`
-//            id = op.getResponse();
-//            String eid = null;
-//            if (client.getAgent() != null && client.getAgent().getPre() != null) {
-//                eid = client.getAgent().getPre();
-//            } else {
-//                throw new IllegalStateException("Agent or pre is null");
-//            }
-//            if (!hasEndRole(client, name, "agent", eid)) {
-//                EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
-//                Operation<?> ops = (Operation<?>) result.op();
-//                op = waitOperation(client, op).join();
-//                System.out.println("identifiers.addEndRole: " + op);
-//            }
-//        }
-//
-//            SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
-//            String[] results = new String[] {
-//                    id.toString(), oobi.getOobis().toString()
-//            };
-//            Pair<String, String> results = Pair.of(String.valueOf(id), String.valueOf(oobi.get(String.valueOf(0), null)));
-        return null;
-    }
-
-    public static CompletableFuture<String[]> getOrCreateIdentifiers(SignifyClient client, String name) {
-        return CompletableFuture.supplyAsync(() -> {
-            String id;
-
-            try {
-                States.HabState identifier = client.getIdentifier().get(name);
-                id = identifier.getPrefix();
-            } catch (Exception e) {
-                // Tạo mới identifier nếu không tồn tại
-                CreateIdentifierArgs kargs = new CreateIdentifierArgs();
-                ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-
+    public static String[] getOrCreateIdentifier(SignifyClient client, String name) throws Exception {
+        Object id;
+        CreateIdentifierArgs kargs = null;
+        try {
+            States.HabState identifier = client.getIdentifier().get(name);
+            id = identifier.getPrefix();
+        } catch (Exception e) {
+            ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
+            if (kargs == null) {
+                kargs = new CreateIdentifierArgs();
                 kargs.setToad(env.witnessIds().size());
                 kargs.setWits(env.witnessIds());
-
-                try {
-                    EventResult result = client.getIdentifier().create(name, kargs);
-                    Operation<Map<String, Object>> op = (Operation<Map<String, Object>>) result.op();
-                    Operation<Object> completedOp = waitOperation(client, op).get();
-                    Map<String, Object> response = (Map<String, Object>) completedOp.getResponse();
-                    id = (String) response.get("i");
-                } catch (Exception createException) {
-                    throw new RuntimeException("Failed to create identifier", createException);
-                }
             }
-
-            // Lấy EndRole
-            String eid = client.getAgent().getPre();
-            try {
-                if (!hasEndRole(client, name, "agent", eid)) {
-                    EventResult result = client.getIdentifier().addEndRole(name, "agent", eid, null);
-                    Class<?> op = result.op().getClass();
-                    op = waitOperation(client, op).get().getClass();
-                    System.out.println("identifiers.addEndRole: " + op);
-                }
-            } catch (Exception endRoleException) {
-                throw new RuntimeException("Failed to add end role", endRoleException);
+            EventResult result = client.getIdentifier().create(name, kargs);
+            Object op = result.op(); // Đợi kết quả của `result.op()`
+//            op = waitOperation(client, op).join(); // Chờ kết quả từ `waitOperation`
+            id = op.getClass();
+            String eid = null;
+            if (client.getAgent() != null && client.getAgent().getPre() != null) {
+                eid = client.getAgent().getPre();
+            } else {
+                throw new IllegalStateException("Agent or pre is null");
             }
-
-            // Lấy OOBI
-            try {
-                SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
-                return new String[]{id, String.valueOf(oobi.getOobis().getClass())};
-            } catch (Exception oobiException) {
-                throw new RuntimeException("Failed to fetch OOBI", oobiException);
+            if (!hasEndRole(client, name, "agent", eid)) {
+                EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
+                Object ops = results.op();
+                ops = waitOperation(client, ops);
+                System.out.println("identifiers.addEndRole: " + ops);
             }
-        });
+        }
+
+            SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
+            String[] results = new String[] {
+                    id.toString(), oobi.getOobis().toString()
+            };
+//            Pair<String, String> results = Pair.of(String.valueOf(id), String.valueOf(oobi.get(String.valueOf(0), null)));
+        return results;
     }
 
-    public static CompletableFuture<String> getOrCreateContact(SignifyClient client, String name, String oobi) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
-                if (!list.isEmpty()) {
-                    Contacting.Contact contact = list.get(0);
-                    if (oobi.equals(contact.getOobi())) {
-                        return contact.getId();
-                    }
-                }
-                try {
-                    Operation op = (Operation) client.getOobis().resolve(oobi, name);
-                    op = waitOperation(client, op).get();
-                    if (op.getResponse() instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> response = (Map<String, Object>) op.getResponse();
-                        return (String) response.get("i");
-                    } else {
-                        throw new RuntimeException("Unexpected response format: " + op.getResponse());
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to resolve OOBI and retrieve ID", e);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to get or create contact", e);
+//    public static CompletableFuture<String[]> getOrCreateIdentifiers(SignifyClient client, String name) {
+//        return CompletableFuture.supplyAsync(() -> {
+//            String id;
+//
+//            try {
+//                States.HabState identifier = client.getIdentifier().get(name);
+//                id = identifier.getPrefix();
+//            } catch (Exception e) {
+//                // Tạo mới identifier nếu không tồn tại
+//                CreateIdentifierArgs kargs = new CreateIdentifierArgs();
+//                ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
+//
+//                kargs.setToad(env.witnessIds().size());
+//                kargs.setWits(env.witnessIds());
+//
+//                try {
+//                    EventResult result = client.getIdentifier().create(name, kargs);
+//                    Object op = result.op();
+//                    Operation<Object> completedOp = waitOperation(client, op).get();
+//                    Object response =  completedOp.getResponse();
+//                    id = (String) response;
+//                } catch (Exception createException) {
+//                    throw new RuntimeException("Failed to create identifier", createException);
+//                }
+//            }
+//
+//            // Lấy EndRole
+//            String eid = client.getAgent().getPre();
+//            try {
+//                if (!hasEndRole(client, name, "agent", eid)) {
+//                    EventResult result = client.getIdentifier().addEndRole(name, "agent", eid, null);
+//                    Class<?> op = result.op().getClass();
+//                    op = waitOperation(client, op).get().getClass();
+//                    System.out.println("identifiers.addEndRole: " + op);
+//                }
+//            } catch (Exception endRoleException) {
+//                throw new RuntimeException("Failed to add end role", endRoleException);
+//            }
+//
+//            // Lấy OOBI
+//            try {
+//                SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
+//                return new String[]{id, String.valueOf(oobi.getOobis().getClass())};
+//            } catch (Exception oobiException) {
+//                throw new RuntimeException("Failed to fetch OOBI", oobiException);
+//            }
+//        });
+//    }
+
+    public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, JsonProcessingException, InterruptedException {
+        List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
+        if (!list.isEmpty()) {
+            Contacting.Contact contact = list.get(0);
+            if (contact.getOobi().equals(oobi)) {
+                return contact.getId();
             }
-        });
+        }
+        Map<String, Object> op = (Map<String, Object>) client.getOobis().resolve(oobi, name);
+        op = (Map<String, Object>) waitOperation(client, op);
+        return op.get("i").toString();
+
+//        return CompletableFuture.supplyAsync(() -> {
+//            try {
+//                List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
+//                if (!list.isEmpty()) {
+//                    Contacting.Contact contact = list.get(0);
+//                    if (oobi.equals(contact.getOobi())) {
+//                        return contact.getId();
+//                    }
+//                }
+//                try {
+//                    Operation op = (Operation) client.getOobis().resolve(oobi, name);
+//                    op = waitOperation(client, op).get();
+//                    if (op.getResponse() instanceof Map) {
+//                        @SuppressWarnings("unchecked")
+//                        Map<String, Object> response = (Map<String, Object>) op.getResponse();
+//                        return (String) response.get("i");
+//                    } else {
+//                        throw new RuntimeException("Unexpected response format: " + op.getResponse());
+//                    }
+//                } catch (Exception e) {
+//                    throw new RuntimeException("Failed to resolve OOBI and retrieve ID", e);
+//                }
+//            } catch (Exception e) {
+//                throw new RuntimeException("Failed to get or create contact", e);
+//            }
+//        });
     }
 
     public static Object getOrIssueCredential() {
@@ -301,11 +325,15 @@ public class TestUtils {
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
         // TO-DO
-        List<Map<String, Object>> list = (List<Map<String, Object>>) getEndRoles(client, alias, role);
-        for (Map<String, Object> i : list) {
-            if (role.equals(i.get("role")) && eid.equals(i.get("eid")))
-                return true;
+//        List<ResponseEntity<String>> lists = (List<ResponseEntity<String>>) getEndRoles(client, alias, role);
+        ResponseEntity<String> list = getEndRoles(client, alias, role);
+        if (role.equals(list.getBody()) && eid.equals(list.getBody())) {
+            return true;
         }
+//        for (Identifier i : list) {
+//            if (role.equals(i.get("role")) && eid.equals(i.get("eid")))
+//                return true;
+//        }
         return false;
     }
 
