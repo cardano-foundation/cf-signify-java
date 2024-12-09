@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.cesr.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
@@ -11,6 +12,11 @@ import java.util.*;
 
 public class Utils {
     public static final int CRYPTO_BOX_SEAL_BYTES = 48;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     public static byte[] intToBytes(BigInteger value, int size) {
         if (value.signum() < 0) {
@@ -63,7 +69,7 @@ public class Utils {
 
     public static String jsonStringify(Object obj) {
         try {
-            return new ObjectMapper().writeValueAsString(obj);
+            return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
             throw new SerializeException("Error while stringify");
         }
@@ -74,19 +80,18 @@ public class Utils {
             return Map.of();
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.convertValue(obj, new TypeReference<>() {});
+            return objectMapper.convertValue(obj, new TypeReference<>() {});
         } catch (Exception e) {
             throw new SerializeException("Unable to create map from object");
         }
     }
 
-    public static <T> T fromJson(String json) {
+    public static <T> T fromJson(String json, Class clazz) {
         try {
-            return new ObjectMapper().readValue(json, new TypeReference<T>() {});
+            return (T) objectMapper.readValue(json, clazz);
         } catch (Exception e) {
-            throw new SerializeException("Error while parsing JSON");
+            throw new SerializeException("Error while parsing JSON: " + e.getMessage());
         }
     }
 

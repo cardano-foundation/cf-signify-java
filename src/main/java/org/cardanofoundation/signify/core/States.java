@@ -8,89 +8,102 @@ import java.util.List;
 
 public class States {
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     public static class State {
-        private final int[] vn;
-        private final String i;
-        private final String s;
-        private final String p;
-        private final String d;
-        private final String f;
-        private final String dt;
-        private final String et;
-        private final Object kt;
-        private final List<String> k;
-        private final Object nt;
-        private final List<String> n;
-        private final String bt;
-        private final List<String> b;
-        private final List<String> c;
-        private final EstablishmentState ee;
-        private final String di;
+        private  int[] vn;
+        private  String i;
+        private  String s;
+        private  String p;
+        private  String d;
+        private  String f;
+        private  String dt;
+        private  String et;
+        private  Object kt;
+        private  List<String> k;
+        private  Object nt;
+        private  List<String> n;
+        private  String bt;
+        private  List<String> b;
+        private  List<String> c;
+        private  EstablishmentState ee;
+        private  String di;
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     public static class EstablishmentState {
-        private final String d;
-        private final String s;
+        private  String d;
+        private  String s;
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     public static class SaltyState {
-        private final String sxlt;
-        private final int pidx;
-        private final int kidx;
-        private final String stem;
-        private final Tier tier;
-        private final String dcode;
-        private final List<String> icodes;
-        private final List<String> ncodes;
-        private final boolean transferable;
+        private  String sxlt;
+        private  int pidx;
+        private  int kidx;
+        private  String stem;
+        private  Tier tier;
+        private  String dcode;
+        private  List<String> icodes;
+        private  List<String> ncodes;
+        private  boolean transferable;
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     public static class RandyState {
-        private final List<String> prxs;
-        private final List<String> nxts;
+        private  List<String> prxs;
+        private  List<String> nxts;
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     public static class GroupState {
-        private final HabState mhab;
-        private final List<String> keys;
-        private final List<String> ndigs;
+        private  HabState mhab;
+        private  List<String> keys;
+        private  List<String> ndigs;
     }
 
     @Getter
     @Builder
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class HabState {
-        private final String name;
-        private final String prefix;
-        private final boolean transferable;
-        private final State state;
-        private final List<Object> windexes;
-        private final SaltyState saltyState;
-        private final RandyState randyState;
-        private final GroupState groupState;
+        private  String name;
+        private  String prefix;
+        private  boolean transferable;
+        private  State state;
+        private  List<Object> windexes;
+        private  SaltyState salty;
+        private  RandyState randy;
+        private  GroupState group;
 
         public boolean containsKey(String algo) {
             return switch (algo) {
-                case "salty" -> saltyState != null;
-                case "randy" -> randyState != null;
-                case "group" -> groupState != null;
+                case "salty" -> salty != null;
+                case "randy" -> randy != null;
+                case "group" -> group != null;
                 default -> throw new InvalidValueException("Unexpected value: " + algo);
             };
         }
 
         public Object get(String algo) {
             return switch (algo) {
-                case "salty" -> saltyState;
-                case "randy" -> randyState;
-                case "group" -> groupState;
+                case "salty" -> salty;
+                case "randy" -> randy;
+                case "group" -> group;
                 default -> throw new InvalidValueException("Unexpected value: " + algo);
             };
         }

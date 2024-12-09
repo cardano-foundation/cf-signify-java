@@ -85,7 +85,7 @@ public class Identifier {
         final String method = "GET";
 
         ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return Utils.fromJson(response.getBody());
+        return Utils.fromJson(response.getBody(), States.HabState.class);
     }
 
     /**
@@ -100,7 +100,7 @@ public class Identifier {
         final String method = "PUT";
 
         ResponseEntity<String> response = client.fetch(path, method, info, null);
-        return Utils.fromJson(response.getBody());
+        return Utils.fromJson(response.getBody(), States.HabState.class);
     }
 
     /**
