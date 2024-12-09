@@ -21,11 +21,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigInteger;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -275,7 +271,7 @@ public class Identifier {
      * @return The reply message as a Serder object
      */
     private Serder makeEndRole(String pre, String role, String eid, String stamp) {
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("cid", pre);
         data.put("role", role);
 

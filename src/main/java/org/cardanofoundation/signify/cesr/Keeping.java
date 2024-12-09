@@ -13,6 +13,7 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.Manager.RandyCreator;
 import org.cardanofoundation.signify.core.Manager.SaltyCreator;
 import org.cardanofoundation.signify.core.Manager.Algos;
+import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.core.States.HabState;
 import org.cardanofoundation.signify.core.States.State;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
@@ -116,56 +117,56 @@ public class Keeping {
 
         public Keeper<? extends KeeperParams> get(HabState aid) throws SodiumException {
             if (aid.containsKey(Algos.salty.getValue())) {
-                Map<String, Object> kargs = (Map<String, Object>) aid.get(Algos.salty.getValue());
+                States.SaltyState kargs = (States.SaltyState) aid.get(Algos.salty.getValue());
                 return new SaltyKeeper(
-                    salter,
-                    (Integer) kargs.get("pidx"),
-                    (Integer) kargs.get("kidx"),
-                    (Tier) kargs.get("tier"),
-                    (Boolean) kargs.get("transferable"),
-                    (String) kargs.get("stem"),
-                    null,
-                    null,
-                    (List<String>) kargs.get("icodes"),
-                    null,
-                    null,
-                    (List<String>) kargs.get("ncodes"),
-                    (String) kargs.get("dcode"),
-                    null,
-                    (String) kargs.get("sxlt")
+                        salter,
+                        kargs.getPidx(),
+                        kargs.getKidx(),
+                        kargs.getTier(),
+                        kargs.isTransferable(),
+                        kargs.getStem(),
+                        null,
+                        null,
+                        kargs.getIcodes(),
+                        null,
+                        null,
+                        kargs.getNcodes(),
+                        kargs.getDcode(),
+                        null,
+                        kargs.getSxlt()
                 );
             } else if (aid.containsKey(Algos.randy.getValue())) {
                 Prefixer pre = new Prefixer(aid.getPrefix());
-                Map<String, Object> kargs = (Map<String, Object>) aid.get(Algos.randy.getValue());
+                States.RandyState kargs = (States.RandyState) aid.get(Algos.randy.getValue());
                 return new RandyKeeper(
-                    salter,
-                    null,
-                    null,
-                    null,
-                    pre.isTransferable(),
-                    null,
-                    null,
-                    List.of(),
-                    null,
-                    (List<String>) kargs.get("prxs"),
-                    (List<String>) kargs.get("nxts")
+                        salter,
+                        null,
+                        null,
+                        null,
+                        pre.isTransferable(),
+                        null,
+                        null,
+                        List.of(),
+                        null,
+                        kargs.getPrxs(),
+                        kargs.getNxts()
                 );
             } else if (aid.containsKey(Algos.group.name())) {
-                Map<String, Object> kargs = (Map<String, Object>) aid.get(Algos.group.name());
+                States.GroupState kargs = (States.GroupState) aid.get(Algos.group.name());
                 return new GroupKeeper(
-                    this,
-                    (HabState) kargs.get("mhab"),
-                    null,
-                    null,
-                    (List<String>) kargs.get("keys"),
-                    (List<String>) kargs.get("ndigs")
+                        this,
+                        kargs.getMhab(),
+                        null,
+                        null,
+                        kargs.getKeys(),
+                        kargs.getNdigs()
                 );
             } else {
                 throw new UnsupportedOperationException("Algo not allowed yet");
             }
         }
     }
-    
+
     @Getter
     public static class SaltyKeeper implements Keeper<SaltyParams> {
         private final String aeid;
@@ -755,7 +756,7 @@ public class Keeping {
             this.gkeys = states.stream()
                 .map(state -> state.getK().getFirst())
                 .collect(Collectors.toList());
-            
+
             this.gdigs = rstates.stream()
                 .map(state -> state.getN().getFirst())
                 .collect(Collectors.toList());
@@ -781,7 +782,7 @@ public class Keeping {
             int pni = gdigs.indexOf(ndig);
 
             Keeper<?> mkeeper = manager.get(mhab);
-            return mkeeper.sign(ser, indexed != null ? indexed : true, 
+            return mkeeper.sign(ser, indexed != null ? indexed : true,
                 Collections.singletonList(csi), Collections.singletonList(pni));
         }
     }
