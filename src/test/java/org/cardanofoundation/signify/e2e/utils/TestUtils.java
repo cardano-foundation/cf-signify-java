@@ -5,15 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
+import org.cardanofoundation.signify.app.clienting.Operations;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
-import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.http.ResponseEntity;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -96,14 +97,15 @@ public class TestUtils {
         return isoTimestamp.replace("Z", "+00:00");
     }
 
-    public static ResponseEntity<String> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
+    public static List<String> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
         // TO-DO
         String path = (role != null)
                 ? "/identifiers/" + alias + "/endroles/" + role
                 : "/identifiers/" + alias + "/endroles";
 
         ResponseEntity<String> response = client.fetch(path, "GET", alias, null);
-        return response;
+        List<String> result = new ArrayList<>(Collections.singleton(response.getBody()));
+        return result;
     }
 
     public static Object getIssuedCredential(
@@ -203,7 +205,7 @@ public class TestUtils {
             }
             EventResult result = client.getIdentifier().create(name, kargs);
             Object op = result.op();
-//            op = waitOperation(client, op);
+            op = waitOperation(client, op);
             if (op instanceof String) {
                 ObjectMapper mapper = new ObjectMapper();
                 try {
@@ -353,14 +355,12 @@ public class TestUtils {
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
         // TO-DO
-//        List<ResponseEntity<String>> lists = (List<ResponseEntity<String>>) getEndRoles(client, alias, role);
-        ResponseEntity<String> list = getEndRoles(client, alias, role);
-        if (role.equals(list.getBody()) && eid.equals(list.getBody())) {
+        List<String> list = getEndRoles(client, alias, role);
+//        HashMap<String, String> listData = (HashMap<String, String>) list;
+//        for (String i : list) {
+        if (role.equals(list.get(0)) && eid.equals(list.get(1))) {
             return true;
         }
-//        for (Identifier i : list) {
-//            if (role.equals(i.get("role")) && eid.equals(i.get("eid")))
-//                return true;
 //        }
         return false;
     }
@@ -412,16 +412,22 @@ public class TestUtils {
         return null;
     }
 
-    public static <T> CompletableFuture<Operation<T>> waitOperation(
+    public static <T> Operation<T> waitOperation(
             SignifyClient client,
             Object op) throws SodiumException, JsonProcessingException, InterruptedException {
-
         if (op instanceof String) {
             op = client.getOperations().get((String) op);
         }
-        op = client.getOperations();
-        deleteOperations(client, (Operation) op);
-        return (CompletableFuture<Operation<T>>) op;
+        op = client.getOperations().wait(op, 3000);
+        deleteOperations(client, (Operation<T>) op);
+        return (Operation<T>) op;
+
+//        if (op instanceof String) {
+//            client.getOperations().get((String) op);
+//        }
+//        op = client.getOperations().wait(op, );
+//        deleteOperations(client, (Operation) op);
+//        return (CompletableFuture<Operation<T>>) op;
     }
 
 }
