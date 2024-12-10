@@ -46,8 +46,8 @@ class HttpingTest {
         Cigar cigar = (Cigar) result.sig();
 
         assertEquals(1, header.size());
-        assertTrue(header.containsKey("Signature-Input"));
-        final String sigipt = header.get("Signature-Input");
+        assertTrue(header.containsKey("signature-input"));
+        final String sigipt = header.get("signature-input");
 
         // TODO find the way to serialize the map like in signify-ts
         // assertEquals(
@@ -55,10 +55,6 @@ class HttpingTest {
         //     "sig0=(\"Signify-Resource\" \"@method\" \"@path\" \"Signify-Timestamp\");created=1663968348;keyid=\"DN54yRad_BTqgZYUSi_NthRBQrxSnqQdJXWI5UHcGOQt\";alg=\"ed25519\""
         // );
 
-        /**
-         * TODO: ciger.getQb64() return different value (0BA4zFVHQuLDVOpTPnkf1EKwkSWsnRMSSX6WaMKr2EioG5Sku4AynGQHHvpqIRqv_pws6pSTUtDTMpWIsrLBIwEK)
-         *  even though the input and the impl is same, probably related to lazysodium
-         */
 //        assertEquals(cigar.getQb64(), "0BAJWoDvZXYKnq_9rFTy_mucctxk3rVK6szopNi1rq5WQcJSNIw-_PocSQNoQGD1Ow_s2mDI5-Qqm34Y56gUKQcF");
     }
 }

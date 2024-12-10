@@ -110,7 +110,7 @@ public class OperationsTest {
     void doesNotWaitForOperationThatIsAlreadyDone() throws SodiumException, IOException, InterruptedException {
         Operation<String> operation = buildOperation(true, true);
 
-        var result = operations.wait(operation, null);
+        var result = operations.wait(operation);
         verify(client, never()).fetch(anyString(), anyString(), isNull(), isNull());
         assertEquals(operation, result);
     }
@@ -127,7 +127,7 @@ public class OperationsTest {
             .thenReturn(mockResponse);
 
         operation.setDone(false);
-        operations.wait(operation, null);
+        operations.wait(operation);
         verify(client, times(1)).fetch(anyString(), anyString(), isNull(), isNull());
     }
 
@@ -149,8 +149,9 @@ public class OperationsTest {
             .thenReturn(mockResponse1)
             .thenReturn(mockResponse2);
 
-        Operations.WaitOptions options = new Operations.WaitOptions();
-        options.setMaxSleep(10);
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .build();
         operations.wait(operation1, options);
         verify(client, times(2)).fetch(anyString(), anyString(), isNull(), isNull());
     }
@@ -175,8 +176,9 @@ public class OperationsTest {
             .thenReturn(mockResponse2)
             .thenReturn(mockResponse3);
 
-        Operations.WaitOptions options = new Operations.WaitOptions();
-        options.setMaxSleep(10);
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .build();
         operations.wait(buildOperation(false, false), options);
         verify(client, times(3)).fetch(anyString(), anyString(), isNull(), isNull());
     }
