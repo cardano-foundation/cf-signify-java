@@ -18,22 +18,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 import static org.cardanofoundation.signify.cesr.util.Utils.intToBytes;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.Codex.NumCodex;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.DigestException;
-import java.util.List;
-
-import static org.cardanofoundation.signify.cesr.util.Utils.intToBytes;
 
 @Builder
 @AllArgsConstructor
