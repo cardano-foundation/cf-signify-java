@@ -68,13 +68,7 @@ public class Operations {
             if (op.isDone()) {
                 return op;
             }
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                // Handle the interruption, e.g., by re-throwing or logging
-                // TODO: handle options.signal
-                Thread.currentThread().interrupt(); // Preserve interrupt status
-            }
+            Thread.sleep(delay);
         }
     }
 
