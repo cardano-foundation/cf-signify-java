@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
-import org.cardanofoundation.signify.app.clienting.Operations;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -14,7 +13,6 @@ import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.http.ResponseEntity;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -130,7 +128,7 @@ public class TestUtils {
             return client.getIdentifier().get(name);
         } catch (Exception e) {
             EventResult result = client.getIdentifier().create(name, kargs);
-            waitOperation(client, result.op());
+            waitOperation(client, (Operation) result.op());
 
             States.HabState aid = client.getIdentifier().get(name);
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
@@ -139,7 +137,7 @@ public class TestUtils {
 
             String pre = client.getAgent().getPre();
             EventResult op = client.getIdentifier().addEndRole(name, "agent", pre, null);
-            waitOperation(client, op.op());
+            waitOperation(client, (Operation) op.op());
 
             System.out.println(name + "AID:" + aid.getPrefix());
             return aid;
@@ -205,7 +203,7 @@ public class TestUtils {
             }
             EventResult result = client.getIdentifier().create(name, kargs);
             Object op = result.op();
-            op = waitOperation(client, op);
+            op = waitOperation(client, (Operation) op);
             if (op instanceof String) {
                 ObjectMapper mapper = new ObjectMapper();
                 try {
@@ -225,7 +223,7 @@ public class TestUtils {
             if (!hasEndRole(client, name, "agent", eid)) {
                 EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
                 Object ops = results.op();
-                ops = waitOperation(client, ops);
+                ops = waitOperation(client, (Operation) ops);
                 System.out.println("identifiers.addEndRole: " + ops);
             }
         }
@@ -234,7 +232,6 @@ public class TestUtils {
         String[] results = new String[]{
                 id != null ? id.toString() : null, oobi.getOobis().toString()
         };
-//            Pair<String, String> results = Pair.of(String.valueOf(id), String.valueOf(oobi.get(String.valueOf(0), null)));
         return results;
     }
 
@@ -296,7 +293,7 @@ public class TestUtils {
             }
         }
         Map<String, Object> op = (Map<String, Object>) client.getOobis().resolve(oobi, name);
-        op = (Map<String, Object>) waitOperation(client, op);
+        op = (Map<String, Object>) waitOperation(client, (Operation) op);
         return op.get("i").toString();
 
 //        return CompletableFuture.supplyAsync(() -> {
@@ -393,7 +390,7 @@ public class TestUtils {
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, JsonProcessingException, InterruptedException {
         // TO-DO
         Object op = client.getOobis().resolve(oobi, alias);
-        waitOperation(client, op);
+        waitOperation(client, (Operation) op);
     }
 
     public static void waitForCredential(SignifyClient client, String credSAID) {
@@ -412,15 +409,13 @@ public class TestUtils {
         return null;
     }
 
-    public static <T> Operation<T> waitOperation(
-            SignifyClient client,
-            Object op) throws SodiumException, JsonProcessingException, InterruptedException {
-        if (op instanceof String) {
-            op = client.getOperations().get((String) op);
-        }
-        op = client.getOperations().wait(op, 3000);
-        deleteOperations(client, (Operation<T>) op);
-        return (Operation<T>) op;
+    public static <T> Operation<T> waitOperation(SignifyClient client, Operation op) throws SodiumException, JsonProcessingException {
+//        if (op instanceof String) {
+//            ops = client.getOperations().get(op.toString());
+//        }
+        Operation ops = client.getOperations().wait(op, null);
+        deleteOperations(client,  ops);
+        return ops;
 
 //        if (op instanceof String) {
 //            client.getOperations().get((String) op);

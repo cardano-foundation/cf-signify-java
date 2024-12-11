@@ -79,9 +79,9 @@ class SinglesigDIP {
         // Refresh keystate to sn=1
         Object op2 = client2.getKeyStates().query(name1_id, 1, null);
 
-        CompletableFuture<Operation<Object>> opFuture = TestUtils.waitOperation(client2, op);
-        CompletableFuture<Operation<Object>> op1Future = TestUtils.waitOperation(client1, op1);
-        CompletableFuture<Operation<Object>> op2Future = TestUtils.waitOperation(client2, op2);
+        CompletableFuture<Operation<Object>> opFuture = TestUtils.waitOperation(client2, (Operation) op);
+        CompletableFuture<Operation<Object>> op1Future = TestUtils.waitOperation(client1, (Operation) op1);
+        CompletableFuture<Operation<Object>> op2Future = TestUtils.waitOperation(client2, (Operation) op2);
         CompletableFuture<Void> allOfOb = CompletableFuture.allOf(opFuture, op1Future, op2Future);
         allOfOb.get();
 
@@ -110,9 +110,9 @@ class SinglesigDIP {
         // refresh keystate to seal event
         op2 = client2.getKeyStates().query(name1_id, null, seal.toString());
 
-        CompletableFuture<Operation<Object>> op_Future = TestUtils.waitOperation(client2, op);
-        CompletableFuture<Operation<Object>> op1_1Future = TestUtils.waitOperation(client1, op1);
-        CompletableFuture<Operation<Object>> op2_1Future = TestUtils.waitOperation(client2, op2);
+        CompletableFuture<Operation<Object>> op_Future = TestUtils.waitOperation(client2, (Operation) op);
+        CompletableFuture<Operation<Object>> op1_1Future = TestUtils.waitOperation(client1, (Operation) op1);
+        CompletableFuture<Operation<Object>> op2_1Future = TestUtils.waitOperation(client2, (Operation) op2);
         CompletableFuture<Void> allOfOb1 = CompletableFuture.allOf(op_Future, op1_1Future, op2_1Future);
         allOfOb1.get();
 
@@ -121,7 +121,7 @@ class SinglesigDIP {
         Assertions.assertEquals(delegate2.getPrefix(), op.get("i"));
 
         // Make sure query with seal is idempotent
-        String ops = (String) client2.getKeyStates().query(name1_id, null, seal.toString());
+        Operation ops = (Operation) client2.getKeyStates().query(name1_id, null, seal.toString());
         TestUtils.waitOperation(client2, ops);
     }
 }
