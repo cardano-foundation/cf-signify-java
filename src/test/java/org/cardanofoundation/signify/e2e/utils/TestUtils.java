@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.e2e.utils;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
@@ -193,6 +194,8 @@ public class TestUtils {
     public static String[] getOrCreateIdentifier(SignifyClient client, String name) throws Exception {
         Object id = null;
         CreateIdentifierArgs kargs = null;
+        String eid;
+        Object op, ops;
         try {
             States.HabState identifier = client.getIdentifier().get(name);
             id = identifier.getPrefix();
@@ -204,20 +207,17 @@ public class TestUtils {
                 kargs.setWits(env.witnessIds());
             }
             EventResult result = client.getIdentifier().create(name, kargs);
-            Object op = result.op();
-            op = waitOperation(client, (Operation) op);
+            op = result.op();
             op = operationToObject(waitOperation(client, op));
             if (op instanceof String) {
-                ObjectMapper mapper = new ObjectMapper();
                 try {
-                    HashMap<String, Object> map = mapper.readValue((String) op, HashMap.class);
-                    HashMap<String, Object> idMap = (HashMap<String, Object>) map.get("metadata");
-                    id = idMap.get("pre");
+                    HashMap<String, Object> map = objectMapper.readValue((String) op, HashMap.class);
+                    HashMap<String, Object> idMap = (HashMap<String, Object>) map.get("response");
+                    id = idMap.get("i");
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
-            String eid = null;
             if (client.getAgent() != null && client.getAgent().getPre() != null) {
                 eid = client.getAgent().getPre();
             } else {
@@ -225,67 +225,19 @@ public class TestUtils {
             }
             if (!hasEndRole(client, name, "agent", eid)) {
                 EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
-                Object ops = results.op();
-                ops = waitOperation(client, (Operation) ops);
+                ops = results.op();
+                ops = operationToObject(waitOperation(client, ops));
                 System.out.println("identifiers.addEndRole: " + ops);
             }
         }
 
-        SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
-        String[] results = new String[]{
-                id != null ? id.toString() : null, oobi.getOobis().toString()
+        Object oobi =  client.getOobis().get(name, "agent");
+        String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
+        String[] result = new String[]{
+                id != null ? id.toString() : null, getOobi
         };
-        return results;
+        return result;
     }
-
-//    public static CompletableFuture<String[]> getOrCreateIdentifiers(SignifyClient client, String name) {
-//        return CompletableFuture.supplyAsync(() -> {
-//            String id;
-//
-//            try {
-//                States.HabState identifier = client.getIdentifier().get(name);
-//                id = identifier.getPrefix();
-//            } catch (Exception e) {
-//                // Tạo mới identifier nếu không tồn tại
-//                CreateIdentifierArgs kargs = new CreateIdentifierArgs();
-//                ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-//
-//                kargs.setToad(env.witnessIds().size());
-//                kargs.setWits(env.witnessIds());
-//
-//                try {
-//                    EventResult result = client.getIdentifier().create(name, kargs);
-//                    Object op = result.op();
-//                    Operation<Object> completedOp = waitOperation(client, op).get();
-//                    Object response =  completedOp.getResponse();
-//                    id = (String) response;
-//                } catch (Exception createException) {
-//                    throw new RuntimeException("Failed to create identifier", createException);
-//                }
-//            }
-//
-//            // Lấy EndRole
-//            String eid = client.getAgent().getPre();
-//            try {
-//                if (!hasEndRole(client, name, "agent", eid)) {
-//                    EventResult result = client.getIdentifier().addEndRole(name, "agent", eid, null);
-//                    Class<?> op = result.op().getClass();
-//                    op = waitOperation(client, op).get().getClass();
-//                    System.out.println("identifiers.addEndRole: " + op);
-//                }
-//            } catch (Exception endRoleException) {
-//                throw new RuntimeException("Failed to add end role", endRoleException);
-//            }
-//
-//            // Lấy OOBI
-//            try {
-//                SignifyClient oobi = (SignifyClient) client.getOobis().get(name, "agent");
-//                return new String[]{id, String.valueOf(oobi.getOobis().getClass())};
-//            } catch (Exception oobiException) {
-//                throw new RuntimeException("Failed to fetch OOBI", oobiException);
-//            }
-//        });
-//    }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, JsonProcessingException, InterruptedException {
         List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
@@ -431,13 +383,6 @@ public class TestUtils {
                 .build());
         deleteOperations(client, operation);
         return operation;
-
-//        if (op instanceof String) {
-//            client.getOperations().get((String) op);
-//        }
-//        op = client.getOperations().wait(op, );
-//        deleteOperations(client, (Operation) op);
-//        return (CompletableFuture<Operation<T>>) op;
     }
 
     private static Object operationToObject(Operation operation) throws JsonProcessingException {
