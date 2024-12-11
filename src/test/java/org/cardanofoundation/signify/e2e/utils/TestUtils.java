@@ -240,43 +240,26 @@ public class TestUtils {
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, JsonProcessingException, InterruptedException {
+        Object getResponseI = null;
         List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
         if (!list.isEmpty()) {
-            Contacting.Contact contact = list.get(0);
+            Contacting.Contact contact = list.getFirst();
             if (contact.getOobi().equals(oobi)) {
                 return contact.getId();
             }
         }
-        Map<String, Object> op = (Map<String, Object>) client.getOobis().resolve(oobi, name);
-        op = (Map<String, Object>) waitOperation(client, (Operation) op);
-        return op.get("i").toString();
-
-//        return CompletableFuture.supplyAsync(() -> {
-//            try {
-//                List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
-//                if (!list.isEmpty()) {
-//                    Contacting.Contact contact = list.get(0);
-//                    if (oobi.equals(contact.getOobi())) {
-//                        return contact.getId();
-//                    }
-//                }
-//                try {
-//                    Operation op = (Operation) client.getOobis().resolve(oobi, name);
-//                    op = waitOperation(client, op).get();
-//                    if (op.getResponse() instanceof Map) {
-//                        @SuppressWarnings("unchecked")
-//                        Map<String, Object> response = (Map<String, Object>) op.getResponse();
-//                        return (String) response.get("i");
-//                    } else {
-//                        throw new RuntimeException("Unexpected response format: " + op.getResponse());
-//                    }
-//                } catch (Exception e) {
-//                    throw new RuntimeException("Failed to resolve OOBI and retrieve ID", e);
-//                }
-//            } catch (Exception e) {
-//                throw new RuntimeException("Failed to get or create contact", e);
-//            }
-//        });
+        Object op = client.getOobis().resolve(oobi, name);
+        op = operationToObject(waitOperation(client, op));
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> contactMap = objectMapper.readValue((String) op, HashMap.class);
+                HashMap<String, Object> responseMap = (HashMap<String, Object>) contactMap.get("response");
+                getResponseI = responseMap.get("i");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return getResponseI.toString();
     }
 
     public static Object getOrIssueCredential() {
@@ -385,7 +368,7 @@ public class TestUtils {
         return operation;
     }
 
-    private static Object operationToObject(Operation operation) throws JsonProcessingException {
+    public static Object operationToObject(Operation operation) throws JsonProcessingException {
         Map<String, Object> opMap = new LinkedHashMap<>();
         opMap.put("name", operation.getName());
         opMap.put("metadata", operation.getMetadata() != null ? operation.getMetadata().getProperties() : null);
