@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
@@ -23,8 +24,7 @@ public class Operations {
         String path = "/operations/" + name;
         String method = "GET";
         ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-        });
+        return Operation.fromObject(objectMapper.readValue(response.getBody(), new TypeReference<>() {})) ;
     }
 
     public List<Operation<?>> list(String type) throws SodiumException, JsonProcessingException {
@@ -78,10 +78,12 @@ public class Operations {
 
     @Getter
     @Setter
+    @Builder
     public static class WaitOptions {
         private Integer minSleep;
         private Integer maxSleep;
         private Integer increaseFactor;
+        private AbortSignal signal;
 
         // TODO mapping options.signal form signify-ts
     }

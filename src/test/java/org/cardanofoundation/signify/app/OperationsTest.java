@@ -132,7 +132,7 @@ public class OperationsTest {
                 .thenReturn(new ResponseEntity<>(Utils.jsonStringify(operation1), null, 200))
                 .thenReturn(new ResponseEntity<>(Utils.jsonStringify(operation2), null, 200));
 
-        Operations.WaitOptions options = new Operations.WaitOptions();
+        Operations.WaitOptions options = Operations.WaitOptions.builder().build();
         options.setMaxSleep(10);
         operations.wait(operation1, options);
         verify(client, times(2)).fetch(anyString(), anyString(), isNull(), isNull());
@@ -148,7 +148,7 @@ public class OperationsTest {
                 .thenReturn(new ResponseEntity<>(Utils.jsonStringify(buildOperation(false, true)), null, 200))
                 .thenReturn(new ResponseEntity<>(Utils.jsonStringify(buildOperation(true, true)), null, 200));
 
-        Operations.WaitOptions options = new Operations.WaitOptions();
+        Operations.WaitOptions options = Operations.WaitOptions.builder().build();
         options.setMaxSleep(10);
         operations.wait(buildOperation(false, false), options);
         verify(client, times(3)).fetch(anyString(), anyString(), isNull(), isNull());

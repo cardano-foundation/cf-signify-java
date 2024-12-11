@@ -1,10 +1,12 @@
 package org.cardanofoundation.signify.app.clienting;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+@Builder
+@Getter
+@Setter
 public class AbortSignal {
-    @Getter @Setter
-    public static long timeout;
-
+    public long timeout;
 }

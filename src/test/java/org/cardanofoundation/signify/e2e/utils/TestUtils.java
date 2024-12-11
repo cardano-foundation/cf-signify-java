@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.e2e.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import org.cardanofoundation.signify.app.clienting.*;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 
 public class TestUtils {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static class Aid {
         public String name;
@@ -204,6 +206,7 @@ public class TestUtils {
             EventResult result = client.getIdentifier().create(name, kargs);
             Object op = result.op();
             op = waitOperation(client, (Operation) op);
+            op = operationToObject(waitOperation(client, op));
             if (op instanceof String) {
                 ObjectMapper mapper = new ObjectMapper();
                 try {
@@ -409,13 +412,25 @@ public class TestUtils {
         return null;
     }
 
-    public static <T> Operation<T> waitOperation(SignifyClient client, Operation op) throws SodiumException, JsonProcessingException {
-//        if (op instanceof String) {
-//            ops = client.getOperations().get(op.toString());
-//        }
-        Operation ops = client.getOperations().wait(op, null);
-        deleteOperations(client,  ops);
-        return ops;
+    public static <T> Operation<T> waitOperation(
+            SignifyClient client,
+            Object op) throws SodiumException, JsonProcessingException {
+        Operation<T> operation;
+        if (op instanceof String) {
+            String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
+            operation = client.getOperations().get(name);
+        } else {
+            operation = Operation.fromObject(op);
+        }
+        operation = client.getOperations().wait(
+            operation,
+            Operations.WaitOptions.builder()
+                .signal(AbortSignal.builder()
+                    .timeout(3000)
+                    .build())
+                .build());
+        deleteOperations(client, operation);
+        return operation;
 
 //        if (op instanceof String) {
 //            client.getOperations().get((String) op);
@@ -423,6 +438,17 @@ public class TestUtils {
 //        op = client.getOperations().wait(op, );
 //        deleteOperations(client, (Operation) op);
 //        return (CompletableFuture<Operation<T>>) op;
+    }
+
+    private static Object operationToObject(Operation operation) throws JsonProcessingException {
+        Map<String, Object> opMap = new LinkedHashMap<>();
+        opMap.put("name", operation.getName());
+        opMap.put("metadata", operation.getMetadata() != null ? operation.getMetadata().getProperties() : null);
+        opMap.put("done", operation.isDone());
+        opMap.put("error", operation.getError());
+        opMap.put("response", operation.getResponse());
+
+        return objectMapper.writeValueAsString(opMap);
     }
 
 }
