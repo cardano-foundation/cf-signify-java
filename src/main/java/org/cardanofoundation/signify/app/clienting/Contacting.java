@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app.clienting;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
@@ -53,7 +52,7 @@ public class Contacting {
          * @param filterValue Optional field value to filter contacts
          * @return List of contacts
          */
-        public Object list(
+        public Contact[] list(
             String group,
             String filterField,
             String filterValue
@@ -72,8 +71,7 @@ public class Contacting {
             }
 
             ResponseEntity<String> response = client.fetch(path.toString(), "GET", null, null);
-            return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-            });
+            return objectMapper.readValue(response.getBody(), Contact[].class);
         }
 
         /**
@@ -81,11 +79,10 @@ public class Contacting {
          * @param pre Prefix of the contact
          * @return The contact
          */
-        public Object get(String pre) throws SodiumException, JsonProcessingException {
+        public Contact get(String pre) throws SodiumException, JsonProcessingException {
             String path = "/contacts/" + pre;
             ResponseEntity<String> response = client.fetch(path, "GET", null, null);
-            return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-            });
+            return objectMapper.readValue(response.getBody(), Contact.class);
         }
 
         /**
@@ -94,11 +91,10 @@ public class Contacting {
          * @param info Information about the contact
          * @return Result of the addition
          */
-        public Object add(String pre, Map<String, Object> info) throws SodiumException, JsonProcessingException {
+        public Contact add(String pre, Map<String, Object> info) throws SodiumException, JsonProcessingException {
             String path = "/contacts/" + pre;
             ResponseEntity<String> response = client.fetch(path, "POST", info, null);
-            return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-            });
+            return objectMapper.readValue(response.getBody(), Contact.class);
         }
 
         /**
@@ -116,11 +112,10 @@ public class Contacting {
          * @param info Updated information about the contact
          * @return Result of the update
          */
-        public Object update(String pre, Object info) throws SodiumException, JsonProcessingException {
+        public Contact update(String pre, Map<String, Object> info) throws SodiumException, JsonProcessingException {
             String path = "/contacts/" + pre;
             ResponseEntity<String> response = client.fetch(path, "PUT", info, null);
-            return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-            });
+            return objectMapper.readValue(response.getBody(), Contact.class);
         }
     }
 }

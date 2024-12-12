@@ -244,7 +244,7 @@ public class TestUtils {
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, JsonProcessingException, InterruptedException {
         Object getResponseI = null;
-        List<Contacting.Contact> list = (List<Contacting.Contact>) client.getContacts().list(null, "alias", "^" + name + "$");
+        List<Contacting.Contact> list = Arrays.asList(client.getContacts().list(null, "alias", "^" + name + "$"));
         if (!list.isEmpty()) {
             Contacting.Contact contact = list.getFirst();
             if (contact.getOobi().equals(oobi)) {
