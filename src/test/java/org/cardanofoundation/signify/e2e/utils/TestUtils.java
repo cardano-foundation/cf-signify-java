@@ -1,7 +1,7 @@
 package org.cardanofoundation.signify.e2e.utils;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.*;
@@ -98,14 +98,17 @@ public class TestUtils {
         return isoTimestamp.replace("Z", "+00:00");
     }
 
-    public static List<String> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
+    public static List<Map<String, Object>> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
         // TO-DO
         String path = (role != null)
                 ? "/identifiers/" + alias + "/endroles/" + role
                 : "/identifiers/" + alias + "/endroles";
 
         ResponseEntity<String> response = client.fetch(path, "GET", alias, null);
-        List<String> result = new ArrayList<>(Collections.singleton(response.getBody()));
+        String responseBody = response.getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, Object>> result = objectMapper.readValue(responseBody, new TypeReference<>() {});
         return result;
     }
 
@@ -290,13 +293,16 @@ public class TestUtils {
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
         // TO-DO
-        List<String> list = getEndRoles(client, alias, role);
-//        HashMap<String, String> listData = (HashMap<String, String>) list;
-//        for (String i : list) {
-        if (role.equals(list.get(0)) && eid.equals(list.get(1))) {
-            return true;
+        List<Map<String, Object>> list = getEndRoles(client, alias, role);
+        for (Map<String, Object> endRoleMap : list) {
+            String endRole = (String) endRoleMap.get("role");
+            String endRoleEid = (String) endRoleMap.get("eid");
+
+            if (endRole != null && endRoleEid != null &&
+                    endRole.equals(role) && endRoleEid.equals(eid)) {
+                return true;
+            }
         }
-//        }
         return false;
     }
 
