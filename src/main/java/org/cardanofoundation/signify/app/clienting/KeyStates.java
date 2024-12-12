@@ -2,7 +2,7 @@ package org.cardanofoundation.signify.app.clienting;
 
 import org.cardanofoundation.signify.cesr.util.Utils;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,10 +58,10 @@ public class KeyStates {
      */
     public Object query(String pre, Integer sn, Object anchor) throws Exception {
         String path = "/queries";
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("pre", pre);
         if (sn != null) {
-            data.put("sn", sn);
+            data.put("sn", sn.toString());
         }
         if (anchor != null) {
             data.put("anchor", anchor);
