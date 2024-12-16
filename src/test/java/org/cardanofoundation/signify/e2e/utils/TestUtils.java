@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.app.clienting.*;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -108,7 +107,8 @@ public class TestUtils {
         String responseBody = response.getBody();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Map<String, Object>> result = objectMapper.readValue(responseBody, new TypeReference<>() {});
+        List<Map<String, Object>> result = objectMapper.readValue(responseBody, new TypeReference<>() {
+        });
         return result;
     }
 
@@ -191,6 +191,11 @@ public class TestUtils {
         SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
+        System.out.println("Client: " +
+                Map.of("agent", client.getAgent() != null ? client.getAgent().getPre() : null,
+                        "controller", client.getController().getPre()
+                )
+        );
         return client;
     }
 
@@ -234,7 +239,7 @@ public class TestUtils {
             }
         }
 
-        Object oobi =  client.getOobis().get(name, "agent");
+        Object oobi = client.getOobis().get(name, "agent");
         String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
@@ -265,30 +270,39 @@ public class TestUtils {
         return getResponseI.toString();
     }
 
-    public static Object getOrIssueCredential() {
+    public static Object getOrIssueCredential(
+            SignifyClient issuerClient,
+            Aid issuerAid,
+            Aid recipientAid,
+//            IssuerRegistry issuerRegistry,
+            Object credData,
+            String schema,
+            Object rules,
+            Object source
+    ) {
+        Boolean privacy = false;
         // TO-DO
         return null;
     }
 
-    public static List<Object> getStates(SignifyClient client, List<String> prefixes) throws ExecutionException, InterruptedException {
+    public static List<Object> getStates(SignifyClient client, List<String> prefixes) {
         // TO-DO
-        List<CompletableFuture<Object>> futures = prefixes.stream()
-                .map(prefix -> CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return client.getKeyStates().get(prefix);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }))
-                .collect(Collectors.toList()).reversed();
-
-        List<String> participantStates = new ArrayList<>();
-        for (CompletableFuture<Object> future : futures) {
-            participantStates.add(future.get().toString());
-        }
-        return participantStates.stream()
-                .map(stateArray -> stateArray.charAt(0))
-                .collect(Collectors.toList());
+        List<Object> participantStates = prefixes.stream().map(p -> {
+            try {
+                return client.getKeyStates().get(p);
+            } catch (Exception e) {
+                throw new RuntimeException("Error fetching key states for prefix: " + p, e);
+            }
+        }).toList();
+        return participantStates.stream().map(s -> {
+            if (s instanceof List<?>) {
+                return ((List<?>) s).get(0);
+            } else if (s instanceof Object) {
+                return ((Object[]) s)[0];
+            } else {
+                throw new IllegalArgumentException("Unexpected type: " + s.getClass());
+            }
+        }).collect(Collectors.toList());
     }
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
@@ -363,13 +377,14 @@ public class TestUtils {
         } else {
             operation = Operation.fromObject(op);
         }
-        operation = client.getOperations().wait(
-            operation,
-            Operations.WaitOptions.builder()
-                .signal(AbortSignal.builder()
-                    .timeout(3000)
-                    .build())
-                .build());
+        operation = client.getOperations().wait(operation, null);
+//        operation = client.getOperations().wait(
+//            operation,
+//            Operations.WaitOptions.builder()
+//                .signal(AbortSignal.builder()
+//                    .timeout(3000)
+//                    .build())
+//                .build());
         deleteOperations(client, operation);
         return operation;
     }

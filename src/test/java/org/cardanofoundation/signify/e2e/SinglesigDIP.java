@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.Operation;
@@ -19,16 +20,16 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-class SinglesigDIP {
+class SinglesigDIP extends TestUtils {
     static SignifyClient client1, client2;
     static String contact1_id;
     static String name1_id, name1_oobi;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
-    public static void getClients() {
+    public static void getClients() throws Exception {
         try {
-            List<SignifyClient> clients = TestUtils.getOrCreateClients(2, null);
+            List<SignifyClient> clients = getOrCreateClients(2, null);
             client1 = clients.get(0);
             client2 = clients.get(1);
         } catch (ExecutionException | InterruptedException e) {
@@ -38,7 +39,7 @@ class SinglesigDIP {
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients = TestUtils.getOrCreateIdentifier(client1, "name1");
+        String[] clients = getOrCreateIdentifier(client1, "name1");
         try {
             name1_id = clients[0];
             name1_oobi = clients[1];
@@ -47,19 +48,12 @@ class SinglesigDIP {
         }
     }
     @BeforeEach
-    public  void getContact() throws SodiumException, JsonProcessingException, InterruptedException {
-        contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
+    public void getContact() throws SodiumException, JsonProcessingException, InterruptedException {
+        contact1_id = getOrCreateContact(client2, "contact1", name1_oobi);
     }
 
-//    @Test
-//    public void testSinglesigDIP() {
-//        System.out.println("Client 1: " + client1);
-//        System.out.println("Client 2: " + client2);
-//        System.out.println("Contact: " + contact1_id);
-//    }
-
     @Test
-    public void delegate1a() throws Exception {
+    public void singlesig_dip() throws Exception {
         String opResponseName = null, opResponseI= null;
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
@@ -69,8 +63,7 @@ class SinglesigDIP {
         States.HabState delegate1 = client2.getIdentifier().get("delegate1");
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, HashMap.class);
-                HashMap<String, Object> responseMap = (HashMap<String, Object>) opMap.get("response");
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
                 opResponseName = opMap.get("name").toString();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -79,7 +72,6 @@ class SinglesigDIP {
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
         delegate1 = client2.getIdentifier().get("delegate1");
-
         Map<String, String> seal = new HashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "0");
@@ -91,13 +83,26 @@ class SinglesigDIP {
         // Refresh keystate to sn=1
         Object op2 = client2.getKeyStates().query(name1_id, 1, null);
 
-//        Object opFuture = TestUtils.operationToObject(TestUtils.waitOperation(client2, op));
+        op = operationToObject(waitOperation(client2, op));
+        Object opFuture1 = operationToObject(waitOperation(client1, op1));
+        Object opFuture2 = operationToObject(waitOperation(client2, op2));
 
-        CompletableFuture<Operation<Object>> opFuture = TestUtils.waitOperation(client2, op);
-        CompletableFuture<Operation<Object>> op1Future = TestUtils.waitOperation(client1, op1);
-        CompletableFuture<Operation<Object>> op2Future = TestUtils.waitOperation(client2, op2);
-        CompletableFuture<Void> allOfOb = CompletableFuture.allOf(opFuture, op1Future, op2Future);
-        allOfOb.get();
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                HashMap<String, Object> responseMap = (HashMap<String, Object>) opMap.get("response");
+                opResponseI = responseMap.get("i").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+
+//        CompletableFuture<Operation<Object>> opFuture = TestUtils.waitOperation(client2, op);
+//        CompletableFuture<Operation<Object>> op1Future = TestUtils.waitOperation(client1, op1);
+//        CompletableFuture<Operation<Object>> op2Future = TestUtils.waitOperation(client2, op2);
+//        CompletableFuture<Void> allOfOb = CompletableFuture.allOf(opFuture, op1Future, op2Future);
+//        allOfOb.get();
 
         delegate1 = client2.getIdentifier().get("delegate1");
         Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
