@@ -229,11 +229,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Object data,
         HttpHeaders extraHeaders
     ) throws SodiumException, InterruptedException, IOException {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
         headers.put("signify-resource", this.controller.getPre());
         headers.put("signify-timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
-        headers.put("content-Type", "application/json");
+        headers.put("content-type", "application/json");
 
         Object _body = method.equals("GET") ? null : Utils.jsonStringify(data);
         if (this.getAuthn() != null) {
@@ -267,9 +267,9 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
                 method, path, response.statusCode(), response.body()));
         }
 
-        Map<String, String> responseHeaders = new HashMap<>();
+        Map<String, String> responseHeaders = new LinkedHashMap<>();
         response.headers().map().forEach((key, values) ->
-            responseHeaders.put(key.toLowerCase(), values.getFirst()));
+            responseHeaders.put(key, values.getFirst()));
 
         boolean isSameAgent = this.agent != null &&
             this.agent.getPre().equals(responseHeaders.get("signify-resource"));

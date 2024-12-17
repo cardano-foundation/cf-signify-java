@@ -94,4 +94,8 @@ public class Utils {
             case null, default -> Collections.emptyList();
         };
     }
+
+    public static long currentTimeSeconds() {
+        return System.currentTimeMillis() / 1000;
+    }
 }
