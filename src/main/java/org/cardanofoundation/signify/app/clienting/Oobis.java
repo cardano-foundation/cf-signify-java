@@ -1,9 +1,9 @@
 package org.cardanofoundation.signify.app.clienting;
 
+import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,15 +27,14 @@ public class Oobis {
      * @throws JsonProcessingException if there is an error processing the JSON
      * @throws SodiumException
      */
-    public Object get(String name, String role) throws JsonProcessingException, SodiumException {
+    public Object get(String name, String role) throws IOException, SodiumException, InterruptedException {
         if (role == null) {
             role = "agent";
         }
         String path = "/identifiers/" + name + "/oobis?role=" + role;
         String method = "GET";
-        ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-        });
+        HttpResponse<String> response = client.fetch(path, method, null, null);
+        return objectMapper.readValue(response.body(), new TypeReference<>() {});
     }
 
     /**
@@ -47,7 +46,7 @@ public class Oobis {
      * @throws JsonProcessingException if there is an error processing the JSON
      * @throws SodiumException
      */
-    public Object resolve(String oobi, String alias) throws JsonProcessingException, SodiumException {
+    public Object resolve(String oobi, String alias) throws IOException, SodiumException, InterruptedException {
         String path = "/oobis";
         String method = "POST";
 
@@ -56,8 +55,7 @@ public class Oobis {
         if (alias != null) {
             data.put("oobialias", alias);
         }
-        ResponseEntity<String> response = client.fetch(path, method, data, null);
-        return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-        });
+        HttpResponse<String> response = client.fetch(path, method, data, null);
+        return objectMapper.readValue(response.body(), new TypeReference<>() {});
     }
 }

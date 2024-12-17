@@ -14,13 +14,14 @@ import org.junit.jupiter.api.Test;
 import static org.cardanofoundation.signify.app.Exchanging.exchange;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.security.DigestException;
 import java.util.*;
 
 public class ExchangingTest extends BaseMockServerTest {
     
     @Test
     @DisplayName("should create an exchange message with no transposed attachments")
-    public void shouldCreateExchangeMessageWithNoTransposedAttachments() throws SodiumException {
+    public void shouldCreateExchangeMessageWithNoTransposedAttachments() throws SodiumException, DigestException {
         String dt = "2023-08-30T17:22:54.183Z";
         
         Exchanging.ExchangeResult result = exchange(
@@ -48,8 +49,7 @@ public class ExchangingTest extends BaseMockServerTest {
         expectedKed.put("t", "exn");
         expectedKed.put("v", "KERI10JSON0000bf_");
 
-        // TODO investigate unmatched "d" value
-//        assertEquals(expectedKed, exn.getKed());
+        assertEquals(expectedKed, exn.getKed());
         assertArrayEquals(new byte[0], end);
 
         int sith = 1;
@@ -85,7 +85,7 @@ public class ExchangingTest extends BaseMockServerTest {
         
         assertEquals("EAKUR-LmLHWMwXTLWQ1QjxHrihBmwwrV2tYaSG7hOrWj", nxt.getFirst());
 
-        Map<String, Object> ked0 = new HashMap<>();
+        Map<String, Object> ked0 = new LinkedHashMap<>();
         ked0.put("v", "KERI10JSON000000_");
         ked0.put("t", Ilks.ICP.getValue());
         ked0.put("d", "");
@@ -103,13 +103,12 @@ public class ExchangingTest extends BaseMockServerTest {
         Serder serder = new Serder(ked0);
         Siger siger = (Siger) skp0.sign(serder.getRaw().getBytes(), 0);
 
-        // TODO investigate unmatched value when .getQb64()
-//        assertEquals(
-//            "AAAPkMTS3LrrhVuQB0k4UndDN0xIfEiKYaN7rTlQ_q9ImnBcugwNO8VWTALXzWoaldJEC1IOpEGkEnjZfxxIleoI",
-//            siger.getQb64()
-//        );
+        assertEquals(
+            "AAAPkMTS3LrrhVuQB0k4UndDN0xIfEiKYaN7rTlQ_q9ImnBcugwNO8VWTALXzWoaldJEC1IOpEGkEnjZfxxIleoI",
+            siger.getQb64()
+        );
 
-        Map<String, Object> ked1 = new HashMap<>();
+        Map<String, Object> ked1 = new LinkedHashMap<>();
         ked1.put("v", "KERI10JSON000000_");
         ked1.put("t", Ilks.VCP.getValue());
         ked1.put("d", "");
@@ -120,11 +119,11 @@ public class ExchangingTest extends BaseMockServerTest {
         
         Serder vcp = new Serder(ked1);
 
-        Map<String, List<Object>> embeds = new HashMap<>();
+        Map<String, List<Object>> embeds = new LinkedHashMap<>();
         embeds.put("icp", Arrays.asList(serder, siger.getQb64()));
         embeds.put("vcp", Arrays.asList(vcp, null));
 
-        result = exchange("/multisig/vcp", new HashMap<>(), "test", "", dt, null, null, embeds);
+        result = exchange("/multisig/vcp", new LinkedHashMap<>(), "test", "", dt, null, null, embeds);
         exn = result.serder();
         end = result.end();
 
@@ -162,24 +161,23 @@ public class ExchangingTest extends BaseMockServerTest {
         embeddedData.put("icp", icpData);
         embeddedData.put("vcp", vcpData);
 
-        expectedFinalKed.put("a", Map.of("i", ""));
-        expectedFinalKed.put("d", "EOK2xNjB5xlSvizCUrkFKbdF4j1nsGpvt6TR1HL0wvaY");
-        expectedFinalKed.put("dt", "2023-08-30T17:22:54.183Z");
-        expectedFinalKed.put("e", embeddedData);
-        expectedFinalKed.put("i", "test");
-        expectedFinalKed.put("p", "");
-        expectedFinalKed.put("q", new HashMap<>());
-        expectedFinalKed.put("r", "/multisig/vcp");
-        expectedFinalKed.put("rp", "");
-        expectedFinalKed.put("t", "exn");
         expectedFinalKed.put("v", "KERI10JSON00021b_");
+        expectedFinalKed.put("t", "exn");
+        expectedFinalKed.put("d", "EOK2xNjB5xlSvizCUrkFKbdF4j1nsGpvt6TR1HL0wvaY");
+        expectedFinalKed.put("i", "test");
+        expectedFinalKed.put("rp", "");
+        expectedFinalKed.put("p", "");
+        expectedFinalKed.put("dt", "2023-08-30T17:22:54.183Z");
+        expectedFinalKed.put("r", "/multisig/vcp");
+        expectedFinalKed.put("q", new LinkedHashMap<>());
+        expectedFinalKed.put("a", Map.of("i", ""));
+        expectedFinalKed.put("e", embeddedData);
 
-        // TODO investigate unmatched value
-//        assertEquals(expectedFinalKed, exn.getKed());
-//        assertEquals(
-//            "-LAZ5AACAA-e-icpAAAPkMTS3LrrhVuQB0k4UndDN0xIfEiKYaN7rTlQ_q9ImnBcugwNO8VWTALXzWoaldJEC1IOpEGkEnjZfxxIleoI",
-//            new String(end)
-//        );
+        assertEquals(expectedFinalKed, exn.getKed());
+        assertEquals(
+            "-LAZ5AACAA-e-icpAAAPkMTS3LrrhVuQB0k4UndDN0xIfEiKYaN7rTlQ_q9ImnBcugwNO8VWTALXzWoaldJEC1IOpEGkEnjZfxxIleoI",
+            new String(end)
+        );
     }
 
     @Test

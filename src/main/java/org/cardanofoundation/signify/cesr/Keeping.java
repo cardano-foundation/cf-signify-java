@@ -4,6 +4,7 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.params.GroupParams;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
@@ -19,6 +20,7 @@ import org.cardanofoundation.signify.core.States.State;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
+import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -59,7 +61,6 @@ public class Keeping {
         ) throws SodiumException;
     }
 
-    @SuppressWarnings("unchecked")
     public static class KeyManager {
         private final Salter salter;
         private final Map<String, ExternalModuleType> modules = new HashMap<>();

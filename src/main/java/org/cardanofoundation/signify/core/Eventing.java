@@ -15,6 +15,7 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
 public class Eventing {
     private static final int MaxIntThold = (int) (Math.pow(2, 32) - 1);
 
-    public static Serder interact(InteractArgs args) {
+    public static Serder interact(InteractArgs args) throws DigestException {
         String vs = versify(
                 Ident.KERI,
                 args.getVersion(),
@@ -56,7 +57,7 @@ public class Eventing {
         return new Serder(result.sad());
     }
 
-    public static Serder incept(InceptArgs args) {
+    public static Serder incept(InceptArgs args) throws DigestException {
         if (args.getIntive() == null) {
             args.setIntive(false);
         }
@@ -239,7 +240,7 @@ public class Eventing {
             String stamp,
             CoreUtil.Version version,
             CoreUtil.Serials kind
-    ) {
+    ) throws DigestException {
         if (route == null) {
             route = "";
         }
@@ -268,7 +269,7 @@ public class Eventing {
         return new Serder(sad);
     }
 
-    public static Serder rotate(RotateArgs args) {
+    public static Serder rotate(RotateArgs args) throws DigestException {
         if (args.getSn() == null) {
             args.setSn(1);
         }

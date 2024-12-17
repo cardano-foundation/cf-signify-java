@@ -15,6 +15,7 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.DigestException;
 import java.util.List;
 
 import static org.cardanofoundation.signify.cesr.util.Utils.intToBytes;
@@ -63,7 +64,7 @@ public class RawArgs {
         return rawArgs;
     }
 
-    public static RawArgs generateBlake3256SeedRaw(RawArgs rawArgs, byte[] ser) {
+    public static RawArgs generateBlake3256SeedRaw(RawArgs rawArgs, byte[] ser) throws DigestException {
         if (rawArgs.getRaw() == null && ser == null) {
             throw new EmptyMaterialException("Empty material");
         }

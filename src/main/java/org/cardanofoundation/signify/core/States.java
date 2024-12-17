@@ -1,6 +1,8 @@
 package org.cardanofoundation.signify.core;
 
 import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 

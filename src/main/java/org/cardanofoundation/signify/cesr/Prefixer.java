@@ -10,6 +10,7 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.security.DigestException;
 import java.util.*;
 
 public class Prefixer extends Matter{
@@ -27,13 +28,13 @@ public class Prefixer extends Matter{
         setVerifyFunction();
     }
 
-    public Prefixer(String code, Map<String, Object> ked) {
+    public Prefixer(String code, Map<String, Object> ked) throws DigestException {
         super(getRawArgs(code, ked));
         this._derive = getDerive(code, ked);
         setVerifyFunction();
     }
 
-    public Prefixer(Map<String, Object> ked) {
+    public Prefixer(Map<String, Object> ked) throws DigestException {
         this(null, ked);
     }
 
@@ -57,7 +58,7 @@ public class Prefixer extends Matter{
         return _derive;
     }
 
-    private static RawArgs getRawArgs(String code, Map<String, Object> ked) {
+    private static RawArgs getRawArgs(String code, Map<String, Object> ked) throws DigestException {
         Derive _derive = getDerive(code, ked);
         DeriveResult deriveResult = _derive.derive(ked);
         return RawArgs.builder()
@@ -157,7 +158,7 @@ public class Prefixer extends Matter{
         return new DeriveResult(verfer.getRaw(), verfer.getCode());
     }
 
-    public static DeriveResult _deriveBlake3_256(Map<String, Object> ked) {
+    public static DeriveResult _deriveBlake3_256(Map<String, Object> ked) throws DigestException {
         String ilk = (String) ked.get("t");
         List<String> validIlks = Arrays.asList(
             CoreUtil.Ilks.ICP.getValue(),
@@ -268,7 +269,7 @@ public class Prefixer extends Matter{
 
     @FunctionalInterface
     private interface Derive {
-        DeriveResult derive(Map<String, Object> ked);
+        DeriveResult derive(Map<String, Object> ked) throws DigestException;
     }
 
     public record DeriveResult (byte[] raw, String code) {}

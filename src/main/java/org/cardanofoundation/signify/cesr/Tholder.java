@@ -41,7 +41,6 @@ public class Tholder {
         return number != null ? number.getQb64b() : null;
     }
 
-    @SuppressWarnings("unchecked")
     public Object getSith() {
         if (this.weighted) {
             List<List<String>> sith = new ArrayList<>();
@@ -78,7 +77,6 @@ public class Tholder {
         if (thold instanceof Integer) {
             _processUnweighted((Integer) thold);
         } else {
-            @SuppressWarnings("unchecked")
             List<List<Fraction>> weightedThold = (List<List<Fraction>>) thold;
             _processWeighted(weightedThold);
         }
@@ -100,7 +98,6 @@ public class Tholder {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void _processSith(Object sith) {
         if (sith instanceof Number) {
             this._processUnweighted(((Number) sith).intValue());
@@ -210,7 +207,6 @@ public class Tholder {
             return false;
         }
 
-        @SuppressWarnings("unchecked")
         List<List<Fraction>> weightedThold = (List<List<Fraction>>) thold;
 
         Set<Integer> indexes = new TreeSet<>(indices);

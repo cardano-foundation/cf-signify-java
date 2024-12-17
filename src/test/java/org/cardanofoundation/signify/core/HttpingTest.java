@@ -1,20 +1,20 @@
 package org.cardanofoundation.signify.core;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.cardanofoundation.signify.cesr.Cigar;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.junit.jupiter.api.DisplayName;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class HttpingTest {
 
@@ -26,39 +26,66 @@ class HttpingTest {
         final Signer signer = salter.signer();
 
         final Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        headers.put("Content-Length", "256");
-        headers.put("Connection", "close");
-        headers.put("Signify-Resource", "EWJkQCFvKuyxZi582yJPb0wcwuW3VXmFNuvbQuBpgmIs");
-        headers.put("Signify-Timestamp", "2022-09-24T00:05:48.196795+00:00");
+        headers.put("content-type", "application/json");
+        headers.put("content-length", "256");
+        headers.put("connection", "close");
+        headers.put("signify-resource", "EWJkQCFvKuyxZi582yJPb0wcwuW3VXmFNuvbQuBpgmIs");
+        headers.put("signify-timestamp", "2022-09-24T00:05:48.196795+00:00");
 
         final Httping.SiginputArgs args = new Httping.SiginputArgs();
         args.setName("sig0");
         args.setMethod("POST");
         args.setPath("/signify");
         args.setHeaders(headers);
-        args.setFields(Arrays.asList("Signify-Resource", "@method", "@path", "Signify-Timestamp"));
+        args.setFields(Arrays.asList("signify-resource", "@method", "@path", "signify-timestamp"));
         args.setAlg("ed25519");
         args.setKeyid(signer.getVerfer().getQb64());
 
-        final Httping.SiginputResult result = Httping.siginput(signer, args);
+        final Httping.SiginputResult result;
+        try(MockedStatic<Utils> utils = Mockito.mockStatic(Utils.class)) {
+            utils.when(Utils::currentTimeSeconds).thenReturn(1663968348L);
+            result = Httping.siginput(signer, args);
+        }
+
         Map<String, String> header = result.headers();
         Cigar cigar = (Cigar) result.sig();
 
         assertEquals(1, header.size());
-        assertTrue(header.containsKey("Signature-Input"));
-        final String sigipt = header.get("Signature-Input");
+        assertTrue(header.containsKey("signature-input"));
+        final String sigipt = header.get("signature-input");
 
-        // TODO find the way to serialize the map like in signify-ts
-        // assertEquals(
-        //     sigipt,
-        //     "sig0=(\"Signify-Resource\" \"@method\" \"@path\" \"Signify-Timestamp\");created=1663968348;keyid=\"DN54yRad_BTqgZYUSi_NthRBQrxSnqQdJXWI5UHcGOQt\";alg=\"ed25519\""
-        // );
+        assertEquals(
+                "sig0=(\"signify-resource\" \"@method\" \"@path\" \"signify-timestamp\");created=1663968348;keyid=\"DN54yRad_BTqgZYUSi_NthRBQrxSnqQdJXWI5UHcGOQt\";alg=\"ed25519\"",
+                sigipt
+        );
 
-        /**
-         * TODO: ciger.getQb64() return different value (0BA4zFVHQuLDVOpTPnkf1EKwkSWsnRMSSX6WaMKr2EioG5Sku4AynGQHHvpqIRqv_pws6pSTUtDTMpWIsrLBIwEK)
-         *  even though the input and the impl is same, probably related to lazysodium
-         */
-        assertEquals(cigar.getQb64(), "0BAJWoDvZXYKnq_9rFTy_mucctxk3rVK6szopNi1rq5WQcJSNIw-_PocSQNoQGD1Ow_s2mDI5-Qqm34Y56gUKQcF");
+        assertEquals("0BAf5J7VAFCvT8w5HivXSRpzI13iaMMJjDfV1LKmoimufvn7hvJ6Ws9VeD91KSVVnM04F9gQSKutujK3tf9xeG0I", cigar.getQb64());
+    }
+
+    @Test
+    @DisplayName("desiginput")
+    void testDesiginput() {
+        final String siginput = "sig0=(\"signify-resource\" \"@method\" \"@path\" \"signify-timestamp\");created=1609459200;keyid=\"EIaGMMWJFPmtXznY1IIiKDIrg-vIyge6mBl2QV8dDjI3\";alg=\"ed25519\"";
+        List<Httping.Inputage> inputages = Httping.desiginput(siginput);
+        assertEquals(1, inputages.size());
+
+        List<String> fields = new ArrayList<>() {{
+            add("signify-resource");
+            add("@method");
+            add("@path");
+            add("signify-timestamp");
+        }};
+        Httping.Inputage inputage = inputages.get(0);
+        assertEquals(fields, inputage.getFields());
+
+
+        assertEquals("sig0", inputage.getName());
+        assertEquals(1609459200L, inputage.getCreated());
+        assertEquals("EIaGMMWJFPmtXznY1IIiKDIrg-vIyge6mBl2QV8dDjI3", inputage.getKeyid());
+        assertEquals("ed25519", inputage.getAlg());
+
+        assertNull(inputage.getExpires());
+        assertNull(inputage.getNonce());
+        assertNull(inputage.getContext());
     }
 }

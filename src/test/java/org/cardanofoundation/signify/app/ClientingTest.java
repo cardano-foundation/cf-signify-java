@@ -3,17 +3,18 @@ package org.cardanofoundation.signify.app;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.*;
-import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
+import org.cardanofoundation.signify.app.clienting.Contacting;
+import org.cardanofoundation.signify.app.clienting.Oobis;
+import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Httping;
+import org.cardanofoundation.signify.app.clienting.Operations;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,17 +27,17 @@ public class ClientingTest extends BaseMockServerTest {
     @DisplayName("SignifyClient initialization")
     void testSignifyClientInitialization() throws Exception {
         InvalidValueException exception = assertThrows(
-                InvalidValueException.class,
-                () -> new SignifyClient(url, "short", Tier.low, bootUrl, null)
+            InvalidValueException.class,
+            () -> new SignifyClient(url, "short", Tier.low, bootUrl, null)
         );
         assertEquals("bran must be 21 characters", exception.getMessage());
 
         SignifyClient client = new SignifyClient(
-                url,
-                bran,
-                Tier.low,
-                bootUrl,
-                null
+            url,
+            bran,
+            Tier.low,
+            bootUrl,
+            null
         );
 
         assertEquals(bran, client.getBran());
@@ -45,19 +46,19 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(Tier.low, client.getTier());
         assertEquals(0, client.getPidx());
         assertEquals(
-                "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
-                client.getController().getPre()
+            "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+            client.getController().getPre()
         );
         assertEquals("signify:controller", client.getController().getStem());
         assertEquals(Tier.low, client.getController().getTier());
 
         String expectedSerderRaw = """
-                {"v":"KERI10JSON00012b_","t":"icp",\
-                "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
-                "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
-                "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
-                "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
-                "bt":"0","b":[],"c":[],"a":[]}""";
+            {"v":"KERI10JSON00012b_","t":"icp",\
+            "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
+            "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
+            "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
+            "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
+            "bt":"0","b":[],"c":[],"a":[]}""";
         assertEquals(expectedSerderRaw, client.getController().getSerder().getRaw());
         assertEquals("0", client.getController().getSerder().getKed().get("s"));
 
@@ -69,18 +70,18 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals("application/json", request.getHeader("Content-Type"));
 
         String expectedRequestBody = """
-                {"icp":{"v":"KERI10JSON00012b_","t":"icp",\
-                "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
-                "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
-                "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
-                "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
-                "bt":"0","b":[],"c":[],"a":[]},\
-                "sig":"AACJwsJ0mvb4VgxD87H4jIsiT1QtlzznUy9zrX3lGdd48jjQRTv8FxlJ8ClDsGtkvK4Eekg5p-oPYiPvK_1eTXEG",\
-                "stem":"signify:controller","pidx":1,"tier":"low"}""";
+            {"icp":{"v":"KERI10JSON00012b_","t":"icp",\
+            "d":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",\
+            "i":"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose","s":"0",\
+            "kt":"1","k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],\
+            "nt":"1","n":["EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL"],\
+            "bt":"0","b":[],"c":[],"a":[]},\
+            "sig":"AACJwsJ0mvb4VgxD87H4jIsiT1QtlzznUy9zrX3lGdd48jjQRTv8FxlJ8ClDsGtkvK4Eekg5p-oPYiPvK_1eTXEG",\
+            "stem":"signify:controller","pidx":1,"tier":"low"}""";
 
         assertEquals(
-                objectMapper.readTree(expectedRequestBody),
-                objectMapper.readTree(request.getBody().readUtf8())
+            objectMapper.readTree(expectedRequestBody),
+            objectMapper.readTree(request.getBody().readUtf8())
         );
         cleanUpRequest();
 
@@ -94,37 +95,36 @@ public class ClientingTest extends BaseMockServerTest {
 
         // Validate agent
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                client.getAgent().getPre()
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getPre()
         );
         assertEquals(
-                "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
-                client.getAgent().getAnchor()
+            "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+            client.getAgent().getAnchor()
         );
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                client.getAgent().getSaid()
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getSaid()
         );
         assertEquals("0", client.getAgent().getState().get("s"));
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                client.getAgent().getState().get("d")
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            client.getAgent().getState().get("d")
         );
 
         // Validate approve delegation
         assertEquals("1", client.getController().getSerder().getKed().get("s"));
         assertEquals("ixn", client.getController().getSerder().getKed().get("t"));
 
-        @SuppressWarnings("unchecked")
         List<Object> actions = (List<Object>) client.getController().getSerder().getKed().get("a");
         Map<String, Object> actionMap = Utils.toMap(actions.getFirst());
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                actionMap.get("i")
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            actionMap.get("i")
         );
         assertEquals(
-                "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
-                actionMap.get("d")
+            "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            actionMap.get("d")
         );
         assertEquals("0", actionMap.get("s"));
 
@@ -134,10 +134,10 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(bran, data[1]);
 
         // Validate service instances
-        assertInstanceOf(Identifier.class, client.getIdentifier());
+        assertInstanceOf(Aiding.Identifier.class, client.getIdentifier());
         assertInstanceOf(Operations.class, client.getOperations());
         assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
-        assertInstanceOf(KeyStates.class, client.getKeyStates());
+        assertInstanceOf(Coring.KeyStates.class, client.getKeyStates());
         assertInstanceOf(Credentialing.Credentials.class, client.getCredentials());
         assertInstanceOf(Credentialing.Registries.class, client.getRegistries());
         assertInstanceOf(Credentialing.Schemas.class, client.getSchemas());
@@ -150,31 +150,40 @@ public class ClientingTest extends BaseMockServerTest {
         assertInstanceOf(Grouping.Groups.class, client.getGroups());
         cleanUpRequest();
 
+    }
+
+    @Test
+    @DisplayName("Signed Fetch")
+    void testSignedFetch() throws Exception {
         // Siged fetch
         String bran = "0123456789abcdefghijk";
-        client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
 
         client.connect();
         cleanUpRequest();
 
         client.fetch("/contacts", "GET", null, null);
-        request = mockWebServer.takeRequest();
+        RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/contacts", request.getPath());
-        assertEquals("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose", request.getHeaders().get("Signify-Resource"));
+        assertEquals("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose", request.getHeaders().get("signify-resource"));
+        cleanUpRequest();
 
+        //test bad request
+        Exception exception = assertThrows(
+                HeaderVerificationException.class,
+            () -> client.fetch("/different-remote-agent", "GET", null, null)
+        );
 
-        // TODO find the way tho mock badAgentHeaders
-        Map<String, String> badAgentHeaders = new HashMap<>();
-        badAgentHeaders.put("signify-resource", "bad_resource");
-        badAgentHeaders.put(Httping.HEADER_SIG_TIME, "2023-08-20T15:34:31.534673+00:00");
-        badAgentHeaders.put(Httping.HEADER_SIG_INPUT,
-                "signify=(\"signify-resource\" \"@method\" \"@path\" \"signify-timestamp\");created=1692545671;keyid=\"EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei\";alg=\"ed25519\"");
-        badAgentHeaders.put("signature",
-                "indexed=\"?0\";signify=\"0BDiSoxCv42h2BtGMHy_tpWAqyCgEoFwRa8bQy20mBB2D5Vik4gRp3XwkEHtqy6iy6SUYAytMUDtRbewotAfkCgN\"");
-        badAgentHeaders.put("content-type", "application/json");
+        assertEquals("Message from a different remote agent", exception.getMessage());
+
+        exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> client.fetch("/invalid-signature", "GET", null, null)
+        );
+
+        assertEquals("Signature for EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei invalid.", exception.getMessage());
     }
-
 
     @Test
     public void testJsonObject() throws Exception {

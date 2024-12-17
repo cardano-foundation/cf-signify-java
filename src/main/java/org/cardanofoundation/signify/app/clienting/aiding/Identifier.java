@@ -18,11 +18,12 @@ import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.core.Manager.Algos;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.http.HttpResponse;
+import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -50,25 +51,26 @@ public class Identifier {
      * @param end   End index of list of notifications, defaults to 24
      * @return A Mono containing the list response
      */
-    public IdentifierListResponse list(Integer start, Integer end) throws SodiumException {
-        HttpHeaders extraHeaders = new HttpHeaders();
-        extraHeaders.add("Range", String.format("aids=%d-%d", start, end));
+    public IdentifierListResponse list(Integer start, Integer end) throws SodiumException, IOException, InterruptedException {
 
-        ResponseEntity<String> response = client.fetch(
+        Map<String, String> extraHeaders = new LinkedHashMap<>();
+        extraHeaders.put("Range", String.format("aids=%d-%d", start, end));
+
+        HttpResponse<String> response = client.fetch(
                 "/identifiers",
                 "GET",
                 null,
                 extraHeaders
         );
 
-        String contentRange = response.getHeaders().getFirst("content-range");
+        String contentRange = response.headers().firstValue("content-range").orElse(null);
         Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
 
         return new IdentifierListResponse(
                 range.start(),
                 range.end(),
                 range.total(),
-                response.getBody()
+                response.body()
         );
     }
 
@@ -78,12 +80,12 @@ public class Identifier {
      * @param name Prefix or alias of the identifier
      * @return A HabState to the identifier information
      */
-    public States.HabState get(String name) throws SodiumException {
+    public States.HabState get(String name) throws SodiumException, IOException, InterruptedException {
         final String path = "/identifiers/" + URI.create(name).toASCIIString();
         final String method = "GET";
 
-        ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return Utils.fromJson(response.getBody(), States.HabState.class);
+        HttpResponse<String> response = client.fetch(path, method, null, null);
+        return Utils.fromJson(response.body(), States.HabState.class);
     }
 
     /**
@@ -93,12 +95,12 @@ public class Identifier {
      * @param info Information to update for the given identifier
      * @return A HabState to the identifier information after updating
      */
-    public States.HabState update(String name, IdentifierInfo info) throws SodiumException {
+    public States.HabState update(String name, IdentifierInfo info) throws SodiumException, IOException, InterruptedException {
         final String path = "/identifiers/" + name;
         final String method = "PUT";
 
-        ResponseEntity<String> response = client.fetch(path, method, info, null);
-        return Utils.fromJson(response.getBody(), States.HabState.class);
+        HttpResponse<String> response = client.fetch(path, method, info, null);
+        return Utils.fromJson(response.body(), States.HabState.class);
     }
 
     /**
@@ -108,7 +110,7 @@ public class Identifier {
      * @param kargs Optional parameters to create the identifier
      * @return An EventResult to the inception result
      */
-    public EventResult create(String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException {
+    public EventResult create(String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
         // Assuming kargs is an instance of a class with appropriate getters
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
@@ -224,7 +226,7 @@ public class Identifier {
 
 
         this.client.setPidx(this.client.getPidx() + 1);
-        ResponseEntity<String> response = this.client.fetch("/identifiers", "POST", jsondata, null);
+        HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata, null);
         return new EventResult(serder, sigs, CompletableFuture.completedFuture(response));
     }
 

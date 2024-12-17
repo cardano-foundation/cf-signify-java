@@ -1,11 +1,6 @@
 package org.cardanofoundation.signify.core;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.cardanofoundation.signify.cesr.Signer;
@@ -14,6 +9,9 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.cardanofoundation.signify.cesr.util.Utils;
+import org.greenbytes.http.sfv.*;
+import org.greenbytes.http.sfv.Dictionary;
 
 public class Httping {
     public static String HEADER_SIG_INPUT = normalize("Signature-Input");
@@ -23,68 +21,36 @@ public class Httping {
         return header.toLowerCase().trim();
     }
 
-    @Getter
-    @Setter
-    public static class SiginputArgs {
-        private String name;
-        private String method;
-        private String path;
-        private Map<String, String> headers;
-        private List<String> fields;
-        private Integer expires;
-        private String nonce;
-        private String alg;
-        private String keyid;
-        private String context;
-    }
-
-    @Getter
-    @Setter
-    public static class Inputage {
-        private Object name;
-        private Object fields;
-        private Object created;
-        private Object expires;
-        private Object nonce;
-        private Object alg;
-        private Object keyid;
-        private Object context;
-    }
-
-    public record SiginputResult(Map<String, String> headers, Object sig) {
-    }
-
     public static SiginputResult siginput(Signer signer, SiginputArgs args) throws SodiumException {
         final List<String> items = new ArrayList<>();
-        List<Entry<String, Map<String, String>>> ifields = new ArrayList<>();
-
+        final List<String> ifields = new ArrayList<>();
         for (String field : args.fields) {
             if (field.startsWith("@")) {
                 switch (field) {
                     case "@method":
                         items.add("\"" + field + "\": " + args.method);
-                        ifields.add(new AbstractMap.SimpleEntry<>(field, new HashMap<>()));
+                        ifields.add(field);
                         break;
                     case "@path":
                         items.add("\"" + field + "\": " + args.path);
-                        ifields.add(new AbstractMap.SimpleEntry<>(field, new HashMap<>()));
+                        ifields.add(field);
                         break;
                 }
             } else {
                 if (!args.headers.containsKey(field)) continue;
 
-                ifields.add(new AbstractMap.SimpleEntry<>(field, new HashMap<>()));
+                ifields.add(field);
                 String value = args.headers.get(field);
                 items.add("\"" + field + "\": " + value);
             }
         }
 
         Map<String, Object> nameParams = new HashMap<>();
-        long now = System.currentTimeMillis() / 1000;
+        long now = Utils.currentTimeSeconds();
         nameParams.put("created", now);
 
         List<String> values = new ArrayList<>();
-        values.add("(" + String.join(" ", ifields.stream().map(Map.Entry::getKey).toArray(String[]::new)) + ")");
+        values.add("(" + String.join(" ", ifields) + ")");
         values.add("created=" + now);
 
         if (args.expires != null) {
@@ -108,8 +74,18 @@ public class Httping {
             nameParams.put("alg", args.alg);
         }
 
-        Map<String, Object> sid = new HashMap<>();
-        sid.put(args.name, Arrays.asList(ifields, nameParams));
+        // Create a dictionary with the structured fields
+        List<Item<?>> itemsList = new ArrayList<>();
+        ifields.forEach(s -> itemsList.add(StringItem.valueOf(s)));
+        Parameters parameters = Parameters.valueOf(nameParams);
+        InnerList innerList = InnerList.valueOf(itemsList)
+                .withParams(parameters);
+        Map<String, ListElement<?>> dicMap = new LinkedHashMap<>();
+        dicMap.put(args.name, innerList);
+        Dictionary dictionary = Dictionary.valueOf(dicMap);
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(HEADER_SIG_INPUT, dictionary.serialize());
 
         String params = String.join(";", values);
         items.add("\"@signature-params: " + params + "\"");
@@ -117,18 +93,57 @@ public class Httping {
         String ser = String.join("\n", items);
         Object sig = signer.sign(ser.getBytes());
 
-        Map<String, String> headers = new HashMap<>();
-
-        // TODO find the way to serialize the map like in signify-ts
-        String mockSignatureInput = "signify=(\"@method\" \"@path\" \"signify-resource\" \"signify-timestamp\");created=%d;keyid=\"%s\";alg=\"%s\"";
-        headers.put(HEADER_SIG_INPUT, String.format(mockSignatureInput, now, args.keyid, args.alg));
-
         return new SiginputResult(headers, sig);
     }
 
     public static List<Inputage> desiginput(String value) {
-        // TODO implement deserialization
-        return new ArrayList<>();
+        Parser parser = new Parser(value);
+        Dictionary dictionary = parser.parseDictionary();
+        List<Inputage> siginputs = new ArrayList<>();
+
+        Map<String, ListElement<?>> rawMap = dictionary.get();
+        for (Entry<String, ListElement<?>> entry : rawMap.entrySet()) {
+            Inputage siginput = new Inputage();
+
+            // set name
+            siginput.setName(entry.getKey());
+
+            // set fields
+            InnerList innerList = (InnerList) entry.getValue();
+            List<String> fields = innerList.get().stream().map(item -> String.valueOf(item.get())).toList();
+            siginput.setFields(fields);
+
+            // extract parameters
+            Parameters params = innerList.getParams();
+            if (!params.containsKey("created")) {
+                throw new IllegalArgumentException("missing required `created` field from signature input");
+            }
+            siginput.setCreated(params.get("created").get());
+
+            if (params.containsKey("expires")) {
+                siginput.setExpires(params.get("expires").get());
+            }
+
+            if (params.containsKey("nonce")) {
+                siginput.setNonce(params.get("nonce").get());
+            }
+
+            if (params.containsKey("alg")) {
+                siginput.setAlg(params.get("alg").get());
+            }
+
+            if (params.containsKey("keyid")) {
+                siginput.setKeyid(params.get("keyid").get());
+            }
+
+            if (params.containsKey("context")) {
+                siginput.setContext(params.get("context").get());
+            }
+
+            siginputs.add(siginput);
+        }
+
+        return siginputs;
     }
 
     /**
@@ -152,6 +167,37 @@ public class Httping {
         } else {
             return new RangeInfo(0, 0, 0);
         }
+    }
+
+    @Getter
+    @Setter
+    public static class SiginputArgs {
+        private String name;
+        private String method;
+        private String path;
+        private Map<String, String> headers;
+        private List<String> fields;
+        private Integer expires;
+        private String nonce;
+        private String alg;
+        private String keyid;
+        private String context;
+    }
+
+    @Getter
+    @Setter
+    public static class Inputage {
+        private Object name;
+        private List<String> fields;
+        private Object created;
+        private Object expires;
+        private Object nonce;
+        private Object alg;
+        private Object keyid;
+        private Object context;
+    }
+
+    public record SiginputResult(Map<String, String> headers, Object sig) {
     }
 
     public record RangeInfo(int start, int end, int total) {
