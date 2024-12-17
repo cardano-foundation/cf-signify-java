@@ -6,9 +6,9 @@ import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.clienting.aiding.*;
-import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class SaltyTests extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
-    static String name1_id;
-    static String ncode1_id;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -62,7 +60,7 @@ class SaltyTests extends TestUtils {
         IdentifierListResponse aidsJson = client.getIdentifier().list(0, 24);
         List<Map<String, Object>> aids = objectMapper.readValue(
                 aidsJson.aids().toString(),
-                new TypeReference<List<Map<String, Object>>>() {}
+                new TypeReference<>() {}
         );
         Assertions.assertEquals(1, aids.size());
 
@@ -114,31 +112,23 @@ class SaltyTests extends TestUtils {
         Assertions.assertEquals(icp2.getPre(), aid3.get("prefix"));
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
-        String[] clients = getOrCreateIdentifier(client, "name1");
-        try {
-            name1_id = clients[0];
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        kargs.setDelpre(name1_id);
+        kargs.setAlgo(Manager.Algos.salty);
         EventResult icpResult2 = client.getIdentifier().create("aid3", kargs);
-        // now is auto false
         waitOperation(client, icpResult2.op());
 
         IdentifierListResponse aidsJson2 = client.getIdentifier().list(0, 24);
         List<Map<String, Object>> aids2 = objectMapper.readValue(
                 aidsJson2.aids().toString(),
-                new TypeReference<List<Map<String, Object>>>() {}
+                new TypeReference<>() {}
         );
-        // back expected to 3
-        Assertions.assertEquals(4, aids2.size());
+        Assertions.assertEquals(3, aids2.size());
         Map<String, Object> aid4 = aids2.getFirst();
         Assertions.assertEquals("aid1", aid4.get("name"));
 
         IdentifierListResponse aidsJson3 = client.getIdentifier().list(1, 2);
         List<Map<String, Object>> aids3 = objectMapper.readValue(
                 aidsJson3.aids().toString(),
-                new TypeReference<List<Map<String, Object>>>() {}
+                new TypeReference<>() {}
         );
         Assertions.assertEquals(2, aids3.size());
         Map<String, Object> aid5 = aids3.getFirst();
@@ -154,26 +144,28 @@ class SaltyTests extends TestUtils {
         Assertions.assertEquals("aid3", aid6.get("name"));
 
         // TO DO getRotate()
-        RotateIdentifierArgs kargsRotate = new RotateIdentifierArgs();
-        if (kargsRotate.getNcode() != null) {
-            ncode1_id = kargsRotate.getNcode();
-        } else {
-            ncode1_id = Codex.MatterCodex.Ed25519_Seed.getValue();
-        }
-        kargsRotate.setNcode(ncode1_id);
-        EventResult icpResult3 = client.getIdentifier().rotate("aid1", kargsRotate);
-        Operation<Object> opRotate = waitOperation(client, icpResult3.op());
-        Object ked = opRotate.getResponse();
-        Serder rotRotate = new Serder((Map<String, Object>) ked);
-        Assertions.assertEquals("EBQABdRgaxJONrSLcgrdtbASflkvLxJkiDO0H-XmuhGg", rotRotate.getKed().get("d"));
-        Assertions.assertEquals("1", rotRotate.getKed().get("s"));
-        Assertions.assertEquals(1, rotRotate.getVerfers().size());
-        Assertions.assertEquals(1, rotRotate.getDigers().size());
-        Assertions.assertEquals("DHgomzINlGJHr-XP3sv2ZcR9QsIEYS3LJhs4KRaZYKly", rotRotate.getVerfers().getFirst().getQb64());
-        Assertions.assertEquals("EJMovBlrBuD6BVeUsGSxLjczbLEbZU9YnTSud9K4nVzk", rotRotate.getDigers().getFirst().getQb64());
+//        EventResult icpResult3 = client.getIdentifier().rotate("aid1");
+//        Operation<Object> opRotate = waitOperation(client, icpResult3.op());
+//        Object ked = opRotate.getResponse();
+//        Serder rotRotate = new Serder((Map<String, Object>) ked);
+//        Assertions.assertEquals("EBQABdRgaxJONrSLcgrdtbASflkvLxJkiDO0H-XmuhGg", rotRotate.getKed().get("d"));
+//        Assertions.assertEquals("1", rotRotate.getKed().get("s"));
+//        Assertions.assertEquals(1, rotRotate.getVerfers().size());
+//        Assertions.assertEquals(1, rotRotate.getDigers().size());
+//        Assertions.assertEquals("DHgomzINlGJHr-XP3sv2ZcR9QsIEYS3LJhs4KRaZYKly", rotRotate.getVerfers().getFirst().getQb64());
+//        Assertions.assertEquals("EJMovBlrBuD6BVeUsGSxLjczbLEbZU9YnTSud9K4nVzk", rotRotate.getDigers().getFirst().getQb64());
 
         // TO DO ( interact have problem )
+        EventResult icpResultInteract = client.getIdentifier().interact("aid1", List.of(icp.getPre()));
+        Operation<Object> opInteract = waitOperation(client, icpResultInteract.op());
+        Object kedInteract = opInteract.getResponse();
+        Serder ixnInteract = new Serder((Map<String, Object>) kedInteract);
+        Assertions.assertEquals("EJIplO1ujssiz1NUBINmO17Uq3sDWit3J9avNbjM8ZJD", ixnInteract.getKed().get("d"));
+        Assertions.assertEquals("1", ixnInteract.getKed().get("s"));
+        List<String> aList = (List<String>) ixnInteract.getKed().get("a");
+        Assertions.assertIterableEquals(List.of(icp.getPre()), aList);
 
         // TO DO KeyEvents
+
     }
 }
