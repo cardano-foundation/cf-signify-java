@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app.clienting.aiding;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.core.States;
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Builder
 public class RotateIdentifierArgs {
     private Boolean transferable;
     private Object nsith;

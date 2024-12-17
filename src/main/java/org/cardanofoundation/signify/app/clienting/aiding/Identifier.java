@@ -328,6 +328,10 @@ public class Identifier {
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
 
+    public EventResult rotate(String name) throws SodiumException, ExecutionException, InterruptedException {
+        return this.rotate(name, RotateIdentifierArgs.builder().build());
+    }
+
     public EventResult rotate(String name, RotateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException {
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
