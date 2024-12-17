@@ -5,6 +5,7 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.args.RotateArgs;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
@@ -15,10 +16,13 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
 
 public class Eventing {
+    private static final int MaxIntThold = (int) (Math.pow(2, 32) - 1);
+
     public static Serder interact(InteractArgs args) {
         String vs = versify(
                 Ident.KERI,
@@ -262,5 +266,175 @@ public class Eventing {
             throw new InvalidValueException("Invalid said = " + saider.getQb64() + " for reply msg=" + sad);
         }
         return new Serder(sad);
+    }
+
+    public static Serder rotate(RotateArgs args) {
+        if (args.getSn() == null) {
+            args.setSn(1);
+        }
+        if (args.getIntive() == null) {
+            args.setIntive(true);
+        }
+
+        String vs = versify(Ident.KERI, args.getVersion(), args.getKind(), 0);
+        String _ilk = args.getIlk() != null ? args.getIlk() : Ilks.ROT.getValue();
+        if (!_ilk.equals(Ilks.ROT.getValue()) && !_ilk.equals(Ilks.DRT.getValue())) {
+            throw new InvalidValueException("Invalid ilk = " + args.getIlk() + "for rot or drt.");
+        }
+
+        CesrNumber sner = new CesrNumber(BigInteger.valueOf(args.getSn()));
+        if (sner.getNum().compareTo(BigInteger.ONE) <= 0) {
+            throw new InvalidValueException("Invalid sn = " + sner.getNumh() + "for rot or drt.");
+        }
+        int _isith;
+        if (args.getIsith() == null) {
+            _isith = Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0));
+        } else {
+            _isith = (Integer) args.getIsith();
+        }
+
+        Tholder tholder = new Tholder(null, null, _isith);
+        if (tholder.getNum() != null && tholder.getNum() < 1) {
+            throw new InvalidValueException("Invalid sith = " + tholder.getNum() + "less than 1.");
+        }
+        if (tholder.getSize() > args.getKeys().size()) {
+            throw new InvalidValueException("Invalid sith = " + tholder.getNum() + "for keys = " + args.getKeys());
+        }
+
+        List<String> _ndigs;
+        if (args.getNdigs() == null) {
+            _ndigs = new ArrayList<>();
+        } else {
+            _ndigs = args.getNdigs();
+        }
+
+        int _nsith;
+        if (args.getNsith() == null) {
+            _nsith = Math.max(1, (int) Math.ceil(_ndigs.size() / 2.0));
+        } else {
+            _nsith = (Integer) args.getNsith();
+        }
+
+        Tholder ntholder = new Tholder(null, null, _nsith);
+        if (ntholder.getNum() != null && ntholder.getNum() < 1) {
+            throw new InvalidValueException("Invalid sith = " + ntholder.getNum() + "less than 1.");
+        }
+        if (ntholder.getSize() > _ndigs.size()) {
+            throw new InvalidValueException("Invalid sith = " + ntholder.getNum() + "for keys = " + _ndigs);
+        }
+
+        List<String> _wits;
+        if (args.getWits() == null) {
+            _wits = new ArrayList<>();
+        } else {
+            _wits = args.getWits();
+        }
+        Set<String> witset = new HashSet<>(_wits);
+        if (witset.size() != _wits.size()) {
+            throw new IllegalArgumentException("Invalid wits = " + args.getWits() + ", has duplicates.");
+        }
+
+        List<String> _cuts;
+        if (args.getCuts() == null) {
+            _cuts = new ArrayList<>();
+        } else {
+            _cuts = args.getCuts();
+        }
+        Set<String> cutset = new HashSet<>(_cuts);
+        if (cutset.size() != _cuts.size()) {
+            throw new IllegalArgumentException("Invalid cuts = " + args.getCuts() + ", has duplicates.");
+        }
+
+        List<String> _adds;
+        if (args.getAdds() == null) {
+            _adds = new ArrayList<>();
+        } else {
+            _adds = args.getAdds();
+        }
+        Set<String> addset = new HashSet<>(_adds);
+
+        // Non-empty intersection of witset and addset
+        Set<String> witaddset = witset.stream()
+            .filter(addset::contains)
+            .collect(Collectors.toSet());
+        if (!witaddset.isEmpty()) {
+            throw new IllegalArgumentException("Invalid member combination among wits = " + _wits + ", and adds = " + addset + ".");
+        }
+
+        // Non-empty intersection of cutset and addset
+        Set<String> cutaddset = cutset.stream()
+            .filter(addset::contains)
+            .collect(Collectors.toSet());
+        if (!cutaddset.isEmpty()) {
+            throw new IllegalArgumentException("Invalid member combination among cuts = " + cutset + ", and adds = " + addset + ".");
+        }
+
+        Set<String> newitsetdiff = new HashSet<>(_wits);
+        for (String v : _cuts) {
+            newitsetdiff.remove(v);
+        }
+
+        Set<String> newitset = new HashSet<>(newitsetdiff);
+        newitset.addAll(addset);
+
+        if (newitset.size() != witset.size() - cutset.size() + addset.size()) {
+            throw new IllegalArgumentException(
+                "Invalid member combination among wits = " + _wits +
+                    ", cuts = " + cutset + ", and adds = " + addset + "."
+            );
+        }
+
+        Integer _toad;
+        if (args.getToad() == null) {
+            if (newitset.isEmpty()) {
+                _toad = 0;
+            } else {
+                _toad = ample(newitset.size());
+            }
+        } else {
+            _toad = args.getToad();
+        }
+
+        if (!newitset.isEmpty()) {
+            if (_toad < 1 || _toad > newitset.size()) {
+                throw new IllegalArgumentException("Invalid toad = " + _toad + " for wit = " + _wits);
+            }
+        } else {
+            if (_toad != 0) {
+                throw new IllegalArgumentException("Invalid toad = " + _toad + " for wit = " + _wits);
+            }
+        }
+
+        Map<String, Object> _ked = new LinkedHashMap<>();
+        _ked.put("v", vs);
+        _ked.put("t", _ilk);
+        _ked.put("d", "");
+        _ked.put("i", args.getPre());
+        _ked.put("s", sner.getNumh());
+        _ked.put("p", args.getDig());
+        _ked.put("kt",
+            tholder.getNum() != null &&
+            args.getIntive() &&
+            tholder.getNum() <= MaxIntThold
+                ? Integer.toHexString(tholder.getNum())
+                : tholder.getSith());
+        _ked.put("k", args.getKeys());
+        _ked.put("nt",
+            ntholder.getNum() != null &&
+            args.getIntive() &&
+            ntholder.getNum() <= MaxIntThold
+                ? Integer.toHexString(ntholder.getNum())
+                : ntholder.getSith());
+        _ked.put("n", _ndigs);
+        _ked.put("bt",
+            _toad != null && args.getIntive() && _toad <= MaxIntThold
+                ? _toad
+                : Integer.toHexString(_toad));
+        _ked.put("br", args.getCuts());
+        _ked.put("ba", args.getAdds());
+        _ked.put("a", args.getData() != null ? args.getData() : new ArrayList<>());
+
+        Saider.SaidifyResult result = Saider.saidify(_ked);
+        return new Serder(result.sad());
     }
 }

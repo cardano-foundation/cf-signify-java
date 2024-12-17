@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.app.clienting.aiding;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -8,8 +7,11 @@ import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.Keeping.KeeperResult;
+import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
+import org.cardanofoundation.signify.cesr.args.RotateArgs;
+import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.core.Eventing;
@@ -325,5 +327,94 @@ public class Identifier {
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams());
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
+
+    public EventResult rotate(String name, RotateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException {
+        boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
+        String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
+        int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
+
+        States.HabState hab = this.get(name);
+        String pre = hab.getPrefix();
+        boolean delegated = !hab.getState().getDi().isEmpty();
+
+        States.State state = hab.getState();
+        int count = state.getK().size();
+        String dig = state.getD();
+        int ridx = Integer.parseInt(state.getS(), 16) + 1;
+        List<String> wits = state.getB();
+        Object isith = state.getNt();
+
+        Object nsith = kargs.getNsith() != null ? kargs.getNsith() : isith;
+
+        // if isith is None:  # compute default from newly rotated verfers above
+        if (isith == null) {
+            isith = Integer.toHexString(Math.max(1, (int) Math.ceil(count / 2.0)));
+        }
+        // if nsith is None:  # compute default from newly rotated digers above
+        if (nsith == null) {
+            nsith = Integer.toHexString(Math.max(1, (int) Math.ceil(count / 2.0)));
+        }
+
+        Object cst = new Tholder(null, null, isith).getSith(); // current signing threshold
+        Object nst = new Tholder(null, null, nsith).getSith(); // next signing threshold
+
+        // Regenerate next keys to sign rotation event
+        Keeper<?> keeper = this.client.getManager().get(hab);
+        // Create new keys for next digests
+        List<String> ncodes = kargs.getNcodes() != null ? kargs.getNcodes() : Collections.nCopies(ncount, ncode);
+
+        List<States.State> states = kargs.getStates() == null ? new ArrayList<>() : kargs.getStates();
+        List<States.State> rstates = kargs.getStates() == null ? new ArrayList<>() : kargs.getRstates();
+        KeeperResult keeperResult = keeper.rotate(
+            ncodes,
+            transferable,
+            states,
+            rstates
+        ).get();
+        List<String> keys = keeperResult.verfers();
+        List<String> ndigs = keeperResult.digers();
+
+        List<String> cuts = kargs.getCuts() != null ? kargs.getCuts() : new ArrayList<>();
+        List<String> adds = kargs.getAdds() != null ? kargs.getAdds() : new ArrayList<>();
+        List<Object> data = kargs.getData() != null ? kargs.getData() : new ArrayList<>();
+        String ilk = delegated ? Ilks.DRT.getValue() : Ilks.ROT.getValue();
+
+        Serder serder = Eventing.rotate(
+            RotateArgs.builder()
+                .pre(pre)
+                .ilk(ilk)
+                .keys(keys)
+                .dig(dig)
+                .sn(ridx)
+                .isith(cst)
+                .nsith(nst)
+                .ndigs(ndigs)
+                .toad(kargs.getToad())
+                .wits(wits)
+                .cuts(cuts)
+                .adds(adds)
+                .data(data)
+            .build()
+        );
+
+        List<String> sigs = keeper.sign(serder.getRaw().getBytes(), true, null, null).get().signatures();
+
+        Map<String, Object> jsondata = new LinkedHashMap<>();
+        jsondata.put("rot", serder.getKed());
+        jsondata.put("sigs", sigs);
+        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI) : null);
+        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI) : null);
+        jsondata.put(keeper.getAlgo().toString(), keeper.getParams());
+
+        ResponseEntity<String> res = this.client.fetch(
+            "/identifiers/" + name + "/events",
+            "POST",
+            jsondata,
+            null
+        );
+
+        return new EventResult(serder, sigs, CompletableFuture.completedFuture(res));
+    }
+
     //TODO implement the rest of the function
 }
