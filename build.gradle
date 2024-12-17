@@ -16,12 +16,15 @@ def jnaVersion = '5.15.0'
 def junitVersion = '5.10.0'
 def math3Version = '3.6.1'
 def jacksonVersion = '2.18.1'
-def mockwebVersion = '4.12.0'
 def slf4jVersion = '2.0.7'
 def bouncycastleVersion = '1.79'
-def testngVersion = '7.7.0'
 def jsonVersion = '20240303'
+def structuredFieldsVersion = '0.4'
+
+// test dependencies
+def testngVersion = '7.7.0'
 def mockitoVersion = '5.5.0'
+def mockwebVersion = '4.12.0'
 
 dependencies {
     implementation "com.goterl:lazysodium-java:${lazysodiumVersion}"
@@ -35,6 +38,7 @@ dependencies {
     // TODO: consider a smaller blake-only package, so long as it's well used and safe of vulnerabilities.
     implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}"
     implementation "org.json:json:${jsonVersion}"
+    implementation "org.greenbytes.http:structured-fields:${structuredFieldsVersion}"
 
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"

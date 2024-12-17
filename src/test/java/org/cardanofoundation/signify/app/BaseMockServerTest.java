@@ -15,7 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -53,7 +53,14 @@ public class BaseMockServerTest {
                             .setResponseCode(202)
                             .setBody("");
                 }
-                else {
+                // Handle bad request headers with invalid signature
+                else if (requestUrl.startsWith(url + "/invalid-signature")) {
+                    return mockBadRequestHeader(false);
+                }
+                // Handle bad request headers with different remote agent
+                else if (requestUrl.startsWith(url + "/different-remote-agent")) {
+                    return mockBadRequestHeader(true);
+                } else {
                     try {
                         return mockAllRequests(request);
                     } catch (SodiumException e) {
@@ -224,10 +231,10 @@ public class BaseMockServerTest {
         }""";
 
     private MockResponse mockAllRequests(RecordedRequest req) throws SodiumException {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Signify-Resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
         headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
-        headers.put("Content-Type", "application/json");
+        headers.put("content-type", "application/json");
 
         String reqUrl = req.getRequestUrl().toString();
         Salter salter = new Salter("0AAwMTIzNDU2Nzg5YWJjZGVm");
@@ -243,7 +250,7 @@ public class BaseMockServerTest {
         Map<String, String> signedHeaderMap = authn.sign(
                 headers,
                 req.getMethod(),
-                reqUrl.split("\\?")[0],
+                req.getPath().split("\\?")[0],
                 null
         );
 
@@ -259,26 +266,48 @@ public class BaseMockServerTest {
         return mockResponse;
     }
 
+    MockResponse mockBadRequestHeader(boolean differentRemoteAgent) {
+        Map<String, String> badAgentHeaders = new LinkedHashMap<>();
+        if (differentRemoteAgent) {
+            badAgentHeaders.put("signify-resource", "bad_resource");
+        } else {
+            badAgentHeaders.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
+        }
+        badAgentHeaders.put(Httping.HEADER_SIG_TIME, "2023-08-20T15:34:31.534673+00:00");
+        badAgentHeaders.put(Httping.HEADER_SIG_INPUT,
+                "signify=(\"signify-resource\" \"@method\" \"@path\" \"signify-timestamp\");created=1692545671;keyid=\"EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei\";alg=\"ed25519\"");
+        badAgentHeaders.put("signature",
+                "indexed=\"?0\";signify=\"0BDiSoxCv42h2BtGMHy_tpWAqyCgEoFwRa8bQy20mBB2D5Vik4gRp3XwkEHtqy6iy6SUYAytMUDtRbewotAfkCgN\"");
+        badAgentHeaders.put("content-type", "application/json");
+
+        MockResponse mockResponse = new MockResponse()
+                .setResponseCode(202)
+                .setBody("");
+
+        badAgentHeaders.forEach(mockResponse::addHeader);
+        return mockResponse;
+    }
+
 
     MockResponse mockConnect() {
         return new MockResponse()
-                .setResponseCode(202)
-                .setHeader("Content-Type", "application/json")
-                .setBody(MOCK_CONNECT);
+            .setResponseCode(202)
+            .setHeader("Content-Type", "application/json")
+            .setBody(MOCK_CONNECT);
     }
 
     MockResponse mockGetAID() {
         return new MockResponse()
-                .setResponseCode(202)
-                .setHeader("Content-Type", "application/json")
-                .setBody(MOCK_GET_AID);
+            .setResponseCode(202)
+            .setHeader("Content-Type", "application/json")
+            .setBody(MOCK_GET_AID);
     }
 
     MockResponse mockCredential() {
         return new MockResponse()
-                .setResponseCode(202)
-                .setHeader("Content-Type", "application/json")
-                .setBody(MOCK_CREDENTIAL);
+            .setResponseCode(202)
+            .setHeader("Content-Type", "application/json")
+            .setBody(MOCK_CREDENTIAL);
     }
 
     void cleanUpRequest() throws InterruptedException {

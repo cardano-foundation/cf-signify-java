@@ -45,7 +45,7 @@ public class OperationsTest {
         Mockito.when(mockResponse.body()).thenReturn(responseBody);
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(mockResponse);
+            .thenReturn(mockResponse);
 
         operations.get("operationName");
 
@@ -61,7 +61,7 @@ public class OperationsTest {
         Mockito.when(mockResponse.body()).thenReturn("[]");
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(mockResponse);
+            .thenReturn(mockResponse);
 
         var response = operations.list(null);
 
@@ -77,7 +77,7 @@ public class OperationsTest {
         Mockito.when(mockResponse.body()).thenReturn(Utils.jsonStringify(Collections.singletonList(buildOperation(true, true))));
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(mockResponse);
+            .thenReturn(mockResponse);
 
         var opsResponse = operations.list("witness");
 
@@ -96,7 +96,7 @@ public class OperationsTest {
         Mockito.when(mockResponse.body()).thenReturn("{}");
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(mockResponse);
+            .thenReturn(mockResponse);
 
         operations.delete("operationName");
 
@@ -110,7 +110,7 @@ public class OperationsTest {
     void doesNotWaitForOperationThatIsAlreadyDone() throws SodiumException, IOException, InterruptedException {
         Operation<String> operation = buildOperation(true, true);
 
-        var result = operations.wait(operation, null);
+        var result = operations.wait(operation);
         verify(client, never()).fetch(anyString(), anyString(), isNull(), isNull());
         assertEquals(operation, result);
     }
@@ -127,7 +127,7 @@ public class OperationsTest {
             .thenReturn(mockResponse);
 
         operation.setDone(false);
-        operations.wait(operation, null);
+        operations.wait(operation);
         verify(client, times(1)).fetch(anyString(), anyString(), isNull(), isNull());
     }
 
@@ -149,8 +149,9 @@ public class OperationsTest {
             .thenReturn(mockResponse1)
             .thenReturn(mockResponse2);
 
-        Operations.WaitOptions options = new Operations.WaitOptions();
-        options.setMaxSleep(10);
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .build();
         operations.wait(operation1, options);
         verify(client, times(2)).fetch(anyString(), anyString(), isNull(), isNull());
     }
@@ -175,8 +176,9 @@ public class OperationsTest {
             .thenReturn(mockResponse2)
             .thenReturn(mockResponse3);
 
-        Operations.WaitOptions options = new Operations.WaitOptions();
-        options.setMaxSleep(10);
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .build();
         operations.wait(buildOperation(false, false), options);
         verify(client, times(3)).fetch(anyString(), anyString(), isNull(), isNull());
     }
@@ -184,21 +186,21 @@ public class OperationsTest {
 
     Operation<String> buildOperation(boolean done, boolean dependsDone) {
         Operation<String> operation = Operation.<String>builder()
-                .name(UUID.randomUUID().toString())
-                .response("response")
-                .done(done)
-                .build();
+            .name(UUID.randomUUID().toString())
+            .response("response")
+            .done(done)
+            .build();
 
         Operation<String> depends = Operation.<String>builder()
-                .name(UUID.randomUUID().toString())
-                .response("depend")
-                .done(dependsDone)
-                .build();
+            .name(UUID.randomUUID().toString())
+            .response("depend")
+            .done(dependsDone)
+            .build();
 
         Operation.Metadata<String> metadata = Operation.Metadata.<String>builder()
-                .depends(depends)
-                .properties(Map.of("key", "value"))
-                .build();
+            .depends(depends)
+            .properties(Map.of("key", "value"))
+            .build();
         operation.setMetadata(metadata);
         return operation;
     }

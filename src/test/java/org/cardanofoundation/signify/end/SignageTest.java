@@ -54,8 +54,8 @@ class SignageTest {
 
         Signage signage = new Signage(sigers);
         final Map<String, String> header = Signage.signature(List.of(signage));
-        assertTrue(header.containsKey("Signature"));
-        assertEquals(expectedHeader, header.get("Signature"));
+        assertTrue(header.containsKey("signature"));
+        assertEquals(expectedHeader, header.get("signature"));
 
         // Can parse signature header
         final List<Signage> signages = Signage.designature(expectedHeader);
@@ -88,8 +88,8 @@ class SignageTest {
 
         Signage signage = new Signage(markers);
         final Map<String, String> header = Signage.signature(List.of(signage));
-        assertTrue(header.containsKey("Signature"));
-        assertEquals(expectedHeader, header.get("Signature"));
+        assertTrue(header.containsKey("signature"));
+        assertEquals(expectedHeader, header.get("signature"));
 
         // Can parse signature header
         final List<Signage> signages = Signage.designature(expectedHeader);
@@ -125,8 +125,8 @@ class SignageTest {
 
         Signage signage = new Signage(sigers, true, pre, "0", digest, "CESR");
         final Map<String, String> header = Signage.signature(List.of(signage));
-        assertTrue(header.containsKey("Signature"));
-        assertEquals(expectedHeader, header.get("Signature"));
+        assertTrue(header.containsKey("signature"));
+        assertEquals(expectedHeader, header.get("signature"));
 
         // Can parse signature header
         final List<Signage> signages = Signage.designature(expectedHeader);
@@ -162,8 +162,8 @@ class SignageTest {
         // Can create signature header
         Signage signage = new Signage(cigars);
         final Map<String, String> header = Signage.signature(List.of(signage));
-        assertTrue(header.containsKey("Signature"));
-        assertEquals(expectedHeader, header.get("Signature"));
+        assertTrue(header.containsKey("signature"));
+        assertEquals(expectedHeader, header.get("signature"));
 
         // Can parse signature header   
         final List<Signage> signages = Signage.designature(expectedHeader);
@@ -207,8 +207,8 @@ class SignageTest {
         Signage signage0 = new Signage(sigers, true, pre, null, null, "CESR");
         Signage signage1 = new Signage(cigars, false, pre, null, null, "CESR");
         final Map<String, String> header = Signage.signature(List.of(signage0, signage1));
-        assertTrue(header.containsKey("Signature"));
-        assertEquals(expectedHeader, header.get("Signature"));
+        assertTrue(header.containsKey("signature"));
+        assertEquals(expectedHeader, header.get("signature"));
 
         // Can parse signature header
         final List<Signage> signages = Signage.designature(expectedHeader);

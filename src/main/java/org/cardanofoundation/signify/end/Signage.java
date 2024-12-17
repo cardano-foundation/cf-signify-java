@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.end;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +123,7 @@ public class Signage {
             values.add(String.join(";", items));
         }
 
-        return Map.of("Signature", String.join(",", values));
+        return Map.of("signature", String.join(",", values));
     }
 
     public static List<Signage> designature(String value) {

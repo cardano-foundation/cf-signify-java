@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.app.clienting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
@@ -39,10 +40,14 @@ public class Operations {
         client.fetch(path, method, null, null);
     }
 
+    public <T> Operation<T> wait(Operation<T> op) throws SodiumException, IOException, InterruptedException {
+        return wait(op, WaitOptions.builder().build());
+    }
+
     public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws SodiumException, IOException, InterruptedException {
-        int minSleep = options == null || options.getMinSleep() == null ? 10 : options.getMinSleep();
-        int maxSleep = options == null || options.getMaxSleep() == null ? 10000 : options.getMaxSleep();
-        int increaseFactor = options == null || options.getIncreaseFactor() == null ? 50 : options.getIncreaseFactor();
+        int minSleep = options.getMinSleep();
+        int maxSleep = options.getMaxSleep();
+        int increaseFactor = options.getIncreaseFactor();
 
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null && !op.getMetadata().getDepends().isDone()) {
             return (Operation<T>) wait(op.getMetadata().getDepends(), options);
@@ -63,22 +68,21 @@ public class Operations {
             if (op.isDone()) {
                 return op;
             }
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                // Handle the interruption, e.g., by re-throwing or logging
-                // TODO: handle options.signal
-                Thread.currentThread().interrupt(); // Preserve interrupt status
-            }
+            Thread.sleep(delay);
         }
     }
 
+    @Builder
     @Getter
     @Setter
     public static class WaitOptions {
-        private Integer minSleep;
-        private Integer maxSleep;
-        private Integer increaseFactor;
+
+        @Builder.Default
+        private Integer minSleep = 10;
+        @Builder.Default
+        private Integer maxSleep = 10000;
+        @Builder.Default
+        private Integer increaseFactor = 50;
 
         // TODO mapping options.signal form signify-ts
     }

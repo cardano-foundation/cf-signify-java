@@ -23,10 +23,12 @@ import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
+import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
+import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
@@ -124,7 +126,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new IOException("Unexpected response code: " + response.statusCode());
+            throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
         }
     }
 
@@ -150,7 +152,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             throw new IllegalArgumentException("Agent does not exist for controller " + caid);
         }
         if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new IOException("Unexpected response code: " + response.statusCode());
+            throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
         }
 
         Map<String, Object> data = objectMapper.readValue(
@@ -227,11 +229,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Object data,
         HttpHeaders extraHeaders
     ) throws SodiumException, InterruptedException, IOException {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
-        headers.put("Signify-Resource", this.controller.getPre());
-        headers.put("Signify-Timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
-        headers.put("Content-Type", "application/json");
+        headers.put("signify-resource", this.controller.getPre());
+        headers.put("signify-timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put("content-type", "application/json");
 
         Object _body = method.equals("GET") ? null : Utils.jsonStringify(data);
         if (this.getAuthn() != null) {
@@ -242,7 +244,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         Map<String, String> finalHeaders = new HashMap<>(signedHeaders);
         if (extraHeaders != null) {
-            extraHeaders.map().forEach((key, values) -> 
+            extraHeaders.map().forEach((key, values) ->
                 finalHeaders.put(key, values.getFirst()));
         }
 
@@ -250,39 +252,37 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             .uri(URI.create(url + path))
             .method(
                 method,
-                _body == null ? HttpRequest.BodyPublishers.noBody() 
-                             : HttpRequest.BodyPublishers.ofString((String)_body)
+                _body == null ? HttpRequest.BodyPublishers.noBody()
+                    : HttpRequest.BodyPublishers.ofString((String)_body)
             );
 
         finalHeaders.forEach(requestBuilder::header);
 
         HttpClient client = HttpClient.newBuilder().build();
-        HttpResponse<String> response = client.send(requestBuilder.build(), 
+        HttpResponse<String> response = client.send(requestBuilder.build(),
             HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IOException(String.format("HTTP %s %s - %d - %s",
+        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
+            throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
                 method, path, response.statusCode(), response.body()));
         }
 
-        Map<String, String> responseHeaders = new HashMap<>();
-        response.headers().map().forEach((key, values) -> 
-            responseHeaders.put(key.toLowerCase(), values.getFirst()));
+        Map<String, String> responseHeaders = new LinkedHashMap<>();
+        response.headers().map().forEach((key, values) ->
+            responseHeaders.put(key, values.getFirst()));
 
-        boolean isSameAgent = this.agent != null && 
+        boolean isSameAgent = this.agent != null &&
             this.agent.getPre().equals(responseHeaders.get("signify-resource"));
         if (!isSameAgent) {
-            throw new IOException("Message from a different remote agent");
+            throw new HeaderVerificationException("Message from a different remote agent");
         }
 
         boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
-        // TODO check if the verification is correct, just return the response for now
-//        if (verification) {
-//            return response;
-//        } else {
-//            throw new RuntimeException("Response verification failed");
-//        }
-        return response;
+        if (verification) {
+            return response;
+        } else {
+            throw new HeaderVerificationException("Response verification failed");
+        }
     }
 
     /**
