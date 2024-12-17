@@ -1,35 +1,23 @@
 package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Oobis;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Authenticater;
+import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.app.clienting.Operations;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -162,29 +150,39 @@ public class ClientingTest extends BaseMockServerTest {
         assertInstanceOf(Grouping.Groups.class, client.getGroups());
         cleanUpRequest();
 
+    }
+
+    @Test
+    @DisplayName("Signed Fetch")
+    void testSignedFetch() throws Exception {
         // Siged fetch
         String bran = "0123456789abcdefghijk";
-        client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
 
         client.connect();
         cleanUpRequest();
 
         client.fetch("/contacts", "GET", null, null);
-        request = mockWebServer.takeRequest();
+        RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/contacts", request.getPath());
-        assertEquals("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose", request.getHeaders().get("Signify-Resource"));
+        assertEquals("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose", request.getHeaders().get("signify-resource"));
+        cleanUpRequest();
 
+        //test bad request
+        Exception exception = assertThrows(
+                HeaderVerificationException.class,
+            () -> client.fetch("/different-remote-agent", "GET", null, null)
+        );
 
-        // TODO find the way tho mock badAgentHeaders
-        Map<String, String> badAgentHeaders = new HashMap<>();
-        badAgentHeaders.put("signify-resource", "bad_resource");
-        badAgentHeaders.put(Httping.HEADER_SIG_TIME, "2023-08-20T15:34:31.534673+00:00");
-        badAgentHeaders.put(Httping.HEADER_SIG_INPUT,
-                "signify=(\"signify-resource\" \"@method\" \"@path\" \"signify-timestamp\");created=1692545671;keyid=\"EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei\";alg=\"ed25519\"");
-        badAgentHeaders.put("signature",
-                "indexed=\"?0\";signify=\"0BDiSoxCv42h2BtGMHy_tpWAqyCgEoFwRa8bQy20mBB2D5Vik4gRp3XwkEHtqy6iy6SUYAytMUDtRbewotAfkCgN\"");
-        badAgentHeaders.put("content-type", "application/json");
+        assertEquals("Message from a different remote agent", exception.getMessage());
+
+        exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> client.fetch("/invalid-signature", "GET", null, null)
+        );
+
+        assertEquals("Signature for EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei invalid.", exception.getMessage());
     }
 
     @Test
