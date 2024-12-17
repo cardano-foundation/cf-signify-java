@@ -14,13 +14,7 @@ import org.cardanofoundation.signify.core.States.HabState;
 
 import java.io.IOException;
 import java.security.DigestException;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -182,14 +176,12 @@ public class Exchanging {
         String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         String ilk = CoreUtil.Ilks.EXN.getValue();
         String dt = date != null ? date :
-            DateTimeFormatter.ISO_LOCAL_DATE_TIME
-                .withZone(ZoneOffset.UTC)
-                .format(Instant.now()) + "000+00:00";
+                new Date().toInstant().toString().replace("Z", "000+00:00");
         String p = dig != null ? dig : "";
-        Map<String, Object> q = modifiers != null ? modifiers : new HashMap<>();
-        Map<String, List<Object>> ems = embeds != null ? embeds : new HashMap<>();
+        Map<String, Object> q = modifiers != null ? modifiers : new LinkedHashMap<>();
+        Map<String, List<Object>> ems = embeds != null ? embeds : new LinkedHashMap<>();
 
-        Map<String, Object> e = new HashMap<>();
+        Map<String, Object> e = new LinkedHashMap<>();
         StringBuilder end = new StringBuilder();
 
         for (Map.Entry<String, List<Object>> entry : ems.entrySet()) {
