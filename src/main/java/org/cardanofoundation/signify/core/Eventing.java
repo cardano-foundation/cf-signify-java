@@ -290,7 +290,7 @@ public class Eventing {
         if (args.getIsith() == null) {
             _isith = Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0));
         } else {
-            _isith = (Integer) args.getIsith();
+            _isith = Integer.parseInt((String) args.getIsith());
         }
 
         Tholder tholder = new Tholder(null, null, _isith);
@@ -312,7 +312,7 @@ public class Eventing {
         if (args.getNsith() == null) {
             _nsith = Math.max(1, (int) Math.ceil(_ndigs.size() / 2.0));
         } else {
-            _nsith = (Integer) args.getNsith();
+            _nsith = Integer.parseInt((String) args.getNsith());
         }
 
         Tholder ntholder = new Tholder(null, null, _nsith);

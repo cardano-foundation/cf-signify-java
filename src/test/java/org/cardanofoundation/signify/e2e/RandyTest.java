@@ -4,15 +4,15 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.LazySodiumJava;
+import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.IdentifierListResponse;
-import org.cardanofoundation.signify.cesr.LazySodiumInstance;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.*;
+import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -23,6 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+@Slf4j
 public class RandyTest extends TestUtils {
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
     private final String url = "http://127.0.0.1:3901";
@@ -114,15 +118,50 @@ public class RandyTest extends TestUtils {
             e.printStackTrace();
         }
         Coring.KeyEvents events = client1.getKeyEvents();
-//        TO-DO
-//        Object log = events.get(opResponsePrefix);
-//        try {
-//            List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
-//            });
-//            verifyEquals(2, logList.size());
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
 
+        Object log = events.get(opResponsePrefix);
+        try {
+            List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
+            });
+            verifyEquals(2, logList.size());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        icpResult = client1.getIdentifier().rotate("aid1");
+        op = operationToObject(waitOperation(client1, icpResult.op()));
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        ked = opResponse;
+        Serder rot = new Serder(ked);
+        assertEquals("2", rot.getKed().get("s"));
+        assertEquals(1, rot.getVerfers().size());
+        assertEquals(1, rot.getDigers().size());
+        assertNotEquals(icp.getVerfers().get(0).getQb64(), rot.getVerfers().get(0).getQb64());
+        assertNotEquals(icp.getDigers().get(0).getQb64(), rot.getDigers().get(0).getQb64());
+
+        RawArgs rawArgs = new RawArgs();
+        rawArgs.setCode(Codex.MatterCodex.Blake3_256.getValue());
+        Diger dig = new Diger(rawArgs,
+                rot.getVerfers().get(0).getQb64b());
+        assertEquals(dig.getQb64(), icp.getDigers().get(0).getQb64());
+
+        log = events.get(opResponsePrefix);
+        try {
+            List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
+            });
+            verifyEquals(3, logList.size());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        assertOperations((List<SignifyClient>) client1);
     }
 }
