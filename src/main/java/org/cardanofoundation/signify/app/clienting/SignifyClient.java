@@ -6,15 +6,14 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
 import org.cardanofoundation.signify.app.Agent;
 import org.cardanofoundation.signify.app.Aiding.Identifier;
-import org.cardanofoundation.signify.app.Contacting.Challenges;
-import org.cardanofoundation.signify.app.Contacting.Contacts;
+import org.cardanofoundation.signify.app.clienting.Contacting.Challenges;
+import org.cardanofoundation.signify.app.clienting.Contacting.Contacts;
 import org.cardanofoundation.signify.app.Controller;
 import org.cardanofoundation.signify.app.Coring.KeyEvents;
 import org.cardanofoundation.signify.app.Coring.KeyStates;
-import org.cardanofoundation.signify.app.Coring.Oobis;
-import org.cardanofoundation.signify.app.Coring.Operations;
 import org.cardanofoundation.signify.app.Credentialing.Credentials;
 import org.cardanofoundation.signify.app.Credentialing.Ipex;
 import org.cardanofoundation.signify.app.Credentialing.Registries;
@@ -24,15 +23,17 @@ import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
+import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
+import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
-import org.cardanofoundation.signify.cesr.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
+import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -125,7 +126,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new IOException("Unexpected response code: " + response.statusCode());
+            throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
         }
     }
 
@@ -151,7 +152,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             throw new IllegalArgumentException("Agent does not exist for controller " + caid);
         }
         if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new IOException("Unexpected response code: " + response.statusCode());
+            throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
         }
 
         Map<String, Object> data = objectMapper.readValue(
@@ -212,15 +213,76 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         );
     }
 
+    /**
+     * Fetch a resource from the KERIA agent
+     *
+     * @param path         Path to the resource
+     * @param method       HTTP method
+     * @param data         Data to be sent in the body of the resource
+     * @param extraHeaders Optional extra headers to be sent with the request
+     * @return A Mono of ClientResponse
+     */
     @Override
     public HttpResponse<String> fetch(
-        String pathname,
+        String path,
         String method,
-        Object body,
-        HttpHeaders headers
-    ) {
-        // TODO implement fetch
-        return null;
+        Object data,
+        HttpHeaders extraHeaders
+    ) throws SodiumException, InterruptedException, IOException {
+        Map<String, String> headers = new LinkedHashMap<>();
+        Map<String, String> signedHeaders;
+        headers.put("signify-resource", this.controller.getPre());
+        headers.put("signify-timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put("content-type", "application/json");
+
+        Object _body = method.equals("GET") ? null : Utils.jsonStringify(data);
+        if (this.getAuthn() != null) {
+            signedHeaders = this.authn.sign(headers, method, path.split("\\?")[0], null);
+        } else {
+            throw new IllegalStateException("Client needs to call connect first");
+        }
+
+        Map<String, String> finalHeaders = new HashMap<>(signedHeaders);
+        if (extraHeaders != null) {
+            extraHeaders.map().forEach((key, values) ->
+                finalHeaders.put(key, values.getFirst()));
+        }
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+            .uri(URI.create(url + path))
+            .method(
+                method,
+                _body == null ? HttpRequest.BodyPublishers.noBody()
+                    : HttpRequest.BodyPublishers.ofString((String)_body)
+            );
+
+        finalHeaders.forEach(requestBuilder::header);
+
+        HttpClient client = HttpClient.newBuilder().build();
+        HttpResponse<String> response = client.send(requestBuilder.build(),
+            HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
+            throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
+                method, path, response.statusCode(), response.body()));
+        }
+
+        Map<String, String> responseHeaders = new LinkedHashMap<>();
+        response.headers().map().forEach((key, values) ->
+            responseHeaders.put(key, values.getFirst()));
+
+        boolean isSameAgent = this.agent != null &&
+            this.agent.getPre().equals(responseHeaders.get("signify-resource"));
+        if (!isSameAgent) {
+            throw new HeaderVerificationException("Message from a different remote agent");
+        }
+
+        boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
+        if (verification) {
+            return response;
+        } else {
+            throw new HeaderVerificationException("Response verification failed");
+        }
     }
 
     /**

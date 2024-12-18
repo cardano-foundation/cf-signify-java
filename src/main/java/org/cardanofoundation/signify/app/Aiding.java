@@ -1,7 +1,8 @@
 package org.cardanofoundation.signify.app;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.deps.IdentifierDeps;
+import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.core.Httping;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class Aiding {
          * @param end   End index of list of notifications, defaults to 24
          * @return A IdentifierListResponse containing the list response
          */
-        public IdentifierListResponse list(Integer start, Integer end) throws IOException, InterruptedException {
+        public IdentifierListResponse list(Integer start, Integer end) throws IOException, InterruptedException, SodiumException {
             HttpHeaders extraHeaders = HttpHeaders.of(Map.of(
                 "Range", List.of(String.format("aids=%d-%d", start, end))
             ), (name, value) -> true);
@@ -58,7 +59,7 @@ public class Aiding {
             );
         }
 
-        public IdentifierListResponse list() throws IOException, InterruptedException {
+        public IdentifierListResponse list() throws IOException, InterruptedException, SodiumException {
             return list(0, 24);
         }
 

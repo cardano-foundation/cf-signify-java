@@ -3,7 +3,6 @@ package org.cardanofoundation.signify.cesr;
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 
-import com.goterl.lazysodium.utils.HexMessageEncoder;
 import com.goterl.lazysodium.utils.Key;
 import com.goterl.lazysodium.utils.KeyPair;
 import lombok.Getter;
@@ -76,7 +75,7 @@ public class Signer extends Matter {
         buffer.put(verfer.getRaw());
 
         final String sigEncoded = lazySodium.cryptoSignDetached(new String(ser), Key.fromBytes(buffer.array()));
-        final byte[] sig = new HexMessageEncoder().decode(sigEncoded);
+        final byte[] sig = lazySodium.decodeFromString(sigEncoded);
         if (index == null) {
             return new Cigar(RawArgs.builder()
                     .raw(sig)

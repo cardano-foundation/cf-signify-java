@@ -1,16 +1,17 @@
-package org.cardanofoundation.signify.core;
+package org.cardanofoundation.signify.cesr;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.Matter;
-import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.Verfer;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.core.Httping.SiginputArgs;
 import org.cardanofoundation.signify.end.Signage;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Getter
 public class Authenticater {
@@ -51,7 +52,7 @@ public class Authenticater {
                     }
                 } else {
                     if (headers.containsKey(field)) {
-                        String value = headers.get(field);
+                        String value = Httping.normalize(headers.get(field));
                         items.add("\"" + field + "\": " + value);
                     }
                 }
@@ -80,9 +81,9 @@ public class Authenticater {
             String ser = String.join("\n", items);
 
             List<Signage> signages = Signage.designature(signature);
-            Map<String, Object> markers = (Map<String, Object>) signages.get(0).getMarkers();
-            Object cig = markers.get(input.getName());
-            if (cig == null || !this.verfer.verify(((Matter) cig).getRaw(), ser.getBytes())) {
+            Map<String, Siger> markers = (Map<String, Siger>) signages.get(0).getMarkers();
+            Siger cig = markers.get(input.getName());
+            if (cig == null || !this.verfer.verify(cig.getRaw(), ser.getBytes())) {
                 throw new IllegalArgumentException("Signature for " + input.getKeyid() + " invalid.");
             }
         });
@@ -91,10 +92,10 @@ public class Authenticater {
     }
 
     public Map<String, String> sign(
-            Map<String, String> headers,
-            String method,
-            String path,
-            List<String> fields
+        Map<String, String> headers,
+        String method,
+        String path,
+        List<String> fields
     ) throws SodiumException {
         if (fields == null) {
             fields = DEFAULT_FIELDS;
@@ -114,7 +115,7 @@ public class Authenticater {
 
         headers.putAll(signedHeaders);
 
-        final Map<String, Object> markers = new LinkedHashMap<>();
+        final Map<String, Object> markers = new HashMap<>();
         markers.put("signify", siginputResult.sig());
         final Signage signage = new Signage(markers, false);
         final Map<String, String> signed = Signage.signature(List.of(signage));
