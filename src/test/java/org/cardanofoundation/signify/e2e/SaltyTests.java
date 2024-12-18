@@ -9,6 +9,7 @@ import org.cardanofoundation.signify.app.clienting.aiding.*;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -143,29 +144,41 @@ class SaltyTests extends TestUtils {
         Map<String, Object> aid6 = aids4.getFirst();
         Assertions.assertEquals("aid3", aid6.get("name"));
 
-        // TO DO getRotate()
-//        EventResult icpResult3 = client.getIdentifier().rotate("aid1");
-//        Operation<Object> opRotate = waitOperation(client, icpResult3.op());
-//        Object ked = opRotate.getResponse();
-//        Serder rotRotate = new Serder((Map<String, Object>) ked);
-//        Assertions.assertEquals("EBQABdRgaxJONrSLcgrdtbASflkvLxJkiDO0H-XmuhGg", rotRotate.getKed().get("d"));
-//        Assertions.assertEquals("1", rotRotate.getKed().get("s"));
-//        Assertions.assertEquals(1, rotRotate.getVerfers().size());
-//        Assertions.assertEquals(1, rotRotate.getDigers().size());
-//        Assertions.assertEquals("DHgomzINlGJHr-XP3sv2ZcR9QsIEYS3LJhs4KRaZYKly", rotRotate.getVerfers().getFirst().getQb64());
-//        Assertions.assertEquals("EJMovBlrBuD6BVeUsGSxLjczbLEbZU9YnTSud9K4nVzk", rotRotate.getDigers().getFirst().getQb64());
+        // TO DO Rotate Identifiers test
+        EventResult icpResult3 = client.getIdentifier().rotate("aid1");
+        Operation<Object> opRotate = waitOperation(client, icpResult3.op());
+        Object ked = opRotate.getResponse();
+        Serder rotRotate = new Serder((Map<String, Object>) ked);
 
-        // TO DO ( interact have problem )
+        Assertions.assertEquals("EBQABdRgaxJONrSLcgrdtbASflkvLxJkiDO0H-XmuhGg", rotRotate.getKed().get("d"));
+        Assertions.assertEquals("1", rotRotate.getKed().get("s"));
+        Assertions.assertEquals(1, rotRotate.getVerfers().size());
+        Assertions.assertEquals(1, rotRotate.getDigers().size());
+        Assertions.assertEquals("DHgomzINlGJHr-XP3sv2ZcR9QsIEYS3LJhs4KRaZYKly", rotRotate.getVerfers().getFirst().getQb64());
+        Assertions.assertEquals("EJMovBlrBuD6BVeUsGSxLjczbLEbZU9YnTSud9K4nVzk", rotRotate.getDigers().getFirst().getQb64());
+
+        // TO DO Interact Identifiers test
         EventResult icpResultInteract = client.getIdentifier().interact("aid1", List.of(icp.getPre()));
         Operation<Object> opInteract = waitOperation(client, icpResultInteract.op());
-        Object kedInteract = opInteract.getResponse();
-        Serder ixnInteract = new Serder((Map<String, Object>) kedInteract);
-        Assertions.assertEquals("EJIplO1ujssiz1NUBINmO17Uq3sDWit3J9avNbjM8ZJD", ixnInteract.getKed().get("d"));
-        Assertions.assertEquals("1", ixnInteract.getKed().get("s"));
-        List<String> aList = (List<String>) ixnInteract.getKed().get("a");
-        Assertions.assertIterableEquals(List.of(icp.getPre()), aList);
+        Map<String, Object> kedInteract = (Map<String, Object>) opInteract.getResponse();
+        Serder ixn = new Serder(kedInteract);
 
-        // TO DO KeyEvents
+        Assertions.assertEquals("ENsmRAg_oM7Hl1S-GTRMA7s4y760lQMjzl0aqOQ2iTce", ixn.getKed().get("d"));
+        Assertions.assertEquals("2", ixn.getKed().get("s"));
+        Assertions.assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
+        // TO DO Get Identifiers test
+        States.HabState aidState = client.getIdentifier().get("aid1");
+        States.State stateGet = aidState.getState();
+
+        Assertions.assertEquals("2", stateGet.getS());
+        Assertions.assertEquals("2", stateGet.getF());
+        Assertions.assertEquals(ixn.getKed().get("d"), stateGet.getD());
+        Map<String, Object> ee = (Map<String, Object>) stateGet.getEe();
+        Assertions.assertEquals(rotRotate.getKed().get("d"), ee.get("d"));
+
+        // TO DO KeyEvents test
+
+        // TO DO Update Identifier test
     }
 }
