@@ -85,8 +85,8 @@ class SinglesigDIP extends TestUtils {
         Object op2 = client2.getKeyStates().query(name1_id, 1, null);
 
         op = operationToObject(waitOperation(client2, op));
-        Object opFuture1 = operationToObject(waitOperation(client1, op1));
-        Object opFuture2 = operationToObject(waitOperation(client2, op2));
+        op1 = operationToObject(waitOperation(client1, op1));
+        op2 = operationToObject(waitOperation(client2, op2));
 
         if (op instanceof String) {
             try {
@@ -97,13 +97,6 @@ class SinglesigDIP extends TestUtils {
                 ex.printStackTrace();
             }
         }
-
-
-//        CompletableFuture<Operation<Object>> opFuture = TestUtils.waitOperation(client2, op);
-//        CompletableFuture<Operation<Object>> op1Future = TestUtils.waitOperation(client1, op1);
-//        CompletableFuture<Operation<Object>> op2Future = TestUtils.waitOperation(client2, op2);
-//        CompletableFuture<Void> allOfOb = CompletableFuture.allOf(opFuture, op1Future, op2Future);
-//        allOfOb.get();
 
         delegate1 = client2.getIdentifier().get("delegate1");
         Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
@@ -118,9 +111,7 @@ class SinglesigDIP extends TestUtils {
         if (op instanceof String) {
             try {
                 HashMap<String, Object> opMap = objectMapper.readValue((String) op, HashMap.class);
-                HashMap<String, Object> responseMap = (HashMap<String, Object>) opMap.get("response");
-                opResponseName = responseMap.get("name").toString();
-                opResponseI = responseMap.get("i").toString();
+                opResponseName = opMap.get("name").toString();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -135,23 +126,31 @@ class SinglesigDIP extends TestUtils {
         seal.put("d", delegate2.getPrefix());
 
         result = client1.getIdentifier().interact("name1", seal);
-        op1 = (Map<String, Object>) result.op();
+        op1 = result.op();
 
         // refresh keystate to seal event
-        op2 = client2.getKeyStates().query(name1_id, null, seal.toString());
+        op2 = client2.getKeyStates().query(name1_id, null, seal);
 
-        CompletableFuture<Operation<Object>> op_Future = TestUtils.waitOperation(client2, op);
-        CompletableFuture<Operation<Object>> op1_1Future = TestUtils.waitOperation(client1, op1);
-        CompletableFuture<Operation<Object>> op2_1Future = TestUtils.waitOperation(client2, op2);
-        CompletableFuture<Void> allOfOb1 = CompletableFuture.allOf(op_Future, op1_1Future, op2_1Future);
-        allOfOb1.get();
+        op = operationToObject(waitOperation(client2, op));
+        op1 = operationToObject(waitOperation(client1, op1));
+        op2 = operationToObject(waitOperation(client2, op2));
+
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, HashMap.class);
+                HashMap<String, Object> responseMap = (HashMap<String, Object>) opMap.get("response");
+                opResponseI = responseMap.get("i").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         // Delegate waits for completion
         delegate2 = client2.getIdentifier().get("delegate2");
         Assertions.assertEquals(delegate2.getPrefix(), opResponseI);
 
         // Make sure query with seal is idempotent
-        Operation ops = (Operation) client2.getKeyStates().query(name1_id, null, seal.toString());
-        TestUtils.waitOperation(client2, ops);
+        op = client2.getKeyStates().query(name1_id, null, seal);
+        operationToObject(waitOperation(client2, op));
     }
 }
