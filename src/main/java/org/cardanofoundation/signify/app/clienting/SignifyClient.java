@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app.clienting;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -46,7 +45,6 @@ import java.util.*;
 @Getter
 @Setter
 public class SignifyClient implements IdentifierDeps, OperationsDeps {
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Controller controller;
     private String url;
@@ -57,7 +55,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private Keeping.KeyManager manager;
     private Salter.Tier tier;
     private String bootUrl;
-    private List<Keeping.ExternalModule> externalModules;
+    private List<ExternalModule> externalModules;
 
     private static final String DEFAULT_BOOT_URL = "http://localhost:3903";
 
@@ -116,7 +114,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(bootUrl + "/boot"))
             .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(data)))
+            .POST(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
             .build();
 
         HttpClient client = HttpClient.newBuilder().build();
@@ -149,15 +147,12 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             throw new IllegalArgumentException("Agent does not exist for controller " + caid);
         }
-        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
+
+        if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
         }
 
-        Map<String, Object> data = objectMapper.readValue(
-            response.body(),
-            new TypeReference<>() {
-            }
-        );
+        Map<String, Object> data = Utils.fromJson(response.body(), new TypeReference<>() {});
 
         return State.builder()
             .agent(data.getOrDefault(SignifyFields.AGENT.getValue(), null))
@@ -255,31 +250,44 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         finalHeaders.forEach(requestBuilder::header);
 
-        HttpClient client = HttpClient.newBuilder().build();
-        HttpResponse<String> response = client.send(requestBuilder.build(),
-            HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
-                method, path, response.statusCode(), response.body()));
-        }
-
+        HttpResponse<String> response = null;
         Map<String, String> responseHeaders = new LinkedHashMap<>();
-        response.headers().map().forEach((key, values) ->
-            responseHeaders.put(key, values.getFirst()));
 
-        boolean isSameAgent = this.agent != null &&
-            this.agent.getPre().equals(responseHeaders.get("signify-resource"));
-        if (!isSameAgent) {
-            throw new HeaderVerificationException("Message from a different remote agent");
+        try {
+            HttpClient client = HttpClient.newBuilder().build();
+            response = client.send(requestBuilder.build(),
+                    HttpResponse.BodyHandlers.ofString());
+
+            if (200 < response.statusCode() && response.statusCode() > 300) {
+                throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
+                        method, path, response.statusCode(), response.body()));
+            }
+
+            response.headers().map().forEach((key, values) ->
+                    responseHeaders.put(key, values.getFirst()));
+
+            boolean isSameAgent = this.agent != null &&
+                    this.agent.getPre().equals(responseHeaders.get("signify-resource"));
+            if (!isSameAgent) {
+                throw new HeaderVerificationException("Message from a different remote agent");
+            }
+
+            boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
+            if (verification) {
+                return response;
+            } else {
+                throw new HeaderVerificationException("Response verification failed");
+            }
+
+        } catch (IOException exception) {
+            if(exception.getMessage().contains("unexpected content length header with 204 response")) {
+                // ignore this exception
+            } else {
+                throw exception;
+            }
         }
 
-        boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
-        if (verification) {
-            return response;
-        } else {
-            throw new HeaderVerificationException("Response verification failed");
-        }
+       return response;
     }
 
     /**
@@ -291,21 +299,26 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
 
         Object sigs = this.controller.approveDelegation(this.agent);
-
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put(SignifyFields.IXN.getValue(), this.controller.getSerder().getKed());
         data.put(SignifyFields.SIGS.getValue(), sigs);
 
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.url + "/agent/" + this.controller.getPre() + "?type=ixn"))
-            .header("Content-Type", "application/json")
-            .PUT(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(data)))
-            .build();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(this.url + "/agent/" + this.controller.getPre() + "?type=ixn"))
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
+                    .build();
 
-        HttpClient client = HttpClient.newBuilder().build();
-
-        client.send(request, HttpResponse.BodyHandlers.ofString());
-
+            HttpClient client = HttpClient.newBuilder().build();
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException exception) {
+            if(exception.getMessage().contains("unexpected content length header with 204 response")) {
+                // ignore this exception
+            } else {
+                throw exception;
+            }
+        }
     }
 
     /**
