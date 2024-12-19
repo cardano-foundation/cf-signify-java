@@ -87,8 +87,6 @@ public class Pather extends Bexter {
         return "-" + String.join("-", vath);
     }
 
-    // TODO: implement SAD access methods like resolve, root, strip, startswith and tail
-
     public String[] getPath() {
         if (!this.getBext().startsWith("-")) {
             throw new InvalidValueException("Invalid SAD ptr");
