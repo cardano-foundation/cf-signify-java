@@ -219,11 +219,9 @@ public class Identifier {
         jsondata.put("smids", states != null ? ((List<States.State>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
         jsondata.put("rmids", rstates != null ? ((List<States.State>) rstates).stream().map(States.State::getI).collect(Collectors.toList()) : null);
 
-        // TODO find the best ways, just for testing for now
         Map<String, Object> aloMap = Utils.toMap(keeper.getParams());
         aloMap.remove("paramsMap");
         jsondata.put(algo.getValue(), aloMap);
-
 
         this.client.setPidx(this.client.getPidx() + 1);
         HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata, null);

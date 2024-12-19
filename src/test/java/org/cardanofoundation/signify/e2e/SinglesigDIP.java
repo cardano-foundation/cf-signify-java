@@ -15,6 +15,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -72,7 +73,7 @@ class SinglesigDIP extends TestUtils {
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
         delegate1 = client2.getIdentifier().get("delegate1");
-        Map<String, String> seal = new HashMap<>();
+        Map<String, String> seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "0");
         seal.put("d", delegate1.getPrefix());
