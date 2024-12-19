@@ -1,11 +1,12 @@
 package org.cardanofoundation.signify.app.clienting;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.net.http.HttpResponse;
 import java.util.Map;
@@ -35,7 +36,6 @@ public class Contacting {
 
     @Getter
     public static class Contacts {
-        private final ObjectMapper objectMapper = new ObjectMapper();
         private final SignifyClient client;
 
         /**
@@ -68,11 +68,11 @@ public class Contacting {
             if (filterField != null && filterValue != null) {
                 path.append(hasQuery ? "&" : "?")
                     .append("filter_field=").append(filterField)
-                    .append("&filter_value=").append(filterValue);
+                    .append("&filter_value=").append(URLEncoder.encode(filterValue, StandardCharsets.UTF_8));
             }
 
             HttpResponse<String> response = client.fetch(path.toString(), "GET", null, null);
-            return objectMapper.readValue(response.body(), Contact[].class);
+            return Utils.fromJson(response.body(), Contact[].class);
         }
 
         /**
@@ -83,7 +83,7 @@ public class Contacting {
         public Object get(String pre) throws SodiumException, InterruptedException, IOException {
             String path = "/contacts/" + pre;
             HttpResponse<String> response = client.fetch(path, "GET", null, null);
-            return objectMapper.readValue(response.body(), new TypeReference<>() {});
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
@@ -95,8 +95,7 @@ public class Contacting {
         public Object add(String pre, Map<String, Object> info) throws SodiumException, IOException, InterruptedException {
             String path = "/contacts/" + pre;
             HttpResponse<String> response = client.fetch(path, "POST", info, null);
-            return objectMapper.readValue(response.body(), new TypeReference<>() {
-            });
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
@@ -117,8 +116,7 @@ public class Contacting {
         public Object update(String pre, Object info) throws SodiumException, IOException, InterruptedException {
             String path = "/contacts/" + pre;
             HttpResponse<String> response = client.fetch(path, "PUT", info, null);
-            return objectMapper.readValue(response.body(), new TypeReference<>() {
-            });
+            return Utils.fromJson(response.body(), Object.class);
         }
     }
 }

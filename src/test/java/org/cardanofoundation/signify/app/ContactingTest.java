@@ -5,15 +5,14 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.http.ResponseEntity;
 
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ContactingTest {
 
@@ -36,8 +35,9 @@ public class ContactingTest {
 
     @Test
     void testGetListContacts() throws Exception {
+        HttpResponse httpResponse = mockHttpResponse("[]");
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-            .thenReturn(new ResponseEntity<>("[]", null, 200));
+            .thenReturn(httpResponse);
 
         contacts.list("mygroup", "company", "mycompany");
         verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
@@ -49,8 +49,9 @@ public class ContactingTest {
     void testGetContact() throws Exception {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
+        HttpResponse httpResponse = mockHttpResponse("{}");
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-            .thenReturn(new ResponseEntity<>("{}", null, 200));
+                .thenReturn(httpResponse);
 
         contacts.get(prefix);
         verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
@@ -66,8 +67,9 @@ public class ContactingTest {
         info.put("name", "John Doe");
         info.put("company", "My Company");
 
+        HttpResponse httpResponse = mockHttpResponse("{}");
         when(client.fetch(anyString(), anyString(), any(), isNull()))
-            .thenReturn(new ResponseEntity<>("{}", null, 200));
+                .thenReturn(httpResponse);
 
         contacts.add(prefix, info);
         verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture(), isNull());
@@ -84,8 +86,9 @@ public class ContactingTest {
         info.put("name", "John Doe");
         info.put("company", "My Company");
 
+        HttpResponse<String> httpResponse = mockHttpResponse("{}");
         when(client.fetch(anyString(), anyString(), any(), isNull()))
-            .thenReturn(new ResponseEntity<>("{}", null, 200));
+                .thenReturn(httpResponse);
 
         contacts.update(prefix, info);
         verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture(), isNull());
@@ -98,12 +101,20 @@ public class ContactingTest {
     void testDeleteContact() throws Exception {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
+        HttpResponse httpResponse = mockHttpResponse("{}");
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-            .thenReturn(new ResponseEntity<>("", null, 200));
+                .thenReturn(httpResponse);
 
         contacts.delete(prefix);
         verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
         assertEquals("DELETE", methodCaptor.getValue());
         assertEquals("/contacts/" + prefix, pathCaptor.getValue());
+    }
+
+    private HttpResponse<String> mockHttpResponse(String responseBody) {
+        HttpResponse<String> httpResponse = mock(HttpResponse.class);
+        when(httpResponse.body()).thenReturn(responseBody);
+        when(httpResponse.statusCode()).thenReturn(200);
+        return httpResponse;
     }
 }

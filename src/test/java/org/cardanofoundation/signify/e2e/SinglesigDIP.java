@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
@@ -14,6 +13,7 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ class SinglesigDIP extends TestUtils {
         }
     }
     @BeforeEach
-    public void getContact() throws SodiumException, JsonProcessingException, InterruptedException {
+    public void getContact() throws SodiumException, IOException, InterruptedException {
         contact1_id = getOrCreateContact(client2, "contact1", name1_oobi);
     }
 

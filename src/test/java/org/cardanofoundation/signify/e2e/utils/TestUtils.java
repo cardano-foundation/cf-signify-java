@@ -12,8 +12,10 @@ import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.Assertions;
-import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
+import java.net.http.HttpResponse;
+import java.security.DigestException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -68,7 +70,7 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void assertOperations(List<SignifyClient> clients) throws SodiumException, JsonProcessingException {
+    public static void assertOperations(List<SignifyClient> clients) throws SodiumException, IOException, InterruptedException {
         // TO-DO
         for (SignifyClient client : clients) {
             List<Operation<?>> operations = client.getOperations().list(null);
@@ -103,8 +105,8 @@ public class TestUtils {
                 ? "/identifiers/" + alias + "/endroles/" + role
                 : "/identifiers/" + alias + "/endroles";
 
-        ResponseEntity<String> response = client.fetch(path, "GET", alias, null);
-        String responseBody = response.getBody();
+        HttpResponse<String> response = client.fetch(path, "GET", alias, null);
+        String responseBody = response.body();
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> result = objectMapper.readValue(responseBody, new TypeReference<>() {
@@ -128,7 +130,7 @@ public class TestUtils {
         return null;
     }
 
-    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, JsonProcessingException {
+    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
         // TO-DO
         try {
             return client.getIdentifier().get(name);
@@ -247,7 +249,7 @@ public class TestUtils {
         return result;
     }
 
-    public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, JsonProcessingException, InterruptedException {
+    public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, IOException, InterruptedException {
         Object getResponseI = null;
         List<Contacting.Contact> list = Arrays.asList(client.getContacts().list(null, "alias", "^" + name + "$"));
         if (!list.isEmpty()) {
@@ -324,7 +326,7 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void deleteOperations(SignifyClient client, Operation op) throws SodiumException {
+    public static void deleteOperations(SignifyClient client, Operation op) throws SodiumException, IOException, InterruptedException {
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null) {
             deleteOperations(client, op.getMetadata().getDepends());
         }
@@ -345,7 +347,7 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, JsonProcessingException, InterruptedException {
+    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
         // TO-DO
         Object op = client.getOobis().resolve(oobi, alias);
         waitOperation(client, (Operation) op);
@@ -369,7 +371,7 @@ public class TestUtils {
 
     public static <T> Operation<T> waitOperation(
             SignifyClient client,
-            Object op) throws SodiumException, JsonProcessingException {
+            Object op) throws SodiumException, IOException, InterruptedException {
         Operation<T> operation;
         if (op instanceof String) {
             String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
@@ -377,14 +379,7 @@ public class TestUtils {
         } else {
             operation = Operation.fromObject(op);
         }
-        operation = client.getOperations().wait(operation, null);
-//        operation = client.getOperations().wait(
-//            operation,
-//            Operations.WaitOptions.builder()
-//                .signal(AbortSignal.builder()
-//                    .timeout(3000)
-//                    .build())
-//                .build());
+        operation = client.getOperations().wait(operation);
         deleteOperations(client, operation);
         return operation;
     }

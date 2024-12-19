@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class SinglesigDRT extends TestUtils {
     }
 
     @BeforeEach
-    public void getContact() throws SodiumException, JsonProcessingException, InterruptedException {
+    public void getContact() throws SodiumException, IOException, InterruptedException {
         contact1_id = getOrCreateContact(delegate, "contact1", name1_oobi);
     }
 

@@ -30,6 +30,10 @@ public class Diger extends Matter {
         }
     }
 
+    public Diger(String code, byte[] ser) throws DigestException {
+        this(RawArgs.builder().code(code).build(), ser);
+    }
+
     public Diger(RawArgs args) throws DigestException {
         this(args, null);
     }

@@ -84,6 +84,14 @@ public class Utils {
         }
     }
 
+    public static <T> T fromJson(String json, TypeReference<T> type) {
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (Exception e) {
+            throw new SerializeException("Error while parsing JSON: " + e.getMessage());
+        }
+    }
+
     public static List<String> toList(Object obj) {
         return switch (obj) {
             case String s -> List.of(s);
