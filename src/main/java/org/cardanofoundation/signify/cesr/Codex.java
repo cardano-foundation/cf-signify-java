@@ -309,4 +309,36 @@ public class Codex {
             return indexedBothSigCodexFieldMap.containsKey(value);
         }
     }
+
+    @Getter
+    public enum CounterCodex {
+        ControllerIdxSigs("-A"),            // Qualified Base64 Indexed Signature
+        WitnessIdxSigs("-B"),               // Qualified Base64 Indexed Signature
+        NonTransReceiptCouples("-C"),       // Composed Base64 Couple, pre+cig
+        TransReceiptQuadruples("-D"),       // Composed Base64 Quadruple, pre+snu+dig+sig
+        FirstSeenReplayCouples("-E"),       // Composed Base64 Couple, fnu+dts
+        TransIdxSigGroups("-F"),            // Composed Base64 Group, pre+snu+dig+ControllerIdxSigs group
+        SealSourceCouples("-G"),            // Composed Base64 couple, snu+dig of given delegators or issuers event
+        TransLastIdxSigGroups("-H"),        // Composed Base64 Group, pre+ControllerIdxSigs group
+        SealSourceTriples("-I"),            // Composed Base64 triple, pre+snu+dig of anchoring source event
+        SadPathSig("-J"),                   // Composed Base64 Group path+TransIdxSigGroup of SAID of content
+        SadPathSigGroup("-K"),              // Composed Base64 Group, root(path)+SaidPathCouples
+        PathedMaterialQuadlets("-L"),       // Composed Grouped Pathed Material Quadlet (4 char each)
+        AttachedMaterialQuadlets("-V"),     // Composed Grouped Attached Material Quadlet (4 char each)
+        BigAttachedMaterialQuadlets("-0V"), // Composed Grouped Attached Material Quadlet (4 char each)
+        KERIProtocolStack("--AAA");         // KERI ACDC Protocol Stack CESR Version
+
+        private final String value;
+        private static final Map<String, CounterCodex> counterCodexFieldMap =
+            Arrays.stream(CounterCodex.values())
+                .collect(Collectors.toMap(CounterCodex::getValue, Function.identity()));
+
+        CounterCodex(String value) {
+            this.value = value;
+        }
+
+        static boolean has(String value) {
+            return counterCodexFieldMap.containsKey(value);
+        }
+    }
 }

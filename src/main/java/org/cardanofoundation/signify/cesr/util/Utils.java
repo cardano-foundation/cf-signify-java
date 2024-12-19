@@ -40,17 +40,6 @@ public class Utils {
         return result;
     }
 
-    public static byte[] intToBytes(int value, int length) {
-        byte[] byteArray = new byte[length]; // Assuming a 4-byte integer (32 bits)
-    
-        for (int index = byteArray.length - 1; index >= 0; index--) {
-            byte byteValue = (byte) (value & 0xff);
-            byteArray[index] = byteValue;
-            value = (value - byteValue) / 256;
-        }
-        return byteArray;
-    }
-
     public static BigInteger bytesToInt(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return BigInteger.ZERO;

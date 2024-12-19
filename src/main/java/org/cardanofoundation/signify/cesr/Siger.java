@@ -5,8 +5,6 @@ import lombok.Setter;
 import org.cardanofoundation.signify.cesr.Codex.IndexedSigCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.validation.ValidationException;
 
 /**
  * Siger is subclass of Indexer, indexed signature material,

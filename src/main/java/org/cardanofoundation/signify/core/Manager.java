@@ -15,10 +15,17 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeExcepti
 
 public class Manager {
 
+    @Getter
     public enum Algos {
-        randy,
-        salty,
-        group,
+        randy("randy"),
+        salty("salty"),
+        group("group");
+
+        private final String value;
+
+        Algos(String value) {
+            this.value = value;
+        }
     }
 
     static class PubLot {
@@ -112,6 +119,10 @@ public class Manager {
 
         public Keys create() throws SodiumException {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
+        }
+
+        public Keys create(List<String> codes, int count, String code, boolean transferable) throws SodiumException {
+            return create(codes, count, code, transferable, 0, 0, 0, false);
         }
 
         public Keys create(List<String> codes, int count) throws SodiumException {

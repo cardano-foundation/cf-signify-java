@@ -15,10 +15,10 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.DigestException;
 import java.util.List;
 
 import static org.cardanofoundation.signify.cesr.util.Utils.intToBytes;
-import java.security.DigestException;
 
 @Builder
 @AllArgsConstructor
