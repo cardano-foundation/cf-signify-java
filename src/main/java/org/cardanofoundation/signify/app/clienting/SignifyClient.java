@@ -148,7 +148,8 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             throw new IllegalArgumentException("Agent does not exist for controller " + caid);
         }
 
-        if (response.statusCode() != HttpURLConnection.HTTP_OK) {
+        if (response.statusCode() != HttpURLConnection.HTTP_OK
+                && response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
             throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
         }
 
