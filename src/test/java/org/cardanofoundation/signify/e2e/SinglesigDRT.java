@@ -7,6 +7,7 @@ import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
+import org.cardanofoundation.signify.app.clienting.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -74,7 +76,7 @@ public class SinglesigDRT extends TestUtils {
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
         // delegator approves delegate
-        Map<String, String> seal = new HashMap<>();
+        Map<String, String> seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "0");
         seal.put("d", delegate1.getPrefix());
@@ -83,18 +85,19 @@ public class SinglesigDRT extends TestUtils {
         Object op1 = result.op();
         Object op2 = delegate.getKeyStates().query(name1_id, 1, null);
 
-        operationToObject(waitOperation(delegate, op));
-        operationToObject(waitOperation(delegator, op1));
-        operationToObject(waitOperation(delegate, op2));
+        op = operationToObject(waitOperation(delegate, op));
+        op1 = operationToObject(waitOperation(delegator, op1));
+        op2 = operationToObject(waitOperation(delegate, op2));
 
         // TO-DO .rotate()
-//        result = delegate.getIdentifier().rotate();
+        RotateIdentifierArgs karg = new RotateIdentifierArgs();
+        result = delegate.getIdentifier().rotate("delegate1", karg);
         op = result.op();
         Assertions.assertEquals(opResponseName, "delegation." + result.serder().getKed().get("d"));
 
         // delegator approves delegate
         delegate1 = delegate.getIdentifier().get("delegate1");
-        seal = new HashMap<>();
+        seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "0");
         seal.put("d", delegate1.getPrefix());
@@ -104,8 +107,8 @@ public class SinglesigDRT extends TestUtils {
         op2 = delegate.getKeyStates().query(name1_id, 2, null);
 
         op = operationToObject(waitOperation(delegate, op));
-        operationToObject(waitOperation(delegator, op1));
-        operationToObject(waitOperation(delegate, op2));
+        op1 = operationToObject(waitOperation(delegator, op1));
+        op2 = operationToObject(waitOperation(delegate, op2));
 
         if (op instanceof String) {
             try {

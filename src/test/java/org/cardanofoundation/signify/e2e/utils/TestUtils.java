@@ -395,17 +395,6 @@ public class TestUtils {
         return objectMapper.writeValueAsString(opMap);
     }
 
-    protected boolean verifyEquals(Object expected, Object actual){
-        boolean pass = true;
-        try {
-            Assertions.assertEquals(expected, actual);
-        }catch (Exception e){
-            e.printStackTrace();
-            pass = false;
-        }
-        return pass;
-    }
-
 }
 
 // Additional classes for SignifyClient, Operation, HabState, etc., would need to be defined or imported.

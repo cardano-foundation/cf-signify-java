@@ -284,14 +284,14 @@ public class Eventing {
         }
 
         CesrNumber sner = new CesrNumber(BigInteger.valueOf(args.getSn()));
-        if (sner.getNum().compareTo(BigInteger.ONE) <= 0) {
-            throw new InvalidValueException("Invalid sn = " + sner.getNumh() + "for rot or drt.");
+        if (sner.getNum().compareTo(BigInteger.ONE) < 0) {
+            throw new InvalidValueException("Invalid sn = " + sner.getNumh() + " for rot or drt.");
         }
         int _isith;
         if (args.getIsith() == null) {
             _isith = Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0));
         } else {
-            _isith = (Integer) args.getIsith();
+            _isith = Integer.parseInt((String) args.getIsith());
         }
 
         Tholder tholder = new Tholder(null, null, _isith);
@@ -313,7 +313,7 @@ public class Eventing {
         if (args.getNsith() == null) {
             _nsith = Math.max(1, (int) Math.ceil(_ndigs.size() / 2.0));
         } else {
-            _nsith = (Integer) args.getNsith();
+            _nsith = Integer.parseInt((String) args.getNsith());
         }
 
         Tholder ntholder = new Tholder(null, null, _nsith);
