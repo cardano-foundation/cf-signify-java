@@ -66,14 +66,14 @@ public class RandyTest extends TestUtils {
                 ex.printStackTrace();
             }
         }
-        Assertions.assertEquals("true", opResponseDone);
+        assertEquals("true", opResponseDone);
 
         HashMap<String, Object> aid = opResponse;
         Serder icp = new Serder(aid);
-        verifyEquals(1, icp.getVerfers().size());
-        verifyEquals(1, icp.getDigers().size());
-        verifyEquals("1", icp.getKed().get("kt"));
-        verifyEquals("1", icp.getKed().get("nt"));
+        assertEquals(1, icp.getVerfers().size());
+        assertEquals(1, icp.getDigers().size());
+        assertEquals("1", icp.getKed().get("kt"));
+        assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aids = client1.getIdentifier().list(0, 24);
         try {
@@ -83,12 +83,12 @@ public class RandyTest extends TestUtils {
                 opResponseName = aid1.get("name").toString();
                 opResponsePrefix = aid1.get("prefix").toString();
             }
-            verifyEquals(1, aidsList.size());
+            assertEquals(1, aidsList.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        verifyEquals("aid1", opResponseName);
-        verifyEquals(icp.getPre(), opResponsePrefix);
+        assertEquals("aid1", opResponseName);
+        assertEquals(icp.getPre(), opResponsePrefix);
 
         icpResult = client1.getIdentifier().interact("aid1", icp.getPre());
         op = operationToObject(waitOperation(client1, icpResult.op()));
@@ -103,8 +103,8 @@ public class RandyTest extends TestUtils {
         }
         HashMap<String, Object> ked = opResponse;
         Serder ixn = new Serder(ked);
-        verifyEquals("1", ixn.getKed().get("s"));
-        verifyEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
+        assertEquals("1", ixn.getKed().get("s"));
+        assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         aids = client1.getIdentifier().list(0, 24);
         try {
@@ -113,7 +113,7 @@ public class RandyTest extends TestUtils {
             for (Map<String, Object> aid1 : aidsList) {
                 opResponsePrefix = aid1.get("prefix").toString();
             }
-            verifyEquals(1, aidsList.size());
+            assertEquals(1, aidsList.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,7 +123,7 @@ public class RandyTest extends TestUtils {
         try {
             List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
             });
-            verifyEquals(2, logList.size());
+            assertEquals(2, logList.size());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -144,20 +144,20 @@ public class RandyTest extends TestUtils {
         assertEquals("2", rot.getKed().get("s"));
         assertEquals(1, rot.getVerfers().size());
         assertEquals(1, rot.getDigers().size());
-        assertNotEquals(icp.getVerfers().get(0).getQb64(), rot.getVerfers().get(0).getQb64());
-        assertNotEquals(icp.getDigers().get(0).getQb64(), rot.getDigers().get(0).getQb64());
+        assertNotEquals(icp.getVerfers().getFirst().getQb64(), rot.getVerfers().getFirst().getQb64());
+        assertNotEquals(icp.getDigers().getFirst().getQb64(), rot.getDigers().getFirst().getQb64());
 
         RawArgs rawArgs = new RawArgs();
         rawArgs.setCode(Codex.MatterCodex.Blake3_256.getValue());
         Diger dig = new Diger(rawArgs,
-                rot.getVerfers().get(0).getQb64b());
-        assertEquals(dig.getQb64(), icp.getDigers().get(0).getQb64());
+                rot.getVerfers().getFirst().getQb64b());
+        assertEquals(dig.getQb64(), icp.getDigers().getFirst().getQb64());
 
         log = events.get(opResponsePrefix);
         try {
             List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
             });
-            verifyEquals(3, logList.size());
+            assertEquals(3, logList.size());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

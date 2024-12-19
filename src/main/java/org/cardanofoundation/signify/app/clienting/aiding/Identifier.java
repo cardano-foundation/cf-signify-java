@@ -321,7 +321,7 @@ public class Identifier {
         Keeping.Keeper keeper = this.client.getManager().get(hab);
         Keeping.SignResult sigs = (Keeping.SignResult) keeper.sign(serder.getRaw().getBytes(), true, null, null).get();
 
-        Map<String, Object> jsondata = new HashMap<>();
+        Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("ixn", serder.getKed());
         jsondata.put("sigs", sigs.signatures());
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams());
