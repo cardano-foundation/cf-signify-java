@@ -19,6 +19,7 @@ import org.cardanofoundation.signify.core.States.State;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
+import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -30,36 +31,43 @@ public class Keeping {
         Keeper<? extends KeeperParams> createKeeper(int pidx, KeeperParams args);
     }
 
-    public record ExternalModule(
-        String type,
-        String name,
-        ExternalModuleType module
-    ) {}
-
-    public record KeeperResult(List<String> verfers, List<String> digers) {}
-
-    public record SignResult(List<String> signatures) {}
-
     public interface Keeper<T extends KeeperParams> {
         Manager.Algos getAlgo();
+
         List<Signer> getSigners();
+
         T getParams();
-        CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException;
+
+        CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException, DigestException;
+
         CompletableFuture<KeeperResult> rotate(
-            List<String> ncodes,
-            boolean transferable,
-            List<State> states,
-            List<State> rstates
-        ) throws SodiumException;
+                List<String> ncodes,
+                boolean transferable,
+                List<State> states,
+                List<State> rstates
+        ) throws SodiumException, DigestException;
+
         CompletableFuture<SignResult> sign(
-            byte[] ser,
-            Boolean indexed,
-            List<Integer> indices,
-            List<Integer> ondices
+                byte[] ser,
+                Boolean indexed,
+                List<Integer> indices,
+                List<Integer> ondices
         ) throws SodiumException;
     }
 
-    @SuppressWarnings("unchecked")
+    public record ExternalModule(
+            String type,
+            String name,
+            ExternalModuleType module
+    ) {
+    }
+
+    public record KeeperResult(List<String> verfers, List<String> digers) {
+    }
+
+    public record SignResult(List<String> signatures) {
+    }
+
     public static class KeyManager {
         private final Salter salter;
         private final Map<String, ExternalModuleType> modules = new HashMap<>();
@@ -74,42 +82,42 @@ public class Keeping {
         public Keeper<? extends KeeperParams> create(Algos algo, int pidx, Map<String, Object> kargs) throws SodiumException {
             return switch (algo) {
                 case salty -> new SaltyKeeper(
-                    salter,
-                    pidx,
-                    (Integer) kargs.get("kidx"),
-                    (Tier) kargs.get("tier"),
-                    (Boolean) kargs.get("transferable"),
-                    (String) kargs.get("stem"),
-                    (String) kargs.get("code"),
-                    (Integer) kargs.get("count"),
-                    (List<String>) kargs.get("icodes"),
-                    (String) kargs.get("ncode"),
-                    (Integer) kargs.get("ncount"),
-                    (List<String>) kargs.get("ncodes"),
-                    (String) kargs.get("dcode"),
-                    (String) kargs.get("bran"),
-                    (String) kargs.get("sxlt")
+                        salter,
+                        pidx,
+                        (Integer) kargs.get("kidx"),
+                        (Tier) kargs.get("tier"),
+                        (Boolean) kargs.get("transferable"),
+                        (String) kargs.get("stem"),
+                        (String) kargs.get("code"),
+                        (Integer) kargs.get("count"),
+                        (List<String>) kargs.get("icodes"),
+                        (String) kargs.get("ncode"),
+                        (Integer) kargs.get("ncount"),
+                        (List<String>) kargs.get("ncodes"),
+                        (String) kargs.get("dcode"),
+                        (String) kargs.get("bran"),
+                        (String) kargs.get("sxlt")
                 );
                 case randy -> new RandyKeeper(
-                    salter,
-                    (String) kargs.get("code"),
-                    (Integer) kargs.get("count"),
-                    (List<String>) kargs.get("icodes"),
-                    (Boolean) kargs.get("transferable"),
-                    (String) kargs.get("ncode"),
-                    (Integer) kargs.get("ncount"),
-                    (List<String>) kargs.get("ncodes"),
-                    (String) kargs.get("dcode"),
-                    (List<String>) kargs.get("prxs"),
-                    (List<String>) kargs.get("nxts")
+                        salter,
+                        (String) kargs.get("code"),
+                        (Integer) kargs.get("count"),
+                        (List<String>) kargs.get("icodes"),
+                        (Boolean) kargs.get("transferable"),
+                        (String) kargs.get("ncode"),
+                        (Integer) kargs.get("ncount"),
+                        (List<String>) kargs.get("ncodes"),
+                        (String) kargs.get("dcode"),
+                        (List<String>) kargs.get("prxs"),
+                        (List<String>) kargs.get("nxts")
                 );
                 case group -> new GroupKeeper(
-                    this,
-                    (HabState) kargs.get("mhab"),
-                    (List<State>) kargs.get("states"),
-                    (List<State>) kargs.get("rstates"),
-                    (List<String>) kargs.get("keys"),
-                    (List<String>) kargs.get("ndigs")
+                        this,
+                        (HabState) kargs.get("mhab"),
+                        (List<State>) kargs.get("states"),
+                        (List<State>) kargs.get("rstates"),
+                        (List<String>) kargs.get("keys"),
+                        (List<String>) kargs.get("ndigs")
                 );
                 default -> throw new UnsupportedOperationException("Unknown algo");
             };
@@ -174,39 +182,39 @@ public class Keeping {
         private final Decrypter decrypter;
         private final Salter salter;
         private final int pidx;
-        private int kidx;
         private final Tier tier;
-        private boolean transferable;
         private final String stem;
         private final String code;
         private final int count;
         private final List<String> icodes;
         private final String ncode;
         private final int ncount;
-        private List<String> ncodes;
         private final String dcode;
         private final String sxlt;
         private final String bran;
         private final SaltyCreator creator;
         private final Algos algo = Algos.salty;
         private final List<Signer> signers;
+        private int kidx;
+        private boolean transferable;
+        private List<String> ncodes;
 
         public SaltyKeeper(
-            Salter salter,
-            Integer pidx,
-            Integer kidx,
-            Tier tier,
-            Boolean transferable,
-            String stem,
-            String code,
-            Integer count,
-            List<String> icodes,
-            String ncode,
-            Integer ncount,
-            List<String> ncodes,
-            String dcode,
-            String bran,
-            String sxlt
+                Salter salter,
+                Integer pidx,
+                Integer kidx,
+                Tier tier,
+                Boolean transferable,
+                String stem,
+                String code,
+                Integer count,
+                List<String> icodes,
+                String ncode,
+                Integer ncount,
+                List<String> ncodes,
+                String dcode,
+                String bran,
+                String sxlt
         ) throws SodiumException {
             this.salter = salter;
             this.pidx = pidx;
@@ -227,14 +235,14 @@ public class Keeping {
             this.decrypter = new Decrypter(RawArgs.builder().build(), signer.getQb64b());
 
             this.icodes = icodes != null ? icodes :
-                IntStream.range(0, this.count)
-                    .mapToObj(i -> this.code)
-                    .collect(Collectors.toList());
+                    IntStream.range(0, this.count)
+                            .mapToObj(i -> this.code)
+                            .collect(Collectors.toList());
 
             this.ncodes = ncodes != null ? ncodes :
-                IntStream.range(0, this.ncount)
-                    .mapToObj(i -> this.ncode)
-                    .collect(Collectors.toList());
+                    IntStream.range(0, this.ncount)
+                            .mapToObj(i -> this.ncode)
+                            .collect(Collectors.toList());
 
             if (bran != null) {
                 this.bran = MatterCodex.Salt_128.getValue() + "A" + bran.substring(0, 21);
@@ -252,15 +260,15 @@ public class Keeping {
 
                 if (ciph.getCode().equals(MatterCodex.X25519_Cipher_Salt.getValue())) {
                     this.creator = new Manager.SaltyCreator(
-                        ((Salter) decrypted).getQb64(),
-                        tier,
-                        this.stem
+                            ((Salter) decrypted).getQb64(),
+                            tier,
+                            this.stem
                     );
                 } else if (ciph.getCode().equals(MatterCodex.X25519_Cipher_Seed.getValue())) {
                     this.creator = new Manager.SaltyCreator(
-                        ((Signer) decrypted).getQb64(),
-                        tier,
-                        this.stem
+                            ((Signer) decrypted).getQb64(),
+                            tier,
+                            this.stem
                     );
                 } else {
                     throw new UnexpectedCodeException("Unsupported cipher text code = " + ciph.getCode());
@@ -268,174 +276,149 @@ public class Keeping {
             }
 
             this.signers = this.creator.create(
-                this.icodes,
-                this.ncount,
-                this.ncode,
-                this.transferable,
-                this.pidx,
-                0,
-                this.kidx,
-                false
+                    this.icodes,
+                    this.ncount,
+                    this.ncode,
+                    this.transferable,
+                    this.pidx,
+                    0,
+                    this.kidx,
+                    false
             ).getSigners();
         }
 
         @Override
         public SaltyParams getParams() {
             return SaltyParams.builder()
-                .sxlt(sxlt)
-                .pidx(pidx)
-                .kidx(kidx)
-                .stem(stem)
-                .tier(tier)
-                .icodes(icodes)
-                .ncodes(ncodes)
-                .dcode(dcode)
-                .transferable(transferable)
-                .build();
+                    .sxlt(sxlt)
+                    .pidx(pidx)
+                    .kidx(kidx)
+                    .stem(stem)
+                    .tier(tier)
+                    .icodes(icodes)
+                    .ncodes(ncodes)
+                    .dcode(dcode)
+                    .transferable(transferable)
+                    .build();
         }
 
         @Override
-        public CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException {
+        public CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException, DigestException {
             this.transferable = transferable;
             this.kidx = 0;
 
             Manager.Keys signers = creator.create(
-                icodes,
-                count,
-                code,
-                this.transferable,
-                pidx,
-                0,
-                kidx,
-                false
+                    icodes,
+                    count,
+                    code,
+                    this.transferable,
+                    pidx,
+                    0,
+                    kidx,
+                    false
             );
             List<String> verfers = signers.getSigners().stream()
-                .map(signer -> signer.getVerfer().getQb64())
-                .collect(Collectors.toList());
+                    .map(signer -> signer.getVerfer().getQb64())
+                    .collect(Collectors.toList());
 
             Manager.Keys nsigners = creator.create(
-                ncodes,
-                ncount,
-                ncode,
-                this.transferable,
-                pidx,
-                0,
-                icodes.size(),
-                false
+                    ncodes,
+                    ncount,
+                    ncode,
+                    this.transferable,
+                    pidx,
+                    0,
+                    icodes.size(),
+                    false
             );
-            List<String> digers = nsigners.getSigners().stream()
-                .map(nsigner ->
-                    new Diger(
-                        RawArgs.builder()
-                            .code(this.dcode)
-                            .build(),
-                        nsigner.getVerfer().getQb64b()
-                    ).getQb64()
-                )
-                .collect(Collectors.toList());
-
+            List<String> digers = new ArrayList<>();
+            for (Signer nsigner : nsigners.getSigners()) {
+                digers.add(new Diger(this.dcode, nsigner.getVerfer().getQb64b()).getQb64());
+            }
             return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
         }
 
         @Override
         public CompletableFuture<KeeperResult> rotate(
-            List<String> ncodes,
-            boolean transferable,
-            List<State> states,
-            List<State> rstates
-        ) throws SodiumException {
+                List<String> ncodes,
+                boolean transferable,
+                List<State> states,
+                List<State> rstates
+        ) throws SodiumException, DigestException {
             this.ncodes = ncodes;
             this.transferable = transferable;
 
             Manager.Keys signers = creator.create(
-                this.ncodes,
-                ncount,
-                ncode,
-                this.transferable,
-                pidx,
-                0,
-                kidx + this.icodes.size(),
-                false
+                    this.ncodes,
+                    ncount,
+                    ncode,
+                    this.transferable,
+                    pidx,
+                    0,
+                    kidx + this.icodes.size(),
+                    false
             );
             List<String> verfers = signers.getSigners().stream()
-                .map(signer -> signer.getVerfer().getQb64())
-                .collect(Collectors.toList());
+                    .map(signer -> signer.getVerfer().getQb64())
+                    .collect(Collectors.toList());
 
             this.kidx = this.kidx + this.icodes.size();
             Manager.Keys nsigners = creator.create(
-                this.ncodes,
-                ncount,
-                ncode,
-                this.transferable,
-                pidx,
-                0,
-                this.kidx + this.icodes.size(),
-                false
+                    this.ncodes,
+                    ncount,
+                    ncode,
+                    this.transferable,
+                    pidx,
+                    0,
+                    this.kidx + this.icodes.size(),
+                    false
             );
-            List<String> digers = nsigners.getSigners().stream()
-                .map(nsigner ->
-                    new Diger(
-                        RawArgs.builder()
-                            .code(this.code)
-                            .build(),
-                        nsigner.getVerfer().getQb64b()
-                    ).getQb64()
-                )
-                .collect(Collectors.toList());
+            List<String> digers = new ArrayList<>();
+            for (Signer nsigner : nsigners.getSigners()) {
+                digers.add(new Diger(this.dcode, nsigner.getVerfer().getQb64b()).getQb64());
+            }
 
             return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
         }
 
         @Override
         public CompletableFuture<SignResult> sign(
-            byte[] ser,
-            Boolean indexed,
-            List<Integer> indices,
-            List<Integer> ondices
+                byte[] ser,
+                Boolean indexed,
+                List<Integer> indices,
+                List<Integer> ondices
         ) throws SodiumException {
             Manager.Keys signers = creator.create(
-                icodes,
-                ncount,
-                ncode,
-                transferable,
-                pidx,
-                0,
-                kidx,
-                false
+                    icodes,
+                    ncount,
+                    ncode,
+                    transferable,
+                    pidx,
+                    0,
+                    kidx,
+                    false
             );
 
-            List<String> signatures;
+            List<String> signatures = new ArrayList<>();
             if (indexed != null && indexed) {
-                signatures = IntStream.range(0, signers.getSigners().size())
-                    .mapToObj(j -> {
-                        Signer signer = signers.getSigners().get(j);
-                        int i = indices != null ? indices.get(j) : j;
-                        if (i < 0) {
-                            throw new InvalidValueException("Invalid signing index = " + i);
-                        }
-                        int o = ondices != null ? ondices.get(j) : i;
-                        if (o < 0) {
-                            throw new InvalidValueException("Invalid ondex = " + o);
-                        }
-                        try {
-                            Siger siger = (Siger) signer.sign(ser, i, o == 0, o);
-                            return siger.getQb64();
-                        } catch (SodiumException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .collect(Collectors.toList());
+                for (int i = 0; i < signers.getSigners().size(); i++) {
+                    Signer signer = signers.getSigners().get(i);
+                    int index = indices != null ? indices.get(i) : i;
+                    if (index < 0) {
+                        throw new InvalidValueException("Invalid signing index = " + index);
+                    }
+                    int ondex = ondices != null ? ondices.get(i) : index;
+                    if (ondex < 0) {
+                        throw new InvalidValueException("Invalid ondex = " + ondex);
+                    }
+                    Siger siger = (Siger) signer.sign(ser, index, ondex == 0, ondex);
+                    signatures.add(siger.getQb64());
+                }
             } else {
-                signatures = signers.getSigners().stream()
-                    .map(signer -> {
-                        try {
-                            Cigar cigar = (Cigar) signer.sign(ser);
-                            return cigar.getQb64();
-                        } catch (SodiumException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .collect(Collectors.toList());
+                for (Signer signer : signers.getSigners()) {
+                    Cigar cigar = (Cigar) signer.sign(ser);
+                    signatures.add(cigar.getQb64());
+                }
             }
 
             return CompletableFuture.completedFuture(new SignResult(signatures));
@@ -451,29 +434,29 @@ public class Keeping {
         private final String code;
         private final int count;
         private final List<String> icodes;
-        private boolean transferable;
         private final String ncode;
         private final int ncount;
-        private List<String> ncodes;
         private final String dcode;
-        private List<String> prxs;
-        private List<String> nxts;
         private final RandyCreator creator;
         private final Algos algo = Algos.randy;
         private final List<Signer> signers;
+        private boolean transferable;
+        private List<String> ncodes;
+        private List<String> prxs;
+        private List<String> nxts;
 
         public RandyKeeper(
-            Salter salter,
-            String code,
-            Integer count,
-            List<String> icodes,
-            Boolean transferable,
-            String ncode,
-            Integer ncount,
-            List<String> ncodes,
-            String dcode,
-            List<String> prxs,
-            List<String> nxts
+                Salter salter,
+                String code,
+                Integer count,
+                List<String> icodes,
+                Boolean transferable,
+                String ncode,
+                Integer ncount,
+                List<String> ncodes,
+                String dcode,
+                List<String> prxs,
+                List<String> nxts
         ) throws SodiumException {
             this.salter = salter;
             this.code = code != null ? code : MatterCodex.Ed25519_Seed.getValue();
@@ -484,14 +467,14 @@ public class Keeping {
             this.dcode = dcode != null ? dcode : MatterCodex.Blake3_256.getValue();
 
             this.icodes = icodes != null ? icodes :
-                IntStream.range(0, this.count)
-                    .mapToObj(i -> this.code)
-                    .collect(Collectors.toList());
+                    IntStream.range(0, this.count)
+                            .mapToObj(i -> this.code)
+                            .collect(Collectors.toList());
 
             this.ncodes = ncodes != null ? ncodes :
-                IntStream.range(0, this.ncount)
-                    .mapToObj(i -> this.ncode)
-                    .collect(Collectors.toList());
+                    IntStream.range(0, this.ncount)
+                            .mapToObj(i -> this.ncode)
+                            .collect(Collectors.toList());
 
             Signer signer = this.salter.signer(this.code, this.transferable, null, null, null);
             this.aeid = signer.getVerfer().getQb64();
@@ -504,193 +487,138 @@ public class Keeping {
 
             this.creator = new RandyCreator();
 
-            this.signers = this.prxs.stream()
-                .map(prx -> {
-                    try {
-                        return (Signer) this.decrypter.decrypt(
-                            new Cipher(prx).getQb64b(),
-                            null,
-                            this.transferable
-                        );
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+            this.signers = new ArrayList<>();
+            for (String prx : this.prxs) {
+                this.signers.add((Signer) this.decrypter.decrypt(
+                        new Cipher(prx).getQb64b(),
+                        null,
+                        this.transferable
+                ));
+            }
         }
 
         @Override
         public RandyParams getParams() {
             return RandyParams.builder()
-                .nxts(nxts)
-                .prxs(prxs)
-                .transferable(transferable)
-                .build();
+                    .nxts(nxts)
+                    .prxs(prxs)
+                    .transferable(transferable)
+                    .build();
         }
 
         @Override
-        public CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException {
+        public CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException, DigestException {
             this.transferable = transferable;
 
             Manager.Keys signers = creator.create(
-                icodes,
-                count,
-                code,
-                this.transferable
+                    icodes,
+                    count,
+                    code,
+                    this.transferable
             );
 
-            this.prxs = signers.getSigners().stream()
-                .map(signer -> {
-                    try {
-                        return this.encrypter.encrypt(null, signer).getQb64();
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+            this.prxs = new ArrayList<>();
+            List<String> verfers = new ArrayList<>();
 
-            List<String> verfers = signers.getSigners().stream()
-                .map(signer -> signer.getVerfer().getQb64())
-                .collect(Collectors.toList());
+            for (Signer signer : signers.getSigners()) {
+                this.prxs.add(this.encrypter.encrypt(null, signer).getQb64());
+                verfers.add(signer.getVerfer().getQb64());
+            }
 
             Manager.Keys nsigners = creator.create(
-                ncodes,
-                ncount,
-                ncode,
-                this.transferable
+                    ncodes,
+                    ncount,
+                    ncode,
+                    this.transferable
             );
 
-            this.nxts = nsigners.getSigners().stream()
-                .map(signer -> {
-                    try {
-                        return this.encrypter.encrypt(null, signer).getQb64();
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+            this.nxts = new ArrayList<>();
+            List<String> digers = new ArrayList<>();
 
-            List<String> digers = nsigners.getSigners().stream()
-                .map(nsigner ->
-                    new Diger(
-                        RawArgs.builder().
-                            code(this.dcode)
-                            .build(),
-                        nsigner.getVerfer().getQb64b()
-                    ).getQb64()
-                )
-                .collect(Collectors.toList());
+            for (Signer nsigner : nsigners.getSigners()) {
+                this.nxts.add(this.encrypter.encrypt(null, nsigner).getQb64());
+                digers.add(new Diger(dcode, nsigner.getVerfer().getQb64b()).getQb64());
+            }
 
             return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
         }
 
         @Override
         public CompletableFuture<KeeperResult> rotate(
-            List<String> ncodes,
-            boolean transferable,
-            List<State> states,
-            List<State> rstates
-        ) throws SodiumException {
+                List<String> ncodes,
+                boolean transferable,
+                List<State> states,
+                List<State> rstates
+        ) throws SodiumException, DigestException {
             this.ncodes = ncodes;
             this.transferable = transferable;
             this.prxs = this.nxts;
 
-            List<Signer> signers = this.nxts.stream()
-                .map(nxt -> {
-                    try {
-                        return (Signer) this.decrypter.decrypt(
-                            null,
-                            new Cipher(nxt),
-                            this.transferable
-                        );
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .toList();
+            List<String> verfers = new ArrayList<>();
 
-            List<String> verfers = signers.stream()
-                .map(signer -> signer.getVerfer().getQb64())
-                .collect(Collectors.toList());
+            for (String ntx : this.nxts) {
+                Signer signer = (Signer) this.decrypter.decrypt(
+                        null,
+                        new Cipher(ntx),
+                        this.transferable
+                );
+                verfers.add(signer.getVerfer().getQb64());
+            }
 
             Manager.Keys nsigners = creator.create(
-                this.ncodes,
-                this.ncount,
-                this.ncode,
-                this.transferable
+                    this.ncodes,
+                    this.ncount,
+                    this.ncode,
+                    this.transferable
             );
 
-            this.nxts = nsigners.getSigners().stream()
-                .map(signer -> {
-                    try {
-                        return this.encrypter.encrypt(null, signer).getQb64();
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
-
-            List<String> digers = nsigners.getSigners().stream()
-                .map(nsigner -> new Diger(
-                    RawArgs.builder().code(this.dcode).build(),
-                    nsigner.getVerfer().getQb64b()
-                ).getQb64())
-                .collect(Collectors.toList());
+            this.nxts = new ArrayList<>();
+            List<String> digers = new ArrayList<>();
+            for (Signer nsigner : nsigners.getSigners()) {
+                this.nxts.add(this.encrypter.encrypt(null, nsigner).getQb64());
+                digers.add(new Diger(dcode, nsigner.getVerfer().getQb64b()).getQb64());
+            }
 
             return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
         }
 
         @Override
         public CompletableFuture<SignResult> sign(
-            byte[] ser,
-            Boolean indexed,
-            List<Integer> indices,
-            List<Integer> ondices
+                byte[] ser,
+                Boolean indexed,
+                List<Integer> indices,
+                List<Integer> ondices
         ) throws SodiumException {
-            List<Signer> signers = this.prxs.stream()
-                .map(prx -> {
-                    try {
-                        return (Signer) this.decrypter.decrypt(
-                            new Cipher(prx).getQb64b(),
-                            null,
-                            this.transferable
-                        );
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .toList();
+            List<Signer> signers = new ArrayList<>();
+            for (String prx : this.prxs) {
+                Signer signer = (Signer) this.decrypter.decrypt(
+                        new Cipher(prx).getQb64b(),
+                        null,
+                        this.transferable
+                );
+                signers.add(signer);
+            }
 
-            List<String> signatures;
+            List<String> signatures = new ArrayList<>();
             if (indexed != null && indexed) {
-                signatures = IntStream.range(0, signers.size())
-                    .mapToObj(j -> {
-                        Signer signer = signers.get(j);
-                        int i = indices != null ? indices.get(j) : j;
-                        if (i < 0) {
-                            throw new InvalidValueException("Invalid signing index = " + i);
-                        }
-                        int o = ondices != null ? ondices.get(j) : i;
-                        if (o < 0) {
-                            throw new InvalidValueException("Invalid ondex = " + o);
-                        }
-                        try {
-                            return ((Siger) signer.sign(ser, i, o == 0, o)).getQb64();
-                        } catch (SodiumException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .collect(Collectors.toList());
+                for (int i = 0; i < signers.size(); i++) {
+                    Signer signer = signers.get(i);
+                    int index = indices != null ? indices.get(i) : i;
+                    if (index < 0) {
+                        throw new InvalidValueException("Invalid signing index = " + index);
+                    }
+                    int ondex = ondices != null ? ondices.get(i) : index;
+                    if (ondex < 0) {
+                        throw new InvalidValueException("Invalid ondex = " + ondex);
+                    }
+                    Siger siger = (Siger) signer.sign(ser, index, ondex == 0, ondex);
+                    signatures.add(siger.getQb64());
+                }
+
             } else {
-                signatures = signers.stream()
-                    .map(signer -> {
-                        try {
-                            return ((Cigar) signer.sign(ser)).getQb64();
-                        } catch (SodiumException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .collect(Collectors.toList());
+                for (Signer signer : signers) {
+                    signatures.add(((Cigar) signer.sign(ser)).getQb64());
+                }
             }
 
             return CompletableFuture.completedFuture(new SignResult(signatures));
@@ -701,18 +629,18 @@ public class Keeping {
     public static class GroupKeeper implements Keeper<GroupParams> {
         private final KeyManager manager;
         private final HabState mhab;
-        private List<String> gkeys;
-        private List<String> gdigs;
         private final Algos algo = Algos.group;
         private final List<Signer> signers;
+        private List<String> gkeys;
+        private List<String> gdigs;
 
         public GroupKeeper(
-            KeyManager manager,
-            HabState mhab,
-            List<State> states,
-            List<State> rstates,
-            List<String> keys,
-            List<String> ndigs
+                KeyManager manager,
+                HabState mhab,
+                List<State> states,
+                List<State> rstates,
+                List<String> keys,
+                List<String> ndigs
         ) {
             this.manager = manager;
             this.mhab = mhab;
@@ -720,14 +648,14 @@ public class Keeping {
 
             if (states != null) {
                 keys = states.stream()
-                    .map(state -> state.getK().getFirst())
-                    .collect(Collectors.toList());
+                        .map(state -> state.getK().getFirst())
+                        .collect(Collectors.toList());
             }
 
             if (rstates != null) {
                 ndigs = rstates.stream()
-                    .map(state -> state.getN().getFirst())
-                    .collect(Collectors.toList());
+                        .map(state -> state.getN().getFirst())
+                        .collect(Collectors.toList());
             }
 
             this.gkeys = keys != null ? keys : new ArrayList<>();
@@ -737,8 +665,8 @@ public class Keeping {
         @Override
         public GroupParams getParams() {
             return GroupParams.builder()
-                .mhab(mhab)
-                .build();
+                    .mhab(mhab)
+                    .build();
         }
 
         @Override
@@ -748,28 +676,28 @@ public class Keeping {
 
         @Override
         public CompletableFuture<KeeperResult> rotate(
-            List<String> ncodes,
-            boolean transferable,
-            List<State> states,
-            List<State> rstates
+                List<String> ncodes,
+                boolean transferable,
+                List<State> states,
+                List<State> rstates
         ) {
             this.gkeys = states.stream()
-                .map(state -> state.getK().getFirst())
-                .collect(Collectors.toList());
+                    .map(state -> state.getK().getFirst())
+                    .collect(Collectors.toList());
 
             this.gdigs = rstates.stream()
-                .map(state -> state.getN().getFirst())
-                .collect(Collectors.toList());
+                    .map(state -> state.getN().getFirst())
+                    .collect(Collectors.toList());
 
             return CompletableFuture.completedFuture(new KeeperResult(gkeys, gdigs));
         }
 
         @Override
         public CompletableFuture<SignResult> sign(
-            byte[] ser,
-            Boolean indexed,
-            List<Integer> indices,
-            List<Integer> ondices
+                byte[] ser,
+                Boolean indexed,
+                List<Integer> indices,
+                List<Integer> ondices
         ) throws SodiumException {
             if (mhab.getState() == null) {
                 throw new IllegalStateException("No state in mhab");
@@ -783,7 +711,7 @@ public class Keeping {
 
             Keeper<?> mkeeper = manager.get(mhab);
             return mkeeper.sign(ser, indexed != null ? indexed : true,
-                Collections.singletonList(csi), Collections.singletonList(pni));
+                    Collections.singletonList(csi), Collections.singletonList(pni));
         }
     }
 }

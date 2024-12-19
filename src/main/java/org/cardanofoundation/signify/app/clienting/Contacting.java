@@ -1,12 +1,14 @@
 package org.cardanofoundation.signify.app.clienting;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
-import org.springframework.http.ResponseEntity;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.net.http.HttpResponse;
 import java.util.Map;
 
 public class Contacting {
@@ -34,7 +36,6 @@ public class Contacting {
 
     @Getter
     public static class Contacts {
-        private final ObjectMapper objectMapper = new ObjectMapper();
         private final SignifyClient client;
 
         /**
@@ -56,7 +57,7 @@ public class Contacting {
             String group,
             String filterField,
             String filterValue
-        ) throws SodiumException, JsonProcessingException {
+        ) throws SodiumException, InterruptedException, IOException {
             StringBuilder path = new StringBuilder("/contacts");
             boolean hasQuery = false;
 
@@ -67,11 +68,11 @@ public class Contacting {
             if (filterField != null && filterValue != null) {
                 path.append(hasQuery ? "&" : "?")
                     .append("filter_field=").append(filterField)
-                    .append("&filter_value=").append(filterValue);
+                    .append("&filter_value=").append(URLEncoder.encode(filterValue, StandardCharsets.UTF_8));
             }
 
-            ResponseEntity<String> response = client.fetch(path.toString(), "GET", null, null);
-            return objectMapper.readValue(response.getBody(), Contact[].class);
+            HttpResponse<String> response = client.fetch(path.toString(), "GET", null, null);
+            return Utils.fromJson(response.body(), Contact[].class);
         }
 
         /**
@@ -79,10 +80,10 @@ public class Contacting {
          * @param pre Prefix of the contact
          * @return The contact
          */
-        public Contact get(String pre) throws SodiumException, JsonProcessingException {
+        public Object get(String pre) throws SodiumException, InterruptedException, IOException {
             String path = "/contacts/" + pre;
-            ResponseEntity<String> response = client.fetch(path, "GET", null, null);
-            return objectMapper.readValue(response.getBody(), Contact.class);
+            HttpResponse<String> response = client.fetch(path, "GET", null, null);
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
@@ -91,17 +92,17 @@ public class Contacting {
          * @param info Information about the contact
          * @return Result of the addition
          */
-        public Contact add(String pre, Map<String, Object> info) throws SodiumException, JsonProcessingException {
+        public Object add(String pre, Map<String, Object> info) throws SodiumException, IOException, InterruptedException {
             String path = "/contacts/" + pre;
-            ResponseEntity<String> response = client.fetch(path, "POST", info, null);
-            return objectMapper.readValue(response.getBody(), Contact.class);
+            HttpResponse<String> response = client.fetch(path, "POST", info, null);
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
          * Delete a contact
          * @param pre Prefix of the contact
          */
-        public void delete(String pre) throws SodiumException {
+        public void delete(String pre) throws SodiumException, IOException, InterruptedException {
             String path = "/contacts/" + pre;
             client.fetch(path, "DELETE", null, null);
         }
@@ -112,10 +113,10 @@ public class Contacting {
          * @param info Updated information about the contact
          * @return Result of the update
          */
-        public Contact update(String pre, Map<String, Object> info) throws SodiumException, JsonProcessingException {
+        public Object update(String pre, Object info) throws SodiumException, IOException, InterruptedException {
             String path = "/contacts/" + pre;
-            ResponseEntity<String> response = client.fetch(path, "PUT", info, null);
-            return objectMapper.readValue(response.getBody(), Contact.class);
+            HttpResponse<String> response = client.fetch(path, "PUT", info, null);
+            return Utils.fromJson(response.body(), Object.class);
         }
     }
 }

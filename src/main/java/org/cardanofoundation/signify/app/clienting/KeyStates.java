@@ -30,7 +30,7 @@ public class KeyStates {
         String path = "/states?pre=" + pre;
         String method = "GET";
         String data = null;
-        return Utils.fromJson(client.fetch(path, method, data, null).getBody(), Object.class);
+        return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
     }
 
     /**
@@ -44,7 +44,7 @@ public class KeyStates {
         String path = "/states?" + String.join("&", pres.stream().map(pre -> "pre=" + pre).toArray(String[]::new));
         String method = "GET";
         String data = null;
-        return Utils.fromJson(client.fetch(path, method, data, null).getBody(), Object.class);
+        return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
     }
 
     /**
@@ -67,6 +67,6 @@ public class KeyStates {
             data.put("anchor", anchor);
         }
         String method = "POST";
-        return Utils.fromJson(client.fetch(path, method, data, null).getBody(), Object.class);
+        return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
     }
 }

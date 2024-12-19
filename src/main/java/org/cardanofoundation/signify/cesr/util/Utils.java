@@ -46,17 +46,6 @@ public class Utils {
         return result;
     }
 
-    public static byte[] intToBytes(int value, int length) {
-        byte[] byteArray = new byte[length]; // Assuming a 4-byte integer (32 bits)
-    
-        for (int index = byteArray.length - 1; index >= 0; index--) {
-            byte byteValue = (byte) (value & 0xff);
-            byteArray[index] = byteValue;
-            value = (value - byteValue) / 256;
-        }
-        return byteArray;
-    }
-
     public static BigInteger bytesToInt(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return BigInteger.ZERO;
@@ -95,6 +84,14 @@ public class Utils {
         }
     }
 
+    public static <T> T fromJson(String json, TypeReference<T> type) {
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (Exception e) {
+            throw new SerializeException("Error while parsing JSON: " + e.getMessage());
+        }
+    }
+
     public static List<String> toList(Object obj) {
         return switch (obj) {
             case String s -> List.of(s);
@@ -106,5 +103,9 @@ public class Utils {
                 .toList();
             case null, default -> Collections.emptyList();
         };
+    }
+
+    public static long currentTimeSeconds() {
+        return System.currentTimeMillis() / 1000;
     }
 }

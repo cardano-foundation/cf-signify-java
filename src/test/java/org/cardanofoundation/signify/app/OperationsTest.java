@@ -9,13 +9,10 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
+import org.mockito.*;
 
+import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,12 +37,15 @@ public class OperationsTest {
 
     @Test
     @DisplayName("should get operation by name")
-    void canGetOperationByName() throws SodiumException, JsonProcessingException {
+    void canGetOperationByName() throws SodiumException, IOException, InterruptedException {
         String operationName = UUID.randomUUID().toString();
         String responseBody = "{\"name\":\"" + operationName + "\"}";
 
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn(responseBody);
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(new ResponseEntity<>(responseBody, null, 200));
+            .thenReturn(mockResponse);
 
         operations.get("operationName");
 
@@ -56,9 +56,12 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Can list operations")
-    void canListOperations() throws SodiumException, JsonProcessingException {
+    void canListOperations() throws SodiumException, IOException, InterruptedException {
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn("[]");
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(new ResponseEntity<>("[]", null, 200));
+            .thenReturn(mockResponse);
 
         var response = operations.list(null);
 
@@ -69,9 +72,12 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Can list operations by type")
-    void canListOperationsByType() throws SodiumException, JsonProcessingException {
+    void canListOperationsByType() throws SodiumException, IOException, InterruptedException {
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn(Utils.jsonStringify(Collections.singletonList(buildOperation(true, true))));
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(new ResponseEntity<>(Utils.jsonStringify(Collections.singletonList(buildOperation(true, true))), null, 200));
+            .thenReturn(mockResponse);
 
         var opsResponse = operations.list("witness");
 
@@ -85,9 +91,12 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Can delete operation by name")
-    void canDeleteOperationByName() throws SodiumException {
+    void canDeleteOperationByName() throws SodiumException, IOException, InterruptedException {
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn("{}");
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(new ResponseEntity<>("{}", null, 200));
+            .thenReturn(mockResponse);
 
         operations.delete("operationName");
 
@@ -98,83 +107,124 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Does not wait for operation that is already done")
-    void doesNotWaitForOperationThatIsAlreadyDone() throws SodiumException, JsonProcessingException {
+    void doesNotWaitForOperationThatIsAlreadyDone() throws SodiumException, IOException, InterruptedException {
         Operation<String> operation = buildOperation(true, true);
 
-        var result = operations.wait(operation, null);
+        var result = operations.wait(operation);
         verify(client, never()).fetch(anyString(), anyString(), isNull(), isNull());
         assertEquals(operation, result);
     }
 
     @Test
     @DisplayName("Returns when operation is done after first call")
-    void returnsWhenOperationIsDoneAfterFirstCall() throws SodiumException, JsonProcessingException {
+    void returnsWhenOperationIsDoneAfterFirstCall() throws SodiumException, JsonProcessingException, IOException, InterruptedException {
         Operation<String> operation = buildOperation(true, true);
 
-        // the first call returns the operation is done
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn(Utils.jsonStringify(operation));
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(new ResponseEntity<>(Utils.jsonStringify(operation), null, 200));
+            .thenReturn(mockResponse);
 
-        // set the operation to not done to test the fetch is called
         operation.setDone(false);
-        operations.wait(operation, null);
+        operations.wait(operation);
         verify(client, times(1)).fetch(anyString(), anyString(), isNull(), isNull());
     }
 
     @Test
     @DisplayName("Returns when operation is done after second call")
-    void returnsWhenOperationIsDoneAfterSecondCall() throws SodiumException, JsonProcessingException {
-        String name = UUID.randomUUID().toString();
+    void returnsWhenOperationIsDoneAfterSecondCall() throws SodiumException, JsonProcessingException, IOException, InterruptedException {
         Operation<String> operation1 = buildOperation(false, false);
         Operation<String> operation2 = buildOperation(true, true);
 
-        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(new ResponseEntity<>(Utils.jsonStringify(operation1), null, 200))
-                .thenReturn(new ResponseEntity<>(Utils.jsonStringify(operation2), null, 200));
+        HttpResponse<String> mockResponse1 = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse1.body()).thenReturn(Utils.jsonStringify(operation1));
+        Mockito.when(mockResponse1.statusCode()).thenReturn(200);
 
-        Operations.WaitOptions options = Operations.WaitOptions.builder().build();
-        options.setMaxSleep(10);
+        HttpResponse<String> mockResponse2 = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse2.body()).thenReturn(Utils.jsonStringify(operation2));
+        Mockito.when(mockResponse2.statusCode()).thenReturn(200);
+
+        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+            .thenReturn(mockResponse1)
+            .thenReturn(mockResponse2);
+
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .build();
         operations.wait(operation1, options);
         verify(client, times(2)).fetch(anyString(), anyString(), isNull(), isNull());
     }
 
     @Test
     @DisplayName("Returns when child operation is also done")
-    void returnsWhenChildOperationIsAlsoDone() throws SodiumException, JsonProcessingException {
-        String name = UUID.randomUUID().toString();
+    void returnsWhenChildOperationIsAlsoDone() throws SodiumException, JsonProcessingException, IOException, InterruptedException {
+        HttpResponse<String> mockResponse1 = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse1.body()).thenReturn(Utils.jsonStringify(buildOperation(false, false)));
+        Mockito.when(mockResponse1.statusCode()).thenReturn(200);
+
+        HttpResponse<String> mockResponse2 = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse2.body()).thenReturn(Utils.jsonStringify(buildOperation(false, true)));
+        Mockito.when(mockResponse2.statusCode()).thenReturn(200);
+
+        HttpResponse<String> mockResponse3 = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse3.body()).thenReturn(Utils.jsonStringify(buildOperation(true, true)));
+        Mockito.when(mockResponse3.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(new ResponseEntity<>(Utils.jsonStringify(buildOperation(false, false)), null, 200))
-                .thenReturn(new ResponseEntity<>(Utils.jsonStringify(buildOperation(false, true)), null, 200))
-                .thenReturn(new ResponseEntity<>(Utils.jsonStringify(buildOperation(true, true)), null, 200));
+            .thenReturn(mockResponse1)
+            .thenReturn(mockResponse2)
+            .thenReturn(mockResponse3);
 
-        Operations.WaitOptions options = Operations.WaitOptions.builder().build();
-        options.setMaxSleep(10);
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .build();
         operations.wait(buildOperation(false, false), options);
         verify(client, times(3)).fetch(anyString(), anyString(), isNull(), isNull());
+    }
+
+    @Test
+    @DisplayName("Throw if aborting operation")
+    void throwIfAbortingOperation() throws SodiumException, IOException, InterruptedException {
+        Operation<String> operation = buildOperation(false, false);
+
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn(Utils.jsonStringify(operation));
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
+
+        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+                .thenReturn(mockResponse);
+
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .abortSignal(Operations.AbortSignal.builder().timeout(5000L).build())
+                .build();
+
+        Exception exception = assertThrows(InterruptedException.class, () -> operations.wait(operation, options));
+        assertEquals("Operation aborted: Timeout", exception.getMessage());
     }
 
 
     Operation<String> buildOperation(boolean done, boolean dependsDone) {
         Operation<String> operation = Operation.<String>builder()
-                .name(UUID.randomUUID().toString())
-                .response("response")
-                .done(done)
-                .build();
+            .name(UUID.randomUUID().toString())
+            .response("response")
+            .done(done)
+            .build();
 
         Operation<String> depends = Operation.<String>builder()
-                .name(UUID.randomUUID().toString())
-                .response("depend")
-                .done(dependsDone)
-                .build();
+            .name(UUID.randomUUID().toString())
+            .response("depend")
+            .done(dependsDone)
+            .build();
 
         Operation.Metadata<String> metadata = Operation.Metadata.<String>builder()
-                .depends(depends)
-                .properties(Map.of("key", "value"))
-                .build();
+            .depends(depends)
+            .properties(Map.of("key", "value"))
+            .build();
         operation.setMetadata(metadata);
         return operation;
     }
 
-    // TODO: missing tests for options.signal
+
 }

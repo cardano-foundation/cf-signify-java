@@ -8,6 +8,7 @@ import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialExcep
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.nio.charset.StandardCharsets;
+import java.security.DigestException;
 import java.util.Arrays;
 
 /**
@@ -19,7 +20,7 @@ import java.util.Arrays;
 public class Diger extends Matter {
     private Verify verify;
 
-    public Diger(RawArgs args, byte[] ser) {
+    public Diger(RawArgs args, byte[] ser) throws DigestException {
         super(RawArgs.generateBlake3256SeedRaw(args, ser));
 
         if (this.getCode().equals(MatterCodex.Blake3_256.getValue())) {
@@ -29,7 +30,11 @@ public class Diger extends Matter {
         }
     }
 
-    public Diger(RawArgs args) {
+    public Diger(String code, byte[] ser) throws DigestException {
+        this(RawArgs.builder().code(code).build(), ser);
+    }
+
+    public Diger(RawArgs args) throws DigestException {
         this(args, null);
     }
 
@@ -44,11 +49,11 @@ public class Diger extends Matter {
      * using .raw as reference digest for ._verify digest algorithm determined
     by .code
      */
-    public boolean verify(byte[] ser) {
+    public boolean verify(byte[] ser) throws DigestException {
         return verify.verify(ser, this.getRaw());
     }
 
-    public boolean compare(byte[] ser, byte[] dig, Diger diger) {
+    public boolean compare(byte[] ser, byte[] dig, Diger diger) throws DigestException {
         if (dig != null) {
             if (Arrays.equals(dig, this.getQb64b())) {
                 return true;
@@ -69,13 +74,13 @@ public class Diger extends Matter {
         return diger.verify(ser) && this.verify(ser);
     }
 
-    private boolean blake3_256(byte[] ser, byte[] dig) {
+    private boolean blake3_256(byte[] ser, byte[] dig) throws DigestException {
         byte[] digest = CoreUtil.blake3_256(ser, 32);
         return Arrays.toString(digest).equals(Arrays.toString(dig));
     }
 
     @FunctionalInterface
     public interface Verify {
-        boolean verify(byte[] ser, byte[] raw);
+        boolean verify(byte[] ser, byte[] raw) throws DigestException;
     }
 }

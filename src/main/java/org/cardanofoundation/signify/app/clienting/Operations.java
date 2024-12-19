@@ -1,54 +1,58 @@
 package org.cardanofoundation.signify.app.clienting;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
-import org.springframework.http.ResponseEntity;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Operations {
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final OperationsDeps client;
 
     public Operations(OperationsDeps client) {
         this.client = client;
     }
 
-    public <T> Operation<T> get(String name) throws SodiumException, JsonProcessingException {
+    public <T> Operation<T> get(String name) throws SodiumException, IOException, InterruptedException {
         String path = "/operations/" + name;
         String method = "GET";
-        ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return Operation.fromObject(objectMapper.readValue(response.getBody(), new TypeReference<>() {})) ;
+        HttpResponse<String> response = client.fetch(path, method, null, null);
+        return Utils.fromJson(response.body(), new TypeReference<>() {});
     }
 
-    public List<Operation<?>> list(String type) throws SodiumException, JsonProcessingException {
+    public List<Operation<?>> list(String type) throws SodiumException, IOException, InterruptedException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
         String method = "GET";
-        ResponseEntity<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.getBody(), new TypeReference<>() {
-        });
+        HttpResponse<String> response = client.fetch(path, method, null, null);
+        return Utils.fromJson(response.body(), new TypeReference<>() {});
     }
 
-    public void delete(String name) throws SodiumException {
+    public void delete(String name) throws SodiumException, IOException, InterruptedException {
         String path = "/operations/" + name;
         String method = "DELETE";
         client.fetch(path, method, null, null);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws SodiumException, JsonProcessingException {
-        int minSleep = options == null || options.getMinSleep() == null ? 10 : options.getMinSleep();
-        int maxSleep = options == null || options.getMaxSleep() == null ? 10000 : options.getMaxSleep();
-        int increaseFactor = options == null || options.getIncreaseFactor() == null ? 50 : options.getIncreaseFactor();
+    public <T> Operation<T> wait(Operation<T> op) throws SodiumException, IOException, InterruptedException {
+        return wait(op, WaitOptions.builder().build(), System.currentTimeMillis());
+    }
+
+    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws SodiumException, IOException, InterruptedException {
+        return wait(op, options, System.currentTimeMillis());
+    }
+
+    public <T> Operation<T> wait(Operation<T> op, WaitOptions options, long startingTime) throws SodiumException, IOException, InterruptedException {
+        int minSleep = options.getMinSleep();
+        int maxSleep = options.getMaxSleep();
+        int increaseFactor = options.getIncreaseFactor();
 
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null && !op.getMetadata().getDepends().isDone()) {
-            return (Operation<T>) wait(op.getMetadata().getDepends(), options);
+            return (Operation<T>) wait(op.getMetadata().getDepends(), options, startingTime);
         }
 
         if (op.isDone()) {
@@ -66,25 +70,60 @@ public class Operations {
             if (op.isDone()) {
                 return op;
             }
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                // Handle the interruption, e.g., by re-throwing or logging
-                // TODO: handle options.signal
-                Thread.currentThread().interrupt(); // Preserve interrupt status
+            Thread.sleep(delay);
+
+            if (options.getAbortSignal().getTimeout() != null) {
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - startingTime > options.getAbortSignal().getTimeout()) {
+                    options.getAbortSignal().abort("Timeout");
+                }
             }
+
+            options.getAbortSignal().throwIfAborted();
         }
     }
 
+    @Builder
     @Getter
     @Setter
-    @Builder
     public static class WaitOptions {
-        private Integer minSleep;
-        private Integer maxSleep;
-        private Integer increaseFactor;
-        private AbortSignal signal;
 
-        // TODO mapping options.signal form signify-ts
+        @Builder.Default
+        private Integer minSleep = 10;
+        @Builder.Default
+        private Integer maxSleep = 10000;
+        @Builder.Default
+        private Integer increaseFactor = 50;
+
+        @Builder.Default
+        private AbortSignal abortSignal = new AbortSignal();
+    }
+
+    @Builder
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class AbortSignal {
+        private final AtomicBoolean aborted = new AtomicBoolean(false);
+        private Object reason;
+        private Long timeout;
+
+        public boolean isAborted() {
+            return aborted.get();
+        }
+
+        public void abort(Object reason) {
+            if (!isAborted()) {
+                this.reason = reason;
+                aborted.set(true);
+            }
+        }
+
+        public void throwIfAborted() throws InterruptedException {
+            if (isAborted()) {
+                throw new InterruptedException("Operation aborted: " + reason.toString());
+            }
+        }
     }
 }

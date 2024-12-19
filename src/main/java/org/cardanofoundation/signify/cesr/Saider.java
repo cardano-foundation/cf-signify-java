@@ -7,6 +7,7 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeExcepti
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 
+import java.security.DigestException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,15 +55,15 @@ public class Saider extends Matter {
         }
     }
 
-    public Saider(Map<String, Object> sad) {
+    public Saider(Map<String, Object> sad) throws DigestException {
         this(new RawArgs(), sad, null, Ids.d.getValue());
     }
 
-    public Saider(RawArgs rawArgs, Map<String, Object> sad) {
+    public Saider(RawArgs rawArgs, Map<String, Object> sad) throws DigestException {
         this(rawArgs, sad, null, Ids.d.getValue());
     }
 
-    public Saider(RawArgs rawArgs, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
+    public Saider(RawArgs rawArgs, Map<String, Object> sad, CoreUtil.Serials kind, String label) throws DigestException {
         super(getRawArgs(rawArgs, sad, kind, label));
 
         if (!this.isDigestible()) {
@@ -70,7 +71,7 @@ public class Saider extends Matter {
         }
     }
 
-    private static RawArgs getRawArgs(RawArgs rawArgs, Map<String, Object> sad, CoreUtil.Serials kind, String label) {
+    private static RawArgs getRawArgs(RawArgs rawArgs, Map<String, Object> sad, CoreUtil.Serials kind, String label) throws DigestException {
         if(rawArgs.getCode() == null){
             if(sad.containsKey(label) && !sad.get(label).toString().isEmpty()){
                 Matter matterTemp = new Matter(sad.get(label).toString());
@@ -102,7 +103,7 @@ public class Saider extends Matter {
         }
     }
 
-    private static byte[] deriveBlake3_256(byte[] ser, int digestSize, int length) {
+    private static byte[] deriveBlake3_256(byte[] ser, int digestSize, int length) throws DigestException {
         return CoreUtil.blake3_256(ser, 32);
     }
 
@@ -111,7 +112,7 @@ public class Saider extends Matter {
         String code,
         CoreUtil.Serials kind,
         String label
-    ) {
+    ) throws DigestException {
         sad = new LinkedHashMap<>(sad);
         if (!Codex.DigiCodex.has(code) || !Digests.containsKey(code)) {
             throw new UnexpectedCodeException("Unsupported digest code = " + code);
@@ -154,7 +155,7 @@ public class Saider extends Matter {
         return Serder.dumps(sad, kind);
     }
 
-    public static SaidifyResult saidify(Map<String, Object> sad, String code, CoreUtil.Serials kind, String label) {
+    public static SaidifyResult saidify(Map<String, Object> sad, String code, CoreUtil.Serials kind, String label) throws DigestException {
         if (!sad.containsKey(label)) {
             throw new NoSuchElementException("Missing id field labeled = " + label + " in sad.");
         }
@@ -210,7 +211,7 @@ public class Saider extends Matter {
         return true;
     }
 
-    public static SaidifyResult saidify(Map<String, Object> sad) {
+    public static SaidifyResult saidify(Map<String, Object> sad) throws DigestException {
         return saidify(sad, Codex.MatterCodex.Blake3_256.getValue(), CoreUtil.Serials.JSON, Ids.d.value);
     }
 
@@ -220,7 +221,7 @@ public class Saider extends Matter {
 
     @FunctionalInterface
     public interface Deriver {
-        byte[] derive(byte[] ser, int digestSize, int length);
+        byte[] derive(byte[] ser, int digestSize, int length) throws DigestException;
     }
 
 }

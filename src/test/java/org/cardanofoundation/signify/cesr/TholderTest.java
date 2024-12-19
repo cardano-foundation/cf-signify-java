@@ -22,7 +22,6 @@ class TholderTest {
 
     @Test
     @DisplayName("should hold thresholds")
-    @SuppressWarnings("unchecked")
     void shouldHoldThresholds() {
         Tholder tholder = new Tholder(null, null, "b");
         assertEquals(11, tholder.getThold());
