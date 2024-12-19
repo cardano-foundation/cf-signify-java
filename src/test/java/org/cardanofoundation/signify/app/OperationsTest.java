@@ -183,6 +183,27 @@ public class OperationsTest {
         verify(client, times(3)).fetch(anyString(), anyString(), isNull(), isNull());
     }
 
+    @Test
+    @DisplayName("Throw if aborting operation")
+    void throwIfAbortingOperation() throws SodiumException, IOException, InterruptedException {
+        Operation<String> operation = buildOperation(false, false);
+
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn(Utils.jsonStringify(operation));
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
+
+        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+                .thenReturn(mockResponse);
+
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .abortSignal(Operations.AbortSignal.builder().timeout(5000L).build())
+                .build();
+
+        Exception exception = assertThrows(InterruptedException.class, () -> operations.wait(operation, options));
+        assertEquals("Operation aborted: Timeout", exception.getMessage());
+    }
+
 
     Operation<String> buildOperation(boolean done, boolean dependsDone) {
         Operation<String> operation = Operation.<String>builder()
@@ -205,5 +226,5 @@ public class OperationsTest {
         return operation;
     }
 
-    // TODO: missing tests for options.signal
+
 }
