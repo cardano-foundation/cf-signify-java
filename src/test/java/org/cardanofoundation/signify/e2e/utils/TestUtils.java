@@ -348,9 +348,8 @@ public class TestUtils {
     }
 
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
-        // TO-DO
         Object op = client.getOobis().resolve(oobi, alias);
-        waitOperation(client, (Operation) op);
+        waitOperation(client, op);
     }
 
     public static void waitForCredential(SignifyClient client, String credSAID) {

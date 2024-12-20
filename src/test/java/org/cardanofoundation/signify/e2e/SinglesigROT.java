@@ -25,7 +25,7 @@ public class SinglesigROT extends TestUtils {
     static SignifyClient client1, client2;
     static String contact1_id;
     static String name1_id, name1_oobi;
-    private HashMap<String, Object>  response;
+    private HashMap<String, Object> response;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -107,11 +107,16 @@ public class SinglesigROT extends TestUtils {
 
         // sequence has incremented
         assertEquals(parseInteger(listKeyState1.getFirst().get("s").toString()),
-                parseInteger(listKeyState0.getFirst().get("s").toString()) + 1);
+                parseInteger(listKeyState0.getFirst().get("s").toString()) + 1
+        );
         // current keys changed
-        assertNotEquals(listKeyState1.getFirst().get("k"), listKeyState0.getFirst().get("k"));
+        assertNotEquals(listKeyState1.getFirst().get("k"),
+                listKeyState0.getFirst().get("k")
+        );
         // next key hashes changed
-        assertNotEquals(listKeyState1.getFirst().get("n"), listKeyState0.getFirst().get("n"));
+        assertNotEquals(listKeyState1.getFirst().get("n"),
+                listKeyState0.getFirst().get("n")
+        );
 
         // remote keystate after rot
         Object keyState2 = client2.getKeyStates().get(contact1_id);
@@ -120,7 +125,8 @@ public class SinglesigROT extends TestUtils {
         });
 
         assertEquals(parseInteger(listKeyState2.getFirst().get("s").toString()),
-                parseInteger(listKeyState1.getFirst().get("s").toString()) - 1);
+                parseInteger(listKeyState1.getFirst().get("s").toString()) - 1
+        );
 
         // refresh remote keystate
         int sn = parseInteger(listKeyState1.getFirst().get("s").toString());
@@ -128,7 +134,7 @@ public class SinglesigROT extends TestUtils {
         op = waitOperation(client2, op);
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
                 });
                 response = (HashMap<String, Object>) opMap.get("response");
             } catch (Exception ex) {
@@ -137,9 +143,15 @@ public class SinglesigROT extends TestUtils {
         }
         HashMap<String, Object> keyState3 = response;
         // local and remote keystate match
-        assertEquals(keyState3.get("s"), listKeyState1.getFirst().get("s"));
-        assertEquals(keyState3.get("k"), listKeyState1.getFirst().get("k"));
-        assertEquals(keyState3.get("n"), listKeyState1.getFirst().get("n"));
+        assertEquals(keyState3.get("s"),
+                listKeyState1.getFirst().get("s")
+        );
+        assertEquals(keyState3.get("k"),
+                listKeyState1.getFirst().get("k")
+        );
+        assertEquals(keyState3.get("n"),
+                listKeyState1.getFirst().get("n")
+        );
     }
 
     public Integer parseInteger(String s) {
@@ -149,7 +161,6 @@ public class SinglesigROT extends TestUtils {
             throw new NumberFormatException("Parse Integer is not successful " + e.getMessage());
         }
     }
-
 
 
 }

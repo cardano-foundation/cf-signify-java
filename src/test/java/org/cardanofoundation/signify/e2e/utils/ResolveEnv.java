@@ -8,7 +8,6 @@ enum TestEnvironmentPreset {
     LOCAL, DOCKER
 }
 public class ResolveEnv {
-    @Getter
         public record EnvironmentConfig(TestEnvironmentPreset preset, String url, String bootUrl, String vleiServerUrl,
                                         List<String> witnessUrls, List<String> witnessIds) {
 

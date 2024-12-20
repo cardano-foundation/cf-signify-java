@@ -133,7 +133,7 @@ public class RandyTest extends TestUtils {
         op = operationToObject(waitOperation(client1, icpResult.op()));
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
                 });
                 opResponse = (HashMap<String, Object>) opMap.get("response");
             } catch (Exception ex) {
