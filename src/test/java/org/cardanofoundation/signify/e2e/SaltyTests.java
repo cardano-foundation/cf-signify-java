@@ -22,12 +22,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class SaltyTests extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
+    private SignifyClient client;
+    private String opResponseDone;
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private HashMap<String, Object> opResponse;
 
     @Test
     void saltyTest() throws Exception {
         String bran1 = Coring.randomPasscode();
-        SignifyClient client = new SignifyClient(
+        client = new SignifyClient(
                 url,
                 bran1,
                 Salter.Tier.low,
@@ -36,17 +39,28 @@ class SaltyTests extends TestUtils {
         );
         client.boot();
         client.connect();
-        State state = client.state();
-        assert state != null;
-        System.out.println(state.getAgent());
+        client.state();
 
         CreateIdentifierArgs bran = new CreateIdentifierArgs();
         bran.setBran("0123456789abcdefghijk");
         EventResult icpResult = client.getIdentifier().create("aid1", bran);
-        Operation<Object> op = waitOperation(client, icpResult.op());
+        Object op = operationToObject(waitOperation(client, icpResult.op()));
 
-        Object aid1 = op.getResponse();
-        Serder icp = new Serder((Map<String, Object>) aid1);
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+                opResponseDone = opMap.get("done").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        assertEquals("true", opResponseDone);
+
+        HashMap<String, Object> aid = opResponse;
+        Serder icp = new Serder(aid);
+
         assertEquals("ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK", icp.getPre());
         assertEquals(1, icp.getVerfers().size());
         assertEquals(
@@ -65,12 +79,12 @@ class SaltyTests extends TestUtils {
         );
         Assertions.assertEquals(1, aids.size());
 
-        Map<String, Object> aid = aids.getLast();
-        Assertions.assertEquals("aid1", aid.get("name"));
-        Map<String, Object> salty = (Map<String, Object>) aid.get("salty");
+        Map<String, Object> aidLast = aids.removeLast();
+        Assertions.assertEquals("aid1", aidLast.get("name"));
+        Map<String, Object> salty = (Map<String, Object>) aidLast.get("salty");
         Assertions.assertEquals(0, salty.get("pidx"));
         Assertions.assertEquals("signify:aid", salty.get("stem"));
-        Assertions.assertEquals(icp.getPre(), aid.get("prefix"));
+        Assertions.assertEquals(icp.getPre(), aidLast.get("prefix"));
 
         CreateIdentifierArgs params = new CreateIdentifierArgs();
         params.setCount(3);
@@ -80,9 +94,21 @@ class SaltyTests extends TestUtils {
         params.setBran("0123456789lmnopqrstuv");
 
         EventResult icpResult1 = client.getIdentifier().create("aid2", params);
-        Operation<Object> op_1 = waitOperation(client, icpResult1.op());
-        Object aid2 = op_1.getResponse();
-        Serder icp2 = new Serder((Map<String, Object>) aid2);
+        Object op_1 = operationToObject(waitOperation(client, icpResult1.op()));
+        if (op_1 instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op_1, new TypeReference<HashMap<String, Object>>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+                opResponseDone = opMap.get("done").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+        }
+        HashMap<String, Object> aid2 = opResponse;
+        Serder icp2 = new Serder(aid2);
+
         assertEquals("EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX", icp2.getPre());
         assertEquals(3, icp2.getVerfers().size());
         assertEquals("DGBw7C7AfC7jbD3jLLRS3SzIWFndM947TyNWKQ52iQx5", icp2.getVerfers().getFirst().getQb64());
@@ -97,7 +123,6 @@ class SaltyTests extends TestUtils {
         assertEquals("2", icp2.getKed().get("nt"));
 
         IdentifierListResponse aidsJson1 = client.getIdentifier().list(0, 24);
-
         List<Map<String, Object>> aids1 = objectMapper.readValue(
                 aidsJson1.aids().toString(),
                 new TypeReference<>() {}
@@ -123,6 +148,7 @@ class SaltyTests extends TestUtils {
                 new TypeReference<>() {}
         );
         Assertions.assertEquals(3, aids2.size());
+
         Map<String, Object> aid4 = aids2.getFirst();
         Assertions.assertEquals("aid1", aid4.get("name"));
 
@@ -132,6 +158,7 @@ class SaltyTests extends TestUtils {
                 new TypeReference<>() {}
         );
         Assertions.assertEquals(2, aids3.size());
+
         Map<String, Object> aid5 = aids3.getFirst();
         Assertions.assertEquals("aid2", aid5.get("name"));
 
@@ -141,6 +168,7 @@ class SaltyTests extends TestUtils {
                 new TypeReference<>() {}
         );
         Assertions.assertEquals(1, aids4.size());
+
         Map<String, Object> aid6 = aids4.getFirst();
         Assertions.assertEquals("aid3", aid6.get("name"));
 
@@ -174,11 +202,49 @@ class SaltyTests extends TestUtils {
         Assertions.assertEquals("2", stateGet.getS());
         Assertions.assertEquals("2", stateGet.getF());
         Assertions.assertEquals(ixn.getKed().get("d"), stateGet.getD());
+
         Map<String, Object> ee = (Map<String, Object>) stateGet.getEe();
         Assertions.assertEquals(rotRotate.getKed().get("d"), ee.get("d"));
 
         // TO DO KeyEvents test
+        Coring.KeyEvents events = client.getKeyEvents();
+        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get((String) aid.get("prefix"));
+        assertEquals(3, log.size());
+
+        List<Serder> expectedSerders = Arrays.asList(
+                new Serder(icp.getKed()),
+                new Serder(rotRotate.getKed()),
+                new Serder(ixn.getKed())
+        );
+
+        for (int i = 0; i < log.size(); i++) {
+            Map<String, Object> kedEvent = (Map<String, Object>) log.get(i).get("ked");
+            Serder actualSerder = new Serder(kedEvent);
+
+            assertEquals(expectedSerders.get(i).getPre(), actualSerder.getPre());
+            assertEquals(expectedSerders.get(i).getKed().get("d"), actualSerder.getKed().get("d"));
+        }
+
+        assertOperations((List<SignifyClient>) client);
 
         // TO DO Update Identifier test
+        States.HabState aidUpdate = client.getIdentifier().update("aid3", (IdentifierInfo) Map.of("name", "aid4"));
+        assertEquals("aid4", aidUpdate.getName());
+
+        States.HabState aidUpdate1 = client.getIdentifier().get("aid4");
+        assertEquals("aid4", aidUpdate1.getName());
+
+        IdentifierListResponse getAidUpdate2 = client.getIdentifier().list(2, 2);
+        List<Map<String, Object>> aidUpdate2 = objectMapper.readValue(
+                getAidUpdate2.aids().toString(),
+                new TypeReference<>() {
+                }
+        );
+        assertEquals(1, aidUpdate2.size());
+
+        Map<String, Object> aidFirst = aidUpdate2.getFirst();
+        assertEquals("aid4", aidFirst.get("name"));
+
+        System.out.println("Salty test passed");
     }
 }
