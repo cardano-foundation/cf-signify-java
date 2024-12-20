@@ -219,9 +219,7 @@ public class Identifier {
         jsondata.put("smids", states != null ? ((List<States.State>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
         jsondata.put("rmids", rstates != null ? ((List<States.State>) rstates).stream().map(States.State::getI).collect(Collectors.toList()) : null);
 
-        Map<String, Object> aloMap = Utils.toMap(keeper.getParams());
-        aloMap.remove("paramsMap");
-        jsondata.put(algo.getValue(), aloMap);
+        jsondata.put(algo.getValue(), keeper.getParams().toMap());
 
         this.client.setPidx(this.client.getPidx() + 1);
         HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata, null);
@@ -324,7 +322,7 @@ public class Identifier {
         Map<String, Object> jsondata = new HashMap<>();
         jsondata.put("ixn", serder.getKed());
         jsondata.put("sigs", sigs.signatures());
-        jsondata.put(keeper.getAlgo().toString(), keeper.getParams());
+        jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
 
@@ -404,7 +402,7 @@ public class Identifier {
         jsondata.put("sigs", sigs);
         jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI) : null);
         jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI) : null);
-        jsondata.put(keeper.getAlgo().toString(), keeper.getParams());
+        jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(
             "/identifiers/" + name + "/events",
