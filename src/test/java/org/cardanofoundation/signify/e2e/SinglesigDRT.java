@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
@@ -93,14 +92,22 @@ public class SinglesigDRT extends TestUtils {
         RotateIdentifierArgs karg = RotateIdentifierArgs.builder().build();
         result = delegate.getIdentifier().rotate("delegate1", karg);
         op = result.op();
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                opResponseName = opMap.get("name").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         Assertions.assertEquals(opResponseName, "delegation." + result.serder().getKed().get("d"));
 
         // delegator approves delegate
         delegate1 = delegate.getIdentifier().get("delegate1");
         seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
-        seal.put("s", "0");
-        seal.put("d", delegate1.getPrefix());
+        seal.put("s", "1");
+        seal.put("d", delegate1.getState().getD());
 
         result = delegator.getIdentifier().interact("name1", seal);
         op1 = result.op();

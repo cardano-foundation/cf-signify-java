@@ -414,21 +414,23 @@ public class Eventing {
         _ked.put("s", sner.getNumh());
         _ked.put("p", args.getDig());
         _ked.put("kt",
-            tholder.getNum() != null &&
+            tholder.getNum() != 0 &&
             args.getIntive() &&
+            tholder.getNum() != null &&
             tholder.getNum() <= MaxIntThold
                 ? Integer.toHexString(tholder.getNum())
                 : tholder.getSith());
         _ked.put("k", args.getKeys());
         _ked.put("nt",
-            ntholder.getNum() != null &&
+            ntholder.getNum() != 0 &&
             args.getIntive() &&
+            ntholder.getNum() != null &&
             ntholder.getNum() <= MaxIntThold
                 ? Integer.toHexString(ntholder.getNum())
                 : ntholder.getSith());
         _ked.put("n", _ndigs);
         _ked.put("bt",
-            _toad != null && args.getIntive() && _toad <= MaxIntThold
+            _toad != 0 && args.getIntive() && _toad <= MaxIntThold
                 ? _toad
                 : Integer.toHexString(_toad));
         _ked.put("br", args.getCuts());
