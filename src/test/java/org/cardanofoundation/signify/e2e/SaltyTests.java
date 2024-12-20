@@ -36,7 +36,7 @@ class SaltyTests extends TestUtils {
         );
         client.boot();
         client.connect();
-        State state = client.state().block();
+        State state = client.state();
         assert state != null;
         System.out.println(state.getAgent());
 

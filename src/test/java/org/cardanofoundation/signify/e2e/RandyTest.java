@@ -49,7 +49,7 @@ public class RandyTest extends TestUtils {
         );
         client1.boot();
         client1.connect();
-        State state = client1.state().block();
+        client1.state();
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
