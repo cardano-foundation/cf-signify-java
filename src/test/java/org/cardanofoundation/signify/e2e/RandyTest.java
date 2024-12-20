@@ -128,6 +128,7 @@ public class RandyTest extends TestUtils {
             ex.printStackTrace();
         }
 
+        // TODO - Failed .rotate()
         icpResult = client1.getIdentifier().rotate("aid1");
         op = operationToObject(waitOperation(client1, icpResult.op()));
         if (op instanceof String) {

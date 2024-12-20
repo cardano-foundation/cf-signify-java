@@ -8,9 +8,10 @@ import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 
 public class Coring {
     private final HttpClient httpClient;
@@ -49,11 +50,11 @@ public class Coring {
          * @param pre Identifier prefix
          * @return A response containing the key events
          */
-        public Object get(String pre) throws SodiumException {
+        public Object get(String pre) throws SodiumException, IOException, InterruptedException {
             String path = "/events?pre=" + pre;
             String method = "GET";
-            ResponseEntity<String> res = this.client.fetch(path, method, null, null);
-            return res.getBody();
+            HttpResponse<String> res = this.client.fetch(path, method, null, null);
+            return res.body();
         }
     }
 }

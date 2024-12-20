@@ -89,8 +89,8 @@ public class SinglesigDRT extends TestUtils {
         op1 = operationToObject(waitOperation(delegator, op1));
         op2 = operationToObject(waitOperation(delegate, op2));
 
-        // TO-DO .rotate()
-        RotateIdentifierArgs karg = new RotateIdentifierArgs();
+        // TODO - Failed .rotate()
+        RotateIdentifierArgs karg = RotateIdentifierArgs.builder().build();
         result = delegate.getIdentifier().rotate("delegate1", karg);
         op = result.op();
         Assertions.assertEquals(opResponseName, "delegation." + result.serder().getKed().get("d"));
