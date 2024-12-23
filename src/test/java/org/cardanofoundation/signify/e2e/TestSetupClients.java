@@ -21,6 +21,7 @@ public class TestSetupClients extends TestUtils {
 
     @BeforeAll
     public static void getClients() throws ExecutionException, InterruptedException {
+        // create two clients with random secrets
         List<SignifyClient> clients = getOrCreateClients(2, null);
         client1 = clients.get(0);
         client2 = clients.get(1);

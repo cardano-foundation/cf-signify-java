@@ -136,7 +136,7 @@ public class TestUtils {
             return client.getIdentifier().get(name);
         } catch (Exception e) {
             EventResult result = client.getIdentifier().create(name, kargs);
-            waitOperation(client, (Operation) result.op());
+            waitOperation(client, result.op());
 
             States.HabState aid = client.getIdentifier().get(name);
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
@@ -145,12 +145,22 @@ public class TestUtils {
 
             String pre = client.getAgent().getPre();
             EventResult op = client.getIdentifier().addEndRole(name, "agent", pre, null);
-            waitOperation(client, (Operation) op.op());
+            waitOperation(client, op.op());
 
             System.out.println(name + "AID:" + aid.getPrefix());
             return aid;
         }
     }
+
+//    public static List<SignifyClient> getOrCreateClients1(int count, List<String> brans) throws Exception {
+//        List<SignifyClient> tasks = new ArrayList<>();
+//        List<String> secrets = System.getenv("SIGNIFY_SECRETS_ENV") != null
+//                ? List.of(System.getenv("SIGNIFY_SECRETS_ENV").split(","))
+//                : new ArrayList<>();
+//        tasks.add(getOrCreateClient(brans));
+//        List<SignifyClient> clients = tasks.stream().collect(Collectors.toList());
+//        return clients;
+//    }
 
     public static List<SignifyClient> getOrCreateClients(int count, List<String> brans) throws ExecutionException, InterruptedException {
         List<CompletableFuture<SignifyClient>> tasks = new ArrayList<>();

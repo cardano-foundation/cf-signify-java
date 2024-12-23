@@ -48,6 +48,7 @@ class SinglesigDIP extends TestUtils {
             e.printStackTrace();
         }
     }
+
     @BeforeEach
     public void getContact() throws SodiumException, IOException, InterruptedException {
         contact1_id = getOrCreateContact(client2, "contact1", name1_oobi);
@@ -55,7 +56,7 @@ class SinglesigDIP extends TestUtils {
 
     @Test
     public void singlesig_dip() throws Exception {
-        String opResponseName = null, opResponseI= null;
+        String opResponseName = null, opResponseI = null;
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
@@ -64,7 +65,8 @@ class SinglesigDIP extends TestUtils {
         States.HabState delegate1 = client2.getIdentifier().get("delegate1");
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
                 opResponseName = opMap.get("name").toString();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -90,7 +92,8 @@ class SinglesigDIP extends TestUtils {
 
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
                 HashMap<String, Object> responseMap = (HashMap<String, Object>) opMap.get("response");
                 opResponseI = responseMap.get("i").toString();
             } catch (Exception ex) {

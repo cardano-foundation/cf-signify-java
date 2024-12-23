@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.LazySodiumJava;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -25,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @Slf4j
 public class RandyTest extends TestUtils {
-    private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -54,7 +52,7 @@ public class RandyTest extends TestUtils {
 
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
                 });
                 opResponse = (HashMap<String, Object>) opMap.get("response");
                 opResponseDone = opMap.get("done").toString();
@@ -90,7 +88,7 @@ public class RandyTest extends TestUtils {
         op = operationToObject(waitOperation(client1, icpResult.op()));
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
                 });
                 opResponse = (HashMap<String, Object>) opMap.get("response");
             } catch (Exception ex) {
