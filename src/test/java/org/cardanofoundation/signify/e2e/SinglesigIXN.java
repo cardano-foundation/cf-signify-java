@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,14 +13,16 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SinglesigIXN extends TestUtils {
     static SignifyClient client1, client2;
     static String name1_id, name1_oobi;
     static String contact1_id;
+    private HashMap<String, Object> response;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -66,5 +69,69 @@ public class SinglesigIXN extends TestUtils {
                 resKeyState2, new TypeReference<>() {}
         );
         assertEquals(keyState2List.getFirst().get("s"), keyState1List.getFirst().get("s"));
+    }
+
+    @Test
+    public void singlesig_ixn_ixn1() throws Exception {
+        // local keystate before rot
+        Object keyStates0 = client1.getKeyStates().get(name1_id);
+
+        String respDataKeyState0 = objectMapper.writeValueAsString(keyStates0);
+        List<Map<String, Object>> listKeyState0 = objectMapper.readValue(
+                respDataKeyState0,
+                new TypeReference<>() {
+        });
+        assertNotNull(listKeyState0);
+
+        // ixn
+        EventResult result = client1.getIdentifier().interact("name1", null);
+        waitOperation(client1, result.op());
+
+        // local keystate after rot
+        Object keyState1 = client1.getKeyStates().get(name1_id);
+        String respDataKeyState1 = objectMapper.writeValueAsString(keyState1);
+        List<Map<String, Object>> listKeyState1 = objectMapper.readValue(
+                respDataKeyState1,
+                new TypeReference<>() {
+        });
+        assertTrue(parseInteger(listKeyState1.getFirst().get("s").toString()) > 0);
+
+        // sequence has incremented
+        assertEquals(parseInteger(listKeyState1.getFirst().get("s").toString()),
+                parseInteger(listKeyState0.getFirst().get("s").toString()) + 1
+        );
+
+        // remote keystate after ixn
+        Object keyState2 = client2.getKeyStates().get(contact1_id);
+        String respDataKeyState2 = objectMapper.writeValueAsString(keyState2);
+        List<Map<String, Object>> listKeyState2 = objectMapper.readValue(
+                respDataKeyState2,
+                new TypeReference<>() {
+        });
+
+        // remote keystate is one behind
+        assertEquals(parseInteger(listKeyState2.getFirst().get("s").toString()),
+                parseInteger(listKeyState1.getFirst().get("s").toString()) - 1
+        );
+
+        // refresh remote keystate
+        int sn = parseInteger(listKeyState1.getFirst().get("s").toString());
+        Object op = client2.getKeyStates().query(contact1_id, sn, null);
+        op = operationToObject(waitOperation(client2, op));
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                response = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        HashMap<String, Object> keyState3 = response;
+
+        // local and remote keystate match
+        assertEquals(keyState3.get("s"),
+                listKeyState1.getFirst().get("s")
+        );
     }
 }
