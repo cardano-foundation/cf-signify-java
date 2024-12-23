@@ -1,19 +1,16 @@
 package org.cardanofoundation.signify.app.clienting;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import org.cardanofoundation.signify.app.Agent;
-import org.cardanofoundation.signify.app.Aiding.Identifier;
 import org.cardanofoundation.signify.app.clienting.Contacting.Challenges;
 import org.cardanofoundation.signify.app.clienting.Contacting.Contacts;
 import org.cardanofoundation.signify.app.Controller;
 import org.cardanofoundation.signify.app.Coring.KeyEvents;
-import org.cardanofoundation.signify.app.Coring.KeyStates;
 import org.cardanofoundation.signify.app.Credentialing.Credentials;
 import org.cardanofoundation.signify.app.Credentialing.Ipex;
 import org.cardanofoundation.signify.app.Credentialing.Registries;
@@ -23,6 +20,7 @@ import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
+import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -39,7 +37,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
@@ -48,7 +45,6 @@ import java.util.*;
 @Getter
 @Setter
 public class SignifyClient implements IdentifierDeps, OperationsDeps {
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Controller controller;
     private String url;
@@ -59,7 +55,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private Keeping.KeyManager manager;
     private Salter.Tier tier;
     private String bootUrl;
-    private List<Keeping.ExternalModule> externalModules;
+    private List<ExternalModule> externalModules;
 
     private static final String DEFAULT_BOOT_URL = "http://localhost:3903";
 
@@ -118,7 +114,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(bootUrl + "/boot"))
             .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(data)))
+            .POST(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
             .build();
 
         HttpClient client = HttpClient.newBuilder().build();
@@ -151,15 +147,13 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             throw new IllegalArgumentException("Agent does not exist for controller " + caid);
         }
-        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
+
+        if (response.statusCode() != HttpURLConnection.HTTP_OK
+                && response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
             throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
         }
 
-        Map<String, Object> data = objectMapper.readValue(
-            response.body(),
-            new TypeReference<>() {
-            }
-        );
+        Map<String, Object> data = Utils.fromJson(response.body(), new TypeReference<>() {});
 
         return State.builder()
             .agent(data.getOrDefault(SignifyFields.AGENT.getValue(), null))
@@ -227,7 +221,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         String path,
         String method,
         Object data,
-        HttpHeaders extraHeaders
+        Map<String, String> extraHeaders
     ) throws SodiumException, InterruptedException, IOException {
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
@@ -244,8 +238,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         Map<String, String> finalHeaders = new HashMap<>(signedHeaders);
         if (extraHeaders != null) {
-            extraHeaders.map().forEach((key, values) ->
-                finalHeaders.put(key, values.getFirst()));
+            finalHeaders.putAll(extraHeaders);
         }
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
@@ -258,31 +251,50 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         finalHeaders.forEach(requestBuilder::header);
 
-        HttpClient client = HttpClient.newBuilder().build();
-        HttpResponse<String> response = client.send(requestBuilder.build(),
-            HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
-                method, path, response.statusCode(), response.body()));
-        }
-
+        HttpResponse<String> response = null;
         Map<String, String> responseHeaders = new LinkedHashMap<>();
-        response.headers().map().forEach((key, values) ->
-            responseHeaders.put(key, values.getFirst()));
 
-        boolean isSameAgent = this.agent != null &&
-            this.agent.getPre().equals(responseHeaders.get("signify-resource"));
-        if (!isSameAgent) {
-            throw new HeaderVerificationException("Message from a different remote agent");
+        try {
+            HttpClient client = HttpClient.newBuilder().build();
+            response = client.send(requestBuilder.build(),
+                    HttpResponse.BodyHandlers.ofString());
+
+            if (200 < response.statusCode() && response.statusCode() > 300) {
+                throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
+                        method, path, response.statusCode(), response.body()));
+            }
+
+            response.headers().map().forEach((key, values) ->
+                    responseHeaders.put(key, values.getFirst()));
+
+            boolean isSameAgent = this.agent != null &&
+                    this.agent.getPre().equals(responseHeaders.get("signify-resource"));
+            if (!isSameAgent) {
+                throw new HeaderVerificationException("Message from a different remote agent");
+            }
+
+            boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
+            if (verification) {
+                return response;
+            } else {
+                throw new HeaderVerificationException("Response verification failed");
+            }
+
+        } catch (IOException exception) {
+            if(exception.getMessage().contains("unexpected content length header with 204 response")) {
+                /**
+                 * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230
+                 * A server MUST NOT send a Transfer-Encoding header field in any 2xx (Successful) response to a CONNECT
+                 * request (Section 4.3.6 of [RFC7231]).
+                 * <br>
+                 * Keria now returns a Transfer-Encoding header field in a 204 response so we need to ignore this exception.
+                 */
+            } else {
+                throw exception;
+            }
         }
 
-        boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
-        if (verification) {
-            return response;
-        } else {
-            throw new HeaderVerificationException("Response verification failed");
-        }
+       return response;
     }
 
     /**
@@ -294,21 +306,33 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
 
         Object sigs = this.controller.approveDelegation(this.agent);
-
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put(SignifyFields.IXN.getValue(), this.controller.getSerder().getKed());
         data.put(SignifyFields.SIGS.getValue(), sigs);
 
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.url + "/agent/" + this.controller.getPre() + "?type=ixn"))
-            .header("Content-Type", "application/json")
-            .PUT(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(data)))
-            .build();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(this.url + "/agent/" + this.controller.getPre() + "?type=ixn"))
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
+                    .build();
 
-        HttpClient client = HttpClient.newBuilder().build();
+            HttpClient client = HttpClient.newBuilder().build();
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException exception) {
+            if(exception.getMessage().contains("unexpected content length header with 204 response")) {
+                /**
+                 * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230
+                 * A server MUST NOT send a Transfer-Encoding header field in any 2xx (Successful) response to a CONNECT
+                 * request (Section 4.3.6 of [RFC7231]).
+                 * <br>
+                 * Keria now returns a Transfer-Encoding header field in a 204 response so we need to ignore this exception.
+                 */
 
-        client.send(request, HttpResponse.BodyHandlers.ofString());
-
+            } else {
+                throw exception;
+            }
+        }
     }
 
     /**

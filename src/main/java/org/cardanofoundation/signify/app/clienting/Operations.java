@@ -1,10 +1,10 @@
 package org.cardanofoundation.signify.app.clienting;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.*;
 import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Operations {
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final OperationsDeps client;
 
     public Operations(OperationsDeps client) {
@@ -23,14 +22,14 @@ public class Operations {
         String path = "/operations/" + name;
         String method = "GET";
         HttpResponse<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.body(), new TypeReference<>() {});
+        return Utils.fromJson(response.body(), new TypeReference<>() {});
     }
 
     public List<Operation<?>> list(String type) throws SodiumException, IOException, InterruptedException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
         String method = "GET";
         HttpResponse<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.body(), new TypeReference<>() {});
+        return Utils.fromJson(response.body(), new TypeReference<>() {});
     }
 
     public void delete(String name) throws SodiumException, IOException, InterruptedException {

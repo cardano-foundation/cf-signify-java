@@ -1,62 +1,120 @@
 package org.cardanofoundation.signify.app;
 
-import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.*;
 
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-public class ContactingTest extends BaseMockServerTest {
+public class ContactingTest {
+
+    @Mock
+    private SignifyClient client;
+    @InjectMocks
+    private Contacting.Contacts contacts;
+    @Captor
+    private ArgumentCaptor<String> pathCaptor;
+    @Captor
+    private ArgumentCaptor<String> methodCaptor;
+    @Captor
+    private ArgumentCaptor<Object> bodyCaptor;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        contacts = new Contacting.Contacts(client);
+    }
 
     @Test
-    void testContacts() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
-        client.boot();
-        client.connect();
-        cleanUpRequest();
+    void testGetListContacts() throws Exception {
+        HttpResponse httpResponse = mockHttpResponse("[]");
+        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+            .thenReturn(httpResponse);
 
-        Contacting.Contacts contacts = client.getContacts();
-
-        // Test list
         contacts.list("mygroup", "company", "mycompany");
-        RecordedRequest request = mockWebServer.takeRequest();
-        assertEquals("GET", request.getMethod());
-        assertEquals("/contacts?group=mygroup&filter_field=company&filter_value=mycompany", request.getPath());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
+        assertEquals("GET", methodCaptor.getValue());
+        assertEquals("/contacts?group=mygroup&filter_field=company&filter_value=mycompany", pathCaptor.getValue());
+    }
 
-        // Test get
+    @Test
+    void testGetContact() throws Exception {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
-        contacts.get(prefix);
-        request = mockWebServer.takeRequest();
-        assertEquals("GET", request.getMethod());
-        assertEquals("/contacts/" + prefix, request.getPath());
 
-        // Test add
+        HttpResponse httpResponse = mockHttpResponse("{}");
+        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+                .thenReturn(httpResponse);
+
+        contacts.get(prefix);
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
+        assertEquals("GET", methodCaptor.getValue());
+        assertEquals("/contacts/" + prefix, pathCaptor.getValue());
+    }
+
+    @Test
+    void testAddContact() throws Exception {
+        String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
+
         Map<String, Object> info = new HashMap<>();
         info.put("name", "John Doe");
         info.put("company", "My Company");
+
+        HttpResponse httpResponse = mockHttpResponse("{}");
+        when(client.fetch(anyString(), anyString(), any(), isNull()))
+                .thenReturn(httpResponse);
+
         contacts.add(prefix, info);
-        request = mockWebServer.takeRequest();
-        assertEquals("POST", request.getMethod());
-        assertEquals("/contacts/" + prefix, request.getPath());
-        assertEquals(objectMapper.writeValueAsString(info), request.getBody().readUtf8());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture(), isNull());
+        assertEquals("POST", methodCaptor.getValue());
+        assertEquals("/contacts/" + prefix, pathCaptor.getValue());
+        assertEquals(info, bodyCaptor.getValue());
+    }
 
-        // Test update
+    @Test
+    void testUpdateContact() throws Exception {
+        String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
+
+        Map<String, Object> info = new HashMap<>();
+        info.put("name", "John Doe");
+        info.put("company", "My Company");
+
+        HttpResponse<String> httpResponse = mockHttpResponse("{}");
+        when(client.fetch(anyString(), anyString(), any(), isNull()))
+                .thenReturn(httpResponse);
+
         contacts.update(prefix, info);
-        request = mockWebServer.takeRequest();
-        assertEquals("PUT", request.getMethod());
-        assertEquals("/contacts/" + prefix, request.getPath());
-        assertEquals(objectMapper.writeValueAsString(info), request.getBody().readUtf8());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture(), isNull());
+        assertEquals("PUT", methodCaptor.getValue());
+        assertEquals("/contacts/" + prefix, pathCaptor.getValue());
+        assertEquals(info, bodyCaptor.getValue());
+    }
 
-        // Test delete
+    @Test
+    void testDeleteContact() throws Exception {
+        String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
+
+        HttpResponse httpResponse = mockHttpResponse("{}");
+        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+                .thenReturn(httpResponse);
+
         contacts.delete(prefix);
-        request = mockWebServer.takeRequest();
-        assertEquals("DELETE", request.getMethod());
-        assertEquals("/contacts/" + prefix, request.getPath());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
+        assertEquals("DELETE", methodCaptor.getValue());
+        assertEquals("/contacts/" + prefix, pathCaptor.getValue());
+    }
+
+    private HttpResponse<String> mockHttpResponse(String responseBody) {
+        HttpResponse<String> httpResponse = mock(HttpResponse.class);
+        when(httpResponse.body()).thenReturn(responseBody);
+        when(httpResponse.statusCode()).thenReturn(200);
+        return httpResponse;
     }
 }

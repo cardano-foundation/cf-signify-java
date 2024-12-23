@@ -8,7 +8,14 @@ import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 
+import java.net.http.HttpClient;
+
 public class Coring {
+    private final HttpClient httpClient;
+
+    public Coring(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
 
     public static String randomPasscode() {
         final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
@@ -32,20 +39,6 @@ public class Coring {
          * @param client {SignifyClient}
          */
         public KeyEvents(SignifyClient client) {
-            this.client = client;
-        }
-        // others functions
-    }
-
-    @Getter
-    public static class KeyStates {
-        public final SignifyClient client;
-
-        /**
-         * KeyStates
-         * @param client {SignifyClient}
-         */
-        public KeyStates(SignifyClient client) {
             this.client = client;
         }
         // others functions

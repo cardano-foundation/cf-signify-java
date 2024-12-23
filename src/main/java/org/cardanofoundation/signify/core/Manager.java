@@ -163,7 +163,15 @@ public class Manager {
         }
 
         public SaltyCreator(String salt, Tier tier, String stem) {
-            this.salter = new Salter(salt, tier);
+            if (salt == null) {
+                RawArgs rawArgs = RawArgs.builder()
+                        .code(MatterCodex.Salt_128.getValue())
+                        .build();
+                this.salter = new Salter(rawArgs, tier);
+            } else {
+                this.salter = new Salter(salt, tier);
+            }
+
             this.stem = stem == null ? "" : stem;
         }
 

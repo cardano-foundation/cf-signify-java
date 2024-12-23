@@ -68,8 +68,8 @@ public class Exchanging {
             Serder exn = result.serder();
             String end = new String(result.end());
 
-            CompletableFuture<Keeping.SignResult> sigs = keeper.sign(exn.getRaw().getBytes(), null, null ,null);
-            return new ExchangeMessageResult(exn, sigs.get().signatures(), end);
+            Keeping.SignResult sigs = keeper.sign(exn.getRaw().getBytes(), null, null ,null);
+            return new ExchangeMessageResult(exn, sigs.signatures(), end);
         }
 
         /**
