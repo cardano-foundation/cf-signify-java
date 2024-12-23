@@ -64,5 +64,5 @@ docker compose up --wait
 Use the gradlew script "test E2E" to run all E2E tests in sequence:
 
 ```bash
-./gradlew testE2E --warning-mode all
+./gradlew test
 ```
