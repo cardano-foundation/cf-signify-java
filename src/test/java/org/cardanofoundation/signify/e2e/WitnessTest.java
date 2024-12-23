@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,7 +22,7 @@ public class WitnessTest extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     String WITNESS_AID = "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha";
-    ArrayList<String> WITNESS_URL = new ArrayList<String>(Arrays.asList(
+    ArrayList<String> WITNESS_URL = new ArrayList<>(Arrays.asList(
             "http://witness-demo:5642",
             "http://witness-demo:5643",
             "http://witness-demo:5644"));
@@ -58,7 +59,6 @@ public class WitnessTest extends TestUtils {
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
 
-        // TODO - Failed .rotate()
         icpResult1 = client1.getIdentifier().rotate("aid1");
         waitOperation(client1, icpResult1.op());
         aid1 = client1.getIdentifier().get("aid1");
@@ -75,6 +75,7 @@ public class WitnessTest extends TestUtils {
         assertEquals(0, aid1.getState().getB().size());
 
         // Add witness again
+        args.setCuts(null);
         args.setAdds(Collections.singletonList(WITNESS_AID));
         icpResult1 = client1.getIdentifier().rotate("aid1", args);
         waitOperation(client1, icpResult1.op());
