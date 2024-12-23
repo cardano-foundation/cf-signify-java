@@ -171,7 +171,7 @@ public class Identifier {
         xargs.put("extern", extern);
 
         Keeper keeper = this.client.getManager().create(algo, this.client.getPidx(), xargs);
-        KeeperResult keeperResult = (KeeperResult) keeper.incept(transferable).get();
+        KeeperResult keeperResult = keeper.incept(transferable);
         Serder serder;
         if (delpre == null) {
             InceptArgs inceptArgs = InceptArgs.builder()
@@ -208,10 +208,10 @@ public class Identifier {
             serder = Eventing.incept(inceptArgs);
         }
 
-        Keeping.SignResult signResult = (Keeping.SignResult) keeper.sign(serder.getRaw().getBytes(), true, null, null).get();
+        Keeping.SignResult signResult = keeper.sign(serder.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
-        Map<String, Object> jsondata = new HashMap<>();
+        Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("name", name);
         jsondata.put("icp", serder.getKed());
         jsondata.put("sigs", sigs);
@@ -245,7 +245,7 @@ public class Identifier {
         // Assuming makeEndRole is a method that returns an object with getRaw() and getKed() methods
         Serder rpy = this.makeEndRole(pre, role, eid, stamp);
         Keeping.Keeper keeper = this.client.getManager().get(hab);
-        Keeping.SignResult signResult = (Keeping.SignResult) keeper.sign(rpy.getRaw().getBytes(), true, null, null).get();
+        Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
         Map<String, Object> jsondata = new HashMap<>();
@@ -317,7 +317,7 @@ public class Identifier {
         Serder serder = Eventing.interact(interactArgs);
 
         Keeping.Keeper keeper = this.client.getManager().get(hab);
-        Keeping.SignResult sigs = (Keeping.SignResult) keeper.sign(serder.getRaw().getBytes(), true, null, null).get();
+        Keeping.SignResult sigs = keeper.sign(serder.getRaw().getBytes());
 
         Map<String, Object> jsondata = new HashMap<>();
         jsondata.put("ixn", serder.getKed());
@@ -368,7 +368,7 @@ public class Identifier {
             transferable,
             states,
             rstates
-        ).get();
+        );
         List<String> keys = keeperResult.verfers();
         List<String> ndigs = keeperResult.digers();
 
@@ -395,7 +395,7 @@ public class Identifier {
             .build()
         );
 
-        List<String> sigs = keeper.sign(serder.getRaw().getBytes(), true, null, null).get().signatures();
+        List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
 
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rot", serder.getKed());
