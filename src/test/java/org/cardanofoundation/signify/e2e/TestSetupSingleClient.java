@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,13 +47,17 @@ public class TestSetupSingleClient extends TestUtils {
     @Test
     public void test_setup_single_client_step2() throws SodiumException, IOException, InterruptedException {
         ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-        Object oobi = client.getOobis().get("name1", "witness");
-        try {
-            List<Map<String, Object>> oobiList = objectMapper.readValue(oobi.toString(), new TypeReference<>() {
-            });
-            assertEquals(1, oobiList.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Map<String, Object> oobi = (Map<String, Object>) client.getOobis().get("name1", "witness");
+        Map<String, Object> oobis = (Map<String, Object>) oobi.get("oobis");
+        assertEquals(3, oobis.size());
+
+//        try {
+//            List<Map<String, Object>> oobiList = objectMapper.readValue(oobi.toString(), new TypeReference<>() {
+//            });
+//            assertEquals(1, oobiList.size());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
     }
 }
