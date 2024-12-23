@@ -3,14 +3,13 @@ package org.cardanofoundation.signify.app.clienting;
 import lombok.*;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Operation<T> extends CompletableFuture<Operation<Object>> {
+public class Operation<T> {
 
     String name;
     Metadata metadata;
