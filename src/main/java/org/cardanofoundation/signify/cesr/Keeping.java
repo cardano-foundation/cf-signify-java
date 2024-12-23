@@ -614,18 +614,32 @@ public class Keeping {
             }
 
             List<String> signatures = new ArrayList<>();
-            if (indexed != null && indexed) {
-                for (int i = 0; i < signers.size(); i++) {
-                    Signer signer = signers.get(i);
-                    int index = indices != null ? indices.get(i) : i;
-                    if (index < 0) {
-                        throw new InvalidValueException("Invalid signing index = " + index);
+            if (Boolean.TRUE.equals(indexed)) {
+                for (int j = 0; j < signers.size(); j++) {
+                    int i;
+                    Signer signer = signers.get(j);
+                    if (indices != null && !indices.isEmpty()) {
+                        i = indices.get(j);
+
+                        if (i < 0) {
+                            throw new InvalidValueException("Invalid signing index = " + i + ", not whole number");
+                        }
+
+                    } else {
+                        i = j;
                     }
-                    int ondex = ondices != null ? ondices.get(i) : index;
-                    if (ondex < 0) {
-                        throw new InvalidValueException("Invalid ondex = " + ondex);
+
+                    Integer o;
+                    if (ondices != null && !ondices.isEmpty()) {
+                        o = ondices.get(j);
+                        if (o != null && o < 0) {
+                            throw new InvalidValueException("Invalid other signing index = " + o + ", not None or not a whole number.");
+                        }
+                    } else {
+                        o = i;
                     }
-                    Siger siger = (Siger) signer.sign(ser, index, ondex == 0, ondex);
+
+                    Siger siger = (Siger) signer.sign(ser, i, o == null, 0);
                     signatures.add(siger.getQb64());
                 }
 
