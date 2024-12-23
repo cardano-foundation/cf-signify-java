@@ -237,7 +237,6 @@ public class TestUtils {
                 EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
                 ops = results.op();
                 ops = operationToObject(waitOperation(client, ops));
-                System.out.println("identifiers.addEndRole: " + ops);
             }
         }
 
@@ -392,6 +391,14 @@ public class TestUtils {
         opMap.put("response", operation.getResponse());
 
         return objectMapper.writeValueAsString(opMap);
+    }
+
+    public Integer parseInteger(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Parse Integer is not successful " + e.getMessage());
+        }
     }
 
 }

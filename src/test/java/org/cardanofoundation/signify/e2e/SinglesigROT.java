@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,6 @@ public class SinglesigROT extends TestUtils {
         assertEquals(1, responseList.size());
 
         // rot
-        // TODO - Failed .rotate()
         RotateIdentifierArgs args = RotateIdentifierArgs.builder().build();
         EventResult result = client1.getIdentifier().rotate("name1", args);
         waitOperation(client1, result.op());
@@ -131,7 +131,7 @@ public class SinglesigROT extends TestUtils {
         // refresh remote keystate
         int sn = parseInteger(listKeyState1.getFirst().get("s").toString());
         Object op = client2.getKeyStates().query(contact1_id, sn, null);
-        op = waitOperation(client2, op);
+        op = operationToObject(waitOperation(client2, op));
         if (op instanceof String) {
             try {
                 HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
@@ -153,14 +153,4 @@ public class SinglesigROT extends TestUtils {
                 listKeyState1.getFirst().get("n")
         );
     }
-
-    public Integer parseInteger(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            throw new NumberFormatException("Parse Integer is not successful " + e.getMessage());
-        }
-    }
-
-
 }
