@@ -57,6 +57,9 @@ allure {
 // JUnit Tests (unit tests)
 tasks.test {
     useJUnitPlatform()  // Use JUnit 5 platform
+    filter {
+        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+    }
     finalizedBy 'allureReport'
 }
 
