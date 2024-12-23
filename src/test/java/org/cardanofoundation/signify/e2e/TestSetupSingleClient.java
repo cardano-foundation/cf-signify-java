@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,9 +26,8 @@ public class TestSetupSingleClient extends TestUtils {
 
     @BeforeAll
     public static void getClients() throws Exception {
-//        List<SignifyClient> clients = getOrCreateClients(1, brans);
-//        client = clients.getFirst();
-        client = getOrCreateClient("0ADF2TpptgqcDE5IQUF1HeTp");
+        List<SignifyClient> clients = getOrCreateClients(1, brans);
+        client = clients.getFirst();
     }
 
     @BeforeEach
@@ -42,6 +40,7 @@ public class TestSetupSingleClient extends TestUtils {
     @Test
     public void test_setup_single_client_step1() {
         assertEquals("EB3UGWwIMq7ppzcQ697ImQIuXlBG5jzh-baSx-YG3-tY", client.getController().getPre());
+        System.out.println("Step 1 is Passed");
     }
 
     @Test
