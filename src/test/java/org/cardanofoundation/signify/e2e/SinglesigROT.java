@@ -1,10 +1,8 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.app.clienting.KeyStates;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.RotateIdentifierArgs;
@@ -14,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
