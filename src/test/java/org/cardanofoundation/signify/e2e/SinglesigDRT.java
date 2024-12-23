@@ -19,35 +19,26 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class SinglesigDRT extends TestUtils {
-    static SignifyClient delegator, delegate;
-    static String name1_id, name1_oobi;
-    static String contact1_id;
-    String opResponseName, opResponseT, opResponseS;
+    private static SignifyClient delegator, delegate;
+    private static String name1_id, name1_oobi;
+    private static String contact1_id;
+    private String opResponseName, opResponseT, opResponseS;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
-    public static void getClients() {
-        try {
-            List<SignifyClient> clients = getOrCreateClients(2, null);
-            delegator = clients.get(0);
-            delegate = clients.get(1);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public static void getClients() throws Exception {
+        List<SignifyClient> clients = getOrCreateClients(2, null);
+        delegator = clients.get(0);
+        delegate = clients.get(1);
     }
 
     @BeforeEach
     public void getIdentifier() throws Exception {
         String[] clients = getOrCreateIdentifier(delegator, "name1");
-        try {
-            name1_id = clients[0];
-            name1_oobi = clients[1];
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        name1_id = clients[0];
+        name1_oobi = clients[1];
     }
 
     @BeforeEach
@@ -66,7 +57,8 @@ public class SinglesigDRT extends TestUtils {
         States.HabState delegate1 = delegate.getIdentifier().get("delegate1");
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
                 opResponseName = opMap.get("name").toString();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -94,7 +86,8 @@ public class SinglesigDRT extends TestUtils {
         op = result.op();
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
                 opResponseName = opMap.get("name").toString();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -119,8 +112,9 @@ public class SinglesigDRT extends TestUtils {
 
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
-                HashMap <String, String> opResponse = (HashMap<String, String>) opMap.get("response");
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                HashMap<String, String> opResponse = (HashMap<String, String>) opMap.get("response");
                 opResponseT = opResponse.get("t");
                 opResponseS = opResponse.get("s");
             } catch (Exception ex) {
