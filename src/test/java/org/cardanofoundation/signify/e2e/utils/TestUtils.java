@@ -237,7 +237,6 @@ public class TestUtils {
                 EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
                 ops = results.op();
                 ops = operationToObject(waitOperation(client, ops));
-                System.out.println("identifiers.addEndRole: " + ops);
             }
         }
 
