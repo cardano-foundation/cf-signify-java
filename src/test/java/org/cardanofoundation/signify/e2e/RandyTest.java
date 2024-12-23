@@ -9,13 +9,13 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.IdentifierListResponse;
-import org.cardanofoundation.signify.app.clienting.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,6 @@ public class RandyTest extends TestUtils {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private SignifyClient client1;
     private String opResponseDone, opResponseName, opResponsePrefix;
-    List<String> opResponseAIDS;
     private HashMap<String, Object> opResponse;
 
     @Test
@@ -125,7 +124,6 @@ public class RandyTest extends TestUtils {
             ex.printStackTrace();
         }
 
-        // TODO - Failed .rotate()
         icpResult = client1.getIdentifier().rotate("aid1");
         op = operationToObject(waitOperation(client1, icpResult.op()));
         if (op instanceof String) {
@@ -160,6 +158,6 @@ public class RandyTest extends TestUtils {
             ex.printStackTrace();
         }
 
-        assertOperations((List<SignifyClient>) client1);
+        assertOperations(Collections.singletonList(client1));
     }
 }
