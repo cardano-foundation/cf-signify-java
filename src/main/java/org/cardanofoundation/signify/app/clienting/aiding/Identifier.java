@@ -25,7 +25,6 @@ import java.net.URI;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -110,7 +109,7 @@ public class Identifier {
      * @param kargs Optional parameters to create the identifier
      * @return An EventResult to the inception result
      */
-    public EventResult create(String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
+    public EventResult create(String name, CreateIdentifierArgs kargs) throws SodiumException, InterruptedException, DigestException, IOException {
         // Assuming kargs is an instance of a class with appropriate getters
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
@@ -171,7 +170,7 @@ public class Identifier {
         xargs.put("extern", extern);
 
         Keeper keeper = this.client.getManager().create(algo, this.client.getPidx(), xargs);
-        KeeperResult keeperResult = (KeeperResult) keeper.incept(transferable).get();
+        KeeperResult keeperResult = keeper.incept(transferable);
         Serder serder;
         if (delpre == null) {
             InceptArgs inceptArgs = InceptArgs.builder()
@@ -208,10 +207,10 @@ public class Identifier {
             serder = Eventing.incept(inceptArgs);
         }
 
-        Keeping.SignResult signResult = (Keeping.SignResult) keeper.sign(serder.getRaw().getBytes(), true, null, null).get();
+        Keeping.SignResult signResult = keeper.sign(serder.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
-        Map<String, Object> jsondata = new HashMap<>();
+        Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("name", name);
         jsondata.put("icp", serder.getKed());
         jsondata.put("sigs", sigs);
@@ -222,8 +221,9 @@ public class Identifier {
         jsondata.put(algo.getValue(), keeper.getParams().toMap());
 
         this.client.setPidx(this.client.getPidx() + 1);
+
         HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata, null);
-        return new EventResult(serder, sigs, CompletableFuture.completedFuture(response));
+        return new EventResult(serder, sigs, response);
     }
 
 
@@ -238,14 +238,14 @@ public class Identifier {
      * @return An EventResult to the result of the authorization
      * @throws SodiumException if there is an error in the cryptographic operations
      */
-    public EventResult addEndRole(String name, String role, String eid, String stamp) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
+    public EventResult addEndRole(String name, String role, String eid, String stamp) throws SodiumException, InterruptedException, DigestException, IOException {
         States.HabState hab = this.get(name);
         String pre = hab.getPrefix();
 
         // Assuming makeEndRole is a method that returns an object with getRaw() and getKed() methods
         Serder rpy = this.makeEndRole(pre, role, eid, stamp);
         Keeping.Keeper keeper = this.client.getManager().get(hab);
-        Keeping.SignResult signResult = (Keeping.SignResult) keeper.sign(rpy.getRaw().getBytes(), true, null, null).get();
+        Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
         Map<String, Object> jsondata = new HashMap<>();
@@ -258,7 +258,7 @@ public class Identifier {
                 jsondata,
                 null
         );
-        return new EventResult(rpy, sigs, CompletableFuture.completedFuture(res));
+        return new EventResult(rpy, sigs, res);
     }
 
     /**
@@ -284,7 +284,7 @@ public class Identifier {
     }
 
 
-    public EventResult interact(String name, Object data) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
+    public EventResult interact(String name, Object data) throws SodiumException, InterruptedException, DigestException, IOException {
         InteractionResponse interactionResponse = this.createInteract(name, data);
         HttpResponse<String> response = this.client.fetch(
                 "/identifiers/" + name + "/events",
@@ -292,11 +292,11 @@ public class Identifier {
                 interactionResponse.jsondata(),
                 null
         );
-        return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), CompletableFuture.completedFuture(response));
+        return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), response);
 
     }
 
-    public InteractionResponse createInteract(String name, Object data) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
+    public InteractionResponse createInteract(String name, Object data) throws SodiumException, InterruptedException, DigestException, IOException {
         States.HabState hab = this.get(name);
         String pre = hab.getPrefix();
 
@@ -317,7 +317,7 @@ public class Identifier {
         Serder serder = Eventing.interact(interactArgs);
 
         Keeping.Keeper keeper = this.client.getManager().get(hab);
-        Keeping.SignResult sigs = (Keeping.SignResult) keeper.sign(serder.getRaw().getBytes(), true, null, null).get();
+        Keeping.SignResult sigs = keeper.sign(serder.getRaw().getBytes());
 
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("ixn", serder.getKed());
@@ -325,12 +325,11 @@ public class Identifier {
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
-
     public EventResult rotate(String name) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
         return this.rotate(name, RotateIdentifierArgs.builder().build());
     }
 
-    public EventResult rotate(String name, RotateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
+    public EventResult rotate(String name, RotateIdentifierArgs kargs) throws SodiumException, InterruptedException, DigestException, IOException {
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
@@ -368,11 +367,11 @@ public class Identifier {
         List<States.State> states = kargs.getStates() == null ? new ArrayList<>() : kargs.getStates();
         List<States.State> rstates = kargs.getStates() == null ? new ArrayList<>() : kargs.getRstates();
         KeeperResult keeperResult = keeper.rotate(
-            ncodes,
-            transferable,
-            states,
-            rstates
-        ).get();
+                ncodes,
+                transferable,
+                states,
+                rstates
+        );
         List<String> keys = keeperResult.verfers();
         List<String> ndigs = keeperResult.digers();
 
@@ -382,24 +381,24 @@ public class Identifier {
         String ilk = delegated ? Ilks.DRT.getValue() : Ilks.ROT.getValue();
 
         Serder serder = Eventing.rotate(
-            RotateArgs.builder()
-                .pre(pre)
-                .ilk(ilk)
-                .keys(keys)
-                .dig(dig)
-                .sn(ridx)
-                .isith(cst)
-                .nsith(nst)
-                .ndigs(ndigs)
-                .toad(kargs.getToad())
-                .wits(wits)
-                .cuts(cuts)
-                .adds(adds)
-                .data(data)
-            .build()
+                RotateArgs.builder()
+                        .pre(pre)
+                        .ilk(ilk)
+                        .keys(keys)
+                        .dig(dig)
+                        .sn(ridx)
+                        .isith(cst)
+                        .nsith(nst)
+                        .ndigs(ndigs)
+                        .toad(kargs.getToad())
+                        .wits(wits)
+                        .cuts(cuts)
+                        .adds(adds)
+                        .data(data)
+                        .build()
         );
 
-        List<String> sigs = keeper.sign(serder.getRaw().getBytes(), true, null, null).get().signatures();
+        List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
 
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rot", serder.getKed());
@@ -409,13 +408,13 @@ public class Identifier {
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(
-            "/identifiers/" + name + "/events",
-            "POST",
-            jsondata,
-            null
+                "/identifiers/" + name + "/events",
+                "POST",
+                jsondata,
+                null
         );
 
-        return new EventResult(serder, sigs, CompletableFuture.completedFuture(res));
+        return new EventResult(serder, sigs, res);
     }
 
     //TODO implement the rest of the function

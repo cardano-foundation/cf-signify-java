@@ -21,7 +21,6 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -38,21 +37,25 @@ public class Keeping {
 
         T getParams();
 
-        CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException, DigestException;
+        KeeperResult incept(boolean transferable) throws SodiumException, DigestException;
 
-        CompletableFuture<KeeperResult> rotate(
+        KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
                 List<State> states,
                 List<State> rstates
         ) throws SodiumException, DigestException;
 
-        CompletableFuture<SignResult> sign(
+        SignResult sign(
                 byte[] ser,
                 Boolean indexed,
                 List<Integer> indices,
                 List<Integer> ondices
         ) throws SodiumException;
+
+        default SignResult sign(byte[] ser) throws SodiumException {
+            return sign(ser, true, null, null);
+        }
     }
 
     public record ExternalModule(
@@ -303,7 +306,7 @@ public class Keeping {
         }
 
         @Override
-        public CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException, DigestException {
+        public KeeperResult incept(boolean transferable) throws SodiumException, DigestException {
             this.transferable = transferable;
             this.kidx = 0;
 
@@ -335,11 +338,11 @@ public class Keeping {
             for (Signer nsigner : nsigners.getSigners()) {
                 digers.add(new Diger(this.dcode, nsigner.getVerfer().getQb64b()).getQb64());
             }
-            return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
+            return new KeeperResult(verfers, digers);
         }
 
         @Override
-        public CompletableFuture<KeeperResult> rotate(
+        public KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
                 List<State> states,
@@ -378,11 +381,11 @@ public class Keeping {
                 digers.add(new Diger(this.dcode, nsigner.getVerfer().getQb64b()).getQb64());
             }
 
-            return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
+            return new KeeperResult(verfers, digers);
         }
 
         @Override
-        public CompletableFuture<SignResult> sign(
+        public SignResult sign(
                 byte[] ser,
                 Boolean indexed,
                 List<Integer> indices,
@@ -435,7 +438,7 @@ public class Keeping {
                 }
             }
 
-            return CompletableFuture.completedFuture(new SignResult(signatures));
+            return new SignResult(signatures);
         }
     }
 
@@ -521,7 +524,7 @@ public class Keeping {
         }
 
         @Override
-        public CompletableFuture<KeeperResult> incept(boolean transferable) throws SodiumException, DigestException {
+        public KeeperResult incept(boolean transferable) throws SodiumException, DigestException {
             this.transferable = transferable;
 
             Manager.Keys signers = creator.create(
@@ -554,11 +557,11 @@ public class Keeping {
                 digers.add(new Diger(dcode, nsigner.getVerfer().getQb64b()).getQb64());
             }
 
-            return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
+            return new KeeperResult(verfers, digers);
         }
 
         @Override
-        public CompletableFuture<KeeperResult> rotate(
+        public KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
                 List<State> states,
@@ -593,11 +596,11 @@ public class Keeping {
                 digers.add(new Diger(dcode, nsigner.getVerfer().getQb64b()).getQb64());
             }
 
-            return CompletableFuture.completedFuture(new KeeperResult(verfers, digers));
+            return new KeeperResult(verfers, digers);
         }
 
         @Override
-        public CompletableFuture<SignResult> sign(
+        public SignResult sign(
                 byte[] ser,
                 Boolean indexed,
                 List<Integer> indices,
@@ -649,7 +652,7 @@ public class Keeping {
                 }
             }
 
-            return CompletableFuture.completedFuture(new SignResult(signatures));
+            return new SignResult(signatures);
         }
     }
 
@@ -698,12 +701,12 @@ public class Keeping {
         }
 
         @Override
-        public CompletableFuture<KeeperResult> incept(boolean transferable) {
-            return CompletableFuture.completedFuture(new KeeperResult(gkeys, gdigs));
+        public KeeperResult incept(boolean transferable) {
+            return new KeeperResult(gkeys, gdigs);
         }
 
         @Override
-        public CompletableFuture<KeeperResult> rotate(
+        public KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
                 List<State> states,
@@ -717,11 +720,11 @@ public class Keeping {
                     .map(state -> state.getN().getFirst())
                     .collect(Collectors.toList());
 
-            return CompletableFuture.completedFuture(new KeeperResult(gkeys, gdigs));
+            return new KeeperResult(gkeys, gdigs);
         }
 
         @Override
-        public CompletableFuture<SignResult> sign(
+        public SignResult sign(
                 byte[] ser,
                 Boolean indexed,
                 List<Integer> indices,
