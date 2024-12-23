@@ -66,7 +66,8 @@ public class SinglesigDRT extends TestUtils {
         States.HabState delegate1 = delegate.getIdentifier().get("delegate1");
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
                 opResponseName = opMap.get("name").toString();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -88,13 +89,13 @@ public class SinglesigDRT extends TestUtils {
         op1 = operationToObject(waitOperation(delegator, op1));
         op2 = operationToObject(waitOperation(delegate, op2));
 
-        // TODO - Failed .rotate()
         RotateIdentifierArgs karg = RotateIdentifierArgs.builder().build();
         result = delegate.getIdentifier().rotate("delegate1", karg);
         op = result.op();
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
                 opResponseName = opMap.get("name").toString();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -119,8 +120,9 @@ public class SinglesigDRT extends TestUtils {
 
         if (op instanceof String) {
             try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {});
-                HashMap <String, String> opResponse = (HashMap<String, String>) opMap.get("response");
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                HashMap<String, String> opResponse = (HashMap<String, String>) opMap.get("response");
                 opResponseT = opResponse.get("t");
                 opResponseS = opResponse.get("s");
             } catch (Exception ex) {
