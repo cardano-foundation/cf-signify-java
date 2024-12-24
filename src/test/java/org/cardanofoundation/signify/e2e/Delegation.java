@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DelegationTest extends TestUtils {
+public class Delegation extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private String opResponseName, oobisResponse;
