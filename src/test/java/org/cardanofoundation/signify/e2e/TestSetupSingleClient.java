@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -38,7 +37,7 @@ public class TestSetupSingleClient extends TestUtils {
     @Test
     public void test_setup_single_client_step1() {
         assertEquals("EB3UGWwIMq7ppzcQ697ImQIuXlBG5jzh-baSx-YG3-tY", client.getController().getPre());
-        System.out.println("Step 1 is Passed");
+        System.out.println("Test Setup Single Client: Step 1 is Passed");
     }
 
     @Test
@@ -47,6 +46,27 @@ public class TestSetupSingleClient extends TestUtils {
         Map<String, Object> oobi = (Map<String, Object>) client.getOobis().get("name1", "witness");
         ArrayList<String> oobis = (ArrayList<String>) oobi.get("oobis");
         assertEquals(3, oobis.size());
-
+        switch (env.preset()) {
+            case LOCAL:
+                assertEquals(name1_oobi, "http://127.0.0.1:3902/oobi/" + name1_id + "/agent/" + client.getAgent().getPre());
+                assertEquals(oobis.get(0), "http://127.0.0.1:5642/oobi/" + name1_id + "/witness/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha");
+                assertEquals(oobis.get(1), "http://127.0.0.1:5643/oobi/" + name1_id + "/witness/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM");
+                assertEquals(oobis.get(2), "http://127.0.0.1:5644/oobi/" + name1_id + "/witness/BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX");
+                break;
+            case DOCKER:
+                assertEquals(name1_oobi, "http://keria:3902/oobi/" + name1_id + "/agent/" + client.getAgent().getPre());
+                assertEquals(oobis.get(0), "http://witness-demo:5642/oobi/" + name1_id + "/witness/BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha");
+                assertEquals(oobis.get(1), "http://witness-demo:5643/oobi/" + name1_id + "/witness/BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM");
+                assertEquals(oobis.get(2), "http://witness-demo:5644/oobi/" + name1_id + "/witness/BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX");
+                break;
+        }
+        System.out.println("Test Setup Single Client: Step 2 is Passed");
     }
+
+
+    public void validate_config() {
+        ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
+        // TO-DO
+    }
+
 }
