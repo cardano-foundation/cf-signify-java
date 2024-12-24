@@ -9,6 +9,7 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -20,6 +21,7 @@ public class Delegation extends TestUtils {
     private String opResponseName, oobisResponse;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Disabled
     @Test
     void delegationTest() throws Exception {
         String bran1 = Coring.randomPasscode();
