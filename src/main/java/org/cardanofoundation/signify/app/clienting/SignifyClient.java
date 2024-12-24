@@ -41,6 +41,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 @Setter

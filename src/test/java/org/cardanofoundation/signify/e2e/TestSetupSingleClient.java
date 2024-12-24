@@ -29,7 +29,7 @@ public class TestSetupSingleClient extends TestUtils {
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients1 = getOrCreateIdentifier(client, "name1");
+        String[] clients1 = getOrCreateIdentifier(client, "name1", null);
         name1_id = clients1[0];
         name1_oobi = clients1[1];
     }

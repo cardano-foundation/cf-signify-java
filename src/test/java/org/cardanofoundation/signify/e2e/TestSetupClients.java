@@ -29,11 +29,11 @@ public class TestSetupClients extends TestUtils {
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients1 = getOrCreateIdentifier(client1, "name1");
+        String[] clients1 = getOrCreateIdentifier(client1, "name1", null);
         name1_id = clients1[0];
         name1_oobi = clients1[1];
 
-        String[] clients2 = getOrCreateIdentifier(client2, "name2");
+        String[] clients2 = getOrCreateIdentifier(client2, "name2", null);
         name2_id = clients2[0];
         name2_oobi = clients2[1];
     }

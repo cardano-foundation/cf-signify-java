@@ -84,14 +84,10 @@ public class TestUtils {
 
     public static Aid createAid(SignifyClient client, String name) throws Exception {
         // TO-DO
-        String[] results = getOrCreateIdentifier(client, name);
-        if (results != null) {
-//            String[] result = results.get();
-            String prefix = results[0];
-            String oobi = results[1];
-            return new Aid(name, prefix, oobi);
-        }
-        return null;
+        String[] results = getOrCreateIdentifier(client, name, null);
+        String prefix = results[0];
+        String oobi = results[1];
+        return new Aid(name, prefix, oobi);
     }
 
     public static String createTimestamp() {
@@ -215,9 +211,8 @@ public class TestUtils {
         return client;
     }
 
-    public static String[] getOrCreateIdentifier(SignifyClient client, String name) throws Exception {
+    public static String[] getOrCreateIdentifier(SignifyClient client, String name, CreateIdentifierArgs kargs) throws Exception {
         Object id = null;
-        CreateIdentifierArgs kargs = null;
         String eid;
         Object op, ops;
         try {

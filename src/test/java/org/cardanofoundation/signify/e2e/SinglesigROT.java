@@ -39,7 +39,7 @@ public class SinglesigROT extends TestUtils {
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients = getOrCreateIdentifier(client1, "name1");
+        String[] clients = getOrCreateIdentifier(client1, "name1", null);
         try {
             name1_id = clients[0];
             name1_oobi = clients[1];
