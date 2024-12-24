@@ -283,7 +283,13 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         } catch (IOException exception) {
             if(exception.getMessage().contains("unexpected content length header with 204 response")) {
-                // ignore this exception
+                /**
+                 * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230
+                 * A server MUST NOT send a Transfer-Encoding header field in any 2xx (Successful) response to a CONNECT
+                 * request (Section 4.3.6 of [RFC7231]).
+                 * <br>
+                 * Keria now returns a Transfer-Encoding header field in a 204 response so we need to ignore this exception.
+                 */
             } else {
                 throw exception;
             }
@@ -316,7 +322,14 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException exception) {
             if(exception.getMessage().contains("unexpected content length header with 204 response")) {
-                // ignore this exception
+                /**
+                 * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230
+                 * A server MUST NOT send a Transfer-Encoding header field in any 2xx (Successful) response to a CONNECT
+                 * request (Section 4.3.6 of [RFC7231]).
+                 * <br>
+                 * Keria now returns a Transfer-Encoding header field in a 204 response so we need to ignore this exception.
+                 */
+
             } else {
                 throw exception;
             }

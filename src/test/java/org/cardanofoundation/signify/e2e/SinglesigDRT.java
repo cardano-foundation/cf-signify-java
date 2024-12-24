@@ -19,35 +19,26 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class SinglesigDRT extends TestUtils {
-    static SignifyClient delegator, delegate;
-    static String name1_id, name1_oobi;
-    static String contact1_id;
-    String opResponseName, opResponseT, opResponseS;
+    private static SignifyClient delegator, delegate;
+    private static String name1_id, name1_oobi;
+    private static String contact1_id;
+    private String opResponseName, opResponseT, opResponseS;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
-    public static void getClients() {
-        try {
-            List<SignifyClient> clients = getOrCreateClients(2, null);
-            delegator = clients.get(0);
-            delegate = clients.get(1);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public static void getClients() throws Exception {
+        List<SignifyClient> clients = getOrCreateClients(2, null);
+        delegator = clients.get(0);
+        delegate = clients.get(1);
     }
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients = getOrCreateIdentifier(delegator, "name1", null);
-        try {
-            name1_id = clients[0];
-            name1_oobi = clients[1];
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String[] clients = getOrCreateIdentifier(delegator, "name1");
+        name1_id = clients[0];
+        name1_oobi = clients[1];
     }
 
     @BeforeEach

@@ -17,34 +17,25 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 class SinglesigDIP extends TestUtils {
-    static SignifyClient client1, client2;
-    static String contact1_id;
-    static String name1_id, name1_oobi;
+    private static SignifyClient client1, client2;
+    private static String contact1_id;
+    private static String name1_id, name1_oobi;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     public static void getClients() throws Exception {
-        try {
-            List<SignifyClient> clients = getOrCreateClients(2, null);
-            client1 = clients.get(0);
-            client2 = clients.get(1);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        List<SignifyClient> clients = getOrCreateClients(2, null);
+        client1 = clients.get(0);
+        client2 = clients.get(1);
     }
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients = getOrCreateIdentifier(client1, "name1", null);
-        try {
-            name1_id = clients[0];
-            name1_oobi = clients[1];
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String[] clients = getOrCreateIdentifier(client1, "name1");
+        name1_id = clients[0];
+        name1_oobi = clients[1];
     }
 
     @BeforeEach
