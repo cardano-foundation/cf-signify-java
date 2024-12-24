@@ -64,5 +64,10 @@ docker compose up --wait
 Use the gradlew script "test E2E" to run all E2E tests in sequence:
 
 ```bash
-./gradlew test
+./gradlew clean testE2E
+```
+
+Use the gradlew script "Allure Serve" to view the test result report:
+```bash
+./gradlew allureServe
 ```

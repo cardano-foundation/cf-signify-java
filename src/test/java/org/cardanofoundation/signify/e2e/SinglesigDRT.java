@@ -36,7 +36,7 @@ public class SinglesigDRT extends TestUtils {
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients = getOrCreateIdentifier(delegator, "name1");
+        String[] clients = getOrCreateIdentifier(delegator, "name1", null);
         name1_id = clients[0];
         name1_oobi = clients[1];
     }
