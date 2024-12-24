@@ -23,7 +23,7 @@ This will compile the source code, run the tests, and package the application.
 Unit tests are an essential part of the development process. To run the unit tests, execut
 
 ```bash
-./gradlew test
+./gradlew clean test
 ```
 This command will run all the tests in the project and provide a summary of the results.
 
