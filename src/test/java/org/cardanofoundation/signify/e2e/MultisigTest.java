@@ -154,6 +154,7 @@ public class MultisigTest extends TestUtils {
         List<Siger> sigers = sigs.stream()
                 .map(sig -> new Siger(qb64))
                 .collect(Collectors.toList());
+
     }
 
 
