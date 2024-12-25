@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Delegation extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
-    private String opResponseName, oobisResponse;
+    private String opResponseName, oobisResponse, apprDelResponse;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Disabled
@@ -90,12 +90,23 @@ public class Delegation extends TestUtils {
         String delegatePrefix = opResponseName.split("\\.")[1];
         System.out.println("Delegate's prefix: " + delegatePrefix);
 
-        Map<String, String> anchor = new HashMap<>();
+        HashMap<String, Object> anchor = new HashMap<>();
         anchor.put("i", delegatePrefix);
         anchor.put("s", "0");
         anchor.put("d", delegatePrefix);
 
-        // TO DO Approve delegation
+        // TO DO Cast apprDelResponse
+        EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
+        waitOperation(client1, apprDelRes.op());
+        String apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
+        String anchorJson = objectMapper.writeValueAsString(anchor);
+        try {
+            List<HashMap<String, Object>> apprDelMap = objectMapper.readValue(apprDelJson, new TypeReference<>() {});
+            apprDelResponse = String.valueOf(apprDelMap.getFirst());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        assertEquals(anchorJson, apprDelResponse);
 
         Object op3 = client2.getKeyStates().query(ator.getPrefix(), 1, null);
         if (op3 instanceof String) {

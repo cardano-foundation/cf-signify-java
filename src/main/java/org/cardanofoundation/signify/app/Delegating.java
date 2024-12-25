@@ -1,7 +1,14 @@
 package org.cardanofoundation.signify.app;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
+import org.cardanofoundation.signify.app.clienting.aiding.InteractionResponse;
+
+import java.io.IOException;
+import java.net.http.HttpResponse;
+import java.security.DigestException;
 
 public class Delegating {
     @Getter
@@ -15,6 +22,17 @@ public class Delegating {
         public Delegations(SignifyClient client) {
             this.client = client;
         }
-        // others functions
+
+        public EventResult approve(String name, Object data) throws SodiumException, DigestException, IOException, InterruptedException {
+            InteractionResponse interactionResponse = this.client.getIdentifier().createInteract(name, data);
+            HttpResponse<String> response = this.client.fetch(
+                    "/identifiers/" + name + "/delegation",
+                    "POST",
+                    interactionResponse.jsondata(),
+                    null
+            );
+            return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), response);
+
+        }
     }
 }
