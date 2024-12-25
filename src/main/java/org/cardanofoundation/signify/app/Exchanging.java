@@ -139,13 +139,21 @@ public class Exchanging {
 
             String path = String.format("/identifiers/%s/exchanges", name);
             String method = "POST";
-            Map<String, Object> data = Map.of(
-                "tpc", topic,
-                "exn", exn.getKed(),
-                "sigs", sigs,
-                "atc", atc,
-                "rec", recipients
-            );
+            LinkedHashMap<String, Object> data = new LinkedHashMap<>();
+            data.put("tpc", topic);
+            data.put("exn", exn.getKed());
+            data.put("sigs", sigs);
+            data.put("atc", atc);
+            data.put("rec", recipients);
+
+            // Check body
+//            Map<String, Object> data = Map.of(
+//                "tpc", topic,
+//                "exn", exn.getKed(),
+//                "sigs", sigs,
+//                "atc", atc,
+//                "rec", recipients
+//            );
 
             return client.fetch(path, method, data, null);
         }
