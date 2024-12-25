@@ -6,6 +6,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.*;
 import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
+import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
@@ -136,7 +137,7 @@ public class ClientingTest extends BaseMockServerTest {
         assertInstanceOf(Operations.class, client.getOperations());
         assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
         assertInstanceOf(KeyStates.class, client.getKeyStates());
-        assertInstanceOf(Credentialing.Credentials.class, client.getCredentials());
+        assertInstanceOf(Credentials.class, client.getCredentials());
         assertInstanceOf(Credentialing.Registries.class, client.getRegistries());
         assertInstanceOf(Credentialing.Schemas.class, client.getSchemas());
         assertInstanceOf(Contacting.Challenges.class, client.getChallenges());

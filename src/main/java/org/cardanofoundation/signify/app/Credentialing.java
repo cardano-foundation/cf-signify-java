@@ -5,20 +5,6 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 
 public class Credentialing {
     @Getter
-    public static class Credentials {
-        public final SignifyClient client;
-
-        /**
-         * Credentials
-         * @param client {SignifyClient}
-         */
-        public Credentials(SignifyClient client) {
-            this.client = client;
-        }
-        // others functions
-    }
-
-    @Getter
     public static class Ipex {
         public final SignifyClient client;
 
