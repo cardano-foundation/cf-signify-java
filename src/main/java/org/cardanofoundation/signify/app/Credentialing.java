@@ -18,19 +18,6 @@ public class Credentialing {
         // others functions
     }
 
-    @Getter
-    public static class Registries {
-        public final SignifyClient client;
-
-        /**
-         * Registries
-         * @param client {SignifyClient}
-         */
-        public Registries(SignifyClient client) {
-            this.client = client;
-        }
-        // others functions
-    }
 
     @Getter
     public static class Schemas {
