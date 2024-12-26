@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -27,6 +28,7 @@ import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Getter
     public static class Aid {
         public String name;
         public String prefix;
