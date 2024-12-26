@@ -28,7 +28,6 @@ import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Getter
     public static class Aid {
         public String name;
         public String prefix;
