@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Delegation extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
-    private String opResponseName, oobisResponse, apprDelResponse;
+    private static SignifyClient client1, client2;
+    private String opResponseName, oobisResponse;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Disabled
@@ -26,14 +27,14 @@ public class Delegation extends TestUtils {
     void delegationTest() throws Exception {
         String bran1 = Coring.randomPasscode();
         String bran2 = Coring.randomPasscode();
-        SignifyClient client1 = new SignifyClient(
+        client1 = new SignifyClient(
                 url,
                 bran1,
                 Salter.Tier.low,
                 bootUrl,
                 null
         );
-        SignifyClient client2 = new SignifyClient(
+        client2 = new SignifyClient(
                 url,
                 bran2,
                 Salter.Tier.low,
@@ -90,7 +91,7 @@ public class Delegation extends TestUtils {
         String delegatePrefix = opResponseName.split("\\.")[1];
         System.out.println("Delegate's prefix: " + delegatePrefix);
 
-        HashMap<String, Object> anchor = new HashMap<>();
+        LinkedHashMap<String, Object> anchor = new LinkedHashMap<>();
         anchor.put("i", delegatePrefix);
         anchor.put("s", "0");
         anchor.put("d", delegatePrefix);
@@ -98,28 +99,24 @@ public class Delegation extends TestUtils {
         // TO DO Cast apprDelResponse
         EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
         waitOperation(client1, apprDelRes.op());
-        String apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
+        Object apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
+        LinkedHashMap<String, Object> apprDelMap = objectMapper.readValue(
+                apprDelJson.toString(),
+                new TypeReference<>() {}
+        );
+
         String anchorJson = objectMapper.writeValueAsString(anchor);
-        try {
-            List<HashMap<String, Object>> apprDelMap = objectMapper.readValue(apprDelJson, new TypeReference<>() {});
-            apprDelResponse = String.valueOf(apprDelMap.getFirst());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        assertEquals(anchorJson, apprDelResponse);
+        Map<String, Object> anchorJsonRes = objectMapper.readValue(
+                anchorJson,
+                new TypeReference<>() {}
+        );
+        assertEquals(anchorJsonRes.toString(), apprDelMap.get("0"));
 
         Object op3 = client2.getKeyStates().query(ator.getPrefix(), 1, null);
-        if (op3 instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op3, new TypeReference<>() {});
-                waitOperation(client2, opMap);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
 
         // Client 2 check approval
-        waitOperation(client2, op2);
+        op3 = operationToObject(waitOperation(client2, op3));
+        op2 = operationToObject(waitOperation(client2, op2));
 
         States.HabState aid2 = client2.getIdentifier().get("delegate");
         assertEquals(delegatePrefix, aid2.getPrefix());
