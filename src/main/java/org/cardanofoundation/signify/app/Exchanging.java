@@ -15,7 +15,6 @@ import org.cardanofoundation.signify.core.States.HabState;
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class Exchanging {
@@ -51,7 +50,7 @@ public class Exchanging {
             String recipient,
             String datetime,
             String dig
-        ) throws InterruptedException, ExecutionException, SodiumException, DigestException {
+        ) throws SodiumException, DigestException {
 
             Keeper<? extends KeeperParams> keeper = client.getManager().get(sender);
             ExchangeResult result = exchange(
