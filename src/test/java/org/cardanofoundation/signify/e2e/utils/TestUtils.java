@@ -71,7 +71,6 @@ public class TestUtils {
     }
 
     public static void assertOperations(List<SignifyClient> clients) throws SodiumException, IOException, InterruptedException {
-        // TO-DO
         for (SignifyClient client : clients) {
             List<Operation<?>> operations = client.getOperations().list(null);
             Assertions.assertEquals(0, operations.size());
@@ -80,6 +79,8 @@ public class TestUtils {
 
     public static void assertNotifications(List<SignifyClient> clients) {
         // TO-DO
+        for (SignifyClient client : clients) {
+        }
     }
 
     public static Aid createAid(SignifyClient client, String name) throws Exception {

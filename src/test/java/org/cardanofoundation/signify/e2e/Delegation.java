@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Delegation extends TestUtils {
@@ -22,7 +23,7 @@ public class Delegation extends TestUtils {
     private String opResponseName, oobisResponse;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Disabled
+    //    @Disabled
     @Test
     void delegationTest() throws Exception {
         String bran1 = Coring.randomPasscode();
@@ -100,17 +101,9 @@ public class Delegation extends TestUtils {
         EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
         waitOperation(client1, apprDelRes.op());
         Object apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
-        LinkedHashMap<String, Object> apprDelMap = objectMapper.readValue(
-                apprDelJson.toString(),
-                new TypeReference<>() {}
+        List<Map<String, Object>> apprDelMap = objectMapper.readValue(apprDelJson.toString(), new TypeReference<>() {}
         );
-
-        String anchorJson = objectMapper.writeValueAsString(anchor);
-        Map<String, Object> anchorJsonRes = objectMapper.readValue(
-                anchorJson,
-                new TypeReference<>() {}
-        );
-        assertEquals(anchorJsonRes.toString(), apprDelMap.get("0"));
+        assertEquals(anchor, apprDelMap.getFirst());
 
         Object op3 = client2.getKeyStates().query(ator.getPrefix(), 1, null);
 
@@ -132,7 +125,7 @@ public class Delegation extends TestUtils {
                 null
         );
         waitOperation(client1, rpyResult2.op());
-        Object oobis =  client2.getOobis().get("delegator", "agent");
+        Object oobis = client2.getOobis().get("delegator", "agent");
         try {
             HashMap<String, Object> opMap = objectMapper.readValue(oobis.toString(), new TypeReference<>() {
             });

@@ -13,6 +13,7 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -23,7 +24,7 @@ public class MultisigTest extends TestUtils {
     States.HabState aid1, aid2, aid3, aid4;
     Object oobi1, oobi2, oobi3, oobi4;
     String oobis1, oobis2, oobis3, oobis4;
-
+    Siger siger;
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     ArrayList<String> WITNESS_AIDS = new ArrayList<>(Arrays.asList(
             "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
@@ -34,6 +35,7 @@ public class MultisigTest extends TestUtils {
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+//    @Disabled("Disabled until bug respond has been fixed")
     @Test
     public void multisig() throws Exception {
         // Boot Four clients
@@ -149,11 +151,9 @@ public class MultisigTest extends TestUtils {
 
         // TO-DO
         List<String> sigs = icpResult1.sigs();
-        Siger sigg = null;
-        String qb64 = sigg.getQb64();
         List<Siger> sigers = sigs.stream()
-                .map(sig -> new Siger(qb64))
-                .collect(Collectors.toList());
+                .map((sig) -> new Siger(sig))
+                .toList();
 
     }
 

@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.e2e.utils;
 import java.util.concurrent.Callable;
 
 public class TestSteps {
-    public static <T> T step(String description, Callable<T> fn) throws Exception {
+    public <T> T step(String description, Callable<T> fn) throws Exception {
         long start = System.currentTimeMillis();
 
         try {
