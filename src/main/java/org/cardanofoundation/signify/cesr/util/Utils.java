@@ -3,6 +3,8 @@ package org.cardanofoundation.signify.cesr.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.signify.cesr.*;
+import org.cardanofoundation.signify.cesr.args.CounterArgs;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
@@ -111,5 +113,70 @@ public class Utils {
 
     public static String currentDateTimeString() {
         return new Date().toInstant().toString().replace("Z", "000+00:00");
+    }
+
+
+    public static byte[] serializeACDCAttachment(Serder anc) {
+        Prefixer prefixer = new Prefixer(anc.getPre());
+        Seqner seqner = new Seqner(BigInteger.valueOf(anc.getSn()));
+        Saider saider = new Saider(anc.getKed().get("d").toString());
+
+        byte[] craw = new byte[0];
+        byte[] ctr = new Counter(CounterArgs.builder()
+                .code(Codex.CounterCodex.SealSourceTriples.getValue())
+                .count(1).build()).getQb64b();
+        byte[] prefix = prefixer.getQb64b();
+        byte[] seq = seqner.getQb64b();
+        byte[] said = saider.getQb64b();
+
+        byte[] newCraw = new byte[craw.length + ctr.length + prefix.length + seq.length + said.length];
+
+        System.arraycopy(craw, 0, newCraw, 0, craw.length);
+        System.arraycopy(ctr, 0, newCraw, craw.length, ctr.length);
+        System.arraycopy(prefix, 0, newCraw, craw.length + ctr.length, prefix.length);
+        System.arraycopy(seq, 0, newCraw, craw.length + ctr.length + prefix.length, seq.length);
+        System.arraycopy(said, 0, newCraw, craw.length + ctr.length + prefix.length + seq.length, said.length);
+
+        return newCraw;
+    }
+
+    public static byte[] serializeIssExnAttachment(Serder anc) {
+        Seqner seqner = new Seqner(BigInteger.valueOf(anc.getSn()));
+        Saider ancSaider = new Saider(anc.getKed().get("d").toString());
+
+        byte[] coupleArray = new byte[seqner.getQb64b().length + ancSaider.getQb64b().length];
+        System.arraycopy(seqner.getQb64b(), 0, coupleArray, 0, seqner.getQb64b().length);
+        System.arraycopy(ancSaider.getQb64b(), 0, coupleArray, seqner.getQb64b().length, ancSaider.getQb64b().length);
+
+        Counter counter = new Counter(CounterArgs.builder()
+                .code(Codex.CounterCodex.SealSourceCouples.getValue())
+                .count(1).build());
+        byte[] counterQb64b = counter.getQb64b();
+
+        byte[] atc = concatByteArrays(counterQb64b, coupleArray);
+
+        if (atc.length % 4 != 0) {
+            throw new InvalidSizeException(
+                    String.format("Invalid attachments size: %d, non-integral quadlets detected.", atc.length)
+            );
+        }
+
+        Counter pcnt = new Counter(CounterArgs.builder()
+                .code(Codex.CounterCodex.AttachedMaterialQuadlets.getValue())
+                .count(atc.length / 4).build());
+        byte[] msg = new byte[pcnt.getQb64b().length + atc.length];
+        System.arraycopy(pcnt.getQb64b(), 0, msg, 0, pcnt.getQb64b().length);
+        System.arraycopy(atc, 0, msg, pcnt.getQb64b().length, atc.length);
+
+        return msg;
+    }
+
+    public static byte[] concatByteArrays(byte[] array1, byte[] array2) {
+        byte[] result = new byte[array1.length + array2.length];
+
+        System.arraycopy(array1, 0, result, 0, array1.length);
+        System.arraycopy(array2, 0, result, array1.length, array2.length);
+
+        return result;
     }
 }
