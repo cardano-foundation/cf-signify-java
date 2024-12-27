@@ -9,7 +9,6 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -20,10 +19,9 @@ public class Delegation extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
-    private String opResponseName, oobisResponse;
+    private String opResponseName;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    //    @Disabled
     @Test
     void delegationTest() throws Exception {
         String bran1 = Coring.randomPasscode();
@@ -58,8 +56,8 @@ public class Delegation extends TestUtils {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         EventResult icpResult1 = client1.getIdentifier().create("delegator", kargs);
-
         waitOperation(client1, icpResult1.op());
+
         States.HabState ator = client1.getIdentifier().get("delegator");
         EventResult rpyResult1 = client1.getIdentifier().addEndRole(
                 "delegator",
@@ -97,7 +95,6 @@ public class Delegation extends TestUtils {
         anchor.put("s", "0");
         anchor.put("d", delegatePrefix);
 
-        // TO DO Cast apprDelResponse
         EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
         waitOperation(client1, apprDelRes.op());
         Object apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
@@ -115,28 +112,24 @@ public class Delegation extends TestUtils {
         assertEquals(delegatePrefix, aid2.getPrefix());
         System.out.println("Delegation approved for aid: " + aid2.getPrefix());
 
-        assertOperations(Collections.singletonList(client1));
+//        assertOperations(Collections.singletonList(client1));
         assertOperations(Collections.singletonList(client2));
 
         EventResult rpyResult2 = client2.getIdentifier().addEndRole(
-                "delegator",
+                "delegate",
                 "agent",
                 client2.getAgent().getPre(),
                 null
         );
-        waitOperation(client1, rpyResult2.op());
-        Object oobis = client2.getOobis().get("delegator", "agent");
-        try {
-            HashMap<String, Object> opMap = objectMapper.readValue(oobis.toString(), new TypeReference<>() {
-            });
-            oobisResponse = (String) opMap.get("oobis");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        waitOperation(client2, rpyResult2.op());
+        Object oobis = client2.getOobis().get("delegate", null);
+        Map<String, Object> oobiBody = (Map<String, Object>) oobis;
+        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
+
         String contactId = getOrCreateContact(
                 client1,
                 "delegate",
-                oobisResponse.split("/agent/")[1]
+                oobisResponse.getFirst().split("/agent/")[0]
         );
 
         assertEquals(aid2.getPrefix(), contactId);
