@@ -1,10 +1,7 @@
 package org.cardanofoundation.signify.app.clienting;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
-import lombok.Setter;
-import org.cardanofoundation.signify.app.Agent;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
@@ -16,7 +13,7 @@ import java.security.DigestException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.net.http.HttpResponse;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -51,44 +48,38 @@ public class Contacting {
         public Object respond(String name, String recipient, Object words) throws SodiumException, IOException, InterruptedException, DigestException, ExecutionException {
             States.HabState hab = client.getIdentifier().get(name);
             Exchanging.Exchanges exchanges = client.getExchanges();
-            Challenge challenge = new Challenge();
-            challenge.setWords((Map<String, Object>) words);
 
-            Object resp = exchanges.send(name,
+            Map<String, Object> wordMap = new LinkedHashMap<>();
+            wordMap.put("words", words);
+            return exchanges.send(name,
                     "challenge",
                     hab,
                     "/challenge/response",
-                    challenge.getWords(),
+                    wordMap,
                     null,
                     Collections.singletonList(recipient)
             );
-            return resp;
         }
 
         public Object verify(String source, Object words) throws SodiumException, IOException, InterruptedException, ExecutionException {
             String path = "/challenges_verify/" + source;
             String method = "POST";
-            Challenge challenge = new Challenge();
-            challenge.setWords((Map<String, Object>) words);
-            Map<String, Object> data = challenge.getWords();
-            HttpResponse<String> response = client.fetch(path, method, data, null);
+            Map<String, Object> wordMap = new LinkedHashMap<>();
+            wordMap.put("words", words);
+            HttpResponse<String> response = client.fetch(path, method, wordMap, null);
             return Utils.fromJson(response.body(), Object.class);
         }
 
         public Object responded(String source, String said) throws SodiumException, IOException, InterruptedException {
             String path = "/challenges_verify/" + source;
             String method = "PUT";
-            String data = said;
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("said", said);
+
             HttpResponse<String> response = client.fetch(path, method, data, null);
             return Utils.fromJson(response.body(), Object.class);
         }
-
-    }
-
-    @Getter
-    @Setter
-    public static class Challenge {
-        private Map<String, Object> words = new HashMap<>();
     }
 
     @Getter

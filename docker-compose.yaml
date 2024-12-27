@@ -9,6 +9,17 @@ x-python-env: &python-env
   PYTHONIOENCODING: UTF-8
 
 services:
+  vlei-server:
+    image: gleif/vlei
+    environment:
+      <<: *python-env
+    command: vLEI-server -s ./schema/acdc -c ./samples/acdc/ -o ./samples/oobis/
+    healthcheck:
+      test: curl -f http://localhost:7723/oobi/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao
+      <<: *healthcheck
+    ports:
+      - 7723:7723
+
   keria:
     image: ${KERIA_IMAGE:-weboftrust/keria}:${KERIA_IMAGE_TAG:-0.2.0-dev5}
     environment:
