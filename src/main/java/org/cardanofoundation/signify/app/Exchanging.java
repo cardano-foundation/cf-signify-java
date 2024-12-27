@@ -15,8 +15,6 @@ import org.cardanofoundation.signify.core.States.HabState;
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class Exchanging {
     @Getter
@@ -51,7 +49,7 @@ public class Exchanging {
             String recipient,
             String datetime,
             String dig
-        ) throws InterruptedException, ExecutionException, SodiumException, DigestException {
+        ) throws SodiumException, DigestException {
 
             Keeper<? extends KeeperParams> keeper = client.getManager().get(sender);
             ExchangeResult result = exchange(
@@ -68,7 +66,7 @@ public class Exchanging {
             Serder exn = result.serder();
             String end = new String(result.end());
 
-            Keeping.SignResult sigs = keeper.sign(exn.getRaw().getBytes(), null, null ,null);
+            Keeping.SignResult sigs = keeper.sign(exn.getRaw().getBytes());
             return new ExchangeMessageResult(exn, sigs.signatures(), end);
         }
 
@@ -92,7 +90,7 @@ public class Exchanging {
             Map<String, Object> payload,
             Map<String, List<Object>> embeds,
             List<String> recipients
-        ) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
+        ) throws SodiumException, InterruptedException, IOException, DigestException {
 
             for (String recipient : recipients) {
                 ExchangeMessageResult result = createExchangeMessage(
@@ -145,15 +143,6 @@ public class Exchanging {
             data.put("sigs", sigs);
             data.put("atc", atc);
             data.put("rec", recipients);
-
-            // Check body
-//            Map<String, Object> data = Map.of(
-//                "tpc", topic,
-//                "exn", exn.getKed(),
-//                "sigs", sigs,
-//                "atc", atc,
-//                "rec", recipients
-//            );
 
             return client.fetch(path, method, data, null);
         }
