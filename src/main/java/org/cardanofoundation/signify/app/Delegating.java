@@ -25,7 +25,6 @@ public class Delegating {
 
         public EventResult approve(String name, Object data) throws SodiumException, DigestException, IOException, InterruptedException {
             InteractionResponse interactionResponse = client.getIdentifier().createInteract(name, data);
-
             HttpResponse<String> response = client.fetch(
                     "/identifiers/" + name + "/delegation",
                     "POST",
