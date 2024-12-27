@@ -15,6 +15,20 @@ public class TestSteps {
             throw new Exception("Step - " + description + " - failed", e);
         }
     }
+
+    public <T> void steps(String description, Callable<T> fn) {
+        long start = System.currentTimeMillis();
+
+        try {
+            System.out.println("Step - " + description + " - started.");
+            fn.call();
+            System.out.println("Step - " + description + " - finished (" + (System.currentTimeMillis() - start) + "ms)");
+        } catch (Exception e) {
+            System.err.println("Step - " + description + " - failed");
+            throw new RuntimeException("Step - " + description + " - failed", e);
+        }
+    }
+
     public void step(String description, Runnable action) {
         long start = System.currentTimeMillis();
 

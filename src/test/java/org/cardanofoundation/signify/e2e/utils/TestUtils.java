@@ -341,7 +341,6 @@ public class TestUtils {
             deleteOperations(client, op.getMetadata().getDepends());
         }
         client.getOperations().delete(op.getName());
-        // TO-DO
     }
 
     public static Object getReceivedCredential(SignifyClient client, String credID) {

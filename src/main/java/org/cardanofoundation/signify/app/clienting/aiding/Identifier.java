@@ -248,7 +248,7 @@ public class Identifier {
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
-        Map<String, Object> jsondata = new HashMap<>();
+        LinkedHashMap<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rpy", rpy.getKed());
         jsondata.put("sigs", sigs);
 

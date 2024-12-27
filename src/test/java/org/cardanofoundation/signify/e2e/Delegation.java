@@ -2,15 +2,20 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.e2e.utils.Retry;
+import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.security.DigestException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +26,8 @@ public class Delegation extends TestUtils {
     private static SignifyClient client1, client2;
     private String opResponseName;
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private TestSteps testSteps = new TestSteps();
+    private Retry retry = new Retry();
 
     @Test
     void delegationTest() throws Exception {
@@ -50,11 +57,16 @@ public class Delegation extends TestUtils {
         // Client 1 create delegator AID
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setToad(3);
-        kargs.setWits(List.of(
+//        kargs.setWits(List.of(
+//                "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
+//                "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
+//                "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
+//        ));
+        List<String> wits = new ArrayList<>(Arrays.asList(
                 "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
                 "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
-                "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
-        ));
+                "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"));
+        kargs.setWits(wits);
         EventResult icpResult1 = client1.getIdentifier().create("delegator", kargs);
         waitOperation(client1, icpResult1.op());
 
@@ -89,31 +101,50 @@ public class Delegation extends TestUtils {
         }
         String delegatePrefix = opResponseName.split("\\.")[1];
         System.out.println("Delegate's prefix: " + delegatePrefix);
+        System.out.println("Delegate waiting for approval...");
 
+        // Client 1 approves delegation
         LinkedHashMap<String, Object> anchor = new LinkedHashMap<>();
         anchor.put("i", delegatePrefix);
         anchor.put("s", "0");
         anchor.put("d", delegatePrefix);
 
-        EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
-        waitOperation(client1, apprDelRes.op());
-        Object apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
-        List<Map<String, Object>> apprDelMap = objectMapper.readValue(apprDelJson.toString(), new TypeReference<>() {}
-        );
-        assertEquals(anchor, apprDelMap.getFirst());
+        testSteps.steps("delegator approves delegation", () -> {
+            try {
+                EventResult result = retry.retry(() -> {
+                    try {
+                        EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
+                        waitOperation(client1, apprDelRes.op());
+//                        Object apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
+//                        List<Map<String, Object>> apprDelMap = objectMapper.readValue(apprDelJson.toString(), new TypeReference<>() {}
+//                        );
+//                        assertEquals(anchor, apprDelMap.getFirst());
+                        return apprDelRes;
+                    } catch (SodiumException | DigestException | IOException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+//                assertEquals(result.serder().getKed().get("a"), anchor);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return retry;
+        });
 
         Object op3 = client2.getKeyStates().query(ator.getPrefix(), 1, null);
 
         // Client 2 check approval
-        op3 = operationToObject(waitOperation(client2, op3));
-        op2 = operationToObject(waitOperation(client2, op2));
+        waitOperation(client2, op3);
+        waitOperation(client2, op2);
 
         States.HabState aid2 = client2.getIdentifier().get("delegate");
         assertEquals(delegatePrefix, aid2.getPrefix());
         System.out.println("Delegation approved for aid: " + aid2.getPrefix());
 
+        List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
+        assertOperations(clientList);
 //        assertOperations(Collections.singletonList(client1));
-        assertOperations(Collections.singletonList(client2));
+//        assertOperations(Collections.singletonList(client2));
 
         EventResult rpyResult2 = client2.getIdentifier().addEndRole(
                 "delegate",

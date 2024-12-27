@@ -30,11 +30,15 @@ public class Retry {
         }
     }
 
-    public static <T> T retry(Supplier<T> fn, RetryOptions options) throws Exception {
+    public <T> T retry(Supplier<T> fn) throws Exception {
         long start = System.currentTimeMillis();
         int retries = 0;
         int increaseFactor = 50;
         Exception cause = null;
+        RetryOptions options = new RetryOptions();
+        options.setMaxSleep(1000);
+        options.setMinSleep(10);
+        options.setTimeout(10000);
 
         while (System.currentTimeMillis() - start < options.timeout && retries < options.maxRetries) {
             try {
