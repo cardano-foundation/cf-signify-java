@@ -18,4 +18,16 @@ public class CoringTest {
         // passcode should be unique
         assertNotEquals(passcode, passcode2);
     }
+
+    @Test
+    public void testRandomNonce() {
+        final String nonce = Coring.randomNonce();
+        assertEquals(nonce.length(), 44);
+
+        final String nonce2 = Coring.randomNonce();
+        assertEquals(nonce2.length(), 44);
+
+        // nonce should be unique
+        assertNotEquals(nonce, nonce2);
+    }
 }
