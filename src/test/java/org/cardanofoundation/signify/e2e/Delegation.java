@@ -57,11 +57,6 @@ public class Delegation extends TestUtils {
         // Client 1 create delegator AID
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setToad(3);
-//        kargs.setWits(List.of(
-//                "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
-//                "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
-//                "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
-//        ));
         List<String> wits = new ArrayList<>(Arrays.asList(
                 "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
                 "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
@@ -157,7 +152,6 @@ public class Delegation extends TestUtils {
                 "delegate",
                 oobisResponse.getFirst().split("/agent/")[0]
         );
-
         assertEquals(aid2.getPrefix(), contactId);
     }
 }
