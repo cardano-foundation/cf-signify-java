@@ -61,19 +61,32 @@ tasks.test {
         includeTestsMatching "org.cardanofoundation.signify.app.*"
         includeTestsMatching "org.cardanofoundation.signify.cesr.*"
         includeTestsMatching "org.cardanofoundation.signify.core.*"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
         includeTestsMatching "org.cardanofoundation.signify.end.*"
     }
     finalizedBy 'allureReport'
 }
 
 // Separate task for TestNG tests (E2E tests)
-tasks.register('testNG', Test) {
-    useTestNG()  // Use TestNG for E2E tests
-    testLogging {
-        events "passed", "failed", "skipped"
+tasks.register('testE2E', Test) {
+    useJUnitPlatform()  // Use TestNG for E2E tests
+    filter {
+        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
     finalizedBy 'allureReport'
+}
+
+
+tasks.register("cleanAllure") {
+    group = "cleanup"
+    description = "Clean Allure results and reports"
+    doLast {
+        delete(file("build/allure-results"))
+        delete(file("build/allure-report"))
+    }
+}
+
+tasks.named("clean") {
+    dependsOn("cleanAllure")
 }
 
 

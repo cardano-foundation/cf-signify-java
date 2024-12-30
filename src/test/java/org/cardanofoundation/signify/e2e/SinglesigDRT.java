@@ -36,7 +36,7 @@ public class SinglesigDRT extends TestUtils {
 
     @BeforeEach
     public void getIdentifier() throws Exception {
-        String[] clients = getOrCreateIdentifier(delegator, "name1");
+        String[] clients = getOrCreateIdentifier(delegator, "name1", null);
         name1_id = clients[0];
         name1_oobi = clients[1];
     }
@@ -80,8 +80,7 @@ public class SinglesigDRT extends TestUtils {
         op1 = operationToObject(waitOperation(delegator, op1));
         op2 = operationToObject(waitOperation(delegate, op2));
 
-        // TO-DO .rotate()
-        RotateIdentifierArgs karg = new RotateIdentifierArgs();
+        RotateIdentifierArgs karg = RotateIdentifierArgs.builder().build();
         result = delegate.getIdentifier().rotate("delegate1", karg);
         op = result.op();
         if (op instanceof String) {

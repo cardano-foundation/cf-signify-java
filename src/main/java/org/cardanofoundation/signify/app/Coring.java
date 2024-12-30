@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.app;
 
 import com.goterl.lazysodium.LazySodiumJava;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Codex;
@@ -8,7 +9,9 @@ import org.cardanofoundation.signify.cesr.LazySodiumInstance;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 
+import java.io.IOException;
 import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 
 public class Coring {
     private final HttpClient httpClient;
@@ -41,6 +44,17 @@ public class Coring {
         public KeyEvents(SignifyClient client) {
             this.client = client;
         }
-        // others functions
+
+        /**
+         * Retrieve key events for an identifier
+         * @param pre Identifier prefix
+         * @return A response containing the key events
+         */
+        public Object get(String pre) throws SodiumException, IOException, InterruptedException {
+            String path = "/events?pre=" + pre;
+            String method = "GET";
+            HttpResponse<String> res = this.client.fetch(path, method, null, null);
+            return res.body();
+        }
     }
 }
