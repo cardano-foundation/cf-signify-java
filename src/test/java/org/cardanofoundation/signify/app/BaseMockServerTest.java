@@ -14,9 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class BaseMockServerTest {
@@ -316,5 +314,18 @@ public class BaseMockServerTest {
                 break;
             }
         }
+    }
+
+    List<RecordedRequest> getRecordedRequests() throws InterruptedException {
+        List<RecordedRequest> recordedRequests = new LinkedList<>();
+        while (true) {
+            RecordedRequest request = mockWebServer.takeRequest(200, TimeUnit.MILLISECONDS);
+            if (request == null) {
+                break;
+            } else {
+                recordedRequests.add(request);
+            }
+        }
+        return recordedRequests;
     }
 }
