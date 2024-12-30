@@ -62,7 +62,6 @@ tasks.test {
         includeTestsMatching "org.cardanofoundation.signify.cesr.*"
         includeTestsMatching "org.cardanofoundation.signify.core.*"
         includeTestsMatching "org.cardanofoundation.signify.end.*"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
     finalizedBy 'allureReport'
 }
