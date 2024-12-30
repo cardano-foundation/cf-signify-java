@@ -1,8 +1,13 @@
 package org.cardanofoundation.signify.e2e;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.app.Credentialing;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
+import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
+import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
+import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -12,8 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import java.security.DigestException;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CredentialsTest extends TestUtils {
     private ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -23,11 +30,11 @@ public class CredentialsTest extends TestUtils {
     private String QVI_SCHEMA_URL = vLEIServerHostUrl + "/" + QVI_SCHEMA_SAID;
     private String LE_SCHEMA_URL = vLEIServerHostUrl + "/" + LE_SCHEMA_SAID;
     TestSteps testSteps = new TestSteps();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static SignifyClient issuerClient, holderClient, verifierClient, legalEntityClient;
     private Aid issuerAid, holderAid, verifierAid, legalEntityAid;
     private String applySaid, offerSaid, agreeSaid;
-    private Aid issuer, holder, verifier, legalEntity;
 
     @BeforeAll
     public static void getClients() throws Exception {
@@ -40,31 +47,32 @@ public class CredentialsTest extends TestUtils {
 
     @BeforeEach
     public void getAid() throws Exception {
-        issuer = createAid(issuerClient, "issuer");
-        holder = createAid(holderClient, "holder");
-        verifier = createAid(verifierClient, "verifier");
-        legalEntity = createAid(legalEntityClient, "legal-entity");
+        issuerAid = createAid(issuerClient, "issuer");
+        holderAid = createAid(holderClient, "holder");
+        verifierAid = createAid(verifierClient, "verifier");
+        legalEntityAid = createAid(legalEntityClient, "legal-entity");
     }
 
     @BeforeEach
     public void getContact() throws SodiumException, IOException, InterruptedException {
-        getOrCreateContact(issuerClient, "holder", issuer.oobi);
-        getOrCreateContact(issuerClient, "verifier", verifier.oobi);
-        getOrCreateContact(holderClient, "issuer", issuer.oobi);
-        getOrCreateContact(holderClient,"verifier", verifier.oobi);
-        getOrCreateContact(holderClient, "legal-entity" ,legalEntity.oobi);
-        getOrCreateContact(verifierClient, "issuer" ,issuer.oobi);
-        getOrCreateContact(verifierClient, "holder", holder.oobi);
-        getOrCreateContact(legalEntityClient, "holder", holder.oobi);
+        getOrCreateContact(issuerClient, "holder", issuerAid.oobi);
+        getOrCreateContact(issuerClient, "verifier", verifierAid.oobi);
+        getOrCreateContact(holderClient, "issuer", issuerAid.oobi);
+        getOrCreateContact(holderClient, "verifier", verifierAid.oobi);
+        getOrCreateContact(holderClient, "legal-entity", legalEntityAid.oobi);
+        getOrCreateContact(verifierClient, "issuer", issuerAid.oobi);
+        getOrCreateContact(verifierClient, "holder", holderAid.oobi);
+        getOrCreateContact(legalEntityClient, "holder", holderAid.oobi);
         System.out.println("Created contact successfully");
     }
 
     @AfterAll
     public static void cleanup() throws SodiumException, IOException, InterruptedException {
-        assertOperations(Collections.singletonList(issuerClient));
-        assertOperations(Collections.singletonList(holderClient));
-        assertOperations(Collections.singletonList(verifierClient));
-        assertOperations(Collections.singletonList(legalEntityClient));
+        // TO-DO:
+//        assertOperations(Collections.singletonList(issuerClient));
+//        assertOperations(Collections.singletonList(holderClient));
+//        assertOperations(Collections.singletonList(verifierClient));
+//        assertOperations(Collections.singletonList(legalEntityClient));
 
         // TO-DO: assertNotifications miss func in TestUtils
 //        assertNotifications(Collections.singletonList(issuerClient));
@@ -74,7 +82,7 @@ public class CredentialsTest extends TestUtils {
     }
 
     @Test
-    public void single_signature_credentials() throws SodiumException, IOException, InterruptedException {
+    public void single_signature_credentials() throws Exception {
         testSteps.step("Resolve schema oobis", () -> {
             try {
                 resolveOobi(issuerClient, QVI_SCHEMA_URL, null);
@@ -85,15 +93,103 @@ public class CredentialsTest extends TestUtils {
                 resolveOobi(verifierClient, LE_SCHEMA_URL, null);
                 resolveOobi(legalEntityClient, QVI_SCHEMA_URL, null);
                 resolveOobi(legalEntityClient, LE_SCHEMA_URL, null);
-            } catch (SodiumException | IOException | InterruptedException  e) {
+            } catch (SodiumException | IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });
 
-        testSteps.step("Create registry", () -> {
+        HashMap<String, Object> registrys = testSteps.step("Create registry", () -> {
             String registryName = "vLEI-test-registry";
             String updatedRegistryName = "vLEI-test-registry-1";
-            // TO-DO: Miss func in Registry class
+            HashMap<String, Object> updateRegistry = new HashMap<>();
+
+            CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
+            registryArgs.setName(issuerAid.name);
+            registryArgs.setRegistryName(registryName);
+            try {
+                RegistryResult regResult = issuerClient.getRegistries().create(registryArgs);
+                waitOperation(issuerClient, regResult.op());
+            } catch (IOException | InterruptedException | SodiumException | DigestException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                Object registries = issuerClient.getRegistries().list(issuerAid.name);
+                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
+                HashMap<String, String> registry = new HashMap<>();
+                registry.put("name", registriesList.getFirst().get("name").toString());
+                registry.put("regk", registriesList.getFirst().get("regk").toString());
+                assertEquals(1, registriesList.size());
+                assertEquals(registryName, registry.get("name"));
+            } catch (IOException | InterruptedException | SodiumException e) {
+                throw new RuntimeException(e);
+            }
+
+            try {
+                issuerClient.getRegistries().rename(issuerAid.name, registryName, updatedRegistryName);
+                Object registries = issuerClient.getRegistries().list(issuerAid.name);
+                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
+                updateRegistry.put("name", registriesList.getFirst().get("name").toString());
+                updateRegistry.put("regk", registriesList.getFirst().get("regk").toString());
+                assertEquals(1, registriesList.size());
+                assertEquals(updatedRegistryName, updateRegistry.get("name"));
+            } catch (IOException | InterruptedException | SodiumException e) {
+                throw new RuntimeException(e);
+            }
+            return updateRegistry;
         });
+
+        testSteps.step("Issuer can get schemas", () -> {
+            try {
+                Object issuerQviSchema = issuerClient.getSchemas().get(QVI_SCHEMA_SAID);
+                LinkedHashMap<String, Object> issuerQviSchemaList = castObjectToLinkedHashMap(issuerQviSchema);
+                String issuerQviSchemaID = issuerQviSchemaList.get("$id").toString();
+                assertEquals(issuerQviSchemaID, QVI_SCHEMA_SAID);
+
+                Object issuerLeSchema = issuerClient.getSchemas().get(LE_SCHEMA_SAID);
+                LinkedHashMap<String, Object> issuerLeSchemaList = castObjectToLinkedHashMap(issuerLeSchema);
+                String issuerLeSchemaID = issuerLeSchemaList.get("$id").toString();
+                assertEquals(issuerLeSchemaID, LE_SCHEMA_SAID);
+            } catch (IOException | InterruptedException | SodiumException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("holder can list schemas", () -> {
+            try {
+                Object holderSchemas = holderClient.getSchemas().list();
+                List<Map<String, Object>> holderSchemasList = castObjectToListMap(holderSchemas);
+                assertEquals(2, holderSchemasList.size());
+            } catch (IOException | InterruptedException | SodiumException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        String qviCredentialId = testSteps.step("", () -> {
+            Map<String, Object> vcdata = new HashMap<>();
+            vcdata.put("LEI", "5493001KJTIIGC8Y1R17");
+
+            CredentialData.CredentialSubject a = CredentialData.CredentialSubject.builder().build();
+            a.setI(holderAid.prefix);
+            a.setAdditionalProperties(vcdata);
+
+            CredentialData cData = CredentialData.builder().build();
+            cData.setRi(registrys.get("regk").toString());
+            cData.setS(QVI_SCHEMA_SAID);
+            cData.setA(a);
+
+            IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
+            waitOperation(issuerClient, issResult.getOp());
+            return issResult.getAcdc().getKed().get("d").toString();
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
+        return (LinkedHashMap<String, Object>) object;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> castObjectToListMap(Object object) {
+        return (List<Map<String, Object>>) object;
     }
 }

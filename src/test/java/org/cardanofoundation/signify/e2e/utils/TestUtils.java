@@ -124,7 +124,7 @@ public class TestUtils {
     ) {
         // TO-DO
         Boolean privacy = false;
-//        String credentialList = issuerClient.getCredentials().list();
+//        String credentialList = issuerClient.getCredentials();
         return null;
     }
 
