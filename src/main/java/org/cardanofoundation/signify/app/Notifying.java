@@ -33,9 +33,9 @@ public class Notifying {
          * @return List of notifications
          */
         public NotificationListResponse list(int start, int end) throws SodiumException, IOException, InterruptedException {
-            HttpHeaders extraHeaders = HttpHeaders.of(Map.of(
-                "Range", List.of(String.format("notes=%d-%d", start, end))
-            ), (name, value) -> true);
+            Map<String, String> extraHeaders = Map.of(
+                "Range", String.format("notes=%d-%d", start, end)
+            );
 
             String path = "/notifications";
             HttpResponse<String> response = client.fetch(path, "GET", null, extraHeaders);

@@ -170,7 +170,7 @@ public class Codex {
             this.value = value;
         }
 
-        static boolean has(String value) {
+        public static boolean has(String value) {
             return nonTransCodexFieldMap.containsKey(value);
         }
     }
