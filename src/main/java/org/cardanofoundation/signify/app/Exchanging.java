@@ -51,7 +51,7 @@ public class Exchanging {
             String recipient,
             String datetime,
             String dig
-        ) throws InterruptedException, ExecutionException, SodiumException, DigestException {
+        ) throws SodiumException, DigestException {
 
             Keeper<? extends KeeperParams> keeper = client.getManager().get(sender);
             ExchangeResult result = exchange(
