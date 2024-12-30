@@ -120,7 +120,8 @@ public class Delegation extends TestUtils {
                         throw new RuntimeException(e);
                     }
                 });
-//                assertEquals(result.serder().getKed().get("a"), anchor);
+                List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");
+                assertEquals(approDelResList.getFirst(), anchor);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
