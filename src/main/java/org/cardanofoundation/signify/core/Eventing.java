@@ -2,18 +2,19 @@ package org.cardanofoundation.signify.core;
 
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.InceptArgs;
-import org.cardanofoundation.signify.cesr.args.InteractArgs;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.args.RotateArgs;
+import org.cardanofoundation.signify.cesr.args.*;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.util.*;
@@ -168,16 +169,85 @@ public class Eventing {
         return new Serder(ked);
     }
 
-    // TODO implement function
     public static byte[] messagize(
             Serder serder,
             List<Siger> sigers,
-            Object seal,
+            List<Object> seal,
             List<Cigar> wigers,
             List<Cigar> cigars,
             boolean pipelined
-    ) {
-        byte[] msg = serder.getRaw().getBytes(StandardCharsets.UTF_8);
+    ) throws InvalidValueException {
+        byte[] msg = serder.getRaw().getBytes();
+        byte[] atc = new byte[0];
+
+        if (sigers == null && wigers == null && cigars == null) {
+            throw new InvalidValueException("Missing attached signatures on message = " + serder.getKed());
+        }
+
+        if (sigers != null) {
+            if (seal != null) {
+                Map<String, Object> sealMap = (Map<String, Object>) seal.get(1);
+
+                if ("SealEvent".equals(seal.get(0).toString())) {
+                    atc = Utils.concatByteArrays(atc, (new Counter(CounterArgs.builder().code(Codex.CounterCodex.TransIdxSigGroups.getValue())
+                            .count(1)
+                            .build()).getQb64b()));
+                    atc = Utils.concatByteArrays(atc, (sealMap.get("i").toString().getBytes()));
+                    atc = Utils.concatByteArrays(atc, (new Seqner(new BigInteger(sealMap.get("s").toString())).getQb64b()));
+                    atc = Utils.concatByteArrays(atc, (sealMap.get("d").toString().getBytes()));
+                } else if ("SealLast".equals(seal.get(0).toString())) {
+                    atc = Utils.concatByteArrays(atc, (new Counter(CounterArgs.builder().code(Codex.CounterCodex.TransLastIdxSigGroups.getValue())
+                            .count(1)
+                            .build()).getQb64b()));
+                    atc = Utils.concatByteArrays(atc, (sealMap.get("i").toString().getBytes()));
+                }
+            }
+
+            atc = Utils.concatByteArrays(atc, (new Counter(CounterArgs.builder().code(Codex.CounterCodex.ControllerIdxSigs.getValue())
+                    .count(sigers.size())
+                    .build()).getQb64b()));
+
+            for (Siger siger : sigers) {
+                atc = Utils.concatByteArrays(atc, (siger.getQb64b()));
+            }
+        }
+
+        if (wigers != null) {
+            atc = Utils.concatByteArrays(atc, (new Counter(CounterArgs.builder().code(Codex.CounterCodex.ControllerIdxSigs.getValue())
+                    .count(wigers.size())
+                    .build()).getQb64b()));
+
+            for (Cigar wiger : wigers) {
+                if (wiger.getVerfer() != null && !Codex.NonTransCodex.has(wiger.getVerfer().getCode())) {
+                    throw new InvalidValueException("Attempt to use transferable prefix=" + wiger.getVerfer().getQb64() + " for receipt.");
+                }
+                atc = Utils.concatByteArrays(atc, (wiger.getQb64b()));
+            }
+        }
+
+        if (cigars != null) {
+            atc = Utils.concatByteArrays(atc, (new Counter(CounterArgs.builder().code(Codex.CounterCodex.ControllerIdxSigs.getValue())
+                    .count(cigars.size())
+                    .build()).getQb64b()));
+
+            for (Cigar cigar : cigars) {
+                if (cigar.getVerfer() != null && !Codex.NonTransCodex.has(cigar.getVerfer().getCode())) {
+                    throw new InvalidValueException("Attempt to use transferable prefix=" + cigar.getVerfer().getQb64() + " for receipt.");
+                }
+                atc = Utils.concatByteArrays(atc, (cigar.getQb64b()));
+            }
+        }
+
+        if (pipelined) {
+            if (atc.length % 4 != 0) {
+                throw new InvalidValueException("Invalid attachments size=" + atc.length + ", nonintegral quadlets.");
+            }
+            atc = Utils.concatByteArrays(atc, new Counter(CounterArgs.builder().code(Codex.CounterCodex.AttachedMaterialQuadlets.getValue())
+                    .count(atc.length / 4)
+                    .build()).getQb64b());
+        }
+        msg = Utils.concatByteArrays(msg, atc);
+
         return msg;
     }
 
@@ -291,7 +361,11 @@ public class Eventing {
         if (args.getIsith() == null) {
             _isith = Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0));
         } else {
-            _isith = Integer.parseInt((String) args.getIsith());
+            if(args.getIsith() instanceof String) {
+                _isith = Integer.parseInt((String) args.getIsith());
+            } else {
+                _isith = (int) args.getIsith();
+            }
         }
 
         Tholder tholder = new Tholder(null, null, _isith);
@@ -313,7 +387,11 @@ public class Eventing {
         if (args.getNsith() == null) {
             _nsith = Math.max(1, (int) Math.ceil(_ndigs.size() / 2.0));
         } else {
-            _nsith = Integer.parseInt((String) args.getNsith());
+            if(args.getNsith() instanceof String) {
+                _nsith = Integer.parseInt((String) args.getNsith());
+            } else {
+                _nsith = (int) args.getNsith();
+            }
         }
 
         Tholder ntholder = new Tholder(null, null, _nsith);
