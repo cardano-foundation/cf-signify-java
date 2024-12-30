@@ -2,13 +2,17 @@ package org.cardanofoundation.signify.app.clienting;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
+import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.net.http.HttpResponse;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Contacting {
@@ -23,7 +27,80 @@ public class Contacting {
         public Challenges(SignifyClient client) {
             this.client = client;
         }
-        // others functions
+
+        /**
+         * Retrieve the key state for an identifier
+         * @param strength Integer representing the strength of the challenge. Typically 128 or 256
+         * @return A list of random words
+         * @throws Exception if the fetch operation fails
+         */
+        public Object generate(Integer strength) throws Exception {
+            String path = "/challenges?strength=" + strength.toString();
+            String method = "GET";
+            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
+        }
+
+        public Object generate() throws Exception {
+            return generate(128);
+        }
+
+        /**
+         * Respond to a challenge by signing a message with the list of words
+         * @param name Name or alias of the identifier
+         * @param recipient Prefix of the recipient of the response
+         * @param words List of words to embed in the signed response
+         * @return The result of the response
+         * @throws Exception if the fetch operation fails
+         */
+        public Object respond(String name, String recipient, List<String> words) throws Exception {
+            States.HabState hab = this.client.getIdentifier().get(name);
+            Exchanging.Exchanges exchanges = this.client.getExchanges();
+
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("words", words);
+
+            Map<String, List<Object>> embeds = new LinkedHashMap<>();
+
+            return exchanges.send(
+                name,
+                "challenge",
+                hab,
+                "/challenge/response",
+                payload,
+                embeds,
+                List.of(recipient)
+            );
+        }
+
+        /**
+         * Ask Agent to verify a given sender signed the provided words
+         * @param source Prefix of the identifier that was challenged
+         * @param words List of challenge words to check for
+         * @return The long-running operation
+         * * @throws Exception if the fetch operation fails
+         */
+        public Object verify(String source, List<String> words) throws Exception {
+            String path = "/challenges_verify/" + source;
+            String method = "POST";
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("words", words);
+            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+        }
+
+        /**
+         * Mark challenge response as signed and accepted
+         * @param source Prefix of the identifier that was challenged
+         * @param said qb64 AID of exn message representing the signed response
+         * @return The result
+         * @throws Exception if the fetch operation fails
+         */
+        public Object responded(String source, String said) throws Exception {
+            String path = "/challenges_verify/" + source;
+            String method = "PUT";
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("said", said);
+            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+        }
     }
 
     @Getter
