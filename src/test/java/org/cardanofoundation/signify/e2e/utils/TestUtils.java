@@ -279,6 +279,7 @@ public class TestUtils {
                 ex.printStackTrace();
             }
         }
+        assert getResponseI != null;
         return getResponseI.toString();
     }
 
@@ -375,6 +376,20 @@ public class TestUtils {
     public static List<Notification> waitForNotifications() {
         // TO-DO
         return null;
+    }
+
+    public static <T> Operation<T> waitOperations(
+            SignifyClient client,
+            Object op) throws SodiumException, IOException, InterruptedException {
+        Operation<T> operation;
+        if (op instanceof String) {
+            String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
+            operation = client.getOperations().get(name);
+        } else {
+            operation = Operation.fromObject(op);
+        }
+        deleteOperations(client, operation);
+        return operation;
     }
 
     public static <T> Operation<T> waitOperation(

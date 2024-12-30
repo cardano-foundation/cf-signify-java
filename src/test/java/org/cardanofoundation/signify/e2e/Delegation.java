@@ -114,11 +114,7 @@ public class Delegation extends TestUtils {
                 EventResult result = retry.retry(() -> {
                     try {
                         EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
-                        waitOperation(client1, apprDelRes.op());
-//                        Object apprDelJson = objectMapper.writeValueAsString(apprDelRes.serder().getKed().get("a"));
-//                        List<Map<String, Object>> apprDelMap = objectMapper.readValue(apprDelJson.toString(), new TypeReference<>() {}
-//                        );
-//                        assertEquals(anchor, apprDelMap.getFirst());
+                        waitOperations(client1, apprDelRes.op());
                         return apprDelRes;
                     } catch (SodiumException | DigestException | IOException | InterruptedException e) {
                         throw new RuntimeException(e);
@@ -143,8 +139,6 @@ public class Delegation extends TestUtils {
 
         List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
         assertOperations(clientList);
-//        assertOperations(Collections.singletonList(client1));
-//        assertOperations(Collections.singletonList(client2));
 
         EventResult rpyResult2 = client2.getIdentifier().addEndRole(
                 "delegate",
