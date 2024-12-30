@@ -1,10 +1,10 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
+import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
@@ -21,6 +21,7 @@ import java.security.DigestException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CredentialsTest extends TestUtils {
     private ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -154,7 +155,7 @@ public class CredentialsTest extends TestUtils {
             }
         });
 
-        testSteps.step("holder can list schemas", () -> {
+        testSteps.step("Holder can list schemas", () -> {
             try {
                 Object holderSchemas = holderClient.getSchemas().list();
                 List<Map<String, Object>> holderSchemasList = castObjectToListMap(holderSchemas);
@@ -164,7 +165,7 @@ public class CredentialsTest extends TestUtils {
             }
         });
 
-        String qviCredentialId = testSteps.step("", () -> {
+        String qviCredentialId = testSteps.step("create QVI credential", () -> {
             Map<String, Object> vcdata = new HashMap<>();
             vcdata.put("LEI", "5493001KJTIIGC8Y1R17");
 
@@ -181,6 +182,62 @@ public class CredentialsTest extends TestUtils {
             waitOperation(issuerClient, issResult.getOp());
             return issResult.getAcdc().getKed().get("d").toString();
         });
+
+        testSteps.step("Issuer list credentials", () -> {
+            CredentialFilter credentialFilter = CredentialFilter.builder().build();
+            try {
+                Object issuerCredentials = issuerClient.getCredentials().list(credentialFilter);
+                List<Map<String, Object>> issuerCredentialsList = castObjectToListMap(issuerCredentials);
+                Object credentialsMap = issuerCredentialsList.getFirst().get("sad");
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(credentialsMap);
+                credentialsMap = issuerCredentialsList.getFirst().get("status");
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(credentialsMap);
+
+                assertTrue(!issuerCredentialsList.isEmpty());
+                assertEquals(QVI_SCHEMA_SAID, sad.get("s").toString());
+                assertEquals("0", status.get("s").toString());
+            } catch (SodiumException | IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Issuer list credentials with filter", () -> {
+            Map<String, Object> filterData = new LinkedHashMap<>();
+            filterData.put("-i", issuerAid.prefix);
+            CredentialFilter credentialFilter = CredentialFilter.builder().build();
+            credentialFilter.setFilter(filterData);
+            try {
+                List<Map<String, Object>> list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                assertEquals(1, list.size());
+
+                filterData.remove("-i");
+                filterData.put("-s", QVI_SCHEMA_SAID);
+                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                assertEquals(1, list.size());
+
+                filterData.remove("-s");
+                filterData.put("-a-i", holderAid.prefix);
+                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                assertEquals(1, list.size());
+
+                filterData.put("-i", issuerAid.prefix);
+                filterData.put("-s", QVI_SCHEMA_SAID);
+                filterData.put("-a-i", holderAid.prefix);
+                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                assertEquals(1, list.size());
+
+                filterData.put("-i", UUID.randomUUID().toString());
+                filterData.put("-s", QVI_SCHEMA_SAID);
+                filterData.put("-a-i", holderAid.prefix);
+                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                assertEquals(0, list.size());
+
+            } catch (SodiumException | IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        // TO-DO
     }
 
     @SuppressWarnings("unchecked")
