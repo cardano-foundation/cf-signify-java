@@ -1,16 +1,19 @@
 package org.cardanofoundation.signify.e2e.utils;
 
-import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
-enum TestEnvironmentPreset {
-    LOCAL, DOCKER
-}
+
 public class ResolveEnv {
-    @Getter
-        public record EnvironmentConfig(TestEnvironmentPreset preset, String url, String bootUrl, String vleiServerUrl,
-                                        List<String> witnessUrls, List<String> witnessIds) {
+    public enum TestEnvironmentPreset {
+        LOCAL, DOCKER
+    }
+    public record EnvironmentConfig(TestEnvironmentPreset preset,
+                                    String url,
+                                    String bootUrl,
+                                    String vleiServerUrl,
+                                    List<String> witnessUrls,
+                                    List<String> witnessIds) {
 
     }
 

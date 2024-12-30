@@ -23,11 +23,11 @@ This will compile the source code, run the tests, and package the application.
 Unit tests are an essential part of the development process. To run the unit tests, execut
 
 ```bash
-./gradlew test
+./gradlew clean test
 ```
 This command will run all the tests in the project and provide a summary of the results.
 
-## Running the e2e tests
+## Build Docker when run E2E tests
 The integration tests depends on a local instance of KERIA, vLEI-Server and Witness Demo. These are specified in the [Docker Compose](./docker-compose.yaml) file. To start the dependencies, use docker compose:
 
 ```bash
@@ -60,9 +60,15 @@ export KERIA_IMAGE=gleif/keria
 docker compose pull
 docker compose up --wait
 ```
-
+## Running E2E tests
 Use the gradlew script "test E2E" to run all E2E tests in sequence:
-
 ```bash
-./gradlew test
+./gradlew clean testE2E
+```
+
+
+## Generate Allure Report
+Use the gradlew script "Allure Serve" to view the test result report:
+```bash
+./gradlew allureServe
 ```

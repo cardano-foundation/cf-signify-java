@@ -228,7 +228,7 @@ public class BaseMockServerTest {
             }
         }""";
 
-    private MockResponse mockAllRequests(RecordedRequest req) throws SodiumException {
+    public MockResponse mockAllRequests(RecordedRequest req) throws SodiumException {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
         headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));

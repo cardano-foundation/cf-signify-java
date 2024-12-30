@@ -28,27 +28,24 @@ public class Operation<T> {
     }
 
     public static <R> Operation<R> fromObject(Object obj) {
-        Operation<R> result = new Operation<>();
-        
+        OperationBuilder<R> resultBuilder = Operation.<R>builder();
+
         if (obj instanceof Operation<?> operation) {
-            result.name = operation.name;
-            result.metadata = operation.metadata;
-            result.done = operation.done;
-            result.error = operation.error;
-            result.response = (R) operation.response;
+           return (Operation<R>) operation;
         } 
         else if (obj instanceof Map<?,?> map) {
-            result.name = (String) map.get("name");
-            result.metadata = convertMetadata(map.get("metadata"));
-            result.done = (Boolean) map.get("done");
-            result.error = map.get("error");
-            result.response = (R) map.get("response");
+            resultBuilder
+                .name(map.containsKey("name") ? (String) map.get("name") : null)
+                .metadata(convertMetadata(map.get("metadata")))
+                .done(map.containsKey("done") && (boolean) map.get("done"))
+                .error(map.getOrDefault("error", null))
+                .response(map.containsKey("response") ? (R) map.get("response") : null);
         }
         else {
             throw new IllegalArgumentException("Object is neither an Operation instance nor a Map");
         }
         
-        return result;
+        return resultBuilder.build();
     }
 
     private static <V> Metadata<V> convertMetadata(Object metadataObj) {

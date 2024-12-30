@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
@@ -318,11 +319,14 @@ public class Identifier {
         Keeping.Keeper keeper = this.client.getManager().get(hab);
         Keeping.SignResult sigs = keeper.sign(serder.getRaw().getBytes());
 
-        Map<String, Object> jsondata = new HashMap<>();
+        Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("ixn", serder.getKed());
         jsondata.put("sigs", sigs.signatures());
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
+    }
+    public EventResult rotate(String name) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
+        return this.rotate(name, RotateIdentifierArgs.builder().build());
     }
 
     public EventResult rotate(String name, RotateIdentifierArgs kargs) throws SodiumException, InterruptedException, DigestException, IOException {

@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.LazySodiumInstance;
+import org.cardanofoundation.signify.cesr.Matter;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -29,6 +30,18 @@ public class Coring {
 
         // https://github.com/WebOfTrust/signify-ts/issues/242
         return salter.getQb64().substring(2, 23);
+    }
+
+    public static String randomNonce() {
+        final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
+        final byte[] seed = lazySodium.randomBytesBuf(32);
+        RawArgs rawArgs = RawArgs.builder()
+                .raw(seed)
+                .code(Codex.MatterCodex.Ed25519_Seed.getValue())
+                .build();
+
+        final Matter matter = new Matter(rawArgs);
+        return matter.getQb64();
     }
 
     @Getter
