@@ -35,7 +35,7 @@ public class MultisigTest extends TestUtils {
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-//    @Disabled("Disabled until bug respond has been fixed")
+    //    @Disabled("Disabled until bug respond has been fixed")
     @Test
     public void multisig() throws Exception {
         // Boot Four clients
@@ -119,14 +119,16 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member3 responded challenge with signed words");
 
         op1 = client1.getChallenges().verify(aid2.getPrefix(), words);
-        op1 = waitOperation(client1, op1);
+        op1 = operationToObject(waitOperation(client1, op1));
         System.out.println("Member1 verified challenge response from member2");
 
-        HashMap<String, Object> op1Body = objectMapper.readValue(op1.toString(), new TypeReference<HashMap<String, Object>>() {
-                }
-        );
-        HashMap<String, Object> op1Response = (HashMap<String, Object>) op1Body.get("response");
-        HashMap<String, Object> exnValue = (HashMap<String, Object>) op1Response.get("exn");
+        Map<String, Object> exnValue = new LinkedHashMap<>();
+        if (op1 instanceof String) {
+            Map<String, Object> opMap = objectMapper.readValue(op1.toString(), new TypeReference<>() {
+            });
+            Map<String, Object> op1Response = (Map<String, Object>) opMap.get("response");
+            exnValue = (Map<String, Object>) op1Response.get("exn");
+        }
 
         Serder exnwords = new Serder(exnValue);
         op1 = client1.getChallenges().responded(aid3.getPrefix(), exnwords.getKed().get("d").toString());

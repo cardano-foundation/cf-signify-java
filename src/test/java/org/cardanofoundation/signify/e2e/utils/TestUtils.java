@@ -11,6 +11,7 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.Assertions;
 
@@ -93,8 +94,7 @@ public class TestUtils {
     }
 
     public static String createTimestamp() {
-        String isoTimestamp = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        return isoTimestamp.replace("Z", "+00:00");
+        return Utils.currentDateTimeString();
     }
 
     public static List<Map<String, Object>> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
