@@ -111,7 +111,7 @@ public class Delegation extends TestUtils {
                         EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
                         waitOperations(client1, apprDelRes.op());
                         return apprDelRes;
-                    } catch (SodiumException | DigestException | IOException | InterruptedException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 });

@@ -280,12 +280,9 @@ public class CredentialsTest extends TestUtils {
                 gArgs.setDatetime(dt);
 
                 Exchanging.ExchangeMessageResult result  = issuerClient.getIpex().grant(gArgs);
-                Serder grant = result.exn();
-                List<String> gsigs = result.sigs();
-                String gend = result.atc();
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
                 // TO-DO: error grant
-                Object op = issuerClient.getIpex().submitGrant(issuerAid.name, grant, gsigs, gend, holderAidPrefix);
+                Object op = issuerClient.getIpex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
                 waitOperation(issuerClient, op);
 
             } catch (SodiumException | IOException | InterruptedException | DigestException | ExecutionException e) {
