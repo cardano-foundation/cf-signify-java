@@ -2,12 +2,16 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import org.bouncycastle.util.io.StreamOverflowException;
+import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
+import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
+import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -19,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -220,6 +225,7 @@ public class CredentialsTest extends TestUtils {
                 list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
                 assertEquals(1, list.size());
 
+                filterData.remove("-a-i");
                 filterData.put("-i", issuerAid.prefix);
                 filterData.put("-s", QVI_SCHEMA_SAID);
                 filterData.put("-a-i", holderAid.prefix);
@@ -236,8 +242,56 @@ public class CredentialsTest extends TestUtils {
                 throw new RuntimeException(e);
             }
         });
-
         // TO-DO
+
+        testSteps.step("Issuer get credential by id", () -> {
+            try {
+                Object issuerCredential =issuerClient.getCredentials().get(qviCredentialId);
+                LinkedHashMap<String, Object> issuerCredentialsList = castObjectToLinkedHashMap(issuerCredential);
+                Object credentialsMap = issuerCredentialsList.get("sad");
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(credentialsMap);
+                credentialsMap = issuerCredentialsList.get("status");
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(credentialsMap);
+
+                assertEquals(QVI_SCHEMA_SAID, sad.get("s").toString());
+                assertEquals(issuerAid.prefix, sad.get("i").toString());
+                assertEquals("0", status.get("s").toString());
+            } catch (SodiumException | IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Issuer IPEX grant", () -> {
+            String dt = createTimestamp();
+            try {
+                Object issuerCredential = issuerClient.getCredentials().get(qviCredentialId);
+                LinkedHashMap<String, Object> issuerCredentialList = castObjectToLinkedHashMap(issuerCredential);
+                Map<String, Object> getSAD = (Map<String, Object>) issuerCredentialList.get("sad");
+                Map<String, Object> getANC = (Map<String, Object>) issuerCredentialList.get("anc");
+                Map<String, Object> getISS = (Map<String, Object>) issuerCredentialList.get("iss");
+                assert issuerCredential != null;
+
+                IpexGrantArgs gArgs = IpexGrantArgs.builder().build();
+                gArgs.setSenderName(issuerAid.name);
+                gArgs.setAcdc(new Serder(getSAD));
+                gArgs.setAnc(new Serder(getANC));
+                gArgs.setIss(new Serder(getISS));
+                gArgs.setRecipient(holderAid.prefix);
+                gArgs.setDatetime(dt);
+
+                Exchanging.ExchangeMessageResult result  = issuerClient.getIpex().grant(gArgs);
+                Serder grant = result.exn();
+                List<String> gsigs = result.sigs();
+                String gend = result.atc();
+                List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
+                // TO-DO: error grant
+                Object op = issuerClient.getIpex().submitGrant(issuerAid.name, grant, gsigs, gend, holderAidPrefix);
+                waitOperation(issuerClient, op);
+
+            } catch (SodiumException | IOException | InterruptedException | DigestException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
