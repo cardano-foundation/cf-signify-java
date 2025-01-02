@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
+import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -373,7 +374,8 @@ public class TestUtils {
         return null;
     }
 
-    public static List<Notification> waitForNotifications() {
+    public static List<Notification> waitForNotifications(SignifyClient client, String route) throws SodiumException, IOException, InterruptedException {
+        Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
         // TO-DO
         return null;
     }

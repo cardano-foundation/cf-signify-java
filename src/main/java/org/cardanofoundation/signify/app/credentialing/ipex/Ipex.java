@@ -147,7 +147,7 @@ public class Ipex {
                 "rec", recp
         );
 
-        return this.client.fetch("/identifiers/" + name + "/ipex/grant", "POST", body, null);
+        return Utils.fromJson(this.client.fetch("/identifiers/" + name + "/ipex/grant", "POST", body, null).body(), Object.class);
     }
 
     public Exchanging.ExchangeMessageResult admit(IpexAdmitArgs args) throws InterruptedException, ExecutionException, SodiumException, DigestException, IOException {

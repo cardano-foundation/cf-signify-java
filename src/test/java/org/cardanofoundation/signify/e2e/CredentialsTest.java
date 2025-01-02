@@ -1,17 +1,23 @@
 package org.cardanofoundation.signify.e2e;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import io.qameta.allure.model.Link;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
+import org.cardanofoundation.signify.app.credentialing.credentials.CredentialState;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
+import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -35,6 +41,7 @@ public class CredentialsTest extends TestUtils {
     private String QVI_SCHEMA_URL = vLEIServerHostUrl + "/" + QVI_SCHEMA_SAID;
     private String LE_SCHEMA_URL = vLEIServerHostUrl + "/" + LE_SCHEMA_SAID;
     TestSteps testSteps = new TestSteps();
+    Retry retry = new Retry();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static SignifyClient issuerClient, holderClient, verifierClient, legalEntityClient;
@@ -245,7 +252,7 @@ public class CredentialsTest extends TestUtils {
 
         testSteps.step("Issuer get credential by id", () -> {
             try {
-                Object issuerCredential =issuerClient.getCredentials().get(qviCredentialId);
+                Object issuerCredential = issuerClient.getCredentials().get(qviCredentialId);
                 LinkedHashMap<String, Object> issuerCredentialsList = castObjectToLinkedHashMap(issuerCredential);
                 Object credentialsMap = issuerCredentialsList.get("sad");
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(credentialsMap);
@@ -279,13 +286,49 @@ public class CredentialsTest extends TestUtils {
                 gArgs.setRecipient(holderAid.prefix);
                 gArgs.setDatetime(dt);
 
-                Exchanging.ExchangeMessageResult result  = issuerClient.getIpex().grant(gArgs);
+                Exchanging.ExchangeMessageResult result = issuerClient.getIpex().grant(gArgs);
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
                 // TO-DO: error grant
                 Object op = issuerClient.getIpex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
                 waitOperation(issuerClient, op);
-
             } catch (SodiumException | IOException | InterruptedException | DigestException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Holder can get the credential status before or without holding", () -> {
+            CredentialState state = CredentialState.builder().build();
+            try {
+                Thread.sleep(3000);
+                Object result = holderClient.getCredentials().state(registrys.get("regk").toString(), qviCredentialId);
+                LinkedHashMap<String, Object> stateMap = castObjectToLinkedHashMap(result);
+
+                ArrayList<Integer> list = (ArrayList<Integer>) stateMap.get("vn");
+                int[] vn = list.stream().mapToInt(i -> i).toArray();
+
+                LinkedHashMap<String, Object> aValue = castObjectToLinkedHashMap(stateMap.get("a"));
+                CredentialState.A a = new CredentialState.A(parseInteger(aValue.get("s").toString()), aValue.get("d").toString());
+
+                state.setVn(vn);
+                state.setI(stateMap.get("i").toString());
+                state.setS(stateMap.get("s").toString());
+                state.setD(stateMap.get("d").toString());
+                state.setRi(stateMap.get("ri").toString());
+                state.setA(a);
+                state.setDt(stateMap.get("dt").toString());
+                state.setEt(stateMap.get("et").toString());
+            } catch (SodiumException | IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            assertEquals(qviCredentialId, state.getI());
+            assertEquals(registrys.get("regk").toString(), state.getRi());
+            assertEquals(CoreUtil.Ilks.ISS.toString(), state.getEt().toUpperCase(Locale.ROOT));
+        });
+
+        testSteps.step("holder IPEX admit", () -> {
+            try {
+                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn/ipex/grant");
+            } catch (SodiumException | IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });

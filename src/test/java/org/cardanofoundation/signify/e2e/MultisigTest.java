@@ -108,7 +108,7 @@ public class MultisigTest extends TestUtils {
         // The other members should do the same challenge/response flow, not shown here for brevity
 
         // TO-DO: miss challenges().generate() function
-        Object words = client1.getChallenges().generate("128");
+        List<String> words = (List<String>) client1.getChallenges().generate(128);
         System.out.println("Member1 generated challenge words: " + words);
 
         // TO-DO: miss challenges().respond() function
