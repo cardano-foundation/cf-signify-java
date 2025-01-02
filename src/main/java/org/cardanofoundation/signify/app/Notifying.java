@@ -75,6 +75,6 @@ public class Notifying {
             client.fetch(path, "DELETE", null, null);
         }
 
-        public record NotificationListResponse(int start, int end, int total, Object notes) {}
+        public record NotificationListResponse(int start, int end, int total, String notes) {}
     }
 }

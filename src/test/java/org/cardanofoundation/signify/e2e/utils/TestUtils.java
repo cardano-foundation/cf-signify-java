@@ -376,8 +376,8 @@ public class TestUtils {
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route) throws Exception {
         Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
-        Object notesResponse = response.notes();
-        List<Notification> notes = Collections.singletonList((Notification) notesResponse);
+        String notesResponse = response.notes();
+        List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<List<Notification>>() {});
 
         filteredNotes = notes.stream()
                 .filter(note -> Objects.equals(route, note.a.r) && !Boolean.TRUE.equals(note.r))
