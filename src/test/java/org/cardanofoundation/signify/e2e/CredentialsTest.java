@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.bouncycastle.util.io.StreamOverflowException;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
@@ -61,7 +60,7 @@ public class CredentialsTest extends TestUtils {
 
     @BeforeEach
     public void getContact() throws SodiumException, IOException, InterruptedException {
-        getOrCreateContact(issuerClient, "holder", issuerAid.oobi);
+        getOrCreateContact(issuerClient, "holder", holderAid.oobi);
         getOrCreateContact(issuerClient, "verifier", verifierAid.oobi);
         getOrCreateContact(holderClient, "issuer", issuerAid.oobi);
         getOrCreateContact(holderClient, "verifier", verifierAid.oobi);
@@ -276,6 +275,7 @@ public class CredentialsTest extends TestUtils {
                 gArgs.setAcdc(new Serder(getSAD));
                 gArgs.setAnc(new Serder(getANC));
                 gArgs.setIss(new Serder(getISS));
+                gArgs.setAncAttachment(null);
                 gArgs.setRecipient(holderAid.prefix);
                 gArgs.setDatetime(dt);
 
