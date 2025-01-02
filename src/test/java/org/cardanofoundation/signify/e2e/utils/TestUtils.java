@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import lombok.Getter;
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
@@ -19,8 +18,6 @@ import org.junit.jupiter.api.Assertions;
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -29,6 +26,7 @@ import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    static Retry retry = new Retry();
 
     public static class Aid {
         public String name;
@@ -374,10 +372,23 @@ public class TestUtils {
         return null;
     }
 
-    public static List<Notification> waitForNotifications(SignifyClient client, String route) throws SodiumException, IOException, InterruptedException {
+    private static List<Notification> filteredNotes;
+
+    public static List<Notification> waitForNotifications(SignifyClient client, String route) throws Exception {
         Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
-        // TO-DO
-        return null;
+        Object notesResponse = response.notes();
+        List<Notification> notes = Collections.singletonList((Notification) notesResponse);
+
+        filteredNotes = notes.stream()
+                .filter(note -> Objects.equals(route, note.a.r) && !Boolean.TRUE.equals(note.r))
+                .toList();
+
+        if (filteredNotes.isEmpty()) {
+            throw new IllegalStateException("No notifications with route " + route);
+        }
+        return filteredNotes;
+
+
     }
 
     public static <T> Operation<T> waitOperations(

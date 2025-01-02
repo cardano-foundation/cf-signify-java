@@ -328,7 +328,9 @@ public class CredentialsTest extends TestUtils {
         testSteps.step("holder IPEX admit", () -> {
             try {
                 List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn/ipex/grant");
-            } catch (SodiumException | IOException | InterruptedException e) {
+                Notification notification = holderNotifications.getFirst();
+//                holderClient.getIpex().admit();
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
