@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class SaltyTests extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
-    private String opResponseDone;
+    private String opResponseDone, opResponsePrefix;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private HashMap<String, Object> opResponse;
 
@@ -206,33 +206,21 @@ class SaltyTests extends TestUtils {
 
         // KeyEvents
         Coring.KeyEvents events = client.getKeyEvents();
-        Object log = events.get((String) aidLast.get("prefix"));
+        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get((String) aidLast.get("prefix"));
+        assertEquals(3, log.size());
 
-        List<Map<String, Object>> logList = null;
-        try {
-            logList = objectMapper.readValue(log.toString(), new TypeReference<>() {});
-            assertEquals(3, logList.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        Serder serder = new Serder((Map<String, Object>) log.getFirst().get("ked"));
+        assertEquals(icp.getPre(), serder.getPre());
+        assertEquals(icp.getKed().get("d"), serder.getKed().get("d"));
 
-        List<Serder> expectedSerders = Arrays.asList(
-                new Serder(icp.getKed()),
-                new Serder(rotRotate.getKed()),
-                new Serder(ixn.getKed())
-        );
+        serder = new Serder((Map<String, Object>) log.get(1).get("ked"));
+        assertEquals(rotRotate.getPre(), serder.getPre());
+        assertEquals(rotRotate.getKed().get("d"), serder.getKed().get("d"));
 
-        for (int i = 0; i < logList.size(); i++) {
-            try {
-                Serder actualSerder = new Serder((Map<String, Object>) logList.get(i).get("ked"));
-                Serder expectedSerder = expectedSerders.get(i);
+        serder = new Serder((Map<String, Object>) log.get(2).get("ked"));
+        assertEquals(ixn.getPre(), serder.getPre());
+        assertEquals(ixn.getKed().get("d"), serder.getKed().get("d"));
 
-                assertEquals(expectedSerder.getPre(), actualSerder.getPre());
-                assertEquals(expectedSerder.getKed().get("d"), actualSerder.getKed().get("d"));
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
         assertOperations(Collections.singletonList(client));
 
         IdentifierInfo identifierInfo = new IdentifierInfo();
