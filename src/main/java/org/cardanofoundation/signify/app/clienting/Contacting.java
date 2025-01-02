@@ -9,13 +9,11 @@ import org.cardanofoundation.signify.core.States;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.DigestException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class Contacting {
     @Getter
@@ -30,55 +28,78 @@ public class Contacting {
             this.client = client;
         }
 
-        // others functions
-
         /**
-         * Generate a random challenge word list based on BIP39
-         * @async
-         * @param {number} strength Integer representing the strength of the challenge. Typically 128 or 256
-         * @returns list of random words
+         * Retrieve the key state for an identifier
+         * @param strength Integer representing the strength of the challenge. Typically 128 or 256
+         * @return A list of random words
+         * @throws Exception if the fetch operation fails
          */
-        public Object generate(String strength) throws SodiumException, IOException, InterruptedException {
-            String path = "/challenges?strength=" + strength;
+        public Object generate(Integer strength) throws Exception {
+            String path = "/challenges?strength=" + strength.toString();
             String method = "GET";
-            HttpResponse<String> response = client.fetch(path, method, null, null);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
         }
 
-        public Object respond(String name, String recipient, Object words) throws SodiumException, IOException, InterruptedException, DigestException, ExecutionException {
-            States.HabState hab = client.getIdentifier().get(name);
-            Exchanging.Exchanges exchanges = client.getExchanges();
+        public Object generate() throws Exception {
+            return generate(128);
+        }
 
-            Map<String, Object> wordMap = new LinkedHashMap<>();
-            wordMap.put("words", words);
-            return exchanges.send(name,
-                    "challenge",
-                    hab,
-                    "/challenge/response",
-                    wordMap,
-                    null,
-                    Collections.singletonList(recipient)
+        /**
+         * Respond to a challenge by signing a message with the list of words
+         * @param name Name or alias of the identifier
+         * @param recipient Prefix of the recipient of the response
+         * @param words List of words to embed in the signed response
+         * @return The result of the response
+         * @throws Exception if the fetch operation fails
+         */
+        public Object respond(String name, String recipient, List<String> words) throws Exception {
+            States.HabState hab = this.client.getIdentifier().get(name);
+            Exchanging.Exchanges exchanges = this.client.getExchanges();
+
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("words", words);
+
+            Map<String, List<Object>> embeds = new LinkedHashMap<>();
+
+            return exchanges.send(
+                name,
+                "challenge",
+                hab,
+                "/challenge/response",
+                payload,
+                embeds,
+                List.of(recipient)
             );
         }
 
-        public Object verify(String source, Object words) throws SodiumException, IOException, InterruptedException, ExecutionException {
+        /**
+         * Ask Agent to verify a given sender signed the provided words
+         * @param source Prefix of the identifier that was challenged
+         * @param words List of challenge words to check for
+         * @return The long-running operation
+         * * @throws Exception if the fetch operation fails
+         */
+        public Object verify(String source, List<String> words) throws Exception {
             String path = "/challenges_verify/" + source;
             String method = "POST";
-            Map<String, Object> wordMap = new LinkedHashMap<>();
-            wordMap.put("words", words);
-            HttpResponse<String> response = client.fetch(path, method, wordMap, null);
-            return Utils.fromJson(response.body(), Object.class);
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("words", words);
+            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
         }
 
-        public Object responded(String source, String said) throws SodiumException, IOException, InterruptedException {
+        /**
+         * Mark challenge response as signed and accepted
+         * @param source Prefix of the identifier that was challenged
+         * @param said qb64 AID of exn message representing the signed response
+         * @return The result
+         * @throws Exception if the fetch operation fails
+         */
+        public Object responded(String source, String said) throws Exception {
             String path = "/challenges_verify/" + source;
             String method = "PUT";
-
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("said", said);
-
-            HttpResponse<String> response = client.fetch(path, method, data, null);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
         }
     }
 

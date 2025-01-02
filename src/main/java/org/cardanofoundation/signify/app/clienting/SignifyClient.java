@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.cardanofoundation.signify.app.Agent;
+import org.cardanofoundation.signify.app.Coring.Config;
 import org.cardanofoundation.signify.app.clienting.Contacting.Challenges;
 import org.cardanofoundation.signify.app.clienting.Contacting.Contacts;
 import org.cardanofoundation.signify.app.Controller;
@@ -478,6 +479,15 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      */
     public Delegations getDelegations() {
         return new Delegations(this);
+    }
+
+    /**
+     * Get config resource
+     *
+     * @return {Config}
+     */
+    public Config getConfig() {
+        return new Config(this);
     }
 
     @Getter

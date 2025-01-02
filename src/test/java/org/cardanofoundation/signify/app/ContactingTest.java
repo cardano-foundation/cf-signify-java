@@ -2,12 +2,16 @@ package org.cardanofoundation.signify.app;
 
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
+import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.net.http.HttpResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +24,8 @@ public class ContactingTest {
     private SignifyClient client;
     @InjectMocks
     private Contacting.Contacts contacts;
+    @InjectMocks
+    private Contacting.Challenges challenges;
     @Captor
     private ArgumentCaptor<String> pathCaptor;
     @Captor
@@ -31,6 +37,7 @@ public class ContactingTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         contacts = new Contacting.Contacts(client);
+        challenges = new Contacting.Challenges(client);
     }
 
     @Test
