@@ -417,5 +417,18 @@ public class Identifier {
         return new EventResult(serder, sigs, res);
     }
 
-    //TODO implement the rest of the function
+    /**
+     * Get the members of a group identifier
+     * @param name Name of the group identifier
+     * @return A list of members of the group
+     */
+    public Object members(String name) throws SodiumException, InterruptedException, IOException {
+        HttpResponse<String> response = this.client.fetch(
+                "/identifiers/" + name + "/members",
+                "GET",
+                null,
+                null
+        );
+        return Utils.fromJson(response.body(), Object.class);
+    }
 }
