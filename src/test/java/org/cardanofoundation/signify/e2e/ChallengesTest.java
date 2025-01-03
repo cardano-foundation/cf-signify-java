@@ -9,6 +9,7 @@ import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class ChallengesTest extends TestUtils {
@@ -167,6 +169,18 @@ public class ChallengesTest extends TestUtils {
 
         List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
         assertOperations(clientList);
+
+        // Check Bob's challenge in contacts
+        client1Contacts = client1.getContacts().list();
+        bobContact = Arrays.stream(client1Contacts)
+            .filter(c -> "bob".equals(c.getAlias()))
+            .findFirst()
+            .orElse(null);
+
+        assertNotNull(bobContact);
+        Object challenges = bobContact.get("challenges");
+        assertInstanceOf(List.class, challenges);
+        assertTrue((Boolean) Utils.toMap(((List<?>) challenges).getFirst()).get("authenticated"));
     }
 
     private static Contacting.Contact findContact(Contacting.Contact[] contacts, String alias) {

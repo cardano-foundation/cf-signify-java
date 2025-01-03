@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 
 public class Contacting {
 
@@ -115,6 +116,20 @@ public class Contacting {
         private String oobi;
         private String id;
         private Map<String, Object> additionalProperties = new HashMap<>();
+
+        @JsonAnySetter
+        public void setAdditionalProperty(String key, Object value) {
+            additionalProperties.put(key, value);
+        }
+
+        public <T> T get(String key) {
+            return switch (key) {
+                case "alias" -> (T) alias;
+                case "oobi" -> (T) oobi;
+                case "id" -> (T) id;
+                default -> (T) additionalProperties.get(key);
+            };
+        }
     }
 
     @Getter
@@ -134,7 +149,7 @@ public class Contacting {
          * @param group Optional group name to filter contacts
          * @param filterField Optional field name to filter contacts
          * @param filterValue Optional field value to filter contacts
-         * @return List of contacts
+         * @return An array list of contacts
          */
         public Contact[] list(
                 String group,
@@ -156,6 +171,10 @@ public class Contacting {
 
             HttpResponse<String> response = client.fetch(path.toString(), "GET", null, null);
             return Utils.fromJson(response.body(), Contact[].class);
+        }
+
+        public Contact[] list() throws SodiumException, IOException, InterruptedException {
+            return list(null, null, null);
         }
 
         /**
