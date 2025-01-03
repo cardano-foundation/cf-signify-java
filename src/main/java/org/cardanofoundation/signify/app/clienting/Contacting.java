@@ -16,6 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Contacting {
+
+    @Getter
+    public static class Challenge {
+        public List<String> words;
+    }
+
     @Getter
     public static class Challenges {
         public final SignifyClient client;
@@ -34,13 +40,13 @@ public class Contacting {
          * @return A list of random words
          * @throws Exception if the fetch operation fails
          */
-        public Object generate(Integer strength) throws Exception {
+        public Challenge generate(Integer strength) throws Exception {
             String path = "/challenges?strength=" + strength.toString();
             String method = "GET";
-            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
+            return Utils.fromJson(client.fetch(path, method, null, null).body(), Challenge.class);
         }
 
-        public Object generate() throws Exception {
+        public Challenge generate() throws Exception {
             return generate(128);
         }
 
