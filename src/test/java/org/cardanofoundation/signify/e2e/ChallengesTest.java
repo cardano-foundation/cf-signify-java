@@ -5,12 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -18,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class ChallengesTest extends TestUtils {
+    private static final Logger log = LoggerFactory.getLogger(ChallengesTest.class);
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
@@ -50,8 +54,12 @@ public class ChallengesTest extends TestUtils {
         client2.state();
 
         // Generate challenge words
-        // TO DO
+        Contacting.Challenge challenge1_small = client1.getChallenges().generate(128);
+        assertEquals(challenge1_small.words.size(), 12);
+        Contacting.Challenge challenge1_big = client1.getChallenges().generate(256);
+        assertEquals(challenge1_big.words.size(), 24);
 
+        // Create two identifiers, one for each client
         CreateIdentifierArgs kargs1 = new CreateIdentifierArgs();
         kargs1.setToad(3);
         kargs1.setWits(List.of(
@@ -103,7 +111,7 @@ public class ChallengesTest extends TestUtils {
                 null);
         waitOperation(client2, rpyResult2.op());
 
-        // Exchenge OOBIs
+        // Exchange OOBIs
         Object oobi1 = client1.getOobis().get("alice", "agent");
         Map<String, Object> oobiBody1 = (Map<String, Object>) oobi1;
         ArrayList<String> oobiResponse1 = (ArrayList<String>) oobiBody1.get("oobis");
