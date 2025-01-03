@@ -48,10 +48,10 @@ public class Ipex {
         body.put("sigs", sigs);
         body.put("rec", recp);
 
-        return this.client.fetch("/identifiers/" + name + "/ipex/apply", "POST", body, null);
+        return Utils.fromJson(this.client.fetch("/identifiers/" + name + "/ipex/apply", "POST", body, null).body(), Object.class);
     }
 
-    public Exchanging.ExchangeMessageResult offer(IpexOfferArgs args) throws InterruptedException, ExecutionException, SodiumException, DigestException, IOException {
+    public Exchanging.ExchangeMessageResult offer(IpexOfferArgs args) throws InterruptedException, SodiumException, DigestException, IOException {
         HabState hab = this.client.getIdentifier().get(args.getSenderName());
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("m", args.getMessage() != null ? args.getMessage() : "");
@@ -77,7 +77,7 @@ public class Ipex {
         body.put("atc", atc);
         body.put("rec", recp);
 
-        return this.client.fetch("/identifiers/" + name + "/ipex/offer", "POST", body, null);
+        return Utils.fromJson(this.client.fetch("/identifiers/" + name + "/ipex/offer", "POST", body, null).body(), Object.class);
     }
 
     public Exchanging.ExchangeMessageResult agree(IpexAgreeArgs args) throws InterruptedException, ExecutionException, SodiumException, DigestException, IOException {
@@ -173,6 +173,6 @@ public class Ipex {
         body.put("atc", atc);
         body.put("rec", recp);
 
-        return this.client.fetch("/identifiers/" + name + "/ipex/admit", "POST", body, null);
+        return Utils.fromJson(this.client.fetch("/identifiers/" + name + "/ipex/admit", "POST", body, null).body(), Object.class);
     }
 }

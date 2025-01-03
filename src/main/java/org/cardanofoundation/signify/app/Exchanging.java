@@ -10,6 +10,7 @@ import org.cardanofoundation.signify.cesr.args.CounterArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States.HabState;
 
 import java.io.IOException;
@@ -156,7 +157,7 @@ public class Exchanging {
         public Object get(String said) throws Exception {
             String path = String.format("/exchanges/%s", said);
             String method = "GET";
-            return client.fetch(path, method, null, null);
+            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
         }
     }
 

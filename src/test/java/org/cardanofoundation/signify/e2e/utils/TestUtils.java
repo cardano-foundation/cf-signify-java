@@ -355,7 +355,18 @@ public class TestUtils {
     }
 
     public static void markAndRemoveNotification(SignifyClient client, Notification note) {
-        // TO-DO
+        try {
+            client.getNotifications().mark(note.i);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error marking notification: " + note.i, e);
+        } finally {
+            try {
+                client.getNotifications().delete(note.i);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public static void markNotification(SignifyClient client, Notification note) {
