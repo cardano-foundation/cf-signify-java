@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import io.qameta.allure.model.Link;
 import org.cardanofoundation.signify.app.Exchanging;
+import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialState;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
+import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
@@ -288,7 +290,6 @@ public class CredentialsTest extends TestUtils {
 
                 Exchanging.ExchangeMessageResult result = issuerClient.getIpex().grant(gArgs);
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
-                // TO-DO: error grant
                 Object op = issuerClient.getIpex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
                 waitOperation(issuerClient, op);
             } catch (SodiumException | IOException | InterruptedException | DigestException | ExecutionException e) {
@@ -328,8 +329,20 @@ public class CredentialsTest extends TestUtils {
         testSteps.step("holder IPEX admit", () -> {
             try {
                 List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn/ipex/grant");
-                Notification notification = holderNotifications.getFirst();
-//                holderClient.getIpex().admit();
+                Notification grantNotification = holderNotifications.getFirst();
+
+                IpexAdmitArgs iargs = IpexAdmitArgs.builder().build();
+                iargs.setSenderName(holderAid.name);
+                iargs.setMessage("");
+                iargs.setGrantSaid(grantNotification.a.d);
+                iargs.setRecipient(issuerAid.prefix);
+                iargs.setRecipient(createTimestamp());
+
+                Exchanging.ExchangeMessageResult result = holderClient.getIpex().admit(iargs);
+                Object op = holderClient.getIpex().submitAdmit(
+                        holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
+                );
+                waitOperation(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

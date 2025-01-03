@@ -4,6 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
@@ -40,22 +44,24 @@ public class TestUtils {
         }
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Notification {
         public String i;
         public String dt;
         public boolean r;
         public NotificationAction a;
 
+        @Getter
+        @Setter
+        @NoArgsConstructor
+        @AllArgsConstructor
         public static class NotificationAction {
             public String r;
             public String d;
             public String m;
-
-            public NotificationAction(String r, String d, String m) {
-                this.r = r;
-                this.d = d;
-                this.m = m;
-            }
         }
     }
 
@@ -387,8 +393,6 @@ public class TestUtils {
             throw new IllegalStateException("No notifications with route " + route);
         }
         return filteredNotes;
-
-
     }
 
     public static <T> Operation<T> waitOperations(
