@@ -5,10 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class ChallengesTest extends TestUtils {
@@ -26,7 +28,7 @@ public class ChallengesTest extends TestUtils {
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private HashMap<String, Object> opResponse1, opResponse2;
+    private HashMap<String, Object> opResponse, opResponse1, opResponse2;
 
     @Test
     void ChallengeTest() throws Exception {
@@ -55,9 +57,9 @@ public class ChallengesTest extends TestUtils {
 
         // Generate challenge words
         Contacting.Challenge challenge1_small = client1.getChallenges().generate(128);
-        assertEquals(challenge1_small.words.size(), 12);
+        assertEquals(12, challenge1_small.words.size());
         Contacting.Challenge challenge1_big = client1.getChallenges().generate(256);
-        assertEquals(challenge1_big.words.size(), 24);
+        assertEquals(24, challenge1_big.words.size());
 
         // Create two identifiers, one for each client
         CreateIdentifierArgs kargs1 = new CreateIdentifierArgs();
@@ -124,22 +126,69 @@ public class ChallengesTest extends TestUtils {
         resolveOobi(client2, oobiResponse1.getFirst(), "alice");
 
         // List Client 1 contacts
-        Contacting.Contact[] contacts1 = client1.getContacts().list(null, null, null);
-        Contacting.Contact bobContact = Arrays.stream(contacts1).filter(contact -> "bob".equals(contact.getAlias()))
-                .findFirst()
-                .orElse(null);
-
+        Contacting.Contacts contacts1 = client1.getContacts();
+        Contacting.Contact[] client1Contacts = contacts1.list(null, null, null);
+        Contacting.Contact bobContact = findContact(client1Contacts, "bob");
         assert bobContact != null;
         assertEquals("bob", bobContact.getAlias());
-        assertEquals(0, bobContact.getAdditionalProperties().size());
+        try {
+            List<HashMap<String, Object>> bobcontactMap = objectMapper.readValue(bobContact.getAdditionalProperties().toString(), new TypeReference<List<HashMap<String, Object>>>() {
+            });
+            assertEquals(0, bobcontactMap.size());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
-        // Bob responds to Alice challenge
-        // TO DO
+        // Bob responds to Alice's challenge
+        client2.getChallenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.words);
+        System.out.println("Bob responded to Alice's challenge with signed words");
 
         // Alice verifies Bob's response
-        // TO DO
+        Object verifyResult = client1.getChallenges().verify((String) opResponse2.get("i"), challenge1_small.words);
+        Object op = operationToObject(waitOperation(client1, verifyResult));
+        System.out.println("Alice verified challenge response");
 
-        // Alice verifies Bob's response
-        // TO DO
+        //Alice mark response as accepted
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        Serder exn = new Serder((Map<String, Object>) opResponse.get("exn"));
+//        client1.getChallenges().responded((String) opResponse2.get("i"), (String) exn.getKed().get("d"));
+
+        // Verify Bob's challenges in Alice's contacts
+//        client1Contacts = contacts1.list(null, null, null);
+//        bobContact = findContact(client1Contacts, "bob");
+//        assert bobContact != null;
+//
+
+        List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
+        assertOperations(clientList);
+
+        // Check Bob's challenge in contacts
+        client1Contacts = client1.getContacts().list();
+        bobContact = Arrays.stream(client1Contacts)
+            .filter(c -> "bob".equals(c.getAlias()))
+            .findFirst()
+            .orElse(null);
+
+        assertNotNull(bobContact);
+        Object challenges = bobContact.get("challenges");
+        assertInstanceOf(List.class, challenges);
+        assertTrue((Boolean) Utils.toMap(((List<?>) challenges).getFirst()).get("authenticated"));
+    }
+
+    private static Contacting.Contact findContact(Contacting.Contact[] contacts, String alias) {
+        for (Contacting.Contact contact : contacts) {
+            if (alias.equals(contact.getAlias())) {
+                return contact;
+            }
+        }
+        return null;
     }
 }
