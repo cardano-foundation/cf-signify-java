@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -14,13 +13,11 @@ import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.security.DigestException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Delegation extends TestUtils {
+public class DelegationTest extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
@@ -123,7 +120,7 @@ public class Delegation extends TestUtils {
             return retry;
         });
 
-        Object op3 = client2.getKeyStates().query(ator.getPrefix(), 1, null);
+        Object op3 = client2.getKeyStates().query(ator.getPrefix(), "1", null);
 
         // Client 2 check approval
         waitOperation(client2, op3);
