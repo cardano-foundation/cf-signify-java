@@ -57,7 +57,7 @@ public class Ipex {
         data.put("m", args.getMessage() != null ? args.getMessage() : "");
 
         Map<String, List<Object>> embeds = new LinkedHashMap<>();
-        embeds.put("acdc", List.of(args.getAcdc(), null));
+        embeds.put("acdc", List.of(args.getAcdc()));
 
         return this.client.getExchanges().createExchangeMessage(
                 hab,

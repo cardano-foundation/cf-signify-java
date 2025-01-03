@@ -36,9 +36,9 @@ public class MultisigUtils {
     }
 
     public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws SodiumException, IOException, InterruptedException, DigestException {
-        final States.HabState memberHab = client2.getIdentifier().get(args.getLocalMemberName());
+        final States.HabState memberHab = client2.getIdentifier().get(args.localMemberName);
 
-        List<Object> res = (List<Object>) client2.getGroups().getRequest(args.getMsgSaid());
+        List<Object> res = (List<Object>) client2.getGroups().getRequest(args.msgSaid);
         Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
         Map<String, Object> exn = (Map<String, Object>) responseMap.get("exn");
         Map<String, Object> icp = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("icp");
@@ -481,21 +481,21 @@ public class MultisigUtils {
             SignifyClient client,
             StartMultisigInceptArgs args
     ) throws SodiumException, IOException, InterruptedException, DigestException {
-        States.HabState aid1 = client.getIdentifier().get(args.getLocalMemberName());
-        List<Object> participantStates = TestUtils.getStates(client, args.getParticipants());
+        States.HabState aid1 = client.getIdentifier().get(args.localMemberName);
+        List<Object> participantStates = TestUtils.getStates(client, args.participants);
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
         createIdentifierArgs.setAlgo(Manager.Algos.group);
         createIdentifierArgs.setMhab(aid1);
-        createIdentifierArgs.setIsith(args.getIsith());
-        createIdentifierArgs.setNsith(args.getNsith());
-        createIdentifierArgs.setToad(args.getToad());
-        createIdentifierArgs.setWits(args.getWits());
-        createIdentifierArgs.setDelpre(args.getDelpre());
+        createIdentifierArgs.setIsith(args.isith);
+        createIdentifierArgs.setNsith(args.nsith);
+        createIdentifierArgs.setToad(args.toad);
+        createIdentifierArgs.setWits(args.wits);
+        createIdentifierArgs.setDelpre(args.delpre);
         createIdentifierArgs.setStates(participantStates);
         createIdentifierArgs.setRstates(participantStates);
 
-        EventResult icpResult1 = client.getIdentifier().create(args.getGroupName(), createIdentifierArgs);
+        EventResult icpResult1 = client.getIdentifier().create(args.groupName, createIdentifierArgs);
         Object op1 = icpResult1.op();
         Serder serder = icpResult1.serder();
 
@@ -517,13 +517,13 @@ public class MultisigUtils {
         payload.put("rmids", smids);
 
         client.getExchanges().send(
-                args.getLocalMemberName(),
-                args.getGroupName(),
+                args.localMemberName,
+                args.groupName,
                 aid1,
                 "/multisig/icp",
                 payload,
                 embeds,
-                args.getParticipants()
+                args.participants
         );
 
         return op1;
