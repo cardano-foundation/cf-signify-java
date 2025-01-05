@@ -1,27 +1,21 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialState;
-import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
+import org.cardanofoundation.signify.app.credentialing.credentials.*;
 import org.cardanofoundation.signify.app.credentialing.ipex.*;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.matchers.Not;
 
 import java.io.IOException;
 import java.security.DigestException;
@@ -38,8 +32,6 @@ public class CredentialsTest extends TestUtils {
     private String QVI_SCHEMA_URL = vLEIServerHostUrl + "/" + QVI_SCHEMA_SAID;
     private String LE_SCHEMA_URL = vLEIServerHostUrl + "/" + LE_SCHEMA_SAID;
     TestSteps testSteps = new TestSteps();
-    Retry retry = new Retry();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static SignifyClient issuerClient, holderClient, verifierClient, legalEntityClient;
     private Aid issuerAid, holderAid, verifierAid, legalEntityAid;
@@ -76,18 +68,15 @@ public class CredentialsTest extends TestUtils {
     }
 
     @AfterAll
-    public static void cleanup() throws SodiumException, IOException, InterruptedException {
-        // TO-DO:
-//        assertOperations(Collections.singletonList(issuerClient));
-//        assertOperations(Collections.singletonList(holderClient));
-//        assertOperations(Collections.singletonList(verifierClient));
-//        assertOperations(Collections.singletonList(legalEntityClient));
-
-        // TO-DO: assertNotifications miss func in TestUtils
-//        assertNotifications(Collections.singletonList(issuerClient));
-//        assertNotifications(Collections.singletonList(holderClient));
-//        assertNotifications(Collections.singletonList(verifierClient));
-//        assertNotifications(Collections.singletonList(legalEntityClient));
+    public static void cleanup() throws Exception {
+        List<SignifyClient> clients = Arrays.asList(
+                issuerClient,
+                holderClient,
+                verifierClient,
+                legalEntityClient
+        );
+        assertOperations(clients);
+        assertNotifications(clients);
     }
 
     @Test
@@ -117,7 +106,7 @@ public class CredentialsTest extends TestUtils {
             registryArgs.setRegistryName(registryName);
             try {
                 RegistryResult regResult = issuerClient.getRegistries().create(registryArgs);
-                waitOperation(issuerClient, regResult.op());
+                waitOperations(issuerClient, regResult.op());
             } catch (IOException | InterruptedException | SodiumException | DigestException e) {
                 throw new RuntimeException(e);
             }
@@ -187,7 +176,7 @@ public class CredentialsTest extends TestUtils {
             cData.setA(a);
 
             IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
-            waitOperation(issuerClient, issResult.getOp());
+            waitOperations(issuerClient, issResult.getOp());
             return issResult.getAcdc().getKed().get("d").toString();
         });
 
@@ -286,7 +275,7 @@ public class CredentialsTest extends TestUtils {
                 Exchanging.ExchangeMessageResult result = issuerClient.getIpex().grant(gArgs);
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
                 Object op = issuerClient.getIpex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
-                waitOperation(issuerClient, op);
+                waitOperations(issuerClient, op);
             } catch (SodiumException | IOException | InterruptedException | DigestException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
@@ -295,7 +284,7 @@ public class CredentialsTest extends TestUtils {
         testSteps.step("Holder can get the credential status before or without holding", () -> {
             CredentialState state = CredentialState.builder().build();
             try {
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 Object result = holderClient.getCredentials().state(registrys.get("regk").toString(), qviCredentialId);
                 LinkedHashMap<String, Object> stateMap = castObjectToLinkedHashMap(result);
 
@@ -337,7 +326,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = holderClient.getIpex().submitAdmit(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
                 );
-                waitOperation(holderClient, op);
+                waitOperations(holderClient, op);
                 markAndRemoveNotification(holderClient, grantNotification);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -390,7 +379,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = verifierClient.getIpex().submitApply(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(verifierClient, op);
+                waitOperations(verifierClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -445,7 +434,7 @@ public class CredentialsTest extends TestUtils {
 
                 Exchanging.ExchangeMessageResult result = holderClient.getIpex().offer(offerArgs);
                 Object op = holderClient.getIpex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
-                waitOperation(holderClient, op);
+                waitOperations(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -486,7 +475,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = verifierClient.getIpex().submitAgree(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(verifierClient, op);
+                waitOperations(verifierClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -537,7 +526,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = holderClient.getIpex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
                 );
-                waitOperation(holderClient, op);
+                waitOperations(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -569,7 +558,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = verifierClient.getIpex().submitAdmit(
                         verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(verifierClient, op);
+                waitOperations(verifierClient, op);
                 markAndRemoveNotification(verifierClient, verifierGrantNote);
                 Object verifierCredential = verifierClient.getCredentials().get(qviCredentialId);
 
@@ -607,7 +596,7 @@ public class CredentialsTest extends TestUtils {
             try {
                 RegistryResult regResult = holderClient.getRegistries().create(registryArgs);
 
-                waitOperation(holderClient, regResult.op());
+                waitOperations(holderClient, regResult.op());
                 Object registries = holderClient.getRegistries().list(holderAid.name);
                 List<Map<String, Object>> registriesList = castObjectToListMap(registries);
 
@@ -657,7 +646,7 @@ public class CredentialsTest extends TestUtils {
                 cData.setE(e);
 
                 IssueCredentialResult result = holderClient.getCredentials().issue(holderAid.name, cData);
-                waitOperation(holderClient, result.getOp());
+                waitOperations(holderClient, result.getOp());
                 return result.getAcdc().getKed().get("d").toString();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -689,7 +678,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = holderClient.getIpex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
                 );
-                waitOperation(holderClient, op);
+                waitOperations(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -697,8 +686,72 @@ public class CredentialsTest extends TestUtils {
 
         testSteps.step("Legal Entity IPEX admit", () -> {
             try {
+                Thread.sleep(2000);
                 List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn/ipex/grant");
-                Notification notification = notifications.getFirst();
+                Notification grantNotification = notifications.getFirst();
+
+                IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
+                admitArgs.setSenderName(legalEntityAid.name);
+                admitArgs.setMessage("");
+                admitArgs.setGrantSaid(grantNotification.a.d);
+                admitArgs.setRecipient(holderAid.prefix);
+                admitArgs.setDatetime(createTimestamp());
+
+                Exchanging.ExchangeMessageResult result = legalEntityClient.getIpex().admit(admitArgs);
+                Object op = legalEntityClient.getIpex().submitAdmit(
+                        legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
+                );
+                waitOperations(legalEntityClient, op);
+                markAndRemoveNotification(legalEntityClient, grantNotification);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("LE credential IPEX grant response", () -> {
+            try {
+                List<Notification> notifications = waitForNotifications(holderClient, "/exn/ipex/admit");
+                markAndRemoveNotification(holderClient, notifications.getFirst());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Legal Entity has chained credential", () -> {
+            try {
+                Thread.sleep(2000);
+                Object legalEntityCredential = legalEntityClient.getCredentials().get(leCredentialId);
+
+                LinkedHashMap<String, Object> legalEntityCredentialBody = castObjectToLinkedHashMap(legalEntityCredential);
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(legalEntityCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(sad.get("a"));
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(legalEntityCredentialBody.get("status"));
+                ArrayList<String> chains = (ArrayList<String>) legalEntityCredentialBody.get("chains");
+                LinkedHashMap<String, Object> chainsBody = castObjectToLinkedHashMap(chains.getFirst());
+                LinkedHashMap<String, Object> sadInChains = castObjectToLinkedHashMap(chainsBody.get("sad"));
+                String atc = legalEntityCredentialBody.get("atc").toString();
+
+                assertEquals(LE_SCHEMA_SAID, sad.get("s").toString());
+                assertEquals(holderAid.prefix, sad.get("i").toString());
+                assertEquals(legalEntityAid.prefix, a.get("i").toString());
+                assertEquals("0", status.get("s").toString());
+                assertEquals(qviCredentialId, sadInChains.get("d").toString());
+                assertNotNull(atc);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Issuer revoke QVI credential", () -> {
+            try {
+                RevokeCredentialResult revokeOperation = issuerClient.getCredentials().revoke(issuerAid.name, qviCredentialId, null);
+                waitOperations(issuerClient, revokeOperation.getOp());
+                Object issuerCredential = issuerClient.getCredentials().get(qviCredentialId);
+
+                LinkedHashMap<String, Object> issuerCredentialBody = castObjectToLinkedHashMap(issuerCredential);
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(issuerCredentialBody.get("status"));
+
+                assertEquals("1", status.get("s").toString());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

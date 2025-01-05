@@ -30,6 +30,7 @@ import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static List<Notification> filteredNotes;
     static Retry retry = new Retry();
 
     public static class Aid {
@@ -77,16 +78,21 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void assertOperations(List<SignifyClient> clients) throws SodiumException, IOException, InterruptedException {
+    public static void assertOperations(List<SignifyClient> clients) throws Exception {
         for (SignifyClient client : clients) {
             List<Operation<?>> operations = client.getOperations().list(null);
             Assertions.assertEquals(0, operations.size());
         }
     }
 
-    public static void assertNotifications(List<SignifyClient> clients) {
+    public static void assertNotifications(List<SignifyClient> clients) throws Exception {
         // TO-DO
         for (SignifyClient client : clients) {
+            Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
+            String notesResponse = res.notes();
+            List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
+            filteredNotes = notes.stream().filter(note -> !note.isR()).collect(Collectors.toList());
+            Assertions.assertEquals(0, filteredNotes.size());
         }
     }
 
@@ -154,16 +160,6 @@ public class TestUtils {
             return aid;
         }
     }
-
-//    public static List<SignifyClient> getOrCreateClients1(int count, List<String> brans) throws Exception {
-//        List<SignifyClient> tasks = new ArrayList<>();
-//        List<String> secrets = System.getenv("SIGNIFY_SECRETS_ENV") != null
-//                ? List.of(System.getenv("SIGNIFY_SECRETS_ENV").split(","))
-//                : new ArrayList<>();
-//        tasks.add(getOrCreateClient(brans));
-//        List<SignifyClient> clients = tasks.stream().collect(Collectors.toList());
-//        return clients;
-//    }
 
     public static List<SignifyClient> getOrCreateClients(int count, List<String> brans) throws ExecutionException, InterruptedException {
         List<CompletableFuture<SignifyClient>> tasks = new ArrayList<>();
@@ -388,8 +384,6 @@ public class TestUtils {
         // TO-DO
         return null;
     }
-
-    private static List<Notification> filteredNotes;
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route) throws Exception {
         Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
