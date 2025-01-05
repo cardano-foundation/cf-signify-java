@@ -258,8 +258,8 @@ public class MultisigUtils {
             States.HabState multisigAID,
             String registryName,
             String nonce,
-            boolean isInitiator) throws SodiumException, DigestException, IOException, InterruptedException {
-
+            boolean isInitiator
+    ) throws SodiumException, DigestException, IOException, InterruptedException {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
         }
@@ -371,8 +371,8 @@ public class MultisigUtils {
             States.HabState recipientAID,
             Object credential,
             String timestamp,
-            boolean isInitiator) throws SodiumException, DigestException, IOException, ExecutionException, InterruptedException {
-
+            boolean isInitiator
+    ) throws SodiumException, DigestException, IOException, ExecutionException, InterruptedException {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
@@ -437,8 +437,8 @@ public class MultisigUtils {
             List<States.HabState> otherMembersAIDs,
             String multisigAIDName,
             CredentialData kargsIss,
-            boolean isInitiator) throws SodiumException, DigestException, IOException, InterruptedException {
-
+            boolean isInitiator
+    ) throws SodiumException, DigestException, IOException, InterruptedException {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/iss");
         }

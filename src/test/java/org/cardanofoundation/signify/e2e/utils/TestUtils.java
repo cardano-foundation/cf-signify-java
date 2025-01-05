@@ -362,8 +362,8 @@ public class TestUtils {
         }
     }
 
-    public static void markNotification(SignifyClient client, Notification note) {
-        // TO-DO
+    public static void markNotification(SignifyClient client, Notification note) throws SodiumException, IOException, InterruptedException {
+        client.getNotifications().mark(note.i);
     }
 
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
@@ -377,9 +377,17 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static String waitAndMarkNotification(SignifyClient client, String route) {
-        // TO-DO
-        return null;
+    public static String waitAndMarkNotification(SignifyClient client, String route) throws Exception {
+        List<Notification> notes = waitForNotifications(client, route);
+        for (Notification note : notes) {
+            markNotification(client, note);
+        }
+
+        return notes.isEmpty() ? "" :
+           Optional.ofNullable(notes.getLast())
+                  .map(note -> note.a)
+                  .map(a -> a.d)
+                  .orElse("");
     }
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route) throws Exception {
@@ -426,7 +434,7 @@ public class TestUtils {
         return operation;
     }
 
-    public static Object operationToObject(Operation operation) throws JsonProcessingException {
+    public static Object operationToObject(Operation<?> operation) throws JsonProcessingException {
         Map<String, Object> opMap = new LinkedHashMap<>();
         opMap.put("name", operation.getName());
         opMap.put("metadata", operation.getMetadata() != null ? operation.getMetadata().getProperties() : null);

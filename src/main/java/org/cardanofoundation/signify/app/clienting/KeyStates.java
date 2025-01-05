@@ -56,17 +56,21 @@ public class KeyStates {
      * @return A map representing the long-running operation
      * @throws Exception if the fetch operation fails
      */
-    public Object query(String pre, Integer sn, Object anchor) throws Exception {
+    public Object query(String pre, String sn, Object anchor) throws Exception {
         String path = "/queries";
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("pre", pre);
         if (sn != null) {
-            data.put("sn", sn.toString());
+            data.put("sn", sn);
         }
         if (anchor != null) {
             data.put("anchor", anchor);
         }
         String method = "POST";
         return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+    }
+
+    public Object query(String pre, String sn) throws Exception {
+        return query(pre, sn, null);
     }
 }

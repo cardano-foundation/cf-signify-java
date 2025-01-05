@@ -73,6 +73,10 @@ public class Identifier {
         );
     }
 
+    public IdentifierListResponse list() throws SodiumException, IOException, InterruptedException {
+        return list(0, 24);
+    }
+
     /**
      * Get information for a managed identifier
      *
