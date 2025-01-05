@@ -118,8 +118,8 @@ public class Identifier {
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
-        String isith = kargs.getIsith() != null ? (String) kargs.getIsith() : "1";
-        String nsith = kargs.getNsith() != null ? (String) kargs.getNsith() : "1";
+        String isith = kargs.getIsith() != null ? kargs.getIsith().toString() : "1";
+        String nsith = kargs.getNsith() != null ? kargs.getNsith().toString() : "1";
         List<String> wits = kargs.getWits() != null ? kargs.getWits() : new ArrayList<>();
         int toad = kargs.getToad() != null ? kargs.getToad() : 0;
         String dcode = kargs.getDcode() != null ? kargs.getDcode() : MatterCodex.Blake3_256.getValue();
