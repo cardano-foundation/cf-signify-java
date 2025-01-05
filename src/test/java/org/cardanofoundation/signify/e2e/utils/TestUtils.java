@@ -86,7 +86,6 @@ public class TestUtils {
     }
 
     public static void assertNotifications(List<SignifyClient> clients) throws Exception {
-        // TO-DO
         for (SignifyClient client : clients) {
             Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
             String notesResponse = res.notes();
@@ -97,7 +96,6 @@ public class TestUtils {
     }
 
     public static Aid createAid(SignifyClient client, String name) throws Exception {
-        // TO-DO
         String[] results = getOrCreateIdentifier(client, name, null);
         String prefix = results[0];
         String oobi = results[1];
@@ -109,7 +107,6 @@ public class TestUtils {
     }
 
     public static List<Map<String, Object>> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
-        // TO-DO
         String path = (role != null)
                 ? "/identifiers/" + alias + "/endroles/" + role
                 : "/identifiers/" + alias + "/endroles";
@@ -446,6 +443,16 @@ public class TestUtils {
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Parse Integer is not successful " + e.getMessage());
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
+        return (LinkedHashMap<String, Object>) object;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> castObjectToListMap(Object object) {
+        return (List<Map<String, Object>>) object;
     }
 
 }

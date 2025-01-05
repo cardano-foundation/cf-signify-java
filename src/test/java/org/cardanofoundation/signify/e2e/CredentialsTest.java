@@ -758,18 +758,8 @@ public class CredentialsTest extends TestUtils {
         });
     }
 
-
     public static class StringData {
         public static final String USAGE_DISCLAIMER = "Usage of a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, does not assert that the Legal Entity is trustworthy, honest, reputable in its business dealings, safe to do business with, or compliant with any laws or that an implied or expressly intended purpose will be fulfilled.";
         public static final String ISSUANCE_DISCLAIMER = "All information in a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, is accurate as of the date the validation process was complete. The vLEI Credential has been issued to the legal entity or person named in the vLEI Credential as the subject; and the qualified vLEI Issuer exercised reasonable care to perform the validation process set forth in the vLEI Ecosystem Governance Framework.";
-    }
-    @SuppressWarnings("unchecked")
-    public LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
-        return (LinkedHashMap<String, Object>) object;
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> castObjectToListMap(Object object) {
-        return (List<Map<String, Object>>) object;
     }
 }
