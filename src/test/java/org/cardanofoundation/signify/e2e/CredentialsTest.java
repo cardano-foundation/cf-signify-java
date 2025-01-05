@@ -21,6 +21,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.matchers.Not;
 
 import java.io.IOException;
 import java.security.DigestException;
@@ -568,12 +569,147 @@ public class CredentialsTest extends TestUtils {
                 Object op = verifierClient.getIpex().submitAdmit(
                         verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
+                waitOperation(verifierClient, op);
+                markAndRemoveNotification(verifierClient, verifierGrantNote);
+                Object verifierCredential = verifierClient.getCredentials().get(qviCredentialId);
+
+                LinkedHashMap<String, Object> verifierCredentialBody = castObjectToLinkedHashMap(verifierCredential);
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(verifierCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(verifierCredentialBody.get("status"));
+                String s = sad.get("s").toString();
+                String i = sad.get("i").toString();
+                String sStatus = status.get("s").toString();
+
+                assertEquals(QVI_SCHEMA_SAID, s);
+                assertEquals(issuerAid.prefix, i);
+                assertEquals("0", sStatus);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Holder IPEX present response", () -> {
+            try {
+                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn/ipex/admit");
+                markAndRemoveNotification(holderClient, holderNotifications.getFirst());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Map<String, Object> holderRegistry = testSteps.step("Holder create registry for LE credential", () -> {
+            String registryName = "vLEI-test-registry";
+            CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
+            registryArgs.setName(holderAid.name);
+            registryArgs.setRegistryName(registryName);
+
+            try {
+                RegistryResult regResult = holderClient.getRegistries().create(registryArgs);
+
+                waitOperation(holderClient, regResult.op());
+                Object registries = holderClient.getRegistries().list(holderAid.name);
+                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
+
+                assertTrue(!registriesList.isEmpty());
+                return registriesList.getFirst();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        String leCredentialId = testSteps.step("Holder create LE (chained) credential", () -> {
+            try {
+                Object qviCredential = holderClient.getCredentials().get(qviCredentialId);
+                LinkedHashMap<String, Object> qviCredentialBody = castObjectToLinkedHashMap(qviCredential);
+                LinkedHashMap<String, Object> sadBody = castObjectToLinkedHashMap(qviCredentialBody.get("sad"));
+
+                Map<String, Object> additionalProperties = new LinkedHashMap<>();
+                additionalProperties.put("LEI", "5493001KJTIIGC8Y1R17");
+
+                CredentialData.CredentialSubject cSubject  = CredentialData.CredentialSubject.builder().build();
+                cSubject.setI(legalEntityAid.prefix);
+                cSubject.setAdditionalProperties(additionalProperties);
+
+                Map<String, Object> usageDisclaimer = new LinkedHashMap<>();
+                usageDisclaimer.put("l", StringData.USAGE_DISCLAIMER);
+                Map<String, Object> issuanceDisclaimer = new LinkedHashMap<>();
+                issuanceDisclaimer.put("l", StringData.ISSUANCE_DISCLAIMER);
+
+                Map<String, Object> sad = new LinkedHashMap<>();
+                sad.put("d", "");
+                sad.put("usageDisclaimer", usageDisclaimer);
+                sad.put("issuanceDisclaimer", issuanceDisclaimer);
+
+                Map<String, Object> qvi = new LinkedHashMap<>();
+                qvi.put("n", sadBody.get("d"));
+                qvi.put("s", sadBody.get("s"));
+
+                Map<String, Object> e = new LinkedHashMap<>();
+                e.put("d", "");
+                e.put("qvi", qvi);
+
+                CredentialData cData = CredentialData.builder().build();
+                cData.setA(cSubject);
+                cData.setRi(holderRegistry.get("regk").toString());
+                cData.setS(LE_SCHEMA_SAID);
+                cData.setR(sad);
+                cData.setE(e);
+
+                IssueCredentialResult result = holderClient.getCredentials().issue(holderAid.name, cData);
+                waitOperation(holderClient, result.getOp());
+                return result.getAcdc().getKed().get("d").toString();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("LE credential IPEX grant", () -> {
+            String dt = createTimestamp();
+            try {
+                Object leCredential = holderClient.getCredentials().get(leCredentialId);
+
+                LinkedHashMap<String, Object> leCredentialBody = castObjectToLinkedHashMap(leCredential);
+                assertTrue(!leCredentialBody.isEmpty());
+
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(leCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> anc = castObjectToLinkedHashMap(leCredentialBody.get("anc"));
+                LinkedHashMap<String, Object> iss = castObjectToLinkedHashMap(leCredentialBody.get("iss"));
+
+                IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
+                grantArgs.setSenderName(holderAid.name);
+                grantArgs.setAcdc(new Serder(sad));
+                grantArgs.setAnc(new Serder(anc));
+                grantArgs.setIss(new Serder(iss));
+                grantArgs.setAncAttachment(null);
+                grantArgs.setRecipient(legalEntityAid.prefix);
+                grantArgs.setDatetime(dt);
+
+                Exchanging.ExchangeMessageResult result = holderClient.getIpex().grant(grantArgs);
+                Object op = holderClient.getIpex().submitGrant(
+                        holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
+                );
+                waitOperation(holderClient, op);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Legal Entity IPEX admit", () -> {
+            try {
+                List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn/ipex/grant");
+                Notification notification = notifications.getFirst();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
+
+    public static class StringData {
+        public static final String USAGE_DISCLAIMER = "Usage of a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, does not assert that the Legal Entity is trustworthy, honest, reputable in its business dealings, safe to do business with, or compliant with any laws or that an implied or expressly intended purpose will be fulfilled.";
+        public static final String ISSUANCE_DISCLAIMER = "All information in a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, is accurate as of the date the validation process was complete. The vLEI Credential has been issued to the legal entity or person named in the vLEI Credential as the subject; and the qualified vLEI Issuer exercised reasonable care to perform the validation process set forth in the vLEI Ecosystem Governance Framework.";
+    }
     @SuppressWarnings("unchecked")
     public LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
         return (LinkedHashMap<String, Object>) object;
