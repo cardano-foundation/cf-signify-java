@@ -106,7 +106,7 @@ public class Contacting {
             String method = "PUT";
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("said", said);
-            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+            return this.client.fetch(path, method, data, null);
         }
     }
 

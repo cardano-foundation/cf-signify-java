@@ -151,7 +151,7 @@ public class MultisigUtils {
             States.HabState multisigAID,
             States.HabState recipientAID,
             String timestamp
-    ) throws SodiumException, DigestException, IOException, ExecutionException, InterruptedException {
+    ) throws Exception {
         String grantMsgSaid = TestUtils.waitAndMarkNotification(client, "/exn/ipex/grant");
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
@@ -259,7 +259,7 @@ public class MultisigUtils {
             String registryName,
             String nonce,
             boolean isInitiator
-    ) throws SodiumException, DigestException, IOException, InterruptedException {
+    ) throws Exception {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
         }
@@ -372,7 +372,7 @@ public class MultisigUtils {
             Object credential,
             String timestamp,
             boolean isInitiator
-    ) throws SodiumException, DigestException, IOException, ExecutionException, InterruptedException {
+    ) throws Exception {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
@@ -438,7 +438,7 @@ public class MultisigUtils {
             String multisigAIDName,
             CredentialData kargsIss,
             boolean isInitiator
-    ) throws SodiumException, DigestException, IOException, InterruptedException {
+    ) throws Exception {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/iss");
         }
