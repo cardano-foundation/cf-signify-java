@@ -127,12 +127,14 @@ public class ChallengesTest extends TestUtils {
 
         // List Client 1 contacts
         Contacting.Contacts contacts1 = client1.getContacts();
-        Contacting.Contact[] client1Contacts = contacts1.list(null, null, null);
+        Contacting.Contact[] client1Contacts = contacts1.list();
         Contacting.Contact bobContact = findContact(client1Contacts, "bob");
         assert bobContact != null;
         assertEquals("bob", bobContact.getAlias());
         try {
-            List<HashMap<String, Object>> bobcontactMap = objectMapper.readValue(bobContact.getAdditionalProperties().toString(), new TypeReference<List<HashMap<String, Object>>>() {
+            List<HashMap<String, Object>> bobcontactMap = objectMapper.readValue(
+                    bobContact.getAdditionalProperties().get("challenges").toString(),
+                    new TypeReference<>() {
             });
             assertEquals(0, bobcontactMap.size());
         } catch (Exception ex) {
@@ -159,28 +161,20 @@ public class ChallengesTest extends TestUtils {
             }
         }
         Serder exn = new Serder((Map<String, Object>) opResponse.get("exn"));
-//        client1.getChallenges().responded((String) opResponse2.get("i"), (String) exn.getKed().get("d"));
-
-        // Verify Bob's challenges in Alice's contacts
-//        client1Contacts = contacts1.list(null, null, null);
-//        bobContact = findContact(client1Contacts, "bob");
-//        assert bobContact != null;
-//
-
-        List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
-        assertOperations(clientList);
+        client1.getChallenges().responded((String) opResponse2.get("i"), (String) exn.getKed().get("d"));
+        System.out.println("Alice marked challenge response as accepted");
 
         // Check Bob's challenge in contacts
         client1Contacts = client1.getContacts().list();
-        bobContact = Arrays.stream(client1Contacts)
-            .filter(c -> "bob".equals(c.getAlias()))
-            .findFirst()
-            .orElse(null);
+        bobContact = findContact(client1Contacts, "bob");
 
         assertNotNull(bobContact);
         Object challenges = bobContact.get("challenges");
         assertInstanceOf(List.class, challenges);
         assertTrue((Boolean) Utils.toMap(((List<?>) challenges).getFirst()).get("authenticated"));
+
+        List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
+        assertOperations(clientList);
     }
 
     private static Contacting.Contact findContact(Contacting.Contact[] contacts, String alias) {
