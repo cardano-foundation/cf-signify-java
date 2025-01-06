@@ -24,6 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.cardanofoundation.signify.core.States.convertToStates;
+
 public class Keeping {
     // External module interface
     public interface ExternalModuleType {
@@ -678,12 +680,14 @@ public class Keeping {
             this.signers = new ArrayList<>();
 
             if (states != null) {
+                states = convertToStates(states);
                 keys = states.stream()
                         .map(state -> state.getK().getFirst())
                         .collect(Collectors.toList());
             }
 
             if (rstates != null) {
+                rstates = convertToStates(rstates);
                 ndigs = rstates.stream()
                         .map(state -> state.getN().getFirst())
                         .collect(Collectors.toList());

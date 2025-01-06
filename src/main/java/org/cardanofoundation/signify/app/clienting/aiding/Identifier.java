@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
+import static org.cardanofoundation.signify.core.States.convertToStates;
 
 public class Identifier {
     public final IdentifierDeps client;
@@ -219,8 +220,8 @@ public class Identifier {
         jsondata.put("icp", serder.getKed());
         jsondata.put("sigs", sigs);
         jsondata.put("proxy", proxy);
-        jsondata.put("smids", states != null ? ((List<States.State>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
-        jsondata.put("rmids", rstates != null ? ((List<States.State>) rstates).stream().map(States.State::getI).collect(Collectors.toList()) : null);
+        jsondata.put("smids", states != null ? convertToStates((List<?>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
+        jsondata.put("rmids", rstates != null ? convertToStates((List<?>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
 
         jsondata.put(algo.getValue(), keeper.getParams().toMap());
 
