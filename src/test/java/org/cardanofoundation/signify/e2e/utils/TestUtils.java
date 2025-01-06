@@ -21,7 +21,6 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.modules.IssuerRegistry;
-import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -394,7 +394,7 @@ public class TestUtils {
 
         Object credential = null;
         if (!credentialListBody.isEmpty()) {
-            Assertions.assertEquals(1, credentialListBody.size());
+            assertEquals(1, credentialListBody.size());
             credential = credentialListBody.getFirst();
         }
         return credential;

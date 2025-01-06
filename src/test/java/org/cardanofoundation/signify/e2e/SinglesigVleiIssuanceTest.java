@@ -1,17 +1,24 @@
 package org.cardanofoundation.signify.e2e;
 
+import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
+import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Saider;
+import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.e2e.modules.IssuerRegistry;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
+import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SinglesigVleiIssuanceTest extends TestUtils {
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -101,11 +108,12 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         Saider.SaidifyResult OOR_RULES = LE_RULES;
         Saider.SaidifyResult OOR_AUTH_RULES = LE_RULES;
 
-        Map<String, Object> CRED_RETRY_DEFAULTS = new LinkedHashMap<>();
-        CRED_RETRY_DEFAULTS.put("maxSleep", "10000");
-        CRED_RETRY_DEFAULTS.put("minSleep", "1000");
-        CRED_RETRY_DEFAULTS.put("maxRetries", null);
-        CRED_RETRY_DEFAULTS.put("timeout", "30000");
+        Retry.RetryOptions CRED_RETRY_DEFAULTS = Retry.RetryOptions.builder()
+                .maxSleep(10000)
+                .minSleep(1000)
+                .maxRetries(null)
+                .timeout(30000)
+                .build();
 
         System.out.println("Created data successfully");
 
@@ -168,6 +176,38 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
                 null
         );
 
+        Map<String, Object> qviCredBody = castObjectToLinkedHashMap(qviCred);
+        Map<String, Object> sad = castObjectToLinkedHashMap(qviCredBody.get("sad"));
+        Object qviCredHolder = getReceivedCredential(qviClient, sad.get("d").toString());
+
+        if (qviCredHolder == null) {
+            sendGrantMessage(gleifClient, gleifAid, qviAid, qviCredBody);
+            sendAdmitMessage(qviClient, qviAid, gleifAid);
+        }
+
+        qviCredHolder = retry(() -> {
+            try {
+                Object cred = getReceivedCredential(qviClient, sad.get("d").toString());
+                assert(cred != null);
+                return cred;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, CRED_RETRY_DEFAULTS);
+
+        Map<String, Object> qviCredHolderBody = castObjectToLinkedHashMap(qviCredHolder);
+        Map<String, Object> sadBody = castObjectToLinkedHashMap(qviCredHolderBody.get("sad"));
+        Map<String, Object> a = castObjectToLinkedHashMap(sadBody.get("a"));
+        Map<String, Object> statusBody = castObjectToLinkedHashMap(qviCredHolderBody.get("status"));
+
+        assertEquals(sadBody.get("d").toString(), sad.get("d").toString());
+        assertEquals(sadBody.get("s").toString(), QVI_SCHEMA_SAID);
+        assertEquals(sadBody.get("i").toString(), gleifAid.prefix);
+        assertEquals(a.get("i").toString(), qviAid.prefix);
+        assertEquals("0", statusBody.get("s").toString());
+        assertNotNull(qviCredHolderBody.get("atc"));
+
+        System.out.println("Issuing LE vLEI Credential");
     }
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
@@ -191,6 +231,58 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             registry.setRegk(registryBody.get("regk").toString());
         }
         return registry;
+    }
+
+    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Map<String, Object> credential) throws Exception {
+        Map<String, Object> sad = castObjectToLinkedHashMap(credential.get("sad"));
+        Map<String, Object> anc = castObjectToLinkedHashMap(credential.get("anc"));
+        Map<String, Object> iss = castObjectToLinkedHashMap(credential.get("iss"));
+
+        IpexGrantArgs grantArgs = IpexGrantArgs.builder()
+                .senderName(senderAid.name)
+                .acdc(new Serder(sad))
+                .anc(new Serder(anc))
+                .iss(new Serder(iss))
+                .ancAttachment(null)
+                .recipient(recipientAid.prefix)
+                .datetime(createTimestamp())
+                .build();
+
+        Exchanging.ExchangeMessageResult result = senderClient.getIpex().grant(grantArgs);
+        Object op = senderClient.getIpex().submitGrant(
+                senderAid.name,
+                result.exn(),
+                result.sigs(),
+                result.atc(),
+                Collections.singletonList(recipientAid.prefix)
+        );
+        waitOperations(senderClient, op);
+    }
+
+    public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) throws Exception {
+        Thread.sleep(2000);
+        List<Notification> notifications = waitForNotifications(senderClient, "/exn/ipex/grant");
+        assertEquals(1, notifications.size());
+        Notification grantNotification = notifications.getFirst();
+
+        IpexAdmitArgs admitArgs = IpexAdmitArgs.builder()
+                .senderName(senderAid.name)
+                .message("")
+                .grantSaid(grantNotification.a.d)
+                .recipient(recipientAid.prefix)
+                .datetime(createTimestamp())
+                .build();
+        Exchanging.ExchangeMessageResult result = senderClient.getIpex().admit(admitArgs);
+
+        Object op = senderClient.getIpex().submitAdmit(
+                senderAid.name,
+                result.exn(),
+                result.sigs(),
+                result.atc(),
+                Collections.singletonList(recipientAid.prefix)
+        );
+        waitOperations(senderClient, op);
+        markAndRemoveNotification(senderClient, grantNotification);
     }
 
     public static class DataString {
