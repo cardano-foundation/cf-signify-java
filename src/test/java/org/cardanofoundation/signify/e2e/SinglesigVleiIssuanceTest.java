@@ -17,8 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SinglesigVleiIssuanceTest extends TestUtils {
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -177,8 +176,8 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         );
 
         Map<String, Object> qviCredBody = castObjectToLinkedHashMap(qviCred);
-        Map<String, Object> sad = castObjectToLinkedHashMap(qviCredBody.get("sad"));
-        Object qviCredHolder = getReceivedCredential(qviClient, sad.get("d").toString());
+        Map<String, Object> sadQviCred = castObjectToLinkedHashMap(qviCredBody.get("sad"));
+        Object qviCredHolder = getReceivedCredential(qviClient, sadQviCred.get("d").toString());
 
         if (qviCredHolder == null) {
             sendGrantMessage(gleifClient, gleifAid, qviAid, qviCredBody);
@@ -187,7 +186,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
 
         qviCredHolder = retry(() -> {
             try {
-                Object cred = getReceivedCredential(qviClient, sad.get("d").toString());
+                Object cred = getReceivedCredential(qviClient, sadQviCred.get("d").toString());
                 assert(cred != null);
                 return cred;
             } catch (Exception e) {
@@ -196,18 +195,73 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         }, CRED_RETRY_DEFAULTS);
 
         Map<String, Object> qviCredHolderBody = castObjectToLinkedHashMap(qviCredHolder);
-        Map<String, Object> sadBody = castObjectToLinkedHashMap(qviCredHolderBody.get("sad"));
-        Map<String, Object> a = castObjectToLinkedHashMap(sadBody.get("a"));
+        Map<String, Object> sadQviCredHolder = castObjectToLinkedHashMap(qviCredHolderBody.get("sad"));
+        Map<String, Object> a = castObjectToLinkedHashMap(sadQviCredHolder.get("a"));
         Map<String, Object> statusBody = castObjectToLinkedHashMap(qviCredHolderBody.get("status"));
 
-        assertEquals(sadBody.get("d").toString(), sad.get("d").toString());
-        assertEquals(sadBody.get("s").toString(), QVI_SCHEMA_SAID);
-        assertEquals(sadBody.get("i").toString(), gleifAid.prefix);
+        assertEquals(sadQviCredHolder.get("d").toString(), sadQviCred.get("d").toString());
+        assertEquals(sadQviCredHolder.get("s").toString(), QVI_SCHEMA_SAID);
+        assertEquals(sadQviCredHolder.get("i").toString(), gleifAid.prefix);
         assertEquals(a.get("i").toString(), qviAid.prefix);
         assertEquals("0", statusBody.get("s").toString());
         assertNotNull(qviCredHolderBody.get("atc"));
 
         System.out.println("Issuing LE vLEI Credential");
+
+        Map<String, Object> qvi = new LinkedHashMap<>();
+        qvi.put("n", sadQviCred.get("d").toString());
+        qvi.put("s", sadQviCred.get("s").toString());
+
+        Map<String, Object> leCredSource = new LinkedHashMap<>();
+        leCredSource.put("d", "");
+        leCredSource.put("qvi", qvi);
+
+        Object leCred = getOrIssueCredential(
+                qviClient,
+                qviAid,
+                leAid,
+                qviRegistry,
+                leData,
+                LE_SCHEMA_SAID,
+                LE_RULES_BODY,
+                leCredSource
+        );
+        Map<String, Object> leCredSourceBody = castObjectToLinkedHashMap(leCred);
+        Map<String, Object> sadLeCred = castObjectToLinkedHashMap(leCredSourceBody.get("sad"));
+        Object leCredHolder = getReceivedCredential(leClient, sadLeCred.get("d").toString());
+
+        if (leCredHolder == null) {
+            sendGrantMessage(qviClient, qviAid, leAid, leCredSourceBody);
+            sendAdmitMessage(leClient, leAid, qviAid);
+
+            leCredHolder = retry(() -> {
+                try {
+                    Object cred = getReceivedCredential(leClient, sadLeCred.get("d").toString());
+                    assert(cred != null);
+                    return cred;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, CRED_RETRY_DEFAULTS);
+        }
+
+        Map<String, Object> leCredHolderBody = castObjectToLinkedHashMap(leCredHolder);
+
+        Map<String, Object> sadLeCredHolder = castObjectToLinkedHashMap(leCredHolderBody.get("sad"));
+        Map<String, Object> aLeCredHolder = castObjectToLinkedHashMap(sadLeCredHolder.get("a"));
+        Map<String, Object> eLeCredHolder = castObjectToLinkedHashMap(sadLeCredHolder.get("e"));
+        Map<String, Object> qviLeCredHolder = castObjectToLinkedHashMap(eLeCredHolder.get("qvi"));
+        Map<String, Object> statusLeCredHolder = castObjectToLinkedHashMap(leCredHolderBody.get("status"));
+
+        assertEquals(sadLeCred.get("d").toString(), sadLeCredHolder.get("d").toString());
+        assertEquals(LE_SCHEMA_SAID, sadLeCredHolder.get("s").toString());
+        assertEquals(qviAid.prefix, sadLeCredHolder.get("i").toString());
+        assertEquals(leAid.prefix, aLeCredHolder.get("i").toString());
+        assertEquals(sadQviCred.get("d").toString(), qviLeCredHolder.get("n").toString());
+        assertEquals("0", statusLeCredHolder.get("s").toString());
+        assertNotNull(leCredHolderBody.get("atc"));
+
+        System.out.println("Issuing ECR vLEI Credential from LE");
     }
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
