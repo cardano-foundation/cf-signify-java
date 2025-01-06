@@ -296,6 +296,19 @@ public class TestUtils {
     }
 
     public static Object getOrIssueCredential(
+        SignifyClient issuerClient,
+        Aid issuerAid,
+        Aid recipientAid,
+        IssuerRegistry regk,
+        Map<String, Object> credData,
+        String schema,
+        Map<String, Object> rules,
+        Map<String, Object> source
+    ) throws Exception {
+        return getOrIssueCredential(issuerClient, issuerAid, recipientAid, regk, credData, schema, rules, source, false);
+    }
+
+    public static Object getOrIssueCredential(
             SignifyClient issuerClient,
             Aid issuerAid,
             Aid recipientAid,
@@ -303,17 +316,25 @@ public class TestUtils {
             Map<String, Object> credData,
             String schema,
             Map<String, Object> rules,
-            Map<String, Object> source
+            Map<String, Object> source,
+            Boolean privacy
     ) throws Exception {
-        Boolean privacy = false;
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
 
-        Object credentialList = issuerClient.getCredentials().list(credentialFilter);
-        ArrayList<String> credentialListBody = (ArrayList<String>) credentialList;
-        if (!credentialListBody.isEmpty()) {
-            /**
-             * TO DO
-             */
+        List<String> credentialList = Utils.toList(issuerClient.getCredentials().list(credentialFilter));
+        if (credentialList != null && !credentialList.isEmpty()) {
+            return credentialList.stream()
+                .filter(cred -> {
+                    Map<String, Object> credMap = Utils.toMap(cred);
+                    Map<String, Object> sad = Utils.toMap(credMap.get("sad"));
+                    Map<String, Object> a = Utils.toMap(sad.get("a"));
+
+                    return schema.equals(sad.get("s")) &&
+                        issuerAid.prefix.equals(sad.get("i")) &&
+                        recipientAid.prefix.equals(a.get("i"));
+                })
+                .findFirst()
+                .orElse(null);
         }
 
         CredentialData.CredentialSubject a = CredentialData.CredentialSubject.builder().build();
