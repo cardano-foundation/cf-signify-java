@@ -84,28 +84,25 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         Map<String, Object> privacyDisclaimer1 = new HashMap<>();
         privacyDisclaimer.put("l", DataString.PRIVACY_DISCLAIMER_1);
 
-        Map<String, Object> LE_RULES_BODY = new LinkedHashMap<>();
-        LE_RULES_BODY.put("d", "");
-        LE_RULES_BODY.put("usageDisclaimer", usageDisclaimer);
-        LE_RULES_BODY.put("issuanceDisclaimer", issuanceDisclaimer);
+        Map<String, Object> LE_RULES = new LinkedHashMap<>();
+        LE_RULES.put("d", "");
+        LE_RULES.put("usageDisclaimer", usageDisclaimer);
+        LE_RULES.put("issuanceDisclaimer", issuanceDisclaimer);
 
-        Map<String, Object> ECR_RULES_BODY = new LinkedHashMap<>();
-        ECR_RULES_BODY.put("d", "");
-        ECR_RULES_BODY.put("usageDisclaimer", usageDisclaimer);
-        ECR_RULES_BODY.put("issuanceDisclaimer", issuanceDisclaimer);
-        ECR_RULES_BODY.put("privacyDisclaimer", privacyDisclaimer);
+        Map<String, Object> ECR_RULES = new LinkedHashMap<>();
+        ECR_RULES.put("d", "");
+        ECR_RULES.put("usageDisclaimer", usageDisclaimer);
+        ECR_RULES.put("issuanceDisclaimer", issuanceDisclaimer);
+        ECR_RULES.put("privacyDisclaimer", privacyDisclaimer);
 
-        Map<String, Object> ECR_AUTH_RULES_BODY = new LinkedHashMap<>();
-        ECR_AUTH_RULES_BODY.put("d", "");
-        ECR_AUTH_RULES_BODY.put("usageDisclaimer", usageDisclaimer);
-        ECR_AUTH_RULES_BODY.put("issuanceDisclaimer", issuanceDisclaimer);
-        ECR_AUTH_RULES_BODY.put("privacyDisclaimer", privacyDisclaimer1);
+        Map<String, Object> ECR_AUTH_RULES = new LinkedHashMap<>();
+        ECR_AUTH_RULES.put("d", "");
+        ECR_AUTH_RULES.put("usageDisclaimer", usageDisclaimer);
+        ECR_AUTH_RULES.put("issuanceDisclaimer", issuanceDisclaimer);
+        ECR_AUTH_RULES.put("privacyDisclaimer", privacyDisclaimer1);
 
-        Saider.SaidifyResult LE_RULES = Saider.saidify(LE_RULES_BODY);
-        Saider.SaidifyResult ECR_RULES = Saider.saidify(ECR_RULES_BODY);
-        Saider.SaidifyResult ECR_AUTH_RULES = Saider.saidify(ECR_AUTH_RULES_BODY);
-        Saider.SaidifyResult OOR_RULES = LE_RULES;
-        Saider.SaidifyResult OOR_AUTH_RULES = LE_RULES;
+        Map<String, Object> OOR_RULES = LE_RULES;
+        Map<String, Object> OOR_AUTH_RULES = LE_RULES;
 
         Retry.RetryOptions CRED_RETRY_DEFAULTS = Retry.RetryOptions.builder()
                 .maxSleep(10000)
@@ -223,7 +220,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
                 qviRegistry,
                 leData,
                 LE_SCHEMA_SAID,
-                LE_RULES_BODY,
+                LE_RULES,
                 leCredSource
         );
         Map<String, Object> leCredSourceBody = castObjectToLinkedHashMap(leCred);
@@ -262,6 +259,63 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         assertNotNull(leCredHolderBody.get("atc"));
 
         System.out.println("Issuing ECR vLEI Credential from LE");
+
+        Map<String, Object> le = new LinkedHashMap<>();
+        qvi.put("n", sadLeCred.get("d").toString());
+        qvi.put("s", sadLeCred.get("s").toString());
+
+        Map<String, Object> ecrCredSource = new LinkedHashMap<>();
+        ecrCredSource.put("d", "");
+        ecrCredSource.put("le", le);
+
+        Object ecrCred = getOrIssueCredential(
+                leClient,
+                leAid,
+                roleAid,
+                leRegistry,
+                ecrData,
+                ECR_SCHEMA_SAID,
+                ECR_RULES,
+                ecrCredSource,
+                true
+        );
+
+        Map<String, Object> ecrCredBody = castObjectToLinkedHashMap(ecrCred);
+        Map<String, Object> sadEcrCred = castObjectToLinkedHashMap(ecrCredBody.get("sad"));
+        Object ecrCredHolder = getReceivedCredential(leClient, sadEcrCred.get("d").toString());
+
+        if (ecrCredHolder == null) {
+            sendGrantMessage(leClient, leAid, roleAid, ecrCredBody);
+            sendAdmitMessage(roleClient, roleAid, leAid);
+
+            ecrCredHolder = retry(() -> {
+                try {
+                    Object cred = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
+                    assert(cred != null);
+                    return cred;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, CRED_RETRY_DEFAULTS);
+        }
+
+        Map<String, Object> ecrCredHolderBody = castObjectToLinkedHashMap(ecrCredHolder);
+
+        Map<String, Object> sadEcrCredHolder = castObjectToLinkedHashMap(ecrCredHolderBody.get("sad"));
+        Map<String, Object> aEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("a"));
+        Map<String, Object> eEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("e"));
+        Map<String, Object> leEcrCredHolder = castObjectToLinkedHashMap(eEcrCredHolder.get("le"));
+        Map<String, Object> statusEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("status"));
+
+        assertEquals(sadEcrCred.get("d").toString(), sadEcrCredHolder.get("d").toString());
+        assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder.get("s").toString());
+        assertEquals(leAid.prefix, sadEcrCredHolder.get("i").toString());
+        assertEquals(roleAid.prefix, aEcrCredHolder.get("i").toString());
+        assertEquals(sadLeCred.get("d").toString(), leEcrCredHolder.get("n").toString());
+        assertEquals("0", statusEcrCredHolder.get("s").toString());
+        assertNotNull(ecrCredHolderBody.get("atc"));
+
+        System.out.println("Issuing ECR AUTH vLEI Credential");
     }
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
