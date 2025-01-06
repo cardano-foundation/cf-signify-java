@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.Oobis;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.core.States;
@@ -12,13 +11,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class DelegationMultisigTest {
+public class DelegationMultisigTest extends BaseIntegrationTest {
 
     TestSteps testSteps = new TestSteps();
     String delegatorGroupName = "delegator_group";
@@ -33,30 +31,20 @@ public class DelegationMultisigTest {
     void delegationMultisigTest() throws Exception {
 
         // Boot four clients
-        List<CompletableFuture<SignifyClient>> bootFutures = new ArrayList<>();
-        bootFutures.add(bootClient());
-        bootFutures.add(bootClient());
-        bootFutures.add(bootClient());
-        bootFutures.add(bootClient());
-
-        CompletableFuture.allOf(bootFutures.toArray(new CompletableFuture[0])).join();
-        SignifyClient delegator1Client = bootFutures.get(0).get();
-        SignifyClient delegator2Client = bootFutures.get(1).get();
-        SignifyClient delegatee1Client = bootFutures.get(2).get();
-        SignifyClient delegatee2Client = bootFutures.get(3).get();
+        List<SignifyClient> signifyClients = getOrCreateClientsAsync(4);
+        SignifyClient delegator1Client = signifyClients.get(0);
+        SignifyClient delegator2Client = signifyClients.get(1);
+        SignifyClient delegatee1Client = signifyClients.get(2);
+        SignifyClient delegatee2Client = signifyClients.get(3);
 
         // Create delegator and delegatee identifiers clients
-        List<States.HabState> aids = testSteps.step("Creating single sig aids", () -> {
-            List<CompletableFuture<States.HabState>> aidFutures = new ArrayList<>();
-            aidFutures.add(createAid(delegator1Client, delegator1Name));
-            aidFutures.add(createAid(delegator2Client, delegator2Name));
-            aidFutures.add(createAid(delegatee1Client, delegatee1Name));
-            aidFutures.add(createAid(delegatee2Client, delegatee2Name));
-
-            return aidFutures.stream()
-                    .map(CompletableFuture::join)
-                    .toList();
-        });
+        List<States.HabState> aids = testSteps.step("Creating single sig aids", () ->
+                createAidAndGetHabStateAsync(
+                        new CreateAidArgs(delegator1Client, delegator1Name),
+                        new CreateAidArgs(delegator2Client, delegator2Name),
+                        new CreateAidArgs(delegatee1Client, delegatee1Name),
+                        new CreateAidArgs(delegatee2Client, delegatee2Name))
+        );
 
         States.HabState delegator1Aid = aids.get(0);
         States.HabState delegator2Aid = aids.get(1);
@@ -64,17 +52,13 @@ public class DelegationMultisigTest {
         States.HabState delegatee2Aid = aids.get(3);
 
         // Exchange OOBIs
-        List<Object> oobis = testSteps.step("Exchanging OOBIs", () -> {
-            List<CompletableFuture<Object>> oobiFutures = new ArrayList<>();
-            oobiFutures.add(getOobis(delegator1Client.getOobis(), delegator1Name, "agent"));
-            oobiFutures.add(getOobis(delegator2Client.getOobis(), delegator2Name, "agent"));
-            oobiFutures.add(getOobis(delegatee1Client.getOobis(), delegatee1Name, "agent"));
-            oobiFutures.add(getOobis(delegatee2Client.getOobis(), delegatee2Name, "agent"));
-
-            return oobiFutures.stream()
-                    .map(CompletableFuture::join)
-                    .toList();
-        });
+        List<Object> oobis = testSteps.step("Exchanging OOBIs", () ->
+                getOobisAsync(
+                        new GetOobisArgs(delegator1Client, delegator1Name, "agent"),
+                        new GetOobisArgs(delegator2Client, delegator2Name, "agent"),
+                        new GetOobisArgs(delegatee1Client, delegatee1Name, "agent"),
+                        new GetOobisArgs(delegatee2Client, delegatee2Name, "agent")
+                ));
 
         Map<String, Object> delegator1Oobi = (Map<String, Object>) oobis.get(0);
         Map<String, Object> delegator2Oobi = (Map<String, Object>) oobis.get(1);
@@ -83,14 +67,12 @@ public class DelegationMultisigTest {
 
         // Resolve OOBIs
         testSteps.step("Resolving OOBIs", () -> {
-            List<CompletableFuture<Void>> resolveOobiFutures = new ArrayList<>();
-            resolveOobiFutures.add(resolveOobis(delegator1Client, ((List<String>) delegator2Oobi.get("oobis")).get(0), delegator2Name));
-            resolveOobiFutures.add(resolveOobis(delegator2Client, ((List<String>) delegator1Oobi.get("oobis")).get(0), delegator1Name));
-            resolveOobiFutures.add(resolveOobis(delegatee1Client, ((List<String>) delegatee2Oobi.get("oobis")).get(0), delegatee2Name));
-            resolveOobiFutures.add(resolveOobis(delegatee2Client, ((List<String>) delegatee1Oobi.get("oobis")).get(0), delegatee1Name));
-
-            CompletableFuture.allOf(resolveOobiFutures.toArray(new CompletableFuture[0])).join();
-
+            resolveOobisAsync(
+                    new ResolveOobisArgs(delegator1Client, ((List<String>) delegator2Oobi.get("oobis")).get(0), delegator2Name),
+                    new ResolveOobisArgs(delegator2Client, ((List<String>) delegator1Oobi.get("oobis")).get(0), delegator1Name),
+                    new ResolveOobisArgs(delegatee1Client, ((List<String>) delegatee2Oobi.get("oobis")).get(0), delegatee2Name),
+                    new ResolveOobisArgs(delegatee2Client, ((List<String>) delegatee1Oobi.get("oobis")).get(0), delegatee1Name)
+            );
         });
         System.out.println(
                 delegator1Name + "(" + delegator1Aid.getPrefix() + ") and " +
@@ -151,8 +133,10 @@ public class DelegationMultisigTest {
 
         String torpre = otor1.getName().split("\\.")[1];
 
-        TestUtils.waitOperation(delegator1Client, otor1);
-        TestUtils.waitOperation(delegator2Client, otor2);
+        waitOperationAsync(
+                new WaitOperationArgs(delegator1Client, otor1),
+                new WaitOperationArgs(delegator2Client, otor2)
+        );
 
         States.HabState adelegatorGroupName1 = delegator1Client.getIdentifier().get(delegatorGroupName);
         States.HabState adelegatorGroupName2 = delegator2Client.getIdentifier().get(delegatorGroupName);
@@ -182,10 +166,10 @@ public class DelegationMultisigTest {
                         timestamp,
                         false);
 
-                List<CompletableFuture<Object>> waitOperationFutures = new ArrayList<>();
-                opList1.forEach(op -> waitOperationFutures.add(waitOperation(delegator1Client, op)));
-                opList2.forEach(op -> waitOperationFutures.add(waitOperation(delegator2Client, op)));
-                CompletableFuture.allOf(waitOperationFutures.toArray(new CompletableFuture[0])).join();
+                List<WaitOperationArgs> waitOperationArgsList = new ArrayList<>();
+                opList1.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator1Client, op)));
+                opList2.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator2Client, op)));
+                waitOperationAsync(waitOperationArgsList.toArray(new WaitOperationArgs[0]));
 
                 TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
                 TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
@@ -207,8 +191,11 @@ public class DelegationMultisigTest {
         });
 
         String oobiGtor = delegatorGroupNameOobi.split("/agent/")[0];
-        getOrCreateContact(delegatee1Client, adelegatorGroupName.getName(), oobiGtor);
-        getOrCreateContact(delegatee2Client, adelegatorGroupName.getName(), oobiGtor);
+
+        getOrCreateContactAsync(
+                new GetOrCreateContactArgs(delegatee1Client, delegateeGroupName, oobiGtor),
+                new GetOrCreateContactArgs(delegatee2Client, delegateeGroupName, oobiGtor)
+        );
 
         Object opDelegatee1 = testSteps.step(delegatee1Name + "(" + delegatee1Aid.getPrefix() + ") initiated delegatee multisig, waiting for "
                 + delegatee2Name + "(" + delegatee2Aid.getPrefix() + ") to join...", () -> {
@@ -281,8 +268,13 @@ public class DelegationMultisigTest {
                         anchor,
                         false);
 
-                Operation dresult1 = TestUtils.waitOperation(delegator1Client, delApprOp1);
-                Operation dresult2 = TestUtils.waitOperation(delegator2Client, delApprOp2);
+                List<Operation> dresults = waitOperationAsync(
+                        new WaitOperationArgs(delegator1Client, delApprOp1),
+                        new WaitOperationArgs(delegator2Client, delApprOp2)
+                );
+
+                Operation dresult1 = dresults.get(0);
+                Operation dresult2 = dresults.get(1);
 
                 assertEquals(dresult1.getResponse(), dresult2.getResponse());
 
@@ -295,18 +287,21 @@ public class DelegationMultisigTest {
         Object queryOp1 = delegator1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
         Object queryOp2 = delegator2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
-        TestUtils.waitOperation(delegator1Client, queryOp1);
-        TestUtils.waitOperation(delegator2Client, queryOp2);
+        waitOperationAsync(
+                new WaitOperationArgs(delegator1Client, queryOp1),
+                new WaitOperationArgs(delegator2Client, queryOp2)
+        );
 
         // QARs query the GEDA's key state
         Object ksteetor1 = delegatee1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
         Object ksteetor2 = delegatee2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
-        TestUtils.waitOperation(delegatee1Client, ksteetor1);
-        TestUtils.waitOperation(delegatee2Client, ksteetor2);
-
-        TestUtils.waitOperation(delegatee1Client, opDelegatee1);
-        TestUtils.waitOperation(delegatee2Client, opDelegatee2);
+        waitOperationAsync(
+                new WaitOperationArgs(delegatee1Client, ksteetor1),
+                new WaitOperationArgs(delegatee2Client, ksteetor2),
+                new WaitOperationArgs(delegatee1Client, opDelegatee1),
+                new WaitOperationArgs(delegatee2Client, opDelegatee2)
+        );
         System.out.println("Delegated multisig created!");
 
         States.HabState agtee = delegatee1Client.getIdentifier().get(delegateeGroupName);
@@ -315,57 +310,5 @@ public class DelegationMultisigTest {
         // TODO check operations and notifications failures
         // assertOperations(List.of(delegator1Client, delegator2Client, delegatee1Client, delegatee2Client));
         // assertNotifications(List.of(delegator1Client, delegator2Client, delegatee1Client, delegatee2Client));
-    }
-
-
-    CompletableFuture<SignifyClient> bootClient() {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return getOrCreateClient();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    CompletableFuture<States.HabState> createAid(SignifyClient client, String name) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return TestUtils.createAidAndGetHabState(client, name);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    CompletableFuture<Object> getOobis(Oobis oobis, String name, String role) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return oobis.get(name, role);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    CompletableFuture<Void> resolveOobis(SignifyClient signifyClient, String oobi, String alias) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                TestUtils.resolveOobi(signifyClient, oobi, alias);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return null;
-        });
-    }
-
-    CompletableFuture<Object> waitOperation(SignifyClient client, Object op) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return TestUtils.waitOperation(client, op);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 }
