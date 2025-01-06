@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app.clienting.aiding;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -114,8 +115,8 @@ public class Identifier {
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
-        String isith = kargs.getIsith() != null ? (String) kargs.getIsith() : "1";
-        String nsith = kargs.getNsith() != null ? (String) kargs.getNsith() : "1";
+        String isith = kargs.getIsith() != null ? kargs.getIsith().toString() : "1";
+        String nsith = kargs.getNsith() != null ? kargs.getNsith().toString() : "1";
         List<String> wits = kargs.getWits() != null ? kargs.getWits() : new ArrayList<>();
         int toad = kargs.getToad() != null ? kargs.getToad() : 0;
         String dcode = kargs.getDcode() != null ? kargs.getDcode() : MatterCodex.Blake3_256.getValue();
@@ -210,13 +211,26 @@ public class Identifier {
         Keeping.SignResult signResult = keeper.sign(serder.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
+        List<String> smids = null;
+        List<String> rmids = null;
+
+        if (states != null) {
+            List<States.State> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
+            smids = stateDeserialized.stream().map(States.State::getI).toList();
+        }
+
+        if (rstates != null) {
+            List<States.State> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
+            rmids = rstateDeserialized.stream().map(States.State::getI).toList();
+        }
+
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("name", name);
         jsondata.put("icp", serder.getKed());
         jsondata.put("sigs", sigs);
         jsondata.put("proxy", proxy);
-        jsondata.put("smids", states != null ? ((List<States.State>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
-        jsondata.put("rmids", rstates != null ? ((List<States.State>) rstates).stream().map(States.State::getI).collect(Collectors.toList()) : null);
+        jsondata.put("smids", smids);
+        jsondata.put("rmids", rmids);
 
         jsondata.put(algo.getValue(), keeper.getParams().toMap());
 
