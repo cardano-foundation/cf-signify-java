@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SinglesigDRT extends TestUtils {
+public class SinglesigDRTTest extends TestUtils {
     private static SignifyClient delegator, delegate;
     private static String name1_id, name1_oobi;
     private static String contact1_id;
@@ -74,7 +74,7 @@ public class SinglesigDRT extends TestUtils {
 
         result = delegator.getIdentifier().interact("name1", seal);
         Object op1 = result.op();
-        Object op2 = delegate.getKeyStates().query(name1_id, 1, null);
+        Object op2 = delegate.getKeyStates().query(name1_id, "1", null);
 
         op = operationToObject(waitOperation(delegate, op));
         op1 = operationToObject(waitOperation(delegator, op1));
@@ -103,7 +103,7 @@ public class SinglesigDRT extends TestUtils {
 
         result = delegator.getIdentifier().interact("name1", seal);
         op1 = result.op();
-        op2 = delegate.getKeyStates().query(name1_id, 2, null);
+        op2 = delegate.getKeyStates().query(name1_id, "2", null);
 
         op = operationToObject(waitOperation(delegate, op));
         op1 = operationToObject(waitOperation(delegator, op1));

@@ -71,7 +71,7 @@ public class CoringTest extends BaseMockServerTest {
 
         keyStates.query(
             "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
-            1,
+            "1",
             "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao"
         );
         request = mockWebServer.takeRequest();

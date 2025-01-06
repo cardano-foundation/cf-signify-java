@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SinglesigROT extends TestUtils {
+public class SinglesigROTTest extends TestUtils {
     static SignifyClient client1, client2;
     static String contact1_id;
     static String name1_id, name1_oobi;
@@ -126,7 +126,7 @@ public class SinglesigROT extends TestUtils {
         );
 
         // refresh remote keystate
-        int sn = parseInteger(listKeyState1.getFirst().get("s").toString());
+        String sn = listKeyState1.getFirst().get("s").toString();
         Object op = client2.getKeyStates().query(contact1_id, sn, null);
         op = operationToObject(waitOperation(client2, op));
         if (op instanceof String) {

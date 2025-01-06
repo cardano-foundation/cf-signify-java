@@ -27,7 +27,6 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -72,6 +71,10 @@ public class Identifier {
                 range.total(),
                 response.body()
         );
+    }
+
+    public IdentifierListResponse list() throws SodiumException, IOException, InterruptedException {
+        return list(0, 24);
     }
 
     /**

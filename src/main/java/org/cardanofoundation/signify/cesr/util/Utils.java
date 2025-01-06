@@ -80,9 +80,9 @@ public class Utils {
         }
     }
 
-    public static <T> T fromJson(String json, Class clazz) {
+    public static <T> T fromJson(String json, Class<T> clazz) {
         try {
-            return (T) objectMapper.readValue(json, clazz);
+            return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
             throw new SerializeException("Error while parsing JSON: " + e.getMessage());
         }

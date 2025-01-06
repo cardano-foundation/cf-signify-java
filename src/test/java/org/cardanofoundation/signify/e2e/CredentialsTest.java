@@ -1,37 +1,23 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import io.qameta.allure.model.Link;
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialState;
-import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexApplyArgs;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexOfferArgs;
+import org.cardanofoundation.signify.app.credentialing.credentials.*;
+import org.cardanofoundation.signify.app.credentialing.ipex.*;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.plugins.MemberAccessor;
 
 import java.io.IOException;
-import java.io.ObjectStreamException;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -46,8 +32,6 @@ public class CredentialsTest extends TestUtils {
     private String QVI_SCHEMA_URL = vLEIServerHostUrl + "/" + QVI_SCHEMA_SAID;
     private String LE_SCHEMA_URL = vLEIServerHostUrl + "/" + LE_SCHEMA_SAID;
     TestSteps testSteps = new TestSteps();
-    Retry retry = new Retry();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static SignifyClient issuerClient, holderClient, verifierClient, legalEntityClient;
     private Aid issuerAid, holderAid, verifierAid, legalEntityAid;
@@ -84,18 +68,15 @@ public class CredentialsTest extends TestUtils {
     }
 
     @AfterAll
-    public static void cleanup() throws SodiumException, IOException, InterruptedException {
-        // TO-DO:
-//        assertOperations(Collections.singletonList(issuerClient));
-//        assertOperations(Collections.singletonList(holderClient));
-//        assertOperations(Collections.singletonList(verifierClient));
-//        assertOperations(Collections.singletonList(legalEntityClient));
-
-        // TO-DO: assertNotifications miss func in TestUtils
-//        assertNotifications(Collections.singletonList(issuerClient));
-//        assertNotifications(Collections.singletonList(holderClient));
-//        assertNotifications(Collections.singletonList(verifierClient));
-//        assertNotifications(Collections.singletonList(legalEntityClient));
+    public static void cleanup() throws Exception {
+        List<SignifyClient> clients = Arrays.asList(
+                issuerClient,
+                holderClient,
+                verifierClient,
+                legalEntityClient
+        );
+        assertOperations(clients);
+        assertNotifications(clients);
     }
 
     @Test
@@ -125,7 +106,7 @@ public class CredentialsTest extends TestUtils {
             registryArgs.setRegistryName(registryName);
             try {
                 RegistryResult regResult = issuerClient.getRegistries().create(registryArgs);
-                waitOperation(issuerClient, regResult.op());
+                waitOperations(issuerClient, regResult.op());
             } catch (IOException | InterruptedException | SodiumException | DigestException e) {
                 throw new RuntimeException(e);
             }
@@ -195,7 +176,7 @@ public class CredentialsTest extends TestUtils {
             cData.setA(a);
 
             IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
-            waitOperation(issuerClient, issResult.getOp());
+            waitOperations(issuerClient, issResult.getOp());
             return issResult.getAcdc().getKed().get("d").toString();
         });
 
@@ -294,7 +275,7 @@ public class CredentialsTest extends TestUtils {
                 Exchanging.ExchangeMessageResult result = issuerClient.getIpex().grant(gArgs);
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
                 Object op = issuerClient.getIpex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
-                waitOperation(issuerClient, op);
+                waitOperations(issuerClient, op);
             } catch (SodiumException | IOException | InterruptedException | DigestException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
@@ -303,7 +284,7 @@ public class CredentialsTest extends TestUtils {
         testSteps.step("Holder can get the credential status before or without holding", () -> {
             CredentialState state = CredentialState.builder().build();
             try {
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 Object result = holderClient.getCredentials().state(registrys.get("regk").toString(), qviCredentialId);
                 LinkedHashMap<String, Object> stateMap = castObjectToLinkedHashMap(result);
 
@@ -345,7 +326,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = holderClient.getIpex().submitAdmit(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
                 );
-                waitOperation(holderClient, op);
+                waitOperations(holderClient, op);
                 markAndRemoveNotification(holderClient, grantNotification);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -381,7 +362,7 @@ public class CredentialsTest extends TestUtils {
             }
             assertEquals(QVI_SCHEMA_SAID, sad.get("s"));
             assertEquals(issuerAid.prefix, sad.get("i"));
-            assertEquals("0",status.get("s") );
+            assertEquals("0", status.get("s"));
             assertNotNull(atc);
         });
 
@@ -398,7 +379,7 @@ public class CredentialsTest extends TestUtils {
                 Object op = verifierClient.getIpex().submitApply(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(verifierClient, op);
+                waitOperations(verifierClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -453,20 +434,332 @@ public class CredentialsTest extends TestUtils {
 
                 Exchanging.ExchangeMessageResult result = holderClient.getIpex().offer(offerArgs);
                 Object op = holderClient.getIpex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
-                waitOperation(holderClient, op);
+                waitOperations(holderClient, op);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Verifier receive offer and agree", () -> {
+            List<Notification> verifierNotifications;
+            try {
+                Thread.sleep(2000);
+                verifierNotifications = waitForNotifications(verifierClient, "/exn/ipex/offer");
+                Notification verifierOfferNote = verifierNotifications.getFirst();
+                assertNotNull(verifierOfferNote.a.d);
+
+                Object offer = verifierClient.getExchanges().get(verifierOfferNote.a.d);
+                LinkedHashMap<String, Object> offerBody = castObjectToLinkedHashMap(offer);
+                LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(offerBody.get("exn"));
+
+                offerSaid = exn.get("d").toString();
+                String p = exn.get("p").toString();
+
+                LinkedHashMap<String, Object> e = castObjectToLinkedHashMap(exn.get("e"));
+                LinkedHashMap<String, Object> acdc = castObjectToLinkedHashMap(e.get("acdc"));
+                LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(acdc.get("a"));
+                String LEI = a.get("LEI").toString();
+
+                assertEquals(applySaid, p);
+                assertEquals("5493001KJTIIGC8Y1R17", LEI);
+
+                markAndRemoveNotification(verifierClient, verifierOfferNote);
+
+                IpexAgreeArgs agreeArgs = IpexAgreeArgs.builder().build();
+                agreeArgs.setSenderName(verifierAid.name);
+                agreeArgs.setRecipient(holderAid.prefix);
+                agreeArgs.setOfferSaid(offerSaid);
+                agreeArgs.setDatetime(createTimestamp());
+
+                Exchanging.ExchangeMessageResult result = verifierClient.getIpex().agree(agreeArgs);
+                Object op = verifierClient.getIpex().submitAgree(
+                        verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
+                );
+                waitOperations(verifierClient, op);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Holder IPEX receive agree and grant/present", () -> {
+            List<Notification> holderNotifications;
+            try {
+                Thread.sleep(2000);
+                holderNotifications = waitForNotifications(holderClient, "/exn/ipex/agree");
+                Notification holderAgreeNote = holderNotifications.getFirst();
+                assertNotNull(holderAgreeNote.a.d);
+
+                Object agree = verifierClient.getExchanges().get(holderAgreeNote.a.d);
+                LinkedHashMap<String, Object> agreeBody = castObjectToLinkedHashMap(agree);
+                LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(agreeBody.get("exn"));
+                agreeSaid = exn.get("d").toString();
+                String agreeP = exn.get("p").toString();
+
+                assertEquals(offerSaid, agreeP);
+
+                markAndRemoveNotification(holderClient, holderAgreeNote);
+
+                Object holderCredential = holderClient.getCredentials().get(qviCredentialId);
+                LinkedHashMap<String, Object> holderCredentialBody = castObjectToLinkedHashMap(holderCredential);
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(holderCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> anc = castObjectToLinkedHashMap(holderCredentialBody.get("anc"));
+                LinkedHashMap<String, Object> iss = castObjectToLinkedHashMap(holderCredentialBody.get("iss"));
+                String atc = holderCredentialBody.get("atc").toString();
+                ArrayList<String> ancatcList = (ArrayList<String>) holderCredentialBody.get("ancatc");
+                String ancatc = ancatcList.getFirst();
+                String issAtc = holderCredentialBody.get("issatc").toString();
+
+                IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
+                grantArgs.setSenderName(holderAid.name);
+                grantArgs.setRecipient(verifierAid.prefix);
+                grantArgs.setAcdc(new Serder(sad));
+                grantArgs.setAnc(new Serder(anc));
+                grantArgs.setIss(new Serder(iss));
+                grantArgs.setAcdcAttachment(atc);
+                grantArgs.setAncAttachment(ancatc);
+                grantArgs.setIssAttachment(issAtc);
+                grantArgs.setAgreeSaid(agreeSaid);
+                grantArgs.setDatetime(createTimestamp());
+
+                Exchanging.ExchangeMessageResult result = holderClient.getIpex().grant(grantArgs);
+
+                Object op = holderClient.getIpex().submitGrant(
+                        holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
+                );
+                waitOperations(holderClient, op);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Verifier receives IPEX grant", () -> {
+            List<Notification> verifierNotifications;
+            try {
+                Thread.sleep(2000);
+                verifierNotifications = waitForNotifications(verifierClient, "/exn/ipex/grant");
+                Notification verifierGrantNote = verifierNotifications.getFirst();
+                assertNotNull(verifierGrantNote.a.d);
+
+                Object grant = holderClient.getExchanges().get(verifierGrantNote.a.d);
+                LinkedHashMap<String, Object> grantBody = castObjectToLinkedHashMap(grant);
+                LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(grantBody.get("exn"));
+                String p = exn.get("p").toString();
+
+                assertEquals(agreeSaid, p);
+
+                IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
+                admitArgs.setSenderName(verifierAid.name);
+                admitArgs.setMessage("");
+                admitArgs.setGrantSaid(verifierGrantNote.a.d);
+                admitArgs.setRecipient(holderAid.prefix);
+                admitArgs.setDatetime(createTimestamp());
+
+                Exchanging.ExchangeMessageResult result = verifierClient.getIpex().admit(admitArgs);
+                Object op = verifierClient.getIpex().submitAdmit(
+                        verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
+                );
+                waitOperations(verifierClient, op);
+                markAndRemoveNotification(verifierClient, verifierGrantNote);
+                Object verifierCredential = verifierClient.getCredentials().get(qviCredentialId);
+
+                LinkedHashMap<String, Object> verifierCredentialBody = castObjectToLinkedHashMap(verifierCredential);
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(verifierCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(verifierCredentialBody.get("status"));
+                String s = sad.get("s").toString();
+                String i = sad.get("i").toString();
+                String sStatus = status.get("s").toString();
+
+                assertEquals(QVI_SCHEMA_SAID, s);
+                assertEquals(issuerAid.prefix, i);
+                assertEquals("0", sStatus);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Holder IPEX present response", () -> {
+            try {
+                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn/ipex/admit");
+                markAndRemoveNotification(holderClient, holderNotifications.getFirst());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Map<String, Object> holderRegistry = testSteps.step("Holder create registry for LE credential", () -> {
+            String registryName = "vLEI-test-registry";
+            CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
+            registryArgs.setName(holderAid.name);
+            registryArgs.setRegistryName(registryName);
+
+            try {
+                RegistryResult regResult = holderClient.getRegistries().create(registryArgs);
+
+                waitOperations(holderClient, regResult.op());
+                Object registries = holderClient.getRegistries().list(holderAid.name);
+                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
+
+                assertTrue(!registriesList.isEmpty());
+                return registriesList.getFirst();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        String leCredentialId = testSteps.step("Holder create LE (chained) credential", () -> {
+            try {
+                Object qviCredential = holderClient.getCredentials().get(qviCredentialId);
+                LinkedHashMap<String, Object> qviCredentialBody = castObjectToLinkedHashMap(qviCredential);
+                LinkedHashMap<String, Object> sadBody = castObjectToLinkedHashMap(qviCredentialBody.get("sad"));
+
+                Map<String, Object> additionalProperties = new LinkedHashMap<>();
+                additionalProperties.put("LEI", "5493001KJTIIGC8Y1R17");
+
+                CredentialData.CredentialSubject cSubject  = CredentialData.CredentialSubject.builder().build();
+                cSubject.setI(legalEntityAid.prefix);
+                cSubject.setAdditionalProperties(additionalProperties);
+
+                Map<String, Object> usageDisclaimer = new LinkedHashMap<>();
+                usageDisclaimer.put("l", StringData.USAGE_DISCLAIMER);
+                Map<String, Object> issuanceDisclaimer = new LinkedHashMap<>();
+                issuanceDisclaimer.put("l", StringData.ISSUANCE_DISCLAIMER);
+
+                Map<String, Object> sad = new LinkedHashMap<>();
+                sad.put("d", "");
+                sad.put("usageDisclaimer", usageDisclaimer);
+                sad.put("issuanceDisclaimer", issuanceDisclaimer);
+
+                Map<String, Object> qvi = new LinkedHashMap<>();
+                qvi.put("n", sadBody.get("d"));
+                qvi.put("s", sadBody.get("s"));
+
+                Map<String, Object> e = new LinkedHashMap<>();
+                e.put("d", "");
+                e.put("qvi", qvi);
+
+                CredentialData cData = CredentialData.builder().build();
+                cData.setA(cSubject);
+                cData.setRi(holderRegistry.get("regk").toString());
+                cData.setS(LE_SCHEMA_SAID);
+                cData.setR(sad);
+                cData.setE(e);
+
+                IssueCredentialResult result = holderClient.getCredentials().issue(holderAid.name, cData);
+                waitOperations(holderClient, result.getOp());
+                return result.getAcdc().getKed().get("d").toString();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("LE credential IPEX grant", () -> {
+            String dt = createTimestamp();
+            try {
+                Object leCredential = holderClient.getCredentials().get(leCredentialId);
+
+                LinkedHashMap<String, Object> leCredentialBody = castObjectToLinkedHashMap(leCredential);
+                assertTrue(!leCredentialBody.isEmpty());
+
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(leCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> anc = castObjectToLinkedHashMap(leCredentialBody.get("anc"));
+                LinkedHashMap<String, Object> iss = castObjectToLinkedHashMap(leCredentialBody.get("iss"));
+
+                IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
+                grantArgs.setSenderName(holderAid.name);
+                grantArgs.setAcdc(new Serder(sad));
+                grantArgs.setAnc(new Serder(anc));
+                grantArgs.setIss(new Serder(iss));
+                grantArgs.setAncAttachment(null);
+                grantArgs.setRecipient(legalEntityAid.prefix);
+                grantArgs.setDatetime(dt);
+
+                Exchanging.ExchangeMessageResult result = holderClient.getIpex().grant(grantArgs);
+                Object op = holderClient.getIpex().submitGrant(
+                        holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
+                );
+                waitOperations(holderClient, op);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Legal Entity IPEX admit", () -> {
+            try {
+                Thread.sleep(2000);
+                List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn/ipex/grant");
+                Notification grantNotification = notifications.getFirst();
+
+                IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
+                admitArgs.setSenderName(legalEntityAid.name);
+                admitArgs.setMessage("");
+                admitArgs.setGrantSaid(grantNotification.a.d);
+                admitArgs.setRecipient(holderAid.prefix);
+                admitArgs.setDatetime(createTimestamp());
+
+                Exchanging.ExchangeMessageResult result = legalEntityClient.getIpex().admit(admitArgs);
+                Object op = legalEntityClient.getIpex().submitAdmit(
+                        legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
+                );
+                waitOperations(legalEntityClient, op);
+                markAndRemoveNotification(legalEntityClient, grantNotification);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("LE credential IPEX grant response", () -> {
+            try {
+                List<Notification> notifications = waitForNotifications(holderClient, "/exn/ipex/admit");
+                markAndRemoveNotification(holderClient, notifications.getFirst());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Legal Entity has chained credential", () -> {
+            try {
+                Thread.sleep(2000);
+                Object legalEntityCredential = legalEntityClient.getCredentials().get(leCredentialId);
+
+                LinkedHashMap<String, Object> legalEntityCredentialBody = castObjectToLinkedHashMap(legalEntityCredential);
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(legalEntityCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(sad.get("a"));
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(legalEntityCredentialBody.get("status"));
+                ArrayList<String> chains = (ArrayList<String>) legalEntityCredentialBody.get("chains");
+                LinkedHashMap<String, Object> chainsBody = castObjectToLinkedHashMap(chains.getFirst());
+                LinkedHashMap<String, Object> sadInChains = castObjectToLinkedHashMap(chainsBody.get("sad"));
+                String atc = legalEntityCredentialBody.get("atc").toString();
+
+                assertEquals(LE_SCHEMA_SAID, sad.get("s").toString());
+                assertEquals(holderAid.prefix, sad.get("i").toString());
+                assertEquals(legalEntityAid.prefix, a.get("i").toString());
+                assertEquals("0", status.get("s").toString());
+                assertEquals(qviCredentialId, sadInChains.get("d").toString());
+                assertNotNull(atc);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        testSteps.step("Issuer revoke QVI credential", () -> {
+            try {
+                RevokeCredentialResult revokeOperation = issuerClient.getCredentials().revoke(issuerAid.name, qviCredentialId, null);
+                waitOperations(issuerClient, revokeOperation.getOp());
+                Object issuerCredential = issuerClient.getCredentials().get(qviCredentialId);
+
+                LinkedHashMap<String, Object> issuerCredentialBody = castObjectToLinkedHashMap(issuerCredential);
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(issuerCredentialBody.get("status"));
+
+                assertEquals("1", status.get("s").toString());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    @SuppressWarnings("unchecked")
-    public LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
-        return (LinkedHashMap<String, Object>) object;
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> castObjectToListMap(Object object) {
-        return (List<Map<String, Object>>) object;
+    public static class StringData {
+        public static final String USAGE_DISCLAIMER = "Usage of a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, does not assert that the Legal Entity is trustworthy, honest, reputable in its business dealings, safe to do business with, or compliant with any laws or that an implied or expressly intended purpose will be fulfilled.";
+        public static final String ISSUANCE_DISCLAIMER = "All information in a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, is accurate as of the date the validation process was complete. The vLEI Credential has been issued to the legal entity or person named in the vLEI Credential as the subject; and the qualified vLEI Issuer exercised reasonable care to perform the validation process set forth in the vLEI Ecosystem Governance Framework.";
     }
 }

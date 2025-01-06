@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class SinglesigDIP extends TestUtils {
+class SinglesigDIPTest extends TestUtils {
     private static SignifyClient client1, client2;
     private static String contact1_id;
     private static String name1_id, name1_oobi;
@@ -73,7 +73,7 @@ class SinglesigDIP extends TestUtils {
         Object op1 = result.op();
 
         // Refresh keystate to sn=1
-        Object op2 = client2.getKeyStates().query(name1_id, 1, null);
+        Object op2 = client2.getKeyStates().query(name1_id, "1", null);
 
         op = operationToObject(waitOperation(client2, op));
         op1 = operationToObject(waitOperation(client1, op1));

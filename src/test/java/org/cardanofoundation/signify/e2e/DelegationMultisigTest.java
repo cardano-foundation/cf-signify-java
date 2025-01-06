@@ -292,15 +292,15 @@ public class DelegationMultisigTest {
             }
         });
 
-        Object queryOp1 = delegator1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), 1, null);
-        Object queryOp2 = delegator2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), 1, null);
+        Object queryOp1 = delegator1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object queryOp2 = delegator2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
         TestUtils.waitOperation(delegator1Client, queryOp1);
         TestUtils.waitOperation(delegator2Client, queryOp2);
 
         // QARs query the GEDA's key state
-        Object ksteetor1 = delegatee1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), 1, null);
-        Object ksteetor2 = delegatee2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), 1, null);
+        Object ksteetor1 = delegatee1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object ksteetor2 = delegatee2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
         TestUtils.waitOperation(delegatee1Client, ksteetor1);
         TestUtils.waitOperation(delegatee2Client, ksteetor2);

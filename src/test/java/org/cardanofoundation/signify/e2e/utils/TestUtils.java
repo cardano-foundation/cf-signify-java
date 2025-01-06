@@ -31,6 +31,7 @@ import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static List<Notification> filteredNotes;
     static Retry retry = new Retry();
 
     public static class Aid {
@@ -78,21 +79,24 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void assertOperations(List<SignifyClient> clients) throws SodiumException, IOException, InterruptedException {
+    public static void assertOperations(List<SignifyClient> clients) throws Exception {
         for (SignifyClient client : clients) {
             List<Operation<?>> operations = client.getOperations().list(null);
             Assertions.assertEquals(0, operations.size());
         }
     }
 
-    public static void assertNotifications(List<SignifyClient> clients) {
-        // TO-DO
+    public static void assertNotifications(List<SignifyClient> clients) throws Exception {
         for (SignifyClient client : clients) {
+            Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
+            String notesResponse = res.notes();
+            List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
+            filteredNotes = notes.stream().filter(note -> !note.isR()).collect(Collectors.toList());
+            Assertions.assertEquals(0, filteredNotes.size());
         }
     }
 
     public static Aid createAid(SignifyClient client, String name) throws Exception {
-        // TO-DO
         String[] results = getOrCreateIdentifier(client, name, null);
         String prefix = results[0];
         String oobi = results[1];
@@ -109,7 +113,6 @@ public class TestUtils {
     }
 
     public static List<Map<String, Object>> getEndRoles(SignifyClient client, String alias, String role) throws Exception {
-        // TO-DO
         String path = (role != null)
                 ? "/identifiers/" + alias + "/endroles/" + role
                 : "/identifiers/" + alias + "/endroles";
@@ -160,16 +163,6 @@ public class TestUtils {
             return aid;
         }
     }
-
-//    public static List<SignifyClient> getOrCreateClients1(int count, List<String> brans) throws Exception {
-//        List<SignifyClient> tasks = new ArrayList<>();
-//        List<String> secrets = System.getenv("SIGNIFY_SECRETS_ENV") != null
-//                ? List.of(System.getenv("SIGNIFY_SECRETS_ENV").split(","))
-//                : new ArrayList<>();
-//        tasks.add(getOrCreateClient(brans));
-//        List<SignifyClient> clients = tasks.stream().collect(Collectors.toList());
-//        return clients;
-//    }
 
     public static List<SignifyClient> getOrCreateClients(int count, List<String> brans) throws ExecutionException, InterruptedException {
         List<CompletableFuture<SignifyClient>> tasks = new ArrayList<>();
@@ -409,15 +402,12 @@ public class TestUtils {
         }
        CompletableFuture.allOf(markOperationFutures.toArray(new CompletableFuture[0]));
 
-        Notification lastNote = notes.getLast();
-        if(lastNote != null && lastNote.getA() != null && lastNote.getA().getD() != null) {
-            return lastNote.getA().getD();
-        } else {
-            return "";
-        }
+        return notes.isEmpty() ? "" :
+                Optional.ofNullable(notes.getLast())
+                        .map(note -> note.a)
+                        .map(a -> a.d)
+                        .orElse("");
     }
-
-    private static List<Notification> filteredNotes;
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route) throws Exception {
        return waitForNotifications(client, route, Retry.RetryOptions.builder().build());
@@ -443,9 +433,6 @@ public class TestUtils {
             }
         }, retryOptions);
     }
-
-
-
 
     public static <T> Operation<T> waitOperations(
             SignifyClient client,
@@ -476,7 +463,7 @@ public class TestUtils {
         return operation;
     }
 
-    public static Object operationToObject(Operation operation) throws JsonProcessingException {
+    public static Object operationToObject(Operation<?> operation) throws JsonProcessingException {
         Map<String, Object> opMap = new LinkedHashMap<>();
         opMap.put("name", operation.getName());
         opMap.put("metadata", operation.getMetadata() != null ? operation.getMetadata().getProperties() : null);
@@ -493,6 +480,16 @@ public class TestUtils {
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Parse Integer is not successful " + e.getMessage());
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
+        return (LinkedHashMap<String, Object>) object;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> castObjectToListMap(Object object) {
+        return (List<Map<String, Object>>) object;
     }
 
 }

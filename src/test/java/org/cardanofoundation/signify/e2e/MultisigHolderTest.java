@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 
-public class MultisigHolder extends TestUtils {
+public class MultisigHolderTest extends TestUtils {
     SignifyClient client1, client2, client3;
     States.HabState aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
