@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app.clienting.aiding;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -26,11 +27,9 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
-import static org.cardanofoundation.signify.core.States.convertToStates;
 
 public class Identifier {
     public final IdentifierDeps client;
@@ -215,13 +214,26 @@ public class Identifier {
         Keeping.SignResult signResult = keeper.sign(serder.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
+        List<String> smids = null;
+        List<String> rmids = null;
+
+        if (states != null) {
+            List<States.State> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
+            smids = stateDeserialized.stream().map(States.State::getI).toList();
+        }
+
+        if (rstates != null) {
+            List<States.State> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
+            rmids = rstateDeserialized.stream().map(States.State::getI).toList();
+        }
+
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("name", name);
         jsondata.put("icp", serder.getKed());
         jsondata.put("sigs", sigs);
         jsondata.put("proxy", proxy);
-        jsondata.put("smids", states != null ? convertToStates((List<?>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
-        jsondata.put("rmids", rstates != null ? convertToStates((List<?>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
+        jsondata.put("smids", smids);
+        jsondata.put("rmids", rmids);
 
         jsondata.put(algo.getValue(), keeper.getParams().toMap());
 

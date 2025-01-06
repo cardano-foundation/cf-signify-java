@@ -27,6 +27,7 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.app.Coring.randomPasscode;
+import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -100,6 +101,11 @@ public class TestUtils {
         String prefix = results[0];
         String oobi = results[1];
         return new Aid(name, prefix, oobi);
+    }
+
+    public static States.HabState createAidAndGetHabState(SignifyClient client, String name) throws Exception {
+        getOrCreateIdentifier(client, name, null);
+        return client.getIdentifier().get(name);
     }
 
     public static String createTimestamp() {
@@ -185,6 +191,10 @@ public class TestUtils {
         System.out.println("SIGNIFY_SECRETS=\"" + secretsLog + "\"");
 
         return clients;
+    }
+
+    public static SignifyClient getOrCreateClient() throws Exception {
+        return getOrCreateClient(null);
     }
 
     public static SignifyClient getOrCreateClient(String bran) throws Exception {
@@ -363,7 +373,7 @@ public class TestUtils {
     }
 
     public static void markNotification(SignifyClient client, Notification note) throws SodiumException, IOException, InterruptedException {
-        client.getNotifications().mark(note.i);
+        client.getNotifications().mark(note.getI());
     }
 
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
@@ -379,30 +389,49 @@ public class TestUtils {
 
     public static String waitAndMarkNotification(SignifyClient client, String route) throws Exception {
         List<Notification> notes = waitForNotifications(client, route);
+
+        List<CompletableFuture<Void>> markOperationFutures = new ArrayList<>();
         for (Notification note : notes) {
-            markNotification(client, note);
+            markOperationFutures.add(CompletableFuture.runAsync(() -> {
+                try {
+                    markNotification(client, note);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }));
         }
+       CompletableFuture.allOf(markOperationFutures.toArray(new CompletableFuture[0]));
 
         return notes.isEmpty() ? "" :
-           Optional.ofNullable(notes.getLast())
-                  .map(note -> note.a)
-                  .map(a -> a.d)
-                  .orElse("");
+                Optional.ofNullable(notes.getLast())
+                        .map(note -> note.a)
+                        .map(a -> a.d)
+                        .orElse("");
     }
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route) throws Exception {
-        Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
-        String notesResponse = response.notes();
-        List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<List<Notification>>() {});
+       return waitForNotifications(client, route, Retry.RetryOptions.builder().build());
+    }
 
-        filteredNotes = notes.stream()
-                .filter(note -> Objects.equals(route, note.a.r) && !Boolean.TRUE.equals(note.r))
-                .toList();
+    public static List<Notification> waitForNotifications(SignifyClient client, String route, Retry.RetryOptions retryOptions) throws Exception {
+        return retry(() -> {
+            try {
+                Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
+                String notesResponse = response.notes();
+                List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<List<Notification>>() {});
 
-        if (filteredNotes.isEmpty()) {
-            throw new IllegalStateException("No notifications with route " + route);
-        }
-        return filteredNotes;
+                filteredNotes = notes.stream()
+                        .filter(note -> Objects.equals(route, note.a.r) && !Boolean.TRUE.equals(note.r))
+                        .toList();
+
+                if (filteredNotes.isEmpty()) {
+                    throw new IllegalStateException("No notifications with route " + route);
+                }
+                return filteredNotes;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, retryOptions);
     }
 
     public static <T> Operation<T> waitOperations(

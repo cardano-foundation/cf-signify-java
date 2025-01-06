@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.app.clienting;
 
 import lombok.*;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.util.Map;
 
@@ -40,6 +41,9 @@ public class Operation<T> {
                 .done(map.containsKey("done") && (boolean) map.get("done"))
                 .error(map.getOrDefault("error", null))
                 .response(map.containsKey("response") ? (R) map.get("response") : null);
+        } else if(obj instanceof String) { // json string
+            Map<String, Object> mapObj = Utils.fromJson((String) obj, Map.class);
+            return fromObject(mapObj);
         }
         else {
             throw new IllegalArgumentException("Object is neither an Operation instance nor a Map");

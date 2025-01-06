@@ -1,6 +1,8 @@
 package org.cardanofoundation.signify.e2e.utils;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.Exchanging;
@@ -25,15 +27,9 @@ import org.cardanofoundation.signify.core.States;
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class MultisigUtils {
-
-    public static void acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs groupName,
-                                            AcceptMultisigInceptArgs localMemberName, AcceptMultisigInceptArgs msgSaid) {
-        // TO-DO
-    }
 
     public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws SodiumException, IOException, InterruptedException, DigestException {
         final States.HabState memberHab = client2.getIdentifier().get(args.getLocalMemberName());
@@ -57,7 +53,7 @@ public class MultisigUtils {
         createIdentifierArgs.setWits((List<String>) icp.get("b"));
         createIdentifierArgs.setStates(states);
         createIdentifierArgs.setRstates(rstates);
-        createIdentifierArgs.setDelpre(icp.get("di").toString());
+        createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
 
         EventResult icpResult2 = client2.getIdentifier().create(args.getGroupName(), createIdentifierArgs);
         Object op2 = icpResult2.op();
@@ -84,13 +80,12 @@ public class MultisigUtils {
         return op2;
     }
 
-    public static Object addEndRoleMultisig(SignifyClient client, String groupName, States.HabState aid,
+    public static List<Object> addEndRoleMultisig(SignifyClient client, String groupName, States.HabState aid,
                                             List<States.HabState> otherMemberAIDs, States.HabState multisigAID,
                                             String timestamp,
-                                            boolean isInitiator) throws SodiumException, IOException, InterruptedException, DigestException {
+                                            boolean isInitiator) throws Exception {
         if (!isInitiator) {
-            // TODO return waitAndMarkNotification form Test-Utils
-            return null;
+            TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
         }
 
         List<Object> opList = new ArrayList<>();
@@ -258,8 +253,8 @@ public class MultisigUtils {
             States.HabState multisigAID,
             String registryName,
             String nonce,
-            boolean isInitiator
-    ) throws Exception {
+            boolean isInitiator) throws Exception {
+
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
         }
@@ -371,8 +366,8 @@ public class MultisigUtils {
             States.HabState recipientAID,
             Object credential,
             String timestamp,
-            boolean isInitiator
-    ) throws Exception {
+            boolean isInitiator) throws Exception {
+
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
@@ -437,8 +432,8 @@ public class MultisigUtils {
             List<States.HabState> otherMembersAIDs,
             String multisigAIDName,
             CredentialData kargsIss,
-            boolean isInitiator
-    ) throws Exception {
+            boolean isInitiator) throws Exception {
+
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/iss");
         }
@@ -532,20 +527,18 @@ public class MultisigUtils {
 
     @Getter
     @Setter
+    @Builder
+    @AllArgsConstructor
     public static class AcceptMultisigInceptArgs {
         private String groupName;
         private String localMemberName;
         private String msgSaid;
-
-        public AcceptMultisigInceptArgs(String groupName, String localMemberName, String msgSaid) {
-            this.groupName = groupName;
-            this.localMemberName = localMemberName;
-            this.msgSaid = msgSaid;
-        }
     }
 
     @Getter
     @Setter
+    @Builder
+    @AllArgsConstructor
     public static class StartMultisigInceptArgs {
         private String groupName;
         private String localMemberName;
