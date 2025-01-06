@@ -14,9 +14,14 @@ import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
+import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
+import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
+import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
+import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.e2e.modules.IssuerRegistry;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
@@ -285,15 +290,41 @@ public class TestUtils {
             SignifyClient issuerClient,
             Aid issuerAid,
             Aid recipientAid,
-//            IssuerRegistry issuerRegistry,
-            Object credData,
+            IssuerRegistry regk,
+            Map<String, Object> credData,
             String schema,
-            Object rules,
-            Object source
-    ) {
+            Map<String, Object> rules,
+            Map<String, Object> source
+    ) throws Exception {
         Boolean privacy = false;
-        // TO-DO
-        return null;
+        CredentialFilter credentialFilter = CredentialFilter.builder().build();
+
+        Object credentialList = issuerClient.getCredentials().list(credentialFilter);
+        ArrayList<String> credentialListBody = (ArrayList<String>) credentialList;
+        if (!credentialListBody.isEmpty()) {
+            /**
+             * TO DO
+             */
+        }
+
+        CredentialData.CredentialSubject a = CredentialData.CredentialSubject.builder().build();
+        a.setI(recipientAid.prefix);
+        a.setU(privacy ? new Salter().getQb64() : null);
+        a.setAdditionalProperties(credData);
+
+        CredentialData cData = CredentialData.builder().build();
+        cData.setRi(regk.getRegk());
+        cData.setS(schema);
+        cData.setU(privacy ? new Salter().getQb64() : null);
+        cData.setA(a);
+        cData.setR(rules);
+        cData.setE(source);
+
+        IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
+        waitOperations(issuerClient, issResult.getOp());
+        Object credential = issuerClient.getCredentials().get(issResult.getAcdc().getKed().get("d").toString());
+
+        return credential;
     }
 
     public static List<Object> getStates(SignifyClient client, List<String> prefixes) {

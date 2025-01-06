@@ -221,7 +221,7 @@ public class Identifier {
         jsondata.put("sigs", sigs);
         jsondata.put("proxy", proxy);
         jsondata.put("smids", states != null ? convertToStates((List<?>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
-        jsondata.put("rmids", rstates != null ? convertToStates((List<?>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
+        jsondata.put("rmids", rstates != null ? convertToStates((List<?>) rstates).stream().map(States.State::getI).collect(Collectors.toList()) : null);
 
         jsondata.put(algo.getValue(), keeper.getParams().toMap());
 
