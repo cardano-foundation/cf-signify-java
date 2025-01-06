@@ -7,7 +7,6 @@ import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.e2e.modules.IssuerRegistry;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -168,6 +167,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
                 null,
                 null
         );
+
     }
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {

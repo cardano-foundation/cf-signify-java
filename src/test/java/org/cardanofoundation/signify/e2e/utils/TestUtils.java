@@ -16,7 +16,6 @@ import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
-import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -87,7 +86,7 @@ public class TestUtils {
     public static void assertOperations(List<SignifyClient> clients) throws Exception {
         for (SignifyClient client : clients) {
             List<Operation<?>> operations = client.getOperations().list(null);
-            Assertions.assertEquals(0, operations.size());
+            assertEquals(0, operations.size());
         }
     }
 
@@ -97,7 +96,7 @@ public class TestUtils {
             String notesResponse = res.notes();
             List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
             filteredNotes = notes.stream().filter(note -> !note.isR()).collect(Collectors.toList());
-            Assertions.assertEquals(0, filteredNotes.size());
+            assertEquals(0, filteredNotes.size());
         }
     }
 
@@ -383,9 +382,22 @@ public class TestUtils {
         client.getOperations().delete(op.getName());
     }
 
-    public static Object getReceivedCredential(SignifyClient client, String credID) {
-        // TO-DO
-        return null;
+    public static Object getReceivedCredential(SignifyClient client, String credID) throws Exception {
+        Map<String, Object> filter = new LinkedHashMap<>();
+        filter.put("-d", credID);
+
+        CredentialFilter credentialFilter = CredentialFilter.builder().build();
+        credentialFilter.setFilter(filter);
+
+        Object credentialList = client.getCredentials().list(credentialFilter);
+        ArrayList<String> credentialListBody = (ArrayList<String>) credentialList;
+
+        Object credential = null;
+        if (!credentialListBody.isEmpty()) {
+            Assertions.assertEquals(1, credentialListBody.size());
+            credential = credentialListBody.getFirst();
+        }
+        return credential;
     }
 
     public static void markAndRemoveNotification(SignifyClient client, Notification note) {
