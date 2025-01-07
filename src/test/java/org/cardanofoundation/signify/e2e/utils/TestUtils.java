@@ -323,7 +323,7 @@ public class TestUtils {
 
         Object credentialList = issuerClient.getCredentials().list(credentialFilter);
         if (credentialList instanceof List && !((List<?>) credentialList).isEmpty()) {
-            return ((List<?>) credentialList).stream()
+            Optional<?> credential = ((List<?>) credentialList).stream()
                 .filter(cred -> {
                     Map<String, Object> credMap = Utils.toMap(cred);
                     Map<String, Object> sad = Utils.toMap(credMap.get("sad"));
@@ -333,8 +333,10 @@ public class TestUtils {
                         issuerAid.prefix.equals(sad.get("i")) &&
                         recipientAid.prefix.equals(a.get("i"));
                 })
-                .findFirst()
-                .orElse(null);
+                .findFirst();
+            if (credential.isPresent()) {
+                return credential.get();
+            }
         }
 
         CredentialData.CredentialSubject a = CredentialData.CredentialSubject.builder().build();
@@ -358,7 +360,6 @@ public class TestUtils {
     }
 
     public static List<Object> getStates(SignifyClient client, List<String> prefixes) {
-        // TO-DO
         List<Object> participantStates = prefixes.stream().map(p -> {
             try {
                 return client.getKeyStates().get(p);
@@ -378,7 +379,6 @@ public class TestUtils {
     }
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
-        // TO-DO
         List<Map<String, Object>> list = getEndRoles(client, alias, role);
         for (Map<String, Object> endRoleMap : list) {
             String endRole = (String) endRoleMap.get("role");
