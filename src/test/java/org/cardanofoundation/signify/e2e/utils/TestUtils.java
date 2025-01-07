@@ -21,7 +21,6 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
-import org.cardanofoundation.signify.e2e.modules.IssuerRegistry;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;

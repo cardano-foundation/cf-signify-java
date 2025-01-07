@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.e2e.modules;
+package org.cardanofoundation.signify.e2e.utils;
 
 import lombok.Builder;
 import lombok.Getter;

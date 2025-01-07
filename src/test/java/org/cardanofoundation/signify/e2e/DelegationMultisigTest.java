@@ -1,5 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.core.States;
@@ -17,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DelegationMultisigTest extends BaseIntegrationTest {
-
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     TestSteps testSteps = new TestSteps();
     String delegatorGroupName = "delegator_group";
     String delegateeGroupName = "delegatee_group";
@@ -268,13 +270,16 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         anchor,
                         false);
 
-                List<Operation> dresults = waitOperationAsync(
-                        new WaitOperationArgs(delegator1Client, delApprOp1),
-                        new WaitOperationArgs(delegator2Client, delApprOp2)
-                );
+                Operation<Object> dresult1 = waitOperations(delegator1Client, delApprOp1);
+                Operation<Object> dresult2 = waitOperations(delegator2Client, delApprOp2);
 
-                Operation dresult1 = dresults.get(0);
-                Operation dresult2 = dresults.get(1);
+//                List<Operation> dresults = waitOperationAsync(
+//                        new WaitOperationArgs(delegator1Client, delApprOp1),
+//                        new WaitOperationArgs(delegator2Client, delApprOp2)
+//                );
+
+//                Operation dresult1 = dresults.get(0);
+//                Operation dresult2 = dresults.get(1);
 
                 assertEquals(dresult1.getResponse(), dresult2.getResponse());
 
@@ -308,7 +313,13 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         assertEquals(agtee.getPrefix(), teepre);
 
         // TODO check operations and notifications failures
-        // assertOperations(List.of(delegator1Client, delegator2Client, delegatee1Client, delegatee2Client));
-        // assertNotifications(List.of(delegator1Client, delegator2Client, delegatee1Client, delegatee2Client));
+        List<SignifyClient> clients = Arrays.asList(
+                delegator1Client,
+                delegator2Client,
+                delegatee1Client,
+                delegatee2Client
+        );
+        assertOperations(clients);
+        assertNotifications(clients);
     }
 }
