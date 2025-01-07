@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.app.clienting.Contacting;
-import org.cardanofoundation.signify.app.clienting.Operation;
+import org.cardanofoundation.signify.app.Contacting;
+import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
+import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
+import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.Assertions;
@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static org.cardanofoundation.signify.app.Coring.randomPasscode;
+import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
 
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();

@@ -6,20 +6,23 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.cardanofoundation.signify.app.Agent;
-import org.cardanofoundation.signify.app.Coring.Config;
-import org.cardanofoundation.signify.app.clienting.Contacting.Challenges;
-import org.cardanofoundation.signify.app.clienting.Contacting.Contacts;
-import org.cardanofoundation.signify.app.Controller;
-import org.cardanofoundation.signify.app.Coring.KeyEvents;
+import org.cardanofoundation.signify.app.controlller.Agent;
+import org.cardanofoundation.signify.app.coring.Coring.Config;
+import org.cardanofoundation.signify.app.Contacting.Challenges;
+import org.cardanofoundation.signify.app.Contacting.Contacts;
+import org.cardanofoundation.signify.app.controlller.Controller;
+import org.cardanofoundation.signify.app.coring.Coring.KeyEvents;
 import org.cardanofoundation.signify.app.Delegating.Delegations;
 import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
-import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.Identifier;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
+import org.cardanofoundation.signify.app.coring.KeyStates;
+import org.cardanofoundation.signify.app.coring.Oobis;
+import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.credentialing.Schemas;
 import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
@@ -29,8 +32,8 @@ import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
-import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.aiding.IdentifierDeps;
+import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 
@@ -42,7 +45,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 @Getter
 @Setter

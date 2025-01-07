@@ -1,5 +1,6 @@
-package org.cardanofoundation.signify.app.clienting;
+package org.cardanofoundation.signify.app.coring;
 
+import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.util.LinkedHashMap;

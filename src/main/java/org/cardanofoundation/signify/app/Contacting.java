@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.app.clienting;
+package org.cardanofoundation.signify.app;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
-import org.cardanofoundation.signify.app.Exchanging;
+import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
 

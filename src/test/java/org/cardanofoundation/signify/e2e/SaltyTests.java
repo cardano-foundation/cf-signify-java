@@ -1,10 +1,13 @@
 package org.cardanofoundation.signify.e2e;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.signify.app.Coring;
-import org.cardanofoundation.signify.app.clienting.Operation;
+import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
+import org.cardanofoundation.signify.app.aiding.EventResult;
+import org.cardanofoundation.signify.app.aiding.IdentifierInfo;
+import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
+import org.cardanofoundation.signify.app.coring.Coring;
+import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.aiding.*;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.core.Manager;

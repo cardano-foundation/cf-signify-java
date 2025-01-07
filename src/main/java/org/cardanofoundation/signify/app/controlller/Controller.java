@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app;
+package org.cardanofoundation.signify.app.controlller;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;

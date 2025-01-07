@@ -1,5 +1,6 @@
-package org.cardanofoundation.signify.app.clienting.deps;
+package org.cardanofoundation.signify.app.aiding;
 
+import org.cardanofoundation.signify.app.coring.deps.BaseDeps;
 import org.cardanofoundation.signify.cesr.Keeping;
 
 public interface IdentifierDeps extends BaseDeps {

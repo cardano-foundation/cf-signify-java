@@ -1,10 +1,10 @@
 package org.cardanofoundation.signify.e2e;
 
-import org.cardanofoundation.signify.app.Coring;
+import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
-import org.cardanofoundation.signify.app.clienting.aiding.RotateIdentifierArgs;
+import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
+import org.cardanofoundation.signify.app.aiding.EventResult;
+import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;

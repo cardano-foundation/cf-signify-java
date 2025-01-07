@@ -1,7 +1,7 @@
 package org.cardanofoundation.signify.app;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.Identifier;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
 import org.cardanofoundation.signify.cesr.Keeping;

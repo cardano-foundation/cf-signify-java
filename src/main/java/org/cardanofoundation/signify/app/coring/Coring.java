@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app;
+package org.cardanofoundation.signify.app.coring;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import lombok.Getter;

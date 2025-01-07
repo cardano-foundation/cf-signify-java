@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.clienting;
+package org.cardanofoundation.signify.app.coring;
 
 import lombok.*;
 
