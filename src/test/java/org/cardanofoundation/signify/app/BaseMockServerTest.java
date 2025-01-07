@@ -74,7 +74,7 @@ public class BaseMockServerTest {
         mockWebServer.shutdown();
     }
 
-    static final String MOCK_CONNECT = """
+    public static final String MOCK_CONNECT = """
         {
             "agent": {
                 "vn": [1, 0],
@@ -145,7 +145,7 @@ public class BaseMockServerTest {
             "pidx": 0
         }""";
 
-    static final String MOCK_GET_AID = """
+    public static final String MOCK_GET_AID = """
         {
             "name": "aid1",
             "prefix": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
@@ -188,7 +188,7 @@ public class BaseMockServerTest {
             "windexes": []
         }""";
 
-    static final String MOCK_CREDENTIAL = """
+    public static final String MOCK_CREDENTIAL = """
         {
             "sad": {
                 "v": "ACDC10JSON000197_",
