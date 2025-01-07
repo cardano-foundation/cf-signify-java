@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.clienting.Contacting;
 import org.cardanofoundation.signify.app.clienting.Operation;
@@ -32,7 +33,9 @@ import java.util.stream.Collectors;
 import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static List<Notification> filteredNotes;
@@ -392,8 +395,19 @@ public class TestUtils {
         return false;
     }
 
-    public static void warnNotifications(List<SignifyClient> clients) {
-        // TO-DO
+    public static void warnNotifications(List<SignifyClient> clients) throws Exception {
+        int count = 0;
+        for (SignifyClient client : clients) {
+            Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
+            String notesResponse = res.notes();
+            List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
+            filteredNotes = notes.stream().filter(note -> !note.isR()).collect(Collectors.toList());
+            if (!notes.isEmpty()) {
+                count += notes.size();
+                log.warn("notifications", notes);
+            }
+        }
+        assertTrue(count > 0);
     }
 
     public static void deleteOperations(SignifyClient client, Operation op) throws SodiumException, IOException, InterruptedException {

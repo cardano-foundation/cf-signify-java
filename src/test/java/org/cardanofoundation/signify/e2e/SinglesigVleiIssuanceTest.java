@@ -82,7 +82,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         privacyDisclaimer.put("l", DataString.PRIVACY_DISCLAIMER);
 
         Map<String, Object> privacyDisclaimer1 = new HashMap<>();
-        privacyDisclaimer.put("l", DataString.PRIVACY_DISCLAIMER_1);
+        privacyDisclaimer1.put("l", DataString.PRIVACY_DISCLAIMER_1);
 
         Map<String, Object> LE_RULES = new LinkedHashMap<>();
         LE_RULES.put("d", "");
@@ -135,25 +135,25 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         getOrCreateContact(roleClient, "qvi", qviAid.oobi);
         getOrCreateContact(roleClient, "le", leAid.oobi);
 
-        resolveOobi(gleifClient, QVI_SCHEMA_URL,null);
-        resolveOobi(qviClient, QVI_SCHEMA_URL,null);
-        resolveOobi(qviClient, LE_SCHEMA_URL,null);
-        resolveOobi(qviClient, ECR_AUTH_SCHEMA_URL,null);
-        resolveOobi(qviClient, ECR_SCHEMA_URL,null);
-        resolveOobi(qviClient, OOR_AUTH_SCHEMA_URL,null);
-        resolveOobi(qviClient, OOR_SCHEMA_URL,null);
-        resolveOobi(leClient, QVI_SCHEMA_URL,null);
-        resolveOobi(leClient, LE_SCHEMA_URL,null);
-        resolveOobi(leClient, ECR_AUTH_SCHEMA_URL,null);
-        resolveOobi(leClient, ECR_SCHEMA_URL,null);
-        resolveOobi(leClient, OOR_AUTH_SCHEMA_URL,null);
-        resolveOobi(leClient, OOR_SCHEMA_URL,null);
-        resolveOobi(roleClient, QVI_SCHEMA_URL,null);
-        resolveOobi(roleClient, LE_SCHEMA_URL,null);
-        resolveOobi(roleClient, ECR_AUTH_SCHEMA_URL,null);
-        resolveOobi(roleClient, ECR_SCHEMA_URL,null);
-        resolveOobi(roleClient, OOR_AUTH_SCHEMA_URL,null);
-        resolveOobi(roleClient, OOR_SCHEMA_URL,null);
+        resolveOobi(gleifClient, QVI_SCHEMA_URL, null);
+        resolveOobi(qviClient, QVI_SCHEMA_URL, null);
+        resolveOobi(qviClient, LE_SCHEMA_URL, null);
+        resolveOobi(qviClient, ECR_AUTH_SCHEMA_URL, null);
+        resolveOobi(qviClient, ECR_SCHEMA_URL, null);
+        resolveOobi(qviClient, OOR_AUTH_SCHEMA_URL, null);
+        resolveOobi(qviClient, OOR_SCHEMA_URL, null);
+        resolveOobi(leClient, QVI_SCHEMA_URL, null);
+        resolveOobi(leClient, LE_SCHEMA_URL, null);
+        resolveOobi(leClient, ECR_AUTH_SCHEMA_URL, null);
+        resolveOobi(leClient, ECR_SCHEMA_URL, null);
+        resolveOobi(leClient, OOR_AUTH_SCHEMA_URL, null);
+        resolveOobi(leClient, OOR_SCHEMA_URL, null);
+        resolveOobi(roleClient, QVI_SCHEMA_URL, null);
+        resolveOobi(roleClient, LE_SCHEMA_URL, null);
+        resolveOobi(roleClient, ECR_AUTH_SCHEMA_URL, null);
+        resolveOobi(roleClient, ECR_SCHEMA_URL, null);
+        resolveOobi(roleClient, OOR_AUTH_SCHEMA_URL, null);
+        resolveOobi(roleClient, OOR_SCHEMA_URL, null);
 
         gleifRegistry = getOrCreateRegistry(gleifClient, gleifAid, "gleifRegistry");
         qviRegistry = getOrCreateRegistry(qviClient, qviAid, "qviRegistry");
@@ -184,7 +184,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         qviCredHolder = retry(() -> {
             try {
                 Object cred = getReceivedCredential(qviClient, sadQviCred.get("d").toString());
-                assert(cred != null);
+                assert (cred != null);
                 return cred;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -234,7 +234,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             leCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(leClient, sadLeCred.get("d").toString());
-                    assert(cred != null);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -261,8 +261,8 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         System.out.println("Issuing ECR vLEI Credential from LE");
 
         Map<String, Object> le = new LinkedHashMap<>();
-        qvi.put("n", sadLeCred.get("d").toString());
-        qvi.put("s", sadLeCred.get("s").toString());
+        le.put("n", sadLeCred.get("d").toString());
+        le.put("s", sadLeCred.get("s").toString());
 
         Map<String, Object> ecrCredSource = new LinkedHashMap<>();
         ecrCredSource.put("d", "");
@@ -282,7 +282,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
 
         Map<String, Object> ecrCredBody = castObjectToLinkedHashMap(ecrCred);
         Map<String, Object> sadEcrCred = castObjectToLinkedHashMap(ecrCredBody.get("sad"));
-        Object ecrCredHolder = getReceivedCredential(leClient, sadEcrCred.get("d").toString());
+        Object ecrCredHolder = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
 
         if (ecrCredHolder == null) {
             sendGrantMessage(leClient, leAid, roleAid, ecrCredBody);
@@ -291,7 +291,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             ecrCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
-                    assert(cred != null);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -305,7 +305,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         Map<String, Object> aEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("a"));
         Map<String, Object> eEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("e"));
         Map<String, Object> leEcrCredHolder = castObjectToLinkedHashMap(eEcrCredHolder.get("le"));
-        Map<String, Object> statusEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("status"));
+        Map<String, Object> statusEcrCredHolder = castObjectToLinkedHashMap(ecrCredHolderBody.get("status"));
 
         assertEquals(sadEcrCred.get("d").toString(), sadEcrCredHolder.get("d").toString());
         assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder.get("s").toString());
@@ -316,6 +316,233 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         assertNotNull(ecrCredHolderBody.get("atc"));
 
         System.out.println("Issuing ECR AUTH vLEI Credential");
+
+        ecrAuthData.put("AID", roleAid.prefix);
+
+        Map<String, Object> leErc = new LinkedHashMap<>();
+        leErc.put("n", sadLeCred.get("d").toString());
+        leErc.put("s", sadLeCred.get("s").toString());
+
+        Map<String, Object> ecrAuthCredSource = new LinkedHashMap<>();
+        ecrAuthCredSource.put("d", "");
+        ecrAuthCredSource.put("le", leErc);
+
+        Object ecrAuthCred = getOrIssueCredential(
+                leClient,
+                leAid,
+                qviAid,
+                leRegistry,
+                ecrAuthData,
+                ECR_AUTH_SCHEMA_SAID,
+                ECR_AUTH_RULES,
+                ecrAuthCredSource
+        );
+        Map<String, Object> ecrAuthCredBody = castObjectToLinkedHashMap(ecrAuthCred);
+        Map<String, Object> sadEcrAuthCred = castObjectToLinkedHashMap(ecrAuthCredBody.get("sad"));
+        Object ecrAuthCredHolder = getReceivedCredential(roleClient, sadEcrAuthCred.get("d").toString());
+
+        if (ecrAuthCredHolder == null) {
+            sendGrantMessage(leClient, leAid, qviAid, ecrAuthCredBody);
+            sendAdmitMessage(qviClient, qviAid, leAid);
+
+            ecrAuthCredHolder = retry(() -> {
+                try {
+                    Object cred = getReceivedCredential(qviClient, sadEcrAuthCred.get("d").toString());
+                    assert (cred != null);
+                    return cred;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, CRED_RETRY_DEFAULTS);
+        }
+        Map<String, Object> ecrAuthCredHolderBody = castObjectToLinkedHashMap(ecrAuthCredHolder);
+
+        Map<String, Object> sadEcrAuthCredHolder = castObjectToLinkedHashMap(ecrAuthCredHolderBody.get("sad"));
+        Map<String, Object> aEcrAuthCredHolder = castObjectToLinkedHashMap(sadEcrAuthCredHolder.get("a"));
+        Map<String, Object> eEcrAuthCredHolder = castObjectToLinkedHashMap(sadEcrAuthCredHolder.get("e"));
+        Map<String, Object> leEcrAuthCredHolder = castObjectToLinkedHashMap(eEcrAuthCredHolder.get("le"));
+        Map<String, Object> statusEcrAuthCredHolder = castObjectToLinkedHashMap(ecrAuthCredHolderBody.get("status"));
+
+        assertEquals(sadEcrAuthCred.get("d").toString(), sadEcrAuthCredHolder.get("d").toString());
+        assertEquals(ECR_AUTH_SCHEMA_SAID, sadEcrAuthCredHolder.get("s").toString());
+        assertEquals(leAid.prefix, sadEcrAuthCredHolder.get("i").toString());
+        assertEquals(qviAid.prefix, aEcrAuthCredHolder.get("i").toString());
+        assertEquals(roleAid.prefix, aEcrAuthCredHolder.get("AID").toString());
+        assertEquals(sadLeCred.get("d").toString(), leEcrAuthCredHolder.get("n").toString());
+        assertEquals("0", statusEcrAuthCredHolder.get("s").toString());
+        assertNotNull(ecrAuthCredHolderBody.get("atc"));
+
+        System.out.println("Issuing ECR vLEI Credential from ECR AUTH");
+
+        Map<String, Object> auth = new LinkedHashMap<>();
+        auth.put("n", sadEcrAuthCred.get("d").toString());
+        auth.put("s", sadEcrAuthCred.get("s").toString());
+        auth.put("o", "I2I");
+
+        Map<String, Object> ecrCredSource2 = new LinkedHashMap<>();
+        ecrCredSource2.put("d", "");
+        ecrCredSource2.put("auth", auth);
+
+        Object ecrCred2 = getOrIssueCredential(
+                qviClient,
+                qviAid,
+                roleAid,
+                qviRegistry,
+                ecrData,
+                ECR_SCHEMA_SAID,
+                ECR_RULES,
+                ecrCredSource2,
+                true
+        );
+        Map<String, Object> ecrCred2Body = castObjectToLinkedHashMap(ecrCred2);
+        Map<String, Object> sadEcrCred2 = castObjectToLinkedHashMap(ecrCred2Body.get("sad"));
+        Object ecrCredHolder2 = getReceivedCredential(roleClient, sadEcrCred2.get("d").toString());
+
+        if (ecrCredHolder2 == null) {
+            sendGrantMessage(qviClient, qviAid, roleAid, ecrCred2Body);
+            sendAdmitMessage(roleClient, roleAid, qviAid);
+
+            ecrCredHolder2 = retry(() -> {
+                try {
+                    Object cred = getReceivedCredential(roleClient, sadEcrCred2.get("d").toString());
+                    assert (cred != null);
+                    return cred;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, CRED_RETRY_DEFAULTS);
+        }
+        Map<String, Object> ecrCredHolder2Body = castObjectToLinkedHashMap(ecrCredHolder2);
+
+        Map<String, Object> sadEcrCredHolder2 = castObjectToLinkedHashMap(ecrCredHolder2Body.get("sad"));
+        Map<String, Object> eEcrCredHolder2 = castObjectToLinkedHashMap(sadEcrCredHolder2.get("e"));
+        Map<String, Object> authEcrCredHolder2 = castObjectToLinkedHashMap(eEcrCredHolder2.get("auth"));
+        Map<String, Object> statusEcrCredHolder2 = castObjectToLinkedHashMap(ecrCredHolder2Body.get("status"));
+
+        assertEquals(sadEcrCred2.get("d").toString(), sadEcrCredHolder2.get("d").toString());
+        assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder2.get("s").toString());
+        assertEquals(qviAid.prefix, sadEcrCredHolder2.get("i").toString());
+        assertEquals(sadEcrAuthCred.get("d").toString(), authEcrCredHolder2.get("n").toString());
+        assertEquals("0", statusEcrCredHolder2.get("s").toString());
+        assertNotNull(ecrCredHolder2Body.get("atc"));
+
+        System.out.println("Issuing OOR AUTH vLEI Credential");
+        oorAuthData.put("AID", roleAid.prefix);
+
+        le = new LinkedHashMap<>();
+        le.put("n", sadLeCred.get("d").toString());
+        le.put("s", sadLeCred.get("s").toString());
+
+        Map<String, Object> oorAuthCredSource = new LinkedHashMap<>();
+        oorAuthCredSource.put("d", "");
+        oorAuthCredSource.put("le", le);
+
+        Object oorAuthCred = getOrIssueCredential(
+                leClient,
+                leAid,
+                qviAid,
+                leRegistry,
+                oorAuthData,
+                OOR_AUTH_SCHEMA_SAID,
+                OOR_AUTH_RULES,
+                oorAuthCredSource
+        );
+        Map<String, Object> oorAuthCredBody = castObjectToLinkedHashMap(oorAuthCred);
+        Map<String, Object> sadOorAuthCred = castObjectToLinkedHashMap(oorAuthCredBody.get("sad"));
+        Object oorAuthCredHolder = getReceivedCredential(qviClient, sadOorAuthCred.get("d").toString());
+
+        if (oorAuthCredHolder == null) {
+            sendGrantMessage(leClient, leAid, qviAid, oorAuthCredBody);
+            sendAdmitMessage(qviClient, qviAid, leAid);
+
+            oorAuthCredHolder = retry(() -> {
+                try {
+                    Object cred = getReceivedCredential(qviClient, sadOorAuthCred.get("d").toString());
+                    assert (cred != null);
+                    return cred;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, CRED_RETRY_DEFAULTS);
+        }
+        Map<String, Object> oorAuthCredHolderBody = castObjectToLinkedHashMap(oorAuthCredHolder);
+
+        Map<String, Object> sadOorAuthCredHolder = castObjectToLinkedHashMap(oorAuthCredHolderBody.get("sad"));
+        Map<String, Object> aOorAuthCredHolder = castObjectToLinkedHashMap(sadOorAuthCredHolder.get("a"));
+        Map<String, Object> eOorAuthCredHolder = castObjectToLinkedHashMap(sadOorAuthCredHolder.get("e"));
+        Map<String, Object> leOorAuthCredHolder = castObjectToLinkedHashMap(eOorAuthCredHolder.get("le"));
+        Map<String, Object> statusOorAuthCredHolder = castObjectToLinkedHashMap(oorAuthCredHolderBody.get("status"));
+
+        assertEquals(sadOorAuthCred.get("d").toString(), sadOorAuthCredHolder.get("d").toString());
+        assertEquals(OOR_AUTH_SCHEMA_SAID, sadOorAuthCredHolder.get("s").toString());
+        assertEquals(leAid.prefix, sadOorAuthCredHolder.get("i").toString());
+        assertEquals(qviAid.prefix, aOorAuthCredHolder.get("i").toString());
+        assertEquals(roleAid.prefix, aOorAuthCredHolder.get("AID").toString());
+        assertEquals(sadLeCred.get("d").toString(), leOorAuthCredHolder.get("n").toString());
+        assertEquals("0", statusOorAuthCredHolder.get("s").toString());
+        assertNotNull(oorAuthCredHolderBody.get("atc"));
+
+        System.out.println("Issuing OOR vLEI Credential from OOR AUTH");
+
+        auth = new LinkedHashMap<>();
+        auth.put("n", sadOorAuthCred.get("d").toString());
+        auth.put("s", sadOorAuthCred.get("s").toString());
+        auth.put("o", "I2I");
+
+        Map<String, Object> oorCredSource = new LinkedHashMap<>();
+        oorCredSource.put("d", "");
+        oorCredSource.put("auth", auth);
+
+        Object oorCred = getOrIssueCredential(
+                qviClient,
+                qviAid,
+                roleAid,
+                qviRegistry,
+                oorData,
+                OOR_SCHEMA_SAID,
+                OOR_RULES,
+                oorCredSource
+        );
+        Map<String, Object> oorCredBody = castObjectToLinkedHashMap(oorCred);
+        Map<String, Object> sadOorCred = castObjectToLinkedHashMap(oorCredBody.get("sad"));
+        Object oorCredHolder = getReceivedCredential(qviClient, sadOorCred.get("d").toString());
+
+        if (oorCredHolder == null) {
+            sendGrantMessage(qviClient, qviAid, roleAid, oorCredBody);
+            sendAdmitMessage(roleClient, roleAid, qviAid);
+
+            oorCredHolder = retry(() -> {
+                try {
+                    Object cred = getReceivedCredential(roleClient, sadOorCred.get("d").toString());
+                    assert (cred != null);
+                    return cred;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, CRED_RETRY_DEFAULTS);
+        }
+        Map<String, Object> oorCredHolderBody = castObjectToLinkedHashMap(oorCredHolder);
+
+        Map<String, Object> sadOorCredHolder = castObjectToLinkedHashMap(oorCredHolderBody.get("sad"));
+        Map<String, Object> eOorCredHolder = castObjectToLinkedHashMap(sadOorCredHolder.get("e"));
+        Map<String, Object> authOorCredHolder = castObjectToLinkedHashMap(eOorCredHolder.get("auth"));
+        Map<String, Object> statusOorCredHolder = castObjectToLinkedHashMap(oorCredHolderBody.get("status"));
+
+        assertEquals(sadOorCred.get("d").toString(), sadOorCredHolder.get("d").toString());
+        assertEquals(OOR_SCHEMA_SAID, sadOorCredHolder.get("s").toString());
+        assertEquals(qviAid.prefix, sadOorCredHolder.get("i").toString());
+        assertEquals(sadOorAuthCred.get("d").toString(), authOorCredHolder.get("n").toString());
+        assertEquals("0", statusOorCredHolder.get("s").toString());
+        assertNotNull(oorCredHolderBody.get("atc"));
+
+        List<SignifyClient> clientList = Arrays.asList(
+                gleifClient,
+                qviClient,
+                leClient,
+                roleClient
+        );
+        assertOperations(clientList);
+        warnNotifications(clientList);
     }
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
