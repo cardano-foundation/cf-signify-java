@@ -321,9 +321,9 @@ public class TestUtils {
     ) throws Exception {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
 
-        List<String> credentialList = Utils.toList(issuerClient.getCredentials().list(credentialFilter));
-        if (credentialList != null && !credentialList.isEmpty()) {
-            return credentialList.stream()
+        Object credentialList = issuerClient.getCredentials().list(credentialFilter);
+        if (credentialList instanceof List && !((List<?>) credentialList).isEmpty()) {
+            return ((List<?>) credentialList).stream()
                 .filter(cred -> {
                     Map<String, Object> credMap = Utils.toMap(cred);
                     Map<String, Object> sad = Utils.toMap(credMap.get("sad"));
