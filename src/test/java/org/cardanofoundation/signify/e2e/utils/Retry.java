@@ -9,8 +9,13 @@ import java.util.function.Supplier;
 
 public class Retry {
 
-    public static <T> T retry(Supplier<T> fn) throws InterruptedException {
-        return retry(fn, RetryOptions.builder().build());
+    public static <T> T retry(Supplier<T> fn) {
+        try {
+            return retry(fn, RetryOptions.builder().build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+//        return retry(fn, RetryOptions.builder().build());
     }
 
     public static <T> T retry(Supplier<T> fn, RetryOptions options) throws InterruptedException {
