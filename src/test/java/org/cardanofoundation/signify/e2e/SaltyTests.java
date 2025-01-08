@@ -1,4 +1,5 @@
 package org.cardanofoundation.signify.e2e;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Coring;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 class SaltyTests extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
@@ -73,7 +73,8 @@ class SaltyTests extends TestUtils {
         IdentifierListResponse aidsJson = client.getIdentifier().list(0, 24);
         List<Map<String, Object>> aids = objectMapper.readValue(
                 aidsJson.aids().toString(),
-                new TypeReference<>() {}
+                new TypeReference<>() {
+                }
         );
         Assertions.assertEquals(1, aids.size());
 
@@ -123,7 +124,8 @@ class SaltyTests extends TestUtils {
         IdentifierListResponse aidsJson1 = client.getIdentifier().list(0, 24);
         List<Map<String, Object>> aids1 = objectMapper.readValue(
                 aidsJson1.aids().toString(),
-                new TypeReference<>() {}
+                new TypeReference<>() {
+                }
         );
         Assertions.assertEquals(2, aids1.size());
 
@@ -143,7 +145,8 @@ class SaltyTests extends TestUtils {
         IdentifierListResponse aidsJson2 = client.getIdentifier().list(0, 24);
         List<Map<String, Object>> aids2 = objectMapper.readValue(
                 aidsJson2.aids().toString(),
-                new TypeReference<>() {}
+                new TypeReference<>() {
+                }
         );
         Assertions.assertEquals(3, aids2.size());
 
@@ -153,7 +156,8 @@ class SaltyTests extends TestUtils {
         IdentifierListResponse aidsJson3 = client.getIdentifier().list(1, 2);
         List<Map<String, Object>> aids3 = objectMapper.readValue(
                 aidsJson3.aids().toString(),
-                new TypeReference<>() {}
+                new TypeReference<>() {
+                }
         );
         Assertions.assertEquals(2, aids3.size());
 
@@ -163,7 +167,8 @@ class SaltyTests extends TestUtils {
         IdentifierListResponse aidsJson4 = client.getIdentifier().list(2, 2);
         List<Map<String, Object>> aids4 = objectMapper.readValue(
                 aidsJson4.aids().toString(),
-                new TypeReference<>() {}
+                new TypeReference<>() {
+                }
         );
         Assertions.assertEquals(1, aids4.size());
 
@@ -234,7 +239,8 @@ class SaltyTests extends TestUtils {
             IdentifierListResponse response = client.getIdentifier().list(2, 2);
             List<Map<String, Object>> identifiers = objectMapper.readValue(
                     response.aids().toString(),
-                    new TypeReference<>() {}
+                    new TypeReference<>() {
+                    }
             );
             assertEquals(1, identifiers.size());
 

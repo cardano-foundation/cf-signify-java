@@ -21,7 +21,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 public class ChallengesTest extends TestUtils {
     private static final Logger log = LoggerFactory.getLogger(ChallengesTest.class);
     private final String url = "http://127.0.0.1:3901";
@@ -135,7 +134,7 @@ public class ChallengesTest extends TestUtils {
             List<HashMap<String, Object>> bobcontactMap = objectMapper.readValue(
                     bobContact.getAdditionalProperties().get("challenges").toString(),
                     new TypeReference<>() {
-            });
+                    });
             assertEquals(0, bobcontactMap.size());
         } catch (Exception ex) {
             ex.printStackTrace();

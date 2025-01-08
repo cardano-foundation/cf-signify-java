@@ -35,7 +35,6 @@ import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisi
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 public class MultisigHolderTest extends BaseIntegrationTest {
     SignifyClient client1, client2, client3;
     States.HabState aid1, aid2, aid3;
@@ -284,7 +283,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         // Check for completion
         op1 = waitOperation(client1, op1);
         op2 = waitOperation(client2, op2);
-        System.out.println("End role authorization for agent " + eid1 +" completed!");
+        System.out.println("End role authorization for agent " + eid1 + " completed!");
 
         System.out.println("Starting multisig end role authorization for agent " + eid2);
 
@@ -459,13 +458,15 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         Object registries = client.getRegistries().list(name);
         try {
             if (registries instanceof String) {
-                registryList = objectMapper.readValue((String) registries, new TypeReference<>() {});
+                registryList = objectMapper.readValue((String) registries, new TypeReference<>() {
+                });
             } else {
-                registryList = objectMapper.convertValue(registries, new TypeReference<>() {});
+                registryList = objectMapper.convertValue(registries, new TypeReference<>() {
+                });
             }
 
         } catch (Exception ex) {
-           ex.printStackTrace();
+            ex.printStackTrace();
         }
         HashMap<String, Object> opResponseName = registryList.getFirst();
 

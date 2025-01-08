@@ -59,14 +59,16 @@ public class SinglesigIXNTest extends TestUtils {
         Object keyState1 = client1.getKeyStates().get(name1_id);
         String resKeyState1 = objectMapper.writeValueAsString(keyState1);
         List<HashMap<String, Object>> keyState1List = objectMapper.readValue(
-                resKeyState1, new TypeReference<>() {}
+                resKeyState1, new TypeReference<>() {
+                }
         );
         assertEquals(1, keyState1List.size());
 
         Object keyState2 = client2.getKeyStates().get(contact1_id);
         String resKeyState2 = objectMapper.writeValueAsString(keyState2);
         List<HashMap<String, Object>> keyState2List = objectMapper.readValue(
-                resKeyState2, new TypeReference<>() {}
+                resKeyState2, new TypeReference<>() {
+                }
         );
         assertEquals(keyState2List.getFirst().get("s"), keyState1List.getFirst().get("s"));
     }
@@ -80,7 +82,7 @@ public class SinglesigIXNTest extends TestUtils {
         List<Map<String, Object>> listKeyState0 = objectMapper.readValue(
                 respDataKeyState0,
                 new TypeReference<>() {
-        });
+                });
         assertNotNull(listKeyState0);
 
         // ixn
@@ -93,7 +95,7 @@ public class SinglesigIXNTest extends TestUtils {
         List<Map<String, Object>> listKeyState1 = objectMapper.readValue(
                 respDataKeyState1,
                 new TypeReference<>() {
-        });
+                });
         assertTrue(parseInteger(listKeyState1.getFirst().get("s").toString()) > 0);
 
         // sequence has incremented
@@ -107,7 +109,7 @@ public class SinglesigIXNTest extends TestUtils {
         List<Map<String, Object>> listKeyState2 = objectMapper.readValue(
                 respDataKeyState2,
                 new TypeReference<>() {
-        });
+                });
 
         // remote keystate is one behind
         assertEquals(parseInteger(listKeyState2.getFirst().get("s").toString()),

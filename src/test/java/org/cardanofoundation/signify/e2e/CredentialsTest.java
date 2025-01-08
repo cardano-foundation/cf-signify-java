@@ -616,7 +616,7 @@ public class CredentialsTest extends TestUtils {
                 Map<String, Object> additionalProperties = new LinkedHashMap<>();
                 additionalProperties.put("LEI", "5493001KJTIIGC8Y1R17");
 
-                CredentialData.CredentialSubject cSubject  = CredentialData.CredentialSubject.builder().build();
+                CredentialData.CredentialSubject cSubject = CredentialData.CredentialSubject.builder().build();
                 cSubject.setI(legalEntityAid.prefix);
                 cSubject.setAdditionalProperties(additionalProperties);
 

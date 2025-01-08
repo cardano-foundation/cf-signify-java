@@ -174,12 +174,12 @@ public class MultisigTest extends TestUtils {
         embeds.put("icp", Arrays.asList(serder, atc));
 
         List<String> smids = states.stream()
-            .map(state -> Utils.toMap(state).get("i").toString())
-            .collect(Collectors.toList());
+                .map(state -> Utils.toMap(state).get("i").toString())
+                .collect(Collectors.toList());
 
         List<String> recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("gid", serder.getPre());
@@ -187,13 +187,13 @@ public class MultisigTest extends TestUtils {
         payload.put("rmids", smids);
 
         client1.getExchanges().send(
-            "member1",
-            "multisig",
-            aid1,
-            "/multisig/icp",
-            payload,
-            embeds,
-            recp
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/icp",
+                payload,
+                embeds,
+                recp
         );
         System.out.println("Member1 initiated multisig, waiting for others to join...");
 
@@ -221,8 +221,8 @@ public class MultisigTest extends TestUtils {
         serder = icpResult2.serder();
         sigs = icpResult2.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -231,8 +231,8 @@ public class MultisigTest extends TestUtils {
 
         smids = Utils.toList(Utils.toMap(exn.get("a")).get("smids"));
         recp = Stream.of(aid1.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         payload = new LinkedHashMap<>();
         payload.put("gid", serder.getPre());
@@ -240,13 +240,13 @@ public class MultisigTest extends TestUtils {
         payload.put("rmids", smids);
 
         client2.getExchanges().send(
-            "member2",
-            "multisig",
-            aid2,
-            "/multisig/icp",
-            payload,
-            embeds,
-            recp
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/icp",
+                payload,
+                embeds,
+                recp
         );
         System.out.println("Member2 joins multisig group, waiting for others...");
 
@@ -274,8 +274,8 @@ public class MultisigTest extends TestUtils {
         serder = icpResult3.serder();
         sigs = icpResult3.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -284,8 +284,8 @@ public class MultisigTest extends TestUtils {
 
         smids = Utils.toList(Utils.toMap(exn.get("a")).get("smids"));
         recp = Stream.of(aid1.getState(), aid2.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         payload = new LinkedHashMap<>();
         payload.put("gid", serder.getPre());
@@ -293,13 +293,13 @@ public class MultisigTest extends TestUtils {
         payload.put("rmids", smids);
 
         client3.getExchanges().send(
-            "member3",
-            "multisig",
-            aid3,
-            "/multisig/icp",
-            payload,
-            embeds,
-            recp
+                "member3",
+                "multisig",
+                aid3,
+                "/multisig/icp",
+                payload,
+                embeds,
+                recp
         );
         System.out.println("Member3 joins multisig group, waiting for others...");
 
@@ -328,27 +328,27 @@ public class MultisigTest extends TestUtils {
         assertEquals("multisig", Utils.toMap(aids3.get(1)).get("name"));
 
         System.out.printf(
-            "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
-            Utils.toMap(aids1.get(0)).get("name"),
-            Utils.toMap(aids1.get(0)).get("prefix"),
-            Utils.toMap(aids1.get(1)).get("name"),
-            Utils.toMap(aids1.get(1)).get("prefix")
+                "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
+                Utils.toMap(aids1.get(0)).get("name"),
+                Utils.toMap(aids1.get(0)).get("prefix"),
+                Utils.toMap(aids1.get(1)).get("name"),
+                Utils.toMap(aids1.get(1)).get("prefix")
         );
 
         System.out.printf(
-            "Client 2 managed AIDs:\n%s [%s]\n%s [%s]%n",
-            Utils.toMap(aids2.get(0)).get("name"),
-            Utils.toMap(aids2.get(0)).get("prefix"),
-            Utils.toMap(aids2.get(1)).get("name"),
-            Utils.toMap(aids2.get(1)).get("prefix")
+                "Client 2 managed AIDs:\n%s [%s]\n%s [%s]%n",
+                Utils.toMap(aids2.get(0)).get("name"),
+                Utils.toMap(aids2.get(0)).get("prefix"),
+                Utils.toMap(aids2.get(1)).get("name"),
+                Utils.toMap(aids2.get(1)).get("prefix")
         );
 
         System.out.printf(
-            "Client 3 managed AIDs:\n%s [%s]\n%s [%s]%n",
-            Utils.toMap(aids3.get(0)).get("name"),
-            Utils.toMap(aids3.get(0)).get("prefix"),
-            Utils.toMap(aids3.get(1)).get("name"),
-            Utils.toMap(aids3.get(1)).get("prefix")
+                "Client 3 managed AIDs:\n%s [%s]\n%s [%s]%n",
+                Utils.toMap(aids3.get(0)).get("name"),
+                Utils.toMap(aids3.get(0)).get("prefix"),
+                Utils.toMap(aids3.get(1)).get("name"),
+                Utils.toMap(aids3.get(1)).get("prefix")
         );
 
         String multisig = Utils.toMap(aids3.get(1)).get("prefix").toString();
@@ -371,44 +371,44 @@ public class MultisigTest extends TestUtils {
         String stamp = new Date().toInstant().toString().replace("Z", "000+00:00");
 
         EventResult endRoleRes = client1
-            .getIdentifier()
-            .addEndRole("multisig", "agent", eid1, stamp);
+                .getIdentifier()
+                .addEndRole("multisig", "agent", eid1, stamp);
         op1 = endRoleRes.op();
         Serder rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
-        
+
         Map<String, Object> mstate = Utils.toMap(hab.getState());
         List<Object> seal = Arrays.asList(
-            "SealEvent",
-            Map.of(
-                "i", hab.getPrefix(),
-                "s", Utils.toMap(mstate.get("ee")).get("s"),
-                "d", Utils.toMap(mstate.get("ee")).get("d")
-            )
+                "SealEvent",
+                Map.of(
+                        "i", hab.getPrefix(),
+                        "s", Utils.toMap(mstate.get("ee")).get("s"),
+                        "d", Utils.toMap(mstate.get("ee")).get("d")
+                )
         );
 
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         String roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
         atc = roleims.substring(rpy.getSize());
-        
+
         Map<String, List<Object>> roleembeds = new LinkedHashMap<>();
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
         recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client1.getExchanges().send(
-            "member1",
-            "multisig",
-            aid1,
-            "/multisig/rpy",
-            Map.of("gid", aid),
-            roleembeds,
-            recp
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/rpy",
+                Map.of("gid", aid),
+                roleembeds,
+                recp
         );
 
         System.out.printf("Member1 authorized agent role to %s, waiting for others to authorize...", eid1);
@@ -419,15 +419,15 @@ public class MultisigTest extends TestUtils {
 
         res = client2.getGroups().getRequest(msgSaid);
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-        
+
         // stamp, eid and role are provided in the exn message
         String rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
         String rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
         String rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
-        
+
         endRoleRes = client2
-            .getIdentifier()
-            .addEndRole("multisig", rpyrole, rpyeid, rpystamp);
+                .getIdentifier()
+                .addEndRole("multisig", rpyrole, rpyeid, rpystamp);
         op2 = endRoleRes.op();
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
@@ -435,36 +435,36 @@ public class MultisigTest extends TestUtils {
         hab = client2.getIdentifier().get("multisig");
         mstate = Utils.toMap(hab.getState());
         seal = Arrays.asList(
-            "SealEvent",
-            Map.of(
-                "i", hab.getPrefix(),
-                "s", Utils.toMap(mstate.get("ee")).get("s"),
-                "d", Utils.toMap(mstate.get("ee")).get("d")
-            )
+                "SealEvent",
+                Map.of(
+                        "i", hab.getPrefix(),
+                        "s", Utils.toMap(mstate.get("ee")).get("s"),
+                        "d", Utils.toMap(mstate.get("ee")).get("d")
+                )
         );
 
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
         atc = roleims.substring(rpy.getSize());
-        
+
         roleembeds = new LinkedHashMap<>();
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
         recp = Stream.of(aid1.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client2.getExchanges().send(
-            "member2",
-            "multisig",
-            aid2,
-            "/multisig/rpy",
-            Map.of("gid", aid),
-            roleembeds,
-            recp
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/rpy",
+                Map.of("gid", aid),
+                roleembeds,
+                recp
         );
 
         System.out.printf("Member2 authorized agent role to %s, waiting for others to authorize...", eid1);
@@ -475,15 +475,15 @@ public class MultisigTest extends TestUtils {
 
         res = client3.getGroups().getRequest(msgSaid);
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-        
+
         // stamp, eid and role are provided in the exn message
         rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
         rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
         rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
-        
+
         endRoleRes = client3
-            .getIdentifier()
-            .addEndRole("multisig", rpyrole, rpyeid, rpystamp);
+                .getIdentifier()
+                .addEndRole("multisig", rpyrole, rpyeid, rpystamp);
         op3 = endRoleRes.op();
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
@@ -491,36 +491,36 @@ public class MultisigTest extends TestUtils {
         hab = client3.getIdentifier().get("multisig");
         mstate = Utils.toMap(hab.getState());
         seal = Arrays.asList(
-            "SealEvent",
-            Map.of(
-                "i", hab.getPrefix(),
-                "s", Utils.toMap(mstate.get("ee")).get("s"),
-                "d", Utils.toMap(mstate.get("ee")).get("d")
-            )
+                "SealEvent",
+                Map.of(
+                        "i", hab.getPrefix(),
+                        "s", Utils.toMap(mstate.get("ee")).get("s"),
+                        "d", Utils.toMap(mstate.get("ee")).get("d")
+                )
         );
 
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
         atc = roleims.substring(rpy.getSize());
-        
+
         roleembeds = new LinkedHashMap<>();
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
         recp = Stream.of(aid1.getState(), aid2.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client3.getExchanges().send(
-            "member3",
-            "multisig",
-            aid3,
-            "/multisig/rpy",
-            Map.of("gid", aid),
-            roleembeds,
-            recp
+                "member3",
+                "multisig",
+                aid3,
+                "/multisig/rpy",
+                Map.of("gid", aid),
+                roleembeds,
+                recp
         );
 
         System.out.printf("Member3 authorized agent role to %s, waiting for others to authorize...", eid1);
@@ -549,8 +549,8 @@ public class MultisigTest extends TestUtils {
         serder = eventResponse1.serder();
         sigs = eventResponse1.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -558,24 +558,24 @@ public class MultisigTest extends TestUtils {
         xembeds.put("ixn", Arrays.asList(serder, atc));
 
         smids = states.stream()
-            .map(state -> Utils.toMap(state).get("i").toString())
-            .collect(Collectors.toList());
+                .map(state -> Utils.toMap(state).get("i").toString())
+                .collect(Collectors.toList());
         recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client1.getExchanges().send(
-            "member1",
-            "multisig",
-            aid1,
-            "/multisig/ixn",
-            Map.of(
-                "gid", serder.getPre(),
-                "smids", smids,
-                "rmids", smids
-            ),
-            xembeds,
-            recp
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/ixn",
+                Map.of(
+                        "gid", serder.getPre(),
+                        "smids", smids,
+                        "rmids", smids
+                ),
+                xembeds,
+                recp
         );
         System.out.println("Member1 initiates interaction event, waiting for others to join...");
 
@@ -593,8 +593,8 @@ public class MultisigTest extends TestUtils {
         serder = icpResult2.serder();
         sigs = icpResult2.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -603,21 +603,21 @@ public class MultisigTest extends TestUtils {
 
         smids = Utils.toList(Utils.toMap(exn.get("a")).get("smids"));
         recp = Stream.of(aid1.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client2.getExchanges().send(
-            "member2",
-            "multisig",
-            aid2,
-            "/multisig/ixn",
-            Map.of(
-                "gid", serder.getPre(),
-                "smids", smids,
-                "rmids", smids
-            ),
-            xembeds,
-            recp
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/ixn",
+                Map.of(
+                        "gid", serder.getPre(),
+                        "smids", smids,
+                        "rmids", smids
+                ),
+                xembeds,
+                recp
         );
         System.out.println("Member2 joins interaction event, waiting for others...");
 
@@ -635,8 +635,8 @@ public class MultisigTest extends TestUtils {
         serder = icpResult3.serder();
         sigs = icpResult3.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -645,21 +645,21 @@ public class MultisigTest extends TestUtils {
 
         smids = Utils.toList(Utils.toMap(exn.get("a")).get("smids"));
         recp = Stream.of(aid1.getState(), aid2.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client3.getExchanges().send(
-            "member3",
-            "multisig",
-            aid3,
-            "/multisig/ixn",
-            Map.of(
-                "gid", serder.getPre(),
-                "smids", smids,
-                "rmids", smids
-            ),
-            xembeds,
-            recp
+                "member3",
+                "multisig",
+                aid3,
+                "/multisig/ixn",
+                Map.of(
+                        "gid", serder.getPre(),
+                        "smids", smids,
+                        "rmids", smids
+                ),
+                xembeds,
+                recp
         );
         System.out.println("Member3 joins interaction event, waiting for others...");
 
@@ -722,15 +722,15 @@ public class MultisigTest extends TestUtils {
 
         // Member1 initiates a rotation event
         eventResponse1 = client1.getIdentifier().rotate("multisig", RotateIdentifierArgs.builder()
-            .states(states)
-            .rstates(rstates)
-            .build());
+                .states(states)
+                .rstates(rstates)
+                .build());
         op1 = eventResponse1.op();
         serder = eventResponse1.serder();
         sigs = eventResponse1.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -738,24 +738,24 @@ public class MultisigTest extends TestUtils {
         rembeds.put("rot", Arrays.asList(serder, atc));
 
         smids = states.stream()
-            .map(state -> Utils.toMap(state).get("i").toString())
-            .collect(Collectors.toList());
+                .map(state -> Utils.toMap(state).get("i").toString())
+                .collect(Collectors.toList());
         recp = Stream.of(aid2State, aid3State)
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client1.getExchanges().send(
-            "member1",
-            "multisig",
-            aid1,
-            "/multisig/rot",
-            Map.of(
-                "gid", serder.getPre(),
-                "smids", smids,
-                "rmids", smids
-            ),
-            rembeds,
-            recp
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/rot",
+                Map.of(
+                        "gid", serder.getPre(),
+                        "smids", smids,
+                        "rmids", smids
+                ),
+                rembeds,
+                recp
         );
         System.out.println("Member1 initiates rotation event, waiting for others to join...");
 
@@ -768,15 +768,15 @@ public class MultisigTest extends TestUtils {
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
 
         icpResult2 = client2.getIdentifier().rotate("multisig", RotateIdentifierArgs.builder()
-            .states(states)
-            .rstates(rstates)
-            .build());
+                .states(states)
+                .rstates(rstates)
+                .build());
         op2 = icpResult2.op();
         serder = icpResult2.serder();
         sigs = icpResult2.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -785,21 +785,21 @@ public class MultisigTest extends TestUtils {
 
         smids = Utils.toList(Utils.toMap(exn.get("a")).get("smids"));
         recp = Stream.of(aid1State, aid3State)
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client2.getExchanges().send(
-            "member2",
-            "multisig",
-            aid2,
-            "/multisig/ixn",
-            Map.of(
-                "gid", serder.getPre(),
-                "smids", smids,
-                "rmids", smids
-            ),
-            rembeds,
-            recp
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/ixn",
+                Map.of(
+                        "gid", serder.getPre(),
+                        "smids", smids,
+                        "rmids", smids
+                ),
+                rembeds,
+                recp
         );
         System.out.println("Member2 joins rotation event, waiting for others...");
 
@@ -810,15 +810,15 @@ public class MultisigTest extends TestUtils {
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
 
         icpResult3 = client3.getIdentifier().rotate("multisig", RotateIdentifierArgs.builder()
-            .states(states)
-            .rstates(rstates)
-            .build());
+                .states(states)
+                .rstates(rstates)
+                .build());
         op3 = icpResult3.op();
         serder = icpResult3.serder();
         sigs = icpResult3.sigs();
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
@@ -827,21 +827,21 @@ public class MultisigTest extends TestUtils {
 
         smids = Utils.toList(Utils.toMap(exn.get("a")).get("smids"));
         recp = Stream.of(aid1State, aid2State)
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client3.getExchanges().send(
-            "member3",
-            "multisig",
-            aid3,
-            "/multisig/ixn",
-            Map.of(
-                "gid", serder.getPre(),
-                "smids", smids,
-                "rmids", smids
-            ),
-            rembeds,
-            recp
+                "member3",
+                "multisig",
+                aid3,
+                "/multisig/ixn",
+                Map.of(
+                        "gid", serder.getPre(),
+                        "smids", smids,
+                        "rmids", smids
+                ),
+                rembeds,
+                recp
         );
         System.out.println("Member3 joins rotation event, waiting for others...");
 
@@ -861,10 +861,10 @@ public class MultisigTest extends TestUtils {
         System.out.println("Starting multisig registry creation");
 
         RegistryResult vcpRes1 = client1.getRegistries().create(CreateRegistryArgs.builder()
-            .name("multisig")
-            .registryName("vLEI Registry")
-            .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
-            .build());
+                .name("multisig")
+                .registryName("vLEI Registry")
+                .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
+                .build());
         op1 = vcpRes1.op();
         serder = vcpRes1.getRegser();
         String regk = serder.getPre();
@@ -872,8 +872,8 @@ public class MultisigTest extends TestUtils {
         sigs = vcpRes1.getSigs();
 
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(anc, sigers));
         atc = ims.substring(anc.getSize());
@@ -882,20 +882,20 @@ public class MultisigTest extends TestUtils {
         regbeds.put("anc", Arrays.asList(anc, atc));
 
         recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client1.getExchanges().send(
-            "member1",
-            "registry",
-            aid1,
-            "/multisig/vcp",
-            Map.of(
-                "gid", multisig,
-                "usage", "Issue vLEIs"
-            ),
-            regbeds,
-            recp
+                "member1",
+                "registry",
+                aid1,
+                "/multisig/vcp",
+                Map.of(
+                        "gid", multisig,
+                        "usage", "Issue vLEIs"
+                ),
+                regbeds,
+                recp
         );
 
         System.out.println("Member1 initiated registry, waiting for others to join...");
@@ -908,18 +908,18 @@ public class MultisigTest extends TestUtils {
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
 
         RegistryResult vcpRes2 = client2.getRegistries().create(CreateRegistryArgs.builder()
-            .name("multisig")
-            .registryName("vLEI Registry")
-            .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
-            .build());
+                .name("multisig")
+                .registryName("vLEI Registry")
+                .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
+                .build());
         op2 = vcpRes2.op();
         serder = vcpRes2.getRegser();
         anc = vcpRes2.getSerder();
         sigs = vcpRes2.getSigs();
 
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(anc, sigers));
         atc = ims.substring(anc.getSize());
@@ -928,20 +928,20 @@ public class MultisigTest extends TestUtils {
         regbeds.put("anc", Arrays.asList(anc, atc));
 
         recp = Stream.of(aid1.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client2.getExchanges().send(
-            "member2",
-            "registry",
-            aid2,
-            "/multisig/vcp",
-            Map.of(
-                "gid", multisig,
-                "usage", "Issue vLEIs"
-            ),
-            regbeds,
-            recp
+                "member2",
+                "registry",
+                aid2,
+                "/multisig/vcp",
+                Map.of(
+                        "gid", multisig,
+                        "usage", "Issue vLEIs"
+                ),
+                regbeds,
+                recp
         );
         System.out.println("Member2 joins registry event, waiting for others...");
 
@@ -953,18 +953,18 @@ public class MultisigTest extends TestUtils {
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
 
         RegistryResult vcpRes3 = client3.getRegistries().create(CreateRegistryArgs.builder()
-            .name("multisig")
-            .registryName("vLEI Registry")
-            .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
-            .build());
+                .name("multisig")
+                .registryName("vLEI Registry")
+                .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
+                .build());
         op3 = vcpRes3.op();
         serder = vcpRes3.getRegser();
         anc = vcpRes3.getSerder();
         sigs = vcpRes3.getSigs();
 
         sigers = sigs.stream()
-            .map(Siger::new)
-            .toList();
+                .map(Siger::new)
+                .toList();
 
         ims = new String(Eventing.messagize(anc, sigers));
         atc = ims.substring(anc.getSize());
@@ -973,20 +973,20 @@ public class MultisigTest extends TestUtils {
         regbeds.put("anc", Arrays.asList(anc, atc));
 
         recp = Stream.of(aid1.getState(), aid2.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client3.getExchanges().send(
-            "member3",
-            "multisig",
-            aid3,
-            "/multisig/vcp",
-            Map.of(
-                "gid", multisig,
-                "usage", "Issue vLEIs"
-            ),
-            regbeds,
-            recp
+                "member3",
+                "multisig",
+                aid3,
+                "/multisig/vcp",
+                Map.of(
+                        "gid", multisig,
+                        "usage", "Issue vLEIs"
+                ),
+                regbeds,
+                recp
         );
 
         // Done
@@ -999,22 +999,22 @@ public class MultisigTest extends TestUtils {
         System.out.println("Starting multisig credential creation");
 
         Map<String, Object> vcdata = Map.of(
-            "LEI", "5493001KJTIIGC8Y1R17"
+                "LEI", "5493001KJTIIGC8Y1R17"
         );
         String holder = aid4.getPrefix();
 
         String TIME = new Date().toInstant().toString().replace("Z", "000+00:00");
         CredentialData.CredentialSubject subject = CredentialData.CredentialSubject.builder()
-            .i(holder)
-            .dt(TIME)
-            .additionalProperties(vcdata)
-            .build();
+                .i(holder)
+                .dt(TIME)
+                .additionalProperties(vcdata)
+                .build();
 
         CredentialData credentialData = CredentialData.builder()
-            .ri(regk)
-            .s(SCHEMA_SAID)
-            .a(subject)
-            .build();
+                .ri(regk)
+                .s(SCHEMA_SAID)
+                .a(subject)
+                .build();
 
         IssueCredentialResult credRes = client1.getCredentials().issue("multisig", credentialData);
         op1 = credRes.getOp();
@@ -1074,13 +1074,13 @@ public class MultisigTest extends TestUtils {
         stamp = new Date().toInstant().toString().replace("Z", "000+00:00");
 
         Exchanging.ExchangeMessageResult grantResult = client1.getIpex().grant(IpexGrantArgs.builder()
-            .senderName("multisig")
-            .acdc(credRes.getAcdc())
-            .anc(credRes.getAnc())
-            .iss(credRes.getIss())
-            .recipient(holder)
-            .datetime(stamp)
-            .build()
+                .senderName("multisig")
+                .acdc(credRes.getAcdc())
+                .anc(credRes.getAnc())
+                .iss(credRes.getIss())
+                .recipient(holder)
+                .datetime(stamp)
+                .build()
         );
         Serder grant = grantResult.exn();
         List<String> gsigs = grantResult.sigs();
@@ -1090,16 +1090,16 @@ public class MultisigTest extends TestUtils {
 
         mstate = Utils.toMap(m.getState());
         seal = Arrays.asList(
-            "SealEvent",
-            Map.of(
-                "i", m.getPrefix(),
-                "s", Utils.toMap(mstate.get("ee")).get("s"),
-                "d", Utils.toMap(mstate.get("ee")).get("d")
-            )
+                "SealEvent",
+                Map.of(
+                        "i", m.getPrefix(),
+                        "s", Utils.toMap(mstate.get("ee")).get("s"),
+                        "d", Utils.toMap(mstate.get("ee")).get("d")
+                )
         );
         sigers = gsigs.stream()
-            .map(Siger::new)
-            .collect(Collectors.toList());
+                .map(Siger::new)
+                .collect(Collectors.toList());
 
         String gims = new String(Eventing.messagize(grant, sigers, seal));
         atc = gims.substring(grant.getSize());
@@ -1108,17 +1108,17 @@ public class MultisigTest extends TestUtils {
         gembeds.put("exn", Arrays.asList(grant, atc));
 
         recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client1.getExchanges().send(
-            "member1",
-            "multisig",
-            aid1,
-            "/multisig/exn",
-            Map.of("gid", m.getPrefix()),
-            gembeds,
-            recp
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/exn",
+                Map.of("gid", m.getPrefix()),
+                gembeds,
+                recp
         );
 
         System.out.println("Member1 initiated grant message, waiting for others to join...");
@@ -1129,13 +1129,13 @@ public class MultisigTest extends TestUtils {
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
 
         Exchanging.ExchangeMessageResult grantResult2 = client2.getIpex().grant(IpexGrantArgs.builder()
-            .senderName("multisig")
-            .recipient(holder)
-            .acdc(credRes2.getAcdc())
-            .anc(credRes2.getAnc())
-            .iss(credRes2.getIss())
-            .datetime(stamp)
-            .build()
+                .senderName("multisig")
+                .recipient(holder)
+                .acdc(credRes2.getAcdc())
+                .anc(credRes2.getAnc())
+                .iss(credRes2.getIss())
+                .datetime(stamp)
+                .build()
         );
         Serder grant2 = grantResult2.exn();
         List<String> gsigs2 = grantResult2.sigs();
@@ -1144,8 +1144,8 @@ public class MultisigTest extends TestUtils {
         op2 = client2.getIpex().submitGrant("multisig", grant2, gsigs2, end2, List.of(holder));
 
         sigers = gsigs2.stream()
-            .map(Siger::new)
-            .collect(Collectors.toList());
+                .map(Siger::new)
+                .collect(Collectors.toList());
 
         gims = new String(Eventing.messagize(grant2, sigers, seal));
         atc = gims.substring(grant2.getSize());
@@ -1154,17 +1154,17 @@ public class MultisigTest extends TestUtils {
         gembeds = new LinkedHashMap<>();
         gembeds.put("exn", Arrays.asList(grant2, atc));
         recp = Stream.of(aid1.getState(), aid3.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client2.getExchanges().send(
-            "member2",
-            "multisig",
-            aid2,
-            "/multisig/exn",
-            Map.of("gid", m.getPrefix()),
-            gembeds,
-            recp
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/exn",
+                Map.of("gid", m.getPrefix()),
+                gembeds,
+                recp
         );
 
         System.out.println("Member2 joined grant message, waiting for others to join...");
@@ -1175,13 +1175,13 @@ public class MultisigTest extends TestUtils {
         exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
 
         Exchanging.ExchangeMessageResult grantResult3 = client3.getIpex().grant(IpexGrantArgs.builder()
-            .senderName("multisig")
-            .recipient(holder)
-            .acdc(credRes3.getAcdc())
-            .anc(credRes3.getAnc())
-            .iss(credRes3.getIss())
-            .datetime(stamp)
-            .build()
+                .senderName("multisig")
+                .recipient(holder)
+                .acdc(credRes3.getAcdc())
+                .anc(credRes3.getAnc())
+                .iss(credRes3.getIss())
+                .datetime(stamp)
+                .build()
         );
         Serder grant3 = grantResult3.exn();
         List<String> gsigs3 = grantResult3.sigs();
@@ -1190,8 +1190,8 @@ public class MultisigTest extends TestUtils {
         op3 = client3.getIpex().submitGrant("multisig", grant3, gsigs3, end3, List.of(holder));
 
         sigers = gsigs3.stream()
-            .map(Siger::new)
-            .collect(Collectors.toList());
+                .map(Siger::new)
+                .collect(Collectors.toList());
 
         gims = new String(Eventing.messagize(grant3, sigers, seal));
         atc = gims.substring(grant3.getSize());
@@ -1200,17 +1200,17 @@ public class MultisigTest extends TestUtils {
         gembeds = new LinkedHashMap<>();
         gembeds.put("exn", Arrays.asList(grant3, atc));
         recp = Stream.of(aid1.getState(), aid2.getState())
-            .map(States.State::getI)
-            .collect(Collectors.toList());
+                .map(States.State::getI)
+                .collect(Collectors.toList());
 
         client3.getExchanges().send(
-            "member3",
-            "multisig",
-            aid3,
-            "/multisig/exn",
-            Map.of("gid", m.getPrefix()),
-            gembeds,
-            recp
+                "member3",
+                "multisig",
+                aid3,
+                "/multisig/exn",
+                Map.of("gid", m.getPrefix()),
+                gembeds,
+                recp
         );
 
         System.out.println("Member3 joined grant message, waiting for others to join...");
@@ -1220,11 +1220,11 @@ public class MultisigTest extends TestUtils {
         res = client4.getExchanges().get(msgSaid);
 
         Exchanging.ExchangeMessageResult admitResult = client4.getIpex().admit(IpexAdmitArgs.builder()
-            .senderName("holder")
-            .message("")
-            .grantSaid(Utils.toMap(Utils.toMap(res).get("exn")).get("d").toString())
-            .recipient(m.getPrefix())
-            .build()
+                .senderName("holder")
+                .message("")
+                .grantSaid(Utils.toMap(Utils.toMap(res).get("exn")).get("d").toString())
+                .recipient(m.getPrefix())
+                .build()
         );
         Serder admit = admitResult.exn();
         List<String> asigs = admitResult.sigs();
@@ -1302,7 +1302,7 @@ public class MultisigTest extends TestUtils {
             String groupName,
             IssueCredentialResult result
     ) throws Exception {
-        
+
         States.HabState leaderHab = client.getIdentifier().get(memberName);
         States.HabState groupHab = client.getIdentifier().get(groupName);
         Object members = client.getIdentifier().members(groupName);
@@ -1310,8 +1310,8 @@ public class MultisigTest extends TestUtils {
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
         Keeping.SignResult sigs = keeper.sign(result.getAnc().getRaw().getBytes());
         List<Siger> sigers = sigs.signatures().stream()
-            .map(Siger::new)
-            .collect(Collectors.toList());
+                .map(Siger::new)
+                .collect(Collectors.toList());
 
         String ims = new String(Eventing.messagize(result.getAnc(), sigers));
         String atc = ims.substring(result.getAnc().getSize());
@@ -1324,18 +1324,18 @@ public class MultisigTest extends TestUtils {
         Map<String, Object> membersMap = Utils.toMap(members);
         List<Map<String, Object>> signing = (List<Map<String, Object>>) membersMap.get("signing");
         List<String> recipients = signing.stream()
-            .map(m -> m.get("aid").toString())
-            .filter(aid -> !aid.equals(leaderHab.getPrefix()))
-            .collect(Collectors.toList());
+                .map(m -> m.get("aid").toString())
+                .filter(aid -> !aid.equals(leaderHab.getPrefix()))
+                .collect(Collectors.toList());
 
         client.getExchanges().send(
-            memberName,
-            "multisig",
-            leaderHab,
-            "/multisig/iss",
-            Map.of("gid", groupHab.getPrefix()),
-            embeds,
-            recipients
+                memberName,
+                "multisig",
+                leaderHab,
+                "/multisig/iss",
+                Map.of("gid", groupHab.getPrefix()),
+                embeds,
+                recipients
         );
     }
 
@@ -1353,8 +1353,8 @@ public class MultisigTest extends TestUtils {
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
         Keeping.SignResult sigs = keeper.sign(anc.getRaw().getBytes());
         List<Siger> sigers = sigs.signatures().stream()
-            .map(Siger::new)
-            .collect(Collectors.toList());
+                .map(Siger::new)
+                .collect(Collectors.toList());
 
         String ims = new String(Eventing.messagize(anc, sigers));
         String atc = ims.substring(anc.getSize());
@@ -1366,18 +1366,18 @@ public class MultisigTest extends TestUtils {
         Map<String, Object> membersMap = Utils.toMap(members);
         List<Map<String, Object>> signing = (List<Map<String, Object>>) membersMap.get("signing");
         List<String> recipients = signing.stream()
-            .map(m -> m.get("aid").toString())
-            .filter(aid -> !aid.equals(leaderHab.getPrefix()))
-            .collect(Collectors.toList());
+                .map(m -> m.get("aid").toString())
+                .filter(aid -> !aid.equals(leaderHab.getPrefix()))
+                .collect(Collectors.toList());
 
         client.getExchanges().send(
-            memberName,
-            "multisig",
-            leaderHab,
-            "/multisig/rev",
-            Map.of("gid", groupHab.getPrefix()),
-            embeds,
-            recipients
+                memberName,
+                "multisig",
+                leaderHab,
+                "/multisig/rev",
+                Map.of("gid", groupHab.getPrefix()),
+                embeds,
+                recipients
         );
     }
 }
