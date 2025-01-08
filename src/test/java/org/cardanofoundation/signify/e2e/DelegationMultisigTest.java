@@ -271,18 +271,12 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         false);
 
                 Operation<Object> dresult1 = waitOperations(delegator1Client, delApprOp1);
+                Object responseDresult1 = dresult1.getResponse();
+
                 Operation<Object> dresult2 = waitOperations(delegator2Client, delApprOp2);
+                Object responseDresult2 = dresult2.getResponse();
 
-//                List<Operation> dresults = waitOperationAsync(
-//                        new WaitOperationArgs(delegator1Client, delApprOp1),
-//                        new WaitOperationArgs(delegator2Client, delApprOp2)
-//                );
-
-//                Operation dresult1 = dresults.get(0);
-//                Operation dresult2 = dresults.get(1);
-
-                assertEquals(dresult1.getResponse(), dresult2.getResponse());
-
+                assertEquals(responseDresult1, responseDresult2);
                 waitAndMarkNotification(delegator1Client, "/multisig/ixn");
             } catch (Exception e) {
                 throw new RuntimeException(e);
