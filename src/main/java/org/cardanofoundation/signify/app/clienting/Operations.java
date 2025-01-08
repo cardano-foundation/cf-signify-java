@@ -30,7 +30,7 @@ public class Operations {
     }
 
     public List<Operation<?>> list(String type) throws SodiumException, IOException, InterruptedException {
-        String path = "/operations?" + (type != null ? "type=" + type : "");
+        String path = "/operations" + (type != null ? "?type=" + type : "");
         String method = "GET";
         HttpResponse<String> response = client.fetch(path, method, null, null);
         return Utils.fromJson(response.body(), new TypeReference<>() {});
