@@ -722,33 +722,26 @@ public class CredentialsTest extends TestUtils {
         testSteps.step("Legal Entity has chained credential", () -> {
             Object legalEntityCredential;
             try {
-                legalEntityCredential = retry(() -> {
-                    try {
-                        return legalEntityClient.getCredentials().get(leCredentialId);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                legalEntityCredential = legalEntityClient.getCredentials().get(leCredentialId);
+                LinkedHashMap<String, Object> legalEntityCredentialBody = castObjectToLinkedHashMap(legalEntityCredential);
+                LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(legalEntityCredentialBody.get("sad"));
+                LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(sad.get("a"));
+                LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(legalEntityCredentialBody.get("status"));
+                ArrayList<String> chains = (ArrayList<String>) legalEntityCredentialBody.get("chains");
+                LinkedHashMap<String, Object> chainsBody = castObjectToLinkedHashMap(chains.getFirst());
+                LinkedHashMap<String, Object> sadInChains = castObjectToLinkedHashMap(chainsBody.get("sad"));
+                String atc = legalEntityCredentialBody.get("atc").toString();
 
-                });
-            } catch (InterruptedException e) {
+                assertEquals(LE_SCHEMA_SAID, sad.get("s").toString());
+                assertEquals(holderAid.prefix, sad.get("i").toString());
+                assertEquals(legalEntityAid.prefix, a.get("i").toString());
+                assertEquals("0", status.get("s").toString());
+                assertEquals(qviCredentialId, sadInChains.get("d").toString());
+                assertNotNull(atc);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
-            LinkedHashMap<String, Object> legalEntityCredentialBody = castObjectToLinkedHashMap(legalEntityCredential);
-            LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(legalEntityCredentialBody.get("sad"));
-            LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(sad.get("a"));
-            LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(legalEntityCredentialBody.get("status"));
-            ArrayList<String> chains = (ArrayList<String>) legalEntityCredentialBody.get("chains");
-            LinkedHashMap<String, Object> chainsBody = castObjectToLinkedHashMap(chains.getFirst());
-            LinkedHashMap<String, Object> sadInChains = castObjectToLinkedHashMap(chainsBody.get("sad"));
-            String atc = legalEntityCredentialBody.get("atc").toString();
-
-            assertEquals(LE_SCHEMA_SAID, sad.get("s").toString());
-            assertEquals(holderAid.prefix, sad.get("i").toString());
-            assertEquals(legalEntityAid.prefix, a.get("i").toString());
-            assertEquals("0", status.get("s").toString());
-            assertEquals(qviCredentialId, sadInChains.get("d").toString());
-            assertNotNull(atc);
         });
 
         testSteps.step("Issuer revoke QVI credential", () -> {
