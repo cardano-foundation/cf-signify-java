@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SinglesigDRT extends TestUtils {
+public class SinglesigDRTTest extends TestUtils {
     private static SignifyClient delegator, delegate;
     private static String name1_id, name1_oobi;
     private static String contact1_id;

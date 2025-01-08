@@ -10,13 +10,12 @@ import org.cardanofoundation.signify.cesr.args.CounterArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States.HabState;
 
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class Exchanging {
     @Getter
@@ -68,7 +67,7 @@ public class Exchanging {
             Serder exn = result.serder();
             String end = new String(result.end());
 
-            Keeping.SignResult sigs = keeper.sign(exn.getRaw().getBytes(), null, null ,null);
+            Keeping.SignResult sigs = keeper.sign(exn.getRaw().getBytes());
             return new ExchangeMessageResult(exn, sigs.signatures(), end);
         }
 
@@ -92,7 +91,7 @@ public class Exchanging {
             Map<String, Object> payload,
             Map<String, List<Object>> embeds,
             List<String> recipients
-        ) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
+        ) throws SodiumException, InterruptedException, IOException, DigestException {
 
             for (String recipient : recipients) {
                 ExchangeMessageResult result = createExchangeMessage(
@@ -139,13 +138,12 @@ public class Exchanging {
 
             String path = String.format("/identifiers/%s/exchanges", name);
             String method = "POST";
-            Map<String, Object> data = Map.of(
-                "tpc", topic,
-                "exn", exn.getKed(),
-                "sigs", sigs,
-                "atc", atc,
-                "rec", recipients
-            );
+            LinkedHashMap<String, Object> data = new LinkedHashMap<>();
+            data.put("tpc", topic);
+            data.put("exn", exn.getKed());
+            data.put("sigs", sigs);
+            data.put("atc", atc);
+            data.put("rec", recipients);
 
             return client.fetch(path, method, data, null);
         }
@@ -159,7 +157,7 @@ public class Exchanging {
         public Object get(String said) throws Exception {
             String path = String.format("/exchanges/%s", said);
             String method = "GET";
-            return client.fetch(path, method, null, null);
+            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
         }
     }
 
@@ -188,7 +186,10 @@ public class Exchanging {
             String key = entry.getKey();
             List<Object> value = entry.getValue();
             Serder serder = (Serder) value.get(0);
-            String atc = (String) value.get(1);
+            String atc = null;
+            if (value.size() > 1) {
+                atc = value.get(1).toString();
+            }
             e.put(key, serder.getKed());
 
             if (atc == null) {

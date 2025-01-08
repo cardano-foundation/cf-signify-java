@@ -126,7 +126,7 @@ public class SinglesigROT extends TestUtils {
         );
 
         // refresh remote keystate
-        int sn = parseInteger(listKeyState1.getFirst().get("s").toString());
+        String sn = listKeyState1.getFirst().get("s").toString();
         Object op = client2.getKeyStates().query(contact1_id, sn, null);
         op = operationToObject(waitOperation(client2, op));
         if (op instanceof String) {

@@ -29,7 +29,7 @@ public class WitnessTest extends TestUtils {
     @Test
     public void testWitness() throws Exception {
         String bran1 = Coring.randomPasscode();
-        client1 = new  SignifyClient(
+        client1 = new SignifyClient(
                 url,
                 bran1,
                 Salter.Tier.low,

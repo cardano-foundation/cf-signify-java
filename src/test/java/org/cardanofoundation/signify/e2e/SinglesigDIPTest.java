@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class SinglesigDIP extends TestUtils {
+class SinglesigDIPTest extends TestUtils {
     private static SignifyClient client1, client2;
     private static String contact1_id;
     private static String name1_id, name1_oobi;
