@@ -183,7 +183,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         qviCredHolder = retry(() -> {
             try {
                 Object cred = getReceivedCredential(qviClient, sadQviCred.get("d").toString());
-                assert (cred != null);
+                assertNotNull(cred);
                 return cred;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -233,7 +233,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             leCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(leClient, sadLeCred.get("d").toString());
-                    assert (cred != null);
+                    assertNotNull(cred);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -290,7 +290,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             ecrCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
-                    assert (cred != null);
+                    assertNotNull(cred);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -347,7 +347,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             ecrAuthCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(qviClient, sadEcrAuthCred.get("d").toString());
-                    assert (cred != null);
+                    assertNotNull(cred);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -404,7 +404,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             ecrCredHolder2 = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(roleClient, sadEcrCred2.get("d").toString());
-                    assert (cred != null);
+                    assertNotNull(cred);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -457,7 +457,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             oorAuthCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(qviClient, sadOorAuthCred.get("d").toString());
-                    assert (cred != null);
+                    assertNotNull(cred);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -513,7 +513,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             oorCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(roleClient, sadOorCred.get("d").toString());
-                    assert (cred != null);
+                    assertNotNull(cred);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
