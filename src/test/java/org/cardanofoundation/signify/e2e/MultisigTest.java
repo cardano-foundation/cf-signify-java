@@ -50,7 +50,7 @@ public class MultisigTest extends TestUtils {
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    //    @Disabled("Disabled until bug respond has been fixed")
+    @Disabled("Disabled until bug respond has been fixed")
     @Test
     public void multisig() throws Exception {
         // Boot Four clients

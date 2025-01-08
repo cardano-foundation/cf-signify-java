@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.app.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class TestUtils {
@@ -293,7 +292,7 @@ public class TestUtils {
                 ex.printStackTrace();
             }
         }
-        assert getResponseI != null;
+        assertNotNull(getResponseI);
         return getResponseI.toString();
     }
 

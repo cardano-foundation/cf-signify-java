@@ -74,6 +74,7 @@ tasks.register('testE2E', Test) {
     useJUnitPlatform()  // Use TestNG for E2E tests
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigVleiIssuanceTest"
     }
     finalizedBy 'allureReport'
 }

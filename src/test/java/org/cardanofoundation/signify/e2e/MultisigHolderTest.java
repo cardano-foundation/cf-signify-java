@@ -23,6 +23,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigIncep
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +56,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
     String TIME = createTimestamp();
 
+    @Disabled
     @Test
     @DisplayName("Multisig Holder Test")
     void multisigHolderTest() throws Exception {

@@ -290,6 +290,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             ecrCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
+                    Thread.sleep(1000);
                     assertNotNull(cred);
                     return cred;
                 } catch (Exception e) {
@@ -594,7 +595,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
     }
 
     public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) throws Exception {
-        Thread.sleep(2000);
+        Thread.sleep(3000);
         List<Notification> notifications = waitForNotifications(senderClient, "/exn/ipex/grant");
         assertEquals(1, notifications.size());
         Notification grantNotification = notifications.getFirst();

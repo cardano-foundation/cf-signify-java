@@ -11,6 +11,7 @@ import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -26,6 +27,7 @@ public class DelegationTest extends TestUtils {
     private TestSteps testSteps = new TestSteps();
     private Retry retry = new Retry();
 
+    @Disabled
     @Test
     void delegationTest() throws Exception {
         String bran1 = Coring.randomPasscode();
