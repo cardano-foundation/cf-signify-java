@@ -718,9 +718,9 @@ public class CredentialsTest extends TestUtils {
         });
 
         testSteps.step("Legal Entity has chained credential", () -> {
+            Object legalEntityCredential;
             try {
-                Thread.sleep(2000);
-                Object legalEntityCredential = legalEntityClient.getCredentials().get(leCredentialId);
+                legalEntityCredential = legalEntityClient.getCredentials().get(leCredentialId);
 
                 LinkedHashMap<String, Object> legalEntityCredentialBody = castObjectToLinkedHashMap(legalEntityCredential);
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(legalEntityCredentialBody.get("sad"));
