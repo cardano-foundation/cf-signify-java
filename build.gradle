@@ -46,7 +46,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
-    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebVersion}"
     testImplementation("org.testng:testng:${testngVersion}")
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
@@ -69,9 +69,8 @@ tasks.test {
     finalizedBy 'allureReport'
 }
 
-// Separate task for TestNG tests (E2E tests)
 tasks.register('testE2E', Test) {
-    useJUnitPlatform()  // Use TestNG for E2E tests
+    useJUnitPlatform()
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
