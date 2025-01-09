@@ -259,4 +259,5 @@ class SaltyTests extends TestUtils {
             e.printStackTrace();
         }
     }
+
 }
