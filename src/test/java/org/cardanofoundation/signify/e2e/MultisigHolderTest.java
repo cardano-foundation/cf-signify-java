@@ -22,7 +22,6 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigIncep
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,10 +32,11 @@ import java.util.stream.Stream;
 
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class MultisigHolderTest extends TestUtils {
+public class MultisigHolderTest extends BaseIntegrationTest {
     SignifyClient client1, client2, client3;
     States.HabState aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
@@ -51,7 +51,6 @@ public class MultisigHolderTest extends TestUtils {
     ));
     String SCHEMA_SAID = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     String TIME = createTimestamp();
 
@@ -59,23 +58,33 @@ public class MultisigHolderTest extends TestUtils {
     @DisplayName("Multisig Holder Test")
     void multisigHolderTest() throws Exception {
         // Boot four clients
-        List<SignifyClient> signifyClients = getOrCreateClients(3, null);
+        List<SignifyClient> signifyClients = getOrCreateClientsAsync(3);
         client1 = signifyClients.get(0);
         client2 = signifyClients.get(1);
         client3 = signifyClients.get(2);
 
         // Create four identifiers, one for each client
-        aid1 = createAid(client1, "member1", WITNESS_AIDS);
-        aid2 = createAid(client2, "member2", WITNESS_AIDS);
-        aid3 = createAid(client3, "issuer", WITNESS_AIDS);
+        List<States.HabState> aids = createAidAndGetHabStateAsync(
+                new CreateAidArgs(client1, "member1"),
+                new CreateAidArgs(client2, "member2"),
+                new CreateAidArgs(client3, "issuer")
+        );
+        aid1 = aids.get(0);
+        aid2 = aids.get(1);
+        aid3 = aids.get(2);
 
         createRegistry(client3, "issuer", "issuer-reg");
 
         // Exchange OOBIs
         System.out.println("Resolving OOBIs");
-        oobi1 = client1.getOobis().get("member1", "agent");
-        oobi2 = client2.getOobis().get("member2", "agent");
-        oobi3 = client3.getOobis().get("issuer", "agent");
+        List<Object> oobis = getOobisAsync(
+                new GetOobisArgs(client1, "member1", "agent"),
+                new GetOobisArgs(client2, "member2", "agent"),
+                new GetOobisArgs(client3, "issuer", "agent")
+        );
+        oobi1 = oobis.get(0);
+        oobi2 = oobis.get(1);
+        oobi3 = oobis.get(2);
 
         oobis1 = getOobisIndexAt0(oobi1);
         oobis2 = getOobisIndexAt0(oobi2);
@@ -134,26 +143,13 @@ public class MultisigHolderTest extends TestUtils {
         System.out.println("Multisig created!");
 
         IdentifierListResponse identifiers1 = client1.getIdentifier().list();
-        try {
-            indentifierMap1 = objectMapper.readValue(
-                    identifiers1.aids().toString(),
-                    new TypeReference<>() {
-                    });
-            assertEquals(2, indentifierMap1.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        indentifierMap1 = Utils.fromJson(identifiers1.aids().toString(), new TypeReference<>() {});
+        assertEquals(2, indentifierMap1.size());
+
 
         IdentifierListResponse identifiers2 = client1.getIdentifier().list();
-        try {
-            indentifierMap2 = objectMapper.readValue(
-                    identifiers2.aids().toString(),
-                    new TypeReference<>() {
-                    });
-            assertEquals(2, indentifierMap2.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        indentifierMap2 = Utils.fromJson(identifiers2.aids().toString(), new TypeReference<>() {});
+        assertEquals(2, indentifierMap2.size());
 
         System.out.printf(
                 "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
@@ -518,18 +514,7 @@ public class MultisigHolderTest extends TestUtils {
         waitOperations(client, op);
 
         Object registries = client.getRegistries().list(name);
-        try {
-            if (registries instanceof String) {
-                registryList = objectMapper.readValue((String) registries, new TypeReference<>() {
-                });
-            } else {
-                registryList = objectMapper.convertValue(registries, new TypeReference<>() {
-                });
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        registryList = (List<HashMap<String, Object>>) registries;
         HashMap<String, Object> opResponseName = registryList.getFirst();
 
         assertEquals(1, registryList.size());

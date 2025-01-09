@@ -552,7 +552,7 @@ public class TestUtils {
         return objectMapper.writeValueAsString(opMap);
     }
 
-    public Integer parseInteger(String s) {
+    public static Integer parseInteger(String s) {
         try {
             return Integer.parseInt(s);
         } catch (NumberFormatException e) {
@@ -561,12 +561,12 @@ public class TestUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
+    public static LinkedHashMap<String, Object> castObjectToLinkedHashMap(Object object) {
         return (LinkedHashMap<String, Object>) object;
     }
 
     @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> castObjectToListMap(Object object) {
+    public static List<Map<String, Object>> castObjectToListMap(Object object) {
         return (List<Map<String, Object>>) object;
     }
 

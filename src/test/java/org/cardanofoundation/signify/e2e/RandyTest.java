@@ -1,17 +1,17 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.signify.app.Coring;
+import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -19,14 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @Slf4j
-public class RandyTest extends TestUtils {
+public class RandyTest {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private SignifyClient client1;
     private String opResponseDone, opResponseName, opResponsePrefix;
     private HashMap<String, Object> opResponse;
@@ -48,18 +48,11 @@ public class RandyTest extends TestUtils {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
         EventResult icpResult = client1.getIdentifier().create("aid1", kargs);
-        Object op = operationToObject(waitOperation(client1, icpResult.op()));
+        Operation op = Operation.fromObject(waitOperation(client1, icpResult.op()));
 
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
-                });
-                opResponse = (HashMap<String, Object>) opMap.get("response");
-                opResponseDone = opMap.get("done").toString();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        opResponse = (HashMap<String, Object>) op.getResponse();
+        opResponseDone = op.isDone() ? "true" : "false";
+
         assertEquals("true", opResponseDone);
 
         HashMap<String, Object> aid = opResponse;
@@ -70,69 +63,40 @@ public class RandyTest extends TestUtils {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aids = client1.getIdentifier().list(0, 24);
-        try {
-            List<Map<String, Object>> aidsList = objectMapper.readValue(aids.aids().toString(), new TypeReference<>() {
-            });
-            for (Map<String, Object> aid1 : aidsList) {
-                opResponseName = aid1.get("name").toString();
-                opResponsePrefix = aid1.get("prefix").toString();
-            }
-            assertEquals(1, aidsList.size());
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<Map<String, Object>> aidsList = Utils.fromJson(aids.aids().toString(), new TypeReference<>() {});
+        for (Map<String, Object> aid1 : aidsList) {
+            opResponseName = aid1.get("name").toString();
+            opResponsePrefix = aid1.get("prefix").toString();
         }
+        assertEquals(1, aidsList.size());
+
         assertEquals("aid1", opResponseName);
         assertEquals(icp.getPre(), opResponsePrefix);
 
         icpResult = client1.getIdentifier().interact("aid1", icp.getPre());
-        op = operationToObject(waitOperation(client1, icpResult.op()));
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
-                });
-                opResponse = (HashMap<String, Object>) opMap.get("response");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        op = Operation.fromObject(waitOperation(client1, icpResult.op()));
+        opResponse = (HashMap<String, Object>) op.getResponse();
         HashMap<String, Object> ked = opResponse;
         Serder ixn = new Serder(ked);
         assertEquals("1", ixn.getKed().get("s"));
         assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         aids = client1.getIdentifier().list(0, 24);
-        try {
-            List<Map<String, Object>> aidsList = objectMapper.readValue(aids.aids().toString(), new TypeReference<>() {
-            });
-            for (Map<String, Object> aid1 : aidsList) {
-                opResponsePrefix = aid1.get("prefix").toString();
-            }
-            assertEquals(1, aidsList.size());
-        } catch (Exception e) {
-            e.printStackTrace();
+        aidsList = Utils.fromJson(aids.aids().toString(), new TypeReference<>() {});
+        for (Map<String, Object> aid1 : aidsList) {
+            opResponsePrefix = aid1.get("prefix").toString();
         }
+        assertEquals(1, aidsList.size());
+
         Coring.KeyEvents events = client1.getKeyEvents();
 
-        Object log = events.get(opResponsePrefix);
-        try {
-            List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
-            });
-            assertEquals(2, logList.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        List<Map<String, Object>> logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
+        assertEquals(2, logList.size());
 
         icpResult = client1.getIdentifier().rotate("aid1");
-        op = operationToObject(waitOperation(client1, icpResult.op()));
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
-                });
-                opResponse = (HashMap<String, Object>) opMap.get("response");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        op = Operation.fromObject((waitOperation(client1, icpResult.op())));
+        opResponse = (HashMap<String, Object>) op.getResponse();
+
         ked = opResponse;
         Serder rot = new Serder(ked);
         assertEquals("2", rot.getKed().get("s"));
@@ -147,15 +111,8 @@ public class RandyTest extends TestUtils {
                 rot.getVerfers().getFirst().getQb64b());
         assertEquals(dig.getQb64(), icp.getDigers().getFirst().getQb64());
 
-        log = events.get(opResponsePrefix);
-        try {
-            List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
-            });
-            assertEquals(3, logList.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
+        logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
+        assertEquals(3, logList.size());
         assertOperations(Collections.singletonList(client1));
     }
 }

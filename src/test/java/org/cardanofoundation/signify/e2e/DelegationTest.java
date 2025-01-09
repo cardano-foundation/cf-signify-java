@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Coring;
+import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
@@ -10,16 +10,16 @@ import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class DelegationTest extends TestUtils {
+public class DelegationTest {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
@@ -84,16 +84,8 @@ public class DelegationTest extends TestUtils {
         CreateIdentifierArgs delpre = new CreateIdentifierArgs();
         delpre.setDelpre(ator.getPrefix());
         EventResult icpResult2 = client2.getIdentifier().create("delegate", delpre);
-        Object op2 = icpResult2.op();
-        if (op2 instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op2, new TypeReference<>() {
-                });
-                opResponseName = opMap.get("name").toString();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        Operation op2 = Operation.fromObject(icpResult2.op());
+        opResponseName = op2.getName();
         String delegatePrefix = opResponseName.split("\\.")[1];
         System.out.println("Delegate's prefix: " + delegatePrefix);
         System.out.println("Delegate waiting for approval...");

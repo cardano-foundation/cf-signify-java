@@ -15,10 +15,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class BaseIntegrationTest {
 
-    public List<SignifyClient> getOrCreateClientsAsync(int count) throws Exception {
+    public static List<SignifyClient> getOrCreateClientsAsync(int count) throws Exception {
         List<CompletableFuture<SignifyClient>> bootFutures = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            bootFutures.add(bootClient());
+            bootFutures.add(bootClientFuture());
         }
         return bootFutures.stream().map(CompletableFuture::join).toList();
     }
@@ -26,7 +26,7 @@ public class BaseIntegrationTest {
     public List<States.HabState> createAidAndGetHabStateAsync(CreateAidArgs... createAidArgs) {
         List<CompletableFuture<States.HabState>> createAidFutures = new ArrayList<>();
         for (CreateAidArgs createAidArg : createAidArgs) {
-            createAidFutures.add(createAidAndGetHabState(createAidArg.signifyClient, createAidArg.name));
+            createAidFutures.add(createAidAndGetHabStateFuture(createAidArg.signifyClient, createAidArg.name));
         }
         return createAidFutures.stream().map(CompletableFuture::join).toList();
 
@@ -35,7 +35,7 @@ public class BaseIntegrationTest {
     public List<Object> getOobisAsync(GetOobisArgs... getOobisArgs) {
         List<CompletableFuture<Object>> getOobisFutures = new ArrayList<>();
         for (GetOobisArgs getOobisArg : getOobisArgs) {
-            getOobisFutures.add(getOobis(getOobisArg.signifyClient, getOobisArg.name, getOobisArg.role));
+            getOobisFutures.add(getOobisFuture(getOobisArg.signifyClient, getOobisArg.name, getOobisArg.role));
         }
         return getOobisFutures.stream().map(CompletableFuture::join).toList();
     }
@@ -43,7 +43,7 @@ public class BaseIntegrationTest {
     public void resolveOobisAsync(ResolveOobisArgs... resolveOobisArgs) {
         List<CompletableFuture<Void>> resolveOobisFutures = new ArrayList<>();
         for (ResolveOobisArgs resolveOobisArg : resolveOobisArgs) {
-            resolveOobisFutures.add(resolveOobis(resolveOobisArg.signifyClient, resolveOobisArg.oobi, resolveOobisArg.alias));
+            resolveOobisFutures.add(resolveOobisFuture(resolveOobisArg.signifyClient, resolveOobisArg.oobi, resolveOobisArg.alias));
         }
         CompletableFuture.allOf(resolveOobisFutures.toArray(new CompletableFuture[0])).join();
     }
@@ -51,7 +51,7 @@ public class BaseIntegrationTest {
     public List<Operation> waitOperationAsync(WaitOperationArgs... waitOperationArgs) {
         List<CompletableFuture<Operation>> waitOperationFutures = new ArrayList<>();
         for (WaitOperationArgs waitOperationArg : waitOperationArgs) {
-            waitOperationFutures.add(waitOperation(waitOperationArg.signifyClient, waitOperationArg.op));
+            waitOperationFutures.add(waitOperationFuture(waitOperationArg.signifyClient, waitOperationArg.op));
         }
         return waitOperationFutures.stream().map(CompletableFuture::join).toList();
     }
@@ -59,12 +59,20 @@ public class BaseIntegrationTest {
     public List<String> getOrCreateContactAsync(GetOrCreateContactArgs... getOrCreateContactArgs) {
         List<CompletableFuture<String>> getOrCreateContactFutures = new ArrayList<>();
         for (GetOrCreateContactArgs getOrCreateContactArg : getOrCreateContactArgs) {
-            getOrCreateContactFutures.add(getOrCreateContact(getOrCreateContactArg.signifyClient, getOrCreateContactArg.name, getOrCreateContactArg.oobi));
+            getOrCreateContactFutures.add(getOrCreateContactFuture(getOrCreateContactArg.signifyClient, getOrCreateContactArg.name, getOrCreateContactArg.oobi));
         }
         return getOrCreateContactFutures.stream().map(CompletableFuture::join).toList();
     }
 
-    CompletableFuture<String> getOrCreateContact(SignifyClient client, String name, String oobi) {
+    public List<TestUtils.Aid> createAidAsync(CreateAidArgs... createAidArgs) {
+        List<CompletableFuture<TestUtils.Aid>> createAidFutures = new ArrayList<>();
+        for (CreateAidArgs createAidArg : createAidArgs) {
+            createAidFutures.add(createAidFuture(createAidArg.signifyClient, createAidArg.name));
+        }
+        return createAidFutures.stream().map(CompletableFuture::join).toList();
+    }
+
+    CompletableFuture<String> getOrCreateContactFuture(SignifyClient client, String name, String oobi) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.getOrCreateContact(client, name, oobi);
@@ -74,7 +82,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<SignifyClient> bootClient() {
+    static CompletableFuture<SignifyClient> bootClientFuture() {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.getOrCreateClient();
@@ -84,7 +92,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<States.HabState> createAidAndGetHabState(SignifyClient client, String name) {
+    CompletableFuture<States.HabState> createAidAndGetHabStateFuture(SignifyClient client, String name) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.createAidAndGetHabState(client, name);
@@ -94,7 +102,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<Object> getOobis(SignifyClient client, String name, String role) {
+    CompletableFuture<Object> getOobisFuture(SignifyClient client, String name, String role) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return client.getOobis().get(name, role);
@@ -104,7 +112,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<Void> resolveOobis(SignifyClient signifyClient, String oobi, String alias) {
+    CompletableFuture<Void> resolveOobisFuture(SignifyClient signifyClient, String oobi, String alias) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 TestUtils.resolveOobi(signifyClient, oobi, alias);
@@ -115,10 +123,20 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<Operation> waitOperation(SignifyClient client, Object op) {
+    CompletableFuture<Operation> waitOperationFuture(SignifyClient client, Object op) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.waitOperation(client, op);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    CompletableFuture<TestUtils.Aid> createAidFuture(SignifyClient client, String name) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return TestUtils.createAid(client, name);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

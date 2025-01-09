@@ -1,8 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -20,16 +19,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SinglesigDRTTest extends TestUtils {
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
+
+public class SinglesigDRTTest extends BaseIntegrationTest {
     private static SignifyClient delegator, delegate;
     private static String name1_id, name1_oobi;
     private static String contact1_id;
     private String opResponseName, opResponseT, opResponseS;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     public static void getClients() throws Exception {
-        List<SignifyClient> clients = getOrCreateClients(2, null);
+        List<SignifyClient> clients = getOrCreateClientsAsync(2);
         delegator = clients.get(0);
         delegate = clients.get(1);
     }
@@ -43,7 +43,7 @@ public class SinglesigDRTTest extends TestUtils {
 
     @BeforeEach
     public void getContact() throws SodiumException, IOException, InterruptedException {
-        contact1_id = getOrCreateContact(delegate, "contact1", name1_oobi);
+        contact1_id = TestUtils.getOrCreateContact(delegate, "contact1", name1_oobi);
     }
 
     @Test
@@ -53,17 +53,10 @@ public class SinglesigDRTTest extends TestUtils {
         kargs.setDelpre(name1_id);
 
         EventResult result = delegate.getIdentifier().create("delegate1", kargs);
-        Object op = result.op();
+        Operation op = Operation.fromObject(result.op());
         States.HabState delegate1 = delegate.getIdentifier().get("delegate1");
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
-                });
-                opResponseName = opMap.get("name").toString();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        opResponseName = op.getName();
+
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
         // delegator approves delegate
@@ -76,22 +69,17 @@ public class SinglesigDRTTest extends TestUtils {
         Object op1 = result.op();
         Object op2 = delegate.getKeyStates().query(name1_id, "1", null);
 
-        op = operationToObject(waitOperation(delegate, op));
-        op1 = operationToObject(waitOperation(delegator, op1));
-        op2 = operationToObject(waitOperation(delegate, op2));
+        waitOperationAsync(
+            new WaitOperationArgs(delegate, op),
+            new WaitOperationArgs(delegator, op1),
+            new WaitOperationArgs(delegate, op2)
+        );
 
         RotateIdentifierArgs karg = RotateIdentifierArgs.builder().build();
         result = delegate.getIdentifier().rotate("delegate1", karg);
-        op = result.op();
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
-                });
-                opResponseName = opMap.get("name").toString();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        op = Operation.fromObject(result.op());
+        opResponseName = op.getName();
+
         Assertions.assertEquals(opResponseName, "delegation." + result.serder().getKed().get("d"));
 
         // delegator approves delegate
@@ -105,21 +93,16 @@ public class SinglesigDRTTest extends TestUtils {
         op1 = result.op();
         op2 = delegate.getKeyStates().query(name1_id, "2", null);
 
-        op = operationToObject(waitOperation(delegate, op));
-        op1 = operationToObject(waitOperation(delegator, op1));
-        op2 = operationToObject(waitOperation(delegate, op2));
+        List<Operation> operationList = waitOperationAsync(
+                new WaitOperationArgs(delegate, op),
+                new WaitOperationArgs(delegator, op1),
+                new WaitOperationArgs(delegate, op2)
+        );
 
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
-                });
-                HashMap<String, String> opResponse = (HashMap<String, String>) opMap.get("response");
-                opResponseT = opResponse.get("t");
-                opResponseS = opResponse.get("s");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        op = operationList.get(0);
+        HashMap<String, String> opResponse = (HashMap<String, String>) op.getResponse();
+        opResponseT = opResponse.get("t");
+        opResponseS = opResponse.get("s");
 
         Assertions.assertEquals("drt", opResponseT);
         Assertions.assertEquals("1", opResponseS);
