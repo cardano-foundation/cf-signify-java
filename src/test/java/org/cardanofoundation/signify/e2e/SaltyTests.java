@@ -1,28 +1,26 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.*;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class SaltyTests extends TestUtils {
+class SaltyTests {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private String opResponseDone, opResponsePrefix;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private HashMap<String, Object> opResponse;
 
     @Test
@@ -42,18 +40,11 @@ class SaltyTests extends TestUtils {
         CreateIdentifierArgs bran = new CreateIdentifierArgs();
         bran.setBran("0123456789abcdefghijk");
         EventResult icpResult = client.getIdentifier().create("aid1", bran);
-        Object op = operationToObject(waitOperation(client, icpResult.op()));
+        Operation op = Operation.fromObject(waitOperation(client, icpResult.op()));
 
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<HashMap<String, Object>>() {
-                });
-                opResponse = (HashMap<String, Object>) opMap.get("response");
-                opResponseDone = opMap.get("done").toString();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        opResponse = (HashMap<String, Object>) op.getResponse();
+        opResponseDone = op.isDone() ? "true" : "false";
+
         assertEquals("true", opResponseDone);
 
         HashMap<String, Object> aid = opResponse;
@@ -89,18 +80,9 @@ class SaltyTests extends TestUtils {
         params.setBran("0123456789lmnopqrstuv");
 
         EventResult icpResult1 = client.getIdentifier().create("aid2", params);
-        Object op_1 = operationToObject(waitOperation(client, icpResult1.op()));
-        if (op_1 instanceof String) {
-            try {
-                HashMap<String, Object> opMap = objectMapper.readValue((String) op_1, new TypeReference<HashMap<String, Object>>() {
-                });
-                opResponse = (HashMap<String, Object>) opMap.get("response");
-                opResponseDone = opMap.get("done").toString();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-        }
+        Operation op_1 = Operation.fromObject(waitOperation(client, icpResult1.op()));
+        opResponse = (HashMap<String, Object>) op_1.getResponse();
+        opResponseDone = op_1.isDone() ? "true" : "false";
         HashMap<String, Object> aid2 = opResponse;
         Serder icp2 = new Serder(aid2);
 
@@ -215,16 +197,12 @@ class SaltyTests extends TestUtils {
 
         States.HabState retrievedState = client.getIdentifier().get("aid4");
         assertEquals("aid4", retrievedState.getName());
-        try {
-            IdentifierListResponse response = client.getIdentifier().list(2, 2);
-            List<Map<String, Object>> identifiers = castObjectToListMap(response.aids());
-            assertEquals(1, identifiers.size());
+        IdentifierListResponse response = client.getIdentifier().list(2, 2);
+        List<Map<String, Object>> identifiers = Utils.fromJson(response.aids().toString(), new TypeReference<>() {});
+        assertEquals(1, identifiers.size());
 
-            Map<String, Object> firstIdentifier = identifiers.getFirst();
-            assertEquals("aid4", firstIdentifier.get("name"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Map<String, Object> firstIdentifier = identifiers.getFirst();
+        assertEquals("aid4", firstIdentifier.get("name"));
+
     }
-
 }
