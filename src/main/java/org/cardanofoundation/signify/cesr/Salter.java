@@ -52,7 +52,7 @@ public class Salter extends Matter {
                 case "low" -> Tier.low;
                 case "med" -> Tier.med;
                 case "high" -> Tier.high;
-                default -> throw new IllegalArgumentException("Invalid tier: " + tier);
+                default -> null;
             };
         }
     }

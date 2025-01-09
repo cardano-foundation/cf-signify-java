@@ -74,7 +74,7 @@ public class Habery {
         return this.habs.get(name);
     }
 
-    public Hab makeHab(MakeHabArgs args) throws SodiumException, DigestException {
+    public Hab makeHab(String name, MakeHabArgs args) throws SodiumException, DigestException {
         if (args.nsith == null) {
             args.nsith = args.isith;
         }

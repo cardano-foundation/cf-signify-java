@@ -36,6 +36,10 @@ public class Controller {
     private List<String> keys;
     public List<String> ndigs;
 
+    public Controller(String bran, Tier tier) throws SodiumException, DigestException {
+        this(bran, tier, 0, null);
+    }
+
     public Controller(String bran, Tier tier, Integer ridx, Object state) throws SodiumException, DigestException {
         ridx = ridx == null ? 0 : ridx;
         this.bran = MatterCodex.Salt_128.getValue() + "A" + bran.substring(0, 21); // qb64 salt for seed

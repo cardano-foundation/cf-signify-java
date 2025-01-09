@@ -32,7 +32,7 @@ public class Manager {
         args.pidx = args.pidx == null ? 0 : args.pidx;
         args.algo = args.algo == null ? Algos.salty : args.algo;
 
-        String salt = args.salter.getQb64();
+        String salt = args.salter != null ? args.salter.getQb64() : null;
         args.tier = args.tier == null ? Tier.low.name() : args.tier;
 
         if (this.getPidx() == null) {
@@ -56,27 +56,61 @@ public class Manager {
         }
     }
 
-    KeyStore getKs() {
+    public static Manager openManager(String passcode, String salt) throws SodiumException {
+        if(passcode.length() < 21) {
+            throw new IllegalArgumentException("Bran (passcode seed material) too short.");
+        }
+
+        String bran = MatterCodex.Salt_128.getValue() + "A" + passcode.substring(0, 21); // qb64 salt for seed
+        Signer signer = new Salter(bran).signer(
+                MatterCodex.Ed25519_Seed.getValue(),
+                false,
+                "",
+                null,
+                false
+        );
+
+        String seed = signer.getQb64();
+        String aeid = signer.getVerfer().getQb64(); // lest it remove encryption
+
+        Algos algo;
+
+        Salter salter = salt != null ? new Salter(salt) : null;
+        if (salter != null) {
+            algo = Algos.salty;
+        } else {
+            algo = Algos.randy;
+        }
+
+        return new Manager(ManagerArgs.builder()
+                .seed(seed)
+                .aeid(aeid)
+                .algo(algo)
+                .salter(salter)
+                .build());
+    }
+
+    public KeyStore getKs() {
         return this.ks;
     }
 
-    Encrypter getEncrypter() {
+    public Encrypter getEncrypter() {
         return this.encrypter;
     }
 
-    Decrypter getDecrypter() {
+    public Decrypter getDecrypter() {
         return this.decrypter;
     }
 
-    String getSeed() {
+    public String getSeed() {
         return this.seed;
     }
 
-    String getAeid() {
+    public String getAeid() {
         return this.ks.getGbls("aeid");
     }
 
-    Integer getPidx() {
+    public Integer getPidx() {
         String pidx = this.ks.getGbls("pidx");
         if (pidx != null) {
             return Integer.valueOf(pidx, 16);
@@ -84,11 +118,11 @@ public class Manager {
         return null;
     }
 
-    void setPidx(Integer pidx) {
+    public void setPidx(Integer pidx) {
         this.ks.pinGbls("pidx", Integer.toString(pidx, 16));
     }
 
-    String getSalt() throws SodiumException {
+    public String getSalt() throws SodiumException {
         if (this.decrypter == null) {
             return this.salt;
         } else {
@@ -97,7 +131,7 @@ public class Manager {
         }
     }
 
-    void setSalt(String salt) throws SodiumException {
+    public void setSalt(String salt) throws SodiumException {
         if (this.encrypter == null) {
             this.salt = salt;
         } else {
@@ -105,20 +139,20 @@ public class Manager {
         }
     }
 
-    String getTier() {
+    public String getTier() {
         return this.ks.getGbls("tier");
     }
 
-    void setTier(String tier) {
+    public void setTier(String tier) {
         this.ks.pinGbls("tier", tier);
     }
 
-    Algos getAlgo() {
+    public Algos getAlgo() {
         String a = this.ks.getGbls("algo");
         return Algos.fromString(a);
     }
 
-    void setAlgo(Algos algo) {
+    public void setAlgo(Algos algo) {
         this.ks.pinGbls("algo", algo.getValue());
     }
 
@@ -257,7 +291,7 @@ public class Manager {
                         : this.encrypter.encrypt(creator.salt().getBytes()).getQb64();
 
         pp.stem = creator.stem();
-        pp.tier = creator.tier().name();
+        pp.tier = creator.tier() != null ? creator.tier().name() : "";
 
         String dt = new Date().toString();
         PubLot nw = new PubLot();
@@ -277,15 +311,19 @@ public class Manager {
         ps.nxt = nt;
 
         String pre = verfers.getFirst().getQb64();
-        if (!this.ks.putPres(pre, digers.getFirst().getQb64b())) {
+        if (!this.ks.putPres(pre, verfers.getFirst().getQb64b())) {
             throw new IllegalArgumentException("Already incepted pre=" + pre);
         }
 
         if (!this.ks.putPrms(pre, pp)) {
-            throw new IllegalArgumentException("Already incepted pre=" + pre);
+            throw new IllegalArgumentException("Already incepted prm for pre=" + pre);
         }
 
         this.setPidx(pidx + 1);
+
+        if(!this.ks.putSits(pre, ps)) {
+            throw new IllegalArgumentException("Already incepted sit for pre=" + pre);
+        }
 
         if (this.encrypter != null) {
             // Only store encrypted keys if we have an encrypter, otherwise regenerate
@@ -484,7 +522,7 @@ public class Manager {
         ps.nxt.kidx = kidx;
         ps.nxt.dt = dt;
 
-        if (!this.ks.putSits(args.pre, ps)) {
+        if (!this.ks.pinSits(args.pre, ps)) {
             throw new IllegalArgumentException("Problem updating pubsit db for pre=" + args.pre);
         }
 
@@ -631,7 +669,7 @@ public class Manager {
         }
     }
 
-    public String riKey(String pre, int ridx) {
+    public static String riKey(String pre, int ridx) {
         return pre + "." + String.format("%032x", ridx);
     }
 
