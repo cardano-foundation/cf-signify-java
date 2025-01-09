@@ -147,8 +147,7 @@ public class TestUtils {
         return null;
     }
 
-    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
-        // TO-DO
+    public States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws Exception {
         try {
             return client.getIdentifier().get(name);
         } catch (Exception e) {
