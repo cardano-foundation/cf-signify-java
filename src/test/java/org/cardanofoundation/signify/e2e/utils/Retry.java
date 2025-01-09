@@ -15,7 +15,6 @@ public class Retry {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-//        return retry(fn, RetryOptions.builder().build());
     }
 
     public static <T> T retry(Supplier<T> fn, RetryOptions options) throws InterruptedException {

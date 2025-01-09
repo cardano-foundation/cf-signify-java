@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -11,11 +12,14 @@ import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 
+import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -27,7 +31,8 @@ public class DelegationTest extends TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private TestSteps testSteps = new TestSteps();
     private Retry retry = new Retry();
-
+    private static String oobi, aid2Prefix;
+    String contactId;
 
     @Test
     void delegationTest() throws Exception {
@@ -106,7 +111,7 @@ public class DelegationTest extends TestUtils {
 
         testSteps.steps("delegator approves delegation", () -> {
             try {
-                EventResult result = retry.retry(() -> {
+                EventResult result = retry(() -> {
                     try {
                         EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
                         waitOperations(client1, apprDelRes.op());
@@ -147,13 +152,10 @@ public class DelegationTest extends TestUtils {
         Map<String, Object> oobiBody = (Map<String, Object>) oobis;
         ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
 
-        String oobi = oobisResponse.getFirst().split("/agent/")[0];
+        oobi = oobisResponse.getFirst().split("/agent/")[0];
         assertNotNull(oobi);
-        String contactId = getOrCreateContact(
-                client1,
-                "delegate",
-                oobi
-        );
+
+        contactId = getOrCreateContact(client1, "delegate", oobi);
         assertEquals(aid2.getPrefix(), contactId);
     }
 }
