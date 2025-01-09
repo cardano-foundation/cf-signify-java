@@ -190,7 +190,7 @@ public class Exchanging {
             Serder serder = (Serder) value.get(0);
             String atc = null;
             if (value.size() > 1) {
-                atc = value.get(1).toString();
+                atc = (String) value.get(1);
             }
             e.put(key, serder.getKed());
 
