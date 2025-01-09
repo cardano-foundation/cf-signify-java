@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DelegationTest extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
@@ -144,10 +145,13 @@ public class DelegationTest extends TestUtils {
         Map<String, Object> oobiBody = (Map<String, Object>) oobis;
         ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
 
+        String oobi = oobisResponse.getFirst().split("/agent/")[0];
+        assertNotNull(oobi);
+
         String contactId = getOrCreateContact(
                 client1,
                 "delegate",
-                oobisResponse.getFirst().split("/agent/")[0]
+                oobi
         );
         assertEquals(aid2.getPrefix(), contactId);
     }

@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
@@ -289,6 +290,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
 
             ecrCredHolder = retry(() -> {
                 try {
+                    assertNotNull(sadEcrCred.get("d").toString());
                     Object cred = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
                     assert (cred != null);
                     return cred;
