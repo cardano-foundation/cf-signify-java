@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
+import static org.cardanofoundation.signify.core.States.convertToStates;
 
 public class Identifier {
     public final IdentifierDeps client;
@@ -218,12 +219,12 @@ public class Identifier {
         List<String> rmids = null;
 
         if (states != null) {
-            List<States.State> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
+            List<States.State> stateDeserialized = convertToStates((List<?>) states);
             smids = stateDeserialized.stream().map(States.State::getI).toList();
         }
 
         if (rstates != null) {
-            List<States.State> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
+            List<States.State> rstateDeserialized = convertToStates((List<?>) rstates);
             rmids = rstateDeserialized.stream().map(States.State::getI).toList();
         }
 
