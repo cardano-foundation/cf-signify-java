@@ -121,10 +121,10 @@ public class Keeping {
                 case group -> new GroupKeeper(
                         this,
                         (HabState) kargs.get("mhab"),
-                        Utils.fromJson(Utils.jsonStringify(kargs.get("states")), new TypeReference<>() {}),
-                        Utils.fromJson(Utils.jsonStringify(kargs.get("rstates")), new TypeReference<>() {}),
-                        Utils.fromJson(Utils.jsonStringify(kargs.get("keys")), new TypeReference<>() {}),
-                        Utils.fromJson(Utils.jsonStringify(kargs.get("ndigs")), new TypeReference<>() {})
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("states")), List.class),
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("rstates")), List.class),
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("keys")), List.class),
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("ndigs")), List.class)
                 );
                 default -> throw new UnsupportedOperationException("Unknown algo");
             };
@@ -682,13 +682,13 @@ public class Keeping {
             this.signers = new ArrayList<>();
 
             if (states != null) {
-                keys = states.stream()
+                keys = convertToStates(states).stream()
                         .map(state -> state.getK().getFirst())
                         .collect(Collectors.toList());
             }
 
             if (rstates != null) {
-                ndigs = rstates.stream()
+                ndigs = convertToStates(rstates).stream()
                         .map(state -> state.getN().getFirst())
                         .collect(Collectors.toList());
             }
