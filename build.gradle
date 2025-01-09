@@ -73,20 +73,21 @@ tasks.test {
 tasks.register('testE2E', Test) {
     useJUnitPlatform()  // Use TestNG for E2E tests
     filter {
-        includeTestsMatching "org.cardanofoundation.signify.e2e.ChallengesTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.CredentialsTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.DelegationMultisigTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.DelegationTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.RandyTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.SaltyTests"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigDIPTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigDRTTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigIXNTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigROTTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigVleiIssuanceTest"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.TestSetupClients"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.TestSetupSingleClient"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.WitnessTest"
+        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.ChallengesTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.CredentialsTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.DelegationMultisigTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.DelegationTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.RandyTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.SaltyTests"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigDIPTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigDRTTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigIXNTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigROTTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigVleiIssuanceTest"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.TestSetupClients"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.TestSetupSingleClient"
+//        includeTestsMatching "org.cardanofoundation.signify.e2e.WitnessTest"
     }
     finalizedBy 'allureReport'
 }
