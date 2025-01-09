@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -12,11 +11,8 @@ import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
@@ -31,7 +27,7 @@ public class DelegationTest extends TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private TestSteps testSteps = new TestSteps();
     private Retry retry = new Retry();
-    private static String oobi, aid2Prefix;
+    private static String oobi;
     String contactId;
 
     @Test

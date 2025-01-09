@@ -50,7 +50,7 @@ public class MultisigTest extends TestUtils {
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Disabled("Disabled until bug respond has been fixed")
+//    @Disabled("Disabled until bug respond has been fixed")
     @Test
     public void multisig() throws Exception {
         // Boot Four clients
@@ -147,7 +147,7 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member1 marked challenge response as accepted");
 
         // First member start the creation of a multisig identifier
-        List<States.State> rstates = new ArrayList<>(Arrays.asList(aid1.getState(), aid2.getState(), aid3.getState()));
+        List<States.State> rstates =  Arrays.asList(aid1.getState(), aid2.getState(), aid3.getState());
         List<States.State> states = rstates;
         CreateIdentifierArgs iargs = new CreateIdentifierArgs();
         iargs.setAlgo(Manager.Algos.group);
