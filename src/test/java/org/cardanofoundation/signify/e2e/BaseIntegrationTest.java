@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class BaseIntegrationTest {
 
-    public List<SignifyClient> getOrCreateClientsAsync(int count) throws Exception {
+    public static List<SignifyClient> getOrCreateClientsAsync(int count) throws Exception {
         List<CompletableFuture<SignifyClient>> bootFutures = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             bootFutures.add(bootClient());
@@ -48,7 +48,7 @@ public class BaseIntegrationTest {
         CompletableFuture.allOf(resolveOobisFutures.toArray(new CompletableFuture[0])).join();
     }
 
-    public List<Operation> waitOperationAsync(WaitOperationArgs... waitOperationArgs) {
+    public static List<Operation> waitOperationAsync(WaitOperationArgs... waitOperationArgs) {
         List<CompletableFuture<Operation>> waitOperationFutures = new ArrayList<>();
         for (WaitOperationArgs waitOperationArg : waitOperationArgs) {
             waitOperationFutures.add(waitOperation(waitOperationArg.signifyClient, waitOperationArg.op));
@@ -74,7 +74,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<SignifyClient> bootClient() {
+    static CompletableFuture<SignifyClient> bootClient() {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.getOrCreateClient();
@@ -115,7 +115,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<Operation> waitOperation(SignifyClient client, Object op) {
+    static CompletableFuture<Operation> waitOperation(SignifyClient client, Object op) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.waitOperation(client, op);
