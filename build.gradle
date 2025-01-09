@@ -76,6 +76,7 @@ tasks.register('testE2E', Test) {
         includeTestsMatching "org.cardanofoundation.signify.e2e.CredentialsTest"
         includeTestsMatching "org.cardanofoundation.signify.e2e.DelegationMultisigTest"
         includeTestsMatching "org.cardanofoundation.signify.e2e.DelegationTest"
+        includeTestsMatching "org.cardanofoundation.signify.e2e.MultisigHolderTest"
         includeTestsMatching "org.cardanofoundation.signify.e2e.RandyTest"
         includeTestsMatching "org.cardanofoundation.signify.e2e.SaltyTests"
         includeTestsMatching "org.cardanofoundation.signify.e2e.SinglesigDIPTest"
