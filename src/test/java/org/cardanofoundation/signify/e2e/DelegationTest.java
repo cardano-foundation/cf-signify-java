@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -26,6 +27,7 @@ public class DelegationTest extends TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private TestSteps testSteps = new TestSteps();
     private Retry retry = new Retry();
+    String oobi, contactId;
 
     @Test
     void delegationTest() throws Exception {
@@ -104,7 +106,7 @@ public class DelegationTest extends TestUtils {
 
         testSteps.steps("delegator approves delegation", () -> {
             try {
-                EventResult result = retry.retry(() -> {
+                EventResult result = retry(() -> {
                     try {
                         EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
                         waitOperations(client1, apprDelRes.op());
@@ -145,13 +147,10 @@ public class DelegationTest extends TestUtils {
         Map<String, Object> oobiBody = (Map<String, Object>) oobis;
         ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
 
-        String oobi = oobisResponse.getFirst().split("/agent/")[0];
+        oobi = oobisResponse.getFirst().split("/agent/")[0];
         assertNotNull(oobi);
-        String contactId = getOrCreateContact(
-                client1,
-                "delegate",
-                oobi
-        );
+
+        contactId = getOrCreateContact(client1, "delegate", oobi);
         assertEquals(aid2.getPrefix(), contactId);
     }
 }
