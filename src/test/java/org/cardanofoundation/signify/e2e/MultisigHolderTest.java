@@ -23,7 +23,6 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigIncept
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +55,6 @@ public class MultisigHolderTest extends TestUtils {
 
     String TIME = createTimestamp();
 
-    @Disabled
     @Test
     @DisplayName("Multisig Holder Test")
     void multisigHolderTest() throws Exception {
@@ -100,11 +98,11 @@ public class MultisigHolderTest extends TestUtils {
         System.out.println("Member2 resolved 3 OOBIs");
 
         Object op3 = client3.getOobis().resolve(oobis1, "member1");
-        op3 = waitOperation(client3, op3);
+        op3 = waitOperations(client3, op3);
         op3 = client3.getOobis().resolve(oobis2, "member2");
-        op3 = waitOperation(client3, op3);
+        op3 = waitOperations(client3, op3);
         op3 = client3.getOobis().resolve(SCHEMA_OOBI, "schema");
-        op3 = waitOperation(client3, op3);
+        op3 = waitOperations(client3, op3);
         System.out.println("Member3 resolved 3 OOBIs");
 
         // First member start the creation of a multisig identifier
@@ -214,7 +212,7 @@ public class MultisigHolderTest extends TestUtils {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
-        Object res = client1.getExchanges().send(
+        Object resp = client1.getExchanges().send(
                 "member1",
                 "multisig",
                 aid1,
@@ -229,8 +227,8 @@ public class MultisigHolderTest extends TestUtils {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        res = client2.getGroups().getRequest(msgSaid);
-        List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) res;
+        resp = client2.getGroups().getRequest(msgSaid);
+        List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) resp;
         Map<String, Object> resMap = listRes.getFirst();
         Map<String, Object> exn = (Map<String, Object>) resMap.get("exn");
 
@@ -271,7 +269,7 @@ public class MultisigHolderTest extends TestUtils {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
-        res = client2.getExchanges().send(
+        resp = client2.getExchanges().send(
                 "member2",
                 "multisig",
                 aid2,
@@ -319,7 +317,7 @@ public class MultisigHolderTest extends TestUtils {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
-        res = client1.getExchanges().send(
+        resp = client1.getExchanges().send(
                 "member1",
                 "multisig",
                 aid1,
@@ -335,8 +333,8 @@ public class MultisigHolderTest extends TestUtils {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        res = client2.getGroups().getRequest(msgSaid);
-        listRes = (List<HashMap<String, Object>>) res;
+        resp = client2.getGroups().getRequest(msgSaid);
+        listRes = (List<HashMap<String, Object>>) resp;
         resMap = listRes.getFirst();
         exn = (Map<String, Object>) resMap.get("exn");
 
@@ -378,7 +376,7 @@ public class MultisigHolderTest extends TestUtils {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
-        res = client2.getExchanges().send(
+        resp = client2.getExchanges().send(
                 "member2",
                 "multisig",
                 aid2,
@@ -402,7 +400,7 @@ public class MultisigHolderTest extends TestUtils {
         String oobiMultisig = oobisResponse.getFirst().split("/agent/")[0];
 
         op3 = client3.getOobis().resolve(oobiMultisig, "holder");
-        waitOperation(client3, op3);
+        waitOperations(client3, op3);
         System.out.println("Issuer resolved multisig holder OOBI");
 
         States.HabState holderAid = client1.getIdentifier().get("holder");
@@ -497,7 +495,7 @@ public class MultisigHolderTest extends TestUtils {
         System.out.println("Member1 has " + creds1.size() + " credential : " + Utils.jsonStringify(creds1));
         assertEquals(1, creds1.size());
 
-        List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2, client3));
+        List<SignifyClient> clientList = Arrays.asList(client1, client2, client3);
         assertOperations(clientList);
         warnNotifications(clientList);
     }
@@ -517,7 +515,7 @@ public class MultisigHolderTest extends TestUtils {
 
         RegistryResult result = client.getRegistries().create(args);
         Object op = result.op();
-        waitOperation(client, op);
+        waitOperations(client, op);
 
         Object registries = client.getRegistries().list(name);
         try {
@@ -545,7 +543,7 @@ public class MultisigHolderTest extends TestUtils {
             CredentialData data
     ) throws Exception {
         IssueCredentialResult result = client.getCredentials().issue(name, data);
-        waitOperation(client, result.getOp());
+        waitOperations(client, result.getOp());
 
         Object creds = client.getCredentials().list(CredentialFilter.builder().build());
         List<HashMap<String, Object>> listCreds = (List<HashMap<String, Object>>) creds;
@@ -577,7 +575,7 @@ public class MultisigHolderTest extends TestUtils {
             Object op = client
                     .getIpex()
                     .submitGrant(name, grant, gsigs, end, List.of(data.getA().getI()));
-            waitOperation(client, op);
+            waitOperations(client, op);
         }
 
         System.out.println("Grant message sent");
