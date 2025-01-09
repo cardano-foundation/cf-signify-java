@@ -147,7 +147,6 @@ public class DelegationTest extends TestUtils {
 
         String oobi = oobisResponse.getFirst().split("/agent/")[0];
         assertNotNull(oobi);
-
         String contactId = getOrCreateContact(
                 client1,
                 "delegate",
