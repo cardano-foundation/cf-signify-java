@@ -3,7 +3,6 @@ package org.cardanofoundation.signify.e2e;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.clienting.Operations;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.IdentifierListResponse;
@@ -23,25 +22,26 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigIncep
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
+import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MultisigHolderTest extends BaseIntegrationTest {
+
+public class MultisigHolderTest extends TestUtils {
     SignifyClient client1, client2, client3;
     States.HabState aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
-    private HashMap<String, Object> listResponse;
     private List<HashMap<String, Object>> registryList, indentifierMap1, indentifierMap2;
 
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -61,7 +61,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
     @DisplayName("Multisig Holder Test")
     void multisigHolderTest() throws Exception {
         // Boot four clients
-        List<SignifyClient> signifyClients = getOrCreateClientsAsync(3);
+        List<SignifyClient> signifyClients = getOrCreateClients(3, null);
         client1 = signifyClients.get(0);
         client2 = signifyClients.get(1);
         client3 = signifyClients.get(2);
@@ -415,13 +415,18 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         List<HashMap<String, Object>> listRegistries = (List<HashMap<String, Object>>) registires;
         Map<String, Object> registryMap = listRegistries.getFirst();
         String regk = registryMap.get("regk").toString();
+
+        CredentialSubject subject = CredentialSubject.builder()
+                .i(holderAid.getPrefix())
+                .additionalProperties(new HashMap<>() {{
+                    put("LEI", "5493001KJTIIGC8Y1R17");
+                }})
+                .build();
+
         CredentialData credentialData = CredentialData.builder()
                 .ri(regk)
                 .s(SCHEMA_SAID)
-                .a(CredentialSubject.builder()
-                        .i(holderAid.getPrefix())
-                        .additionalProperties(Map.of("LEI", "5493001KJTIIGC8Y1R17"))
-                        .build())
+                .a(subject)
                 .build();
 
         issueCredential(client3, "issuer", credentialData);
@@ -436,8 +441,65 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
-        // TO Do
+        LinkedHashMap<String, Object> exnResList = castObjectToLinkedHashMap(exnRes);
+        LinkedHashMap<String, Object> getExn = castObjectToLinkedHashMap(exnResList.get("exn"));
 
+        op1 = multisigAdmitCredential(client1,
+                "holder",
+                "member1",
+                getExn.get("d").toString(),
+                getExn.get("i").toString(),
+                recp
+        );
+
+        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.get("e"));
+        LinkedHashMap<String, Object> exnGetAcdc = castObjectToLinkedHashMap(exnGetE.get("acdc"));
+
+        System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
+
+        String grantMsgSaid2 = waitAndMarkNotification(client2, "/exn/ipex/grant");
+        System.out.println("Member2 received /exn/ipex/grant msg with SAID: " + grantMsgSaid2);
+
+        Object exnRes2 = client2.getExchanges().get(grantMsgSaid2);
+        assertEquals(grantMsgSaid2, grantMsgSaid);
+        System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
+
+        List<String> recp2 = Stream.of(aid1.getState())
+                .map(States.State::getI)
+                .toList();
+
+        op2 = multisigAdmitCredential(client2,
+                "holder",
+                "member2",
+                getExn.get("d").toString(),
+                getExn.get("i").toString(),
+                recp2
+        );
+        System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
+
+        waitOperation(client1, op1);
+        waitOperation(client2, op2);
+
+        CredentialFilter args = CredentialFilter.builder().build();
+        List<Map<String, Object>> creds1 = (List<Map<String, Object>>) client1.getCredentials().list(args);
+        System.out.println("Member1 has " + creds1.size() + " credential");
+
+        int retryCount = 0;
+        while (retryCount < 10) {
+            retryCount++;
+            System.out.println(" retry-" + retryCount + ": No credentials yet...");
+
+            creds1 = (List<Map<String, Object>>) client1.getCredentials().list(args);
+            if (!creds1.isEmpty()) break;
+
+            TimeUnit.SECONDS.sleep(1);
+        }
+        System.out.println("Member1 has " + creds1.size() + " credential : " + Utils.jsonStringify(creds1));
+        assertEquals(1, creds1.size());
+
+        List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2, client3));
+        assertOperations(clientList);
+        warnNotifications(clientList);
     }
 
     public States.HabState createAid(SignifyClient client, String name, List<String> wits) throws Exception {
@@ -485,8 +547,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         IssueCredentialResult result = client.getCredentials().issue(name, data);
         waitOperation(client, result.getOp());
 
-        CredentialFilter args = CredentialFilter.builder().build();
-        Object creds = client.getCredentials().list(args);
+        Object creds = client.getCredentials().list(CredentialFilter.builder().build());
         List<HashMap<String, Object>> listCreds = (List<HashMap<String, Object>>) creds;
         Map<String, Object> credMap = listCreds.getFirst();
         Map<String, Object> credSad = (Map<String, Object>) credMap.get("sad");
@@ -498,7 +559,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         String dt = createTimestamp();
 
-        if (data.getA().getI() != null) {
+        if (!data.getA().getI().isEmpty()) {
             Exchanging.ExchangeMessageResult grantResult = client.getIpex().grant(IpexGrantArgs.builder()
                     .senderName(name)
                     .recipient(data.getA().getI())
@@ -508,6 +569,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                     .iss(result.getIss())
                     .build()
             );
+
             Serder grant = grantResult.exn();
             List<String> gsigs = grantResult.sigs();
             String end = grantResult.atc();
@@ -515,14 +577,14 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             Object op = client
                     .getIpex()
                     .submitGrant(name, grant, gsigs, end, List.of(data.getA().getI()));
-            op = waitOperation(client, op);
+            waitOperation(client, op);
         }
 
         System.out.println("Grant message sent");
         return listCreds.getFirst();
     }
 
-    public Operations multisigAdmitCredential(
+    public Object multisigAdmitCredential(
             SignifyClient client,
             String groupName,
             String memberAlias,
@@ -579,7 +641,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                         gembeds,
                         recipients
                 );
-        return (Operations) op;
+        return op;
     }
 
     public String getOobisIndexAt0(Object oobi) {
