@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.app.clienting.aiding;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -65,12 +64,13 @@ public class Identifier {
 
         String contentRange = response.headers().firstValue("content-range").orElse(null);
         Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
+        Object aids = Utils.fromJson(response.body(), Object.class);
 
         return new IdentifierListResponse(
                 range.start(),
                 range.end(),
                 range.total(),
-                response.body()
+                aids
         );
     }
 

@@ -202,8 +202,8 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member2 received exchange message to join multisig");
 
         Object res = client2.getGroups().getRequest(msgSaid);
-        Map<String, Object> exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-        Map<String, Object> icp = Utils.toMap(Utils.toMap(exn.get("e")).get("icp"));
+        Map<String, Object> exn = castObjectToLinkedHashMap(castObjectToListMap(res).getFirst().get("exn"));
+        Map<String, Object> icp = castObjectToLinkedHashMap(castObjectToLinkedHashMap(exn.get("e")).get("icp"));
 
         CreateIdentifierArgs iargs2 = new CreateIdentifierArgs();
         iargs2.setAlgo(Manager.Algos.group);
@@ -255,8 +255,8 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member3 received exchange message to join multisig");
 
         res = client3.getGroups().getRequest(msgSaid);
-        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-        icp = Utils.toMap(Utils.toMap(exn.get("e")).get("icp"));
+        exn = castObjectToLinkedHashMap(castObjectToListMap(res).getFirst().get("exn"));;
+        icp = castObjectToLinkedHashMap(castObjectToLinkedHashMap(exn.get("e")).get("icp"));
 
         CreateIdentifierArgs iargs3 = new CreateIdentifierArgs();
         iargs3.setAlgo(Manager.Algos.group);
@@ -418,12 +418,27 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member2 received exchange message to join the end role authorization");
 
         res = client2.getGroups().getRequest(msgSaid);
-        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
+        exn = castObjectToLinkedHashMap(castObjectToListMap(res).getFirst().get("exn"));
 
         // stamp, eid and role are provided in the exn message
-        String rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        String rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        String rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+        String rpystamp = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(
+                        castObjectToLinkedHashMap(exn.get("e"))).get("rpy")).get("dt")
+                .toString();
+
+        String rpyrole = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(
+                        castObjectToLinkedHashMap(
+                                castObjectToLinkedHashMap(
+                                        exn.get("e"))).get("rpy")).get("a")).get("role")
+                .toString();
+
+        String rpyeid = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(
+                        castObjectToLinkedHashMap(
+                                castObjectToLinkedHashMap(
+                                        exn.get("e"))).get("rpy")).get("a")).get("eid")
+                .toString();
 
         endRoleRes = client2
                 .getIdentifier()
@@ -474,12 +489,28 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member3 received exchange message to join the end role authorization");
 
         res = client3.getGroups().getRequest(msgSaid);
-        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
+        exn = castObjectToLinkedHashMap(castObjectToListMap(res).getFirst().get("exn"));
 
         // stamp, eid and role are provided in the exn message
-        rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+
+        rpystamp = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(
+                        castObjectToLinkedHashMap(exn.get("e"))).get("rpy")).get("dt")
+                .toString();
+
+        rpyrole = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(
+                        castObjectToLinkedHashMap(
+                                castObjectToLinkedHashMap(
+                                        exn.get("e"))).get("rpy")).get("a")).get("role")
+                .toString();
+
+        rpyeid = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(
+                        castObjectToLinkedHashMap(
+                                castObjectToLinkedHashMap(
+                                        exn.get("e"))).get("rpy")).get("a")).get("eid")
+                .toString();
 
         endRoleRes = client3
                 .getIdentifier()
