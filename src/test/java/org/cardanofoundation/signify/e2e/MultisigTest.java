@@ -614,9 +614,9 @@ public class MultisigTest extends TestUtils {
         msgSaid = waitAndMarkNotification(client2, "/multisig/ixn");
         System.out.println("Member2 received exchange message to join the interaction event");
 
-        res = client2.getGroups().getRequest(msgSaid);
+        Object res1 = client2.getGroups().getRequest(msgSaid);
         exn = castObjectToLinkedHashMap(
-                castObjectToListMap(res).getFirst().get("exn")
+                castObjectToListMap(res1).getFirst().get("exn")
         );
         Map<String, Object> ixn = castObjectToLinkedHashMap(
                 castObjectToLinkedHashMap(exn.get("e")).get("ixn")
