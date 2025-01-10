@@ -2,15 +2,17 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
+import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.createAIDMultisig;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitAndMarkNotification;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultisigVleiIssuance extends BaseIntegrationTest {
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -121,6 +123,79 @@ public class MultisigVleiIssuance extends BaseIntegrationTest {
         getOrCreateContact(clientLAR2, "ECR", oobiECR.get("oobis").toString());
         getOrCreateContact(clientLAR3, "ECR", oobiECR.get("oobis").toString());
 
+        resolveOobisAsync(
+                new ResolveOobisArgs(clientGAR1, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientGAR2, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientQAR1, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientQAR1, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientQAR2, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientQAR2, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientQAR3, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientQAR3, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR1, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR1, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR1, ECR_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR2, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR2, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR2, ECR_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR3, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR3, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientLAR3, ECR_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientECR, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientECR, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(clientECR, ECR_SCHEMA_URL, null)
+
+        );
+
+        States.HabState aidGEDAbyGAR1, aidGEDAbyGAR2;
+        CreateIdentifierArgs kargsMultisigAID = new CreateIdentifierArgs();
+        try {
+            aidGEDAbyGAR1 = clientGAR1.getIdentifier().get("GEDA");
+            aidGEDAbyGAR2 = clientGAR2.getIdentifier().get("GEDA");
+        } catch (Exception e) {
+            List<States.State> rstates = Arrays.asList(aidGAR1.getState(), aidGAR2.getState());
+            List<States.State> states = rstates;
+
+            kargsMultisigAID.setAlgo(Manager.Algos.group);
+            kargsMultisigAID.setIsith(Arrays.asList("1/2", "1/2"));
+            kargsMultisigAID.setNsith(Arrays.asList("1/2", "1/2"));
+            kargsMultisigAID.setToad(kargsAID.getToad());
+            kargsMultisigAID.setWits(kargsAID.getWits());
+            kargsMultisigAID.setStates(Collections.singletonList(states));
+            kargsMultisigAID.setRstates(Collections.singletonList(rstates));
+        }
+
+        kargsMultisigAID.setMhab(aidGAR1);
+        Object multisigAIDOp1 = createAIDMultisig(
+                clientGAR1,
+                aidGAR1,
+                Collections.singletonList(aidGAR2),
+                "GEDA",
+                kargsMultisigAID,
+                true
+        );
+
+        kargsMultisigAID.setMhab(aidGAR2);
+        Object multisigAIDOp2 = createAIDMultisig(
+                clientGAR2,
+                aidGAR2,
+                Collections.singletonList(aidGAR1),
+                "GEDA",
+                kargsMultisigAID,
+                false
+        );
+
+        waitOperationAsync(
+                new WaitOperationArgs(clientGAR1, multisigAIDOp1),
+                new WaitOperationArgs(clientGAR2, multisigAIDOp2)
+        );
+
+        waitAndMarkNotification(clientGAR1, "/multisig/icp");
+        aidGEDAbyGAR1 = clientGAR1.getIdentifier().get("GEDA");
+        aidGEDAbyGAR2 = clientGAR2.getIdentifier().get("GEDA");
+
+        assertEquals(aidGEDAbyGAR1.getPrefix(), aidGEDAbyGAR2.getPrefix());
+        assertEquals(aidGEDAbyGAR1.getName(), aidGEDAbyGAR2.getName());
     }
 
     public class DataString {
