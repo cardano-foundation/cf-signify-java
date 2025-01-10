@@ -1,0 +1,126 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+group = 'org.cardanofoundation'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+def lombokVersion = '1.18.30'
+def lazysodiumVersion = '5.1.4'
+def jnaVersion = '5.15.0'
+def junitVersion = '5.10.0'
+def math3Version = '3.6.1'
+def jacksonVersion = '2.18.1'
+def slf4jVersion = '2.0.7'
+def bouncycastleVersion = '1.79'
+def jsonVersion = '20240303'
+def structuredFieldsVersion = '0.4'
+
+// test dependencies
+def testngVersion = '7.7.0'
+def mockitoVersion = '5.5.0'
+def mockwebVersion = '4.12.0'
+
+dependencies {
+    implementation "com.goterl:lazysodium-java:${lazysodiumVersion}"
+    implementation "net.java.dev.jna:jna:${jnaVersion}"
+    implementation "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    implementation "org.apache.commons:commons-math3:${math3Version}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+    // TODO: consider a smaller blake-only package, so long as it's well used and safe of vulnerabilities.
+    implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}"
+    implementation "org.json:json:${jsonVersion}"
+    implementation "org.greenbytes.http:structured-fields:${structuredFieldsVersion}"
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebVersion}"
+    testImplementation("org.testng:testng:${testngVersion}")
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+}
+
+allure {
+    version = '2.13.6'
+}
+
+// JUnit Tests (unit tests)
+tasks.test {
+    useJUnitPlatform()  // Use JUnit 5 platform
+    filter {
+        includeTestsMatching "org.cardanofoundation.signify.app.*"
+        includeTestsMatching "org.cardanofoundation.signify.cesr.*"
+        includeTestsMatching "org.cardanofoundation.signify.core.*"
+        includeTestsMatching "org.cardanofoundation.signify.end.*"
+    }
+    finalizedBy 'allureReport'
+}
+
+// Separate task for TestNG tests (E2E tests)
+tasks.register('testE2E', Test) {
+    useJUnitPlatform()  // Use TestNG for E2E tests
+    filter {
+        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+    }
+    finalizedBy 'allureReport'
+}
+
+
+tasks.register("cleanAllure") {
+    group = "cleanup"
+    description = "Clean Allure results and reports"
+    doLast {
+        delete(file("build/allure-results"))
+        delete(file("build/allure-report"))
+    }
+}
+
+tasks.named("clean") {
+    dependsOn("cleanAllure")
+}
+
+
+// Custom Allure report task for unit tests
+tasks.register('allureUnitTestReport') {
+    doLast {
+        copy {
+            from "$buildDir/allure-results" // Default results dir
+            into "$buildDir/allure-results/unitTest"
+        }
+        javaexec {
+            main = 'io.qameta.allure.cli.AllureCommand'
+            classpath = configurations.allure
+            args = ['generate', "$buildDir/allure-results/unitTest", '-o', "$buildDir/reports/allure-report/unitTest"]
+        }
+    }
+}
+
+// Custom Allure report task for E2E tests
+tasks.register('allureE2ETestReport') {
+    doLast {
+        copy {
+            from "$buildDir/allure-results" // Default results dir
+            into "$buildDir/allure-results/e2eTest"
+        }
+        javaexec {
+            main = 'io.qameta.allure.cli.AllureCommand'
+            classpath = configurations.allure
+            args = ['generate', "$buildDir/allure-results/e2eTest", '-o', "$buildDir/reports/allure-report/e2eTest"]
+        }
+    }
+}
+
+// Disable the default allureReport task if custom tasks are used
+tasks.named('allureReport') {
+    enabled = false
+}

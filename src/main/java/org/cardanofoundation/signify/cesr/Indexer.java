@@ -1,0 +1,355 @@
+package org.cardanofoundation.signify.cesr;
+
+import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ConversionException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCountCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedOpCodeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeSizeException;
+import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarIndexException;
+import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
+import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
+import org.cardanofoundation.signify.cesr.Codex.IndexedCurrentSigCodex;
+import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+@Getter
+public class Indexer {
+
+    static Map<String, Xizage> sizes = new HashMap<>();
+
+    static {
+        sizes.put("A", new Xizage(1, 1, 0, 88, 0));
+        sizes.put("B", new Xizage(1, 1, 0, 88, 0));
+        sizes.put("C", new Xizage(1, 1, 0, 88, 0));
+        sizes.put("D", new Xizage(1, 1, 0, 88, 0));
+        sizes.put("E", new Xizage(1, 1, 0, 88, 0));
+        sizes.put("F", new Xizage(1, 1, 0, 88, 0));
+        sizes.put("0A", new Xizage(2, 2, 1, 156, 0));
+        sizes.put("0B", new Xizage(2, 2, 1, 156, 0));
+
+        sizes.put("2A", new Xizage(2, 4, 2, 92, 0));
+        sizes.put("2B", new Xizage(2, 4, 2, 92, 0));
+        sizes.put("2C", new Xizage(2, 4, 2, 92, 0));
+        sizes.put("2D", new Xizage(2, 4, 2, 92, 0));
+        sizes.put("2E", new Xizage(2, 4, 2, 92, 0));
+        sizes.put("2F", new Xizage(2, 4, 2, 92, 0));
+
+        sizes.put("3A", new Xizage(2, 6, 3, 160, 0));
+        sizes.put("3B", new Xizage(2, 6, 3, 160, 0));
+
+        sizes.put("0z", new Xizage(2, 2, 0, null, 0));
+        sizes.put("1z", new Xizage(2, 2, 1, 76, 1));
+        sizes.put("4z", new Xizage(2, 6, 3, 80, 1));
+    }
+
+    static Map<String, Integer> hards = new HashMap<>();
+
+    static {
+        hards.put("A", 1);
+        hards.put("B", 1);
+        hards.put("C", 1);
+        hards.put("D", 1);
+        hards.put("E", 1);
+        hards.put("F", 1);
+        hards.put("G", 1);
+        hards.put("H", 1);
+        hards.put("I", 1);
+        hards.put("J", 1);
+        hards.put("K", 1);
+        hards.put("L", 1);
+        hards.put("M", 1);
+        hards.put("N", 1);
+        hards.put("O", 1);
+        hards.put("P", 1);
+        hards.put("Q", 1);
+        hards.put("R", 1);
+        hards.put("S", 1);
+        hards.put("T", 1);
+        hards.put("U", 1);
+        hards.put("V", 1);
+        hards.put("W", 1);
+        hards.put("X", 1);
+        hards.put("Y", 1);
+        hards.put("Z", 1);
+        hards.put("a", 1);
+        hards.put("b", 1);
+        hards.put("c", 1);
+        hards.put("d", 1);
+        hards.put("e", 1);
+        hards.put("f", 1);
+        hards.put("g", 1);
+        hards.put("h", 1);
+        hards.put("i", 1);
+        hards.put("j", 1);
+        hards.put("k", 1);
+        hards.put("l", 1);
+        hards.put("m", 1);
+        hards.put("n", 1);
+        hards.put("o", 1);
+        hards.put("p", 1);
+        hards.put("q", 1);
+        hards.put("r", 1);
+        hards.put("s", 1);
+        hards.put("t", 1);
+        hards.put("u", 1);
+        hards.put("v", 1);
+        hards.put("w", 1);
+        hards.put("x", 1);
+        hards.put("y", 1);
+        hards.put("z", 1);
+        hards.put("0", 2);
+        hards.put("1", 2);
+        hards.put("2", 2);
+        hards.put("3", 2);
+        hards.put("4", 2);
+    }
+
+    private String code = "";
+    private Integer index = -1;
+    private Integer ondex;
+    private byte[] raw = new byte[0];
+
+    public Indexer(RawArgs args, Integer index, Integer ondex) {
+        String code = args.getCode();
+        byte[] raw = args.getRaw();
+
+        index = index == null ? 0 : index;
+
+        if (!sizes.containsKey(code)) {
+            throw new UnexpectedCodeException("Unsupported code=" + code + ".");
+        }
+
+        Xizage xizage = sizes.get(code);
+        int os = xizage.os;
+        Integer fs = xizage.fs;
+        int cs = xizage.hs + xizage.ss;
+        int ms = xizage.ss - xizage.os;
+
+        if (index < 0 || index > Math.pow(64, ms) - 1) {
+            throw new InvalidVarIndexException("Invalid index=" + index + " for code=" + code + ".");
+        }
+
+        if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, os) - 1)) {
+            throw new InvalidVarIndexException("Invalid ondex=" + ondex + " for code=" + code + ".");
+        }
+
+        if (IndexedCurrentSigCodex.has(code) && ondex != null) {
+            throw new InvalidVarIndexException("Non None ondex=" + ondex + " for code=" + code + ".");
+        }
+
+        if (IndexedBothSigCodex.has(code)) {
+            if (ondex == null) {
+                ondex = index;
+            } else {
+                if (!ondex.equals(index) && os == 0) {
+                    throw new InvalidVarIndexException("Non matching ondex=" + ondex + " and index=" + index + " for code=" + code + ".");
+                }
+            }
+        }
+
+        if (fs == null) {
+            throw new UnsupportedOperationException("Variable length unsupported");
+        }
+
+        int rawsize = (int) Math.floor(((fs - cs) * 3.0) / 4.0);
+        if (raw.length < rawsize) {
+            throw new RawMaterialException("Not enough raw bytes for code=" + code + " and index=" + index + ", expected " + rawsize + " got " + raw.length + ".");
+        }
+
+        raw = Arrays.copyOf(raw, rawsize);
+
+        this.code = code;
+        this.index = index;
+        this.ondex = ondex;
+        this.raw = raw;
+    }
+
+    public Indexer(RawArgs rawArgs) {
+        this(rawArgs, null, null);
+    }
+
+    public Indexer(String qb64) {
+        this._exfil(qb64);
+    }
+
+    public Indexer(byte[] qb2) {
+        this._bexfil(qb2);
+    }
+
+    private void _bexfil(byte[] qb2) {
+        throw new UnsupportedOperationException("qb2 not yet supported: " + Arrays.toString(qb2));
+    }
+
+    public static int getRawSize(String code) {
+        final Xizage xizage = sizes.get(code);
+        return (int) Math.floor(((xizage.fs - (xizage.hs + xizage.ss)) * 3.0) / 4.0) - xizage.ls;
+    }
+
+    public String getQb64() {
+        return this._infil();
+    }
+
+    public byte[] getQb64b() {
+        return this.getQb64().getBytes();
+    }
+
+    private String _infil() {
+        String code = this.getCode();
+        Integer index = this.getIndex();
+        Integer ondex = this.getOndex();
+        byte[] raw = this.getRaw();
+
+        int ps = (3 - (raw.length % 3)) % 3;
+        Xizage xizage = sizes.get(code);
+        int cs = xizage.hs + xizage.ss;
+        int ms = xizage.ss - xizage.os;
+
+        if (index < 0 || index > Math.pow(64, ms) - 1) {
+            throw new InvalidVarIndexException("Invalid index=" + index + " for code=" + code + ".");
+        }
+
+        if (ondex != null && xizage.os != 0 && !(ondex >= 0 && ondex <= Math.pow(64, xizage.os) - 1)) {
+            throw new InvalidVarIndexException("Invalid ondex=" + ondex + " for os=" + xizage.os + " and code=" + code + ".");
+        }
+
+        String both = code + CoreUtil.intToB64(index, ms) + CoreUtil.intToB64(ondex == null ? 0 : ondex, xizage.os);
+
+        if (both.length() != cs) {
+            throw new InvalidCodeSizeException("Mismatch code size = " + cs + " with table = " + both.length() + ".");
+        }
+
+        if (cs % 4 != ps - xizage.ls) {
+            throw new InvalidCodeSizeException("Invalid code=" + both + " for converted raw pad size=" + ps + ".");
+        }
+
+        byte[] bytes = new byte[ps + raw.length];
+        for (int i = 0; i < ps; i++) {
+            bytes[i] = 0;
+        }
+        System.arraycopy(raw, 0, bytes, ps, raw.length);
+
+        String full = both + CoreUtil.encodeBase64Url(bytes).substring(ps - xizage.ls);
+        if (full.length() != xizage.fs) {
+            throw new InvalidCodeSizeException("Invalid code=" + both + " for raw size=" + raw.length + ".");
+        }
+
+        return full;
+    }
+
+    public void _exfil(String qb64) {
+        if (qb64.isEmpty()) {
+            throw new ShortageException("Empty Material");
+        }
+
+        char first = qb64.charAt(0);
+        if (!hards.containsKey(String.valueOf(first))) {
+            if (first == '-') {
+                throw new UnexpectedCountCodeException("Unexpected count code start while extracing Indexer");
+            } else if (first == '_') {
+                throw new UnexpectedOpCodeException("Unexpected op code start while extracing Indexer");
+            } else {
+                throw new UnexpectedCodeException("Unsupported code start char=" + first);
+            }
+        }
+
+        int hs = hards.get(String.valueOf(first));
+        if (qb64.length() < hs) {
+            throw new ShortageException("Need " + (hs - qb64.length()) + " more characters.");
+        }
+
+        String hard = qb64.substring(0, hs);
+        if (!sizes.containsKey(hard)) {
+            throw new UnexpectedCodeException("Unsupported code " + hard);
+        }
+
+        Xizage xizage = sizes.get(hard);
+        int cs = xizage.hs + xizage.ss; // both hard + soft code size
+        int ms = xizage.ss - xizage.os;
+
+        if (qb64.length() < cs) {
+            throw new ShortageException("Need " + (cs - qb64.length()) + " more characters.");
+        }
+
+        String sindex = qb64.substring(hs, hs + ms);
+        int index = CoreUtil.b64ToInt(sindex);
+
+        String sondex = qb64.substring(hs + ms, hs + ms + xizage.os);
+        Integer ondex;
+        if (IndexedCurrentSigCodex.has(hard)) {
+            ondex = xizage.os != 0 ? CoreUtil.b64ToInt(sondex) : null;
+            if (ondex != null && ondex != 0) {
+                throw new IllegalArgumentException("Invalid ondex=" + ondex + " for code=" + hard + ".");
+            } else {
+                ondex = null;
+            }
+        } else {
+            ondex = xizage.os != 0 ? CoreUtil.b64ToInt(sondex) : index;
+        }
+
+        if (xizage.fs == null) {
+            throw new IllegalArgumentException("variable length not supported");
+        }
+
+        if (qb64.length() < xizage.fs) {
+            throw new ShortageException("Need " + (xizage.fs - qb64.length()) + " more chars.");
+        }
+
+        qb64 = qb64.substring(0, xizage.fs);
+        int ps = cs % 4;
+        int pbs = 2 * ps != 0 ? ps : xizage.ls;
+        byte[] raw;
+        if (ps != 0) {
+            String base = "A".repeat(ps) + qb64.substring(cs);
+            byte[] paw = CoreUtil.decodeBase64Url(base); // decode base to leave prepadded raw
+            int pi = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, ps)); // prepad as int
+            if ((pi & (1 << pbs) - 1) != 0) {
+                // masked pad bits non-zero
+                throw new ConversionException("Non zeroed prepad bits = " + Integer.toBinaryString(pi & (1 << pbs) - 1) + " in " + qb64.charAt(cs) + ".");
+            }
+            raw = Arrays.copyOfRange(paw, ps, paw.length); // strip off ps prepad paw bytes
+        } else {
+            String base = qb64.substring(cs);
+            byte[] paw = CoreUtil.decodeBase64Url(base);
+            int li = CoreUtil.readInt(Arrays.copyOfRange(paw, 0, xizage.ls));
+            if (li != 0) {
+                if (li == 1) {
+                    throw new ConversionException("Non zeroed lead byte = 0x" + String.format("%02x", li) + ".");
+                } else {
+                    throw new ConversionException("Non zeroed lead bytes = 0x" + String.format("%04x", li));
+                }
+            }
+            raw = Arrays.copyOfRange(paw, xizage.ls, paw.length);
+        }
+
+        if (raw.length != Math.floor(((qb64.length() - cs) * 3.0) / 4.0)) {
+            throw new ConversionException("Improperly qualified material = " + qb64);
+        }
+
+        this.code = hard;
+        this.index = index;
+        this.ondex = ondex;
+        this.raw = raw; // must be bytes for crypto opts and immutable not bytearray
+    }
+
+    static class Xizage {
+        public Integer hs;
+        public Integer ss;
+        public Integer os;
+        public Integer fs;
+        public Integer ls;
+
+        public Xizage(Integer hs, Integer ss, Integer os, Integer fs, Integer ls) {
+            this.hs = hs;
+            this.ss = ss;
+            this.os = os;
+            this.fs = fs;
+            this.ls = ls;
+        }
+    }
+}
