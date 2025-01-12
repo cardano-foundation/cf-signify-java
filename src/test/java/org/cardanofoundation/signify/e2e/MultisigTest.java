@@ -621,7 +621,7 @@ public class MultisigTest extends TestUtils {
         Map<String, Object> ixn = castObjectToLinkedHashMap(
                 castObjectToLinkedHashMap(exn.get("e")).get("ixn")
         );
-        data = castObjectToLinkedHashMap(ixn.get("a"));
+        data = castObjectToListMap(ixn.get("a")).getFirst();
 
         icpResult2 = client2.getIdentifier().interact("multisig", data);
         op2 = icpResult2.op();
@@ -661,9 +661,13 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member3 received exchange message to join the interaction event");
 
         res = client3.getGroups().getRequest(msgSaid);
-        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-        ixn = Utils.toMap(Utils.toMap(exn.get("e")).get("ixn"));
-        data = Utils.toMap(ixn.get("a"));
+        exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
+        ixn = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(exn.get("e")).get("ixn")
+        );
+        data = castObjectToListMap(ixn.get("a")).getFirst();
 
         icpResult3 = client3.getIdentifier().interact("multisig", data);
         op3 = icpResult3.op();
