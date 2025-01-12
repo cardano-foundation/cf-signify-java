@@ -61,9 +61,10 @@ public class States {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EstablishmentState {
-        private  String d;
         private  String s;
+        private  String d;
     }
 
     @Data

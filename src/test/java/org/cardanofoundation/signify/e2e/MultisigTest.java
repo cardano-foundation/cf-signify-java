@@ -2,7 +2,9 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Exchanging;
+import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -25,9 +27,9 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,7 +52,7 @@ public class MultisigTest extends TestUtils {
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-//    @Disabled("Disabled until bug respond has been fixed")
+    //    @Disabled("Disabled until bug respond has been fixed")
     @Test
     public void multisig() throws Exception {
         // Boot Four clients
@@ -147,7 +149,7 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member1 marked challenge response as accepted");
 
         // First member start the creation of a multisig identifier
-        List<States.State> rstates =  Arrays.asList(aid1.getState(), aid2.getState(), aid3.getState());
+        List<States.State> rstates = Arrays.asList(aid1.getState(), aid2.getState(), aid3.getState());
         List<States.State> states = rstates;
         CreateIdentifierArgs iargs = new CreateIdentifierArgs();
         iargs.setAlgo(Manager.Algos.group);
@@ -202,8 +204,12 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member2 received exchange message to join multisig");
 
         Object res = client2.getGroups().getRequest(msgSaid);
-        Map<String, Object> exn = castObjectToLinkedHashMap(castObjectToListMap(res).getFirst().get("exn"));
-        Map<String, Object> icp = castObjectToLinkedHashMap(castObjectToLinkedHashMap(exn.get("e")).get("icp"));
+        Map<String, Object> exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
+        Map<String, Object> icp = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(exn.get("e")).get("icp")
+        );
 
         CreateIdentifierArgs iargs2 = new CreateIdentifierArgs();
         iargs2.setAlgo(Manager.Algos.group);
@@ -255,7 +261,7 @@ public class MultisigTest extends TestUtils {
         System.out.println("Member3 received exchange message to join multisig");
 
         res = client3.getGroups().getRequest(msgSaid);
-        exn = castObjectToLinkedHashMap(castObjectToListMap(res).getFirst().get("exn"));;
+        exn = castObjectToLinkedHashMap(castObjectToListMap(res).getFirst().get("exn"));
         icp = castObjectToLinkedHashMap(castObjectToLinkedHashMap(exn.get("e")).get("icp"));
 
         CreateIdentifierArgs iargs3 = new CreateIdentifierArgs();
@@ -731,16 +737,16 @@ public class MultisigTest extends TestUtils {
         // Update new key states
         op1 = client1.getKeyStates().query(aid2.getPrefix(), "1");
         op1 = waitOperation(client1, op1);
-        States.State aid2State = (States.State) Utils.toMap(op1).get("response");
+        States.State aid2State = convertValueToStateClass(Utils.toMap(op1).get("response"));
         op1 = client1.getKeyStates().query(aid3.getPrefix(), "1");
         op1 = waitOperation(client1, op1);
-        States.State aid3State = (States.State) Utils.toMap(op1).get("response");
+        States.State aid3State = convertValueToStateClass(Utils.toMap(op1).get("response"));
 
         op2 = client2.getKeyStates().query(aid3.getPrefix(), "1");
         op2 = waitOperation(client2, op2);
         op2 = client2.getKeyStates().query(aid1.getPrefix(), "1");
         op2 = waitOperation(client2, op2);
-        States.State aid1State = (States.State) Utils.toMap(op2).get("response");
+        States.State aid1State = convertValueToStateClass(Utils.toMap(op2).get("response"));
 
         op3 = client3.getKeyStates().query(aid1.getPrefix(), "1");
         op3 = waitOperation(client3, op3);
@@ -783,16 +789,17 @@ public class MultisigTest extends TestUtils {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
+        Map<String, Object> payload1 = new LinkedHashMap<>();
+        payload1.put("gid", serder.getPre());
+        payload1.put("smids", smids);
+        payload1.put("rmids", smids);
+
         client1.getExchanges().send(
                 "member1",
                 "multisig",
                 aid1,
                 "/multisig/rot",
-                Map.of(
-                        "gid", serder.getPre(),
-                        "smids", smids,
-                        "rmids", smids
-                ),
+                payload1,
                 rembeds,
                 recp
         );
@@ -804,7 +811,9 @@ public class MultisigTest extends TestUtils {
 
         Thread.sleep(5000);
         res = client2.getGroups().getRequest(msgSaid);
-        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
+        exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
 
         icpResult2 = client2.getIdentifier().rotate("multisig", RotateIdentifierArgs.builder()
                 .states(states)
@@ -827,16 +836,17 @@ public class MultisigTest extends TestUtils {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
+        Map<String, Object> payload2 = new LinkedHashMap<>();
+        payload2.put("gid", serder.getPre());
+        payload2.put("smids", smids);
+        payload2.put("rmids", smids);
+
         client2.getExchanges().send(
                 "member2",
                 "multisig",
                 aid2,
                 "/multisig/ixn",
-                Map.of(
-                        "gid", serder.getPre(),
-                        "smids", smids,
-                        "rmids", smids
-                ),
+                payload2,
                 rembeds,
                 recp
         );
@@ -846,7 +856,9 @@ public class MultisigTest extends TestUtils {
         msgSaid = waitAndMarkNotification(client3, "/multisig/rot");
         System.out.println("Member3 received exchange message to join the rotation event");
         res = client3.getGroups().getRequest(msgSaid);
-        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
+        exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
 
         icpResult3 = client3.getIdentifier().rotate("multisig", RotateIdentifierArgs.builder()
                 .states(states)
@@ -869,16 +881,17 @@ public class MultisigTest extends TestUtils {
                 .map(States.State::getI)
                 .collect(Collectors.toList());
 
+        Map<String, Object> payload3 = new LinkedHashMap<>();
+        payload3.put("gid", serder.getPre());
+        payload3.put("smids", smids);
+        payload3.put("rmids", smids);
+
         client3.getExchanges().send(
                 "member3",
                 "multisig",
                 aid3,
                 "/multisig/ixn",
-                Map.of(
-                        "gid", serder.getPre(),
-                        "smids", smids,
-                        "rmids", smids
-                ),
+                payload3,
                 rembeds,
                 recp
         );
@@ -1418,5 +1431,25 @@ public class MultisigTest extends TestUtils {
                 embeds,
                 recipients
         );
+    }
+
+    public States.State convertValueToStateClass(Object obj) {
+        return objectMapper.convertValue(obj, new TypeReference<>() {
+        });
+    }
+
+    public static <T> Operation<T> waitOperationToMultisig(
+            SignifyClient client,
+            Object op) throws SodiumException, IOException, InterruptedException {
+        Operation<T> operation;
+        if (op instanceof Operation) {
+            String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
+            operation = client.getOperations().get(name);
+        } else {
+            operation = Operation.fromObject(op);
+        }
+        operation = client.getOperations().wait(operation);
+        deleteOperations(client, operation);
+        return operation;
     }
 }

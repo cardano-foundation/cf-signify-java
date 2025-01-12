@@ -24,7 +24,6 @@ import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
