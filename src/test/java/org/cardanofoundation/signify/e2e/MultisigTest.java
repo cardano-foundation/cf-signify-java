@@ -770,10 +770,12 @@ public class MultisigTest extends TestUtils {
         op1 = eventResponse1.op();
         serder = eventResponse1.serder();
         sigs = eventResponse1.sigs();
-        sigers = sigs.stream()
-                .map(Siger::new)
-                .toList();
 
+//        sigers = sigs.stream()
+//                .map(Siger::new)
+//                .toList();
+
+        sigers = sigs.stream().map(sig -> new Siger(sig)).collect(Collectors.toList());
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
         Map<String, List<Object>> rembeds = new LinkedHashMap<>();
