@@ -14,11 +14,12 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SinglesigVleiIssuanceTest extends TestUtils {
+public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     String vleiServerUrl = env.vleiServerUrl();
 
@@ -112,47 +113,57 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
 
         System.out.println("Created data successfully");
 
-        List<SignifyClient> clients = getOrCreateClients(4, null);
+        List<SignifyClient> clients = getOrCreateClientsAsync(4);
         gleifClient = clients.get(0);
         qviClient = clients.get(1);
         leClient = clients.get(2);
         roleClient = clients.get(3);
 
-        gleifAid = createAid(gleifClient, "gleif");
-        qviAid = createAid(qviClient, "qvi");
-        leAid = createAid(leClient, "le");
-        roleAid = createAid(roleClient, "role");
+        List<TestUtils.Aid> aids = createAidAsync(
+                new CreateAidArgs(gleifClient, "gleif"),
+                new CreateAidArgs(qviClient, "qvi"),
+                new CreateAidArgs(leClient, "le"),
+                new CreateAidArgs(roleClient, "role")
+        );
+        gleifAid = aids.get(0);
+        qviAid = aids.get(1);
+        leAid = aids.get(2);
+        roleAid = aids.get(3);
 
-        getOrCreateContact(gleifClient, "qvi", qviAid.oobi);
-        getOrCreateContact(qviClient, "gleif", gleifAid.oobi);
-        getOrCreateContact(qviClient, "le", leAid.oobi);
-        getOrCreateContact(qviClient, "role", roleAid.oobi);
-        getOrCreateContact(leClient, "gleif", gleifAid.oobi);
-        getOrCreateContact(leClient, "qvi", qviAid.oobi);
-        getOrCreateContact(leClient, "role", roleAid.oobi);
-        getOrCreateContact(roleClient, "gleif", gleifAid.oobi);
-        getOrCreateContact(roleClient, "qvi", qviAid.oobi);
-        getOrCreateContact(roleClient, "le", leAid.oobi);
+        getOrCreateContactAsync(
+                new GetOrCreateContactArgs(gleifClient, "qvi", qviAid.oobi),
+                new GetOrCreateContactArgs(qviClient, "gleif", gleifAid.oobi),
+                new GetOrCreateContactArgs(qviClient, "le", leAid.oobi),
+                new GetOrCreateContactArgs(qviClient, "role", roleAid.oobi),
+                new GetOrCreateContactArgs(leClient, "gleif", gleifAid.oobi),
+                new GetOrCreateContactArgs(leClient, "qvi", qviAid.oobi),
+                new GetOrCreateContactArgs(leClient, "role", roleAid.oobi),
+                new GetOrCreateContactArgs(roleClient, "gleif", gleifAid.oobi),
+                new GetOrCreateContactArgs(roleClient, "qvi", qviAid.oobi),
+                new GetOrCreateContactArgs(roleClient, "le", leAid.oobi)
+        );
 
-        resolveOobi(gleifClient, QVI_SCHEMA_URL, null);
-        resolveOobi(qviClient, QVI_SCHEMA_URL, null);
-        resolveOobi(qviClient, LE_SCHEMA_URL, null);
-        resolveOobi(qviClient, ECR_AUTH_SCHEMA_URL, null);
-        resolveOobi(qviClient, ECR_SCHEMA_URL, null);
-        resolveOobi(qviClient, OOR_AUTH_SCHEMA_URL, null);
-        resolveOobi(qviClient, OOR_SCHEMA_URL, null);
-        resolveOobi(leClient, QVI_SCHEMA_URL, null);
-        resolveOobi(leClient, LE_SCHEMA_URL, null);
-        resolveOobi(leClient, ECR_AUTH_SCHEMA_URL, null);
-        resolveOobi(leClient, ECR_SCHEMA_URL, null);
-        resolveOobi(leClient, OOR_AUTH_SCHEMA_URL, null);
-        resolveOobi(leClient, OOR_SCHEMA_URL, null);
-        resolveOobi(roleClient, QVI_SCHEMA_URL, null);
-        resolveOobi(roleClient, LE_SCHEMA_URL, null);
-        resolveOobi(roleClient, ECR_AUTH_SCHEMA_URL, null);
-        resolveOobi(roleClient, ECR_SCHEMA_URL, null);
-        resolveOobi(roleClient, OOR_AUTH_SCHEMA_URL, null);
-        resolveOobi(roleClient, OOR_SCHEMA_URL, null);
+        resolveOobisAsync(
+                new ResolveOobisArgs(gleifClient, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(qviClient, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(qviClient, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(qviClient, ECR_AUTH_SCHEMA_URL, null),
+                new ResolveOobisArgs(qviClient, ECR_SCHEMA_URL, null),
+                new ResolveOobisArgs(qviClient, OOR_AUTH_SCHEMA_URL, null),
+                new ResolveOobisArgs(qviClient, OOR_SCHEMA_URL, null),
+                new ResolveOobisArgs(leClient, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(leClient, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(leClient, ECR_AUTH_SCHEMA_URL, null),
+                new ResolveOobisArgs(leClient, ECR_SCHEMA_URL, null),
+                new ResolveOobisArgs(leClient, OOR_AUTH_SCHEMA_URL, null),
+                new ResolveOobisArgs(leClient, OOR_SCHEMA_URL, null),
+                new ResolveOobisArgs(roleClient, QVI_SCHEMA_URL, null),
+                new ResolveOobisArgs(roleClient, LE_SCHEMA_URL, null),
+                new ResolveOobisArgs(roleClient, ECR_AUTH_SCHEMA_URL, null),
+                new ResolveOobisArgs(roleClient, ECR_SCHEMA_URL, null),
+                new ResolveOobisArgs(roleClient, OOR_AUTH_SCHEMA_URL, null),
+                new ResolveOobisArgs(roleClient, OOR_SCHEMA_URL, null)
+        );
 
         gleifRegistry = getOrCreateRegistry(gleifClient, gleifAid, "gleifRegistry");
         qviRegistry = getOrCreateRegistry(qviClient, qviAid, "qviRegistry");
@@ -183,7 +194,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
         qviCredHolder = retry(() -> {
             try {
                 Object cred = getReceivedCredential(qviClient, sadQviCred.get("d").toString());
-                assertNotNull(cred);
+                assert (cred != null);
                 return cred;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -233,7 +244,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             leCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(leClient, sadLeCred.get("d").toString());
-                    assertNotNull(cred);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -289,9 +300,9 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
 
             ecrCredHolder = retry(() -> {
                 try {
+                    assertNotNull(sadEcrCred.get("d").toString());
                     Object cred = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
-                    Thread.sleep(1000);
-                    assertNotNull(cred);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -348,7 +359,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             ecrAuthCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(qviClient, sadEcrAuthCred.get("d").toString());
-                    assertNotNull(cred);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -405,7 +416,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             ecrCredHolder2 = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(roleClient, sadEcrCred2.get("d").toString());
-                    assertNotNull(cred);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -458,7 +469,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             oorAuthCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(qviClient, sadOorAuthCred.get("d").toString());
-                    assertNotNull(cred);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -514,7 +525,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
             oorCredHolder = retry(() -> {
                 try {
                     Object cred = getReceivedCredential(roleClient, sadOorCred.get("d").toString());
-                    assertNotNull(cred);
+                    assert (cred != null);
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -595,7 +606,7 @@ public class SinglesigVleiIssuanceTest extends TestUtils {
     }
 
     public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) throws Exception {
-        Thread.sleep(3000);
+        Thread.sleep(2000);
         List<Notification> notifications = waitForNotifications(senderClient, "/exn/ipex/grant");
         assertEquals(1, notifications.size());
         Notification grantNotification = notifications.getFirst();
