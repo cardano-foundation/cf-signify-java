@@ -7,6 +7,7 @@ import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.Map;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MultisigInceptionTest extends BaseIntegrationTest {
     SignifyClient client1, client2;
@@ -65,8 +67,13 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 System.out.println("Member1 initiated multisig, waiting for others to join...");
 
                 // Second member check notifications and join the multisig
-                String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
-                assertEquals(msgSaid, "msgSaid not defined");
+                List<Notification> notifications = TestUtils.waitForNotifications(client2, "/multisig/icp");
+                for (Notification note : notifications) {
+                    client2.getNotifications().mark(note.getI());
+                }
+
+                String msgSaid = notifications.getLast().getA().getD();
+                assertNotNull(msgSaid, "msgSaid not defined");
                 Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                     .localMemberName("member2")
                     .groupName(groupName)
@@ -114,8 +121,13 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 System.out.println("Member1 initiated multisig, waiting for others to join...");
 
                 // Second member check notifications and join the multisig
-                String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
-                assertEquals(msgSaid, "msgSaid not defined");
+                List<Notification> notifications = TestUtils.waitForNotifications(client2, "/multisig/icp");
+                for (Notification note : notifications) {
+                    client2.getNotifications().mark(note.getI());
+                }
+
+                String msgSaid = notifications.getLast().getA().getD();
+                assertNotNull(msgSaid, "msgSaid not defined");
                 Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                     .localMemberName("member2")
                     .groupName(groupName)
