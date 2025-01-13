@@ -672,8 +672,8 @@ public class Keeping {
         public GroupKeeper(
                 KeyManager manager,
                 HabState mhab,
-                List<Object> states,
-                List<Object> rstates,
+                List<State> states,
+                List<State> rstates,
                 List<String> keys,
                 List<String> ndigs
         ) {
@@ -682,24 +682,19 @@ public class Keeping {
             this.signers = new ArrayList<>();
 
             if (states != null) {
-                keys = states.stream()
-                        .map(state -> Utils.toList(Utils.toMap(state).get("k")).getFirst())
-                        .collect(Collectors.toList());
+                keys = convertToStates(states).stream()
+                    .map(state -> state.getK().getFirst())
+                    .collect(Collectors.toList());
             }
 
             if (rstates != null) {
-                ndigs = rstates.stream()
-                        .map(state -> Utils.toList(Utils.toMap(state).get("n")).getFirst())
+                ndigs = convertToStates(rstates).stream()
+                        .map(state -> state.getN().getFirst())
                         .collect(Collectors.toList());
             }
 
-            this.gkeys = states != null ? states.stream()
-                    .map(state -> Utils.toList(Utils.toMap(state).get("k")).getFirst())
-                    .collect(Collectors.toList()) : keys;
-
-            this.gdigs = rstates != null ? rstates.stream()
-                    .map(state -> Utils.toList(Utils.toMap(state).get("n")).getFirst())
-                    .collect(Collectors.toList()) : ndigs;
+            this.gkeys = keys != null ? keys : new ArrayList<>();
+            this.gdigs = ndigs != null ? ndigs : new ArrayList<>();
         }
 
         @Override
