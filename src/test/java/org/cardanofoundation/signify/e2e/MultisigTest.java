@@ -2,9 +2,7 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -29,7 +27,6 @@ import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -773,10 +770,12 @@ public class MultisigTest extends TestUtils {
         op1 = eventResponse1.op();
         serder = eventResponse1.serder();
         sigs = eventResponse1.sigs();
-        sigers = sigs.stream()
-                .map(Siger::new)
-                .toList();
 
+//        sigers = sigs.stream()
+//                .map(Siger::new)
+//                .toList();
+
+        sigers = sigs.stream().map(sig -> new Siger(sig)).collect(Collectors.toList());
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
         Map<String, List<Object>> rembeds = new LinkedHashMap<>();
@@ -1436,20 +1435,5 @@ public class MultisigTest extends TestUtils {
     public States.State convertValueToStateClass(Object obj) {
         return objectMapper.convertValue(obj, new TypeReference<>() {
         });
-    }
-
-    public static <T> Operation<T> waitOperationToMultisig(
-            SignifyClient client,
-            Object op) throws SodiumException, IOException, InterruptedException {
-        Operation<T> operation;
-        if (op instanceof Operation) {
-            String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
-            operation = client.getOperations().get(name);
-        } else {
-            operation = Operation.fromObject(op);
-        }
-        operation = client.getOperations().wait(operation);
-        deleteOperations(client, operation);
-        return operation;
     }
 }
