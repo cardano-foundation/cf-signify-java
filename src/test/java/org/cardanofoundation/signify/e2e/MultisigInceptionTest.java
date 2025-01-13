@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultis
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MultisigInceptionTest extends TestUtils {
+public class MultisigInceptionTest extends BaseIntegrationTest {
     SignifyClient client1, client2;
     String aid1, aid2;
     Object oobi1, oobi2;
@@ -26,19 +27,20 @@ public class MultisigInceptionTest extends TestUtils {
 
     @Test
     public void testMultisigInception() throws Exception {
-        client1 = getOrCreateClient();
-        client2 = getOrCreateClient();
+        List<SignifyClient> clients = getOrCreateClientsAsync(2);
+        client1 = clients.get(0);
+        client2 = clients.get(1);
 
-        aid1 = getOrCreateIdentifier(client1, "member1", null)[0];
-        aid2 = getOrCreateIdentifier(client2, "member2", null)[0];
+        aid1 = TestUtils.getOrCreateIdentifier(client1, "member1", null)[0];
+        aid2 = TestUtils.getOrCreateIdentifier(client2, "member2", null)[0];
 
         testSteps.step("Resolve oobis", () -> {
             try {
                 oobi1 = client1.getOobis().get("member1", "agent");
-                oobi2 = client1.getOobis().get("member1", "agent");
+                oobi2 = client2.getOobis().get("member2", "agent");
 
-                resolveOobi(client1, Utils.toList(Utils.toMap(oobi2).get("oobis")).getFirst(), "member2");
-                resolveOobi(client2, Utils.toList(Utils.toMap(oobi1).get("oobis")).getFirst(), "member1");
+                TestUtils.resolveOobi(client1, Utils.toList(Utils.toMap(oobi2).get("oobis")).getFirst(), "member2");
+                TestUtils.resolveOobi(client2, Utils.toList(Utils.toMap(oobi1).get("oobis")).getFirst(), "member1");
             } catch (SodiumException | IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -50,11 +52,11 @@ public class MultisigInceptionTest extends TestUtils {
                 Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                     .groupName(groupName)
                     .localMemberName("member1")
-                    .participants(List.of(aid1, aid2))
+                    .participants(Arrays.asList(aid1, aid2))
                     .toad(2)
                     .isith(2)
                     .nsith(2)
-                    .wits(List.of(
+                    .wits(Arrays.asList(
                         "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
                         "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
                         "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
@@ -63,7 +65,7 @@ public class MultisigInceptionTest extends TestUtils {
                 System.out.println("Member1 initiated multisig, waiting for others to join...");
 
                 // Second member check notifications and join the multisig
-                String msgSaid = waitAndMarkNotification(client2, "/multisig/icp");
+                String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
                 assertEquals(msgSaid, "msgSaid not defined");
                 Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                     .localMemberName("member2")
@@ -112,7 +114,7 @@ public class MultisigInceptionTest extends TestUtils {
                 System.out.println("Member1 initiated multisig, waiting for others to join...");
 
                 // Second member check notifications and join the multisig
-                String msgSaid = waitAndMarkNotification(client2, "/multisig/icp");
+                String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
                 assertEquals(msgSaid, "msgSaid not defined");
                 Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                     .localMemberName("member2")

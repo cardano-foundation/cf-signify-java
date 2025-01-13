@@ -368,7 +368,7 @@ public class TestUtils {
         }).toList();
         return participantStates.stream().map(s -> {
             if (s instanceof List<?>) {
-                return ((List<?>) s).get(0);
+                return ((List<?>) s).getFirst();
             } else if (s instanceof Object) {
                 return ((Object[]) s)[0];
             } else {

@@ -148,7 +148,7 @@ public class Identifier {
             dcode = MatterCodex.Ed25519N.getValue();
         }
 
-        Map<String, Object> xargs = new HashMap<>();
+        Map<String, Object> xargs = new LinkedHashMap<>();
         xargs.put("transferable", transferable);
         xargs.put("isith", isith);
         xargs.put("nsith", nsith);
