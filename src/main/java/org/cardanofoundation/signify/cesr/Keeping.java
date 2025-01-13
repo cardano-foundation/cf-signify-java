@@ -672,8 +672,8 @@ public class Keeping {
         public GroupKeeper(
                 KeyManager manager,
                 HabState mhab,
-                List<State> states,
-                List<State> rstates,
+                List<Object> states,
+                List<Object> rstates,
                 List<String> keys,
                 List<String> ndigs
         ) {
@@ -682,19 +682,24 @@ public class Keeping {
             this.signers = new ArrayList<>();
 
             if (states != null) {
-                keys = convertToStates(states).stream()
-                        .map(state -> state.getK().getFirst())
+                keys = states.stream()
+                        .map(state -> Utils.toList(Utils.toMap(state).get("k")).getFirst())
                         .collect(Collectors.toList());
             }
 
             if (rstates != null) {
-                ndigs = convertToStates(rstates).stream()
-                        .map(state -> state.getN().getFirst())
+                ndigs = rstates.stream()
+                        .map(state -> Utils.toList(Utils.toMap(state).get("n")).getFirst())
                         .collect(Collectors.toList());
             }
 
-            this.gkeys = keys != null ? keys : new ArrayList<>();
-            this.gdigs = ndigs != null ? ndigs : new ArrayList<>();
+            this.gkeys = states != null ? states.stream()
+                    .map(state -> Utils.toList(Utils.toMap(state).get("k")).getFirst())
+                    .collect(Collectors.toList()) : keys;
+
+            this.gdigs = rstates != null ? rstates.stream()
+                    .map(state -> Utils.toList(Utils.toMap(state).get("n")).getFirst())
+                    .collect(Collectors.toList()) : ndigs;
         }
 
         @Override
@@ -722,11 +727,11 @@ public class Keeping {
                 List<State> rstates
         ) {
             this.gkeys = states.stream()
-                    .map(state -> state.getK().getFirst())
+                    .map(state -> state.getK().get(0))
                     .collect(Collectors.toList());
 
             this.gdigs = rstates.stream()
-                    .map(state -> state.getN().getFirst())
+                    .map(state -> state.getN().get(0))
                     .collect(Collectors.toList());
 
             return new KeeperResult(gkeys, gdigs);
@@ -743,8 +748,8 @@ public class Keeping {
                 throw new IllegalStateException("No state in mhab");
             }
 
-            String key = mhab.getState().getK().getFirst();
-            String ndig = mhab.getState().getN().getFirst();
+            String key = mhab.getState().getK().get(0);
+            String ndig = mhab.getState().getN().get(0);
 
             int csi = gkeys.indexOf(key);
             int pni = gdigs.indexOf(ndig);
