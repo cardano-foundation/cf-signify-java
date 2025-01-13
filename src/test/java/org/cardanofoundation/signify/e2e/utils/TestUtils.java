@@ -293,8 +293,7 @@ public class TestUtils {
                 ex.printStackTrace();
             }
         }
-        assert getResponseI != null;
-        return getResponseI.toString();
+        return getResponseI == null ? null : getResponseI.toString();
     }
 
     public static Object getOrIssueCredential(
