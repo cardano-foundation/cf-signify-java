@@ -71,11 +71,7 @@ class SaltyTests extends TestUtils {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aidsJson = client.getIdentifier().list(0, 24);
-        List<Map<String, Object>> aids = objectMapper.readValue(
-                aidsJson.aids().toString(),
-                new TypeReference<>() {
-                }
-        );
+        List<Map<String, Object>> aids = castObjectToListMap(aidsJson.aids());
         Assertions.assertEquals(1, aids.size());
 
         Map<String, Object> aidLast = aids.removeLast();
@@ -122,11 +118,7 @@ class SaltyTests extends TestUtils {
         assertEquals("2", icp2.getKed().get("nt"));
 
         IdentifierListResponse aidsJson1 = client.getIdentifier().list(0, 24);
-        List<Map<String, Object>> aids1 = objectMapper.readValue(
-                aidsJson1.aids().toString(),
-                new TypeReference<>() {
-                }
-        );
+        List<Map<String, Object>> aids1 = castObjectToListMap(aidsJson1.aids());
         Assertions.assertEquals(2, aids1.size());
 
         Map<String, Object> aid3 = aids1.removeLast();
@@ -143,33 +135,21 @@ class SaltyTests extends TestUtils {
         waitOperation(client, icpResult2.op());
 
         IdentifierListResponse aidsJson2 = client.getIdentifier().list(0, 24);
-        List<Map<String, Object>> aids2 = objectMapper.readValue(
-                aidsJson2.aids().toString(),
-                new TypeReference<>() {
-                }
-        );
+        List<Map<String, Object>> aids2 = castObjectToListMap(aidsJson2.aids());
         Assertions.assertEquals(3, aids2.size());
 
         Map<String, Object> aid4 = aids2.getFirst();
         Assertions.assertEquals("aid1", aid4.get("name"));
 
         IdentifierListResponse aidsJson3 = client.getIdentifier().list(1, 2);
-        List<Map<String, Object>> aids3 = objectMapper.readValue(
-                aidsJson3.aids().toString(),
-                new TypeReference<>() {
-                }
-        );
+        List<Map<String, Object>> aids3 = castObjectToListMap(aidsJson3.aids());
         Assertions.assertEquals(2, aids3.size());
 
         Map<String, Object> aid5 = aids3.getFirst();
         Assertions.assertEquals("aid2", aid5.get("name"));
 
         IdentifierListResponse aidsJson4 = client.getIdentifier().list(2, 2);
-        List<Map<String, Object>> aids4 = objectMapper.readValue(
-                aidsJson4.aids().toString(),
-                new TypeReference<>() {
-                }
-        );
+        List<Map<String, Object>> aids4 = castObjectToListMap(aidsJson4.aids());
         Assertions.assertEquals(1, aids4.size());
 
         Map<String, Object> aid6 = aids4.getFirst();
@@ -211,7 +191,7 @@ class SaltyTests extends TestUtils {
 
         // KeyEvents
         Coring.KeyEvents events = client.getKeyEvents();
-        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get((String) aidLast.get("prefix"));
+        List<Map<String, Object>> log = castObjectToListMap(events.get((String) aidLast.get("prefix")));
         assertEquals(3, log.size());
 
         Serder serder = new Serder((Map<String, Object>) log.getFirst().get("ked"));
@@ -237,11 +217,7 @@ class SaltyTests extends TestUtils {
         assertEquals("aid4", retrievedState.getName());
         try {
             IdentifierListResponse response = client.getIdentifier().list(2, 2);
-            List<Map<String, Object>> identifiers = objectMapper.readValue(
-                    response.aids().toString(),
-                    new TypeReference<>() {
-                    }
-            );
+            List<Map<String, Object>> identifiers = castObjectToListMap(response.aids());
             assertEquals(1, identifiers.size());
 
             Map<String, Object> firstIdentifier = identifiers.getFirst();
