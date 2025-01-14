@@ -19,6 +19,7 @@ import org.junit.jupiter.api.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -149,10 +150,10 @@ public class MultisigJoinTest extends TestUtils {
         Map<String, Object> membersAgent1 = (Map<String, Object>) client1.getIdentifier().members(nameMultisig);
         Map<String, Object> membersAgent2 = (Map<String, Object>) client2.getIdentifier().members(nameMultisig);
 
-        List<Map<String, Object>> signing1 = (List<Map<String, Object>>) Utils.toMap(membersAgent1).get("signing");
+        List<Map<String, Object>> signing1 = castObjectToListMap(Utils.toMap(membersAgent1).get("signing"));
         String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing1.getFirst().get("ends")).get("agent")).keySet()).getFirst();
 
-        List<Map<String, Object>> signing2 = (List<Map<String, Object>>) Utils.toMap(membersAgent2).get("signing");
+        List<Map<String, Object>> signing2 = castObjectToListMap(Utils.toMap(membersAgent2).get("signing"));
         String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing2.getFirst().get("ends")).get("agent")).keySet()).getFirst();
 
         EventResult endRoleOperation1 = client1.getIdentifier().addEndRole(nameMultisig, "agent", eid1, null);
