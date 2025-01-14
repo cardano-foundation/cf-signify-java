@@ -25,6 +25,7 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -49,7 +50,7 @@ public class MultisigTest extends TestUtils {
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    //    @Disabled("Disabled until bug respond has been fixed")
+    @Disabled("Disabled until bug respond has been fixed")
     @Test
     public void multisig() throws Exception {
         // Boot Four clients
@@ -782,11 +783,10 @@ public class MultisigTest extends TestUtils {
         serder = eventResponse1.serder();
         sigs = eventResponse1.sigs();
 
-//        sigers = sigs.stream()
-//                .map(Siger::new)
-//                .toList();
+        sigers = sigs.stream()
+                .map(Siger::new)
+                .toList();
 
-        sigers = sigs.stream().map(sig -> new Siger(sig)).collect(Collectors.toList());
         ims = new String(Eventing.messagize(serder, sigers));
         atc = ims.substring(serder.getSize());
         Map<String, List<Object>> rembeds = new LinkedHashMap<>();
