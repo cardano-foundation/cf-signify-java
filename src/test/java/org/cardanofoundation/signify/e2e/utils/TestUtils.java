@@ -24,6 +24,7 @@ import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
+import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -94,7 +95,8 @@ public class TestUtils {
         for (SignifyClient client : clients) {
             Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
             String notesResponse = res.notes();
-            List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
+            List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {
+            });
             filteredNotes = notes.stream().filter(note -> !note.isR()).collect(Collectors.toList());
             assertEquals(0, filteredNotes.size());
         }
@@ -132,21 +134,24 @@ public class TestUtils {
 
     public static Object getIssuedCredential(
             SignifyClient issuerClient,
-            Aid issuerAid,
-            Aid recipientAid,
-            Map<String, String> issuerRegistry,
-            Object credData,
-            String schema,
-            Object rule,
-            Object source
-    ) {
-        // TO-DO
-        Boolean privacy = false;
-//        String credentialList = issuerClient.getCredentials();
-        return null;
+            States.HabState issuerAid,
+            States.HabState recipientAid,
+            String schemaSAID
+            ) throws SodiumException, IOException, InterruptedException {
+        Map<String, Object> filter = new LinkedHashMap<>() {{
+            put("-i", issuerAid.getPrefix());
+            put("-s", schemaSAID);
+            put("-a-i", recipientAid.getPrefix());
+        }};
+        CredentialFilter credentialFilter = CredentialFilter.builder()
+                .filter(filter)
+                .build();
+        List<Object> credentialList = (List<Object>) issuerClient.getCredentials().list(credentialFilter);
+        assert credentialList.size() <= 1;
+        return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
 
-    public States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws Exception {
+    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, InterruptedException, IOException, DigestException {
         try {
             return client.getIdentifier().get(name);
         } catch (Exception e) {
@@ -290,19 +295,18 @@ public class TestUtils {
                 ex.printStackTrace();
             }
         }
-        assertNotNull(getResponseI);
-        return getResponseI.toString();
+        return getResponseI == null ? null : getResponseI.toString();
     }
 
     public static Object getOrIssueCredential(
-        SignifyClient issuerClient,
-        Aid issuerAid,
-        Aid recipientAid,
-        IssuerRegistry regk,
-        Map<String, Object> credData,
-        String schema,
-        Map<String, Object> rules,
-        Map<String, Object> source
+            SignifyClient issuerClient,
+            Aid issuerAid,
+            Aid recipientAid,
+            IssuerRegistry regk,
+            Map<String, Object> credData,
+            String schema,
+            Map<String, Object> rules,
+            Map<String, Object> source
     ) throws Exception {
         return getOrIssueCredential(issuerClient, issuerAid, recipientAid, regk, credData, schema, rules, source, false);
     }
@@ -323,16 +327,16 @@ public class TestUtils {
         Object credentialList = issuerClient.getCredentials().list(credentialFilter);
         if (credentialList instanceof List && !((List<?>) credentialList).isEmpty()) {
             Optional<?> credential = ((List<?>) credentialList).stream()
-                .filter(cred -> {
-                    Map<String, Object> credMap = Utils.toMap(cred);
-                    Map<String, Object> sad = Utils.toMap(credMap.get("sad"));
-                    Map<String, Object> a = Utils.toMap(sad.get("a"));
+                    .filter(cred -> {
+                        Map<String, Object> credMap = Utils.toMap(cred);
+                        Map<String, Object> sad = Utils.toMap(credMap.get("sad"));
+                        Map<String, Object> a = Utils.toMap(sad.get("a"));
 
-                    return schema.equals(sad.get("s")) &&
-                        issuerAid.prefix.equals(sad.get("i")) &&
-                        recipientAid.prefix.equals(a.get("i"));
-                })
-                .findFirst();
+                        return schema.equals(sad.get("s")) &&
+                                issuerAid.prefix.equals(sad.get("i")) &&
+                                recipientAid.prefix.equals(a.get("i"));
+                    })
+                    .findFirst();
             if (credential.isPresent()) {
                 return credential.get();
             }
@@ -368,7 +372,7 @@ public class TestUtils {
         }).toList();
         return participantStates.stream().map(s -> {
             if (s instanceof List<?>) {
-                return ((List<?>) s).getFirst();
+                return ((List<?>) s).get(0);
             } else if (s instanceof Object) {
                 return ((Object[]) s)[0];
             } else {
@@ -396,7 +400,8 @@ public class TestUtils {
         for (SignifyClient client : clients) {
             Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
             String notesResponse = res.notes();
-            List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
+            List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {
+            });
             filteredNotes = notes.stream().filter(note -> !note.isR()).collect(Collectors.toList());
             if (!notes.isEmpty()) {
                 count += notes.size();
@@ -434,8 +439,7 @@ public class TestUtils {
     public static void markAndRemoveNotification(SignifyClient client, Notification note) {
         try {
             client.getNotifications().mark(note.i);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error marking notification: " + note.i, e);
         } finally {
             try {
@@ -455,10 +459,25 @@ public class TestUtils {
         waitOperation(client, op);
     }
 
-    public static void waitForCredential(SignifyClient client, String credSAID) {
-        int MAX_RETRIES = 10;
+    public static Object waitForCredential(SignifyClient client, String credSAID) throws Exception {
+        return waitForCredential(client, credSAID, null);
+    }
+
+    public static Object waitForCredential(SignifyClient client, String credSAID, Integer MAX_RETRIES) throws Exception {
+        if(MAX_RETRIES == null) {
+            MAX_RETRIES = 10;
+        }
         int retryCount = 0;
-        // TO-DO
+        while (retryCount < MAX_RETRIES) {
+            Object cred = getReceivedCredential(client, credSAID);
+            if (cred != null) {
+                return cred;
+            }
+            Thread.sleep(1000);
+            System.out.println("retry-" + retryCount + ": No credentials yet...");
+            retryCount++;
+        }
+        throw new RuntimeException("Credential SAID: " + credSAID + " has not been received");
     }
 
     public static String waitAndMarkNotification(SignifyClient client, String route) throws Exception {
@@ -474,7 +493,7 @@ public class TestUtils {
                 }
             }));
         }
-       CompletableFuture.allOf(markOperationFutures.toArray(new CompletableFuture[0]));
+        CompletableFuture.allOf(markOperationFutures.toArray(new CompletableFuture[0]));
 
         return notes.isEmpty() ? "" :
                 Optional.ofNullable(notes.getLast())
@@ -484,7 +503,7 @@ public class TestUtils {
     }
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route) throws Exception {
-       return waitForNotifications(client, route, Retry.RetryOptions.builder().build());
+        return waitForNotifications(client, route, Retry.RetryOptions.builder().build());
     }
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route, Retry.RetryOptions retryOptions) throws Exception {
@@ -492,7 +511,8 @@ public class TestUtils {
             try {
                 Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
                 String notesResponse = response.notes();
-                List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<List<Notification>>() {});
+                List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<List<Notification>>() {
+                });
 
                 filteredNotes = notes.stream()
                         .filter(note -> Objects.equals(route, note.a.r) && !Boolean.TRUE.equals(note.r))
@@ -524,15 +544,8 @@ public class TestUtils {
 
     public static <T> Operation<T> waitOperation(
             SignifyClient client,
-            Object op
-    ) throws SodiumException, IOException, InterruptedException {
-        Operation<T> operation;
-        if (op instanceof String) {
-            String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
-            operation = client.getOperations().get(name);
-        } else {
-            operation = Operation.fromObject(op);
-        }
+            Object op) throws SodiumException, IOException, InterruptedException {
+        Operation operation = Operation.fromObject(op);
         operation = client.getOperations().wait(operation);
         deleteOperations(client, operation);
         return operation;
@@ -549,7 +562,7 @@ public class TestUtils {
         return objectMapper.writeValueAsString(opMap);
     }
 
-    public Integer parseInteger(String s) {
+    public static Integer parseInteger(String s) {
         try {
             return Integer.parseInt(s);
         } catch (NumberFormatException e) {

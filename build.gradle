@@ -72,7 +72,7 @@ tasks.test {
 // Separate task for TestNG tests (E2E tests)
 tasks.register('testE2E', Test) {
     maxParallelForks = 1
-    useJUnitPlatform()  // Use TestNG for E2E tests
+    useJUnitPlatform()
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
