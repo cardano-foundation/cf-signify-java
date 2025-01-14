@@ -13,7 +13,6 @@ import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
-import org.mockito.plugins.MemberAccessor;
 
 import java.util.*;
 
