@@ -156,6 +156,11 @@ public class States {
                         flatStates.add((States.State) innerItem);
                     }
                 }
+            } else if (outerItem instanceof Map) {
+                States.State state = objectMapper.convertValue(outerItem, States.State.class);
+                flatStates.add(state);
+            } else if (outerItem instanceof States.State) {
+                flatStates.add((States.State) outerItem);
             }
         }
 
