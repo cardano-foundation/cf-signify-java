@@ -84,6 +84,7 @@ tasks.register('testE2E', Test) {
         println "Finished test: ${descriptor.className}. Waiting for 2 seconds..."
         Thread.sleep(2000)
     }
+    finalizedBy 'allureReport'
 }
 
 
