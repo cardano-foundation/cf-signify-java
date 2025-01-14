@@ -134,22 +134,24 @@ public class TestUtils {
 
     public static Object getIssuedCredential(
             SignifyClient issuerClient,
-            Aid issuerAid,
-            Aid recipientAid,
-            Map<String, String> issuerRegistry,
-            Object credData,
-            String schema,
-            Object rule,
-            Object source
-    ) {
-        // TO-DO
-        Boolean privacy = false;
-//        String credentialList = issuerClient.getCredentials();
-        return null;
+            States.HabState issuerAid,
+            States.HabState recipientAid,
+            String schemaSAID
+            ) throws SodiumException, IOException, InterruptedException {
+        Map<String, Object> filter = new LinkedHashMap<>() {{
+            put("-i", issuerAid.getPrefix());
+            put("-s", schemaSAID);
+            put("-a-i", recipientAid.getPrefix());
+        }};
+        CredentialFilter credentialFilter = CredentialFilter.builder()
+                .filter(filter)
+                .build();
+        List<Object> credentialList = (List<Object>) issuerClient.getCredentials().list(credentialFilter);
+        assert credentialList.size() <= 1;
+        return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
 
     public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
-        // TO-DO
         try {
             return client.getIdentifier().get(name);
         } catch (Exception e) {
@@ -457,10 +459,25 @@ public class TestUtils {
         waitOperation(client, op);
     }
 
-    public static void waitForCredential(SignifyClient client, String credSAID) {
-        int MAX_RETRIES = 10;
+    public static Object waitForCredential(SignifyClient client, String credSAID) throws Exception {
+        return waitForCredential(client, credSAID, null);
+    }
+
+    public static Object waitForCredential(SignifyClient client, String credSAID, Integer MAX_RETRIES) throws Exception {
+        if(MAX_RETRIES == null) {
+            MAX_RETRIES = 10;
+        }
         int retryCount = 0;
-        // TO-DO
+        while (retryCount < MAX_RETRIES) {
+            Object cred = getReceivedCredential(client, credSAID);
+            if (cred != null) {
+                return cred;
+            }
+            Thread.sleep(1000);
+            System.out.println("retry-" + retryCount + ": No credentials yet...");
+            retryCount++;
+        }
+        throw new RuntimeException("Credential SAID: " + credSAID + " has not been received");
     }
 
     public static String waitAndMarkNotification(SignifyClient client, String route) throws Exception {
@@ -528,13 +545,7 @@ public class TestUtils {
     public static <T> Operation<T> waitOperation(
             SignifyClient client,
             Object op) throws SodiumException, IOException, InterruptedException {
-        Operation<T> operation;
-        if (op instanceof String) {
-            String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
-            operation = client.getOperations().get(name);
-        } else {
-            operation = Operation.fromObject(op);
-        }
+        Operation operation = Operation.fromObject(op);
         operation = client.getOperations().wait(operation);
         deleteOperations(client, operation);
         return operation;

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 
@@ -70,6 +71,14 @@ public class BaseIntegrationTest {
             createAidFutures.add(createAidFuture(createAidArg.signifyClient, createAidArg.name));
         }
         return createAidFutures.stream().map(CompletableFuture::join).toList();
+    }
+
+    public List<States.HabState> getOrCreateAIDAsync(CreateAidArgs... createAidArgs) {
+        List<CompletableFuture<States.HabState>> getOrCreateAIDFutures = new ArrayList<>();
+        for (CreateAidArgs getOrCreateAIDArg : createAidArgs) {
+            getOrCreateAIDFutures.add(getOrCreateAIDFuture(getOrCreateAIDArg.signifyClient, getOrCreateAIDArg.name, getOrCreateAIDArg.args));
+        }
+        return getOrCreateAIDFutures.stream().map(CompletableFuture::join).toList();
     }
 
     CompletableFuture<String> getOrCreateContactFuture(SignifyClient client, String name, String oobi) {
@@ -143,6 +152,16 @@ public class BaseIntegrationTest {
         });
     }
 
+    CompletableFuture<States.HabState> getOrCreateAIDFuture(SignifyClient client, String name, CreateIdentifierArgs args) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return TestUtils.getOrCreateAID(client, name, args);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     @Getter
     @Setter
     @Builder
@@ -160,6 +179,12 @@ public class BaseIntegrationTest {
     public static class CreateAidArgs {
         private SignifyClient signifyClient;
         private String name;
+        private CreateIdentifierArgs args;
+
+        public CreateAidArgs(SignifyClient signifyClient, String name) {
+            this.signifyClient = signifyClient;
+            this.name = name;
+        }
     }
 
     @Getter
