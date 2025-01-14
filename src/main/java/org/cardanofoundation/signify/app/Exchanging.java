@@ -68,7 +68,7 @@ public class Exchanging {
             Serder exn = result.serder();
             String end = new String(result.end());
 
-            Keeping.SignResult sigs = keeper.sign(exn.getRaw().getBytes(), null, null ,null);
+            Keeping.SignResult sigs = keeper.sign(exn.getRaw().getBytes());
             return new ExchangeMessageResult(exn, sigs.signatures(), end);
         }
 
@@ -188,7 +188,10 @@ public class Exchanging {
             String key = entry.getKey();
             List<Object> value = entry.getValue();
             Serder serder = (Serder) value.get(0);
-            String atc = (String) value.get(1);
+            String atc = null;
+            if (value.size() > 1 && value.get(1) != null) {
+                atc = value.get(1).toString();
+            }
             e.put(key, serder.getKed());
 
             if (atc == null) {

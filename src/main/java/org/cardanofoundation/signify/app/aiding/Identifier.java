@@ -1,7 +1,6 @@
-package org.cardanofoundation.signify.app.clienting.aiding;
+package org.cardanofoundation.signify.app.aiding;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;

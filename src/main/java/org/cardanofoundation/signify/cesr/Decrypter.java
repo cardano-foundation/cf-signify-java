@@ -18,6 +18,11 @@ public class Decrypter extends Matter {
         setDecrypter();
     }
 
+    public Decrypter(String qb64) {
+        super(qb64);
+        setDecrypter();
+    }
+
     public Decrypter(RawArgs args) throws SodiumException {
         this(args, null);
     }

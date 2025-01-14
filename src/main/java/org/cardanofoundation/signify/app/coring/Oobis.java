@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.clienting;
+package org.cardanofoundation.signify.app.coring;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
+import org.cardanofoundation.signify.app.clienting.SignifyClient;
 
 public class Oobis {
     private final SignifyClient client;

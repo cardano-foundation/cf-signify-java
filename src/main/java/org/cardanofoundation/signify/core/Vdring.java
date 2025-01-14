@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.core;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.app.Coring;
+import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.habery.TraitCodex;
 import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.Prefixer;

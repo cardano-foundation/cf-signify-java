@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.clienting.aiding;
+package org.cardanofoundation.signify.app.aiding;
 
 import java.net.http.HttpResponse;
 import java.util.List;

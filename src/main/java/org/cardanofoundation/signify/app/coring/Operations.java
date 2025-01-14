@@ -1,9 +1,9 @@
-package org.cardanofoundation.signify.app.clienting;
+package org.cardanofoundation.signify.app.coring;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.*;
-import org.cardanofoundation.signify.app.clienting.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;

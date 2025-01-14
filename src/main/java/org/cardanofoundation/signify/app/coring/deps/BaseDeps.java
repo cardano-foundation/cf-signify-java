@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.clienting.deps;
+package org.cardanofoundation.signify.app.coring.deps;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 

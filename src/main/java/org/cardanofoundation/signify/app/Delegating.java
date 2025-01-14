@@ -2,8 +2,8 @@ package org.cardanofoundation.signify.app;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
-import org.cardanofoundation.signify.app.clienting.aiding.InteractionResponse;
+import org.cardanofoundation.signify.app.aiding.EventResult;
+import org.cardanofoundation.signify.app.aiding.InteractionResponse;
 
 import java.net.http.HttpResponse;
 

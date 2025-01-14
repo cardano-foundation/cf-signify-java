@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app;
+package org.cardanofoundation.signify.app.controlller;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
@@ -35,6 +35,10 @@ public class Controller {
     public Serder serder;
     private List<String> keys;
     public List<String> ndigs;
+
+    public Controller(String bran, Tier tier) throws SodiumException, DigestException {
+        this(bran, tier, 0, null);
+    }
 
     public Controller(String bran, Tier tier, Integer ridx, Object state) throws SodiumException, DigestException {
         ridx = ridx == null ? 0 : ridx;

@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app;
+package org.cardanofoundation.signify.app.controlller;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Tholder;
