@@ -13,11 +13,9 @@ import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.plugins.MemberAccessor;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -70,19 +68,10 @@ public class RandyTest extends TestUtils {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aids = client1.getIdentifier().list(0, 24);
-        try {
-            List<Map<String, Object>> aidsList = objectMapper.readValue(aids.aids().toString(), new TypeReference<>() {
-            });
-            for (Map<String, Object> aid1 : aidsList) {
-                opResponseName = aid1.get("name").toString();
-                opResponsePrefix = aid1.get("prefix").toString();
-            }
-            assertEquals(1, aidsList.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        assertEquals("aid1", opResponseName);
-        assertEquals(icp.getPre(), opResponsePrefix);
+        List<Map<String, Object>> aidsList = castObjectToListMap(aids.aids());
+
+        assertEquals("aid1", aidsList.getFirst().get("name"));
+        assertEquals(icp.getPre(), aidsList.getFirst().get("prefix"));
 
         icpResult = client1.getIdentifier().interact("aid1", icp.getPre());
         op = operationToObject(waitOperation(client1, icpResult.op()));
@@ -101,26 +90,12 @@ public class RandyTest extends TestUtils {
         assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         aids = client1.getIdentifier().list(0, 24);
-        try {
-            List<Map<String, Object>> aidsList = objectMapper.readValue(aids.aids().toString(), new TypeReference<>() {
-            });
-            for (Map<String, Object> aid1 : aidsList) {
-                opResponsePrefix = aid1.get("prefix").toString();
-            }
-            assertEquals(1, aidsList.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        aidsList = castObjectToListMap(aids.aids());
         Coring.KeyEvents events = client1.getKeyEvents();
 
-        Object log = events.get(opResponsePrefix);
-        try {
-            List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
-            });
-            assertEquals(2, logList.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        Object log = events.get(aidsList.getFirst().get("prefix").toString());
+        List<Map<String, Object>> logList = castObjectToListMap(log);
+        assertEquals(2, logList.size());
 
         icpResult = client1.getIdentifier().rotate("aid1");
         op = operationToObject(waitOperation(client1, icpResult.op()));
@@ -147,14 +122,9 @@ public class RandyTest extends TestUtils {
                 rot.getVerfers().getFirst().getQb64b());
         assertEquals(dig.getQb64(), icp.getDigers().getFirst().getQb64());
 
-        log = events.get(opResponsePrefix);
-        try {
-            List<Map<String, Object>> logList = objectMapper.readValue(log.toString(), new TypeReference<>() {
-            });
-            assertEquals(3, logList.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        log = events.get(aidsList.getFirst().get("prefix").toString());
+        logList = castObjectToListMap(log);
+        assertEquals(3, logList.size());
 
         assertOperations(Collections.singletonList(client1));
     }
