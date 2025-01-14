@@ -151,7 +151,7 @@ public class TestUtils {
         return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
 
-    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, InterruptedException, IOException, DigestException {
+    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
         try {
             return client.getIdentifier().get(name);
         } catch (Exception e) {

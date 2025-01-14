@@ -198,7 +198,7 @@ class SaltyTests {
         States.HabState retrievedState = client.getIdentifier().get("aid4");
         assertEquals("aid4", retrievedState.getName());
         IdentifierListResponse response = client.getIdentifier().list(2, 2);
-        List<Map<String, Object>> identifiers = Utils.fromJson(response.aids().toString(), new TypeReference<>() {});
+        List<Map<String, Object>> identifiers = castObjectToListMap(response.aids());
         assertEquals(1, identifiers.size());
 
         Map<String, Object> firstIdentifier = identifiers.getFirst();
