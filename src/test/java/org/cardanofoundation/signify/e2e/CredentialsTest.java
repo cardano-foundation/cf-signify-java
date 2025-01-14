@@ -24,10 +24,9 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CredentialsTest extends BaseIntegrationTest {
+public class CredentialsTest extends TestUtils {
     private ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     private String QVI_SCHEMA_SAID = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
     private String LE_SCHEMA_SAID = "ENPXp1vQzRF6JwIuS-mp2U8Uf1MoADoP_GqQ62VsDZWY";
@@ -37,12 +36,12 @@ public class CredentialsTest extends BaseIntegrationTest {
     TestSteps testSteps = new TestSteps();
 
     private static SignifyClient issuerClient, holderClient, verifierClient, legalEntityClient;
-    private TestUtils.Aid issuerAid, holderAid, verifierAid, legalEntityAid;
+    private Aid issuerAid, holderAid, verifierAid, legalEntityAid;
     private String applySaid, offerSaid, agreeSaid;
 
     @BeforeAll
     public static void getClients() throws Exception {
-        List<SignifyClient> clients = getOrCreateClientsAsync(4);
+        List<SignifyClient> clients = getOrCreateClients(4, null);
         issuerClient = clients.get(0);
         holderClient = clients.get(1);
         verifierClient = clients.get(2);
@@ -51,30 +50,22 @@ public class CredentialsTest extends BaseIntegrationTest {
 
     @BeforeEach
     public void getAid() throws Exception {
-        List<TestUtils.Aid> aids = createAidAsync(
-                new CreateAidArgs(issuerClient, "issuer"),
-                new CreateAidArgs(holderClient, "holder"),
-                new CreateAidArgs(verifierClient, "verifier"),
-                new CreateAidArgs(legalEntityClient, "legal-entity")
-        );
-        issuerAid = aids.get(0);
-        holderAid = aids.get(1);
-        verifierAid = aids.get(2);
-        legalEntityAid = aids.get(3);
+        issuerAid = createAid(issuerClient, "issuer");
+        holderAid = createAid(holderClient, "holder");
+        verifierAid = createAid(verifierClient, "verifier");
+        legalEntityAid = createAid(legalEntityClient, "legal-entity");
     }
 
     @BeforeEach
-    public void getContact() {
-        getOrCreateContactAsync(
-                new GetOrCreateContactArgs(issuerClient, "holder", holderAid.oobi),
-                new GetOrCreateContactArgs(issuerClient, "verifier", verifierAid.oobi),
-                new GetOrCreateContactArgs(holderClient, "issuer", issuerAid.oobi),
-                new GetOrCreateContactArgs(holderClient, "verifier", verifierAid.oobi),
-                new GetOrCreateContactArgs(holderClient, "legal-entity", legalEntityAid.oobi),
-                new GetOrCreateContactArgs(verifierClient, "issuer", issuerAid.oobi),
-                new GetOrCreateContactArgs(verifierClient, "holder", holderAid.oobi),
-                new GetOrCreateContactArgs(legalEntityClient, "holder", holderAid.oobi)
-        );
+    public void getContact() throws SodiumException, IOException, InterruptedException {
+        getOrCreateContact(issuerClient, "holder", holderAid.oobi);
+        getOrCreateContact(issuerClient, "verifier", verifierAid.oobi);
+        getOrCreateContact(holderClient, "issuer", issuerAid.oobi);
+        getOrCreateContact(holderClient, "verifier", verifierAid.oobi);
+        getOrCreateContact(holderClient, "legal-entity", legalEntityAid.oobi);
+        getOrCreateContact(verifierClient, "issuer", issuerAid.oobi);
+        getOrCreateContact(verifierClient, "holder", holderAid.oobi);
+        getOrCreateContact(legalEntityClient, "holder", holderAid.oobi);
         System.out.println("Created contact successfully");
     }
 
@@ -93,16 +84,18 @@ public class CredentialsTest extends BaseIntegrationTest {
     @Test
     public void single_signature_credentials() throws Exception {
         testSteps.step("Resolve schema oobis", () -> {
-            resolveOobisAsync(
-                    new ResolveOobisArgs(issuerClient, QVI_SCHEMA_URL, null),
-                    new ResolveOobisArgs(issuerClient, LE_SCHEMA_URL, null),
-                    new ResolveOobisArgs(holderClient, QVI_SCHEMA_URL, null),
-                    new ResolveOobisArgs(holderClient, LE_SCHEMA_URL, null),
-                    new ResolveOobisArgs(verifierClient, QVI_SCHEMA_URL, null),
-                    new ResolveOobisArgs(verifierClient, LE_SCHEMA_URL, null),
-                    new ResolveOobisArgs(legalEntityClient, QVI_SCHEMA_URL, null),
-                    new ResolveOobisArgs(legalEntityClient, LE_SCHEMA_URL, null)
-            );
+            try {
+                resolveOobi(issuerClient, QVI_SCHEMA_URL, null);
+                resolveOobi(issuerClient, LE_SCHEMA_URL, null);
+                resolveOobi(holderClient, QVI_SCHEMA_URL, null);
+                resolveOobi(holderClient, LE_SCHEMA_URL, null);
+                resolveOobi(verifierClient, QVI_SCHEMA_URL, null);
+                resolveOobi(verifierClient, LE_SCHEMA_URL, null);
+                resolveOobi(legalEntityClient, QVI_SCHEMA_URL, null);
+                resolveOobi(legalEntityClient, LE_SCHEMA_URL, null);
+            } catch (SodiumException | IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         HashMap<String, Object> registrys = testSteps.step("Create registry", () -> {
@@ -291,17 +284,32 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Holder can get the credential status before or without holding", () -> {
-            Map<String, Object> state = (Map<String, Object>) Retry.retry(() -> {
-                try {
-                    return holderClient.getCredentials().state(registrys.get("regk").toString(), qviCredentialId);
-                } catch (SodiumException | IOException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            CredentialState state = CredentialState.builder().build();
+            try {
+                Thread.sleep(2000);
+                Object result = holderClient.getCredentials().state(registrys.get("regk").toString(), qviCredentialId);
+                LinkedHashMap<String, Object> stateMap = castObjectToLinkedHashMap(result);
 
-            assertEquals(qviCredentialId, state.get("i"));
-            assertEquals(registrys.get("regk").toString(), state.get("ri"));
-            assertEquals(CoreUtil.Ilks.ISS.getValue(), state.get("et"));
+                ArrayList<Integer> list = (ArrayList<Integer>) stateMap.get("vn");
+                int[] vn = list.stream().mapToInt(i -> i).toArray();
+
+                LinkedHashMap<String, Object> aValue = castObjectToLinkedHashMap(stateMap.get("a"));
+                CredentialState.A a = new CredentialState.A(parseInteger(aValue.get("s").toString()), aValue.get("d").toString());
+
+                state.setVn(vn);
+                state.setI(stateMap.get("i").toString());
+                state.setS(stateMap.get("s").toString());
+                state.setD(stateMap.get("d").toString());
+                state.setRi(stateMap.get("ri").toString());
+                state.setA(a);
+                state.setDt(stateMap.get("dt").toString());
+                state.setEt(stateMap.get("et").toString());
+            } catch (SodiumException | IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            assertEquals(qviCredentialId, state.getI());
+            assertEquals(registrys.get("regk").toString(), state.getRi());
+            assertEquals(CoreUtil.Ilks.ISS.toString(), state.getEt().toUpperCase(Locale.ROOT));
         });
 
         testSteps.step("holder IPEX admit", () -> {
@@ -437,6 +445,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Verifier receive offer and agree", () -> {
             List<Notification> verifierNotifications;
             try {
+                Thread.sleep(2000);
                 verifierNotifications = waitForNotifications(verifierClient, "/exn/ipex/offer");
                 Notification verifierOfferNote = verifierNotifications.getFirst();
                 assertNotNull(verifierOfferNote.a.d);
@@ -477,6 +486,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Holder IPEX receive agree and grant/present", () -> {
             List<Notification> holderNotifications;
             try {
+                Thread.sleep(2000);
                 holderNotifications = waitForNotifications(holderClient, "/exn/ipex/agree");
                 Notification holderAgreeNote = holderNotifications.getFirst();
                 assertNotNull(holderAgreeNote.a.d);
@@ -527,6 +537,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Verifier receives IPEX grant", () -> {
             List<Notification> verifierNotifications;
             try {
+                Thread.sleep(2000);
                 verifierNotifications = waitForNotifications(verifierClient, "/exn/ipex/grant");
                 Notification verifierGrantNote = verifierNotifications.getFirst();
                 assertNotNull(verifierGrantNote.a.d);
@@ -677,6 +688,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Legal Entity IPEX admit", () -> {
             try {
+                Thread.sleep(2000);
                 List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn/ipex/grant");
                 Notification grantNotification = notifications.getFirst();
 
@@ -715,6 +727,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+
             });
             LinkedHashMap<String, Object> legalEntityCredentialBody = castObjectToLinkedHashMap(legalEntityCredential);
             LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(legalEntityCredentialBody.get("sad"));
@@ -731,6 +744,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertEquals("0", status.get("s").toString());
             assertEquals(qviCredentialId, sadInChains.get("d").toString());
             assertNotNull(atc);
+
         });
 
         testSteps.step("Issuer revoke QVI credential", () -> {

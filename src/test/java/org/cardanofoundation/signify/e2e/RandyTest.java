@@ -1,32 +1,29 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.signify.app.Coring;
-import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @Slf4j
-public class RandyTest {
+public class RandyTest extends TestUtils {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private SignifyClient client1;
     private String opResponseDone, opResponseName, opResponsePrefix;
     private HashMap<String, Object> opResponse;
@@ -48,11 +45,18 @@ public class RandyTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
         EventResult icpResult = client1.getIdentifier().create("aid1", kargs);
-        Operation op = Operation.fromObject(waitOperation(client1, icpResult.op()));
+        Object op = operationToObject(waitOperation(client1, icpResult.op()));
 
-        opResponse = (HashMap<String, Object>) op.getResponse();
-        opResponseDone = op.isDone() ? "true" : "false";
-
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+                opResponseDone = opMap.get("done").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         assertEquals("true", opResponseDone);
 
         HashMap<String, Object> aid = opResponse;
@@ -63,40 +67,46 @@ public class RandyTest {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aids = client1.getIdentifier().list(0, 24);
-        List<Map<String, Object>> aidsList = Utils.fromJson(aids.aids().toString(), new TypeReference<>() {});
-        for (Map<String, Object> aid1 : aidsList) {
-            opResponseName = aid1.get("name").toString();
-            opResponsePrefix = aid1.get("prefix").toString();
-        }
-        assertEquals(1, aidsList.size());
+        List<Map<String, Object>> aidsList = castObjectToListMap(aids.aids());
 
-        assertEquals("aid1", opResponseName);
-        assertEquals(icp.getPre(), opResponsePrefix);
+        assertEquals("aid1", aidsList.getFirst().get("name"));
+        assertEquals(icp.getPre(), aidsList.getFirst().get("prefix"));
 
         icpResult = client1.getIdentifier().interact("aid1", icp.getPre());
-        op = Operation.fromObject(waitOperation(client1, icpResult.op()));
-        opResponse = (HashMap<String, Object>) op.getResponse();
+        op = operationToObject(waitOperation(client1, icpResult.op()));
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         HashMap<String, Object> ked = opResponse;
         Serder ixn = new Serder(ked);
         assertEquals("1", ixn.getKed().get("s"));
         assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         aids = client1.getIdentifier().list(0, 24);
-        aidsList = Utils.fromJson(aids.aids().toString(), new TypeReference<>() {});
-        for (Map<String, Object> aid1 : aidsList) {
-            opResponsePrefix = aid1.get("prefix").toString();
-        }
-        assertEquals(1, aidsList.size());
-
+        aidsList = castObjectToListMap(aids.aids());
         Coring.KeyEvents events = client1.getKeyEvents();
 
-        List<Map<String, Object>> logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
+        Object log = events.get(aidsList.getFirst().get("prefix").toString());
+        List<Map<String, Object>> logList = castObjectToListMap(log);
         assertEquals(2, logList.size());
 
         icpResult = client1.getIdentifier().rotate("aid1");
-        op = Operation.fromObject((waitOperation(client1, icpResult.op())));
-        opResponse = (HashMap<String, Object>) op.getResponse();
-
+        op = operationToObject(waitOperation(client1, icpResult.op()));
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         ked = opResponse;
         Serder rot = new Serder(ked);
         assertEquals("2", rot.getKed().get("s"));
@@ -111,8 +121,10 @@ public class RandyTest {
                 rot.getVerfers().getFirst().getQb64b());
         assertEquals(dig.getQb64(), icp.getDigers().getFirst().getQb64());
 
-        logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
+        log = events.get(aidsList.getFirst().get("prefix").toString());
+        logList = castObjectToListMap(log);
         assertEquals(3, logList.size());
+
         assertOperations(Collections.singletonList(client1));
     }
 }

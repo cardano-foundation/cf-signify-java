@@ -2,16 +2,14 @@ package org.cardanofoundation.signify.app.clienting.aiding;
 
 import java.util.List;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.core.Manager.Algos;
 import org.cardanofoundation.signify.core.States.HabState;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class CreateIdentifierArgs {
     private Boolean transferable;
     private Object isith;

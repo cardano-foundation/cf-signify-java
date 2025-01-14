@@ -305,6 +305,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         States.HabState agtee = delegatee1Client.getIdentifier().get(delegateeGroupName);
         assertEquals(agtee.getPrefix(), teepre);
 
+        // TODO check operations and notifications failures
         List<SignifyClient> clients = Arrays.asList(
                 delegator1Client,
                 delegator2Client,

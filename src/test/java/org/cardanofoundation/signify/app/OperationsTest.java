@@ -58,7 +58,7 @@ public class OperationsTest {
     @DisplayName("Can list operations")
     void canListOperations() throws SodiumException, IOException, InterruptedException {
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(mockResponse.body()).thenReturn("[{}]");
+        Mockito.when(mockResponse.body()).thenReturn("[]");
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull(), isNull()))
             .thenReturn(mockResponse);

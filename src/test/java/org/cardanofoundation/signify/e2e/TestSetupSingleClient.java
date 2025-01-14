@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
+import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,11 +12,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.*;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateClients;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestSetupSingleClient {
+public class TestSetupSingleClient extends TestUtils {
     private static SignifyClient client;
     private static String name1_id;
     private static String name1_oobi;
@@ -63,4 +62,11 @@ public class TestSetupSingleClient {
         }
         System.out.println("Test Setup Single Client: Step 2 is Passed");
     }
+
+
+    public void validate_config() {
+        ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
+        // TO-DO
+    }
+
 }

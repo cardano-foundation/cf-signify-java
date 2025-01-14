@@ -64,17 +64,26 @@ tasks.test {
         includeTestsMatching "org.cardanofoundation.signify.cesr.*"
         includeTestsMatching "org.cardanofoundation.signify.core.*"
         includeTestsMatching "org.cardanofoundation.signify.end.*"
+        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
     finalizedBy 'allureReport'
 }
 
 // Separate task for TestNG tests (E2E tests)
 tasks.register('testE2E', Test) {
+    maxParallelForks = 1
     useJUnitPlatform()  // Use TestNG for E2E tests
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
-    finalizedBy 'allureReport'
+
+    beforeTest { descriptor ->
+        println "Starting test: ${descriptor.className}"
+    }
+    afterTest { descriptor, result ->
+        println "Finished test: ${descriptor.className}. Waiting for 2 seconds..."
+        Thread.sleep(2000)
+    }
 }
 
 

@@ -1,7 +1,8 @@
 package org.cardanofoundation.signify.e2e;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -17,16 +18,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
-
-class SinglesigDIPTest extends BaseIntegrationTest {
+class SinglesigDIPTest extends TestUtils {
     private static SignifyClient client1, client2;
     private static String contact1_id;
     private static String name1_id, name1_oobi;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     public static void getClients() throws Exception {
-        List<SignifyClient> clients = getOrCreateClientsAsync(2);
+        List<SignifyClient> clients = getOrCreateClients(2, null);
         client1 = clients.get(0);
         client2 = clients.get(1);
     }
@@ -40,7 +40,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
 
     @BeforeEach
     public void getContact() throws SodiumException, IOException, InterruptedException {
-        contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
+        contact1_id = getOrCreateContact(client2, "contact1", name1_oobi);
     }
 
     @Test
@@ -50,9 +50,17 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
         EventResult result = client2.getIdentifier().create("delegate1", kargs);
-        Operation op = Operation.fromObject(result.op());
+        Object op = result.op();
         States.HabState delegate1 = client2.getIdentifier().get("delegate1");
-        opResponseName = op.getName();
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                opResponseName = opMap.get("name").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
         delegate1 = client2.getIdentifier().get("delegate1");
@@ -67,15 +75,20 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         // Refresh keystate to sn=1
         Object op2 = client2.getKeyStates().query(name1_id, "1", null);
 
-        List<Operation> opList = waitOperationAsync(
-                new WaitOperationArgs(client2, op),
-                new WaitOperationArgs(client1, op1),
-                new WaitOperationArgs(client2, op2)
-        );
-        op = opList.get(0);
+        op = operationToObject(waitOperation(client2, op));
+        op1 = operationToObject(waitOperation(client1, op1));
+        op2 = operationToObject(waitOperation(client2, op2));
 
-        HashMap<String, Object> responseMap = (HashMap<String, Object>) op.getResponse();
-        opResponseI = responseMap.get("i").toString();
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                HashMap<String, Object> responseMap = (HashMap<String, Object>) opMap.get("response");
+                opResponseI = responseMap.get("i").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         delegate1 = client2.getIdentifier().get("delegate1");
         Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
@@ -86,9 +99,15 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         kargs.setToad(env.witnessIds().size());
         kargs.setWits(env.witnessIds());
         result = client2.getIdentifier().create("delegate2", kargs);
-        op = Operation.fromObject(result.op());
-        opResponseName = op.getName();
-
+        op = result.op();
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, HashMap.class);
+                opResponseName = opMap.get("name").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         States.HabState delegate2 = client2.getIdentifier().get("delegate2");
         Assertions.assertEquals(opResponseName, "delegation." + delegate2.getPrefix());
 
@@ -104,22 +123,26 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         // refresh keystate to seal event
         op2 = client2.getKeyStates().query(name1_id, null, seal);
 
-        opList = waitOperationAsync(
-                new WaitOperationArgs(client2, op),
-                new WaitOperationArgs(client1, op1),
-                new WaitOperationArgs(client2, op2)
-        );
-        op = opList.get(0);
+        op = operationToObject(waitOperation(client2, op));
+        op1 = operationToObject(waitOperation(client1, op1));
+        op2 = operationToObject(waitOperation(client2, op2));
 
-        responseMap = (HashMap<String, Object>) op.getResponse();
-        opResponseI = responseMap.get("i").toString();
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, HashMap.class);
+                HashMap<String, Object> responseMap = (HashMap<String, Object>) opMap.get("response");
+                opResponseI = responseMap.get("i").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         // Delegate waits for completion
         delegate2 = client2.getIdentifier().get("delegate2");
         Assertions.assertEquals(delegate2.getPrefix(), opResponseI);
 
         // Make sure query with seal is idempotent
-        op = Operation.fromObject(client2.getKeyStates().query(name1_id, null, seal));
-        waitOperation(client2, op);
+        op = client2.getKeyStates().query(name1_id, null, seal);
+        operationToObject(waitOperation(client2, op));
     }
 }

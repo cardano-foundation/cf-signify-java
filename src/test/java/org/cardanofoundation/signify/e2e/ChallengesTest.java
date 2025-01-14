@@ -1,14 +1,16 @@
 package org.cardanofoundation.signify.e2e;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.Contacting;
-import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.e2e.utils.TestUtils;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -18,13 +20,13 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 
-public class ChallengesTest {
+public class ChallengesTest extends TestUtils {
     private static final Logger log = LoggerFactory.getLogger(ChallengesTest.class);
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private HashMap<String, Object> opResponse, opResponse1, opResponse2;
 
     @Test
@@ -67,8 +69,16 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         EventResult icpResult1 = client1.getIdentifier().create("alice", kargs1);
-        Operation op1 = Operation.fromObject(waitOperation(client1, icpResult1.op()));
-        opResponse1 = (HashMap<String, Object>) op1.getResponse();
+        Object op1 = operationToObject(waitOperation(client1, icpResult1.op()));
+        if (op1 instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op1, new TypeReference<>() {
+                });
+                opResponse1 = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         EventResult rpyResult1 = client1.getIdentifier().addEndRole(
                 "alice",
                 "agent",
@@ -85,9 +95,16 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         EventResult icpResult2 = client2.getIdentifier().create("bob", kargs2);
-        Operation op2 = Operation.fromObject(waitOperation(client2, icpResult2.op()));
-        opResponse2 = (HashMap<String, Object>) op2.getResponse();
-
+        Object op2 = operationToObject(waitOperation(client2, icpResult2.op()));
+        if (op2 instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op2, new TypeReference<>() {
+                });
+                opResponse2 = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         EventResult rpyResult2 = client2.getIdentifier().addEndRole(
                 "bob",
                 "agent",
@@ -113,7 +130,15 @@ public class ChallengesTest {
         Contacting.Contact bobContact = findContact(client1Contacts, "bob");
         assert bobContact != null;
         assertEquals("bob", bobContact.getAlias());
-        assertEquals(((List<Object>) bobContact.get("challenges")).size(), 0);
+        try {
+            List<HashMap<String, Object>> bobcontactMap = objectMapper.readValue(
+                    bobContact.getAdditionalProperties().get("challenges").toString(),
+                    new TypeReference<>() {
+                    });
+            assertEquals(0, bobcontactMap.size());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         // Bob responds to Alice's challenge
         client2.getChallenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.words);
@@ -121,10 +146,19 @@ public class ChallengesTest {
 
         // Alice verifies Bob's response
         Object verifyResult = client1.getChallenges().verify((String) opResponse2.get("i"), challenge1_small.words);
-        Operation op = Operation.fromObject(waitOperation(client1, verifyResult));
+        Object op = operationToObject(waitOperation(client1, verifyResult));
         System.out.println("Alice verified challenge response");
-        opResponse = (HashMap<String, Object>) op.getResponse();
 
+        //Alice mark response as accepted
+        if (op instanceof String) {
+            try {
+                HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
+                });
+                opResponse = (HashMap<String, Object>) opMap.get("response");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         Serder exn = new Serder((Map<String, Object>) opResponse.get("exn"));
         client1.getChallenges().responded((String) opResponse2.get("i"), (String) exn.getKed().get("d"));
         System.out.println("Alice marked challenge response as accepted");

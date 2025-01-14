@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.app.clienting.aiding;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.deps.IdentifierDeps;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -30,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
+import static org.cardanofoundation.signify.core.States.convertToStates;
 
 public class Identifier {
     public final IdentifierDeps client;
@@ -64,12 +64,13 @@ public class Identifier {
 
         String contentRange = response.headers().firstValue("content-range").orElse(null);
         Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
+        Object aids = Utils.fromJson(response.body(), Object.class);
 
         return new IdentifierListResponse(
                 range.start(),
                 range.end(),
                 range.total(),
-                response.body()
+                aids
         );
     }
 
@@ -118,26 +119,8 @@ public class Identifier {
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
-        Object isith;
-        Object nsith;
-
-        if (kargs.getIsith() == null) {
-            isith = "1";
-            nsith = "1";
-        } else {
-            // String or number
-            if(!(kargs.getIsith() instanceof List<?>)) {
-                isith = kargs.getIsith().toString();
-            } else {
-                isith = kargs.getIsith();
-            }
-
-            if(!(kargs.getNsith() instanceof List<?>)) {
-                nsith = kargs.getNsith().toString();
-            } else {
-                nsith = kargs.getNsith();
-            }
-        }
+        String isith = kargs.getIsith() != null ? kargs.getIsith().toString() : "1";
+        String nsith = kargs.getNsith() != null ? kargs.getNsith().toString() : "1";
         List<String> wits = kargs.getWits() != null ? kargs.getWits() : new ArrayList<>();
         int toad = kargs.getToad() != null ? kargs.getToad() : 0;
         String dcode = kargs.getDcode() != null ? kargs.getDcode() : MatterCodex.Blake3_256.getValue();
@@ -165,7 +148,7 @@ public class Identifier {
             dcode = MatterCodex.Ed25519N.getValue();
         }
 
-        Map<String, Object> xargs = new HashMap<>();
+        Map<String, Object> xargs = new LinkedHashMap<>();
         xargs.put("transferable", transferable);
         xargs.put("isith", isith);
         xargs.put("nsith", nsith);
@@ -236,12 +219,12 @@ public class Identifier {
         List<String> rmids = null;
 
         if (states != null) {
-            List<States.State> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
+            List<States.State> stateDeserialized = convertToStates((List<?>) states);
             smids = stateDeserialized.stream().map(States.State::getI).toList();
         }
 
         if (rstates != null) {
-            List<States.State> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
+            List<States.State> rstateDeserialized = convertToStates((List<?>) rstates);
             rmids = rstateDeserialized.stream().map(States.State::getI).toList();
         }
 
@@ -438,8 +421,8 @@ public class Identifier {
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rot", serder.getKed());
         jsondata.put("sigs", sigs);
-        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI) : null);
-        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI) : null);
+        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI).toList() : null);
+        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI).toList() : null);
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(

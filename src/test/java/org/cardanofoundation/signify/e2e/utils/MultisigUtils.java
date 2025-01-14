@@ -224,14 +224,7 @@ public class MultisigUtils {
         String atc = ims.substring(serder.getSize());
 
         Map<String, List<Object>> embeds = Map.of("icp", List.of(serder, atc));
-        List<String> smids = kargs.getStates().stream().map(state -> {
-                    if (state instanceof Map<?, ?> stateMap) {
-                        return stateMap.get("i").toString();
-                    } else if (state instanceof States.State stateHab) {
-                        return stateHab.getI();
-                    }
-                    return null;
-                }).toList();
+        List<String> smids = kargs.getStates().stream().map(state -> ((Map<String, Object>) state).get("i").toString()).toList();
         List<String> recp = otherMembersAIDs.stream().map(States.HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
