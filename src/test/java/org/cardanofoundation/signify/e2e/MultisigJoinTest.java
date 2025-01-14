@@ -6,6 +6,7 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.RotateIdentifierArgs;
+import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -13,27 +14,28 @@ import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MultisigJoinTest extends TestUtils {
     private static SignifyClient client1, client2, client3;
 
-    States.HabState aid1, aid2;
+    States.HabState aid1, aid2, aid3;
     static String nameMember1 = "member1";
     static String nameMember2 = "member2";
     static String nameMember3 = "member3";
     static String nameMultisig = "multisigGroup";
-    static Object oobi1, oobi2, oobi3, oobi4;
+    static Object oobi1, oobi2, oobi3;
     static Object opOobi1, opOobi2, opOobi3, opOobi4, opOobi5;
-    static String oobis1, oobis2, oobis3, oobiMultisig;
+    static String oobis1, oobis2, oobis3, oobiMultisig, opResponseDone, opResponseError;
+    private static Map<String, Object> oobiGetMultisig;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
@@ -58,8 +60,8 @@ public class MultisigJoinTest extends TestUtils {
         waitOperation(client2, opOobi2);
     }
 
-    @Disabled
     @Test
+    @Order(1)
     public void multisigJoinTest() throws Exception {
         aid1 = client1.getIdentifier().get(nameMember1);
         aid2 = client2.getIdentifier().get(nameMember2);
@@ -158,22 +160,25 @@ public class MultisigJoinTest extends TestUtils {
 
         waitOperation(client1, endRoleOperation1.op());
         waitOperation(client2, endRoleOperation2.op());
+
+        oobiGetMultisig = new LinkedHashMap<>();
+        oobiGetMultisig = (Map<String, Object>) client1.getOobis().get(nameMultisig, "agent");
+        System.out.println("Available OOBIs: " + oobiGetMultisig);
     }
 
-    @Disabled
     @Test
+    @Order(2)
     public void multisigJoinTestAddMember3() throws Exception {
         client3 = getOrCreateClient();
 
-        States.HabState aid3 = createAID(client3, nameMember3, new ArrayList<>());
+        aid3 = createAID(client3, nameMember3, new ArrayList<>());
 
         oobi1 = client1.getOobis().get(nameMember1, "agent");
         oobi2 = client2.getOobis().get(nameMember2, "agent");
         oobi3 = client3.getOobis().get(nameMember3, "agent");
-        oobi4 = client1.getOobis().get(nameMultisig, "agent");
 
         oobis3 = getOobisIndexAt0(oobi3);
-        oobiMultisig = getOobisIndexAt0(oobi4);
+        oobiMultisig = getOobisIndexAt0(oobiGetMultisig);
 
         opOobi1 = client1.getOobis().resolve(oobis3, nameMember3);
         opOobi2 = client2.getOobis().resolve(oobis3, nameMember3);
@@ -207,12 +212,13 @@ public class MultisigJoinTest extends TestUtils {
 
         Object aid2States = waitOperation(client1, updates.get(0));
         States.State aid2State = convertValueToStateClass(Utils.toMap(aid2States).get("response"));
-        waitOperation(client1, updates.get(1));
         Object aid1States = waitOperation(client2, updates.get(2));
         States.State aid1State = convertValueToStateClass(Utils.toMap(aid1States).get("response"));
-        waitOperation(client2, updates.get(3));
-        Object aid3States = waitOperation(client3, updates.get(4));
+        Object aid3States = waitOperation(client1, updates.get(1));
         States.State aid3State = convertValueToStateClass(Utils.toMap(aid3States).get("response"));
+
+        waitOperation(client2, updates.get(3));
+        waitOperation(client3, updates.get(4));
         waitOperation(client3, updates.get(5));
 
         List<States.State> states = Arrays.asList(aid1State, aid2State);
@@ -275,6 +281,134 @@ public class MultisigJoinTest extends TestUtils {
         assertEquals(aid1.getState().getN().getFirst(), multiSigAid.getState().getN().getFirst());
         assertEquals(aid2.getState().getN().getFirst(), multiSigAid.getState().getN().get(1));
         assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
+    }
+
+    @Test
+    @Order(3)
+    public void signingKeysAndJoinTest() throws Exception {
+        EventResult rotateResult1 = client1.getIdentifier().rotate(nameMember1);
+        EventResult rotateResult2 = client2.getIdentifier().rotate(nameMember2);
+        EventResult rotateResult3 = client3.getIdentifier().rotate(nameMember3);
+
+        waitOperation(client1, rotateResult1.op());
+        waitOperation(client2, rotateResult2.op());
+        waitOperation(client3, rotateResult3.op());
+
+        aid1 = client1.getIdentifier().get(nameMember1);
+        aid2 = client2.getIdentifier().get(nameMember2);
+        aid3 = client3.getIdentifier().get(nameMember3);
+
+        List<Object> updates = Arrays.asList(
+                client1.getKeyStates().query(aid2.getPrefix(), "2"),
+                client1.getKeyStates().query(aid3.getPrefix(), "1"),
+                client2.getKeyStates().query(aid1.getPrefix(), "2"),
+                client2.getKeyStates().query(aid3.getPrefix(), "1"),
+                client3.getKeyStates().query(aid1.getPrefix(), "2"),
+                client3.getKeyStates().query(aid2.getPrefix(), "2")
+        );
+
+        Object aid2States = waitOperation(client1, updates.get(0));
+        States.State aid2State = convertValueToStateClass(Utils.toMap(aid2States).get("response"));
+        Object aid1States = waitOperation(client2, updates.get(2));
+        States.State aid1State = convertValueToStateClass(Utils.toMap(aid1States).get("response"));
+        Object aid3States = waitOperation(client1, updates.get(1));
+        States.State aid3State = convertValueToStateClass(Utils.toMap(aid3States).get("response"));
+
+        waitOperation(client2, updates.get(3));
+        waitOperation(client3, updates.get(4));
+        waitOperation(client3, updates.get(5));
+
+        List<States.State> states = Arrays.asList(aid1State, aid2State, aid3State);
+
+        EventResult rotateOperation1 = client1.getIdentifier().rotate(nameMultisig, RotateIdentifierArgs.builder()
+                .states(states)
+                .rstates(states)
+                .build());
+
+        Serder serder1 = rotateOperation1.serder();
+        List<String> sigs = rotateOperation1.sigs();
+        List<Siger> sigers = sigs.stream()
+                .map(Siger::new)
+                .toList();
+
+        String ims = new String(Eventing.messagize(serder1, sigers));
+        String atc = ims.substring(serder1.getSize());
+        Map<String, List<Object>> rembeds = new LinkedHashMap<>();
+        rembeds.put("rot", Arrays.asList(serder1, atc));
+
+        List<String> smids = states.stream()
+                .map(state -> Utils.toMap(state).get("i").toString())
+                .collect(Collectors.toList());
+
+        List<String> rmids = states.stream()
+                .map(state -> Utils.toMap(state).get("i").toString())
+                .collect(Collectors.toList());
+
+        List<String> recp = Stream.of(aid2.getState(), aid3.getState())
+                .map(States.State::getI)
+                .collect(Collectors.toList());
+
+        Map<String, Object> payload1 = new LinkedHashMap<>();
+        payload1.put("gid", serder1.getPre());
+        payload1.put("smids", smids);
+        payload1.put("rmids", rmids);
+
+        client1.getExchanges().send(
+                nameMember1,
+                nameMultisig,
+                aid1,
+                "/multisig/rot",
+                payload1,
+                rembeds,
+                recp
+        );
+
+        String rotationNotification3 = waitAndMarkNotification(client3, "/multisig/rot");
+        Object response = client3.getGroups().getRequest(rotationNotification3);
+
+        Map<String, Object> exn3 = castObjectToLinkedHashMap(
+                castObjectToListMap(response).getFirst().get("exn")
+        );
+        Map<String, Object> op1Response = Utils.toMap(exn3.get("e"));
+        Map<String, Object> exnValue = Utils.toMap(op1Response.get("rot"));
+        Serder serder3 = new Serder(exnValue);
+
+        Keeping.Keeper<?> keeper3 = client3.getManager().get(aid3);
+        List<String> sig3 = keeper3.sign(serder3.getRaw().getBytes()).signatures();
+
+        Object joinOperation = client3.getGroups()
+                .join(
+                        nameMultisig,
+                        serder3,
+                        sig3,
+                        Utils.toMap(exn3.get("a")).get("gid").toString(),
+                        smids,
+                        rmids
+                );
+
+        waitOperation(client3, joinOperation);
+
+        States.HabState multiSigAid = client3.getIdentifier().get(nameMultisig);
+
+        assertEquals(3, multiSigAid.getState().getK().size());
+        assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
+        assertEquals(aid2.getState().getK().getFirst(), multiSigAid.getState().getK().get(1));
+        assertEquals(aid3.getState().getK().getFirst(), multiSigAid.getState().getK().get(2));
+
+        assertEquals(3, multiSigAid.getState().getN().size());
+        assertEquals(aid1.getState().getN().getFirst(), multiSigAid.getState().getN().getFirst());
+        assertEquals(aid2.getState().getN().getFirst(), multiSigAid.getState().getN().get(1));
+        assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
+
+        Object members = client3.getIdentifier().members(nameMultisig);
+        List<Map<String, Object>> signing3 = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
+        String eid = Utils.toList(Utils.toMap(Utils.toMap(signing3.get(2).get("ends")).get("agent")).keySet()).getFirst();
+
+        EventResult endRoleOperation = client3.getIdentifier().addEndRole(nameMultisig, "agent", eid, null);
+        Object endRoleResult = waitOperation(client3, endRoleOperation.op());
+
+        assertEquals("true", Utils.toMap(endRoleResult).get("done").toString());
+        assertNull(Utils.toMap(endRoleResult).get("error"));
     }
 
     public static States.HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {
