@@ -41,7 +41,7 @@ public class MultisigHolderTest extends TestUtils {
     States.HabState aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
-    private List<HashMap<String, Object>> registryList, indentifierMap1, indentifierMap2;
+    private List<Map<String, Object>> registryList, indentifierMap1, indentifierMap2;
 
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     ArrayList<String> WITNESS_AIDS = new ArrayList<>(Arrays.asList(
@@ -134,26 +134,14 @@ public class MultisigHolderTest extends TestUtils {
         System.out.println("Multisig created!");
 
         IdentifierListResponse identifiers1 = client1.getIdentifier().list();
-        try {
-            indentifierMap1 = objectMapper.readValue(
-                    identifiers1.aids().toString(),
-                    new TypeReference<>() {
-                    });
-            assertEquals(2, indentifierMap1.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        indentifierMap1 = castObjectToListMap(identifiers1.aids());
+        assertEquals(2, indentifierMap1.size());
+
 
         IdentifierListResponse identifiers2 = client1.getIdentifier().list();
-        try {
-            indentifierMap2 = objectMapper.readValue(
-                    identifiers2.aids().toString(),
-                    new TypeReference<>() {
-                    });
-            assertEquals(2, indentifierMap2.size());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        indentifierMap2 = castObjectToListMap(identifiers2.aids());
+        assertEquals(2, indentifierMap2.size());
+
 
         System.out.printf(
                 "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
@@ -176,7 +164,7 @@ public class MultisigHolderTest extends TestUtils {
         aid2 = client2.getIdentifier().get("member2");
         Object members = client1.getIdentifier().members("holder");
         States.HabState ghab1 = client1.getIdentifier().get("holder");
-        List<Map<String, Object>> signing = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
+        List<Map<String, Object>> signing = castObjectToListMap(Utils.toMap(members).get("signing"));
         String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing.getFirst().get("ends")).get("agent")).keySet()).getFirst();
         String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing.get(1).get("ends")).get("agent")).keySet()).getFirst();
 
@@ -228,7 +216,7 @@ public class MultisigHolderTest extends TestUtils {
         System.out.println("Member2 received exchange message to join the end role authorization");
 
         resp = client2.getGroups().getRequest(msgSaid);
-        List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) resp;
+        List<Map<String, Object>> listRes = castObjectToListMap(resp);
         Map<String, Object> resMap = listRes.getFirst();
         Map<String, Object> exn = (Map<String, Object>) resMap.get("exn");
 
@@ -334,7 +322,7 @@ public class MultisigHolderTest extends TestUtils {
         System.out.println("Member2 received exchange message to join the end role authorization");
 
         resp = client2.getGroups().getRequest(msgSaid);
-        listRes = (List<HashMap<String, Object>>) resp;
+        listRes = castObjectToListMap(resp);
         resMap = listRes.getFirst();
         exn = (Map<String, Object>) resMap.get("exn");
 
@@ -530,7 +518,7 @@ public class MultisigHolderTest extends TestUtils {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        HashMap<String, Object> opResponseName = registryList.getFirst();
+        Map<String, Object> opResponseName = registryList.getFirst();
 
         assertEquals(1, registryList.size());
         assertEquals(registryName, opResponseName.get("name"));
