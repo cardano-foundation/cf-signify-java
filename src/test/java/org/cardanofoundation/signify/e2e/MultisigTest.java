@@ -132,7 +132,6 @@ public class MultisigTest extends TestUtils {
         op1 = client1.getChallenges().verify(aid2.getPrefix(), words);
         op1 = operationToObject(waitOperation(client1, op1));
         System.out.println("Member1 verified challenge response from member2");
-
         Map<String, Object> exnValue = new LinkedHashMap<>();
         if (op1 instanceof String) {
             Map<String, Object> opMap = objectMapper.readValue(op1.toString(), new TypeReference<>() {
@@ -140,8 +139,20 @@ public class MultisigTest extends TestUtils {
             Map<String, Object> op1Response = Utils.toMap(opMap.get("response"));
             exnValue = Utils.toMap(op1Response.get("exn"));
         }
-
         Serder exnwords = new Serder(exnValue);
+        op1 = client1.getChallenges().responded(aid2.getPrefix(), exnwords.getKed().get("d").toString());
+        System.out.println("Member1 marked challenge response as accepted");
+
+        op1 = client1.getChallenges().verify(aid3.getPrefix(), words);
+        op1 = operationToObject(waitOperation(client1, op1));
+        System.out.println("Member1 verified challenge response from member3");
+        if (op1 instanceof String) {
+            Map<String, Object> opMap = objectMapper.readValue(op1.toString(), new TypeReference<>() {
+            });
+            Map<String, Object> op1Response = Utils.toMap(opMap.get("response"));
+            exnValue = Utils.toMap(op1Response.get("exn"));
+        }
+        exnwords = new Serder(exnValue);
         op1 = client1.getChallenges().responded(aid3.getPrefix(), exnwords.getKed().get("d").toString());
         System.out.println("Member1 marked challenge response as accepted");
 

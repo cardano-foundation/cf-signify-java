@@ -524,7 +524,8 @@ public class TestUtils {
 
     public static <T> Operation<T> waitOperation(
             SignifyClient client,
-            Object op) throws SodiumException, IOException, InterruptedException {
+            Object op
+    ) throws SodiumException, IOException, InterruptedException {
         Operation<T> operation;
         if (op instanceof String) {
             String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
