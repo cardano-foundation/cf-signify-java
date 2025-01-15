@@ -83,8 +83,10 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 System.out.println("Member2 joined multisig, waiting for others...");
 
                 // Check for completion
-                op1 = waitOperation(client1, op1);
-                op2 = waitOperation(client2, op2);
+                waitOperationAsync(
+                        new WaitOperationArgs(client1, op1),
+                        new WaitOperationArgs(client2, op2)
+                );
                 System.out.println("Multisig created!");
 
                 States.HabState multisig1 = client1.getIdentifier().get(groupName);

@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
@@ -20,12 +19,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MultisigJoinTest extends TestUtils {
+public class MultisigJoinTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2, client3;
 
     States.HabState aid1, aid2, aid3;
@@ -33,39 +33,49 @@ public class MultisigJoinTest extends TestUtils {
     static String nameMember2 = "member2";
     static String nameMember3 = "member3";
     static String nameMultisig = "multisigGroup";
-    static Object oobi1, oobi2, oobi3;
+    static String oobi1, oobi2, oobi3, oobiMultisig;
     static Object opOobi1, opOobi2, opOobi3, opOobi4, opOobi5;
-    static String oobis1, oobis2, oobis3, oobiMultisig, opResponseDone, opResponseError;
     private static Map<String, Object> oobiGetMultisig;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     public static void getClients() throws Exception {
-        client1 = getOrCreateClient(null);
-        client2 = getOrCreateClient(null);
-        client3 = getOrCreateClient(null);
+        List<SignifyClient> signifyClients = getOrCreateClientsAsync(3);
+        client1 = signifyClients.get(0);
+        client2 = signifyClients.get(1);
+        client3 = signifyClients.get(2);
 
         createAID(client1, nameMember1, new ArrayList<>());
         createAID(client2, nameMember2, new ArrayList<>());
 
-        oobi1 = client1.getOobis().get(nameMember1, "agent");
-        oobi2 = client2.getOobis().get(nameMember2, "agent");
+        List<Object> oobis = getOobisAsync(
+                new GetOobisArgs(client1, nameMember1, "agent"),
+                new GetOobisArgs(client2, nameMember2, "agent")
+        );
+        oobi1 = getOobisIndexAt0(oobis.get(0));
+        oobi2 = getOobisIndexAt0(oobis.get(1));
 
-        oobis1 = getOobisIndexAt0(oobi1);
-        oobis2 = getOobisIndexAt0(oobi2);
+        List<Object> opOobiList = resolveOobisAsync(
+                new ResolveOobisArgs(client1, oobi2, nameMember2),
+                new ResolveOobisArgs(client2, oobi1, nameMember1)
+        );
+        opOobi1 = opOobiList.get(0);
+        opOobi2 = opOobiList.get(1);
 
-        opOobi1 = client1.getOobis().resolve(oobis2, nameMember2);
-        opOobi2 = client2.getOobis().resolve(oobis1, nameMember1);
-
-        waitOperation(client1, opOobi1);
-        waitOperation(client2, opOobi2);
+        waitOperationAsync(
+                new WaitOperationArgs(client1, opOobi1),
+                new WaitOperationArgs(client2, opOobi2)
+        );
     }
 
     @Test
     @Order(1)
     public void multisigJoinTest() throws Exception {
-        aid1 = client1.getIdentifier().get(nameMember1);
-        aid2 = client2.getIdentifier().get(nameMember2);
+        List<States.HabState> aids = createAidAndGetHabStateAsync(
+                new CreateAidArgs(client1, nameMember1),
+                new CreateAidArgs(client2, nameMember2)
+        );
+        aid1 = aids.get(0);
+        aid2 = aids.get(1);
 
         List<Object> states = Arrays.asList(aid1.getState(), aid2.getState());
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
@@ -134,8 +144,13 @@ public class MultisigJoinTest extends TestUtils {
 
         Object createMultisig2 = icpResult2.op();
 
-        createMultisig1 = waitOperation(client1, createMultisig1);
-        createMultisig2 = waitOperation(client2, createMultisig2);
+        List<Operation> op = waitOperationAsync(
+                new WaitOperationArgs(client1, createMultisig1),
+                new WaitOperationArgs(client2, createMultisig2)
+        );
+
+        createMultisig1 = op.get(0);
+        createMultisig2 = op.get(1);
 
         Map<String, Object> multisigRes1 = castObjectToLinkedHashMap(
                 Utils.toMap(createMultisig1).get("response"));
@@ -159,12 +174,13 @@ public class MultisigJoinTest extends TestUtils {
         EventResult endRoleOperation1 = client1.getIdentifier().addEndRole(nameMultisig, "agent", eid1, null);
         EventResult endRoleOperation2 = client2.getIdentifier().addEndRole(nameMultisig, "agent", eid2, null);
 
-        waitOperation(client1, endRoleOperation1.op());
-        waitOperation(client2, endRoleOperation2.op());
-
         oobiGetMultisig = new LinkedHashMap<>();
         oobiGetMultisig = (Map<String, Object>) client1.getOobis().get(nameMultisig, "agent");
-        System.out.println("Available OOBIs: " + oobiGetMultisig);
+
+        waitOperationAsync(
+                new WaitOperationArgs(client1, endRoleOperation1.op()),
+                new WaitOperationArgs(client2, endRoleOperation2.op())
+        );
     }
 
     @Test
@@ -174,53 +190,72 @@ public class MultisigJoinTest extends TestUtils {
 
         aid3 = createAID(client3, nameMember3, new ArrayList<>());
 
-        oobi1 = client1.getOobis().get(nameMember1, "agent");
-        oobi2 = client2.getOobis().get(nameMember2, "agent");
-        oobi3 = client3.getOobis().get(nameMember3, "agent");
+        List<Object> oobis = getOobisAsync(
+                new GetOobisArgs(client1, nameMember1, "agent"),
+                new GetOobisArgs(client2, nameMember2, "agent"),
+                new GetOobisArgs(client3, nameMember3, "agent")
+        );
 
-        oobis3 = getOobisIndexAt0(oobi3);
+        oobi3 = getOobisIndexAt0(oobis.get(2));
         oobiMultisig = getOobisIndexAt0(oobiGetMultisig);
 
-        opOobi1 = client1.getOobis().resolve(oobis3, nameMember3);
-        opOobi2 = client2.getOobis().resolve(oobis3, nameMember3);
-        opOobi3 = client3.getOobis().resolve(oobis1, nameMember1);
-        opOobi4 = client3.getOobis().resolve(oobis2, nameMember2);
-        opOobi5 = client3.getOobis().resolve(oobiMultisig, nameMultisig);
+        List<Object> opOobiList = resolveOobisAsync(
+                new ResolveOobisArgs(client1, oobi3, nameMember3),
+                new ResolveOobisArgs(client2, oobi3, nameMember3),
+                new ResolveOobisArgs(client3, oobi1, nameMember1),
+                new ResolveOobisArgs(client3, oobi2, nameMember2),
+                new ResolveOobisArgs(client3, oobiMultisig, nameMultisig)
+        );
+        opOobi1 = opOobiList.get(0);
+        opOobi2 = opOobiList.get(1);
+        opOobi3 = opOobiList.get(2);
+        opOobi4 = opOobiList.get(3);
+        opOobi5 = opOobiList.get(4);
 
-        waitOperation(client1, opOobi1);
-        waitOperation(client2, opOobi2);
-        waitOperation(client3, opOobi3);
-        waitOperation(client3, opOobi4);
-        waitOperation(client3, opOobi5);
+        waitOperationAsync(
+                new WaitOperationArgs(client1, opOobi1),
+                new WaitOperationArgs(client2, opOobi2),
+                new WaitOperationArgs(client3, opOobi3),
+                new WaitOperationArgs(client3, opOobi4),
+                new WaitOperationArgs(client3, opOobi5)
+        );
 
         EventResult rotateResult1 = client1.getIdentifier().rotate(nameMember1);
         EventResult rotateResult2 = client2.getIdentifier().rotate(nameMember2);
 
-        waitOperation(client1, rotateResult1.op());
-        waitOperation(client2, rotateResult2.op());
+        waitOperationAsync(
+                new WaitOperationArgs(client1, rotateResult1.op()),
+                new WaitOperationArgs(client2, rotateResult2.op())
+        );
 
         aid1 = client1.getIdentifier().get(nameMember1);
         aid2 = client2.getIdentifier().get(nameMember2);
 
-        List<Object> updates = Arrays.asList(
-                client1.getKeyStates().query(aid2.getPrefix(), "1"),
-                client1.getKeyStates().query(aid3.getPrefix(), "0"),
-                client2.getKeyStates().query(aid1.getPrefix(), "1"),
-                client2.getKeyStates().query(aid3.getPrefix(), "0"),
-                client3.getKeyStates().query(aid1.getPrefix(), "1"),
-                client3.getKeyStates().query(aid2.getPrefix(), "1")
+        List<Object> updates = getKeyStateQuerAsync(
+                new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "1"),
+                new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "0"),
+                new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "1"),
+                new GetKeyStateQueryArgs(client2, aid3.getPrefix(), "0"),
+                new GetKeyStateQueryArgs(client3, aid1.getPrefix(), "1"),
+                new GetKeyStateQueryArgs(client3, aid2.getPrefix(), "1")
+
         );
 
-        Object aid2States = waitOperation(client1, updates.get(0));
-        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
-        Object aid1States = waitOperation(client2, updates.get(2));
-        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
-        Object aid3States = waitOperation(client1, updates.get(1));
-        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
+        List<Operation> statesUpdate = waitOperationAsync(
+                new WaitOperationArgs(client1, updates.get(0)),
+                new WaitOperationArgs(client1, updates.get(1)),
+                new WaitOperationArgs(client2, updates.get(2)),
+                new WaitOperationArgs(client2, updates.get(3)),
+                new WaitOperationArgs(client3, updates.get(4)),
+                new WaitOperationArgs(client3, updates.get(5))
+        );
+        Object aid2States = statesUpdate.get(0);
+        Object aid1States = statesUpdate.get(2);
+        Object aid3States = statesUpdate.get(1);
 
-        waitOperation(client2, updates.get(3));
-        waitOperation(client3, updates.get(4));
-        waitOperation(client3, updates.get(5));
+        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
+        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
+        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
 
         List<States.State> states = Arrays.asList(aid1State, aid2State);
         List<States.State> rstates = new ArrayList<>(states);
@@ -269,8 +304,8 @@ public class MultisigJoinTest extends TestUtils {
                 recp
         );
 
-        waitAndMarkNotification(client2, "/multisig/rot");
-        waitAndMarkNotification(client3, "/multisig/rot");
+        TestUtils.waitAndMarkNotification(client2, "/multisig/rot");
+        TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
 
         States.HabState multiSigAid = client1.getIdentifier().get(nameMultisig);
 
@@ -291,33 +326,41 @@ public class MultisigJoinTest extends TestUtils {
         EventResult rotateResult2 = client2.getIdentifier().rotate(nameMember2);
         EventResult rotateResult3 = client3.getIdentifier().rotate(nameMember3);
 
-        waitOperation(client1, rotateResult1.op());
-        waitOperation(client2, rotateResult2.op());
-        waitOperation(client3, rotateResult3.op());
+        waitOperationAsync(
+                new WaitOperationArgs(client1, rotateResult1.op()),
+                new WaitOperationArgs(client2, rotateResult2.op()),
+                new WaitOperationArgs(client3, rotateResult3.op())
+        );
 
         aid1 = client1.getIdentifier().get(nameMember1);
         aid2 = client2.getIdentifier().get(nameMember2);
         aid3 = client3.getIdentifier().get(nameMember3);
 
-        List<Object> updates = Arrays.asList(
-                client1.getKeyStates().query(aid2.getPrefix(), "2"),
-                client1.getKeyStates().query(aid3.getPrefix(), "1"),
-                client2.getKeyStates().query(aid1.getPrefix(), "2"),
-                client2.getKeyStates().query(aid3.getPrefix(), "1"),
-                client3.getKeyStates().query(aid1.getPrefix(), "2"),
-                client3.getKeyStates().query(aid2.getPrefix(), "2")
+        List<Object> updates = getKeyStateQuerAsync(
+                new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "2"),
+                new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "1"),
+                new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "2"),
+                new GetKeyStateQueryArgs(client2, aid3.getPrefix(), "1"),
+                new GetKeyStateQueryArgs(client3, aid1.getPrefix(), "2"),
+                new GetKeyStateQueryArgs(client3, aid2.getPrefix(), "2")
+
         );
 
-        Object aid2States = waitOperation(client1, updates.get(0));
-        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
-        Object aid1States = waitOperation(client2, updates.get(2));
-        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
-        Object aid3States = waitOperation(client1, updates.get(1));
-        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
+        List<Operation> statesUpdate = waitOperationAsync(
+                new WaitOperationArgs(client1, updates.get(0)),
+                new WaitOperationArgs(client1, updates.get(1)),
+                new WaitOperationArgs(client2, updates.get(2)),
+                new WaitOperationArgs(client2, updates.get(3)),
+                new WaitOperationArgs(client3, updates.get(4)),
+                new WaitOperationArgs(client3, updates.get(5))
+        );
+        Object aid2States = statesUpdate.get(0);
+        Object aid1States = statesUpdate.get(2);
+        Object aid3States = statesUpdate.get(1);
 
-        waitOperation(client2, updates.get(3));
-        waitOperation(client3, updates.get(4));
-        waitOperation(client3, updates.get(5));
+        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
+        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
+        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
 
         List<States.State> states = Arrays.asList(aid1State, aid2State, aid3State);
 
@@ -364,7 +407,7 @@ public class MultisigJoinTest extends TestUtils {
                 recp
         );
 
-        String rotationNotification3 = waitAndMarkNotification(client3, "/multisig/rot");
+        String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
         Object response = client3.getGroups().getRequest(rotationNotification3);
 
         Map<String, Object> exn3 = castObjectToLinkedHashMap(
