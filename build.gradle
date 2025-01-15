@@ -71,16 +71,19 @@ tasks.test {
 // Separate task for TestNG tests (E2E tests)
 tasks.register('testE2E', Test) {
     maxParallelForks = 1
+    def startTime = [:]
     useJUnitPlatform()
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
 
     beforeTest { descriptor ->
+        startTime[descriptor] = System.currentTimeMillis()
         println "Starting test: ${descriptor.className}"
     }
     afterTest { descriptor, result ->
-        println "Finished test: ${descriptor.className}. Waiting for 2 seconds..."
+        def duration = System.currentTimeMillis() - startTime[descriptor]
+        println "Finished test: ${descriptor.className} in ${duration} ms. Waiting for 2 seconds..."
         Thread.sleep(2000)
     }
     finalizedBy 'allureReport'
