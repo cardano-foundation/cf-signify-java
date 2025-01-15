@@ -143,7 +143,7 @@ public class BaseIntegrationTest {
     static CompletableFuture<Object> resolveOobisFuture(SignifyClient signifyClient, String oobi, String alias) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return TestUtils.resolveOobi(signifyClient, oobi, alias);
+                return TestUtils.resolveOobiJoin(signifyClient, oobi, alias);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

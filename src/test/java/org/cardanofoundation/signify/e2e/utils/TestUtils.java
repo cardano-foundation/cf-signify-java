@@ -454,8 +454,13 @@ public class TestUtils {
         client.getNotifications().mark(note.getI());
     }
 
-    public static Object resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
+    public static Object resolveOobiJoin(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
         return client.getOobis().resolve(oobi, alias);
+    }
+
+    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
+        Object op = client.getOobis().resolve(oobi, alias);
+        waitOperation(client, op);
     }
 
     public static Object waitForCredential(SignifyClient client, String credSAID) throws Exception {
