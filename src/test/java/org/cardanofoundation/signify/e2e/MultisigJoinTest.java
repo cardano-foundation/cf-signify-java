@@ -1,7 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
@@ -67,7 +67,7 @@ public class MultisigJoinTest extends TestUtils {
         aid1 = client1.getIdentifier().get(nameMember1);
         aid2 = client2.getIdentifier().get(nameMember2);
 
-        List<States.State> states = Arrays.asList(aid1.getState(), aid2.getState());
+        List<Object> states = Arrays.asList(aid1.getState(), aid2.getState());
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.group);
         kargs.setMhab(aid1);
@@ -75,8 +75,8 @@ public class MultisigJoinTest extends TestUtils {
         kargs.setNsith(1);
         kargs.setToad(aid1.getState().getB().size());
         kargs.setWits(aid1.getState().getB());
-        kargs.setStates(Collections.singletonList(states));
-        kargs.setRstates(Collections.singletonList(states));
+        kargs.setStates(states);
+        kargs.setRstates(states);
 
         EventResult icpResult = client1.getIdentifier().create(nameMultisig, kargs);
 
@@ -127,8 +127,8 @@ public class MultisigJoinTest extends TestUtils {
         iargs2.setNsith(icp.get("nt"));
         iargs2.setToad(Integer.parseInt(icp.get("bt").toString()));
         iargs2.setWits(Utils.toList(icp.get("b")));
-        iargs2.setStates(Collections.singletonList(states));
-        iargs2.setRstates(Collections.singletonList(states));
+        iargs2.setStates(states);
+        iargs2.setRstates(states);
 
         EventResult icpResult2 = client2.getIdentifier().create(nameMultisig, iargs2);
 
@@ -212,11 +212,11 @@ public class MultisigJoinTest extends TestUtils {
         );
 
         Object aid2States = waitOperation(client1, updates.get(0));
-        States.State aid2State = convertValueToStateClass(Utils.toMap(aid2States).get("response"));
+        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
         Object aid1States = waitOperation(client2, updates.get(2));
-        States.State aid1State = convertValueToStateClass(Utils.toMap(aid1States).get("response"));
+        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
         Object aid3States = waitOperation(client1, updates.get(1));
-        States.State aid3State = convertValueToStateClass(Utils.toMap(aid3States).get("response"));
+        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
 
         waitOperation(client2, updates.get(3));
         waitOperation(client3, updates.get(4));
@@ -309,11 +309,11 @@ public class MultisigJoinTest extends TestUtils {
         );
 
         Object aid2States = waitOperation(client1, updates.get(0));
-        States.State aid2State = convertValueToStateClass(Utils.toMap(aid2States).get("response"));
+        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
         Object aid1States = waitOperation(client2, updates.get(2));
-        States.State aid1State = convertValueToStateClass(Utils.toMap(aid1States).get("response"));
+        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
         Object aid3States = waitOperation(client1, updates.get(1));
-        States.State aid3State = convertValueToStateClass(Utils.toMap(aid3States).get("response"));
+        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
 
         waitOperation(client2, updates.get(3));
         waitOperation(client3, updates.get(4));
@@ -424,10 +424,5 @@ public class MultisigJoinTest extends TestUtils {
         Map<String, Object> oobiBody = Utils.toMap(oobi);
         ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
         return oobisResponse.getFirst();
-    }
-
-    public States.State convertValueToStateClass(Object obj) {
-        return objectMapper.convertValue(obj, new TypeReference<>() {
-        });
     }
 }

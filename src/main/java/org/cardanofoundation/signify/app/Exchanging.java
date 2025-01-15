@@ -187,7 +187,7 @@ public class Exchanging {
             List<Object> value = entry.getValue();
             Serder serder = (Serder) value.get(0);
             String atc = null;
-            if (value.size() > 1) {
+            if (value.size() > 1 && value.get(1) != null) {
                 atc = value.get(1).toString();
             }
             e.put(key, serder.getKed());
