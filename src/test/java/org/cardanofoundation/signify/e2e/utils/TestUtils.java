@@ -109,8 +109,8 @@ public class TestUtils {
         return new Aid(name, prefix, oobi);
     }
 
-    public static States.HabState createAidAndGetHabState(SignifyClient client, String name) throws Exception {
-        getOrCreateIdentifier(client, name, null);
+    public static States.HabState createAidAndGetHabState(SignifyClient client, String name, CreateIdentifierArgs args) throws Exception {
+        getOrCreateIdentifier(client, name, args);
         return client.getIdentifier().get(name);
     }
 

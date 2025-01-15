@@ -26,7 +26,7 @@ public class Operations {
         String path = "/operations/" + name;
         String method = "GET";
         HttpResponse<String> response = client.fetch(path, method, null, null);
-        return Utils.fromJson(response.body(), new TypeReference<>() {});
+        return Operation.fromObject(response.body());
     }
 
     public List<Operation<?>> list(String type) throws SodiumException, IOException, InterruptedException {

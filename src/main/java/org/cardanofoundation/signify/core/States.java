@@ -19,41 +19,23 @@ public class States {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class State {
-        @JsonProperty("vn")
         private  int[] vn;
-        @JsonProperty("i")
         private  String i;
-        @JsonProperty("s")
         private  String s;
-        @JsonProperty("p")
         private  String p;
-        @JsonProperty("d")
         private  String d;
-        @JsonProperty("f")
         private  String f;
-        @JsonProperty("dt")
         private  String dt;
-        @JsonProperty("et")
         private  String et;
-        @JsonProperty("kt")
         private  Object kt;
-        @JsonProperty("k")
         private  List<String> k;
-        @JsonProperty("nt")
         private  Object nt;
-        @JsonProperty("n")
         private  List<String> n;
-        @JsonProperty("bt")
         private  String bt;
-        @JsonProperty("b")
         private  List<String> b;
-        @JsonProperty("c")
         private  List<String> c;
-        @JsonProperty("ee")
         private  EstablishmentState ee;
-        @JsonProperty("di")
         private  String di;
     }
 
@@ -112,6 +94,7 @@ public class States {
         private  boolean transferable;
         private  State state;
         private  List<Object> windexes;
+        String icp_dt;
         private  SaltyState salty;
         private  RandyState randy;
         private  GroupState group;
@@ -133,31 +116,5 @@ public class States {
                 default -> throw new InvalidValueException("Unexpected value: " + algo);
             };
         }
-    }
-
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    public static List<States.State> convertToStates(List<?> nestedStates) {
-        List<States.State> flatStates = new ArrayList<>();
-
-        if (nestedStates == null) {
-            return flatStates;
-        }
-
-        for (Object outerItem : nestedStates) {
-            if (outerItem instanceof List<?> innerList) {
-                for (Object innerItem : innerList) {
-                    if (innerItem instanceof Map) {
-                        States.State state = objectMapper.convertValue(innerItem, States.State.class);
-                        flatStates.add(state);
-                    } else if (innerItem instanceof States.State) {
-                        flatStates.add((States.State) innerItem);
-                    }
-                }
-            }
-        }
-
-        return flatStates;
     }
 }

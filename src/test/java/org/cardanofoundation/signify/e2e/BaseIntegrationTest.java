@@ -27,7 +27,7 @@ public class BaseIntegrationTest {
     public List<States.HabState> createAidAndGetHabStateAsync(CreateAidArgs... createAidArgs) {
         List<CompletableFuture<States.HabState>> createAidFutures = new ArrayList<>();
         for (CreateAidArgs createAidArg : createAidArgs) {
-            createAidFutures.add(createAidAndGetHabStateFuture(createAidArg.signifyClient, createAidArg.name));
+            createAidFutures.add(createAidAndGetHabStateFuture(createAidArg.signifyClient, createAidArg.name, createAidArg.args));
         }
         return createAidFutures.stream().map(CompletableFuture::join).toList();
 
@@ -101,10 +101,10 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<States.HabState> createAidAndGetHabStateFuture(SignifyClient client, String name) {
+    CompletableFuture<States.HabState> createAidAndGetHabStateFuture(SignifyClient client, String name, CreateIdentifierArgs args) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return TestUtils.createAidAndGetHabState(client, name);
+                return TestUtils.createAidAndGetHabState(client, name, args);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
