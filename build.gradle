@@ -78,13 +78,17 @@ tasks.register('testE2E', Test) {
     }
 
     beforeTest { descriptor ->
-        startTime[descriptor] = System.currentTimeMillis()
+        startTime[descriptor] = System.currentTimeSeconds()
+        def now = java.time.LocalDateTime.now()
+        def formatter = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+        def formattedDateTime = now.format(formatter)
+        println "\n=================================================================================\n"
+        println "Start time: ${formattedDateTime}"
         println "Starting test: ${descriptor.className}"
     }
     afterTest { descriptor, result ->
-        def duration = System.currentTimeMillis() - startTime[descriptor]
-        println "Finished test: ${descriptor.className} in ${duration} ms. Waiting for 2 seconds..."
-        println "--------------------------------------------------------------------------------- "
+        def duration = System.currentTimeSeconds() - startTime[descriptor]
+        println "Finished test: ${descriptor.className} in ${duration} seconds. Waiting for 2 seconds..."
         Thread.sleep(2000)
     }
     finalizedBy 'allureReport'
