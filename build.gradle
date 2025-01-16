@@ -70,9 +70,26 @@ tasks.test {
 
 // Separate task for TestNG tests (E2E tests)
 tasks.register('testE2E', Test) {
-    useJUnitPlatform()  // Use TestNG for E2E tests
+    maxParallelForks = 1
+    def startTime = [:]
+    useJUnitPlatform()
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+    }
+
+    beforeTest { descriptor ->
+        startTime[descriptor] = System.currentTimeSeconds()
+        def now = java.time.LocalDateTime.now()
+        def formatter = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+        def formattedDateTime = now.format(formatter)
+        println "\n=================================================================================\n"
+        println "Start time: ${formattedDateTime}"
+        println "Starting test: ${descriptor.className}"
+    }
+    afterTest { descriptor, result ->
+        def duration = System.currentTimeSeconds() - startTime[descriptor]
+        println "Finished test: ${descriptor.className} in ${duration} seconds. Waiting for 2 seconds..."
+        Thread.sleep(2000)
     }
     finalizedBy 'allureReport'
 }

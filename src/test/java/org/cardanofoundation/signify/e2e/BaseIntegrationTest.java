@@ -24,7 +24,7 @@ public class BaseIntegrationTest {
         return bootFutures.stream().map(CompletableFuture::join).toList();
     }
 
-    public List<States.HabState> createAidAndGetHabStateAsync(CreateAidArgs... createAidArgs) {
+    public static List<States.HabState> createAidAndGetHabStateAsync(CreateAidArgs... createAidArgs) {
         List<CompletableFuture<States.HabState>> createAidFutures = new ArrayList<>();
         for (CreateAidArgs createAidArg : createAidArgs) {
             createAidFutures.add(createAidAndGetHabStateFuture(createAidArg.signifyClient, createAidArg.name));
@@ -33,7 +33,7 @@ public class BaseIntegrationTest {
 
     }
 
-    public List<Object> getOobisAsync(GetOobisArgs... getOobisArgs) {
+    public static List<Object> getOobisAsync(GetOobisArgs... getOobisArgs) {
         List<CompletableFuture<Object>> getOobisFutures = new ArrayList<>();
         for (GetOobisArgs getOobisArg : getOobisArgs) {
             getOobisFutures.add(getOobisFuture(getOobisArg.signifyClient, getOobisArg.name, getOobisArg.role));
@@ -41,7 +41,15 @@ public class BaseIntegrationTest {
         return getOobisFutures.stream().map(CompletableFuture::join).toList();
     }
 
-    public void resolveOobisAsync(ResolveOobisArgs... resolveOobisArgs) {
+    public static List<Object> getKeyStateQuerAsync(GetKeyStateQueryArgs... getKeyStateQueryArgs) {
+        List<CompletableFuture<Object>> getKeyStatesFutures = new ArrayList<>();
+        for (GetKeyStateQueryArgs getKeyStateQueryArg : getKeyStateQueryArgs) {
+            getKeyStatesFutures.add(getKeyStateFuture(getKeyStateQueryArg.signifyClient, getKeyStateQueryArg.pre, getKeyStateQueryArg.sn));
+        }
+        return getKeyStatesFutures.stream().map(CompletableFuture::join).toList();
+    }
+
+    public static void resolveOobisAsync(ResolveOobisArgs... resolveOobisArgs) {
         List<CompletableFuture<Void>> resolveOobisFutures = new ArrayList<>();
         for (ResolveOobisArgs resolveOobisArg : resolveOobisArgs) {
             resolveOobisFutures.add(resolveOobisFuture(resolveOobisArg.signifyClient, resolveOobisArg.oobi, resolveOobisArg.alias));
@@ -49,7 +57,7 @@ public class BaseIntegrationTest {
         CompletableFuture.allOf(resolveOobisFutures.toArray(new CompletableFuture[0])).join();
     }
 
-    public List<Operation> waitOperationAsync(WaitOperationArgs... waitOperationArgs) {
+    public static List<Operation> waitOperationAsync(WaitOperationArgs... waitOperationArgs) {
         List<CompletableFuture<Operation>> waitOperationFutures = new ArrayList<>();
         for (WaitOperationArgs waitOperationArg : waitOperationArgs) {
             waitOperationFutures.add(waitOperationFuture(waitOperationArg.signifyClient, waitOperationArg.op));
@@ -73,7 +81,7 @@ public class BaseIntegrationTest {
         return createAidFutures.stream().map(CompletableFuture::join).toList();
     }
 
-    public List<States.HabState> getOrCreateAIDAsync(CreateAidArgs... createAidArgs) {
+    public static List<States.HabState> getOrCreateAIDAsync(CreateAidArgs... createAidArgs) {
         List<CompletableFuture<States.HabState>> getOrCreateAIDFutures = new ArrayList<>();
         for (CreateAidArgs getOrCreateAIDArg : createAidArgs) {
             getOrCreateAIDFutures.add(getOrCreateAIDFuture(getOrCreateAIDArg.signifyClient, getOrCreateAIDArg.name, getOrCreateAIDArg.args));
@@ -101,7 +109,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<States.HabState> createAidAndGetHabStateFuture(SignifyClient client, String name) {
+    static CompletableFuture<States.HabState> createAidAndGetHabStateFuture(SignifyClient client, String name) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.createAidAndGetHabState(client, name);
@@ -111,7 +119,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<Object> getOobisFuture(SignifyClient client, String name, String role) {
+    static CompletableFuture<Object> getOobisFuture(SignifyClient client, String name, String role) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return client.getOobis().get(name, role);
@@ -121,7 +129,17 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<Void> resolveOobisFuture(SignifyClient signifyClient, String oobi, String alias) {
+    static CompletableFuture<Object> getKeyStateFuture(SignifyClient client, String pre, String sn) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return client.getKeyStates().query(pre, sn);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    static CompletableFuture<Void> resolveOobisFuture(SignifyClient signifyClient, String oobi, String alias) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 TestUtils.resolveOobi(signifyClient, oobi, alias);
@@ -132,7 +150,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<Operation> waitOperationFuture(SignifyClient client, Object op) {
+    static CompletableFuture<Operation> waitOperationFuture(SignifyClient client, Object op) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.waitOperation(client, op);
@@ -152,7 +170,7 @@ public class BaseIntegrationTest {
         });
     }
 
-    CompletableFuture<States.HabState> getOrCreateAIDFuture(SignifyClient client, String name, CreateIdentifierArgs args) {
+    static CompletableFuture<States.HabState> getOrCreateAIDFuture(SignifyClient client, String name, CreateIdentifierArgs args) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.getOrCreateAID(client, name, args);
@@ -195,6 +213,16 @@ public class BaseIntegrationTest {
         private SignifyClient signifyClient;
         private String name;
         private String role;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class GetKeyStateQueryArgs {
+        private SignifyClient signifyClient;
+        private String pre;
+        private String sn;
     }
 
     @Getter

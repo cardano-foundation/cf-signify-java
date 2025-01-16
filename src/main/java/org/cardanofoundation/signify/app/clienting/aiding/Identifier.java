@@ -438,8 +438,8 @@ public class Identifier {
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rot", serder.getKed());
         jsondata.put("sigs", sigs);
-        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI) : null);
-        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI) : null);
+        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI).toList() : null);
+        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI).toList() : null);
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(
