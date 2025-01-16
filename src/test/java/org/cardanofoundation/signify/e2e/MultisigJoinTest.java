@@ -34,7 +34,6 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     static String nameMember3 = "member3";
     static String nameMultisig = "multisigGroup";
     static String oobi1, oobi2, oobi3, oobiMultisig;
-    static Object opOobi1, opOobi2, opOobi3, opOobi4, opOobi5;
     private static Map<String, Object> oobiGetMultisig;
 
     @BeforeAll
@@ -54,16 +53,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         oobi1 = getOobisIndexAt0(oobis.get(0));
         oobi2 = getOobisIndexAt0(oobis.get(1));
 
-        List<Object> opOobiList = resolveOobisJoinAsync(
-                new ResolveOobisJoinArgs(client1, oobi2, nameMember2),
-                new ResolveOobisJoinArgs(client2, oobi1, nameMember1)
-        );
-        opOobi1 = opOobiList.get(0);
-        opOobi2 = opOobiList.get(1);
-
-        waitOperationAsync(
-                new WaitOperationArgs(client1, opOobi1),
-                new WaitOperationArgs(client2, opOobi2)
+        resolveOobisAsync(
+                new ResolveOobisArgs(client1, oobi2, nameMember2),
+                new ResolveOobisArgs(client2, oobi1, nameMember1)
         );
     }
 
@@ -199,25 +191,12 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         oobi3 = getOobisIndexAt0(oobis.get(2));
         oobiMultisig = getOobisIndexAt0(oobiGetMultisig);
 
-        List<Object> opOobiList = resolveOobisJoinAsync(
-                new ResolveOobisJoinArgs(client1, oobi3, nameMember3),
-                new ResolveOobisJoinArgs(client2, oobi3, nameMember3),
-                new ResolveOobisJoinArgs(client3, oobi1, nameMember1),
-                new ResolveOobisJoinArgs(client3, oobi2, nameMember2),
-                new ResolveOobisJoinArgs(client3, oobiMultisig, nameMultisig)
-        );
-        opOobi1 = opOobiList.get(0);
-        opOobi2 = opOobiList.get(1);
-        opOobi3 = opOobiList.get(2);
-        opOobi4 = opOobiList.get(3);
-        opOobi5 = opOobiList.get(4);
-
-        waitOperationAsync(
-                new WaitOperationArgs(client1, opOobi1),
-                new WaitOperationArgs(client2, opOobi2),
-                new WaitOperationArgs(client3, opOobi3),
-                new WaitOperationArgs(client3, opOobi4),
-                new WaitOperationArgs(client3, opOobi5)
+        resolveOobisAsync(
+                new ResolveOobisArgs(client1, oobi3, nameMember3),
+                new ResolveOobisArgs(client2, oobi3, nameMember3),
+                new ResolveOobisArgs(client3, oobi1, nameMember1),
+                new ResolveOobisArgs(client3, oobi2, nameMember2),
+                new ResolveOobisArgs(client3, oobiMultisig, nameMultisig)
         );
 
         EventResult rotateResult1 = client1.getIdentifier().rotate(nameMember1);
@@ -445,7 +424,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
 
         Object members = client3.getIdentifier().members(nameMultisig);
-        List<Map<String, Object>> signing3 = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
+        List<Map<String, Object>> signing3 = castObjectToListMap(Utils.toMap(members).get("signing"));
         String eid = Utils.toList(Utils.toMap(Utils.toMap(signing3.get(2).get("ends")).get("agent")).keySet()).getFirst();
 
         EventResult endRoleOperation = client3.getIdentifier().addEndRole(nameMultisig, "agent", eid, null);
