@@ -64,7 +64,6 @@ tasks.test {
         includeTestsMatching "org.cardanofoundation.signify.cesr.*"
         includeTestsMatching "org.cardanofoundation.signify.core.*"
         includeTestsMatching "org.cardanofoundation.signify.end.*"
-        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
     finalizedBy 'allureReport'
 }
@@ -85,6 +84,7 @@ tasks.register('testE2E', Test) {
     afterTest { descriptor, result ->
         def duration = System.currentTimeMillis() - startTime[descriptor]
         println "Finished test: ${descriptor.className} in ${duration} ms. Waiting for 2 seconds..."
+        println "--------------------------------------------------------------------------------- "
         Thread.sleep(2000)
     }
     finalizedBy 'allureReport'

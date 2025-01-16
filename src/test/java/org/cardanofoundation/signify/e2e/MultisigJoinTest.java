@@ -54,9 +54,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         oobi1 = getOobisIndexAt0(oobis.get(0));
         oobi2 = getOobisIndexAt0(oobis.get(1));
 
-        List<Object> opOobiList = resolveOobisAsync(
-                new ResolveOobisArgs(client1, oobi2, nameMember2),
-                new ResolveOobisArgs(client2, oobi1, nameMember1)
+        List<Object> opOobiList = resolveOobisJoinAsync(
+                new ResolveOobisJoinArgs(client1, oobi2, nameMember2),
+                new ResolveOobisJoinArgs(client2, oobi1, nameMember1)
         );
         opOobi1 = opOobiList.get(0);
         opOobi2 = opOobiList.get(1);
@@ -199,12 +199,12 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         oobi3 = getOobisIndexAt0(oobis.get(2));
         oobiMultisig = getOobisIndexAt0(oobiGetMultisig);
 
-        List<Object> opOobiList = resolveOobisAsync(
-                new ResolveOobisArgs(client1, oobi3, nameMember3),
-                new ResolveOobisArgs(client2, oobi3, nameMember3),
-                new ResolveOobisArgs(client3, oobi1, nameMember1),
-                new ResolveOobisArgs(client3, oobi2, nameMember2),
-                new ResolveOobisArgs(client3, oobiMultisig, nameMultisig)
+        List<Object> opOobiList = resolveOobisJoinAsync(
+                new ResolveOobisJoinArgs(client1, oobi3, nameMember3),
+                new ResolveOobisJoinArgs(client2, oobi3, nameMember3),
+                new ResolveOobisJoinArgs(client3, oobi1, nameMember1),
+                new ResolveOobisJoinArgs(client3, oobi2, nameMember2),
+                new ResolveOobisJoinArgs(client3, oobiMultisig, nameMultisig)
         );
         opOobi1 = opOobiList.get(0);
         opOobi2 = opOobiList.get(1);

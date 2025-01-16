@@ -11,7 +11,6 @@ import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,12 +49,20 @@ public class BaseIntegrationTest {
         return getKeyStatesFutures.stream().map(CompletableFuture::join).toList();
     }
 
-    public static List<Object> resolveOobisAsync(ResolveOobisArgs... resolveOobisArgs) {
-        List<CompletableFuture<Object>> resolveOobisFutures = new ArrayList<>();
+    public void resolveOobisAsync(ResolveOobisArgs... resolveOobisArgs) {
+        List<CompletableFuture<Void>> resolveOobisFutures = new ArrayList<>();
         for (ResolveOobisArgs resolveOobisArg : resolveOobisArgs) {
             resolveOobisFutures.add(resolveOobisFuture(resolveOobisArg.signifyClient, resolveOobisArg.oobi, resolveOobisArg.alias));
         }
-        return resolveOobisFutures.stream().map(CompletableFuture::join).toList();
+        CompletableFuture.allOf(resolveOobisFutures.toArray(new CompletableFuture[0])).join();
+    }
+
+    public static List<Object> resolveOobisJoinAsync(ResolveOobisJoinArgs... resolveOobisJoinArgs) {
+        List<CompletableFuture<Object>> resolveOobisJoinFutures = new ArrayList<>();
+        for (ResolveOobisJoinArgs resolveOobisJoinArg : resolveOobisJoinArgs) {
+            resolveOobisJoinFutures.add(resolveOobisJoinFuture(resolveOobisJoinArg.signifyClient, resolveOobisJoinArg.oobi, resolveOobisJoinArg.alias));
+        }
+        return resolveOobisJoinFutures.stream().map(CompletableFuture::join).toList();
     }
 
     public static List<Operation> waitOperationAsync(WaitOperationArgs... waitOperationArgs) {
@@ -140,7 +147,18 @@ public class BaseIntegrationTest {
         });
     }
 
-    static CompletableFuture<Object> resolveOobisFuture(SignifyClient signifyClient, String oobi, String alias) {
+    CompletableFuture<Void> resolveOobisFuture(SignifyClient signifyClient, String oobi, String alias) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                TestUtils.resolveOobi(signifyClient, oobi, alias);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        });
+    }
+
+    static CompletableFuture<Object> resolveOobisJoinFuture(SignifyClient signifyClient, String oobi, String alias) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return TestUtils.resolveOobiJoin(signifyClient, oobi, alias);
@@ -185,6 +203,16 @@ public class BaseIntegrationTest {
     @Builder
     @AllArgsConstructor
     public static class ResolveOobisArgs {
+        private SignifyClient signifyClient;
+        private String oobi;
+        private String alias;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    public static class ResolveOobisJoinArgs {
         private SignifyClient signifyClient;
         private String oobi;
         private String alias;
