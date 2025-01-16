@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.Retry;

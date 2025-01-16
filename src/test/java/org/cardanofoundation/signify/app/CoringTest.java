@@ -1,15 +1,14 @@
 package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.KeyStates;
+import org.cardanofoundation.signify.app.coring.KeyStates;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.security.DigestException;
 import java.util.List;
 import java.util.Map;
 

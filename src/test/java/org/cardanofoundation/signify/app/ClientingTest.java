@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.*;
-import org.cardanofoundation.signify.app.clienting.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.Identifier;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
+import org.cardanofoundation.signify.app.coring.Coring;
+import org.cardanofoundation.signify.app.coring.KeyStates;
+import org.cardanofoundation.signify.app.coring.Oobis;
+import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.credentialing.Schemas;
 import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;

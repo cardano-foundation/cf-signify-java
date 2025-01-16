@@ -1,7 +1,7 @@
 package org.cardanofoundation.signify.app.credentialing.credentials;
 
 import lombok.*;
-import org.cardanofoundation.signify.app.clienting.Operation;
+import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Serder;
 
 @Getter

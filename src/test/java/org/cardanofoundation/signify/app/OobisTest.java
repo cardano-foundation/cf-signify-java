@@ -2,7 +2,7 @@ package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.Oobis;
+import org.cardanofoundation.signify.app.coring.Oobis;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.junit.jupiter.api.DisplayName;

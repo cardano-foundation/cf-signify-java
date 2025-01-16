@@ -57,7 +57,7 @@ jobs:
         run: docker compose up -d
 
       - name: Run E2E Tests
-        run: ./gradlew testNG
+        run: ./gradlew testE2E
 
       - name: Generate Allure Report for Unit Tests
         run: ./gradlew allureReport

@@ -9,12 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.cardanofoundation.signify.app.Contacting;
 import org.cardanofoundation.signify.app.Notifying;
-import org.cardanofoundation.signify.app.clienting.Contacting;
-import org.cardanofoundation.signify.app.clienting.Operation;
+import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
+import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
+import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static org.cardanofoundation.signify.app.Coring.randomPasscode;
+import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 

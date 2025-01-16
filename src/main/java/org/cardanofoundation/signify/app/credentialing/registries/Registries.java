@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.app.credentialing.registries;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
-import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.habery.TraitCodex;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;

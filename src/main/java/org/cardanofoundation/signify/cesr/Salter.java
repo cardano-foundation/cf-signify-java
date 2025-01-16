@@ -45,7 +45,16 @@ public class Salter extends Matter {
     public enum Tier {
         low,
         med,
-        high
+        high;
+
+        public static Tier fromString(String tier) {
+            return switch (tier) {
+                case "low" -> Tier.low;
+                case "med" -> Tier.med;
+                case "high" -> Tier.high;
+                default -> null;
+            };
+        }
     }
 
     public byte[] stretch(int size, String path, Tier tier, boolean temp) throws SodiumException {
