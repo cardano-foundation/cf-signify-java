@@ -137,7 +137,7 @@ public class TestUtils {
             States.HabState issuerAid,
             States.HabState recipientAid,
             String schemaSAID
-            ) throws SodiumException, IOException, InterruptedException {
+    ) throws SodiumException, IOException, InterruptedException {
         Map<String, Object> filter = new LinkedHashMap<>() {{
             put("-i", issuerAid.getPrefix());
             put("-s", schemaSAID);
@@ -290,6 +290,8 @@ public class TestUtils {
 
         if (response.get("i") != null) {
             return response.get("i").toString();
+        } else if (response.get("i") == null) {
+            return getOrCreateContact(client, name, oobi);
         }
         return null;
     }
@@ -460,7 +462,7 @@ public class TestUtils {
     }
 
     public static Object waitForCredential(SignifyClient client, String credSAID, Integer MAX_RETRIES) throws Exception {
-        if(MAX_RETRIES == null) {
+        if (MAX_RETRIES == null) {
             MAX_RETRIES = 10;
         }
         int retryCount = 0;
