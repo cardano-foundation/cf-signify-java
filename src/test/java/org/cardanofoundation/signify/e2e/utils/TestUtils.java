@@ -276,7 +276,6 @@ public class TestUtils {
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, IOException, InterruptedException {
-        Object getResponseI = null;
         List<Contacting.Contact> list = Arrays.asList(client.getContacts().list(null, "alias", "^" + name + "$"));
         if (!list.isEmpty()) {
             Contacting.Contact contact = list.getFirst();
@@ -285,17 +284,14 @@ public class TestUtils {
             }
         }
         Object op = client.getOobis().resolve(oobi, name);
-        op = operationToObject(waitOperation(client, op));
-        if (op instanceof String) {
-            try {
-                HashMap<String, Object> contactMap = objectMapper.readValue((String) op, HashMap.class);
-                HashMap<String, Object> responseMap = (HashMap<String, Object>) contactMap.get("response");
-                getResponseI = responseMap.get("i");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+
+        Operation<?> opBody = waitOperation(client, op);
+        LinkedHashMap<String, Object> response = castObjectToLinkedHashMap(opBody.getResponse());
+
+        if (response.get("i") != null) {
+            return response.get("i").toString();
         }
-        return getResponseI == null ? null : getResponseI.toString();
+        return null;
     }
 
     public static Object getOrIssueCredential(
