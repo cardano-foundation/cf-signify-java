@@ -201,6 +201,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 assertTrue(!issuerCredentialsList.isEmpty());
                 assertEquals(QVI_SCHEMA_SAID, sad.get("s").toString());
+                assertEquals(issuerAid.prefix, sad.get("i").toString());
                 assertEquals("0", status.get("s").toString());
             } catch (SodiumException | IOException | InterruptedException e) {
                 throw new RuntimeException(e);
@@ -243,7 +244,6 @@ public class CredentialsTest extends BaseIntegrationTest {
                 throw new RuntimeException(e);
             }
         });
-        // TO-DO
 
         testSteps.step("Issuer get credential by id", () -> {
             try {
@@ -314,7 +314,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 iargs.setMessage("");
                 iargs.setGrantSaid(grantNotification.a.d);
                 iargs.setRecipient(issuerAid.prefix);
-                iargs.setRecipient(createTimestamp());
+                iargs.setDatetime(createTimestamp());
 
                 Exchanging.ExchangeMessageResult result = holderClient.getIpex().admit(iargs);
                 Object op = holderClient.getIpex().submitAdmit(
