@@ -96,31 +96,26 @@ public class DelegationTest {
         anchor.put("s", "0");
         anchor.put("d", delegatePrefix);
 
-        testSteps.steps("delegator approves delegation", () -> {
-            try {
-                EventResult result = retry(() -> {
-                    try {
-                        EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
-                        waitOperations(client1, apprDelRes.op());
-                        return apprDelRes;
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-                List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");
-                assertEquals(approDelResList.getFirst(), anchor);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return retry;
+        testSteps.step("delegator approves delegation", () -> {
+            EventResult result = retry(() -> {
+                try {
+                    EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
+                    waitOperations(client1, apprDelRes.op());
+                    return apprDelRes;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");
+            assertEquals(approDelResList.getFirst(), anchor);
+
         });
 
         Object op3 = client2.getKeyStates().query(ator.getPrefix(), "1", null);
+        waitOperation(client2, op3);
 
         // Client 2 check approval
-        waitOperation(client2, op3);
         waitOperation(client2, op2);
-
         States.HabState aid2 = client2.getIdentifier().get("delegate");
         assertEquals(delegatePrefix, aid2.getPrefix());
         System.out.println("Delegation approved for aid: " + aid2.getPrefix());
