@@ -8,7 +8,6 @@ import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
-import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +25,6 @@ public class DelegationTest {
     private String opResponseName;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private TestSteps testSteps = new TestSteps();
-    private Retry retry = new Retry();
     String oobi, contactId;
 
     @Test
@@ -98,17 +96,12 @@ public class DelegationTest {
 
         testSteps.step("delegator approves delegation", () -> {
             EventResult result = retry(() -> {
-                try {
-                    EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
-                    waitOperations(client1, apprDelRes.op());
-                    return apprDelRes;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
+                waitOperations(client1, apprDelRes.op());
+                return apprDelRes;
             });
             List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");
             assertEquals(approDelResList.getFirst(), anchor);
-
         });
 
         Object op3 = client2.getKeyStates().query(ator.getPrefix(), "1", null);

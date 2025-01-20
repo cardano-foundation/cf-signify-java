@@ -528,16 +528,20 @@ public class TestUtils {
 
     public static <T> Operation<T> waitOperations(
             SignifyClient client,
-            Object op) throws SodiumException, IOException, InterruptedException {
+            Object op) {
         Operation<T> operation;
-        if (op instanceof String) {
-            String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
-            operation = client.getOperations().get(name);
-        } else {
-            operation = Operation.fromObject(op);
+        try {
+            if (op instanceof String) {
+                String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
+                operation = client.getOperations().get(name);
+            } else {
+                operation = Operation.fromObject(op);
+            }
+            deleteOperations(client, operation);
+            return operation;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        deleteOperations(client, operation);
-        return operation;
     }
 
     public static <T> Operation<T> waitOperation(
