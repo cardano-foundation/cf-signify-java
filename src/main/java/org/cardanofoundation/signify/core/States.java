@@ -117,5 +117,36 @@ public class States {
                 default -> throw new InvalidValueException("Unexpected value: " + algo);
             };
         }
+
+        private static final ObjectMapper objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        public static List<States.State> convertToStates(List<?> nestedStates) {
+            List<States.State> flatStates = new ArrayList<>();
+
+            if (nestedStates == null) {
+                return flatStates;
+            }
+
+            for (Object outerItem : nestedStates) {
+                if (outerItem instanceof List<?> innerList) {
+                    for (Object innerItem : innerList) {
+                        if (innerItem instanceof Map) {
+                            States.State state = objectMapper.convertValue(innerItem, States.State.class);
+                            flatStates.add(state);
+                        } else if (innerItem instanceof States.State) {
+                            flatStates.add((States.State) innerItem);
+                        }
+                    }
+                } else if (outerItem instanceof Map) {
+                    States.State state = objectMapper.convertValue(outerItem, States.State.class);
+                    flatStates.add(state);
+                } else if (outerItem instanceof States.State) {
+                    flatStates.add((States.State) outerItem);
+                }
+            }
+
+            return flatStates;
+        }
     }
 }
