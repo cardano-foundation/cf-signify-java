@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
-import static org.cardanofoundation.signify.core.States.convertToStates;
+import static org.cardanofoundation.signify.core.States.HabState.convertToStates;
 
 public class Identifier {
     public final IdentifierDeps client;
