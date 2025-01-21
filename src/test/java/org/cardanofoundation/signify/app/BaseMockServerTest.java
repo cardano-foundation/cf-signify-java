@@ -6,7 +6,7 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.core.Authenticater;
+import org.cardanofoundation.signify.core.Authenticator;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.core.Httping;
@@ -244,7 +244,7 @@ public class BaseMockServerTest {
                 false
         );
 
-        Authenticater authn = new Authenticater(signer, signer.getVerfer());
+        Authenticator authn = new Authenticator(signer, signer.getVerfer());
         Map<String, String> signedHeaderMap = authn.sign(
                 headers,
                 req.getMethod(),

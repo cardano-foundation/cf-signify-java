@@ -14,8 +14,11 @@ import org.greenbytes.http.sfv.*;
 import org.greenbytes.http.sfv.Dictionary;
 
 public class Httping {
+    public static String HEADER_SIG = normalize("Signature");
     public static String HEADER_SIG_INPUT = normalize("Signature-Input");
     public static String HEADER_SIG_TIME = normalize("Signify-Timestamp");
+    public static String HEADER_SIG_SENDER = normalize("Signify-Resource");
+    public static String HEADER_SIG_DESTINATION = normalize("Signify-Receiver");
 
     public static String normalize(String header) {
         return header.toLowerCase().trim();
