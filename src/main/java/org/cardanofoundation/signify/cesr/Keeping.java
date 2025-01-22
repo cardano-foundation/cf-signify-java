@@ -433,7 +433,7 @@ public class Keeping {
                         o = i;
                     }
 
-                    Siger siger = (Siger) signer.sign(ser, i, o == null, 0);
+                    Siger siger = (Siger) signer.sign(ser, i, o == null, o);
                     signatures.add(siger.getQb64());
                 }
             } else {
@@ -647,7 +647,7 @@ public class Keeping {
                         o = i;
                     }
 
-                    Siger siger = (Siger) signer.sign(ser, i, o == null, 0);
+                    Siger siger = (Siger) signer.sign(ser, i, o == null, o);
                     signatures.add(siger.getQb64());
                 }
 
