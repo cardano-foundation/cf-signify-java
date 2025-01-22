@@ -134,10 +134,10 @@ public class MultisigUtils {
     }
 
     public static Object rotateMultisig(SignifyClient client, String groupName, States.HabState aid,
-                                          List<States.HabState> otherMemberAIDs,
-                                          RotateIdentifierArgs kargs,
-                                          String route,
-                                          boolean isInitiator) throws Exception {
+                                        List<States.HabState> otherMemberAIDs,
+                                        RotateIdentifierArgs kargs,
+                                        String route,
+                                        boolean isInitiator) throws Exception {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/rot");
         }
@@ -186,9 +186,9 @@ public class MultisigUtils {
     }
 
     public static List<Object> addEndRoleMultisig(SignifyClient client, String groupName, States.HabState aid,
-                                            List<States.HabState> otherMemberAIDs, States.HabState multisigAID,
-                                            String timestamp,
-                                            boolean isInitiator) throws Exception {
+                                                  List<States.HabState> otherMemberAIDs, States.HabState multisigAID,
+                                                  String timestamp,
+                                                  boolean isInitiator) throws Exception {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
         }
@@ -330,13 +330,13 @@ public class MultisigUtils {
 
         Map<String, List<Object>> embeds = Map.of("icp", List.of(serder, atc));
         List<String> smids = kargs.getStates().stream().map(state -> {
-                    if (state instanceof Map<?, ?> stateMap) {
-                        return stateMap.get("i").toString();
-                    } else if (state instanceof States.State stateHab) {
-                        return stateHab.getI();
-                    }
-                    return null;
-                }).toList();
+            if (state instanceof Map<?, ?> stateMap) {
+                return stateMap.get("i").toString();
+            } else if (state instanceof States.State stateHab) {
+                return stateHab.getI();
+            }
+            return null;
+        }).toList();
         List<String> recp = otherMembersAIDs.stream().map(States.HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
@@ -409,6 +409,59 @@ public class MultisigUtils {
 
         return op;
     }
+
+    public static Object createMultisig(
+            SignifyClient client,
+            States.HabState aid,
+            List<States.HabState> otherMembersAIDs,
+            States.HabState multisigAID,
+            String registryName,
+            String nonce,
+            boolean isInitiator) throws Exception {
+
+        if (!isInitiator) {
+            TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
+        }
+
+        CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
+                .builder()
+                .name(multisigAID.getName())
+                .registryName(registryName)
+                .nonce(nonce)
+                .build();
+        RegistryResult vcpResult = client.getRegistries().create(createRegistryArgs);
+        Object op = vcpResult.op();
+
+        Serder serder = vcpResult.getRegser();
+        Serder anc = vcpResult.getSerder();
+        List<String> sigs = vcpResult.getSigs();
+        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
+
+        String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
+        String atc = ims.substring(anc.getSize());
+
+        Map<String, List<Object>> regbeds = new LinkedHashMap<>() {{
+            put("vcp", List.of(serder, ""));
+            put("anc", List.of(anc, atc));
+        }};
+
+        List<String> recp = otherMembersAIDs.stream()
+                .map(States.HabState::getPrefix)
+                .toList();
+
+        client.getExchanges().send(
+                aid.getName(),
+                "multisig",
+                aid,
+                "/multisig/vcp",
+                Map.of("gid", multisigAID.getPrefix()),
+                regbeds,
+                recp
+        );
+        return op;
+    }
+
+
 
     public static Object delegateMultisig(
             SignifyClient client,
