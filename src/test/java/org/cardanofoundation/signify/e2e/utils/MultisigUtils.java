@@ -410,6 +410,59 @@ public class MultisigUtils {
         return op;
     }
 
+    public static Object createMultisig(
+            SignifyClient client,
+            States.HabState aid,
+            List<States.HabState> otherMembersAIDs,
+            States.HabState multisigAID,
+            String registryName,
+            String nonce,
+            boolean isInitiator) throws Exception {
+
+        if (!isInitiator) {
+            TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
+        }
+
+        CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
+                .builder()
+                .name(multisigAID.getName())
+                .registryName(registryName)
+                .nonce(nonce)
+                .build();
+        RegistryResult vcpResult = client.getRegistries().create(createRegistryArgs);
+        Object op = vcpResult.op();
+
+        Serder serder = vcpResult.getRegser();
+        Serder anc = vcpResult.getSerder();
+        List<String> sigs = vcpResult.getSigs();
+        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
+
+        String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
+        String atc = ims.substring(anc.getSize());
+
+        Map<String, List<Object>> regbeds = new LinkedHashMap<>() {{
+            put("vcp", List.of(serder, ""));
+            put("anc", List.of(anc, atc));
+        }};
+
+        List<String> recp = otherMembersAIDs.stream()
+                .map(States.HabState::getPrefix)
+                .toList();
+
+        client.getExchanges().send(
+                aid.getName(),
+                "multisig",
+                aid,
+                "/multisig/vcp",
+                Map.of("gid", multisigAID.getPrefix()),
+                regbeds,
+                recp
+        );
+        return op;
+    }
+
+
+
     public static Object delegateMultisig(
             SignifyClient client,
             States.HabState aid,

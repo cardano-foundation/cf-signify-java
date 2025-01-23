@@ -416,6 +416,10 @@ public class TestUtils {
         client.getOperations().delete(op.getName());
     }
 
+    public static void deleteOperation(SignifyClient client, String name) throws SodiumException, IOException, InterruptedException {
+        client.getOperations().delete(name);
+    }
+
     public static Object getReceivedCredential(SignifyClient client, String credID) throws Exception {
         Map<String, Object> filter = new LinkedHashMap<>();
         filter.put("-d", credID);
@@ -562,6 +566,17 @@ public class TestUtils {
         opMap.put("response", operation.getResponse());
 
         return objectMapper.writeValueAsString(opMap);
+    }
+
+    public static void waitAsync(int millisSecond) throws Exception {
+        CompletableFuture<Void> wait =  CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(millisSecond);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        wait.get();
     }
 
     public static Integer parseInteger(String s) {

@@ -1,14 +1,22 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
+import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
+import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
+import org.cardanofoundation.signify.app.credentialing.credentials.RevokeCredentialResult;
+import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
+import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
+import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
+import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
@@ -37,7 +45,6 @@ public class MultisigTest extends BaseIntegrationTest {
     ));
     String SCHEMA_SAID = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void multisig() throws Exception {
@@ -453,447 +460,396 @@ public class MultisigTest extends BaseIntegrationTest {
                 new WaitOperationArgs(client3, op3)
         );
 
+        States.HabState hab = client1.getIdentifier().get("multisig");
+        String aid = hab.getPrefix();
+
         // Multisig Registry creation
+        aid1 = client1.getIdentifier().get("member1");
+        aid2 = client2.getIdentifier().get("member2");
+        aid3 = client3.getIdentifier().get("member3");
         System.out.println("Starting multisig registry creation");
 
-//        String nonce = Coring.randomNonce();
-//        MultisigUtils.createRegistryMultisig(
-//                client1,
-//                aid1,
-//                List.of(aid2, aid3),
-//                multisigAID,
-//                "vLEI Registry",
-//                nonce,
-//                true
-//        );
+        String nonce = Coring.randomNonce();
+        List<Object> registryMultisigList = createRegistryMultisig(
+                client1,
+                aid1,
+                List.of(aid2, aid3),
+                multisigAID,
+                "vLEI Registry",
+                nonce,
+                true
+        );
+        op1 = registryMultisigList.get(0);
+        String regk = registryMultisigList.get(1).toString();
+        String nameOp1 = Operation.fromObject(op1).getName();
 
-//        // Multisig Registry creation
-//        aid1 = client1.getIdentifier().get("member1");
-//        aid2 = client2.getIdentifier().get("member2");
-//        aid3 = client3.getIdentifier().get("member3");
-//        System.out.println("Starting multisig registry creation");
-//
-//        RegistryResult vcpRes1 = client1.getRegistries().create(CreateRegistryArgs.builder()
-//                .name("multisig")
-//                .registryName("vLEI Registry")
-//                .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
-//                .build());
-//        op1 = vcpRes1.op();
-//        Serder serder = vcpRes1.getRegser();
-//        String regk = serder.getPre();
-//        Serder anc = vcpRes1.getSerder();
-//        List<String> sigs = vcpRes1.getSigs();
-//
-//        List<Siger> sigers = sigs.stream()
-//                .map(Siger::new)
-//                .toList();
-//
-//        String ims = new String(Eventing.messagize(anc, sigers));
-//        String atc = ims.substring(anc.getSize());
-//        Map<String, List<Object>> regbeds = new LinkedHashMap<>();
-//        regbeds.put("vcp", Arrays.asList(serder, ""));
-//        regbeds.put("anc", Arrays.asList(anc, atc));
-//
-//        List<String> recp = Stream.of(aid2.getState(), aid3.getState())
-//                .map(States.State::getI)
-//                .collect(Collectors.toList());
-//
-//        client1.getExchanges().send(
-//                "member1",
-//                "registry",
-//                aid1,
-//                "/multisig/vcp",
-//                Map.of(
-//                        "gid", multisig,
-//                        "usage", "Issue vLEIs"
-//                ),
-//                regbeds,
-//                recp
-//        );
-//
-//        System.out.println("Member1 initiated registry, waiting for others to join...");
+        System.out.println("Member1 initiated registry, waiting for others to join...");
 
+        // Member2 check for notifications and join the create registry event
+        op2 = MultisigUtils.createRegistryMultisig(
+                client2,
+                aid2,
+                List.of(aid1, aid3),
+                multisigAID,
+                "vLEI Registry",
+                nonce,
+                true
+        );
+        String nameOp2 = Operation.fromObject(op2).getName();
+        System.out.println("Member2 joins registry event, waiting for others...");
 
-//        // Member2 check for notifications and join the create registry event
-//        msgSaid = waitAndMarkNotification(client2, "/multisig/vcp");
-//        System.out.println("Member2 received exchange message to join the create registry event");
-//
-//        res = client2.getGroups().getRequest(msgSaid);
-//        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-//
-//        RegistryResult vcpRes2 = client2.getRegistries().create(CreateRegistryArgs.builder()
-//                .name("multisig")
-//                .registryName("vLEI Registry")
-//                .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
-//                .build());
-//        op2 = vcpRes2.op();
-//        serder = vcpRes2.getRegser();
-//        anc = vcpRes2.getSerder();
-//        sigs = vcpRes2.getSigs();
-//
-//        sigers = sigs.stream()
-//                .map(Siger::new)
-//                .toList();
-//
-//        ims = new String(Eventing.messagize(anc, sigers));
-//        atc = ims.substring(anc.getSize());
-//        regbeds = new LinkedHashMap<>();
-//        regbeds.put("vcp", Arrays.asList(serder, ""));
-//        regbeds.put("anc", Arrays.asList(anc, atc));
-//
-//        recp = Stream.of(aid1.getState(), aid3.getState())
-//                .map(States.State::getI)
-//                .collect(Collectors.toList());
-//
-//        client2.getExchanges().send(
-//                "member2",
-//                "registry",
-//                aid2,
-//                "/multisig/vcp",
-//                Map.of(
-//                        "gid", multisig,
-//                        "usage", "Issue vLEIs"
-//                ),
-//                regbeds,
-//                recp
-//        );
-//        System.out.println("Member2 joins registry event, waiting for others...");
-//
-//        // Member3 check for notifications and join the create registry event
-//        msgSaid = waitAndMarkNotification(client3, "/multisig/vcp");
-//        System.out.println("Member3 received exchange message to join the create registry event");
-//
-//        res = client3.getGroups().getRequest(msgSaid);
-//        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-//
-//        RegistryResult vcpRes3 = client3.getRegistries().create(CreateRegistryArgs.builder()
-//                .name("multisig")
-//                .registryName("vLEI Registry")
-//                .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
-//                .build());
-//        op3 = vcpRes3.op();
-//        serder = vcpRes3.getRegser();
-//        anc = vcpRes3.getSerder();
-//        sigs = vcpRes3.getSigs();
-//
-//        sigers = sigs.stream()
-//                .map(Siger::new)
-//                .toList();
-//
-//        ims = new String(Eventing.messagize(anc, sigers));
-//        atc = ims.substring(anc.getSize());
-//        regbeds = new LinkedHashMap<>();
-//        regbeds.put("vcp", Arrays.asList(serder, ""));
-//        regbeds.put("anc", Arrays.asList(anc, atc));
-//
-//        recp = Stream.of(aid1.getState(), aid2.getState())
-//                .map(States.State::getI)
-//                .collect(Collectors.toList());
-//
-//        client3.getExchanges().send(
-//                "member3",
-//                "multisig",
-//                aid3,
-//                "/multisig/vcp",
-//                Map.of(
-//                        "gid", multisig,
-//                        "usage", "Issue vLEIs"
-//                ),
-//                regbeds,
-//                recp
-//        );
-//
-//        // Done
-//        op1 = waitOperation(client1, op1);
-//        op2 = waitOperation(client2, op2);
-//        op3 = waitOperation(client3, op3);
-//        System.out.println("Multisig create registry completed!");
-//
-//        // Create Credential
-//        System.out.println("Starting multisig credential creation");
-//
-//        Map<String, Object> vcdata = Map.of(
-//                "LEI", "5493001KJTIIGC8Y1R17"
-//        );
-//        String holder = aid4.getPrefix();
-//
-//        String TIME = new Date().toInstant().toString().replace("Z", "000+00:00");
-//        CredentialData.CredentialSubject subject = CredentialData.CredentialSubject.builder()
-//                .i(holder)
-//                .dt(TIME)
-//                .additionalProperties(vcdata)
-//                .build();
-//
-//        CredentialData credentialData = CredentialData.builder()
-//                .ri(regk)
-//                .s(SCHEMA_SAID)
-//                .a(subject)
-//                .build();
-//
-//        IssueCredentialResult credRes = client1.getCredentials().issue("multisig", credentialData);
-//        op1 = credRes.getOp();
-//        multisigIssue(client1, "member1", "multisig", credRes);
-//
-//        System.out.println("Member1 initiated credential creation, waiting for others to join...");
-//
-//        // Member2 check for notifications and join the credential create event
-//        msgSaid = waitAndMarkNotification(client2, "/multisig/iss");
-//        System.out.println("Member2 received exchange message to join the credential create event");
-//        res = client2.getGroups().getRequest(msgSaid);
-//        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-//
-//        String credentialSaid = Utils.toMap(Utils.toMap(exn.get("e")).get("acdc")).get("d").toString();
-//        Map<String, Object> acdcMap = Utils.toMap(Utils.toMap(exn.get("e")).get("acdc"));
-//        CredentialData credentialData2 = objectMapper.convertValue(acdcMap, CredentialData.class);
-//        IssueCredentialResult credRes2 = client2.getCredentials().issue("multisig", credentialData2);
-//
-//        op2 = credRes2.getOp();
-//        multisigIssue(client2, "member2", "multisig", credRes2);
-//        System.out.println("Member2 joins credential create event, waiting for others...");
-//
-//        // Member3 check for notifications and join the create registry event
-//        msgSaid = waitAndMarkNotification(client3, "/multisig/iss");
-//        System.out.println("Member3 received exchange message to join the credential create event");
-//        res = client3.getGroups().getRequest(msgSaid);
-//        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-//
-//        acdcMap = Utils.toMap(Utils.toMap(exn.get("e")).get("acdc"));
-//        CredentialData credentialData3 = objectMapper.convertValue(acdcMap, CredentialData.class);
-//        IssueCredentialResult credRes3 = client3.getCredentials().issue("multisig", credentialData3);
-//
-//        op3 = credRes3.getOp();
-//        multisigIssue(client3, "member3", "multisig", credRes3);
-//        System.out.println("Member3 joins credential create event, waiting for others...");
-//
-//        // Check completion
-//        op1 = waitOperation(client1, op1);
-//        op2 = waitOperation(client2, op2);
-//        op3 = waitOperation(client3, op3);
-//        System.out.println("Multisig create credential completed!");
-//
-//        States.HabState m = client1.getIdentifier().get("multisig");
-//
-//        // Update states
-//        op1 = client1.getKeyStates().query(m.getPrefix(), "4");
-//        op1 = waitOperation(client1, op1);
-//        op2 = client2.getKeyStates().query(m.getPrefix(), "4");
-//        op2 = waitOperation(client2, op2);
-//        op3 = client3.getKeyStates().query(m.getPrefix(), "4");
-//        op3 = waitOperation(client3, op3);
-//        op4 = client4.getKeyStates().query(m.getPrefix(), "4");
-//        op4 = waitOperation(client4, op4);
-//
-//        // IPEX grant message
-//        System.out.println("Starting grant message");
-//        stamp = new Date().toInstant().toString().replace("Z", "000+00:00");
-//
-//        Exchanging.ExchangeMessageResult grantResult = client1.getIpex().grant(IpexGrantArgs.builder()
-//                .senderName("multisig")
-//                .acdc(credRes.getAcdc())
-//                .anc(credRes.getAnc())
-//                .iss(credRes.getIss())
-//                .recipient(holder)
-//                .datetime(stamp)
-//                .build()
-//        );
-//        Serder grant = grantResult.exn();
-//        List<String> gsigs = grantResult.sigs();
-//        String end = grantResult.atc();
-//
-//        client1.getIpex().submitGrant("multisig", grant, gsigs, end, List.of(holder));
-//
-//        mstate = Utils.toMap(m.getState());
-//        seal = Arrays.asList(
-//                "SealEvent",
-//                Map.of(
-//                        "i", m.getPrefix(),
-//                        "s", Utils.toMap(mstate.get("ee")).get("s"),
-//                        "d", Utils.toMap(mstate.get("ee")).get("d")
-//                )
-//        );
-//        sigers = gsigs.stream()
-//                .map(Siger::new)
-//                .collect(Collectors.toList());
-//
-//        String gims = new String(Eventing.messagize(grant, sigers, seal));
-//        atc = gims.substring(grant.getSize());
-//        atc += end;
-//        Map<String, List<Object>> gembeds = new LinkedHashMap<>();
-//        gembeds.put("exn", Arrays.asList(grant, atc));
-//
-//        recp = Stream.of(aid2.getState(), aid3.getState())
-//                .map(States.State::getI)
-//                .collect(Collectors.toList());
-//
-//        client1.getExchanges().send(
-//                "member1",
-//                "multisig",
-//                aid1,
-//                "/multisig/exn",
-//                Map.of("gid", m.getPrefix()),
-//                gembeds,
-//                recp
-//        );
-//
-//        System.out.println("Member1 initiated grant message, waiting for others to join...");
-//
-//        msgSaid = waitAndMarkNotification(client2, "/multisig/exn");
-//        System.out.println("Member2 received exchange message to join the grant message");
-//        res = client2.getGroups().getRequest(msgSaid);
-//        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-//
-//        Exchanging.ExchangeMessageResult grantResult2 = client2.getIpex().grant(IpexGrantArgs.builder()
-//                .senderName("multisig")
-//                .recipient(holder)
-//                .acdc(credRes2.getAcdc())
-//                .anc(credRes2.getAnc())
-//                .iss(credRes2.getIss())
-//                .datetime(stamp)
-//                .build()
-//        );
-//        Serder grant2 = grantResult2.exn();
-//        List<String> gsigs2 = grantResult2.sigs();
-//        String end2 = grantResult2.atc();
-//
-//        op2 = client2.getIpex().submitGrant("multisig", grant2, gsigs2, end2, List.of(holder));
-//
-//        sigers = gsigs2.stream()
-//                .map(Siger::new)
-//                .collect(Collectors.toList());
-//
-//        gims = new String(Eventing.messagize(grant2, sigers, seal));
-//        atc = gims.substring(grant2.getSize());
-//        atc += end2;
-//
-//        gembeds = new LinkedHashMap<>();
-//        gembeds.put("exn", Arrays.asList(grant2, atc));
-//        recp = Stream.of(aid1.getState(), aid3.getState())
-//                .map(States.State::getI)
-//                .collect(Collectors.toList());
-//
-//        client2.getExchanges().send(
-//                "member2",
-//                "multisig",
-//                aid2,
-//                "/multisig/exn",
-//                Map.of("gid", m.getPrefix()),
-//                gembeds,
-//                recp
-//        );
-//
-//        System.out.println("Member2 joined grant message, waiting for others to join...");
-//
-//        msgSaid = waitAndMarkNotification(client3, "/multisig/exn");
-//        System.out.println("Member3 received exchange message to join the grant message");
-//        res = client3.getGroups().getRequest(msgSaid);
-//        exn = Utils.toMap(Utils.toMap(Utils.toList(res).getFirst()).get("exn"));
-//
-//        Exchanging.ExchangeMessageResult grantResult3 = client3.getIpex().grant(IpexGrantArgs.builder()
-//                .senderName("multisig")
-//                .recipient(holder)
-//                .acdc(credRes3.getAcdc())
-//                .anc(credRes3.getAnc())
-//                .iss(credRes3.getIss())
-//                .datetime(stamp)
-//                .build()
-//        );
-//        Serder grant3 = grantResult3.exn();
-//        List<String> gsigs3 = grantResult3.sigs();
-//        String end3 = grantResult3.atc();
-//
-//        op3 = client3.getIpex().submitGrant("multisig", grant3, gsigs3, end3, List.of(holder));
-//
-//        sigers = gsigs3.stream()
-//                .map(Siger::new)
-//                .collect(Collectors.toList());
-//
-//        gims = new String(Eventing.messagize(grant3, sigers, seal));
-//        atc = gims.substring(grant3.getSize());
-//        atc += end3;
-//
-//        gembeds = new LinkedHashMap<>();
-//        gembeds.put("exn", Arrays.asList(grant3, atc));
-//        recp = Stream.of(aid1.getState(), aid2.getState())
-//                .map(States.State::getI)
-//                .collect(Collectors.toList());
-//
-//        client3.getExchanges().send(
-//                "member3",
-//                "multisig",
-//                aid3,
-//                "/multisig/exn",
-//                Map.of("gid", m.getPrefix()),
-//                gembeds,
-//                recp
-//        );
-//
-//        System.out.println("Member3 joined grant message, waiting for others to join...");
-//
-//        msgSaid = waitAndMarkNotification(client4, "/exn/ipex/grant");
-//        System.out.println("Holder received exchange message with the grant message");
-//        res = client4.getExchanges().get(msgSaid);
-//
-//        Exchanging.ExchangeMessageResult admitResult = client4.getIpex().admit(IpexAdmitArgs.builder()
-//                .senderName("holder")
-//                .message("")
-//                .grantSaid(Utils.toMap(Utils.toMap(res).get("exn")).get("d").toString())
-//                .recipient(m.getPrefix())
-//                .build()
-//        );
-//        Serder admit = admitResult.exn();
-//        List<String> asigs = admitResult.sigs();
-//        String aend = admitResult.atc();
-//
-//        op4 = client4.getIpex().submitAdmit("holder", admit, asigs, aend, List.of(m.getPrefix()));
-//
-//        op1 = waitOperation(client1, op1);
-//        op2 = waitOperation(client2, op2);
-//        op3 = waitOperation(client3, op3);
-//        op4 = waitOperation(client4, op4);
-//
-//        System.out.println("Holder creates and sends admit message");
-//
-//        msgSaid = waitAndMarkNotification(client1, "/exn/ipex/admit");
-//        System.out.println("Member1 received exchange message with the admit response");
-//        List<Object> creds = (List<Object>) client4.getCredentials().list(CredentialFilter.builder().build());
-//        System.out.println("Holder holds " + creds.size() + " credential");
-//
-//        assertOperations(List.of(client1, client2, client3, client4));
-//        warnNotifications(List.of(client1, client2, client3, client4));
-//
-//        System.out.println("Revoking credential...");
-//        String REVTIME = new Date().toInstant().toString().replace("Z", "000+00:00");
-//        RevokeCredentialResult revokeRes = client1.getCredentials().revoke("multisig", credentialSaid, REVTIME);
-//        op1 = revokeRes.getOp();
-//
-//        multisigRevoke(client1, "member1", "multisig", revokeRes.getRev(), revokeRes.getAnc());
-//        System.out.println("Member1 initiated credential revocation, waiting for others to join...");
-//
-//        // Member2 check for notifications and join the credential create  event
-//        msgSaid = waitAndMarkNotification(client2, "/multisig/rev");
-//        System.out.println("Member2 received exchange message to join the credential revocation event");
-//        res = client2.getGroups().getRequest(msgSaid);
-//
-//        RevokeCredentialResult revokeRes2 = client2.getCredentials().revoke("multisig", credentialSaid, REVTIME);
-//        op2 = revokeRes2.getOp();
-//        multisigRevoke(client2, "member2", "multisig", revokeRes2.getRev(), revokeRes2.getAnc());
-//        System.out.println("Member2 joins credential revoke event, waiting for others...");
-//
-//        // Member3 check for notifications and join the create registry event
-//        msgSaid = waitAndMarkNotification(client3, "/multisig/rev");
-//        System.out.println("Member3 received exchange message to join the credential revocation event");
-//        res = client3.getGroups().getRequest(msgSaid);
-//
-//        RevokeCredentialResult revokeRes3 = client3.getCredentials().revoke("multisig", credentialSaid, REVTIME);
-//        op3 = revokeRes3.getOp();
-//        multisigRevoke(client3, "member3", "multisig", revokeRes3.getRev(), revokeRes3.getAnc());
-//        System.out.println("Member3 joins credential revoke event, waiting for others...");
-//
-//        // Check completion
-//        op1 = waitOperation(client1, op1);
-//        op2 = waitOperation(client2, op2);
-//        op3 = waitOperation(client3, op3);
-//        System.out.println("Multisig credential revocation completed!");
+        // Member3 check for notifications and join the create registry event
+        op3 = MultisigUtils.createMultisig(
+                client3,
+                aid3,
+                List.of(aid1, aid2),
+                multisigAID,
+                "vLEI Registry",
+                nonce,
+                true
+        );
+        String nameOp3 = Operation.fromObject(op3).getName();
+
+        // Done
+//        waitAsync(2000);
+        waitOperationAsync(
+                new WaitOperationArgs(client1, op1),
+                new WaitOperationArgs(client2, op2),
+                new WaitOperationArgs(client3, op3)
+        );
+        deleteOperations(
+                List.of(client1, client2, client3),
+                List.of(nameOp1, nameOp2, nameOp3)
+        );
+        System.out.println("Multisig create registry completed!");
+
+        //Create Credential
+        System.out.println("Starting multisig credential creation");
+
+        Map<String, Object> vcdata = new HashMap<>();
+        vcdata.put("LEI", "5493001KJTIIGC8Y1R17");
+        String holder = aid4.getPrefix();
+        String TIME = new Date().toInstant().toString().replace("Z", "000+00:00");
+
+        CredentialData.CredentialSubject subject = CredentialData.CredentialSubject.builder()
+                .i(holder)
+                .dt(TIME)
+                .additionalProperties(vcdata)
+                .build();
+
+        CredentialData credentialData = CredentialData.builder()
+                .ri(regk)
+                .s(SCHEMA_SAID)
+                .a(subject)
+                .build();
+
+        waitAsync(2000);
+        IssueCredentialResult credRes = client1.getCredentials().issue("multisig", credentialData);
+        op1 = credRes.getOp();
+        nameOp1 = Operation.fromObject(op1).getName();
+
+        multisigIssue(client1, "member1", "multisig", credRes);
+
+        System.out.println("Member1 initiated credential creation, waiting for others to join...");
+
+        // Member2 check for notifications and join the credential create event
+        String msgSaid = waitAndMarkNotification(client2, "/multisig/iss");
+        System.out.println("Member2 received exchange message to join the credential create event");
+
+        Object res = client2.getGroups().getRequest(msgSaid);
+        Map<String, Object> exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
+        String credentialSaid = castObjectToLinkedHashMap(
+                castObjectToLinkedHashMap(exn.get("e")).get("acdc")).get("d").toString();
+
+        Object acdcMap = Utils.toMap(Utils.toMap(exn.get("e"))).get("acdc");
+        String i = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("i").toString();
+        String dt = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("dt").toString();
+        String LEI = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("LEI").toString();
+
+        CredentialData credentialData2 = Utils.fromJson(Utils.jsonStringify(acdcMap), CredentialData.class);
+        CredentialData.CredentialSubject credentialSubject = CredentialData.CredentialSubject.builder()
+                .i(i)
+                .dt(dt)
+                .additionalProperties(Map.of("LEI", LEI))
+                .build();
+        credentialData2.setA(credentialSubject);
+        IssueCredentialResult credRes2 = client2.getCredentials().issue("multisig", credentialData2);
+
+        op2 = credRes2.getOp();
+        nameOp2 = Operation.fromObject(op2).getName();
+        multisigIssue(client2, "member2", "multisig", credRes2);
+        System.out.println("Member2 joins credential create event, waiting for others...");
+
+        // Member3 check for notifications and join the create registry event
+        msgSaid = waitAndMarkNotification(client3, "/multisig/iss");
+        System.out.println("Member3 received exchange message to join the credential create event");
+        res = client3.getGroups().getRequest(msgSaid);
+        exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
+        acdcMap = Utils.toMap(Utils.toMap(exn.get("e"))).get("acdc");
+        i = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("i").toString();
+        dt = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("dt").toString();
+        LEI = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("LEI").toString();
+        CredentialData credentialData3 = Utils.fromJson(Utils.jsonStringify(acdcMap), CredentialData.class);
+        credentialSubject = CredentialData.CredentialSubject.builder()
+                .i(i)
+                .dt(dt)
+                .additionalProperties(Map.of("LEI", LEI))
+                .build();
+        credentialData3.setA(credentialSubject);
+        IssueCredentialResult credRes3 = client3.getCredentials().issue("multisig", credentialData3);
+
+        op3 = credRes3.getOp();
+        nameOp3 = Operation.fromObject(op3).getName();
+        multisigIssue(client3, "member3", "multisig", credRes3);
+        System.out.println("Member3 joins credential create event, waiting for others...");
+        waitAsync(2000);
+
+        // Check completion
+        waitOperationAsync(
+                new WaitOperationArgs(client1, op1),
+                new WaitOperationArgs(client2, op2),
+                new WaitOperationArgs(client3, op3)
+        );
+        deleteOperations(
+                List.of(client1, client2, client3),
+                List.of(nameOp1, nameOp2, nameOp3)
+        );
+        System.out.println("Multisig create credential completed!");
+
+        States.HabState m = client1.getIdentifier().get("multisig");
+
+        // Update states
+        op1 = client1.getKeyStates().query(m.getPrefix(), "4");
+        op1 = waitOperation(client1, op1);
+        op2 = client2.getKeyStates().query(m.getPrefix(), "4");
+        op2 = waitOperation(client2, op2);
+        op3 = client3.getKeyStates().query(m.getPrefix(), "4");
+        op3 = waitOperation(client3, op3);
+        op4 = client4.getKeyStates().query(m.getPrefix(), "4");
+        op4 = waitOperation(client4, op4);
+
+        // IPEX grant message
+        System.out.println("Starting grant message");
+        String stamp = new Date().toInstant().toString().replace("Z", "000+00:00");
+
+        Exchanging.ExchangeMessageResult grantResult = client1.getIpex().grant(IpexGrantArgs.builder()
+                .senderName("multisig")
+                .acdc(credRes.getAcdc())
+                .anc(credRes.getAnc())
+                .iss(credRes.getIss())
+                .recipient(holder)
+                .datetime(stamp)
+                .build()
+        );
+        Serder grant = grantResult.exn();
+        List<String> gsigs = grantResult.sigs();
+        String end = grantResult.atc();
+
+        op1 = client1.getIpex().submitGrant("multisig", grant, gsigs, end, List.of(holder));
+
+        Map<String, Object> mstate = Utils.toMap(m.getState());
+        List<Object> seal = Arrays.asList(
+                "SealEvent",
+                Map.of(
+                        "i", m.getPrefix(),
+                        "s", Utils.toMap(mstate.get("ee")).get("s"),
+                        "d", Utils.toMap(mstate.get("ee")).get("d")
+                )
+        );
+        List<Siger> sigers = gsigs.stream()
+                .map(Siger::new)
+                .collect(Collectors.toList());
+
+        String gims = new String(Eventing.messagize(grant, sigers, seal));
+        String atc = gims.substring(grant.getSize());
+        atc += end;
+        Map<String, List<Object>> gembeds = new LinkedHashMap<>();
+        gembeds.put("exn", Arrays.asList(grant, atc));
+
+        List<String> recp = Stream.of(aid2.getState(), aid3.getState())
+                .map(States.State::getI)
+                .collect(Collectors.toList());
+
+        client1.getExchanges().send(
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/exn",
+                Map.of("gid", m.getPrefix()),
+                gembeds,
+                recp
+        );
+        System.out.println("Member1 initiated grant message, waiting for others to join...");
+
+        msgSaid = waitAndMarkNotification(client2, "/multisig/exn");
+        System.out.println("Member2 received exchange message to join the grant message");
+        res = client2.getGroups().getRequest(msgSaid);
+        exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
+
+        Exchanging.ExchangeMessageResult grantResult2 = client2.getIpex().grant(IpexGrantArgs.builder()
+                .senderName("multisig")
+                .recipient(holder)
+                .acdc(credRes2.getAcdc())
+                .anc(credRes2.getAnc())
+                .iss(credRes2.getIss())
+                .datetime(stamp)
+                .build()
+        );
+        Serder grant2 = grantResult2.exn();
+        List<String> gsigs2 = grantResult2.sigs();
+        String end2 = grantResult2.atc();
+
+        op2 = client2.getIpex().submitGrant("multisig", grant2, gsigs2, end2, List.of(holder));
+
+        sigers = gsigs2.stream()
+                .map(Siger::new)
+                .collect(Collectors.toList());
+
+        gims = new String(Eventing.messagize(grant2, sigers, seal));
+        atc = gims.substring(grant2.getSize());
+        atc += end2;
+
+        gembeds = new LinkedHashMap<>();
+        gembeds.put("exn", Arrays.asList(grant2, atc));
+        recp = Stream.of(aid1.getState(), aid3.getState())
+                .map(States.State::getI)
+                .collect(Collectors.toList());
+
+        client2.getExchanges().send(
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/exn",
+                Map.of("gid", m.getPrefix()),
+                gembeds,
+                recp
+        );
+
+        System.out.println("Member2 joined grant message, waiting for others to join...");
+
+        msgSaid = waitAndMarkNotification(client3, "/multisig/exn");
+        System.out.println("Member3 received exchange message to join the grant message");
+        res = client3.getGroups().getRequest(msgSaid);
+        exn = castObjectToLinkedHashMap(
+                castObjectToListMap(res).getFirst().get("exn")
+        );
+
+        Exchanging.ExchangeMessageResult grantResult3 = client3.getIpex().grant(IpexGrantArgs.builder()
+                .senderName("multisig")
+                .recipient(holder)
+                .acdc(credRes3.getAcdc())
+                .anc(credRes3.getAnc())
+                .iss(credRes3.getIss())
+                .datetime(stamp)
+                .build()
+        );
+        Serder grant3 = grantResult3.exn();
+        List<String> gsigs3 = grantResult3.sigs();
+        String end3 = grantResult3.atc();
+
+        op3 = client3.getIpex().submitGrant("multisig", grant3, gsigs3, end3, List.of(holder));
+
+        sigers = gsigs3.stream()
+                .map(Siger::new)
+                .collect(Collectors.toList());
+
+        gims = new String(Eventing.messagize(grant3, sigers, seal));
+        atc = gims.substring(grant3.getSize());
+        atc += end3;
+
+        gembeds = new LinkedHashMap<>();
+        gembeds.put("exn", Arrays.asList(grant3, atc));
+        recp = Stream.of(aid1.getState(), aid2.getState())
+                .map(States.State::getI)
+                .collect(Collectors.toList());
+
+        client3.getExchanges().send(
+                "member3",
+                "multisig",
+                aid3,
+                "/multisig/exn",
+                Map.of("gid", m.getPrefix()),
+                gembeds,
+                recp
+        );
+
+        System.out.println("Member3 joined grant message, waiting for others to join...");
+
+        msgSaid = waitAndMarkNotification(client4, "/exn/ipex/grant");
+        System.out.println("Holder received exchange message with the grant message");
+        res = client4.getExchanges().get(msgSaid);
+
+        Exchanging.ExchangeMessageResult admitResult = client4.getIpex().admit(IpexAdmitArgs.builder()
+                .senderName("holder")
+                .message("")
+                .grantSaid(Utils.toMap(Utils.toMap(res).get("exn")).get("d").toString())
+                .recipient(m.getPrefix())
+                .build()
+        );
+        Serder admit = admitResult.exn();
+        List<String> asigs = admitResult.sigs();
+        String aend = admitResult.atc();
+
+        op4 = client4.getIpex().submitAdmit("holder", admit, asigs, aend, List.of(m.getPrefix()));
+
+        waitOperationAsync(
+                new WaitOperationArgs(client1, op1),
+                new WaitOperationArgs(client2, op2),
+                new WaitOperationArgs(client3, op3),
+                new WaitOperationArgs(client4, op4)
+        );
+        System.out.println("Holder creates and sends admit message");
+
+        waitAsync(2000);
+        msgSaid = waitAndMarkNotification(client1, "/exn/ipex/admit");
+        System.out.println("Member1 received exchange message with the admit response");
+        List<Object> creds = (List<Object>) client4.getCredentials().list(CredentialFilter.builder().build());
+        System.out.println("Holder holds " + creds.size() + " credential");
+
+        assertOperations(List.of(client1, client2, client3, client4));
+        warnNotifications(List.of(client1, client2, client3, client4));
+
+        System.out.println("Revoking credential...");
+        String REVTIME = new Date().toInstant().toString().replace("Z", "000+00:00");
+        RevokeCredentialResult revokeRes = client1.getCredentials().revoke("multisig", credentialSaid, REVTIME);
+        op1 = revokeRes.getOp();
+
+        multisigRevoke(client1, "member1", "multisig", revokeRes.getRev(), revokeRes.getAnc());
+        System.out.println("Member1 initiated credential revocation, waiting for others to join...");
+
+        // Member2 check for notifications and join the credential create  event
+        msgSaid = waitAndMarkNotification(client2, "/multisig/rev");
+        System.out.println("Member2 received exchange message to join the credential revocation event");
+        res = client2.getGroups().getRequest(msgSaid);
+
+        RevokeCredentialResult revokeRes2 = client2.getCredentials().revoke("multisig", credentialSaid, REVTIME);
+        op2 = revokeRes2.getOp();
+        multisigRevoke(client2, "member2", "multisig", revokeRes2.getRev(), revokeRes2.getAnc());
+        System.out.println("Member2 joins credential revoke event, waiting for others...");
+
+        // Member3 check for notifications and join the create registry event
+        msgSaid = waitAndMarkNotification(client3, "/multisig/rev");
+        System.out.println("Member3 received exchange message to join the credential revocation event");
+        res = client3.getGroups().getRequest(msgSaid);
+
+        RevokeCredentialResult revokeRes3 = client3.getCredentials().revoke("multisig", credentialSaid, REVTIME);
+        op3 = revokeRes3.getOp();
+        multisigRevoke(client3, "member3", "multisig", revokeRes3.getRev(), revokeRes3.getAnc());
+        System.out.println("Member3 joins credential revoke event, waiting for others...");
+
+        // Check completion
+        waitOperationAsync(
+                new WaitOperationArgs(client1, op1),
+                new WaitOperationArgs(client2, op2),
+                new WaitOperationArgs(client3, op3)
+        );
+        System.out.println("Multisig credential revocation completed!");
     }
 
     public String getOobisIndexAt0(Object oobi) {
@@ -908,7 +864,6 @@ public class MultisigTest extends BaseIntegrationTest {
             String groupName,
             IssueCredentialResult result
     ) throws Exception {
-
         States.HabState leaderHab = client.getIdentifier().get(memberName);
         States.HabState groupHab = client.getIdentifier().get(groupName);
         Object members = client.getIdentifier().members(groupName);
@@ -987,8 +942,62 @@ public class MultisigTest extends BaseIntegrationTest {
         );
     }
 
-    public States.State convertValueToStateClass(Object obj) {
-        return objectMapper.convertValue(obj, new TypeReference<>() {
-        });
+    public static List<Object> createRegistryMultisig(
+            SignifyClient client,
+            States.HabState aid,
+            List<States.HabState> otherMembersAIDs,
+            States.HabState multisigAID,
+            String registryName,
+            String nonce,
+            boolean isInitiator) throws Exception {
+
+        if (!isInitiator) {
+            TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
+        }
+
+        CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
+                .builder()
+                .name(multisigAID.getName())
+                .registryName(registryName)
+                .nonce(nonce)
+                .build();
+        RegistryResult vcpResult = client.getRegistries().create(createRegistryArgs);
+        Object op = vcpResult.op();
+
+        Serder serder = vcpResult.getRegser();
+        String regk = serder.getPre();
+        Serder anc = vcpResult.getSerder();
+        List<String> sigs = vcpResult.getSigs();
+        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
+
+        String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
+        String atc = ims.substring(anc.getSize());
+
+        Map<String, List<Object>> regbeds = new LinkedHashMap<>() {{
+            put("vcp", List.of(serder, ""));
+            put("anc", List.of(anc, atc));
+        }};
+
+        List<String> recp = otherMembersAIDs.stream()
+                .map(States.HabState::getPrefix)
+                .toList();
+
+        client.getExchanges().send(
+                aid.getName(),
+                "registry",
+                aid,
+                "/multisig/vcp",
+                Map.of("gid", multisigAID.getPrefix()),
+                regbeds,
+                recp
+        );
+        List<Object> list = List.of(op, regk);
+        return list;
+    }
+
+    public void deleteOperations(List<SignifyClient> clients, List<String> name) throws Exception {
+        for (int i = 1; i <= clients.size(); i++) {
+            deleteOperation(clients.get(i - 1), name.get(i - 1));
+        }
     }
 }
