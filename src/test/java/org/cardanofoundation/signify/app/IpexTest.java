@@ -1,11 +1,7 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
-import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.ipex.*;
 import org.cardanofoundation.signify.cesr.Saider;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
@@ -13,24 +9,33 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.math.BigInteger;
-import java.security.DigestException;
+import java.net.http.HttpResponse;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 public class IpexTest extends BaseMockServerTest {
+
+    @Override
+    public HttpResponse<String> mockFetch(String path) {
+        String body = path.startsWith("/credentials")
+            ? MOCK_CREDENTIAL
+            : MOCK_GET_AID;
+
+        return createMockResponse(body);
+    }
 
     @Test
     @DisplayName("IPEX - grant-admit flow initiated by discloser")
     void testIpexGrantAdmitFlow() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -38,7 +43,7 @@ public class IpexTest extends BaseMockServerTest {
         Ipex ipex = client.getIpex();
         String holder = "ELjSFdrTdCebJlmvbFNX9-TLhR2PO0_60al1kQp5_e6k";
         Map<String, Object> mockCredential = Utils.fromJson(MOCK_CREDENTIAL, Map.class);
-        Map<String, Object> sad = (Map<String, Object>) mockCredential.get("sad");
+        Map<String, Object> sad = Utils.toMap(mockCredential.get("sad"));
 
         Map<String, Object> acdc = Saider.saidify(sad).sad();
 
@@ -110,8 +115,12 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(ngend, end);
 
         ipex.submitGrant("multisig", ng, ngsigs, ngend, List.of(holder));
-        RecordedRequest lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/grant", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/grant"),
+            eq("POST"),
+            any(),
+            any()
+        );
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs.builder()
                 .senderName("holder")
@@ -129,8 +138,12 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(asigs, Collections.singletonList("AAC4MTRQR-U8_3Hf53f2nJuh3n93lauXSHUkF1Yk2diTHwF-qkcBHn_jd-6pgRnRtBV2CInfwZyOsSL2CrRyuNEN"));
 
         ipex.submitAdmit("multisig", admit, asigs, aend, List.of(holder));
-        lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/admit", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/admit"),
+            eq("POST"),
+            any(),
+            any()
+        );
 
         assertEquals(aend, "");
     }
@@ -138,8 +151,6 @@ public class IpexTest extends BaseMockServerTest {
     @Test
     @DisplayName("IPEX - apply-admit flow initiated by disclosee")
     void testIpexApplyAdmitFlow() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -147,7 +158,7 @@ public class IpexTest extends BaseMockServerTest {
         Ipex ipex = client.getIpex();
         String holder = "ELjSFdrTdCebJlmvbFNX9-TLhR2PO0_60al1kQp5_e6k";
         Map<String, Object> mockCredential = Utils.fromJson(MOCK_CREDENTIAL, Map.class);
-        Map<String, Object> sad = (Map<String, Object>) mockCredential.get("sad");
+        Map<String, Object> sad = Utils.toMap(mockCredential.get("sad"));
 
         Map<String, Object> acdc = Saider.saidify(sad).sad();
 
@@ -196,8 +207,12 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(applyEnd, "");
 
         ipex.submitApply("multisig", apply, applySigs, List.of(holder));
-        RecordedRequest lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/apply", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/apply"),
+            eq("POST"),
+            any(),
+            any()
+        );
 
         IpexOfferArgs ipexOfferArgs = IpexOfferArgs
                 .builder()
@@ -218,8 +233,12 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(offerEnd, "");
 
         ipex.submitOffer("multisig", offer, offerSigs, offerEnd, List.of(holder));
-        lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/offer", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/offer"),
+            eq("POST"),
+            any(),
+            any()
+        );
 
         IpexAgreeArgs ipexAgreeArgs = IpexAgreeArgs
                 .builder()
@@ -240,8 +259,12 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(agreeEnd, "");
 
         ipex.submitAgree("multisig", agree, agreeSigs, List.of(holder));
-        lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/agree", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/agree"),
+            eq("POST"),
+            any(),
+            any()
+        );
 
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
@@ -289,8 +312,12 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(ngend, end);
 
         ipex.submitGrant("multisig", ng, ngsigs, ngend, List.of(holder));
-        lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/grant", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/grant"),
+            eq("POST"),
+            any(),
+            any()
+        );
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
                 .builder()
@@ -310,16 +337,18 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(asigs, Collections.singletonList("AABqIUE6czxB5BotjxFUZT9Gu8tkFkAx7bOYQzWD422r-HS8z_6gaNuIlpnABHjxlX7PEXFDTj8WnoGVW197XlQP"));
 
         ipex.submitAdmit("multisig", admit, asigs, aend, List.of(holder));
-        lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/admit", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/admit"),
+            eq("POST"),
+            any(),
+            any()
+        );
         assertEquals(aend, "");
     }
 
     @Test
     @DisplayName("IPEX - discloser can create an offer without apply")
     void testIpexDiscloser() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -327,7 +356,7 @@ public class IpexTest extends BaseMockServerTest {
         Ipex ipex = client.getIpex();
         String holder = "ELjSFdrTdCebJlmvbFNX9-TLhR2PO0_60al1kQp5_e6k";
         Map<String, Object> mockCredential = Utils.fromJson(MOCK_CREDENTIAL, Map.class);
-        Map<String, Object> sad = (Map<String, Object>) mockCredential.get("sad");
+        Map<String, Object> sad = Utils.toMap(mockCredential.get("sad"));
 
         Map<String, Object> acdc = Saider.saidify(sad).sad();
 
@@ -351,7 +380,11 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals(offerEnd, "");
 
         ipex.submitOffer("multisig", offer, offerSigs, offerEnd, List.of(holder));
-        RecordedRequest lastCall = getRecordedRequests().getLast();
-        assertEquals("/identifiers/multisig/ipex/offer", lastCall.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/multisig/ipex/offer"),
+            eq("POST"),
+            any(),
+            any()
+        );
     }
 }

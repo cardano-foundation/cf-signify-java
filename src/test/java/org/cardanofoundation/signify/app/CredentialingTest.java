@@ -1,69 +1,34 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Authenticator;
-import org.cardanofoundation.signify.core.Httping;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
+import java.net.http.HttpResponse;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 
 public class CredentialingTest extends BaseMockServerTest {
 
-
     @Override
-    public MockResponse mockAllRequests(RecordedRequest req) throws SodiumException {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
-        headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
-        headers.put("content-type", "application/json");
+    public HttpResponse<String> mockFetch(String path) {
+        String body = path.startsWith("/credentials")
+            ? MOCK_CREDENTIAL
+            : MOCK_GET_AID;
 
-        String reqUrl = req.getRequestUrl().toString();
-        Salter salter = new Salter("0AAwMTIzNDU2Nzg5YWJjZGVm");
-        Signer signer = salter.signer(
-                "A",
-                true,
-                "agentagent-ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
-                Salter.Tier.low,
-                false
-        );
-
-        Authenticator authn = new Authenticator(signer, signer.getVerfer());
-        Map<String, String> signedHeaderMap = authn.sign(
-                headers,
-                req.getMethod(),
-                req.getPath().split("\\?")[0],
-                null
-        );
-
-        String body = reqUrl.startsWith(url + "/credentials")
-                ? MOCK_CREDENTIAL
-                : MOCK_GET_AID;
-
-        MockResponse mockResponse = new MockResponse()
-                .setResponseCode(202)
-                .setBody(body);
-
-        signedHeaderMap.forEach(mockResponse::addHeader);
-        return mockResponse;
+        return createMockResponse(body);
     }
 
     @Test
     @DisplayName("Test Credentialing")
     void testCredentialing() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -83,16 +48,20 @@ public class CredentialingTest extends BaseMockServerTest {
                 .build();
 
         credentials.list(kargs);
-        RecordedRequest lastCall = mockWebServer.takeRequest();
-        assertEquals("POST", lastCall.getMethod());
-        assertEquals("/credentials/query", lastCall.getPath());
-        assertEquals(Utils.jsonStringify(kargs), lastCall.getBody().readUtf8());
-
+        Mockito.verify(client).fetch(
+            eq("/credentials/query"),
+            eq("POST"),
+            argThat(arg -> Utils.jsonStringify(arg).equals(Utils.jsonStringify(kargs))),
+            any()
+        );
 
         credentials.get("EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao", true);
-        lastCall = mockWebServer.takeRequest();
-        assertEquals("GET", lastCall.getMethod());
-        assertEquals(url + "/credentials/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao", lastCall.getRequestUrl().toString());
+        Mockito.verify(client).fetch(
+            eq("/credentials/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao"),
+            eq("GET"),
+            isNull(),
+            any()
+        );
 
         String registry = "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX";
         String schema = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
@@ -111,19 +80,22 @@ public class CredentialingTest extends BaseMockServerTest {
                 .a(subject)
                 .build();
 
-
         // test issue
         credentials.issue("aid1", credentialData);
-        lastCall = getRecordedRequests().getLast();
+        ArgumentCaptor<Object> bodyCaptor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(client).fetch(
+            eq("/identifiers/aid1/credentials"),
+            eq("POST"),
+            bodyCaptor.capture(),
+            any()
+        );
 
-        Map<String, Object> lastBody = Utils.fromJson(lastCall.getBody().readUtf8(), Map.class);
-        Map<String, Object> acdc = (Map<String, Object>) lastBody.get("acdc");
-        Map<String, Object> iss = (Map<String, Object>) lastBody.get("iss");
-        Map<String, Object> ixn = (Map<String, Object>) lastBody.get("ixn");
-        List<String> sigs = (List<String>) lastBody.get("sigs");
+        Map<String, Object> lastBody = Utils.fromJson(Utils.jsonStringify(bodyCaptor.getValue()), Map.class);
+        Map<String, Object> acdc = Utils.toMap(lastBody.get("acdc"));
+        Map<String, Object> iss = Utils.toMap(lastBody.get("iss"));
+        Map<String, Object> ixn = Utils.toMap(lastBody.get("ixn"));
+        List<String> sigs = Utils.toList(lastBody.get("sigs"));
 
-        assertEquals("POST", lastCall.getMethod());
-        assertEquals("/identifiers/aid1/credentials", lastCall.getPath());
         assertEquals(acdc.get("ri"), registry);
         assertEquals(acdc.get("s"), schema);
         assertEquals(((Map<?, ?>) acdc.get("a")).get("i"), isuee);
@@ -139,22 +111,25 @@ public class CredentialingTest extends BaseMockServerTest {
         assertEquals(ixn.get("p"), acdc.get("i"));
 
         assertEquals(sigs.size(), 1);
-        assertEquals(sigs.get(0).substring(0, 2), "AA");
-        assertEquals(sigs.get(0).length(), 88);
+        assertEquals(sigs.getFirst().substring(0, 2), "AA");
+        assertEquals(sigs.getFirst().length(), 88);
 
         // test revoke
         String credential = acdc.get("i").toString();
         credentials.revoke("aid1", credential, null);
 
-        lastCall = getRecordedRequests().getLast();
-        assertEquals("DELETE", lastCall.getMethod());
-        assertEquals(url + "/identifiers/aid1/credentials/" + credential, lastCall.getRequestUrl().toString());
+        bodyCaptor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(client).fetch(
+            eq("/identifiers/aid1/credentials/" + credential),
+            eq("DELETE"),
+            bodyCaptor.capture(),
+            any()
+        );
 
-        lastBody = Utils.fromJson(lastCall.getBody().readUtf8(), Map.class);
-
-        Map<String, Object> rev = (Map<String, Object>) lastBody.get("rev");
-        ixn = (Map<String, Object>) lastBody.get("ixn");
-        sigs = (List<String>) lastBody.get("sigs");
+        lastBody = Utils.fromJson(Utils.jsonStringify(bodyCaptor.getValue()), Map.class);
+        Map<String, Object> rev = Utils.toMap(lastBody.get("rev"));
+        ixn = Utils.toMap(lastBody.get("ixn"));
+        sigs = Utils.toList(lastBody.get("sigs"));
 
         assertEquals(rev.get("t"), "rev");
         assertEquals(rev.get("s"), "1");
@@ -166,14 +141,16 @@ public class CredentialingTest extends BaseMockServerTest {
         assertEquals(ixn.get("p"), "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK");
 
         assertEquals(sigs.size(), 1);
-        assertEquals(sigs.get(0).substring(0, 2), "AA");
-        assertEquals(sigs.get(0).length(), 88);
+        assertEquals(sigs.getFirst().substring(0, 2), "AA");
+        assertEquals(sigs.getFirst().length(), 88);
 
         // test state
         credentials.state("EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df", "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo");
-        lastCall = getRecordedRequests().getLast();
-        assertEquals("GET", lastCall.getMethod());
-        assertEquals(url + "/registries/EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df/EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo", lastCall.getRequestUrl().toString());
-        assertEquals(lastCall.getBody().readUtf8(), "");
+        Mockito.verify(client).fetch(
+            eq("/registries/EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df/EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo"),
+            eq("GET"),
+            isNull(),
+            any()
+        );
     }
 }

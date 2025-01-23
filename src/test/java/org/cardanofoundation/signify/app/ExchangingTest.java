@@ -1,8 +1,6 @@
 package org.cardanofoundation.signify.app;
 
 import com.goterl.lazysodium.exceptions.SodiumException;
-import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
@@ -10,14 +8,26 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.cardanofoundation.signify.app.Exchanging.exchange;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 
+import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 
 public class ExchangingTest extends BaseMockServerTest {
+
+    @Override
+    public HttpResponse<String> mockFetch(String path) {
+        String body = path.startsWith("/identifiers/aid1/credentials")
+            ? MOCK_CREDENTIAL
+            : MOCK_GET_AID;
+
+        return createMockResponse(body);
+    }
     
     @Test
     @DisplayName("should create an exchange message with no transposed attachments")
@@ -183,8 +193,6 @@ public class ExchangingTest extends BaseMockServerTest {
     @Test
     @DisplayName("Send from events")
     void sendFromEvents() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -242,16 +250,17 @@ public class ExchangingTest extends BaseMockServerTest {
 
         exchange.sendFromEvents("aid1", "", serder, Collections.singletonList(""), "", new ArrayList<>());
 
-        RecordedRequest request = mockWebServer.takeRequest();
-        assertEquals("POST", request.getMethod());
-        assertEquals("/identifiers/aid1/exchanges", request.getPath());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/aid1/exchanges"),
+            eq("POST"),
+            any(),
+            any()
+        );
     }
 
     @Test
     @DisplayName("Get exchange")
     void getExchange() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -261,8 +270,11 @@ public class ExchangingTest extends BaseMockServerTest {
 
         exchanges.get(exchangeId);
 
-        RecordedRequest request = mockWebServer.takeRequest();
-        assertEquals("GET", request.getMethod());
-        assertEquals("/exchanges/" + exchangeId, request.getPath());
+        Mockito.verify(client).fetch(
+            eq("/exchanges/" + exchangeId),
+            eq("GET"),
+            isNull(),
+            any()
+        );
     }
 }

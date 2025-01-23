@@ -21,7 +21,7 @@ public class Httping {
     public static String HEADER_SIG_DESTINATION = normalize("Signify-Receiver");
 
     public static String normalize(String header) {
-        return header.toLowerCase().trim();
+        return header.trim();
     }
 
     public static SiginputResult siginput(Signer signer, SiginputArgs args) throws SodiumException {

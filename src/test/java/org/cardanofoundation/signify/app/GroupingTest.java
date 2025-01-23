@@ -1,21 +1,29 @@
 package org.cardanofoundation.signify.app;
 
-import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class GroupingTest extends BaseMockServerTest {
+
+    @Override
+    public HttpResponse<String> mockFetch(String path) {
+        String body = path.startsWith("/identifiers/aid1/credentials")
+            ? MOCK_CREDENTIAL
+            : MOCK_GET_AID;
+
+        return createMockResponse(body);
+    }
 
     @Test
     void testGroups() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -23,16 +31,19 @@ public class GroupingTest extends BaseMockServerTest {
         Grouping.Groups groups = client.getGroups();
 
         groups.sendRequest("aid1", new HashMap<>(), List.of(), "");
-        RecordedRequest request = mockWebServer.takeRequest();
-        assertEquals("POST", request.getMethod());
-        assertEquals(url + "/identifiers/aid1/multisig/request", request.getRequestUrl().toString());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/aid1/multisig/request"),
+            eq("POST"),
+            any(),
+            any()
+        );
 
         groups.getRequest("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00");
-        request = mockWebServer.takeRequest();
-        assertEquals("GET", request.getMethod());
-        assertEquals(
-            url + "/multisig/request/ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
-            request.getRequestUrl().toString()
+        Mockito.verify(client).fetch(
+            eq("/multisig/request/ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00"),
+            eq("GET"),
+            isNull(),
+            any()
         );
 
         groups.join(
@@ -43,8 +54,11 @@ public class GroupingTest extends BaseMockServerTest {
             List.of("1", "2", "3"),
             List.of("a", "b", "c")
         );
-        request = mockWebServer.takeRequest();
-        assertEquals("POST", request.getMethod());
-        assertEquals(url + "/identifiers/aid1/multisig/join", request.getRequestUrl().toString());
+        Mockito.verify(client).fetch(
+            eq("/identifiers/aid1/multisig/join"),
+            eq("POST"),
+            any(),
+            any()
+        );
     }
 }
