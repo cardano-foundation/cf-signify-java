@@ -919,42 +919,6 @@ public class MultisigTest1 extends BaseIntegrationTest {
         );
     }
 
-    public List<Object> issueMultisig(SignifyClient client,
-                                      String groupName,
-                                      boolean isInitiator)
-            throws Exception {
-        String msgSaid = null;
-        if (isInitiator) {
-            msgSaid = waitAndMarkNotification(client, "/multisig/iss");
-        }
-        System.out.println(groupName + " received exchange message to join the credential create event");
-
-        Object res = client.getGroups().getRequest(msgSaid);
-        Map<String, Object> exn = castObjectToLinkedHashMap(
-                castObjectToListMap(res).getFirst().get("exn")
-        );
-        String credentialSaid = castObjectToLinkedHashMap(
-                castObjectToLinkedHashMap(exn.get("e")).get("acdc")).get("d").toString();
-        Object acdcMap = Utils.toMap(Utils.toMap(exn.get("e"))).get("acdc");
-
-        CredentialData.CredentialSubject credentialSubject = CredentialData.CredentialSubject.builder()
-                .i(Utils.toMap(Utils.toMap(acdcMap).get("a")).get("i").toString())
-                .dt(Utils.toMap(Utils.toMap(acdcMap).get("a")).get("dt").toString())
-                .additionalProperties(Map.of("LEI", Utils.toMap(Utils.toMap(acdcMap).get("a")).get("LEI").toString()))
-                .build();
-
-
-        CredentialData credentialData = objectMapper.convertValue(acdcMap, CredentialData.class);
-        credentialData.setA(credentialSubject);
-
-        IssueCredentialResult credRes = client.getCredentials().issue("multisig", credentialData);
-
-        Object op = credRes.getOp();
-        multisigIssue(client, groupName, "multisig", credRes);
-        List<Object> list = Arrays.asList(op, credentialSaid);
-        return list;
-    }
-
     public static List<Object> createRegistryMultisig(
             SignifyClient client,
             States.HabState aid,
