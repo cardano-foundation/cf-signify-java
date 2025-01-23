@@ -1,15 +1,14 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Coring;
 import org.cardanofoundation.signify.app.Exchanging;
+import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.clienting.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -261,7 +260,6 @@ public class MultisigTest1 extends BaseIntegrationTest {
         );
 
         String multisig = Utils.toMap(aids3.get(1)).get("prefix").toString();
-
         States.HabState multisigAID = client1.getIdentifier().get("multisig");
 
         String timestamp = TestUtils.createTimestamp();
@@ -480,6 +478,8 @@ public class MultisigTest1 extends BaseIntegrationTest {
         );
         op1 = registryMultisigList.get(0);
         String regk = registryMultisigList.get(1).toString();
+        String nameOp1 = Operation.fromObject(op1).getName();
+
         System.out.println("Member1 initiated registry, waiting for others to join...");
 
         // Member2 check for notifications and join the create registry event
@@ -492,6 +492,7 @@ public class MultisigTest1 extends BaseIntegrationTest {
                 nonce,
                 true
         );
+        String nameOp2 = Operation.fromObject(op2).getName();
         System.out.println("Member2 joins registry event, waiting for others...");
 
         // Member3 check for notifications and join the create registry event
@@ -504,12 +505,18 @@ public class MultisigTest1 extends BaseIntegrationTest {
                 nonce,
                 true
         );
+        String nameOp3 = Operation.fromObject(op3).getName();
 
         // Done
+//        waitAsync(2000);
         waitOperationAsync(
                 new WaitOperationArgs(client1, op1),
                 new WaitOperationArgs(client2, op2),
                 new WaitOperationArgs(client3, op3)
+        );
+        deleteOperations(
+                List.of(client1, client2, client3),
+                List.of(nameOp1, nameOp2, nameOp3)
         );
         System.out.println("Multisig create registry completed!");
 
@@ -533,8 +540,11 @@ public class MultisigTest1 extends BaseIntegrationTest {
                 .a(subject)
                 .build();
 
+        waitAsync(2000);
         IssueCredentialResult credRes = client1.getCredentials().issue("multisig", credentialData);
         op1 = credRes.getOp();
+        nameOp1 = Operation.fromObject(op1).getName();
+
         multisigIssue(client1, "member1", "multisig", credRes);
 
         System.out.println("Member1 initiated credential creation, waiting for others to join...");
@@ -565,6 +575,7 @@ public class MultisigTest1 extends BaseIntegrationTest {
         IssueCredentialResult credRes2 = client2.getCredentials().issue("multisig", credentialData2);
 
         op2 = credRes2.getOp();
+        nameOp2 = Operation.fromObject(op2).getName();
         multisigIssue(client2, "member2", "multisig", credRes2);
         System.out.println("Member2 joins credential create event, waiting for others...");
 
@@ -589,13 +600,21 @@ public class MultisigTest1 extends BaseIntegrationTest {
         IssueCredentialResult credRes3 = client3.getCredentials().issue("multisig", credentialData3);
 
         op3 = credRes3.getOp();
+        nameOp3 = Operation.fromObject(op3).getName();
         multisigIssue(client3, "member3", "multisig", credRes3);
         System.out.println("Member3 joins credential create event, waiting for others...");
+        waitAsync(2000);
 
         // Check completion
-        op1 = waitOperation(client1, op1);
-        op2 = waitOperation(client2, op2);
-        op3 = waitOperation(client3, op3);
+        waitOperationAsync(
+                new WaitOperationArgs(client1, op1),
+                new WaitOperationArgs(client2, op2),
+                new WaitOperationArgs(client3, op3)
+        );
+        deleteOperations(
+                List.of(client1, client2, client3),
+                List.of(nameOp1, nameOp2, nameOp3)
+        );
         System.out.println("Multisig create credential completed!");
 
         States.HabState m = client1.getIdentifier().get("multisig");
@@ -627,7 +646,7 @@ public class MultisigTest1 extends BaseIntegrationTest {
         List<String> gsigs = grantResult.sigs();
         String end = grantResult.atc();
 
-        client1.getIpex().submitGrant("multisig", grant, gsigs, end, List.of(holder));
+        op1 = client1.getIpex().submitGrant("multisig", grant, gsigs, end, List.of(holder));
 
         Map<String, Object> mstate = Utils.toMap(m.getState());
         List<Object> seal = Arrays.asList(
@@ -757,7 +776,6 @@ public class MultisigTest1 extends BaseIntegrationTest {
                 recp
         );
 
-
         System.out.println("Member3 joined grant message, waiting for others to join...");
 
         msgSaid = waitAndMarkNotification(client4, "/exn/ipex/grant");
@@ -777,14 +795,15 @@ public class MultisigTest1 extends BaseIntegrationTest {
 
         op4 = client4.getIpex().submitAdmit("holder", admit, asigs, aend, List.of(m.getPrefix()));
 
-        /// Debug error 404 - {"title": "long running operation 'query.EMowowbwZTyIKjNEJDsR13R5toMWOzhm0pSo9KWf-dSM.4' not found"}
-        op1 = waitOperation(client1, op1);
-        op2 = waitOperation(client2, op2);
-        op3 = waitOperation(client3, op3);
-        op4 = waitOperation(client4, op4);
-
+        waitOperationAsync(
+                new WaitOperationArgs(client1, op1),
+                new WaitOperationArgs(client2, op2),
+                new WaitOperationArgs(client3, op3),
+                new WaitOperationArgs(client4, op4)
+        );
         System.out.println("Holder creates and sends admit message");
 
+        waitAsync(2000);
         msgSaid = waitAndMarkNotification(client1, "/exn/ipex/admit");
         System.out.println("Member1 received exchange message with the admit response");
         List<Object> creds = (List<Object>) client4.getCredentials().list(CredentialFilter.builder().build());
@@ -822,9 +841,11 @@ public class MultisigTest1 extends BaseIntegrationTest {
         System.out.println("Member3 joins credential revoke event, waiting for others...");
 
         // Check completion
-        op1 = waitOperation(client1, op1);
-        op2 = waitOperation(client2, op2);
-        op3 = waitOperation(client3, op3);
+        waitOperationAsync(
+                new WaitOperationArgs(client1, op1),
+                new WaitOperationArgs(client2, op2),
+                new WaitOperationArgs(client3, op3)
+        );
         System.out.println("Multisig credential revocation completed!");
     }
 
@@ -840,7 +861,6 @@ public class MultisigTest1 extends BaseIntegrationTest {
             String groupName,
             IssueCredentialResult result
     ) throws Exception {
-
         States.HabState leaderHab = client.getIdentifier().get(memberName);
         States.HabState groupHab = client.getIdentifier().get(groupName);
         Object members = client.getIdentifier().members(groupName);
@@ -972,8 +992,10 @@ public class MultisigTest1 extends BaseIntegrationTest {
         return list;
     }
 
-    public States.State convertValueToStateClass(Object obj) {
-        return objectMapper.convertValue(obj, new TypeReference<>() {
-        });
+    public void deleteOperations(List<SignifyClient> clients, List<String> name) throws Exception {
+        for (int i = 1; i <= clients.size(); i++) {
+            deleteOperation(clients.get(i - 1), name.get(i - 1));
+        }
     }
 }
+
