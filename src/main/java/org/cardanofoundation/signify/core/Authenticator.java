@@ -56,7 +56,7 @@ public class Authenticator {
         if (!success) {
             throw new SodiumException("Failed to convert secret key ed25519 to Curve25519");
         }
-        this.cx25519Priv = sigkey;
+        this.cx25519Priv = skey;
 
         byte[] pkey = new byte[32];
         success = lazySodium.cryptoScalarMultBase(pkey, skey);
@@ -76,8 +76,14 @@ public class Authenticator {
 
     public boolean verify(Map<String, String> headers, String method, String path) {
         String sigInput = headers.get(Httping.HEADER_SIG_INPUT);
+        if (sigInput == null) {
+            return false;
+        }
 
-        final String signature = headers.get(Httping.HEADER_SIG);
+        String signature = headers.get(Httping.HEADER_SIG);
+        if (signature == null) {
+            return false;
+        }
         List<Httping.Inputage> inputs = Httping.desiginput(sigInput);
         inputs = inputs.stream().filter(input -> input.getName().equals("signify")).toList();
 
@@ -95,8 +101,8 @@ public class Authenticator {
                         items.add("\"" + field + "\": " + path);
                     }
                 } else {
-                    if (headers.containsKey(field)) {
-                        String value = headers.get(field);
+                    if (headers.keySet().stream().anyMatch(key -> key.equalsIgnoreCase(field))) {
+                        String value = normalize(getHeaderCaseInsensitive(headers, field));
                         items.add("\"" + field + "\": " + value);
                     }
                 }
@@ -127,7 +133,7 @@ public class Authenticator {
             List<Signage> signages = Signage.designature(signature);
             Map<String, Object> markers = (Map<String, Object>) signages.get(0).getMarkers();
             Object cig = markers.get(input.getName());
-            if (cig == null || !this.verfer.verify(((Matter) cig).getRaw(), ser.getBytes())) {
+            if (cig == null || !this.verfer.verify(((Cigar) cig).getRaw(), ser.getBytes())) {
                 throw new IllegalArgumentException("Signature for " + input.getKeyid() + " invalid.");
             }
         });
@@ -177,7 +183,7 @@ public class Authenticator {
     ) throws Exception {
         String dt = new Date().toInstant().toString().replace("Z", "000+00:00");
 
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         headers.put(HEADER_SIG_SENDER, sender);
         headers.put(HEADER_SIG_DESTINATION, receiver);
         headers.put(HEADER_SIG_TIME, dt);
@@ -194,31 +200,31 @@ public class Authenticator {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("src", sender);
         payload.put("dest", receiver);
-        payload.put("d", diger.getQb64b());
+        payload.put("d", diger.getQb64());
         payload.put("dt", dt);
 
-        Siger sig = (Siger) this.csig.sign(Utils.jsonStringify(payload).getBytes());
+        Cigar sig = (Cigar) this.csig.sign(Utils.jsonStringify(payload).getBytes());
         Map<String, Object> markers = new LinkedHashMap<>();
         markers.put("signify", sig);
         Signage signage = new Signage(markers, false);
         Map<String, String> signed = Signage.signature(Collections.singletonList(signage));
 
-        Map<String, String> finalHeaders = new HashMap<>(headers);
+        Map<String, String> finalHeaders = new LinkedHashMap<>(headers);
         finalHeaders.putAll(signed);
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
             .uri(URI.create(baseUrl + '/'))
-            .method("POST", HttpRequest.BodyPublishers.ofString(Arrays.toString(raw)));
+            .method("POST", HttpRequest.BodyPublishers.ofByteArray(raw));
 
         finalHeaders.forEach(requestBuilder::header);
 
         return requestBuilder.build();
     }
 
-    private String serializeRequest(HttpRequest request) throws Exception {
+    public static String serializeRequest(HttpRequest request) throws Exception {
         StringBuilder headers = new StringBuilder();
         request.headers().map().forEach((key, values) -> {
-            values.forEach(value -> headers.append(key).append(": ").append(value).append("\r\n"));
+            values.forEach(value -> headers.append(key.toLowerCase()).append(": ").append(value).append("\r\n"));
         });
 
         String body = "";
@@ -284,10 +290,10 @@ public class Authenticator {
             throw new InvalidValueException("Timestamp is missing from ESSR payload");
         }
 
-        byte[] ciphertext = wrapper.body().toString().getBytes(StandardCharsets.UTF_8);
+        byte[] ciphertext = wrapper.body() != null ? getResponseBody(wrapper) : new byte[0];
         Diger diger = new Diger(Codex.MatterCodex.Blake3_256.getValue(), ciphertext);
 
-        Map<String, Object> payload = new HashMap<>();
+        Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("src", sender);
         payload.put("dest", receiver);
         payload.put("d", diger.getQb64b());
@@ -295,7 +301,7 @@ public class Authenticator {
 
         List<Signage> signages = Signage.designature(signature);
         Map<String, Object> markers = (Map<String, Object>) signages.get(0).getMarkers();
-        Matter cig = (Matter) markers.get("signify");
+        Cigar cig = (Cigar) markers.get("signify");
 
         boolean verified = this.verfer.verify(cig.getRaw(), Utils.jsonStringify(payload).getBytes());
         if (!verified) {
@@ -314,12 +320,12 @@ public class Authenticator {
             throw new SodiumException("Crypto box seal open failed");
         }
 
-        HttpResponse<?> response = deserializeResponse(Arrays.toString(plain));
+        HttpResponse<?> response = deserializeResponse(new String(plain, StandardCharsets.UTF_8));
 
         Map<String, String> finalResponseHeaders = new LinkedHashMap<>();
         response.headers().map().forEach((key, values) ->
             finalResponseHeaders.put(key, values.getFirst()));
-        if (!sender.equals(finalResponseHeaders.get(HEADER_SIG_SENDER))) {
+        if (!sender.equals(finalResponseHeaders.get(HEADER_SIG_SENDER.toLowerCase()))) {
             throw new InvalidValueException("Invalid ESSR payload, missing or incorrect encrypted sender");
         }
 
@@ -396,5 +402,55 @@ public class Authenticator {
                 return HttpClient.Version.HTTP_1_1;
             }
         };
+    }
+
+    private String getHeaderCaseInsensitive(Map<String, String> headers, String field) {
+        return headers.entrySet()
+            .stream()
+            .filter(e -> e.getKey().equalsIgnoreCase(field))
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .orElse(null);
+    }
+
+    public static byte[] getRequestBody(HttpRequest request) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        request.bodyPublisher().ifPresent(publisher ->
+            publisher.subscribe(new Flow.Subscriber<>() {
+                @Override
+                public void onSubscribe(Flow.Subscription subscription) {
+                    subscription.request(Long.MAX_VALUE);
+                }
+
+                @Override
+                public void onNext(ByteBuffer item) {
+                    bytes.writeBytes(item.array());
+                }
+
+                @Override
+                public void onError(Throwable throwable) {}
+
+                @Override
+                public void onComplete() {}
+            }));
+        return bytes.toByteArray();
+    }
+
+    public static byte[] getResponseBody(HttpResponse<?> response) {
+        if (response.body() == null) {
+            return new byte[0];
+        }
+
+        if (response.body() instanceof byte[]) {
+            return (byte[]) response.body();
+        }
+
+        if (response.body() instanceof ByteBuffer buffer) {
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            return bytes;
+        }
+
+        throw new IllegalArgumentException("Unsupported response body type: " + response.body().getClass());
     }
 }
