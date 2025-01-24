@@ -365,6 +365,7 @@ public class MultisigUtils {
             States.HabState multisigAID,
             String registryName,
             String nonce,
+            String topic,
             boolean isInitiator) throws Exception {
 
         if (!isInitiator) {
@@ -399,7 +400,7 @@ public class MultisigUtils {
 
         client.getExchanges().send(
                 aid.getName(),
-                "registry",
+                topic,
                 aid,
                 "/multisig/vcp",
                 Map.of("gid", multisigAID.getPrefix()),
@@ -408,6 +409,18 @@ public class MultisigUtils {
         );
 
         return op;
+    }
+
+    public static Object createRegistryMultisig(
+            SignifyClient client,
+            States.HabState aid,
+            List<States.HabState> otherMembersAIDs,
+            States.HabState multisigAID,
+            String registryName,
+            String nonce,
+            boolean isInitiator) throws Exception {
+
+        return createRegistryMultisig(client, aid, otherMembersAIDs, multisigAID, registryName, nonce, "registry", isInitiator);
     }
 
     public static Object createMultisig(
