@@ -5,9 +5,6 @@ plugins {
     id 'org.ajoberstar.grgit' version '5.2.0'
 }
 
-group = 'org.cardanofoundation'
-version = '1.0-SNAPSHOT'
-
 repositories {
     mavenCentral()
     maven {
@@ -15,14 +12,18 @@ repositories {
     }
 }
 
+group = 'org.cardanofoundation'
+version = '1.0-SNAPSHOT'
+
 def commit_id=getCheckedOutGitCommitHash()
 if (project.version.endsWith("-SNAPSHOT")) {
     version = "${project.version}".replace("-SNAPSHOT", "-${commit_id}-SNAPSHOT")
 }
-
 def getCheckedOutGitCommitHash() {
     grgit.head().abbreviatedId
 }
+
+apply from: './publish-common.gradle'
 
 def lombokVersion = '1.18.30'
 def lazysodiumVersion = '5.1.4'

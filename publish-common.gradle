@@ -6,17 +6,11 @@ if (!name.equalsIgnoreCase("components")) {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
-                artifact(sourceJar) {
-                    classifier = 'sources'
-                }
-                artifact(javadocJar) {
-                    classifier = 'javadoc'
-                }
 
-                artifactId 'ledger-sync-' + project.name
+                artifactId 'signify'
 
                 pom {
-                    url = 'https://github.com/cardanofoundation/cf-ledger-sync'
+                    url = 'https://github.com/cardanofoundation/cf-signify-java'
                     licenses {
                         license {
                             name = 'Apache License 2.0'
