@@ -77,6 +77,18 @@ jobs:
       - e2e-tests
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v3
+
       - name: GPG checks
         run: |
           which gpg
