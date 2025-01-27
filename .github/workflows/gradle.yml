@@ -99,6 +99,10 @@ jobs:
           echo "${{secrets.MAVEN_CENTRAL_GPG_KEY_BASE64}}" > ~/.gradle/secring.gpg.b64
           base64 -d ~/.gradle/secring.gpg.b64 > ~/.gradle/secring.gpg
           echo "${{secrets.MAVEN_CENTRAL_GPG_PASSPHRASE}}" | gpg --batch --yes --passphrase-fd 0 --import ~/.gradle/secring.gpg
+
+      - name: Build package
+        run: ./gradlew build
+
       - name: Publish package
         run: |
           ./gradlew publish \
