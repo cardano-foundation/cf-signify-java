@@ -1,8 +1,6 @@
 package org.cardanofoundation.signify.app.credentialing.credentials;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,6 +8,8 @@ import java.util.Map;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CredentialData {
     private String v;
     private String d;
@@ -24,6 +24,8 @@ public class CredentialData {
     @Getter
     @Setter
     @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class CredentialSubject {
         private String i; // Issuee, or holder of the credential.
         private String dt; // Timestamp of issuance.
