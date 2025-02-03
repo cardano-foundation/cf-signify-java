@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
@@ -29,6 +30,7 @@ import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -262,7 +264,7 @@ public class MultisigTest extends BaseIntegrationTest {
         States.HabState multisigAID = client1.getIdentifier().get("multisig");
 
         String timestamp = TestUtils.createTimestamp();
-        List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
+        List<Object> opList1 = MultisigUtils.addEndRoleMultisigs(
                 client1,
                 "multisig",
                 aid1,
@@ -272,7 +274,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 true
         );
 
-        List<Object> opList2 = MultisigUtils.addEndRoleMultisig(
+        List<Object> opList2 = MultisigUtils.addEndRoleMultisigs(
                 client2,
                 "multisig",
                 aid2,
@@ -281,7 +283,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 timestamp,
                 false
         );
-        List<Object> opList3 = MultisigUtils.addEndRoleMultisig(
+        List<Object> opList3 = MultisigUtils.addEndRoleMultisigs(
                 client3,
                 "multisig",
                 aid3,
@@ -972,6 +974,17 @@ public class MultisigTest extends BaseIntegrationTest {
         );
         List<Object> list = List.of(op, regk);
         return list;
+    }
+
+    public static <T> Operation<T> waitOperations(
+            SignifyClient client,
+            Object op) throws SodiumException, IOException, InterruptedException {
+        Operation operation = Operation.fromObject(op);
+        String name = operation.getName();
+        operation = client.getOperations().wait(operation);
+        TestUtils.deleteOperations(client, operation);
+        TestUtils.deleteOperation(client, name);
+        return operation;
     }
 
     public void deleteOperations(List<SignifyClient> clients, List<String> name) throws Exception {

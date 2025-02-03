@@ -244,6 +244,62 @@ public class MultisigUtils {
         return opList;
     }
 
+    public static List<Object> addEndRoleMultisigs(SignifyClient client, String groupName, States.HabState aid,
+                                                  List<States.HabState> otherMemberAIDs, States.HabState multisigAID,
+                                                  String timestamp,
+                                                  boolean isInitiator) throws Exception {
+        if (!isInitiator) {
+            TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
+        }
+
+        List<Object> opList = new ArrayList<>();
+        Map<String, Object> members = (Map<String, Object>) client.getIdentifier().members(groupName);
+        List<Object> signings = (List<Object>) members.get("signing");
+
+        Map<String, Object> signingMap = TestUtils.castObjectToListMap(signings).get(0);
+        Map<String, Object> ends = (Map<String, Object>) signingMap.get("ends");
+        LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.get("agent");
+
+        String eid = agent.firstEntry().getKey();
+        EventResult endRoleResult = client
+                .getIdentifier()
+                .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
+
+        opList.add(endRoleResult.op());
+
+        Serder rpy = endRoleResult.serder();
+        List<String> sigs = endRoleResult.sigs();
+        States.State ghapState1 = multisigAID.getState();
+
+        Map<String, Object> seal2 = new LinkedHashMap<>();
+        seal2.put("i", multisigAID.getPrefix());
+        seal2.put("s", ghapState1.getEe().getS());
+        seal2.put("d", ghapState1.getEe().getD());
+        List<Object> seal = List.of("SealEvent", seal2);
+
+        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
+        String roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
+        String atc = roleims.substring(rpy.getSize());
+        Map<String, List<Object>> roleEmbeds = new LinkedHashMap<>();
+        roleEmbeds.put("rpy", List.of(rpy, atc));
+
+        List<String> recp = otherMemberAIDs.stream().map(States.HabState::getPrefix).toList();
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("gid", multisigAID.getPrefix());
+
+        client.getExchanges().send(
+                aid.getName(),
+                groupName,
+                aid,
+                "/multisig/rpy",
+                payload,
+                roleEmbeds,
+                recp
+        );
+        return opList;
+    }
+
     public static void admitMultisig(
             SignifyClient client,
             States.HabState aid,
