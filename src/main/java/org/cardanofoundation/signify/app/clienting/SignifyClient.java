@@ -28,7 +28,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Authenticater;
+import org.cardanofoundation.signify.core.Authenticator;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.cesr.Salter;
@@ -55,7 +55,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private String bran;
     private int pidx;
     private Agent agent;
-    private Authenticater authn;
+    private Authenticator authn;
     private Keeping.KeyManager manager;
     private Salter.Tier tier;
     private String bootUrl;
@@ -205,7 +205,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             this.externalModules
         );
 
-        this.authn = new Authenticater(
+        this.authn = new Authenticator(
             this.controller.getSigner(),
             this.agent.getVerfer()
         );

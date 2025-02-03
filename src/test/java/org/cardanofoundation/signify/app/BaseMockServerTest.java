@@ -1,21 +1,26 @@
 package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.core.Authenticater;
+import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.core.Httping;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 
+import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class BaseMockServerTest {
     public MockWebServer mockWebServer;
@@ -23,6 +28,8 @@ public class BaseMockServerTest {
     public String bootUrl = "http://127.0.0.1:3903";
     public final String bran = "0123456789abcdefghijk";
     public final ObjectMapper objectMapper = new ObjectMapper();
+    public SignifyClient client;
+    public Map<String, String> lastRequestHeaders;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -31,7 +38,32 @@ public class BaseMockServerTest {
         bootUrl = mockWebServer.url("/").toString().replaceAll("/$", "");
         url = mockWebServer.url("/").toString().replaceAll("/$", "");
 
+        SignifyClient realClient = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+
+        // Create spy and mock fetch method
+        client = Mockito.spy(realClient);
+        Mockito.doAnswer(invocation -> {
+            String path = invocation.getArgument(0);
+            lastRequestHeaders = invocation.getArgument(3);
+            return mockFetch(path);
+        }).when(client).fetch(anyString(), anyString(), any(), any());
+
         setUpNormalDispatcher();
+    }
+
+    public HttpResponse<String> mockFetch(String path) {
+        return createMockResponse(MOCK_GET_AID);
+    }
+
+    public HttpResponse<String> createMockResponse(String body) {
+        HttpResponse<String> httpResponse = mock(HttpResponse.class);
+        when(httpResponse.body()).thenReturn(body);
+        when(httpResponse.statusCode()).thenReturn(202);
+        return httpResponse;
+    }
+
+    public void verifyRequestHeader(String key, String expectedValue) {
+        assertEquals(expectedValue, lastRequestHeaders.get(key));
     }
 
     void setUpNormalDispatcher() {
@@ -59,11 +91,7 @@ public class BaseMockServerTest {
                 else if (requestUrl.startsWith(url + "/different-remote-agent")) {
                     return mockBadRequestHeader(true);
                 } else {
-                    try {
-                        return mockAllRequests(request);
-                    } catch (SodiumException e) {
-                        throw new RuntimeException(e);
-                    }
+                    throw new RuntimeException("Wrong fetch used");
                 }
             }
         });
@@ -228,42 +256,6 @@ public class BaseMockServerTest {
             }
         }""";
 
-    public MockResponse mockAllRequests(RecordedRequest req) throws SodiumException {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
-        headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
-        headers.put("content-type", "application/json");
-
-        String reqUrl = req.getRequestUrl().toString();
-        Salter salter = new Salter("0AAwMTIzNDU2Nzg5YWJjZGVm");
-        Signer signer = salter.signer(
-                "A",
-                true,
-                "agentagent-ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
-                Salter.Tier.low,
-                false
-        );
-
-        Authenticater authn = new Authenticater(signer, signer.getVerfer());
-        Map<String, String> signedHeaderMap = authn.sign(
-                headers,
-                req.getMethod(),
-                req.getPath().split("\\?")[0],
-                null
-        );
-
-        String body = reqUrl.startsWith(url + "/identifiers/aid1/credentials")
-                ? MOCK_CREDENTIAL
-                : MOCK_GET_AID;
-
-        MockResponse mockResponse = new MockResponse()
-                .setResponseCode(202)
-                .setBody(body);
-
-        signedHeaderMap.forEach(mockResponse::addHeader);
-        return mockResponse;
-    }
-
     MockResponse mockBadRequestHeader(boolean differentRemoteAgent) {
         Map<String, String> badAgentHeaders = new LinkedHashMap<>();
         if (differentRemoteAgent) {
@@ -314,18 +306,5 @@ public class BaseMockServerTest {
                 break;
             }
         }
-    }
-
-    List<RecordedRequest> getRecordedRequests() throws InterruptedException {
-        List<RecordedRequest> recordedRequests = new LinkedList<>();
-        while (true) {
-            RecordedRequest request = mockWebServer.takeRequest(200, TimeUnit.MILLISECONDS);
-            if (request == null) {
-                break;
-            } else {
-                recordedRequests.add(request);
-            }
-        }
-        return recordedRequests;
     }
 }

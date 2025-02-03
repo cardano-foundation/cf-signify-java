@@ -1,20 +1,29 @@
 package org.cardanofoundation.signify.app;
 
-import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.net.http.HttpResponse;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 
 public class EscrowingTest extends BaseMockServerTest {
+
+    @Override
+    public HttpResponse<String> mockFetch(String path) {
+        String body = path.startsWith("/identifiers/aid1/credentials")
+            ? MOCK_CREDENTIAL
+            : MOCK_GET_AID;
+
+        return createMockResponse(body);
+    }
 
     @Test
     @DisplayName("Test Escrows")
     void testEscrows() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -22,11 +31,11 @@ public class EscrowingTest extends BaseMockServerTest {
         Escrowing.Escrows escrows = client.getEscrows();
         escrows.listReply("/presentation/request");
 
-        RecordedRequest request = mockWebServer.takeRequest();
-        assertEquals("GET", request.getMethod());
-        assertEquals(
-            url + "/escrows/rpy?route=%2Fpresentation%2Frequest",
-            request.getRequestUrl().toString()
+        Mockito.verify(client).fetch(
+            eq("/escrows/rpy?route=%2Fpresentation%2Frequest"),
+            eq("GET"),
+            isNull(),
+            any()
         );
     }
 }

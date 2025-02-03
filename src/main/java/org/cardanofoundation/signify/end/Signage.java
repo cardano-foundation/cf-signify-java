@@ -12,6 +12,8 @@ import org.cardanofoundation.signify.cesr.Siger;
 import lombok.Getter;
 import lombok.Setter;
 
+import static org.cardanofoundation.signify.core.Httping.HEADER_SIG;
+
 @Getter
 @Setter
 public class Signage {
@@ -123,7 +125,7 @@ public class Signage {
             values.add(String.join(";", items));
         }
 
-        return Map.of("signature", String.join(",", values));
+        return Map.of(HEADER_SIG, String.join(",", values));
     }
 
     public static List<Signage> designature(String value) {

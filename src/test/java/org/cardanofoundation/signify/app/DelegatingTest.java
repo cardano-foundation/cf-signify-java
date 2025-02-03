@@ -1,33 +1,24 @@
 package org.cardanofoundation.signify.app;
 
-import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.mockito.Mockito;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 
 public class DelegatingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Test approve delegation")
     void testApproveDelegation() throws Exception {
-        String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
 
         Delegating.Delegations delegations = client.getDelegations();
         delegations.approve("EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao");
-
-        RecordedRequest request = getRecordedRequests().getLast();
-        assertEquals("POST", request.getMethod());
-        assertEquals(
-            url + "/identifiers/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao/delegation",
-            request.getRequestUrl().toString()
-        );
 
         String expectedBody = """
             {
@@ -56,9 +47,18 @@ public class DelegatingTest extends BaseMockServerTest {
                 }
             }""";
 
-        assertEquals(
-            objectMapper.readTree(expectedBody),
-            objectMapper.readTree(request.getBody().readUtf8())
+        Mockito.verify(client).fetch(
+            eq("/identifiers/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao/delegation"),
+            eq("POST"),
+            argThat(arg -> {
+                try {
+                    return objectMapper.readTree(objectMapper.writeValueAsString(arg))
+                            .equals(objectMapper.readTree(expectedBody));
+                } catch (JsonProcessingException e) {
+                    return false;
+                }
+            }),
+            any()
         );
     }
 }
