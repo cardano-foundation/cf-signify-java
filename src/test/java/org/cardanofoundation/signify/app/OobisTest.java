@@ -24,7 +24,7 @@ public class OobisTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Oobis oobis = client.getOobis();
+        Oobis oobis = client.oobis();
 
         // Test get
         oobis.get("aid", "agent");

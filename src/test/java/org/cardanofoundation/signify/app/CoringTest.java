@@ -38,8 +38,8 @@ public class CoringTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Coring.KeyEvents keyEvents = client.getKeyEvents();
-        KeyStates keyStates = client.getKeyStates();
+        Coring.KeyEvents keyEvents = client.keyEvents();
+        KeyStates keyStates = client.keyStates();
 
         keyEvents.get("EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX");
         RecordedRequest request = mockWebServer.takeRequest();
@@ -92,7 +92,7 @@ public class CoringTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Coring.Config config = client.getConfig();
+        Coring.Config config = client.config();
 
         config.get();
         RecordedRequest request = mockWebServer.takeRequest();

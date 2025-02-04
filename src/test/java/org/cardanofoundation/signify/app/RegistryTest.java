@@ -53,9 +53,8 @@ public class RegistryTest {
         when(mockedKeyManager.get(hab)).thenReturn(mockedKeeper);
         when(mockedKeeper.sign(any(byte[].class))).thenReturn(new Keeping.SignResult(Collections.singletonList("'a signature'")));
 
-
         when(mockedIdentifiers.get("a name")).thenReturn(hab);
-        when(mockedClient.getIdentifier()).thenReturn(mockedIdentifiers);
+        when(mockedClient.identifiers()).thenReturn(mockedIdentifiers);
 
         when(mockedKeeper.getAlgo()).thenReturn(Manager.Algos.salty);
         when(mockedKeeper.getParams()).thenReturn(SaltyParams.builder().build());
@@ -91,8 +90,7 @@ public class RegistryTest {
                 .build();
 
         when(mockedIdentifiers.get("a name")).thenReturn(hab);
-        when(mockedClient.getIdentifier()).thenReturn(mockedIdentifiers);
-
+        when(mockedClient.identifiers()).thenReturn(mockedIdentifiers);
 
         assertThrows(Exception.class, () -> {
             CreateRegistryArgs args = CreateRegistryArgs.builder()

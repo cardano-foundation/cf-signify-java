@@ -50,7 +50,6 @@ public class Identifier {
      * @return A Mono containing the list response
      */
     public IdentifierListResponse list(Integer start, Integer end) throws SodiumException, InterruptedException, IOException {
-
         Map<String, String> extraHeaders = new LinkedHashMap<>();
         extraHeaders.put("Range", String.format("aids=%d-%d", start, end));
 
@@ -70,6 +69,14 @@ public class Identifier {
                 range.total(),
                 response.body()
         );
+    }
+
+    public IdentifierListResponse list() throws SodiumException, IOException, InterruptedException {
+        return this.list(0, 24);
+    }
+
+    public IdentifierListResponse list(Integer start) throws SodiumException, IOException, InterruptedException {
+        return this.list(start, 24);
     }
 
     /**
@@ -286,13 +293,12 @@ public class Identifier {
     public EventResult interact(String name, Object data) throws SodiumException, InterruptedException, DigestException, IOException {
         InteractionResponse interactionResponse = this.createInteract(name, data);
         HttpResponse<String> response = this.client.fetch(
-                "/identifiers/" + name + "/events",
-                "POST",
-                interactionResponse.jsondata(),
-                null
+            "/identifiers/" + name + "/events",
+            "POST",
+            interactionResponse.jsondata(),
+            null
         );
         return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), response);
-
     }
 
     public InteractionResponse createInteract(String name, Object data) throws SodiumException, InterruptedException, DigestException, IOException {
@@ -308,11 +314,11 @@ public class Identifier {
         }
 
         InteractArgs interactArgs = InteractArgs.builder()
-                .pre(pre)
-                .sn(BigInteger.valueOf(sn + 1))
-                .data((List<Object>) data)
-                .dig(dig)
-                .build();
+            .pre(pre)
+            .sn(BigInteger.valueOf(sn + 1))
+            .data((List<Object>) data)
+            .dig(dig)
+            .build();
         Serder serder = Eventing.interact(interactArgs);
 
         Keeping.Keeper keeper = this.client.getManager().get(hab);
@@ -366,10 +372,10 @@ public class Identifier {
         List<States.State> states = kargs.getStates() == null ? new ArrayList<>() : kargs.getStates();
         List<States.State> rstates = kargs.getStates() == null ? new ArrayList<>() : kargs.getRstates();
         KeeperResult keeperResult = keeper.rotate(
-                ncodes,
-                transferable,
-                states,
-                rstates
+            ncodes,
+            transferable,
+            states,
+            rstates
         );
         List<String> keys = keeperResult.verfers();
         List<String> ndigs = keeperResult.digers();
@@ -380,21 +386,21 @@ public class Identifier {
         String ilk = delegated ? Ilks.DRT.getValue() : Ilks.ROT.getValue();
 
         Serder serder = Eventing.rotate(
-                RotateArgs.builder()
-                        .pre(pre)
-                        .ilk(ilk)
-                        .keys(keys)
-                        .dig(dig)
-                        .sn(ridx)
-                        .isith(cst)
-                        .nsith(nst)
-                        .ndigs(ndigs)
-                        .toad(kargs.getToad())
-                        .wits(wits)
-                        .cuts(cuts)
-                        .adds(adds)
-                        .data(data)
-                        .build()
+            RotateArgs.builder()
+                .pre(pre)
+                .ilk(ilk)
+                .keys(keys)
+                .dig(dig)
+                .sn(ridx)
+                .isith(cst)
+                .nsith(nst)
+                .ndigs(ndigs)
+                .toad(kargs.getToad())
+                .wits(wits)
+                .cuts(cuts)
+                .adds(adds)
+                .data(data)
+                .build()
         );
 
         List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
@@ -407,14 +413,13 @@ public class Identifier {
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(
-                "/identifiers/" + name + "/events",
-                "POST",
-                jsondata,
-                null
+            "/identifiers/" + name + "/events",
+            "POST",
+            jsondata,
+            null
         );
 
         return new EventResult(serder, sigs, res);
     }
 
-    //TODO implement the rest of the function
 }

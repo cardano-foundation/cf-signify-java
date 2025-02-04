@@ -57,13 +57,13 @@ public class SinglesigROT extends TestUtils {
     public void singlesig_rot_step1() throws Exception {
         assertEquals(name1_id, contact1_id);
 
-        Object keyState1 = client1.getKeyStates().get(name1_id);
+        Object keyState1 = client1.keyStates().get(name1_id);
         String respDataKeyState1 = objectMapper.writeValueAsString(keyState1);
         List<Map<String, Object>> keyState1List = objectMapper.readValue(respDataKeyState1, new TypeReference<>() {
         });
         assertEquals(1, keyState1List.size());
 
-        Object ketState2 = client2.getKeyStates().get(contact1_id);
+        Object ketState2 = client2.keyStates().get(contact1_id);
         String respDataKeyState2 = objectMapper.writeValueAsString(ketState2);
         List<Map<String, Object>> keyState2List = objectMapper.readValue(respDataKeyState2, new TypeReference<>() {
         });
@@ -76,7 +76,7 @@ public class SinglesigROT extends TestUtils {
     @Test
     public void singlesig_rot_rot1() throws Exception {
         // local keystate before rot
-        Object keyStates0 = client1.getKeyStates().get(name1_id);
+        Object keyStates0 = client1.keyStates().get(name1_id);
 
         String respDataKeyState0 = objectMapper.writeValueAsString(keyStates0);
         List<Map<String, Object>> listKeyState0 = objectMapper.readValue(respDataKeyState0, new TypeReference<>() {
@@ -92,11 +92,11 @@ public class SinglesigROT extends TestUtils {
 
         // rot
         RotateIdentifierArgs args = RotateIdentifierArgs.builder().build();
-        EventResult result = client1.getIdentifier().rotate("name1", args);
+        EventResult result = client1.identifiers().rotate("name1", args);
         waitOperation(client1, result.op());
 
         // local keystate after rot
-        Object keyState1 = client1.getKeyStates().get(name1_id);
+        Object keyState1 = client1.keyStates().get(name1_id);
         String respDataKeyState1 = objectMapper.writeValueAsString(keyState1);
         List<Map<String, Object>> listKeyState1 = objectMapper.readValue(respDataKeyState1, new TypeReference<>() {
         });
@@ -116,7 +116,7 @@ public class SinglesigROT extends TestUtils {
         );
 
         // remote keystate after rot
-        Object keyState2 = client2.getKeyStates().get(contact1_id);
+        Object keyState2 = client2.keyStates().get(contact1_id);
         String respDataKeyState2 = objectMapper.writeValueAsString(keyState2);
         List<Map<String, Object>> listKeyState2 = objectMapper.readValue(respDataKeyState2, new TypeReference<>() {
         });
@@ -127,7 +127,7 @@ public class SinglesigROT extends TestUtils {
 
         // refresh remote keystate
         int sn = parseInteger(listKeyState1.getFirst().get("s").toString());
-        Object op = client2.getKeyStates().query(contact1_id, sn, null);
+        Object op = client2.keyStates().query(contact1_id, sn, null);
         op = operationToObject(waitOperation(client2, op));
         if (op instanceof String) {
             try {

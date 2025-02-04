@@ -56,14 +56,14 @@ public class SinglesigIXN extends TestUtils {
     public void singlesig_ixn_step1() throws Exception {
         assertEquals(name1_id, contact1_id);
 
-        Object keyState1 = client1.getKeyStates().get(name1_id);
+        Object keyState1 = client1.keyStates().get(name1_id);
         String resKeyState1 = objectMapper.writeValueAsString(keyState1);
         List<HashMap<String, Object>> keyState1List = objectMapper.readValue(
                 resKeyState1, new TypeReference<>() {}
         );
         assertEquals(1, keyState1List.size());
 
-        Object keyState2 = client2.getKeyStates().get(contact1_id);
+        Object keyState2 = client2.keyStates().get(contact1_id);
         String resKeyState2 = objectMapper.writeValueAsString(keyState2);
         List<HashMap<String, Object>> keyState2List = objectMapper.readValue(
                 resKeyState2, new TypeReference<>() {}
@@ -74,7 +74,7 @@ public class SinglesigIXN extends TestUtils {
     @Test
     public void singlesig_ixn_ixn1() throws Exception {
         // local keystate before rot
-        Object keyStates0 = client1.getKeyStates().get(name1_id);
+        Object keyStates0 = client1.keyStates().get(name1_id);
 
         String respDataKeyState0 = objectMapper.writeValueAsString(keyStates0);
         List<Map<String, Object>> listKeyState0 = objectMapper.readValue(
@@ -84,11 +84,11 @@ public class SinglesigIXN extends TestUtils {
         assertNotNull(listKeyState0);
 
         // ixn
-        EventResult result = client1.getIdentifier().interact("name1", null);
+        EventResult result = client1.identifiers().interact("name1", null);
         waitOperation(client1, result.op());
 
         // local keystate after rot
-        Object keyState1 = client1.getKeyStates().get(name1_id);
+        Object keyState1 = client1.keyStates().get(name1_id);
         String respDataKeyState1 = objectMapper.writeValueAsString(keyState1);
         List<Map<String, Object>> listKeyState1 = objectMapper.readValue(
                 respDataKeyState1,
@@ -102,7 +102,7 @@ public class SinglesigIXN extends TestUtils {
         );
 
         // remote keystate after ixn
-        Object keyState2 = client2.getKeyStates().get(contact1_id);
+        Object keyState2 = client2.keyStates().get(contact1_id);
         String respDataKeyState2 = objectMapper.writeValueAsString(keyState2);
         List<Map<String, Object>> listKeyState2 = objectMapper.readValue(
                 respDataKeyState2,
@@ -116,7 +116,7 @@ public class SinglesigIXN extends TestUtils {
 
         // refresh remote keystate
         int sn = parseInteger(listKeyState1.getFirst().get("s").toString());
-        Object op = client2.getKeyStates().query(contact1_id, sn, null);
+        Object op = client2.keyStates().query(contact1_id, sn, null);
         op = operationToObject(waitOperation(client2, op));
         if (op instanceof String) {
             try {

@@ -54,7 +54,7 @@ public class Registries {
      * @throws SodiumException      if a sodium exception occurs
      */
     public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, SodiumException, DigestException {
-        States.HabState hab = this.client.getIdentifier().get(args.getName());
+        States.HabState hab = this.client.identifiers().get(args.getName());
         String pre = hab.getPrefix();
 
         List<String> cnfg = new ArrayList<>();

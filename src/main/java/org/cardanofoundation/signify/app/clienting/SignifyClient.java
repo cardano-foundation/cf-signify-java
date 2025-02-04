@@ -86,7 +86,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
         this.bran = bran;
         this.pidx = 0;
-        this.controller = new Controller(bran, tier, null, null);
+        this.controller = new Controller(bran, tier);
         this.authn = null;
         this.agent = null;
         this.manager = null;
@@ -344,7 +344,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Identifier}
      */
-    public Identifier getIdentifier() {
+    public Identifier identifiers() {
         return new Identifier(this);
     }
 
@@ -353,7 +353,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Oobis}
      */
-    public Oobis getOobis() {
+    public Oobis oobis() {
         return new Oobis(this);
     }
 
@@ -362,7 +362,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Operations}
      */
-    public Operations getOperations() {
+    public Operations operations() {
         return new Operations(this);
     }
 
@@ -371,7 +371,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {KeyEvents}
      */
-    public KeyEvents getKeyEvents() {
+    public KeyEvents keyEvents() {
         return new KeyEvents(this);
     }
 
@@ -380,7 +380,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {KeyStates}
      */
-    public KeyStates getKeyStates() {
+    public KeyStates keyStates() {
         return new KeyStates(this);
     }
 
@@ -389,7 +389,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Credentials}
      */
-    public Credentials getCredentials() {
+    public Credentials credentials() {
         return new Credentials(this);
     }
 
@@ -398,7 +398,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Ipex}
      */
-    public Ipex getIpex() {
+    public Ipex ipex() {
         return new Ipex(this);
     }
 
@@ -407,7 +407,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Registries}
      */
-    public Registries getRegistries() {
+    public Registries registries() {
         return new Registries(this);
     }
 
@@ -416,7 +416,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Schemas}
      */
-    public Schemas getSchemas() {
+    public Schemas schemas() {
         return new Schemas(this);
     }
 
@@ -425,7 +425,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Challenges}
      */
-    public Challenges getChallenges() {
+    public Challenges challenges() {
         return new Challenges(this);
     }
 
@@ -434,7 +434,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Contacts}
      */
-    public Contacts getContacts() {
+    public Contacts contacts() {
         return new Contacts(this);
     }
 
@@ -443,7 +443,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Notifications}
      */
-    public Notifications getNotifications() {
+    public Notifications notifications() {
         return new Notifications(this);
     }
 
@@ -452,7 +452,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Escrows}
      */
-    public Escrows getEscrows() {
+    public Escrows escrows() {
         return new Escrows(this);
     }
 
@@ -461,7 +461,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Groups}
      */
-    public Groups getGroups() {
+    public Groups groups() {
         return new Groups(this);
     }
 
@@ -470,7 +470,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Exchanges}
      */
-    public Exchanges getExchanges() {
+    public Exchanges exchanges() {
         return new Exchanges(this);
     }
 
@@ -479,7 +479,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Delegations}
      */
-    public Delegations getDelegations() {
+    public Delegations delegations() {
         return new Delegations(this);
     }
 
@@ -488,7 +488,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Config}
      */
-    public Config getConfig() {
+    public Config config() {
         return new Config(this);
     }
 

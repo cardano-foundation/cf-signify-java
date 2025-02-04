@@ -23,7 +23,6 @@ public class Credentials {
 
     public final SignifyClient client;
 
-
     public Credentials(SignifyClient client) {
         this.client = client;
     }
@@ -32,7 +31,7 @@ public class Credentials {
      * List credentials
      *
      * @param kargs Optional parameters to filter the credentials
-     * @returns Object to the list of credentials
+     * @return Object to the list of credentials
      */
     public Object list(CredentialFilter kargs) throws SodiumException, IOException, InterruptedException {
         final String path = "/credentials/query";
@@ -57,7 +56,7 @@ public class Credentials {
      *
      * @param said        - SAID of the credential
      * @param includeCESR - Optional flag export the credential in CESR format
-     * @returns Object to the credential
+     * @return Object to the credential
      */
     public Object get(String said, boolean includeCESR) throws SodiumException, IOException, InterruptedException {
         final String path = "/credentials/" + said;
@@ -75,6 +74,17 @@ public class Credentials {
         return Utils.fromJson(response.body(), Object.class);
     }
 
+    /**
+     * Delete a credential from the DB
+     *
+     * @param said - SAID of the credential
+     */
+    public void delete(String said) throws SodiumException, IOException, InterruptedException {
+        final String path = "/credentials/" + said;
+        final String method = "DELETE";
+        this.client.fetch(path, method, null, null);
+    }
+
     public Object state(String ri, String said) throws SodiumException, IOException, InterruptedException {
         final String path = "/registries/" + ri + "/" + said;
         final String method = "GET";
@@ -87,7 +97,7 @@ public class Credentials {
      * Issue a credential
      */
     public IssueCredentialResult issue(String name, CredentialData args) throws SodiumException, IOException, InterruptedException, DigestException {
-        final States.HabState hab = this.client.getIdentifier().get(name);
+        final States.HabState hab = this.client.identifiers().get(name);
 
         final boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
         if (estOnly) {
@@ -169,10 +179,10 @@ public class Credentials {
      * @param name     Name or alias of the identifier
      * @param said     SAID of the credential
      * @param datetime Date time of revocation
-     * @returns A promise to the long-running operation
+     * @return A promise to the long-running operation
      */
     public RevokeCredentialResult revoke(String name, String said, String datetime) throws SodiumException, IOException, InterruptedException, DigestException {
-        final States.HabState hab = this.client.getIdentifier().get(name);
+        final States.HabState hab = this.client.identifiers().get(name);
         final String pre = hab.getPrefix();
 
         final String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);

@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.ipex.*;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.security.DigestException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,7 +33,7 @@ public class IpexTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Ipex ipex = client.getIpex();
+        Ipex ipex = client.ipex();
         String holder = "ELjSFdrTdCebJlmvbFNX9-TLhR2PO0_60al1kQp5_e6k";
         Map<String, Object> mockCredential = Utils.fromJson(MOCK_CREDENTIAL, Map.class);
         Map<String, Object> sad = (Map<String, Object>) mockCredential.get("sad");
@@ -144,7 +142,7 @@ public class IpexTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Ipex ipex = client.getIpex();
+        Ipex ipex = client.ipex();
         String holder = "ELjSFdrTdCebJlmvbFNX9-TLhR2PO0_60al1kQp5_e6k";
         Map<String, Object> mockCredential = Utils.fromJson(MOCK_CREDENTIAL, Map.class);
         Map<String, Object> sad = (Map<String, Object>) mockCredential.get("sad");
@@ -324,7 +322,7 @@ public class IpexTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Ipex ipex = client.getIpex();
+        Ipex ipex = client.ipex();
         String holder = "ELjSFdrTdCebJlmvbFNX9-TLhR2PO0_60al1kQp5_e6k";
         Map<String, Object> mockCredential = Utils.fromJson(MOCK_CREDENTIAL, Map.class);
         Map<String, Object> sad = (Map<String, Object>) mockCredential.get("sad");

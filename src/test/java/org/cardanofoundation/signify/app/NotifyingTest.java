@@ -17,7 +17,7 @@ public class NotifyingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Notifying.Notifications notifications = client.getNotifications();
+        Notifying.Notifications notifications = client.notifications();
 
         notifications.list(20, 40);
         RecordedRequest request = mockWebServer.takeRequest();

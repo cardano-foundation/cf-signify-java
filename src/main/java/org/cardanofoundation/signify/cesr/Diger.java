@@ -45,7 +45,7 @@ public class Diger extends Matter {
     /**
      *
      * @param ser  serialization bytes
-     * @description  This method will return true if digest of bytes serialization ser matches .raw
+     * @return This method will return true if digest of bytes serialization ser matches .raw
      * using .raw as reference digest for ._verify digest algorithm determined
     by .code
      */

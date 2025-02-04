@@ -33,12 +33,16 @@ public class Saider extends Matter {
 
         public Digestage(Deriver klas, Integer size, Integer length) {
             this.klas = klas;
-            this.size = size == null ? 0 : size;
-            this.length = length == null ? 0 : length;
+            this.size = size;
+            this.length = length;
         }
 
         public Digestage(Deriver klas) {
-            this(klas, null, null);
+            this(klas, 0, 0);
+        }
+
+        public Digestage(Deriver klas, Integer size) {
+            this(klas, size, 0);
         }
     }
 
@@ -155,7 +159,24 @@ public class Saider extends Matter {
         return Serder.dumps(sad, kind);
     }
 
-    public static SaidifyResult saidify(Map<String, Object> sad, String code, CoreUtil.Serials kind, String label) throws DigestException {
+    public static SaidifyResult saidify(Map<String, Object> sad) throws DigestException {
+        return saidify(sad, Codex.MatterCodex.Blake3_256.getValue());
+    }
+
+    public static SaidifyResult saidify(Map<String, Object> sad, String code) throws DigestException {
+        return saidify(sad, code, CoreUtil.Serials.JSON);
+    }
+
+    public static SaidifyResult saidify(Map<String, Object> sad, String code, CoreUtil.Serials kind) throws DigestException {
+        return saidify(sad, code, kind, Ids.d.getValue());
+    }
+
+    public static SaidifyResult saidify(
+        Map<String, Object> sad,
+        String code,
+        CoreUtil.Serials kind,
+        String label
+    ) throws DigestException {
         if (!sad.containsKey(label)) {
             throw new NoSuchElementException("Missing id field labeled = " + label + " in sad.");
         }
@@ -178,10 +199,28 @@ public class Saider extends Matter {
     }
 
     public boolean verify(Map<String, Object> sad) {
-        return verify(sad, false, false, null, Ids.d.getValue());
+        return verify(sad, false);
     }
 
-    public boolean verify(Map<String, Object> sad, boolean prefixed, boolean versioned, CoreUtil.Serials kind, String label) {
+    public boolean verify(Map<String, Object> sad, boolean prefixed) {
+        return verify(sad, prefixed, false);
+    }
+
+    public boolean verify(Map<String, Object> sad, boolean prefixed, boolean versioned) {
+        return verify(sad, prefixed, versioned, null);
+    }
+
+    public boolean verify(Map<String, Object> sad, boolean prefixed, boolean versioned, CoreUtil.Serials kind) {
+        return verify(sad, prefixed, versioned, kind, Ids.d.getValue());
+    }
+
+    public boolean verify(
+        Map<String, Object> sad,
+        boolean prefixed,
+        boolean versioned,
+        CoreUtil.Serials kind,
+        String label
+    ) {
         try {
             DeriveResult deriveResult = derive(sad, this.getCode(), kind, label);
             Map<String, Object> dsad = deriveResult.sad();
@@ -209,10 +248,6 @@ public class Saider extends Matter {
         }
 
         return true;
-    }
-
-    public static SaidifyResult saidify(Map<String, Object> sad) throws DigestException {
-        return saidify(sad, Codex.MatterCodex.Blake3_256.getValue(), CoreUtil.Serials.JSON, Ids.d.value);
     }
 
     public record SaidifyResult(Saider saider, Map<String, Object> sad) {}

@@ -140,21 +140,21 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(bran, data[1]);
 
         // Validate service instances
-        assertInstanceOf(Identifier.class, client.getIdentifier());
-        assertInstanceOf(Operations.class, client.getOperations());
-        assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
-        assertInstanceOf(KeyStates.class, client.getKeyStates());
-        assertInstanceOf(Credentials.class, client.getCredentials());
-        assertInstanceOf(Registries.class, client.getRegistries());
-        assertInstanceOf(Schemas.class, client.getSchemas());
-        assertInstanceOf(Ipex.class, client.getIpex());
-        assertInstanceOf(Contacting.Challenges.class, client.getChallenges());
-        assertInstanceOf(Contacting.Contacts.class, client.getContacts());
-        assertInstanceOf(Notifying.Notifications.class, client.getNotifications());
-        assertInstanceOf(Escrowing.Escrows.class, client.getEscrows());
-        assertInstanceOf(Oobis.class, client.getOobis());
-        assertInstanceOf(Exchanging.Exchanges.class, client.getExchanges());
-        assertInstanceOf(Grouping.Groups.class, client.getGroups());
+        assertInstanceOf(Identifier.class, client.identifiers());
+        assertInstanceOf(Operations.class, client.operations());
+        assertInstanceOf(Coring.KeyEvents.class, client.keyEvents());
+        assertInstanceOf(KeyStates.class, client.keyStates());
+        assertInstanceOf(Credentials.class, client.credentials());
+        assertInstanceOf(Registries.class, client.registries());
+        assertInstanceOf(Schemas.class, client.schemas());
+        assertInstanceOf(Ipex.class, client.ipex());
+        assertInstanceOf(Contacting.Challenges.class, client.challenges());
+        assertInstanceOf(Contacting.Contacts.class, client.contacts());
+        assertInstanceOf(Notifying.Notifications.class, client.notifications());
+        assertInstanceOf(Escrowing.Escrows.class, client.escrows());
+        assertInstanceOf(Oobis.class, client.oobis());
+        assertInstanceOf(Exchanging.Exchanges.class, client.exchanges());
+        assertInstanceOf(Grouping.Groups.class, client.groups());
         cleanUpRequest();
 
     }

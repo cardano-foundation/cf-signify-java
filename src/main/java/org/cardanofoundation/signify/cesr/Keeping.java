@@ -231,7 +231,7 @@ public class Keeping {
             this.dcode = dcode != null ? dcode : MatterCodex.Blake3_256.getValue();
             this.stem = stem != null ? stem : "signify:aid";
 
-            Signer signer = this.salter.signer(this.code, this.transferable, null, this.tier, null);
+            Signer signer = this.salter.signer(this.code, this.transferable, null, this.tier);
             this.aeid = signer.getVerfer().getQb64();
 
             this.encrypter = new Encrypter(RawArgs.builder().build(), this.aeid.getBytes());
@@ -493,7 +493,7 @@ public class Keeping {
                             .mapToObj(i -> this.ncode)
                             .collect(Collectors.toList());
 
-            Signer signer = this.salter.signer(this.code, this.transferable, null, null, null);
+            Signer signer = this.salter.signer(this.code, this.transferable);
             this.aeid = signer.getVerfer().getQb64();
 
             this.encrypter = new Encrypter(RawArgs.builder().build(), this.aeid.getBytes());

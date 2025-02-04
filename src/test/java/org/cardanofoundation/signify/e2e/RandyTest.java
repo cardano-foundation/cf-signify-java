@@ -47,7 +47,7 @@ public class RandyTest extends TestUtils {
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
-        EventResult icpResult = client1.getIdentifier().create("aid1", kargs);
+        EventResult icpResult = client1.identifiers().create("aid1", kargs);
         Object op = operationToObject(waitOperation(client1, icpResult.op()));
 
         if (op instanceof String) {
@@ -69,7 +69,7 @@ public class RandyTest extends TestUtils {
         assertEquals("1", icp.getKed().get("kt"));
         assertEquals("1", icp.getKed().get("nt"));
 
-        IdentifierListResponse aids = client1.getIdentifier().list(0, 24);
+        IdentifierListResponse aids = client1.identifiers().list(0, 24);
         try {
             List<Map<String, Object>> aidsList = objectMapper.readValue(aids.aids().toString(), new TypeReference<>() {
             });
@@ -84,7 +84,7 @@ public class RandyTest extends TestUtils {
         assertEquals("aid1", opResponseName);
         assertEquals(icp.getPre(), opResponsePrefix);
 
-        icpResult = client1.getIdentifier().interact("aid1", icp.getPre());
+        icpResult = client1.identifiers().interact("aid1", icp.getPre());
         op = operationToObject(waitOperation(client1, icpResult.op()));
         if (op instanceof String) {
             try {
@@ -100,7 +100,7 @@ public class RandyTest extends TestUtils {
         assertEquals("1", ixn.getKed().get("s"));
         assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
-        aids = client1.getIdentifier().list(0, 24);
+        aids = client1.identifiers().list(0, 24);
         try {
             List<Map<String, Object>> aidsList = objectMapper.readValue(aids.aids().toString(), new TypeReference<>() {
             });
@@ -111,7 +111,7 @@ public class RandyTest extends TestUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Coring.KeyEvents events = client1.getKeyEvents();
+        Coring.KeyEvents events = client1.keyEvents();
 
         Object log = events.get(opResponsePrefix);
         try {
@@ -122,7 +122,7 @@ public class RandyTest extends TestUtils {
             ex.printStackTrace();
         }
 
-        icpResult = client1.getIdentifier().rotate("aid1");
+        icpResult = client1.identifiers().rotate("aid1");
         op = operationToObject(waitOperation(client1, icpResult.op()));
         if (op instanceof String) {
             try {

@@ -23,7 +23,7 @@ public class ChallengesTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Contacting.Challenges challenges = client.getChallenges();
+        Contacting.Challenges challenges = client.challenges();
 
         challenges.generate(128);
         RecordedRequest request = mockWebServer.takeRequest();

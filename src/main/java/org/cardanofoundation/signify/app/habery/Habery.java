@@ -62,10 +62,6 @@ public class Habery {
         this.mgr = new Manager(managerArgs);
     }
 
-    public Manager getMgr() {
-        return this.mgr;
-    }
-
     public List<Hab> getHabs() {
         return this.habs.values().stream().toList();
     }

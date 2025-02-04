@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
 
 import java.io.IOException;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.Map;
 
 public class Notifying {
@@ -38,21 +37,27 @@ public class Notifying {
             );
 
             String path = "/notifications";
-            HttpResponse<String> response = client.fetch(path, "GET", null, extraHeaders);
+            String method = "GET";
+            HttpResponse<String> res = client.fetch(path, method, null, extraHeaders);
 
-            String contentRange = response.headers().firstValue("content-range").orElse(null);
-            Httping.RangeInfo range = Httping.parseRangeHeaders(contentRange, "notes");
+            String cr = res.headers().firstValue("content-range").orElse(null);
+            Httping.RangeInfo range = Httping.parseRangeHeaders(cr, "notes");
+            Object notes = Utils.fromJson(res.body(), Object.class);
 
             return new NotificationListResponse(
                 range.start(),
                 range.end(),
                 range.total(),
-                response.body()
+                notes
             );
         }
 
         public NotificationListResponse list() throws SodiumException, IOException, InterruptedException {
             return list(0, 24);
+        }
+
+        public NotificationListResponse list(int start) throws SodiumException, IOException, InterruptedException {
+            return list(start, 24);
         }
 
         /**
@@ -62,7 +67,9 @@ public class Notifying {
          */
         public String mark(String said) throws SodiumException, IOException, InterruptedException {
             String path = "/notifications/" + said;
-            HttpResponse<String> response = client.fetch(path, "PUT", null, null);
+            String method = "PUT";
+
+            HttpResponse<String> response = this.client.fetch(path, method, null, null);
             return response.body();
         }
 
@@ -72,7 +79,9 @@ public class Notifying {
          */
         public void delete(String said) throws SodiumException, IOException, InterruptedException {
             String path = "/notifications/" + said;
-            client.fetch(path, "DELETE", null, null);
+            String method = "DELETE";
+
+            this.client.fetch(path, method, null, null);
         }
 
         public record NotificationListResponse(int start, int end, int total, Object notes) {}

@@ -52,9 +52,9 @@ public class SinglesigDRT extends TestUtils {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
 
-        EventResult result = delegate.getIdentifier().create("delegate1", kargs);
+        EventResult result = delegate.identifiers().create("delegate1", kargs);
         Object op = result.op();
-        States.HabState delegate1 = delegate.getIdentifier().get("delegate1");
+        States.HabState delegate1 = delegate.identifiers().get("delegate1");
         if (op instanceof String) {
             try {
                 HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
@@ -72,16 +72,16 @@ public class SinglesigDRT extends TestUtils {
         seal.put("s", "0");
         seal.put("d", delegate1.getPrefix());
 
-        result = delegator.getIdentifier().interact("name1", seal);
+        result = delegator.identifiers().interact("name1", seal);
         Object op1 = result.op();
-        Object op2 = delegate.getKeyStates().query(name1_id, 1, null);
+        Object op2 = delegate.keyStates().query(name1_id, 1, null);
 
         op = operationToObject(waitOperation(delegate, op));
         op1 = operationToObject(waitOperation(delegator, op1));
         op2 = operationToObject(waitOperation(delegate, op2));
 
         RotateIdentifierArgs karg = RotateIdentifierArgs.builder().build();
-        result = delegate.getIdentifier().rotate("delegate1", karg);
+        result = delegate.identifiers().rotate("delegate1", karg);
         op = result.op();
         if (op instanceof String) {
             try {
@@ -95,15 +95,15 @@ public class SinglesigDRT extends TestUtils {
         Assertions.assertEquals(opResponseName, "delegation." + result.serder().getKed().get("d"));
 
         // delegator approves delegate
-        delegate1 = delegate.getIdentifier().get("delegate1");
+        delegate1 = delegate.identifiers().get("delegate1");
         seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "1");
         seal.put("d", delegate1.getState().getD());
 
-        result = delegator.getIdentifier().interact("name1", seal);
+        result = delegator.identifiers().interact("name1", seal);
         op1 = result.op();
-        op2 = delegate.getKeyStates().query(name1_id, 2, null);
+        op2 = delegate.keyStates().query(name1_id, 2, null);
 
         op = operationToObject(waitOperation(delegate, op));
         op1 = operationToObject(waitOperation(delegator, op1));

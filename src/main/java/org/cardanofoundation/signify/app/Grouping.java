@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,9 @@ public class Grouping {
         public Object getRequest(String said) throws Exception {
             String path = "/multisig/request/" + said;
             String method = "GET";
-            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
+
+            HttpResponse<String> response = this.client.fetch(path, method, null, null);
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
@@ -55,7 +58,8 @@ public class Grouping {
             data.put("sigs", sigs);
             data.put("atc", atc);
 
-            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+            HttpResponse<String> response = this.client.fetch(path, method, data, null);
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
@@ -88,7 +92,8 @@ public class Grouping {
             data.put("smids", smids);
             data.put("rmids", rmids);
 
-            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+            HttpResponse<String> response = this.client.fetch(path, method, data, null);
+            return Utils.fromJson(response.body(), Object.class);
         }
     }
 }

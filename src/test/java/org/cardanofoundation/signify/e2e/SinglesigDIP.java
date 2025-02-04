@@ -49,9 +49,9 @@ class SinglesigDIP extends TestUtils {
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
-        EventResult result = client2.getIdentifier().create("delegate1", kargs);
+        EventResult result = client2.identifiers().create("delegate1", kargs);
         Object op = result.op();
-        States.HabState delegate1 = client2.getIdentifier().get("delegate1");
+        States.HabState delegate1 = client2.identifiers().get("delegate1");
         if (op instanceof String) {
             try {
                 HashMap<String, Object> opMap = objectMapper.readValue((String) op, new TypeReference<>() {
@@ -63,17 +63,17 @@ class SinglesigDIP extends TestUtils {
         }
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
-        delegate1 = client2.getIdentifier().get("delegate1");
+        delegate1 = client2.identifiers().get("delegate1");
         Map<String, String> seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "0");
         seal.put("d", delegate1.getPrefix());
 
-        result = client1.getIdentifier().interact("name1", seal);
+        result = client1.identifiers().interact("name1", seal);
         Object op1 = result.op();
 
         // Refresh keystate to sn=1
-        Object op2 = client2.getKeyStates().query(name1_id, 1, null);
+        Object op2 = client2.keyStates().query(name1_id, 1, null);
 
         op = operationToObject(waitOperation(client2, op));
         op1 = operationToObject(waitOperation(client1, op1));
@@ -90,7 +90,7 @@ class SinglesigDIP extends TestUtils {
             }
         }
 
-        delegate1 = client2.getIdentifier().get("delegate1");
+        delegate1 = client2.identifiers().get("delegate1");
         Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
 
         // Delegate creates identifier with default witness config
@@ -98,7 +98,7 @@ class SinglesigDIP extends TestUtils {
         kargs.setDelpre(name1_id);
         kargs.setToad(env.witnessIds().size());
         kargs.setWits(env.witnessIds());
-        result = client2.getIdentifier().create("delegate2", kargs);
+        result = client2.identifiers().create("delegate2", kargs);
         op = result.op();
         if (op instanceof String) {
             try {
@@ -108,20 +108,20 @@ class SinglesigDIP extends TestUtils {
                 ex.printStackTrace();
             }
         }
-        States.HabState delegate2 = client2.getIdentifier().get("delegate2");
+        States.HabState delegate2 = client2.identifiers().get("delegate2");
         Assertions.assertEquals(opResponseName, "delegation." + delegate2.getPrefix());
 
         // Delegator approves delegate
-        delegate2 = client2.getIdentifier().get("delegate2");
+        delegate2 = client2.identifiers().get("delegate2");
         seal.put("i", delegate2.getPrefix());
         seal.put("s", "0");
         seal.put("d", delegate2.getPrefix());
 
-        result = client1.getIdentifier().interact("name1", seal);
+        result = client1.identifiers().interact("name1", seal);
         op1 = result.op();
 
         // refresh keystate to seal event
-        op2 = client2.getKeyStates().query(name1_id, null, seal);
+        op2 = client2.keyStates().query(name1_id, null, seal);
 
         op = operationToObject(waitOperation(client2, op));
         op1 = operationToObject(waitOperation(client1, op1));
@@ -138,11 +138,11 @@ class SinglesigDIP extends TestUtils {
         }
 
         // Delegate waits for completion
-        delegate2 = client2.getIdentifier().get("delegate2");
+        delegate2 = client2.identifiers().get("delegate2");
         Assertions.assertEquals(delegate2.getPrefix(), opResponseI);
 
         // Make sure query with seal is idempotent
-        op = client2.getKeyStates().query(name1_id, null, seal);
+        op = client2.keyStates().query(name1_id, null, seal);
         operationToObject(waitOperation(client2, op));
     }
 }

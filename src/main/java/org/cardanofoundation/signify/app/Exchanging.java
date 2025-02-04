@@ -15,7 +15,6 @@ import org.cardanofoundation.signify.core.States.HabState;
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class Exchanging {

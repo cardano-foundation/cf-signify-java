@@ -19,7 +19,7 @@ public class EscrowingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Escrowing.Escrows escrows = client.getEscrows();
+        Escrowing.Escrows escrows = client.escrows();
         escrows.listReply("/presentation/request");
 
         RecordedRequest request = mockWebServer.takeRequest();

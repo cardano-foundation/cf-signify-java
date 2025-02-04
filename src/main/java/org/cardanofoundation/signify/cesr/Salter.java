@@ -57,11 +57,27 @@ public class Salter extends Matter {
         }
     }
 
+    public byte[] stretch() throws SodiumException {
+        return stretch(32);
+    }
+
+    public byte[] stretch(int size) throws SodiumException {
+        return stretch(size, "");
+    }
+
+    public byte[] stretch(int size, String path) throws SodiumException {
+        return stretch(size, path, null);
+    }
+
+    public byte[] stretch(int size, String path, Tier tier) throws SodiumException {
+        return stretch(size, path, tier, false);
+    }
+
     public byte[] stretch(int size, String path, Tier tier, boolean temp) throws SodiumException {
         tier = tier == null ? this.tier : tier;
         int opslimit, memlimit;
 
-        // Harcoded values based on keripy
+        // Hardcoded values based on keripy
         if (temp) {
             opslimit = 1; //libsodium.crypto_pwhash_OPSLIMIT_MIN
             memlimit = 8192; //libsodium.crypto_pwhash_MEMLIMIT_MIN
@@ -106,7 +122,23 @@ public class Salter extends Matter {
     }
 
     public Signer signer() throws SodiumException {
-        return this.signer(Codex.MatterCodex.Ed25519_Seed.getValue(), true, "", null, false);
+        return signer(Codex.MatterCodex.Ed25519_Seed.getValue());
+    }
+
+    public Signer signer(String code) throws SodiumException {
+        return signer(code, true);
+    }
+
+    public Signer signer(String code, Boolean transferable) throws SodiumException {
+        return signer(code, transferable, "");
+    }
+
+    public Signer signer(String code, Boolean transferable, String path) throws SodiumException {
+        return signer(code, transferable, path, null);
+    }
+
+    public Signer signer(String code, Boolean transferable, String path, Tier tier) throws SodiumException {
+        return signer(code, transferable, path, tier, false);
     }
 
     public Signer signer(String code, Boolean transferable, String path, Tier tier, Boolean temp) throws SodiumException {

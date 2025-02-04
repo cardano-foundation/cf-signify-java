@@ -189,7 +189,7 @@ public class ExchangingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Exchanging.Exchanges exchange = client.getExchanges();
+        Exchanging.Exchanges exchange = client.exchanges();
         int sith = 1;
         int nsith = 1;
         int sn = 0;
@@ -256,7 +256,7 @@ public class ExchangingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Exchanging.Exchanges exchanges = client.getExchanges();
+        Exchanging.Exchanges exchanges = client.exchanges();
         String exchangeId = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
         exchanges.get(exchangeId);

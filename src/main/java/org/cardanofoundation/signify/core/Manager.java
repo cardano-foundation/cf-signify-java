@@ -696,7 +696,7 @@ public class Manager {
     }
 
     interface Creator {
-        Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException;
+        Keys create(List<String> codes, Integer count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException;
 
         String salt();
 
@@ -887,14 +887,15 @@ public class Manager {
     public static class RandyCreator implements Creator {
         @Override
         public Keys create(
-                List<String> codes,
-                int count,
-                String code,
-                boolean transferable,
-                int pidx,
-                int ridx,
-                int kidx,
-                boolean temp) throws SodiumException {
+            List<String> codes,
+            Integer count,
+            String code,
+            boolean transferable,
+            int pidx,
+            int ridx,
+            int kidx,
+            boolean temp
+        ) throws SodiumException {
             List<Signer> signers = new ArrayList<>();
 
             if (codes == null) {
@@ -918,11 +919,11 @@ public class Manager {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes, int count, String code, boolean transferable) throws SodiumException {
+        public Keys create(List<String> codes, Integer count, String code, boolean transferable) throws SodiumException {
             return create(codes, count, code, transferable, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes, int count) throws SodiumException {
+        public Keys create(List<String> codes, Integer count) throws SodiumException {
             return create(codes, count, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
@@ -973,7 +974,7 @@ public class Manager {
         }
 
         @Override
-        public Keys create(List<String> codes, int count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException {
+        public Keys create(List<String> codes, Integer count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException {
             List<Signer> signers = new ArrayList<>();
             List<String> paths = new ArrayList<>();
 

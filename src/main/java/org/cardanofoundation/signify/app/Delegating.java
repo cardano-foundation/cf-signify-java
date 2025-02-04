@@ -28,7 +28,7 @@ public class Delegating {
          * @throws Exception if the fetch operation fails
          */
         public EventResult approve(String name, Object data) throws Exception {
-            InteractionResponse interactionResponse = this.client.getIdentifier().createInteract(name, data);
+            InteractionResponse interactionResponse = this.client.identifiers().createInteract(name, data);
 
             HttpResponse<String> res = this.client.fetch(
                 "/identifiers/" + name + "/delegation",

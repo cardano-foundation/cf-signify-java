@@ -68,7 +68,7 @@ public class CredentialingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Credentials credentials = client.getCredentials();
+        Credentials credentials = client.credentials();
 
         // Create the CredentialFilter object
         CredentialFilter kargs = CredentialFilter.builder()

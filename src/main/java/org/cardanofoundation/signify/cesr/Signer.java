@@ -69,7 +69,24 @@ public class Signer extends Matter {
         return sign.sign(ser, this.getRaw(), this.getVerfer(), index, false, null);
     }
 
-    private Object _ed25519(byte[] ser, byte[] seed, Verfer verfer, Integer index, boolean only, Integer ondex) throws SodiumException {
+    private Object _ed25519(
+        byte[] ser,
+        byte[] seed,
+        Verfer verfer,
+        Integer index,
+        Integer ondex
+    ) throws SodiumException {
+        return _ed25519(ser, seed, verfer, index, false, ondex);
+    }
+
+    private Object _ed25519(
+        byte[] ser,
+        byte[] seed,
+        Verfer verfer,
+        Integer index,
+        boolean only,
+        Integer ondex
+    ) throws SodiumException {
         ByteBuffer buffer = ByteBuffer.allocate(seed.length + verfer.getRaw().length);
         buffer.put(seed);
         buffer.put(verfer.getRaw());

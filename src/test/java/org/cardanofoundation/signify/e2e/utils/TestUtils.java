@@ -73,7 +73,7 @@ public class TestUtils {
     public static void assertOperations(List<SignifyClient> clients) throws SodiumException, IOException, InterruptedException {
         // TO-DO
         for (SignifyClient client : clients) {
-            List<Operation<?>> operations = client.getOperations().list(null);
+            List<Operation<?>> operations = client.operations().list(null);
             Assertions.assertEquals(0, operations.size());
         }
     }
@@ -129,18 +129,18 @@ public class TestUtils {
     public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
         // TO-DO
         try {
-            return client.getIdentifier().get(name);
+            return client.identifiers().get(name);
         } catch (Exception e) {
-            EventResult result = client.getIdentifier().create(name, kargs);
+            EventResult result = client.identifiers().create(name, kargs);
             waitOperation(client, result.op());
 
-            States.HabState aid = client.getIdentifier().get(name);
+            States.HabState aid = client.identifiers().get(name);
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
                 throw new IllegalArgumentException("Client, agent, or pre cannot be null");
             }
 
             String pre = client.getAgent().getPre();
-            EventResult op = client.getIdentifier().addEndRole(name, "agent", pre, null);
+            EventResult op = client.identifiers().addEndRole(name, "agent", pre, null);
             waitOperation(client, op.op());
 
             System.out.println(name + "AID:" + aid.getPrefix());
@@ -216,7 +216,7 @@ public class TestUtils {
         String eid;
         Object op, ops;
         try {
-            States.HabState identifier = client.getIdentifier().get(name);
+            States.HabState identifier = client.identifiers().get(name);
             id = identifier.getPrefix();
         } catch (Exception e) {
             ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -225,7 +225,7 @@ public class TestUtils {
                 kargs.setToad(env.witnessIds().size());
                 kargs.setWits(env.witnessIds());
             }
-            EventResult result = client.getIdentifier().create(name, kargs);
+            EventResult result = client.identifiers().create(name, kargs);
             op = result.op();
             op = operationToObject(waitOperation(client, op));
             if (op instanceof String) {
@@ -243,13 +243,13 @@ public class TestUtils {
                 throw new IllegalStateException("Agent or pre is null");
             }
             if (!hasEndRole(client, name, "agent", eid)) {
-                EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
+                EventResult results = client.identifiers().addEndRole(name, "agent", eid, null);
                 ops = results.op();
                 ops = operationToObject(waitOperation(client, ops));
             }
         }
 
-        Object oobi = client.getOobis().get(name, "agent");
+        Object oobi = client.oobis().get(name, "agent");
         String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
@@ -259,14 +259,14 @@ public class TestUtils {
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, IOException, InterruptedException {
         Object getResponseI = null;
-        List<Contacting.Contact> list = Arrays.asList(client.getContacts().list(null, "alias", "^" + name + "$"));
+        List<Contacting.Contact> list = Arrays.asList(client.contacts().list(null, "alias", "^" + name + "$"));
         if (!list.isEmpty()) {
             Contacting.Contact contact = list.getFirst();
             if (contact.getOobi().equals(oobi)) {
                 return contact.getId();
             }
         }
-        Object op = client.getOobis().resolve(oobi, name);
+        Object op = client.oobis().resolve(oobi, name);
         op = operationToObject(waitOperation(client, op));
         if (op instanceof String) {
             try {
@@ -299,7 +299,7 @@ public class TestUtils {
         // TO-DO
         List<Object> participantStates = prefixes.stream().map(p -> {
             try {
-                return client.getKeyStates().get(p);
+                return client.keyStates().get(p);
             } catch (Exception e) {
                 throw new RuntimeException("Error fetching key states for prefix: " + p, e);
             }
@@ -338,7 +338,7 @@ public class TestUtils {
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null) {
             deleteOperations(client, op.getMetadata().getDepends());
         }
-        client.getOperations().delete(op.getName());
+        client.operations().delete(op.getName());
         // TO-DO
     }
 
@@ -356,7 +356,7 @@ public class TestUtils {
     }
 
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
-        Object op = client.getOobis().resolve(oobi, alias);
+        Object op = client.oobis().resolve(oobi, alias);
         waitOperation(client, op);
     }
 
@@ -382,11 +382,11 @@ public class TestUtils {
         Operation<T> operation;
         if (op instanceof String) {
             String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
-            operation = client.getOperations().get(name);
+            operation = client.operations().get(name);
         } else {
             operation = Operation.fromObject(op);
         }
-        operation = client.getOperations().wait(operation);
+        operation = client.operations().wait(operation);
         deleteOperations(client, operation);
         return operation;
     }
