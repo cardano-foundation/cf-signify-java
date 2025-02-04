@@ -532,7 +532,6 @@ public class MultisigTest extends BaseIntegrationTest {
                 .a(subject)
                 .build();
 
-        waitAsync(2000);
         IssueCredentialResult credRes = client1.getCredentials().issue("multisig", credentialData);
         op1 = credRes.getOp();
 
@@ -592,7 +591,6 @@ public class MultisigTest extends BaseIntegrationTest {
         op3 = credRes3.getOp();
         multisigIssue(client3, "member3", "multisig", credRes3);
         System.out.println("Member3 joins credential create event, waiting for others...");
-        waitAsync(2000);
 
         // Check completion
         waitOperationAsync(
