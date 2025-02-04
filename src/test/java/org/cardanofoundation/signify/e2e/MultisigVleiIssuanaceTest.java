@@ -209,7 +209,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             aidGEDAbyGAR2 = clientGAR2.getIdentifier().get("GEDA");
         } catch (Exception e) {
             List<Object> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
-            List<Object> states = List.copyOf(rstates);
+            List<Object> states = rstates;
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
@@ -330,6 +330,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .wits(kargsAID.getWits())
                     .states(states)
                     .rstates(rstates)
+                    .delpre(aidGEDA.getPrefix())
                     .build();
 
             kargsMultisigAID.setMhab(aidQAR1);
