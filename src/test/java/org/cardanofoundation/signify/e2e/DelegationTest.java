@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -11,6 +12,7 @@ import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
@@ -97,7 +99,11 @@ public class DelegationTest {
         testSteps.step("delegator approves delegation", () -> {
             EventResult result = retry(() -> {
                 EventResult apprDelRes = client1.getDelegations().approve("delegator", anchor);
-                waitOperations(client1, apprDelRes.op());
+                try {
+                    waitOperation(client1, apprDelRes.op());
+                } catch (SodiumException | IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 return apprDelRes;
             });
             List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");

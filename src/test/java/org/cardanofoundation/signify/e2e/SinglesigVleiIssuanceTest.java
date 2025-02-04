@@ -568,7 +568,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             registryArgs.setRegistryName(registryName);
 
             RegistryResult regResult = client.getRegistries().create(registryArgs);
-            waitOperations(client, regResult.op());
+            waitOperation(client, regResult.op());
             registries = client.getRegistries().list(aid.name);
 
             registriesBody = (ArrayList<String>) registries;
@@ -602,7 +602,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 result.atc(),
                 Collections.singletonList(recipientAid.prefix)
         );
-        waitOperations(senderClient, op);
+        waitOperation(senderClient, op);
     }
 
     public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) throws Exception {
@@ -627,7 +627,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 result.atc(),
                 Collections.singletonList(recipientAid.prefix)
         );
-        waitOperations(senderClient, op);
+        waitOperation(senderClient, op);
         markAndRemoveNotification(senderClient, grantNotification);
     }
 

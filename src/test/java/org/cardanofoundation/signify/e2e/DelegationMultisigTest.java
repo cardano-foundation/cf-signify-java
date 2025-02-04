@@ -269,10 +269,10 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         anchor,
                         false);
 
-                Operation<Object> dresult1 = waitOperations(delegator1Client, delApprOp1);
+                Operation<Object> dresult1 = waitOperation(delegator1Client, delApprOp1);
                 Object responseDresult1 = dresult1.getResponse();
 
-                Operation<Object> dresult2 = waitOperations(delegator2Client, delApprOp2);
+                Operation<Object> dresult2 = waitOperation(delegator2Client, delApprOp2);
                 Object responseDresult2 = dresult2.getResponse();
 
                 assertEquals(responseDresult1, responseDresult2);

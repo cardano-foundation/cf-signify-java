@@ -354,7 +354,7 @@ public class TestUtils {
         cData.setE(source);
 
         IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
-        waitOperations(issuerClient, issResult.getOp());
+        waitOperation(issuerClient, issResult.getOp());
         Object credential = issuerClient.getCredentials().get(issResult.getAcdc().getKed().get("d").toString());
 
         return credential;
@@ -528,24 +528,6 @@ public class TestUtils {
                 throw new RuntimeException(e);
             }
         }, retryOptions);
-    }
-
-    public static <T> Operation<T> waitOperations(
-            SignifyClient client,
-            Object op) {
-        Operation<T> operation;
-        try {
-            if (op instanceof String) {
-                String name = objectMapper.readValue((String) op, Map.class).get("name").toString();
-                operation = client.getOperations().get(name);
-            } else {
-                operation = Operation.fromObject(op);
-            }
-            deleteOperations(client, operation);
-            return operation;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static <T> Operation<T> waitOperation(

@@ -8,17 +8,18 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-      url "https://oss.sonatype.org/content/repositories/snapshots"
+        url "https://oss.sonatype.org/content/repositories/snapshots"
     }
 }
 
 group = 'org.cardanofoundation'
 version = '1.0-SNAPSHOT'
 
-def commit_id=getCheckedOutGitCommitHash()
+def commit_id = getCheckedOutGitCommitHash()
 if (project.version.endsWith("-SNAPSHOT")) {
     version = "${project.version}".replace("-SNAPSHOT", "-${commit_id}-SNAPSHOT")
 }
+
 def getCheckedOutGitCommitHash() {
     grgit.head().abbreviatedId
 }
@@ -87,7 +88,16 @@ tasks.test {
 tasks.register('testE2E', Test) {
     maxParallelForks = 1
     def startTime = [:]
+    def totalTests = 0
+    def passedTests = 0
+    def failedTests = 0
+    def skippedTests = 0
+    def suiteStartTime
+
     useJUnitPlatform()
+    doFirst {
+        suiteStartTime = System.nanoTime()
+    }
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
@@ -102,9 +112,32 @@ tasks.register('testE2E', Test) {
         println "Starting test: ${descriptor.className}"
     }
     afterTest { descriptor, result ->
+        totalTests++
+        if (result.resultType == TestResult.ResultType.SUCCESS) {
+            passedTests++
+        } else if (result.resultType == TestResult.ResultType.FAILURE) {
+            failedTests++
+        } else if (result.resultType == TestResult.ResultType.SKIPPED) {
+            skippedTests++
+        }
         def duration = System.currentTimeSeconds() - startTime[descriptor]
         println "Finished test: ${descriptor.className} in ${duration} seconds. Waiting for 2 seconds..."
         Thread.sleep(2000)
+
+    }
+
+    afterSuite { desc, result ->
+        if (desc.parent == null) { // Kiểm tra nếu là toàn bộ test suite
+            def totalDuration  = (System.nanoTime() - suiteStartTime) / 1_000_000_000
+            println "\n================================================================================="
+            println "Test Summary:"
+            println "Total Tests: ${totalTests}"
+            println "Passed: ${passedTests}"
+            println "Failed: ${failedTests}"
+            println "Skipped: ${skippedTests}"
+            println "Total Execution Time: ${totalDuration} seconds"
+            println "=================================================================================\n"
+        }
     }
     finalizedBy 'allureReport'
 }

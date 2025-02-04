@@ -106,11 +106,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Member2 resolved 3 OOBIs");
 
         Object op3 = client3.getOobis().resolve(oobis1, "member1");
-        op3 = waitOperations(client3, op3);
+        op3 = waitOperation(client3, op3);
         op3 = client3.getOobis().resolve(oobis2, "member2");
-        op3 = waitOperations(client3, op3);
+        op3 = waitOperation(client3, op3);
         op3 = client3.getOobis().resolve(SCHEMA_OOBI, "schema");
-        op3 = waitOperations(client3, op3);
+        op3 = waitOperation(client3, op3);
         System.out.println("Member3 resolved 3 OOBIs");
 
         // First member start the creation of a multisig identifier
@@ -395,7 +395,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String oobiMultisig = oobisResponse.getFirst().split("/agent/")[0];
 
         op3 = client3.getOobis().resolve(oobiMultisig, "holder");
-        waitOperations(client3, op3);
+        waitOperation(client3, op3);
         System.out.println("Issuer resolved multisig holder OOBI");
 
         States.HabState holderAid = client1.getIdentifier().get("holder");
@@ -510,7 +510,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         RegistryResult result = client.getRegistries().create(args);
         Object op = result.op();
-        waitOperations(client, op);
+        waitOperation(client, op);
 
         Object registries = client.getRegistries().list(name);
         registryList = (List<HashMap<String, Object>>) registries;
@@ -527,7 +527,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             CredentialData data
     ) throws Exception {
         IssueCredentialResult result = client.getCredentials().issue(name, data);
-        waitOperations(client, result.getOp());
+        waitOperation(client, result.getOp());
 
         Object creds = client.getCredentials().list(CredentialFilter.builder().build());
         List<HashMap<String, Object>> listCreds = (List<HashMap<String, Object>>) creds;
@@ -559,7 +559,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             Object op = client
                     .getIpex()
                     .submitGrant(name, grant, gsigs, end, List.of(data.getA().getI()));
-            waitOperations(client, op);
+            waitOperation(client, op);
         }
 
         System.out.println("Grant message sent");
