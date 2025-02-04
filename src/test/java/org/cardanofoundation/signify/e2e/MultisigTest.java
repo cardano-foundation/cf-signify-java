@@ -197,6 +197,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 kargsMultisigAID,
                 false
         );
+        System.out.println("Member2 joins multisig group, waiting for others...");
 
         kargsMultisigAID.setMhab(aid3);
         op3 = MultisigUtils.createAIDMultisig(
