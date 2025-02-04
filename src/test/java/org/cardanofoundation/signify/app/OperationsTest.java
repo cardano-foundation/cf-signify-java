@@ -153,7 +153,7 @@ public class OperationsTest {
                 .maxSleep(10)
                 .build();
         operations.wait(operation1, options);
-        verify(client, times(2)).fetch(anyString(), anyString(), isNull(), isNull());
+        verify(client, times(3)).fetch(anyString(), anyString(), isNull(), isNull());
     }
 
     @Test
@@ -180,7 +180,7 @@ public class OperationsTest {
                 .maxSleep(10)
                 .build();
         operations.wait(buildOperation(false, false), options);
-        verify(client, times(3)).fetch(anyString(), anyString(), isNull(), isNull());
+        verify(client, times(4)).fetch(anyString(), anyString(), isNull(), isNull());
     }
 
     @Test
