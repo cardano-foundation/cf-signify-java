@@ -70,13 +70,13 @@ public class CoringTest extends BaseMockServerTest {
 
         keyStates.query(
             "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
-            1,
+            "1",
             "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao"
         );
         request = mockWebServer.takeRequest();
         assertEquals("POST", request.getMethod());
         assertEquals(url + "/queries", request.getRequestUrl().toString());
-        
+
         Map<String, Object> data = objectMapper.readValue(request.getBody().readUtf8(), new TypeReference<>() {});
         assertEquals("EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX", data.get("pre"));
         assertEquals("1", data.get("sn"));
@@ -98,5 +98,17 @@ public class CoringTest extends BaseMockServerTest {
         RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals(url + "/config", request.getRequestUrl().toString());
+    }
+
+    @Test
+    public void testRandomNonce() {
+        final String nonce = Coring.randomNonce();
+        assertEquals(nonce.length(), 44);
+
+        final String nonce2 = Coring.randomNonce();
+        assertEquals(nonce2.length(), 44);
+
+        // nonce should be unique
+        assertNotEquals(nonce, nonce2);
     }
 }

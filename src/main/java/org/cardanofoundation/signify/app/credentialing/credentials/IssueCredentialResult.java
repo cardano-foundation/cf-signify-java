@@ -12,7 +12,7 @@ import org.cardanofoundation.signify.cesr.Serder;
 public class IssueCredentialResult {
 
     private Serder acdc;
-    private Serder anc;
     private Serder iss;
-    private Operation op;
+    private Serder anc;
+    private Operation<?> op;
 }

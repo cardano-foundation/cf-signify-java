@@ -27,15 +27,20 @@ public class Delegating {
          * @return The delegated approval result
          * @throws Exception if the fetch operation fails
          */
-        public EventResult approve(String name, Object data) throws Exception {
-            InteractionResponse interactionResponse = this.client.getIdentifier().createInteract(name, data);
-
-            HttpResponse<String> res = this.client.fetch(
-                "/identifiers/" + name + "/delegation",
-                "POST",
-                interactionResponse.jsondata(),
-                null
-            );
+        public EventResult approve(String name, Object data) {
+            InteractionResponse interactionResponse = null;
+            HttpResponse<String> res = null;
+            try {
+                interactionResponse = this.client.getIdentifier().createInteract(name, data);
+                res = this.client.fetch(
+                        "/identifiers/" + name + "/delegation",
+                        "POST",
+                        interactionResponse.jsondata(),
+                        null
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), res);
         }
 

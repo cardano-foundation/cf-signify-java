@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.cesr;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
@@ -9,6 +10,7 @@ import org.cardanofoundation.signify.cesr.params.GroupParams;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.params.RandyParams;
 import org.cardanofoundation.signify.cesr.params.SaltyParams;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.Manager.RandyCreator;
 import org.cardanofoundation.signify.core.Manager.SaltyCreator;
@@ -23,6 +25,8 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.cardanofoundation.signify.core.States.convertToStates;
 
 public class Keeping {
     // External module interface
@@ -117,10 +121,10 @@ public class Keeping {
                 case group -> new GroupKeeper(
                         this,
                         (HabState) kargs.get("mhab"),
-                        (List<State>) kargs.get("states"),
-                        (List<State>) kargs.get("rstates"),
-                        (List<String>) kargs.get("keys"),
-                        (List<String>) kargs.get("ndigs")
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("states")), new TypeReference<>() {}),
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("rstates")), new TypeReference<>() {}),
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("keys")), new TypeReference<>() {}),
+                        Utils.fromJson(Utils.jsonStringify(kargs.get("ndigs")), new TypeReference<>() {})
                 );
                 default -> throw new UnsupportedOperationException("Unknown algo");
             };
@@ -428,7 +432,7 @@ public class Keeping {
                         o = i;
                     }
 
-                    Siger siger = (Siger) signer.sign(ser, i, o == null, 0);
+                    Siger siger = (Siger) signer.sign(ser, i, o == null, o);
                     signatures.add(siger.getQb64());
                 }
             } else {
@@ -642,7 +646,7 @@ public class Keeping {
                         o = i;
                     }
 
-                    Siger siger = (Siger) signer.sign(ser, i, o == null, 0);
+                    Siger siger = (Siger) signer.sign(ser, i, o == null, o);
                     signatures.add(siger.getQb64());
                 }
 
@@ -695,8 +699,13 @@ public class Keeping {
 
         @Override
         public GroupParams getParams() {
+            Map<String, Object> paramsMap = new LinkedHashMap<>();
+            paramsMap.put("keys", this.gkeys);
+            paramsMap.put("ndigs", this.gdigs);
+
             return GroupParams.builder()
                     .mhab(mhab)
+                    .paramsMap(paramsMap)
                     .build();
         }
 

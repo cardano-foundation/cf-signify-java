@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app.aiding;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
@@ -25,7 +26,6 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -72,6 +72,10 @@ public class Identifier {
         );
     }
 
+    public IdentifierListResponse list() throws SodiumException, IOException, InterruptedException {
+        return list(0, 24);
+    }
+
     /**
      * Get information for a managed identifier
      *
@@ -113,8 +117,26 @@ public class Identifier {
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
-        String isith = kargs.getIsith() != null ? (String) kargs.getIsith() : "1";
-        String nsith = kargs.getNsith() != null ? (String) kargs.getNsith() : "1";
+        Object isith;
+        Object nsith;
+
+        if (kargs.getIsith() == null) {
+            isith = "1";
+            nsith = "1";
+        } else {
+            // String or number
+            if(!(kargs.getIsith() instanceof List<?>)) {
+                isith = kargs.getIsith().toString();
+            } else {
+                isith = kargs.getIsith();
+            }
+
+            if(!(kargs.getNsith() instanceof List<?>)) {
+                nsith = kargs.getNsith().toString();
+            } else {
+                nsith = kargs.getNsith();
+            }
+        }
         List<String> wits = kargs.getWits() != null ? kargs.getWits() : new ArrayList<>();
         int toad = kargs.getToad() != null ? kargs.getToad() : 0;
         String dcode = kargs.getDcode() != null ? kargs.getDcode() : MatterCodex.Blake3_256.getValue();
@@ -209,13 +231,26 @@ public class Identifier {
         Keeping.SignResult signResult = keeper.sign(serder.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
+        List<String> smids = null;
+        List<String> rmids = null;
+
+        if (states != null) {
+            List<States.State> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
+            smids = stateDeserialized.stream().map(States.State::getI).toList();
+        }
+
+        if (rstates != null) {
+            List<States.State> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
+            rmids = rstateDeserialized.stream().map(States.State::getI).toList();
+        }
+
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("name", name);
         jsondata.put("icp", serder.getKed());
         jsondata.put("sigs", sigs);
         jsondata.put("proxy", proxy);
-        jsondata.put("smids", states != null ? ((List<States.State>) states).stream().map(States.State::getI).collect(Collectors.toList()) : null);
-        jsondata.put("rmids", rstates != null ? ((List<States.State>) rstates).stream().map(States.State::getI).collect(Collectors.toList()) : null);
+        jsondata.put("smids", smids);
+        jsondata.put("rmids", rmids);
 
         jsondata.put(algo.getValue(), keeper.getParams().toMap());
 
@@ -247,7 +282,7 @@ public class Identifier {
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
-        Map<String, Object> jsondata = new HashMap<>();
+        LinkedHashMap<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rpy", rpy.getKed());
         jsondata.put("sigs", sigs);
 
@@ -402,8 +437,8 @@ public class Identifier {
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rot", serder.getKed());
         jsondata.put("sigs", sigs);
-        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI) : null);
-        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI) : null);
+        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI).toList() : null);
+        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI).toList() : null);
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(
@@ -416,5 +451,18 @@ public class Identifier {
         return new EventResult(serder, sigs, res);
     }
 
-    //TODO implement the rest of the function
+    /**
+     * Get the members of a group identifier
+     * @param name Name of the group identifier
+     * @return A list of members of the group
+     */
+    public Object members(String name) throws SodiumException, InterruptedException, IOException {
+        HttpResponse<String> response = this.client.fetch(
+                "/identifiers/" + name + "/members",
+                "GET",
+                null,
+                null
+        );
+        return Utils.fromJson(response.body(), Object.class);
+    }
 }

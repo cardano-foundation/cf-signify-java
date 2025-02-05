@@ -7,16 +7,17 @@ import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.States;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.resolveOobi;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitOperation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WitnessTest extends TestUtils {
+public class WitnessTest {
     SignifyClient client1;
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
@@ -29,7 +30,7 @@ public class WitnessTest extends TestUtils {
     @Test
     public void testWitness() throws Exception {
         String bran1 = Coring.randomPasscode();
-        client1 = new  SignifyClient(
+        client1 = new SignifyClient(
                 url,
                 bran1,
                 Salter.Tier.low,

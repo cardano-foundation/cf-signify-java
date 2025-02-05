@@ -7,8 +7,12 @@ import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Operations {
@@ -22,14 +26,16 @@ public class Operations {
         String path = "/operations/" + name;
         String method = "GET";
         HttpResponse<String> response = client.fetch(path, method, null, null);
-        return Utils.fromJson(response.body(), new TypeReference<>() {});
+        return Utils.fromJson(response.body(), new TypeReference<>() {
+        });
     }
 
     public List<Operation<?>> list(String type) throws SodiumException, IOException, InterruptedException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
         String method = "GET";
         HttpResponse<String> response = client.fetch(path, method, null, null);
-        return Utils.fromJson(response.body(), new TypeReference<>() {});
+        return Utils.fromJson(response.body(), new TypeReference<>() {
+        });
     }
 
     public void delete(String name) throws SodiumException, IOException, InterruptedException {
@@ -52,7 +58,7 @@ public class Operations {
         int increaseFactor = options.getIncreaseFactor();
 
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null && !op.getMetadata().getDepends().isDone()) {
-            return (Operation<T>) wait(op.getMetadata().getDepends(), options, startingTime);
+            wait(op.getMetadata().getDepends(), options, startingTime);
         }
 
         if (op.isDone()) {

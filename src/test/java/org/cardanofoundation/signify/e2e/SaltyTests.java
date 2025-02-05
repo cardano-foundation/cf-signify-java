@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -66,8 +65,7 @@ class SaltyTests {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aidsJson = client.getIdentifier().list(0, 24);
-        List<Map<String, Object>> aids = Utils.fromJson(aidsJson.aids().toString(), new TypeReference<>() {
-        });
+        List<Map<String, Object>> aids = Utils.fromJson(aidsJson.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(1, aids.size());
 
         Map<String, Object> aidLast = aids.removeLast();
@@ -105,8 +103,7 @@ class SaltyTests {
         assertEquals("2", icp2.getKed().get("nt"));
 
         IdentifierListResponse aidsJson1 = client.getIdentifier().list(0, 24);
-        List<Map<String, Object>> aids1 = Utils.fromJson(aidsJson1.aids().toString(), new TypeReference<>() {
-        });
+        List<Map<String, Object>> aids1 = Utils.fromJson(aidsJson1.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(2, aids1.size());
 
         Map<String, Object> aid3 = aids1.removeLast();
@@ -123,24 +120,21 @@ class SaltyTests {
         waitOperation(client, icpResult2.op());
 
         IdentifierListResponse aidsJson2 = client.getIdentifier().list(0, 24);
-        List<Map<String, Object>> aids2 = Utils.fromJson(aidsJson2.aids().toString(), new TypeReference<>() {
-        });
+        List<Map<String, Object>> aids2 = Utils.fromJson(aidsJson2.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(3, aids2.size());
 
         Map<String, Object> aid4 = aids2.getFirst();
         Assertions.assertEquals("aid1", aid4.get("name"));
 
         IdentifierListResponse aidsJson3 = client.getIdentifier().list(1, 2);
-        List<Map<String, Object>> aids3 = Utils.fromJson(aidsJson3.aids().toString(), new TypeReference<>() {
-        });
+        List<Map<String, Object>> aids3 = Utils.fromJson(aidsJson3.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(2, aids3.size());
 
         Map<String, Object> aid5 = aids3.getFirst();
         Assertions.assertEquals("aid2", aid5.get("name"));
 
         IdentifierListResponse aidsJson4 = client.getIdentifier().list(2, 2);
-        List<Map<String, Object>> aids4 = Utils.fromJson(aidsJson4.aids().toString(), new TypeReference<>() {
-        });
+        List<Map<String, Object>> aids4 = Utils.fromJson(aidsJson4.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(1, aids4.size());
 
         Map<String, Object> aid6 = aids4.getFirst();
@@ -207,8 +201,7 @@ class SaltyTests {
         States.HabState retrievedState = client.getIdentifier().get("aid4");
         assertEquals("aid4", retrievedState.getName());
         IdentifierListResponse response = client.getIdentifier().list(2, 2);
-        List<Map<String, Object>> identifiers = Utils.fromJson(response.aids().toString(), new TypeReference<>() {
-        });
+        List<Map<String, Object>> identifiers = Utils.fromJson(response.aids().toString(), new TypeReference<>() {});
         assertEquals(1, identifiers.size());
 
         Map<String, Object> firstIdentifier = identifiers.getFirst();

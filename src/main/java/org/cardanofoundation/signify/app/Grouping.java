@@ -1,9 +1,11 @@
 package org.cardanofoundation.signify.app;
 
+import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class Grouping {
          * @return The list of replay messages
          * @throws Exception if the fetch operation fails
          */
-        public Object getRequest(String said) throws Exception {
+        public Object getRequest(String said) throws SodiumException, IOException, InterruptedException {
             String path = "/multisig/request/" + said;
             String method = "GET";
             return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
