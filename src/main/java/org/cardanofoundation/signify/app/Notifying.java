@@ -1,9 +1,9 @@
 package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
 
@@ -31,14 +31,14 @@ public class Notifying {
          * @param end End index of list of notifications, defaults to 24
          * @return List of notifications
          */
-        public NotificationListResponse list(int start, int end) throws SodiumException, IOException, InterruptedException {
+        public NotificationListResponse list(int start, int end) throws IOException, InterruptedException, LibsodiumException {
             Map<String, String> extraHeaders = Map.of(
                 "Range", String.format("notes=%d-%d", start, end)
             );
 
             String path = "/notifications";
             String method = "GET";
-            HttpResponse<String> res = client.fetch(path, method, null, extraHeaders);
+            HttpResponse<String> res = this.client.fetch(path, method, null, extraHeaders);
 
             String cr = res.headers().firstValue("content-range").orElse(null);
             Httping.RangeInfo range = Httping.parseRangeHeaders(cr, "notes");
@@ -52,11 +52,11 @@ public class Notifying {
             );
         }
 
-        public NotificationListResponse list() throws SodiumException, IOException, InterruptedException {
+        public NotificationListResponse list() throws IOException, InterruptedException, LibsodiumException {
             return list(0, 24);
         }
 
-        public NotificationListResponse list(int start) throws SodiumException, IOException, InterruptedException {
+        public NotificationListResponse list(int start) throws IOException, InterruptedException, LibsodiumException {
             return list(start, 24);
         }
 
@@ -65,11 +65,10 @@ public class Notifying {
          * @param said SAID of the notification
          * @return Result of the marking
          */
-        public String mark(String said) throws SodiumException, IOException, InterruptedException {
+        public String mark(String said) throws IOException, InterruptedException, LibsodiumException {
             String path = "/notifications/" + said;
             String method = "PUT";
-
-            HttpResponse<String> response = this.client.fetch(path, method, null, null);
+            HttpResponse<String> response = this.client.fetch(path, method, null);
             return response.body();
         }
 
@@ -77,11 +76,10 @@ public class Notifying {
          * Delete a notification
          * @param said SAID of the notification
          */
-        public void delete(String said) throws SodiumException, IOException, InterruptedException {
+        public void delete(String said) throws IOException, InterruptedException, LibsodiumException {
             String path = "/notifications/" + said;
             String method = "DELETE";
-
-            this.client.fetch(path, method, null, null);
+            this.client.fetch(path, method, null);
         }
 
         public record NotificationListResponse(int start, int end, int total, Object notes) {}

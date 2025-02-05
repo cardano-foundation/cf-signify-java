@@ -1,8 +1,11 @@
 package org.cardanofoundation.signify.app.coring;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +30,11 @@ public class KeyStates {
      * @return A map representing the key states
      * @throws Exception if the fetch operation fails
      */
-    public Object get(String pre) throws Exception {
+    public Object get(String pre) throws LibsodiumException, IOException, InterruptedException {
         String path = "/states?pre=" + pre;
         String method = "GET";
-        String data = null;
-        return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+        HttpResponse<String> res = this.client.fetch(path, method, null);
+        return Utils.fromJson(res.body(), Object.class);
     }
 
     /**
@@ -41,11 +44,11 @@ public class KeyStates {
      * @return A map representing the key states
      * @throws Exception if the fetch operation fails
      */
-    public Object list(List<String> pres) throws Exception {
+    public Object list(List<String> pres) throws LibsodiumException, IOException, InterruptedException {
         String path = "/states?" + String.join("&", pres.stream().map(pre -> "pre=" + pre).toArray(String[]::new));
         String method = "GET";
-        String data = null;
-        return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+        HttpResponse<String> res = this.client.fetch(path, method, null);
+        return Utils.fromJson(res.body(), Object.class);
     }
 
     /**
@@ -57,7 +60,7 @@ public class KeyStates {
      * @return A map representing the long-running operation
      * @throws Exception if the fetch operation fails
      */
-    public Object query(String pre, Integer sn, Object anchor) throws Exception {
+    public Object query(String pre, Integer sn, Object anchor) throws LibsodiumException, IOException, InterruptedException {
         String path = "/queries";
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("pre", pre);
@@ -68,6 +71,7 @@ public class KeyStates {
             data.put("anchor", anchor);
         }
         String method = "POST";
-        return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+        HttpResponse<String> res = this.client.fetch(path, method, data);
+        return Utils.fromJson(res.body(), Object.class);
     }
 }

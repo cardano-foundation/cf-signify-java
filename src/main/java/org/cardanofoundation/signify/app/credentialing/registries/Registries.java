@@ -1,11 +1,11 @@
 package org.cardanofoundation.signify.app.credentialing.registries;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.habery.TraitCodex;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
@@ -35,12 +35,12 @@ public class Registries {
      * @return an Object representing the list of registries
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
-     * @throws SodiumException      if a sodium exception occurs
+     * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object list(String name) throws IOException, InterruptedException, SodiumException {
+    public Object list(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries";
         String method = "GET";
-        HttpResponse<String> response = this.client.fetch(path, method, null, null);
+        HttpResponse<String> response = this.client.fetch(path, method, null);
         return Utils.fromJson(response.body(), Object.class);
     }
 
@@ -51,9 +51,9 @@ public class Registries {
      * @return a RegistryResult containing the result of the operation
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
-     * @throws SodiumException      if a sodium exception occurs
+     * @throws LibsodiumException   if a sodium exception occurs
      */
-    public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, SodiumException, DigestException {
+    public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException {
         States.HabState hab = this.client.identifiers().get(args.getName());
         String pre = hab.getPrefix();
 
@@ -105,7 +105,6 @@ public class Registries {
         }
     }
 
-
     /**
      * Creates a registry from events.
      *
@@ -118,9 +117,16 @@ public class Registries {
      * @return an Object representing the result of the operation
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
-     * @throws SodiumException      if a sodium exception occurs
+     * @throws LibsodiumException   if a sodium exception occurs
      */
-    private HttpResponse<String> createFromEvents(States.HabState hab, String name, String registryName, Map<String, Object> vcp, Map<String, Object> ixn, List<String> sigs) throws IOException, InterruptedException, SodiumException {
+    private HttpResponse<String> createFromEvents(
+        States.HabState hab,
+        String name,
+        String registryName,
+        Map<String, Object> vcp,
+        Map<String, Object> ixn,
+        List<String> sigs
+    ) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries";
         String method = "POST";
 
@@ -130,10 +136,10 @@ public class Registries {
         data.put("ixn", ixn);
         data.put("sigs", sigs);
 
-        Keeping.Keeper keeper = this.client.getManager().get(hab);
+        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
         data.put(keeper.getAlgo().getValue(), keeper.getParams().toMap());
 
-        return this.client.fetch(path, method, data, null);
+        return this.client.fetch(path, method, data);
     }
 
     /**
@@ -145,16 +151,16 @@ public class Registries {
      * @return an Object representing the updated registry record
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
-     * @throws SodiumException      if a sodium exception occurs
+     * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object rename(String name, String registryName, String newName) throws IOException, InterruptedException, SodiumException {
+    public Object rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries/" + registryName;
         String method = "PUT";
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("name", newName);
 
-        HttpResponse<String> response = this.client.fetch(path, method, data, null);
+        HttpResponse<String> response = this.client.fetch(path, method, data);
         return Utils.fromJson(response.body(), Object.class);
     }
 }

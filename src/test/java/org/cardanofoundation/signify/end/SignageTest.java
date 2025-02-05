@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.end;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class SignageTest {
     String digest;
 
     @BeforeEach
-    void setUp() throws SodiumException {
+    void setUp() throws LibsodiumException {
         final String name = "Hilga";
         final Signer signer0 = createSigner(name + "00");
         final Signer signer1 = createSigner(name + "01");
@@ -122,7 +122,6 @@ class SignageTest {
         );
 
         // Can create signature header
-
         Signage signage = new Signage(sigers, true, pre, "0", digest, "CESR");
         final Map<String, String> header = Signage.signature(List.of(signage));
         assertTrue(header.containsKey("signature"));
@@ -247,7 +246,7 @@ class SignageTest {
         });
     }
 
-    private Signer createSigner(String name) throws SodiumException {
+    private Signer createSigner(String name) throws LibsodiumException {
         final boolean temp = true;
         final byte[] raw = "0123456789abcdef".getBytes();
         final Salter salter = new Salter(RawArgs.builder().raw(raw).build());

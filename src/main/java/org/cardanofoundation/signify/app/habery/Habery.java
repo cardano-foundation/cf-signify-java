@@ -1,11 +1,10 @@
 package org.cardanofoundation.signify.app.habery;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 
@@ -22,7 +21,7 @@ public class Habery {
     private Manager mgr;
     private Map<String, Hab> habs = new LinkedHashMap<>();
 
-    public Habery(HaberyArgs args) throws SodiumException {
+    public Habery(HaberyArgs args) throws LibsodiumException {
         this.name = args.getName();
         if (args.getPasscode() != null && args.getSeed() == null) {
             if (args.passcode.length() < 21) {
@@ -70,7 +69,7 @@ public class Habery {
         return this.habs.get(name);
     }
 
-    public Hab makeHab(String name, MakeHabArgs args) throws SodiumException, DigestException {
+    public Hab makeHab(String name, MakeHabArgs args) throws DigestException, LibsodiumException {
         if (args.nsith == null) {
             args.nsith = args.isith;
         }

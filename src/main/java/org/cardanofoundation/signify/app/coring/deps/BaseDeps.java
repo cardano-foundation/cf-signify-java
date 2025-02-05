@@ -1,9 +1,8 @@
 package org.cardanofoundation.signify.app.coring.deps;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 
 import java.io.IOException;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.util.Map;
 
@@ -13,5 +12,11 @@ public interface BaseDeps {
         String method,
         Object body,
         Map<String, String> extraHeaders
-    ) throws SodiumException, InterruptedException, IOException;
+    ) throws LibsodiumException, InterruptedException, IOException;
+
+    HttpResponse<String> fetch(
+        String pathname,
+        String method,
+        Object body
+    ) throws LibsodiumException, InterruptedException, IOException;
 }

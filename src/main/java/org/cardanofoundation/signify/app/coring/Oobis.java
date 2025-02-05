@@ -6,14 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.cesr.util.Utils;
 
 public class Oobis {
     private final SignifyClient client;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Oobis(SignifyClient client) {
         this.client = client;
@@ -26,16 +24,16 @@ public class Oobis {
      * @param role Authorized role
      * @return A promise to the OOBI(s)
      * @throws JsonProcessingException if there is an error processing the JSON
-     * @throws SodiumException
+     * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Object get(String name, String role) throws IOException, SodiumException, InterruptedException {
+    public Object get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
         if (role == null) {
             role = "agent";
         }
         String path = "/identifiers/" + name + "/oobis?role=" + role;
         String method = "GET";
-        HttpResponse<String> response = client.fetch(path, method, null, null);
-        return objectMapper.readValue(response.body(), new TypeReference<>() {});
+        HttpResponse<String> response = this.client.fetch(path, method, null);
+        return Utils.fromJson(response.body(), Object.class);
     }
 
     /**
@@ -45,9 +43,9 @@ public class Oobis {
      * @param alias Optional name or alias to link the OOBI resolution to a contact
      * @return A promise to the long-running operation
      * @throws JsonProcessingException if there is an error processing the JSON
-     * @throws SodiumException
+     * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Object resolve(String oobi, String alias) throws IOException, SodiumException, InterruptedException {
+    public Object resolve(String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
         String path = "/oobis";
         String method = "POST";
 
@@ -56,7 +54,7 @@ public class Oobis {
         if (alias != null) {
             data.put("oobialias", alias);
         }
-        HttpResponse<String> response = client.fetch(path, method, data, null);
-        return objectMapper.readValue(response.body(), new TypeReference<>() {});
+        HttpResponse<String> response = this.client.fetch(path, method, data);
+        return Utils.fromJson(response.body(), Object.class);
     }
 }

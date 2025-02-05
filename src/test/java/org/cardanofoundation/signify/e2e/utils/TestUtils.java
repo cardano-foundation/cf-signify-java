@@ -3,13 +3,13 @@ package org.cardanofoundation.signify.e2e.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Contacting;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.States;
 import org.junit.jupiter.api.Assertions;
 
@@ -70,7 +70,7 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void assertOperations(List<SignifyClient> clients) throws SodiumException, IOException, InterruptedException {
+    public static void assertOperations(List<SignifyClient> clients) throws IOException, InterruptedException, LibsodiumException {
         // TO-DO
         for (SignifyClient client : clients) {
             List<Operation<?>> operations = client.operations().list(null);
@@ -126,7 +126,7 @@ public class TestUtils {
         return null;
     }
 
-    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
+    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
         // TO-DO
         try {
             return client.identifiers().get(name);
@@ -257,7 +257,7 @@ public class TestUtils {
         return result;
     }
 
-    public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, IOException, InterruptedException {
+    public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws IOException, InterruptedException, LibsodiumException {
         Object getResponseI = null;
         List<Contacting.Contact> list = Arrays.asList(client.contacts().list(null, "alias", "^" + name + "$"));
         if (!list.isEmpty()) {
@@ -334,7 +334,7 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void deleteOperations(SignifyClient client, Operation op) throws SodiumException, IOException, InterruptedException {
+    public static void deleteOperations(SignifyClient client, Operation op) throws IOException, InterruptedException, LibsodiumException {
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null) {
             deleteOperations(client, op.getMetadata().getDepends());
         }
@@ -355,7 +355,7 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
+    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
         Object op = client.oobis().resolve(oobi, alias);
         waitOperation(client, op);
     }
@@ -378,7 +378,8 @@ public class TestUtils {
 
     public static <T> Operation<T> waitOperation(
             SignifyClient client,
-            Object op) throws SodiumException, IOException, InterruptedException {
+            Object op
+    ) throws IOException, InterruptedException, LibsodiumException {
         Operation<T> operation;
         if (op instanceof String) {
             String name = objectMapper.readValue((String) op, Map.class).get("name").toString();

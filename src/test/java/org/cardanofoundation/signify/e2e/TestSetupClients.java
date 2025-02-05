@@ -1,7 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ public class TestSetupClients extends TestUtils {
     }
 
     @BeforeEach
-    public void getContact() throws SodiumException, IOException, InterruptedException {
+    public void getContact() throws IOException, InterruptedException, LibsodiumException {
         contact1_id = getOrCreateContact(client2, "contact1", name1_oobi);
         contact2_id = getOrCreateContact(client1, "contact2", name2_oobi);
     }

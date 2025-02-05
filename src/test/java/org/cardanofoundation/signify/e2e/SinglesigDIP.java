@@ -2,10 +2,10 @@ package org.cardanofoundation.signify.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -39,7 +39,7 @@ class SinglesigDIP extends TestUtils {
     }
 
     @BeforeEach
-    public void getContact() throws SodiumException, IOException, InterruptedException {
+    public void getContact() throws IOException, InterruptedException, LibsodiumException {
         contact1_id = getOrCreateContact(client2, "contact1", name1_oobi);
     }
 

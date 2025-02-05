@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.cesr;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.params.GroupParams;
@@ -37,23 +37,23 @@ public class Keeping {
 
         T getParams();
 
-        KeeperResult incept(boolean transferable) throws SodiumException, DigestException;
+        KeeperResult incept(boolean transferable) throws DigestException, LibsodiumException;
 
         KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
                 List<State> states,
                 List<State> rstates
-        ) throws SodiumException, DigestException;
+        ) throws DigestException, LibsodiumException;
 
         SignResult sign(
                 byte[] ser,
                 Boolean indexed,
                 List<Integer> indices,
                 List<Integer> ondices
-        ) throws SodiumException;
+        ) throws LibsodiumException;
 
-        default SignResult sign(byte[] ser) throws SodiumException {
+        default SignResult sign(byte[] ser) throws LibsodiumException {
             return sign(ser, true, null, null);
         }
     }
@@ -82,7 +82,7 @@ public class Keeping {
             }
         }
 
-        public Keeper<? extends KeeperParams> create(Algos algo, int pidx, Map<String, Object> kargs) throws SodiumException {
+        public Keeper<? extends KeeperParams> create(Algos algo, int pidx, Map<String, Object> kargs) throws LibsodiumException {
             return switch (algo) {
                 case salty -> new SaltyKeeper(
                         salter,
@@ -126,7 +126,7 @@ public class Keeping {
             };
         }
 
-        public Keeper<? extends KeeperParams> get(HabState aid) throws SodiumException {
+        public Keeper<? extends KeeperParams> get(HabState aid) throws LibsodiumException {
             if (aid.containsKey(Algos.salty.getValue())) {
                 States.SaltyState kargs = (States.SaltyState) aid.get(Algos.salty.getValue());
                 return new SaltyKeeper(
@@ -218,7 +218,7 @@ public class Keeping {
                 String dcode,
                 String bran,
                 String sxlt
-        ) throws SodiumException {
+        ) throws LibsodiumException {
             this.salter = salter;
             this.pidx = pidx;
             this.kidx = kidx != null ? kidx : 0;
@@ -306,7 +306,7 @@ public class Keeping {
         }
 
         @Override
-        public KeeperResult incept(boolean transferable) throws SodiumException, DigestException {
+        public KeeperResult incept(boolean transferable) throws DigestException, LibsodiumException {
             this.transferable = transferable;
             this.kidx = 0;
 
@@ -347,7 +347,7 @@ public class Keeping {
                 boolean transferable,
                 List<State> states,
                 List<State> rstates
-        ) throws SodiumException, DigestException {
+        ) throws DigestException, LibsodiumException {
             this.ncodes = ncodes;
             this.transferable = transferable;
 
@@ -390,7 +390,7 @@ public class Keeping {
                 Boolean indexed,
                 List<Integer> indices,
                 List<Integer> ondices
-        ) throws SodiumException {
+        ) throws LibsodiumException {
             Manager.Keys signers = creator.create(
                     icodes,
                     ncount,
@@ -474,7 +474,7 @@ public class Keeping {
                 String dcode,
                 List<String> prxs,
                 List<String> nxts
-        ) throws SodiumException {
+        ) throws LibsodiumException {
             this.salter = salter;
             this.code = code != null ? code : MatterCodex.Ed25519_Seed.getValue();
             this.count = count != null ? count : 1;
@@ -524,7 +524,7 @@ public class Keeping {
         }
 
         @Override
-        public KeeperResult incept(boolean transferable) throws SodiumException, DigestException {
+        public KeeperResult incept(boolean transferable) throws DigestException, LibsodiumException {
             this.transferable = transferable;
 
             Manager.Keys signers = creator.create(
@@ -566,7 +566,7 @@ public class Keeping {
                 boolean transferable,
                 List<State> states,
                 List<State> rstates
-        ) throws SodiumException, DigestException {
+        ) throws DigestException, LibsodiumException {
             this.ncodes = ncodes;
             this.transferable = transferable;
             this.prxs = this.nxts;
@@ -605,7 +605,7 @@ public class Keeping {
                 Boolean indexed,
                 List<Integer> indices,
                 List<Integer> ondices
-        ) throws SodiumException {
+        ) throws LibsodiumException {
             List<Signer> signers = new ArrayList<>();
             for (String prx : this.prxs) {
                 Signer signer = (Signer) this.decrypter.decrypt(
@@ -729,7 +729,7 @@ public class Keeping {
                 Boolean indexed,
                 List<Integer> indices,
                 List<Integer> ondices
-        ) throws SodiumException {
+        ) throws LibsodiumException {
             if (mhab.getState() == null) {
                 throw new IllegalStateException("No state in mhab");
             }

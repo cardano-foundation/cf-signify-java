@@ -1,11 +1,11 @@
 package org.cardanofoundation.signify.cesr.args;
 
 import com.goterl.lazysodium.LazySodiumJava;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.*;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
@@ -148,7 +148,7 @@ public class RawArgs {
         return args;
     }
 
-    public static RawArgs generateEncrypterRaw(RawArgs args, byte[] verkey) throws SodiumException {
+    public static RawArgs generateEncrypterRaw(RawArgs args, byte[] verkey) throws LibsodiumException {
         if (args.getCode() == null) {
             args.setCode(MatterCodex.X25519.getValue());
         }
@@ -165,14 +165,14 @@ public class RawArgs {
             byte[] raw = new byte[32];
             boolean success = lazySodium.convertPublicKeyEd25519ToCurve25519(raw, verfer.getRaw());
             if (!success) {
-                throw new SodiumException("Failed to convert public key ed25519 to Curve25519");
+                throw new LibsodiumException("Failed to convert public key ed25519 to Curve25519");
             }
             args.setRaw(raw);
         }
         return args;
     }
 
-    public static RawArgs generateDecrypterRaw(RawArgs args, byte[] seed) throws SodiumException {
+    public static RawArgs generateDecrypterRaw(RawArgs args, byte[] seed) throws LibsodiumException {
         if (args.getCode() == null) {
             args.setCode(MatterCodex.X25519_Private.getValue());
         }
@@ -191,7 +191,7 @@ public class RawArgs {
             byte[] raw = new byte[32];
             boolean success = lazySodium.convertSecretKeyEd25519ToCurve25519(raw, sigKey);
             if (!success) {
-                throw new SodiumException("Failed to convert secret key ed25519 to Curve25519");
+                throw new LibsodiumException("Failed to convert secret key ed25519 to Curve25519");
             }
             args.setRaw(raw);
         }

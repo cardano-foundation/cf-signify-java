@@ -169,7 +169,7 @@ public class ClientingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        client.fetch("/contacts", "GET", null, null);
+        client.fetch("/contacts", "GET", null);
         RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/contacts", request.getPath());
@@ -179,14 +179,14 @@ public class ClientingTest extends BaseMockServerTest {
         //test bad request
         Exception exception = assertThrows(
                 HeaderVerificationException.class,
-                () -> client.fetch("/different-remote-agent", "GET", null, null)
+                () -> client.fetch("/different-remote-agent", "GET", null)
         );
 
         assertEquals("Message from a different remote agent", exception.getMessage());
 
         exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> client.fetch("/invalid-signature", "GET", null, null)
+                () -> client.fetch("/invalid-signature", "GET", null)
         );
 
         assertEquals("Signature for EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei invalid.", exception.getMessage());

@@ -3,7 +3,6 @@ package org.cardanofoundation.signify.core;
 import java.security.DigestException;
 import java.util.*;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,10 +10,11 @@ import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
 
+@Getter
 public class Manager {
-
     private String seed;
     private String salt;
     private Encrypter encrypter;
@@ -24,7 +24,7 @@ public class Manager {
     public Manager() {
     }
 
-    public Manager(ManagerArgs args) throws SodiumException {
+    public Manager(ManagerArgs args) throws LibsodiumException {
         this.ks = args.ks == null ? new Keeper() : args.ks;
         this.seed = args.seed;
 
@@ -56,8 +56,8 @@ public class Manager {
         }
     }
 
-    public static Manager openManager(String passcode, String salt) throws SodiumException {
-        if(passcode.length() < 21) {
+    public static Manager openManager(String passcode, String salt) throws LibsodiumException {
+        if (passcode.length() < 21) {
             throw new IllegalArgumentException("Bran (passcode seed material) too short.");
         }
 
@@ -90,22 +90,6 @@ public class Manager {
                 .build());
     }
 
-    public KeyStore getKs() {
-        return this.ks;
-    }
-
-    public Encrypter getEncrypter() {
-        return this.encrypter;
-    }
-
-    public Decrypter getDecrypter() {
-        return this.decrypter;
-    }
-
-    public String getSeed() {
-        return this.seed;
-    }
-
     public String getAeid() {
         return this.ks.getGbls("aeid");
     }
@@ -122,7 +106,7 @@ public class Manager {
         this.ks.pinGbls("pidx", Integer.toString(pidx, 16));
     }
 
-    public String getSalt() throws SodiumException {
+    public String getSalt() throws LibsodiumException {
         if (this.decrypter == null) {
             return this.salt;
         } else {
@@ -131,7 +115,7 @@ public class Manager {
         }
     }
 
-    public void setSalt(String salt) throws SodiumException {
+    public void setSalt(String salt) throws LibsodiumException {
         if (this.encrypter == null) {
             this.salt = salt;
         } else {
@@ -156,7 +140,7 @@ public class Manager {
         this.ks.pinGbls("algo", algo.getValue());
     }
 
-    private void updateAeid(String aeid, String seed) throws SodiumException {
+    private void updateAeid(String aeid, String seed) throws LibsodiumException {
         if (this.getAeid() != null) {
             byte[] seedBytes = this.getSeed().getBytes();
             if (this.seed == null || !this.encrypter.verifySeed(seedBytes)) {
@@ -166,7 +150,7 @@ public class Manager {
         }
 
         if (aeid != null && !aeid.isEmpty()) {
-            if (aeid != this.getAeid()) {
+            if (!aeid.equals(this.getAeid())) {
                 this.encrypter = new Encrypter(new RawArgs(), aeid.getBytes());
                 if (seed == null || !this.encrypter.verifySeed(seed.getBytes())) {
                     throw new IllegalArgumentException("Last seed missing or provided last seed " +
@@ -217,7 +201,7 @@ public class Manager {
 
     }
 
-    public ManagerInceptResult incept(ManagerInceptArgs args) throws SodiumException, DigestException {
+    public ManagerInceptResult incept(ManagerInceptArgs args) throws DigestException, LibsodiumException {
         if (args.rooted && args.algo == null) {
             args.algo = this.getAlgo();
         }
@@ -437,7 +421,7 @@ public class Manager {
         }
     }
 
-    public ManagerRotateResult rotate(RotateArgs args) throws SodiumException, DigestException {
+    public ManagerRotateResult rotate(RotateArgs args) throws DigestException, LibsodiumException {
         PrePrm pp = this.ks.getPrms(args.pre);
         if (pp == null) {
             throw new IllegalArgumentException("Attempt to rotate nonexistent pre=" + args.pre);
@@ -556,7 +540,7 @@ public class Manager {
         return new ManagerRotateResult(verfers, digers);
     }
 
-    public Object sign(SignArgs args) throws SodiumException {
+    public Object sign(SignArgs args) throws LibsodiumException {
         List<Signer> signers = new ArrayList<>();
         if (args.pubs == null && args.verfers == null) {
             throw new IllegalArgumentException("pubs or verfers required");
@@ -696,7 +680,7 @@ public class Manager {
     }
 
     interface Creator {
-        Keys create(List<String> codes, Integer count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException;
+        Keys create(List<String> codes, Integer count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws LibsodiumException;
 
         String salt();
 
@@ -720,13 +704,13 @@ public class Manager {
 
         boolean remPrms(String keys);
 
-        List<Map.Entry<String, Signer>> prisElements(Decrypter decrypter) throws SodiumException;
+        List<Map.Entry<String, Signer>> prisElements(Decrypter decrypter) throws LibsodiumException;
 
-        Signer getPris(String keys, Decrypter decrypter) throws SodiumException;
+        Signer getPris(String keys, Decrypter decrypter) throws LibsodiumException;
 
-        void pinPris(String keys, Signer data, Encrypter encrypter) throws SodiumException;
+        void pinPris(String keys, Signer data, Encrypter encrypter) throws LibsodiumException;
 
-        boolean putPris(String pubKey, Signer signer, Encrypter encrypter) throws SodiumException;
+        boolean putPris(String pubKey, Signer signer, Encrypter encrypter) throws LibsodiumException;
 
         void remPris(String pubKey);
 
@@ -895,7 +879,7 @@ public class Manager {
             int ridx,
             int kidx,
             boolean temp
-        ) throws SodiumException {
+        ) throws LibsodiumException {
             List<Signer> signers = new ArrayList<>();
 
             if (codes == null) {
@@ -915,19 +899,19 @@ public class Manager {
             return new Keys(signers, null);
         }
 
-        public Keys create() throws SodiumException {
+        public Keys create() throws LibsodiumException {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes, Integer count, String code, boolean transferable) throws SodiumException {
+        public Keys create(List<String> codes, Integer count, String code, boolean transferable) throws LibsodiumException {
             return create(codes, count, code, transferable, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes, Integer count) throws SodiumException {
+        public Keys create(List<String> codes, Integer count) throws LibsodiumException {
             return create(codes, count, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
-        public Keys create(List<String> codes) throws SodiumException {
+        public Keys create(List<String> codes) throws LibsodiumException {
             return create(codes, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
@@ -974,7 +958,16 @@ public class Manager {
         }
 
         @Override
-        public Keys create(List<String> codes, Integer count, String code, boolean transferable, int pidx, int ridx, int kidx, boolean temp) throws SodiumException {
+        public Keys create(
+            List<String> codes,
+            Integer count,
+            String code,
+            boolean transferable,
+            int pidx,
+            int ridx,
+            int kidx,
+            boolean temp
+        ) throws LibsodiumException {
             List<Signer> signers = new ArrayList<>();
             List<String> paths = new ArrayList<>();
 
@@ -999,7 +992,7 @@ public class Manager {
             return new Keys(signers, paths);
         }
 
-        public Keys create() throws SodiumException {
+        public Keys create() throws LibsodiumException {
             return create(null, 1, MatterCodex.Ed25519_Seed.getValue(), true, 0, 0, 0, false);
         }
 
@@ -1125,7 +1118,7 @@ public class Manager {
         }
 
         @Override
-        public List<Map.Entry<String, Signer>> prisElements(Decrypter decrypter) throws SodiumException {
+        public List<Map.Entry<String, Signer>> prisElements(Decrypter decrypter) throws LibsodiumException {
             List<Map.Entry<String, Signer>> entries = new ArrayList<>();
             for (Map.Entry<String, byte[]> entry : pris.entrySet()) {
                 Verfer verfer = new Verfer(entry.getKey());
@@ -1135,13 +1128,12 @@ public class Manager {
             return entries;
         }
 
-
-        public void pinPris(String pubKey, Signer signer, Encrypter encrypter) throws SodiumException {
+        public void pinPris(String pubKey, Signer signer, Encrypter encrypter) throws LibsodiumException {
             Cipher cipher = encrypter.encrypt(null, signer);
             pris.put(pubKey, cipher.getQb64b());
         }
 
-        public boolean putPris(String pubKey, Signer signer, Encrypter encrypter) throws SodiumException {
+        public boolean putPris(String pubKey, Signer signer, Encrypter encrypter) throws LibsodiumException {
             if (pris.containsKey(pubKey)) {
                 return false;
             }
@@ -1150,7 +1142,7 @@ public class Manager {
             return true;
         }
 
-        public Signer getPris(String pubKey, Decrypter decrypter) throws SodiumException {
+        public Signer getPris(String pubKey, Decrypter decrypter) throws LibsodiumException {
             byte[] val = pris.get(pubKey);
             if (val == null) {
                 return null;

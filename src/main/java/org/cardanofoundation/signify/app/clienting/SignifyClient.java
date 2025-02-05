@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app.clienting;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +26,7 @@ import org.cardanofoundation.signify.app.credentialing.Schemas;
 import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -78,7 +78,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Salter.Tier tier,
         String bootUrl,
         List<ExternalModule> externalModules
-    ) throws SodiumException, DigestException {
+    ) throws DigestException, LibsodiumException {
         tier = tier != null ? tier : Salter.Tier.low;
         this.url = url;
         if (bran.length() < 21) {
@@ -226,7 +226,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         String method,
         Object data,
         Map<String, String> extraHeaders
-    ) throws SodiumException, InterruptedException, IOException {
+    ) throws LibsodiumException, InterruptedException, IOException {
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
         headers.put("signify-resource", this.controller.getPre());
@@ -301,10 +301,18 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
        return response;
     }
 
+    public HttpResponse<String> fetch(
+        String path,
+        String method,
+        Object data
+    ) throws LibsodiumException, InterruptedException, IOException {
+        return this.fetch(path, method, data, null);
+    }
+
     /**
      * Approve the delegation of the client AID to the KERIA agent
      */
-    public void approveDelegation() throws Exception {
+    public void approveDelegation() throws DigestException, IOException, InterruptedException, LibsodiumException {
         if (this.agent == null) {
             throw new RuntimeException("Agent not initialized");
         }
@@ -323,7 +331,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
             HttpClient client = HttpClient.newBuilder().build();
             client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException exception) {
+        } catch (IOException | InterruptedException exception) {
             if(exception.getMessage().contains("unexpected content length header with 204 response")) {
                 /**
                  * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230

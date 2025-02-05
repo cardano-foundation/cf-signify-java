@@ -1,19 +1,21 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestException;
 import java.util.HashMap;
 import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class Contacting {
     @Getter
@@ -34,15 +36,15 @@ public class Contacting {
          * @return A list of random words
          * @throws Exception if the fetch operation fails
          */
-        public Object generate(Integer strength) throws Exception {
+        public Object generate(Integer strength) throws LibsodiumException, IOException, InterruptedException {
             String path = "/challenges?strength=" + strength.toString();
             String method = "GET";
 
-            HttpResponse<String> response = this.client.fetch(path, method, null, null);
+            HttpResponse<String> response = this.client.fetch(path, method, null);
             return Utils.fromJson(response.body(), Object.class);
         }
 
-        public Object generate() throws Exception {
+        public Object generate() throws LibsodiumException, IOException, InterruptedException {
             return generate(128);
         }
 
@@ -54,7 +56,7 @@ public class Contacting {
          * @return The result of the response
          * @throws Exception if the fetch operation fails
          */
-        public Object respond(String name, String recipient, List<String> words) throws Exception {
+        public Object respond(String name, String recipient, List<String> words) throws IOException, InterruptedException, DigestException, ExecutionException, LibsodiumException {
             States.HabState hab = this.client.identifiers().get(name);
             Exchanging.Exchanges exchanges = this.client.exchanges();
 
@@ -79,15 +81,15 @@ public class Contacting {
          * @param source Prefix of the identifier that was challenged
          * @param words List of challenge words to check for
          * @return The long-running operation
-         * * @throws Exception if the fetch operation fails
+         * @throws Exception if the fetch operation fails
          */
-        public Object verify(String source, List<String> words) throws Exception {
+        public Object verify(String source, List<String> words) throws LibsodiumException, IOException, InterruptedException {
             String path = "/challenges_verify/" + source;
             String method = "POST";
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("words", words);
 
-            HttpResponse<String> response = this.client.fetch(path, method, data, null);
+            HttpResponse<String> response = this.client.fetch(path, method, data);
             return Utils.fromJson(response.body(), Object.class);
         }
 
@@ -98,13 +100,13 @@ public class Contacting {
          * @return The result
          * @throws Exception if the fetch operation fails
          */
-        public Object responded(String source, String said) throws Exception {
+        public Object responded(String source, String said) throws LibsodiumException, IOException, InterruptedException {
             String path = "/challenges_verify/" + source;
             String method = "PUT";
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("said", said);
 
-            HttpResponse<String> response = this.client.fetch(path, method, data, null);
+            HttpResponse<String> response = this.client.fetch(path, method, data);
             return Utils.fromJson(response.body(), Object.class);
         }
     }
@@ -140,7 +142,7 @@ public class Contacting {
             String group,
             String filterField,
             String filterValue
-        ) throws SodiumException, InterruptedException, IOException {
+        ) throws InterruptedException, IOException, LibsodiumException {
             StringBuilder path = new StringBuilder("/contacts");
             boolean hasQuery = false;
 
@@ -153,8 +155,8 @@ public class Contacting {
                     .append("filter_field=").append(filterField)
                     .append("&filter_value=").append(URLEncoder.encode(filterValue, StandardCharsets.UTF_8));
             }
-
-            HttpResponse<String> response = this.client.fetch(path.toString(), "GET", null, null);
+            String method = "GET";
+            HttpResponse<String> response = this.client.fetch(path.toString(), method, null);
             return Utils.fromJson(response.body(), Contact[].class);
         }
 
@@ -163,9 +165,10 @@ public class Contacting {
          * @param pre Prefix of the contact
          * @return The contact
          */
-        public Object get(String pre) throws SodiumException, InterruptedException, IOException {
+        public Object get(String pre) throws InterruptedException, IOException, LibsodiumException {
             String path = "/contacts/" + pre;
-            HttpResponse<String> response = this.client.fetch(path, "GET", null, null);
+            String method = "GET";
+            HttpResponse<String> response = this.client.fetch(path, method, null);
             return Utils.fromJson(response.body(), Object.class);
         }
 
@@ -175,9 +178,10 @@ public class Contacting {
          * @param info Information about the contact
          * @return Result of the addition
          */
-        public Object add(String pre, Map<String, Object> info) throws SodiumException, IOException, InterruptedException {
+        public Object add(String pre, Map<String, Object> info) throws IOException, InterruptedException, LibsodiumException {
             String path = "/contacts/" + pre;
-            HttpResponse<String> response = this.client.fetch(path, "POST", info, null);
+            String method = "POST";
+            HttpResponse<String> response = this.client.fetch(path, method, info);
             return Utils.fromJson(response.body(), Object.class);
         }
 
@@ -185,11 +189,10 @@ public class Contacting {
          * Delete a contact
          * @param pre Prefix of the contact
          */
-        public void delete(String pre) throws SodiumException, IOException, InterruptedException {
+        public void delete(String pre) throws IOException, InterruptedException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "DELETE";
-
-            this.client.fetch(path, method, null, null);
+            this.client.fetch(path, method, null);
         }
 
         /**
@@ -198,10 +201,10 @@ public class Contacting {
          * @param info Updated information about the contact
          * @return Result of the update
          */
-        public Object update(String pre, Object info) throws SodiumException, IOException, InterruptedException {
+        public Object update(String pre, Object info) throws IOException, InterruptedException, LibsodiumException {
             String path = "/contacts/" + pre;
-
-            HttpResponse<String> response = this.client.fetch(path, "PUT", info, null);
+            String method = "PUT";
+            HttpResponse<String> response = this.client.fetch(path, method, info);
             return Utils.fromJson(response.body(), Object.class);
         }
     }

@@ -4,8 +4,11 @@ import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.InteractionResponse;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 
+import java.io.IOException;
 import java.net.http.HttpResponse;
+import java.security.DigestException;
 
 public class Delegating {
     @Getter
@@ -27,19 +30,20 @@ public class Delegating {
          * @return The delegated approval result
          * @throws Exception if the fetch operation fails
          */
-        public EventResult approve(String name, Object data) throws Exception {
-            InteractionResponse interactionResponse = this.client.identifiers().createInteract(name, data);
+        public EventResult approve(String name, Object data) throws LibsodiumException, DigestException, IOException, InterruptedException {
+            InteractionResponse interactionResponse = this.client
+                .identifiers()
+                .createInteract(name, data);
 
             HttpResponse<String> res = this.client.fetch(
                 "/identifiers/" + name + "/delegation",
                 "POST",
-                interactionResponse.jsondata(),
-                null
+                interactionResponse.jsondata()
             );
             return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), res);
         }
 
-        public EventResult approve(String name) throws Exception {
+        public EventResult approve(String name) throws LibsodiumException, DigestException, IOException, InterruptedException {
             return this.approve(name, null);
         }
     }

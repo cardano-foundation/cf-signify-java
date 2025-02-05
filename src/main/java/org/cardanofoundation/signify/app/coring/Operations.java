@@ -1,9 +1,9 @@
 package org.cardanofoundation.signify.app.coring;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.*;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
@@ -18,35 +18,35 @@ public class Operations {
         this.client = client;
     }
 
-    public <T> Operation<T> get(String name) throws SodiumException, IOException, InterruptedException {
+    public <T> Operation<T> get(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations/" + name;
         String method = "GET";
-        HttpResponse<String> response = client.fetch(path, method, null, null);
+        HttpResponse<String> response = this.client.fetch(path, method, null);
         return Utils.fromJson(response.body(), new TypeReference<>() {});
     }
 
-    public List<Operation<?>> list(String type) throws SodiumException, IOException, InterruptedException {
+    public List<Operation<?>> list(String type) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
         String method = "GET";
-        HttpResponse<String> response = client.fetch(path, method, null, null);
+        HttpResponse<String> response = this.client.fetch(path, method, null);
         return Utils.fromJson(response.body(), new TypeReference<>() {});
     }
 
-    public void delete(String name) throws SodiumException, IOException, InterruptedException {
+    public void delete(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations/" + name;
         String method = "DELETE";
-        client.fetch(path, method, null, null);
+        this.client.fetch(path, method, null);
     }
 
-    public <T> Operation<T> wait(Operation<T> op) throws SodiumException, IOException, InterruptedException {
+    public <T> Operation<T> wait(Operation<T> op) throws IOException, InterruptedException, LibsodiumException {
         return wait(op, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws SodiumException, IOException, InterruptedException {
+    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
         return wait(op, options, System.currentTimeMillis());
     }
 
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options, long startingTime) throws SodiumException, IOException, InterruptedException {
+    public <T> Operation<T> wait(Operation<T> op, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
         int minSleep = options.getMinSleep();
         int maxSleep = options.getMaxSleep();
         int increaseFactor = options.getIncreaseFactor();

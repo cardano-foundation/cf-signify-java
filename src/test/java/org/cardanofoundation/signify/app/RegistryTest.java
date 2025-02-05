@@ -60,7 +60,7 @@ public class RegistryTest {
         when(mockedKeeper.getParams()).thenReturn(SaltyParams.builder().build());
 
         HttpResponse<String> mockedResponse = mock(HttpResponse.class);
-        when(mockedClient.fetch(eq("/identifiers/a name/registries"), eq("POST"), any(), isNull()))
+        when(mockedClient.fetch(eq("/identifiers/a name/registries"), eq("POST"), any(), any()))
                 .thenReturn(mockedResponse);
 
         CreateRegistryArgs args = CreateRegistryArgs.builder()

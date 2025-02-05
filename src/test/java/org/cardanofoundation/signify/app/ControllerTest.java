@@ -1,12 +1,12 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.controlller.Controller;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.Manager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ public class ControllerTest {
 
     @Test
     @DisplayName("manage account AID signing and agent verification")
-    void controllerTest() throws SodiumException, DigestException {
+    void controllerTest() throws DigestException, LibsodiumException {
         String passcode = "0123456789abcdefghijk";
         Manager mgr = Manager.openManager(passcode, null);
 
@@ -39,8 +39,8 @@ public class ControllerTest {
 
         assertEquals(agentSigner.getVerfer().getQb64(),"BHptu91ecGv_mxO8T3b98vNQUCghT8nfYkWRkVqOZark");
 
-        // New account needed.  Send to remote my name and encryption pubk and get back
-        // their pubk and and my encrypted account package
+        // New account needed. Send to remote my name and encryption pubk and get back
+        // their pubk and my encrypted account package
         // let pkg = {}
 
         Controller controller = new Controller(passcode, Salter.Tier.low);
@@ -53,7 +53,7 @@ public class ControllerTest {
 
     @Test
     @DisplayName("should generate unique controller AIDs per passcode")
-    void shouldGenerateUniqueControllerAIDsPerPasscode() throws SodiumException, DigestException {
+    void shouldGenerateUniqueControllerAIDsPerPasscode() throws DigestException, LibsodiumException {
         String passcode1 = Coring.randomPasscode();
         String passcode2 = Coring.randomPasscode();
 

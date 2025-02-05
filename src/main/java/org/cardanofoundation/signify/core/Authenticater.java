@@ -4,11 +4,10 @@ import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Matter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.Verfer;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping.SiginputArgs;
 import org.cardanofoundation.signify.end.Signage;
-
-import com.goterl.lazysodium.exceptions.SodiumException;
 
 import java.util.*;
 
@@ -95,7 +94,7 @@ public class Authenticater {
             String method,
             String path,
             List<String> fields
-    ) throws SodiumException {
+    ) throws LibsodiumException {
         if (fields == null) {
             fields = DEFAULT_FIELDS;
         }

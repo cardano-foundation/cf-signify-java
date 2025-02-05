@@ -19,8 +19,6 @@ public class ContactingTest {
     private SignifyClient client;
     @InjectMocks
     private Contacting.Contacts contacts;
-    @InjectMocks
-    private Contacting.Challenges challenges;
     @Captor
     private ArgumentCaptor<String> pathCaptor;
     @Captor
@@ -32,17 +30,16 @@ public class ContactingTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         contacts = new Contacting.Contacts(client);
-        challenges = new Contacting.Challenges(client);
     }
 
     @Test
     void testGetListContacts() throws Exception {
-        HttpResponse httpResponse = mockHttpResponse("[]");
-        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+        HttpResponse<String> httpResponse = mockHttpResponse("[]");
+        when(client.fetch(anyString(), anyString(), isNull()))
             .thenReturn(httpResponse);
 
         contacts.list("mygroup", "company", "mycompany");
-        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull());
         assertEquals("GET", methodCaptor.getValue());
         assertEquals("/contacts?group=mygroup&filter_field=company&filter_value=mycompany", pathCaptor.getValue());
     }
@@ -51,12 +48,12 @@ public class ContactingTest {
     void testGetContact() throws Exception {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
-        HttpResponse httpResponse = mockHttpResponse("{}");
-        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+        HttpResponse<String> httpResponse = mockHttpResponse("{}");
+        when(client.fetch(anyString(), anyString(), isNull()))
                 .thenReturn(httpResponse);
 
         contacts.get(prefix);
-        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull());
         assertEquals("GET", methodCaptor.getValue());
         assertEquals("/contacts/" + prefix, pathCaptor.getValue());
     }
@@ -69,12 +66,12 @@ public class ContactingTest {
         info.put("name", "John Doe");
         info.put("company", "My Company");
 
-        HttpResponse httpResponse = mockHttpResponse("{}");
-        when(client.fetch(anyString(), anyString(), any(), isNull()))
+        HttpResponse<String> httpResponse = mockHttpResponse("{}");
+        when(client.fetch(anyString(), anyString(), any()))
                 .thenReturn(httpResponse);
 
         contacts.add(prefix, info);
-        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture(), isNull());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture());
         assertEquals("POST", methodCaptor.getValue());
         assertEquals("/contacts/" + prefix, pathCaptor.getValue());
         assertEquals(info, bodyCaptor.getValue());
@@ -89,11 +86,11 @@ public class ContactingTest {
         info.put("company", "My Company");
 
         HttpResponse<String> httpResponse = mockHttpResponse("{}");
-        when(client.fetch(anyString(), anyString(), any(), isNull()))
+        when(client.fetch(anyString(), anyString(), any()))
                 .thenReturn(httpResponse);
 
         contacts.update(prefix, info);
-        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture(), isNull());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), bodyCaptor.capture());
         assertEquals("PUT", methodCaptor.getValue());
         assertEquals("/contacts/" + prefix, pathCaptor.getValue());
         assertEquals(info, bodyCaptor.getValue());
@@ -103,12 +100,12 @@ public class ContactingTest {
     void testDeleteContact() throws Exception {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
-        HttpResponse httpResponse = mockHttpResponse("{}");
-        when(client.fetch(anyString(), anyString(), isNull(), isNull()))
+        HttpResponse<String> httpResponse = mockHttpResponse("{}");
+        when(client.fetch(anyString(), anyString(), isNull()))
                 .thenReturn(httpResponse);
 
         contacts.delete(prefix);
-        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull(), isNull());
+        verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull());
         assertEquals("DELETE", methodCaptor.getValue());
         assertEquals("/contacts/" + prefix, pathCaptor.getValue());
     }

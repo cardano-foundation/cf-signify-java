@@ -4,6 +4,7 @@ import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.utils.KeyPair;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
@@ -16,12 +17,12 @@ public class Encrypter extends Matter {
     private EncrypterFunction encrypter;
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
 
-    public Encrypter(RawArgs args, byte[] verkey) throws SodiumException {
+    public Encrypter(RawArgs args, byte[] verkey) throws LibsodiumException {
         super(RawArgs.generateEncrypterRaw(args, verkey));
         setEncrypter();
     }
 
-    public Encrypter(RawArgs args) throws SodiumException {
+    public Encrypter(RawArgs args) throws LibsodiumException {
         this(args, null);
     }
 
@@ -38,20 +39,25 @@ public class Encrypter extends Matter {
         }
     }
 
-    public boolean verifySeed(byte[] seed) throws SodiumException {
+    public boolean verifySeed(byte[] seed) throws LibsodiumException {
         Signer signer = new Signer(seed);
-        KeyPair keypair = lazySodium.cryptoSignSeedKeypair(signer.getRaw());
+        KeyPair keypair;
+        try {
+            keypair = lazySodium.cryptoSignSeedKeypair(signer.getRaw());
+        } catch (SodiumException e) {
+            throw new LibsodiumException(e);
+        }
 
         byte[] pubKey = new byte[32];
         boolean success = lazySodium.convertPublicKeyEd25519ToCurve25519(pubKey, keypair.getPublicKey().getAsBytes());
         if (!success) {
-            throw new SodiumException("Failed to convert public key ed25519 to Curve25519");
+            throw new LibsodiumException("Failed to convert public key ed25519 to Curve25519");
         }
 
         return Arrays.equals(pubKey, this.getRaw());
     }
 
-    public Cipher encrypt(byte[] ser, Matter matter) throws SodiumException {
+    public Cipher encrypt(byte[] ser, Matter matter) throws LibsodiumException {
         if (ser == null && matter == null) {
             throw new EmptyMaterialException("Neither ser nor matter are provided.");
         }
@@ -70,15 +76,15 @@ public class Encrypter extends Matter {
         return encrypter.encrypt(matter.getQb64().getBytes(), this.getRaw(), code);
     }
 
-    public Cipher encrypt(byte[] ser) throws SodiumException {
+    public Cipher encrypt(byte[] ser) throws LibsodiumException {
         return encrypt(ser, null);
     }
 
-    private Cipher _x25519(byte[] ser, byte[] pubKey, String code) throws SodiumException {
+    private Cipher _x25519(byte[] ser, byte[] pubKey, String code) throws LibsodiumException {
         byte[] raw = new byte[ser.length + CRYPTO_BOX_SEAL_BYTES];
         boolean success = lazySodium.cryptoBoxSeal(raw, ser, ser.length, pubKey);
         if (!success) {
-            throw new SodiumException("Fail to crypto box seal");
+            throw new LibsodiumException("Fail to crypto box seal");
         }
         return new Cipher(
             RawArgs.builder()
@@ -90,6 +96,6 @@ public class Encrypter extends Matter {
 
     @FunctionalInterface
     private interface EncrypterFunction {
-        Cipher encrypt(byte[] ser, byte[] pubKey, String key) throws SodiumException;
+        Cipher encrypt(byte[] ser, byte[] pubKey, String key) throws LibsodiumException;
     }
 }
