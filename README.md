@@ -11,6 +11,8 @@ The library uses **libsodium** for cryptographic operations, including generatin
 
 This project is built using **Java 21** and **Gradle** as the build tool.
 
+**Note:** For an example of how this library can be used in a backend, check out [cf-signify-java-example](https://github.com/cardano-foundation/cf-signify-java-example). This repository provides a practical implementation reference for those interested in using `cf-signify-java` in real-world applications.
+
 ---
 
 ## Prerequisites
