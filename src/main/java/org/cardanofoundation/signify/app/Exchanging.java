@@ -139,13 +139,12 @@ public class Exchanging {
         ) throws IOException, InterruptedException, LibsodiumException {
             String path = String.format("/identifiers/%s/exchanges", name);
             String method = "POST";
-            Map<String, Object> data = Map.of(
-                "tpc", topic,
-                "exn", exn.getKed(),
-                "sigs", sigs,
-                "atc", atc,
-                "rec", recipients
-            );
+            LinkedHashMap<String, Object> data = new LinkedHashMap<>();
+            data.put("tpc", topic);
+            data.put("exn", exn.getKed());
+            data.put("sigs", sigs);
+            data.put("atc", atc);
+            data.put("rec", recipients);
 
             HttpResponse<String> res = this.client.fetch(path, method, data);
             return Utils.fromJson(res.body(), Object.class);

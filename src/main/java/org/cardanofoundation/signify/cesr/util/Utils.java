@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.cesr.util;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ public class Utils {
 
     static {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
     public static byte[] intToBytes(BigInteger value, int size) {
@@ -78,9 +80,9 @@ public class Utils {
         }
     }
 
-    public static <T> T fromJson(String json, Class clazz) {
+    public static <T> T fromJson(String json, Class<T> clazz) {
         try {
-            return (T) objectMapper.readValue(json, clazz);
+            return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
             throw new SerializeException("Error while parsing JSON: " + e.getMessage());
         }

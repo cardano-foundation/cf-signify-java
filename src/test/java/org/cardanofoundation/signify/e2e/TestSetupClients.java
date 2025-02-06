@@ -1,28 +1,29 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateContact;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestSetupClients extends TestUtils {
+public class TestSetupClients extends BaseIntegrationTest {
     private static SignifyClient client1, client2;
     private static String name1_id, name2_id;
     private static String name1_oobi, name2_oobi;
     private static String contact1_id, contact2_id;
 
     @BeforeAll
-    public static void getClients() throws ExecutionException, InterruptedException {
+    public static void getClients() throws Exception {
         // create two clients with random secrets
-        List<SignifyClient> clients = getOrCreateClients(2, null);
+        List<SignifyClient> clients = getOrCreateClientsAsync(2);
         client1 = clients.get(0);
         client2 = clients.get(1);
     }

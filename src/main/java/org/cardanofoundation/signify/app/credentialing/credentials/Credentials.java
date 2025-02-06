@@ -248,6 +248,6 @@ public class Credentials {
         HttpResponse<String> response = this.client.fetch(path, method, body, extraHeaders);
         Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
 
-        return new RevokeCredentialResult(new Serder(rev), new Serder(ixn), op);
+        return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
     }
 }

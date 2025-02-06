@@ -82,6 +82,6 @@ public class Notifying {
             this.client.fetch(path, method, null);
         }
 
-        public record NotificationListResponse(int start, int end, int total, Object notes) {}
+        public record NotificationListResponse(int start, int end, int total, String notes) {}
     }
 }

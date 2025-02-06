@@ -60,12 +60,12 @@ public class KeyStates {
      * @return A map representing the long-running operation
      * @throws Exception if the fetch operation fails
      */
-    public Object query(String pre, Integer sn, Object anchor) throws LibsodiumException, IOException, InterruptedException {
+    public Object query(String pre, String sn, Object anchor) throws LibsodiumException, IOException, InterruptedException {
         String path = "/queries";
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("pre", pre);
         if (sn != null) {
-            data.put("sn", sn.toString());
+            data.put("sn", sn);
         }
         if (anchor != null) {
             data.put("anchor", anchor);
@@ -73,5 +73,9 @@ public class KeyStates {
         String method = "POST";
         HttpResponse<String> res = this.client.fetch(path, method, data);
         return Utils.fromJson(res.body(), Object.class);
+    }
+
+    public Object query(String pre, String sn) throws Exception {
+        return query(pre, sn, null);
     }
 }

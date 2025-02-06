@@ -15,9 +15,16 @@ import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.concurrent.ExecutionException;
 
 public class Contacting {
+
+    @Getter
+    public static class Challenge {
+        public List<String> words;
+    }
+
     @Getter
     public static class Challenges {
         public final SignifyClient client;
@@ -36,15 +43,15 @@ public class Contacting {
          * @return A list of random words
          * @throws Exception if the fetch operation fails
          */
-        public Object generate(Integer strength) throws LibsodiumException, IOException, InterruptedException {
+        public Challenge generate(Integer strength) throws LibsodiumException, IOException, InterruptedException {
             String path = "/challenges?strength=" + strength.toString();
             String method = "GET";
 
             HttpResponse<String> response = this.client.fetch(path, method, null);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(response.body(), Challenge.class);
         }
 
-        public Object generate() throws LibsodiumException, IOException, InterruptedException {
+        public Challenge generate() throws LibsodiumException, IOException, InterruptedException {
             return generate(128);
         }
 
@@ -117,6 +124,20 @@ public class Contacting {
         private String oobi;
         private String id;
         private Map<String, Object> additionalProperties = new HashMap<>();
+
+        @JsonAnySetter
+        public void setAdditionalProperty(String key, Object value) {
+            additionalProperties.put(key, value);
+        }
+
+        public <T> T get(String key) {
+            return switch (key) {
+                case "alias" -> (T) alias;
+                case "oobi" -> (T) oobi;
+                case "id" -> (T) id;
+                default -> (T) additionalProperties.get(key);
+            };
+        }
     }
 
     @Getter
@@ -136,7 +157,7 @@ public class Contacting {
          * @param group Optional group name to filter contacts
          * @param filterField Optional field name to filter contacts
          * @param filterValue Optional field value to filter contacts
-         * @return Array list of contacts
+         * @return An array list of contacts
          */
         public Contact[] list(
             String group,
@@ -158,6 +179,10 @@ public class Contacting {
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path.toString(), method, null);
             return Utils.fromJson(response.body(), Contact[].class);
+        }
+
+        public Contact[] list() throws SodiumException, IOException, InterruptedException {
+            return list(null, null, null);
         }
 
         /**

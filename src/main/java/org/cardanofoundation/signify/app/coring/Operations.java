@@ -7,8 +7,12 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Operations {
@@ -52,7 +56,7 @@ public class Operations {
         int increaseFactor = options.getIncreaseFactor();
 
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null && !op.getMetadata().getDepends().isDone()) {
-            return (Operation<T>) wait(op.getMetadata().getDepends(), options, startingTime);
+            wait(op.getMetadata().getDepends(), options, startingTime);
         }
 
         if (op.isDone()) {

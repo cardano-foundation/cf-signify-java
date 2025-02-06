@@ -165,6 +165,14 @@ public class Eventing {
         return new Serder(ked);
     }
 
+    public static byte[] messagize(Serder serder, List<Siger> sigers) {
+        return messagize(serder, sigers, null, null, null, false);
+    }
+
+    public static byte[] messagize(Serder serder, List<Siger> sigers, List<Object> seal) {
+        return messagize(serder, sigers, seal, null, null, false);
+    }
+
     public static byte[] messagize(
             Serder serder,
             List<Siger> sigers,
