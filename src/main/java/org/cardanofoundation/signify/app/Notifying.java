@@ -33,7 +33,7 @@ public class Notifying {
          */
         public NotificationListResponse list(int start, int end) throws IOException, InterruptedException, LibsodiumException {
             Map<String, String> extraHeaders = Map.of(
-                "Range", String.format("notes=%d-%d", start, end)
+                    "Range", String.format("notes=%d-%d", start, end)
             );
 
             String path = "/notifications";
@@ -42,13 +42,12 @@ public class Notifying {
 
             String cr = res.headers().firstValue("content-range").orElse(null);
             Httping.RangeInfo range = Httping.parseRangeHeaders(cr, "notes");
-            Object notes = Utils.fromJson(res.body(), Object.class);
 
             return new NotificationListResponse(
-                range.start(),
-                range.end(),
-                range.total(),
-                notes.toString()
+                    range.start(),
+                    range.end(),
+                    range.total(),
+                    res.body()
             );
         }
 
@@ -82,6 +81,7 @@ public class Notifying {
             this.client.fetch(path, method, null);
         }
 
-        public record NotificationListResponse(int start, int end, int total, String notes) {}
+        public record NotificationListResponse(int start, int end, int total, String notes) {
+        }
     }
 }

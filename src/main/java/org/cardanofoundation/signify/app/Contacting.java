@@ -113,8 +113,7 @@ public class Contacting {
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("said", said);
 
-            HttpResponse<String> response = this.client.fetch(path, method, data);
-            return Utils.fromJson(response.body(), Object.class);
+            return this.client.fetch(path, method, data);
         }
     }
 
