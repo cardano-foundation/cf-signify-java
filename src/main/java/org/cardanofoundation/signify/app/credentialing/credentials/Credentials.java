@@ -1,12 +1,12 @@
 package org.cardanofoundation.signify.app.credentialing.credentials;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -23,7 +23,6 @@ public class Credentials {
 
     public final SignifyClient client;
 
-
     public Credentials(SignifyClient client) {
         this.client = client;
     }
@@ -32,9 +31,9 @@ public class Credentials {
      * List credentials
      *
      * @param kargs Optional parameters to filter the credentials
-     * @returns Object to the list of credentials
+     * @return Object to the list of credentials
      */
-    public Object list(CredentialFilter kargs) throws SodiumException, IOException, InterruptedException {
+    public Object list(CredentialFilter kargs) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/query";
 
         Map<String, Object> data = new LinkedHashMap<>();
@@ -44,11 +43,11 @@ public class Credentials {
         data.put("limit", kargs.getLimit());
 
         final String method = "POST";
-        HttpResponse<String> response = this.client.fetch(path, method, data, null);
+        HttpResponse<String> response = this.client.fetch(path, method, data);
         return Utils.fromJson(response.body(), Object.class);
     }
 
-    public Object get(String said) throws SodiumException, IOException, InterruptedException {
+    public Object get(String said) throws IOException, InterruptedException, LibsodiumException {
         return this.get(said, false);
     }
 
@@ -57,9 +56,9 @@ public class Credentials {
      *
      * @param said        - SAID of the credential
      * @param includeCESR - Optional flag export the credential in CESR format
-     * @returns Object to the credential
+     * @return Object to the credential
      */
-    public Object get(String said, boolean includeCESR) throws SodiumException, IOException, InterruptedException {
+    public Object get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/" + said;
         final String method = "GET";
 
@@ -75,19 +74,30 @@ public class Credentials {
         return Utils.fromJson(response.body(), Object.class);
     }
 
-    public Object state(String ri, String said) throws SodiumException, IOException, InterruptedException {
+    /**
+     * Delete a credential from the DB
+     *
+     * @param said - SAID of the credential
+     */
+    public void delete(String said) throws IOException, InterruptedException, LibsodiumException {
+        final String path = "/credentials/" + said;
+        final String method = "DELETE";
+        this.client.fetch(path, method, null);
+    }
+
+    public Object state(String ri, String said) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/registries/" + ri + "/" + said;
         final String method = "GET";
 
-        HttpResponse<String> response = this.client.fetch(path, method, null, null);
+        HttpResponse<String> response = this.client.fetch(path, method, null);
         return Utils.fromJson(response.body(), Object.class);
     }
 
     /**
      * Issue a credential
      */
-    public IssueCredentialResult issue(String name, CredentialData args) throws SodiumException, IOException, InterruptedException, DigestException {
-        final States.HabState hab = this.client.getIdentifier().get(name);
+    public IssueCredentialResult issue(String name, CredentialData args) throws IOException, InterruptedException, DigestException, LibsodiumException {
+        final States.HabState hab = this.client.identifiers().get(name);
 
         final boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
         if (estOnly) {
@@ -158,7 +168,7 @@ public class Credentials {
         extraHeaders.put("Accept", "application/json+cesr");
 
         HttpResponse<String> response = this.client.fetch(path, method, body, extraHeaders);
-        Operation op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
+        Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
 
         return new IssueCredentialResult(new Serder(acdc), new Serder(iss), anc, op);
     }
@@ -169,16 +179,16 @@ public class Credentials {
      * @param name     Name or alias of the identifier
      * @param said     SAID of the credential
      * @param datetime Date time of revocation
-     * @returns A promise to the long-running operation
+     * @return A promise to the long-running operation
      */
-    public RevokeCredentialResult revoke(String name, String said, String datetime) throws SodiumException, IOException, InterruptedException, DigestException {
-        final States.HabState hab = this.client.getIdentifier().get(name);
+    public RevokeCredentialResult revoke(String name, String said, String datetime) throws IOException, InterruptedException, DigestException, LibsodiumException {
+        final States.HabState hab = this.client.identifiers().get(name);
         final String pre = hab.getPrefix();
 
         final String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         final String dt = datetime != null ? datetime : Utils.currentDateTimeString();
 
-        Map<String, Object> cred = (Map<String, Object>) this.get(said);
+        Map<String, Object> cred = Utils.toMap(this.get(said));
 
         // Create rev
         Map<String, Object> _rev = new LinkedHashMap<>();
@@ -187,15 +197,15 @@ public class Credentials {
         _rev.put("d", "");
         _rev.put("i", said);
         _rev.put("s", "1");
-        _rev.put("ri", ((Map<String, Object>)cred.get("sad")).get("ri"));
-        _rev.put("p", ((Map<String, Object>)cred.get("status")).get("d"));
+        _rev.put("ri", (Utils.toMap(cred.get("sad"))).get("ri"));
+        _rev.put("p", (Utils.toMap(cred.get("status"))).get("d"));
         _rev.put("dt", dt);
 
         Map<String, Object> rev = Saider.saidify(_rev).sad();
 
         // create ixn
-        Map<String, Object> ixn = new LinkedHashMap<>();
-        List<String> sigs = new ArrayList<>();
+        Map<String, Object> ixn;
+        List<String> sigs;
 
         final boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
 
@@ -236,7 +246,7 @@ public class Credentials {
         extraHeaders.put("Accept", "application/json+cesr");
 
         HttpResponse<String> response = this.client.fetch(path, method, body, extraHeaders);
-        Operation op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
+        Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
 
         return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
     }

@@ -10,15 +10,9 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
-import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 
 public class Coring {
-    private final HttpClient httpClient;
-
-    public Coring(HttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
-
     public static String randomPasscode() {
         final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
         final byte[] raw = lazySodium.randomBytesBuf(16);
@@ -65,7 +59,8 @@ public class Coring {
         public Object get(String pre) throws Exception {
             String path = "/events?pre=" + pre;
             String method = "GET";
-            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
+            HttpResponse<String> res = this.client.fetch(path, method, null);
+            return Utils.fromJson(res.body(), Object.class);
         }
     }
 
@@ -84,7 +79,8 @@ public class Coring {
         public Object get() throws Exception {
             String path = "/config";
             String method = "GET";
-            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
+            HttpResponse<String> res = this.client.fetch(path, method, null);
+            return Utils.fromJson(res.body(), Object.class);
         }
     }
 }

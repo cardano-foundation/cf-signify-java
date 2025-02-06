@@ -99,6 +99,10 @@ public class Serder {
         return digers;
     }
 
+    public static String dumps(Map<String, Object> ked) {
+        return dumps(ked, Serials.JSON);
+    }
+
     public static String dumps(Map<String, Object> ked, Serials kind) {
         if (kind == Serials.JSON) {
             return Utils.jsonStringify(ked);

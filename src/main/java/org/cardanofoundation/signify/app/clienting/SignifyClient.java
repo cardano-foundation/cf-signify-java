@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app.clienting;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +26,7 @@ import org.cardanofoundation.signify.app.credentialing.Schemas;
 import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -78,7 +78,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Salter.Tier tier,
         String bootUrl,
         List<ExternalModule> externalModules
-    ) throws SodiumException, DigestException {
+    ) throws DigestException, LibsodiumException {
         tier = tier != null ? tier : Salter.Tier.low;
         this.url = url;
         if (bran.length() < 21) {
@@ -86,7 +86,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         }
         this.bran = bran;
         this.pidx = 0;
-        this.controller = new Controller(bran, tier, null, null);
+        this.controller = new Controller(bran, tier);
         this.authn = null;
         this.agent = null;
         this.manager = null;
@@ -226,7 +226,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         String method,
         Object data,
         Map<String, String> extraHeaders
-    ) throws SodiumException, InterruptedException, IOException {
+    ) throws LibsodiumException, InterruptedException, IOException {
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
         headers.put("signify-resource", this.controller.getPre());
@@ -301,10 +301,18 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
        return response;
     }
 
+    public HttpResponse<String> fetch(
+        String path,
+        String method,
+        Object data
+    ) throws LibsodiumException, InterruptedException, IOException {
+        return this.fetch(path, method, data, null);
+    }
+
     /**
      * Approve the delegation of the client AID to the KERIA agent
      */
-    public void approveDelegation() throws Exception {
+    public void approveDelegation() throws DigestException, IOException, InterruptedException, LibsodiumException {
         if (this.agent == null) {
             throw new RuntimeException("Agent not initialized");
         }
@@ -323,7 +331,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
             HttpClient client = HttpClient.newBuilder().build();
             client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException exception) {
+        } catch (IOException | InterruptedException exception) {
             if(exception.getMessage().contains("unexpected content length header with 204 response")) {
                 /**
                  * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230
@@ -344,7 +352,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Identifier}
      */
-    public Identifier getIdentifier() {
+    public Identifier identifiers() {
         return new Identifier(this);
     }
 
@@ -353,7 +361,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Oobis}
      */
-    public Oobis getOobis() {
+    public Oobis oobis() {
         return new Oobis(this);
     }
 
@@ -362,7 +370,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Operations}
      */
-    public Operations getOperations() {
+    public Operations operations() {
         return new Operations(this);
     }
 
@@ -371,7 +379,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {KeyEvents}
      */
-    public KeyEvents getKeyEvents() {
+    public KeyEvents keyEvents() {
         return new KeyEvents(this);
     }
 
@@ -380,7 +388,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {KeyStates}
      */
-    public KeyStates getKeyStates() {
+    public KeyStates keyStates() {
         return new KeyStates(this);
     }
 
@@ -389,7 +397,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Credentials}
      */
-    public Credentials getCredentials() {
+    public Credentials credentials() {
         return new Credentials(this);
     }
 
@@ -398,7 +406,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Ipex}
      */
-    public Ipex getIpex() {
+    public Ipex ipex() {
         return new Ipex(this);
     }
 
@@ -407,7 +415,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Registries}
      */
-    public Registries getRegistries() {
+    public Registries registries() {
         return new Registries(this);
     }
 
@@ -416,7 +424,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Schemas}
      */
-    public Schemas getSchemas() {
+    public Schemas schemas() {
         return new Schemas(this);
     }
 
@@ -425,7 +433,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Challenges}
      */
-    public Challenges getChallenges() {
+    public Challenges challenges() {
         return new Challenges(this);
     }
 
@@ -434,7 +442,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Contacts}
      */
-    public Contacts getContacts() {
+    public Contacts contacts() {
         return new Contacts(this);
     }
 
@@ -443,7 +451,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Notifications}
      */
-    public Notifications getNotifications() {
+    public Notifications notifications() {
         return new Notifications(this);
     }
 
@@ -452,7 +460,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Escrows}
      */
-    public Escrows getEscrows() {
+    public Escrows escrows() {
         return new Escrows(this);
     }
 
@@ -461,7 +469,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Groups}
      */
-    public Groups getGroups() {
+    public Groups groups() {
         return new Groups(this);
     }
 
@@ -470,7 +478,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Exchanges}
      */
-    public Exchanges getExchanges() {
+    public Exchanges exchanges() {
         return new Exchanges(this);
     }
 
@@ -479,7 +487,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Delegations}
      */
-    public Delegations getDelegations() {
+    public Delegations delegations() {
         return new Delegations(this);
     }
 
@@ -488,7 +496,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Config}
      */
-    public Config getConfig() {
+    public Config config() {
         return new Config(this);
     }
 

@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.core;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of random signers")
-    void testRandyCreator() throws SodiumException {
+    void testRandyCreator() throws LibsodiumException {
         Manager.RandyCreator randy = new Manager.RandyCreator();
 
         // test default arguments
@@ -63,7 +63,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of salty signers")
-    void testSaltyCreator() throws SodiumException {
+    void testSaltyCreator() throws LibsodiumException {
         Manager manager = new Manager();
         Manager.SaltyCreator salty = new Manager.SaltyCreator();
 
@@ -148,7 +148,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should manage key pairs for identifiers")
-    void testManager_shouldManageKeyPairsForIdentifiers() throws SodiumException, DigestException {
+    void testManager_shouldManageKeyPairsForIdentifiers() throws DigestException, LibsodiumException {
         String raw = "0123456789abcdef";
         Salter salter = new Salter(RawArgs.builder().raw(raw.getBytes()).build());
         String salt = salter.getQb64();
@@ -576,7 +576,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should support only Salty/Encrypted, Salty/Unencrypted and Randy/Encrypted")
-    void testManager_shouldSupportOnlySaltyEncryptedSaltyUnencryptedRandyEncrypted() throws SodiumException, DigestException {
+    void testManager_shouldSupportOnlySaltyEncryptedSaltyUnencryptedRandyEncrypted() throws DigestException, LibsodiumException {
         // Support Salty/Unencrypted - pass only stretched passcode as Salt.
         String passcode = "0123456789abcdefghijk";
         Salter salter = new Salter(RawArgs.builder().raw(passcode.getBytes()).build());
@@ -686,7 +686,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("Should support creating and getting randy keeper")
-    void testManager_ShouldSupportCreatingAndGettingRandyKeeper() throws SodiumException, DigestException {
+    void testManager_ShouldSupportCreatingAndGettingRandyKeeper() throws DigestException, LibsodiumException {
         String passcode = "0123456789abcdefghijk";
         Salter salter = new Salter(RawArgs.builder().raw(passcode.getBytes()).build());
         Keeping.KeyManager manager = new Keeping.KeyManager(salter, Collections.emptyList());
@@ -708,7 +708,7 @@ class ManagerTest {
                 .transferable(false)
                 .windexes(Collections.emptyList())
                 .build();
-        Keeping.Keeper keeper1 = manager.get(habState);
+        Keeping.Keeper<?> keeper1 = manager.get(habState);
 
         assertInstanceOf(Keeping.RandyKeeper.class, keeper1);
     }

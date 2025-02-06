@@ -1,9 +1,9 @@
 package org.cardanofoundation.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.utils.Key;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 
@@ -13,7 +13,7 @@ public class Decrypter extends Matter {
     private DecrypterFunction decrypter;
     private final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
 
-    public Decrypter(RawArgs args, byte[] seed) throws SodiumException {
+    public Decrypter(RawArgs args, byte[] seed) throws LibsodiumException {
         super(RawArgs.generateDecrypterRaw(args, seed));
         setDecrypter();
     }
@@ -23,7 +23,7 @@ public class Decrypter extends Matter {
         setDecrypter();
     }
 
-    public Decrypter(RawArgs args) throws SodiumException {
+    public Decrypter(RawArgs args) throws LibsodiumException {
         this(args, null);
     }
 
@@ -35,7 +35,7 @@ public class Decrypter extends Matter {
         }
     }
 
-    public Object decrypt(byte[] ser, Cipher cipher, Boolean transferable) throws SodiumException {
+    public Object decrypt(byte[] ser, Cipher cipher, Boolean transferable) throws LibsodiumException {
         if (ser == null && cipher == null) {
             throw new EmptyMaterialException("Neither ser nor matter are provided.");
         }
@@ -47,11 +47,11 @@ public class Decrypter extends Matter {
         return decrypter.decrypt(cipher, this.getRaw(), transferable != null && transferable);
     }
 
-    public Object decrypt(byte[] ser, Cipher cipher) throws SodiumException {
+    public Object decrypt(byte[] ser, Cipher cipher) throws LibsodiumException {
         return decrypt(ser, cipher, false);
     }
 
-    private Object _x25519(Cipher cipher, byte[] priKey, Boolean transferable) throws SodiumException {
+    private Object _x25519(Cipher cipher, byte[] priKey, Boolean transferable) throws LibsodiumException {
         Key pubKey = lazySodium.cryptoScalarMultBase(Key.fromBytes(priKey));
         byte[] plain = new byte[cipher.getRaw().length - CRYPTO_BOX_SEAL_BYTES];
         boolean success = lazySodium.cryptoBoxSealOpen(
@@ -62,7 +62,7 @@ public class Decrypter extends Matter {
             priKey
         );
         if (!success) {
-            throw new SodiumException("Decryption failed");
+            throw new LibsodiumException("Decryption failed");
         }
         if (cipher.getCode().equals(Codex.MatterCodex.X25519_Cipher_Salt.getValue())) {
             return new Salter(plain);
@@ -75,6 +75,6 @@ public class Decrypter extends Matter {
 
     @FunctionalInterface
     private interface DecrypterFunction {
-        Object decrypt(Cipher cipher, byte[] priKey, Boolean transferable) throws SodiumException;
+        Object decrypt(Cipher cipher, byte[] priKey, Boolean transferable) throws LibsodiumException;
     }
 }

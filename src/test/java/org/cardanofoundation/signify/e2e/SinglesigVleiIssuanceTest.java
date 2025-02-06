@@ -558,7 +558,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
         IssuerRegistry registry = IssuerRegistry.builder().build();
-        Object registries = client.getRegistries().list(aid.name);
+        Object registries = client.registries().list(aid.name);
         ArrayList<String> registriesBody = (ArrayList<String>) registries;
         if (!registriesBody.isEmpty()) {
             assertEquals(1, registriesBody.size());
@@ -567,9 +567,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             registryArgs.setName(aid.name);
             registryArgs.setRegistryName(registryName);
 
-            RegistryResult regResult = client.getRegistries().create(registryArgs);
+            RegistryResult regResult = client.registries().create(registryArgs);
             waitOperation(client, regResult.op());
-            registries = client.getRegistries().list(aid.name);
+            registries = client.registries().list(aid.name);
 
             registriesBody = (ArrayList<String>) registries;
             LinkedHashMap<String, Object> registryBody = castObjectToLinkedHashMap(registriesBody.getFirst());
@@ -594,8 +594,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 .datetime(createTimestamp())
                 .build();
 
-        Exchanging.ExchangeMessageResult result = senderClient.getIpex().grant(grantArgs);
-        Object op = senderClient.getIpex().submitGrant(
+        Exchanging.ExchangeMessageResult result = senderClient.ipex().grant(grantArgs);
+        Object op = senderClient.ipex().submitGrant(
                 senderAid.name,
                 result.exn(),
                 result.sigs(),
@@ -618,9 +618,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 .recipient(recipientAid.prefix)
                 .datetime(createTimestamp())
                 .build();
-        Exchanging.ExchangeMessageResult result = senderClient.getIpex().admit(admitArgs);
+        Exchanging.ExchangeMessageResult result = senderClient.ipex().admit(admitArgs);
 
-        Object op = senderClient.getIpex().submitAdmit(
+        Object op = senderClient.ipex().submitAdmit(
                 senderAid.name,
                 result.exn(),
                 result.sigs(),

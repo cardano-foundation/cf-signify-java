@@ -1,11 +1,11 @@
 package org.cardanofoundation.signify.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
@@ -61,7 +61,7 @@ public class BaseMockServerTest {
                 } else {
                     try {
                         return mockAllRequests(request);
-                    } catch (SodiumException e) {
+                    } catch (LibsodiumException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -228,7 +228,7 @@ public class BaseMockServerTest {
             }
         }""";
 
-    public MockResponse mockAllRequests(RecordedRequest req) throws SodiumException {
+    public MockResponse mockAllRequests(RecordedRequest req) throws LibsodiumException {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
         headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));

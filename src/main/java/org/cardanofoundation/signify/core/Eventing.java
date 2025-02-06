@@ -11,11 +11,7 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;

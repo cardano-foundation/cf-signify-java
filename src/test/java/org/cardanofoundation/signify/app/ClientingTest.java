@@ -140,21 +140,21 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(bran, data[1]);
 
         // Validate service instances
-        assertInstanceOf(Identifier.class, client.getIdentifier());
-        assertInstanceOf(Operations.class, client.getOperations());
-        assertInstanceOf(Coring.KeyEvents.class, client.getKeyEvents());
-        assertInstanceOf(KeyStates.class, client.getKeyStates());
-        assertInstanceOf(Credentials.class, client.getCredentials());
-        assertInstanceOf(Registries.class, client.getRegistries());
-        assertInstanceOf(Schemas.class, client.getSchemas());
-        assertInstanceOf(Ipex.class, client.getIpex());
-        assertInstanceOf(Contacting.Challenges.class, client.getChallenges());
-        assertInstanceOf(Contacting.Contacts.class, client.getContacts());
-        assertInstanceOf(Notifying.Notifications.class, client.getNotifications());
-        assertInstanceOf(Escrowing.Escrows.class, client.getEscrows());
-        assertInstanceOf(Oobis.class, client.getOobis());
-        assertInstanceOf(Exchanging.Exchanges.class, client.getExchanges());
-        assertInstanceOf(Grouping.Groups.class, client.getGroups());
+        assertInstanceOf(Identifier.class, client.identifiers());
+        assertInstanceOf(Operations.class, client.operations());
+        assertInstanceOf(Coring.KeyEvents.class, client.keyEvents());
+        assertInstanceOf(KeyStates.class, client.keyStates());
+        assertInstanceOf(Credentials.class, client.credentials());
+        assertInstanceOf(Registries.class, client.registries());
+        assertInstanceOf(Schemas.class, client.schemas());
+        assertInstanceOf(Ipex.class, client.ipex());
+        assertInstanceOf(Contacting.Challenges.class, client.challenges());
+        assertInstanceOf(Contacting.Contacts.class, client.contacts());
+        assertInstanceOf(Notifying.Notifications.class, client.notifications());
+        assertInstanceOf(Escrowing.Escrows.class, client.escrows());
+        assertInstanceOf(Oobis.class, client.oobis());
+        assertInstanceOf(Exchanging.Exchanges.class, client.exchanges());
+        assertInstanceOf(Grouping.Groups.class, client.groups());
         cleanUpRequest();
 
     }
@@ -169,7 +169,7 @@ public class ClientingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        client.fetch("/contacts", "GET", null, null);
+        client.fetch("/contacts", "GET", null);
         RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/contacts", request.getPath());
@@ -179,14 +179,14 @@ public class ClientingTest extends BaseMockServerTest {
         //test bad request
         Exception exception = assertThrows(
                 HeaderVerificationException.class,
-                () -> client.fetch("/different-remote-agent", "GET", null, null)
+                () -> client.fetch("/different-remote-agent", "GET", null)
         );
 
         assertEquals("Message from a different remote agent", exception.getMessage());
 
         exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> client.fetch("/invalid-signature", "GET", null, null)
+                () -> client.fetch("/invalid-signature", "GET", null)
         );
 
         assertEquals("Signature for EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei invalid.", exception.getMessage());

@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e.utils;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +19,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
@@ -28,14 +28,15 @@ import org.cardanofoundation.signify.core.States;
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class MultisigUtils {
 
-    public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws SodiumException, IOException, InterruptedException, DigestException {
-        final States.HabState memberHab = client2.getIdentifier().get(args.getLocalMemberName());
+    public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
+        final States.HabState memberHab = client2.identifiers().get(args.getLocalMemberName());
 
-        List<Object> res = (List<Object>) client2.getGroups().getRequest(args.getMsgSaid());
+        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid());
         Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
         Map<String, Object> exn = (Map<String, Object>) responseMap.get("exn");
         Map<String, Object> icp = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("icp");
@@ -56,7 +57,7 @@ public class MultisigUtils {
         createIdentifierArgs.setRstates(rstates);
         createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
 
-        EventResult icpResult2 = client2.getIdentifier().create(args.getGroupName(), createIdentifierArgs);
+        EventResult icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
         Object op2 = icpResult2.op();
         Serder serder = icpResult2.serder();
         List<String> sigs = icpResult2.sigs();
@@ -75,7 +76,7 @@ public class MultisigUtils {
         payload.put("smids", smids);
         payload.put("rmids", rmids);
 
-        client2.getExchanges()
+        client2.exchanges()
                 .send(args.localMemberName, args.groupName, memberHab, "/multisig/icp", payload, embeds, recipients);
 
         return op2;
@@ -91,7 +92,7 @@ public class MultisigUtils {
         }
 
         EventResult interactResult = client
-                .getIdentifier()
+                .identifiers()
                 .interact(groupName, data);
 
         Serder serder = interactResult.serder();
@@ -120,7 +121,7 @@ public class MultisigUtils {
             put("rmids", smids);
         }};
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 groupName,
                 aid,
@@ -143,7 +144,7 @@ public class MultisigUtils {
         }
 
         EventResult interactResult = client
-                .getIdentifier()
+                .identifiers()
                 .rotate(groupName, kargs);
 
         Serder serder = interactResult.serder();
@@ -172,7 +173,7 @@ public class MultisigUtils {
             put("rmids", smids);
         }};
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 groupName,
                 aid,
@@ -194,7 +195,7 @@ public class MultisigUtils {
         }
 
         List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.getIdentifier().members(groupName);
+        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
         List<Object> signings = (List<Object>) members.get("signing");
 
         for (Object signing : signings) {
@@ -204,7 +205,7 @@ public class MultisigUtils {
 
             String eid = agent.firstEntry().getKey();
             EventResult endRoleResult = client
-                    .getIdentifier()
+                    .identifiers()
                     .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
             opList.add(endRoleResult.op());
@@ -230,7 +231,7 @@ public class MultisigUtils {
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("gid", multisigAID.getPrefix());
 
-            client.getExchanges().send(
+            client.exchanges().send(
                     aid.getName(),
                     groupName,
                     aid,
@@ -253,7 +254,7 @@ public class MultisigUtils {
         }
 
         List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.getIdentifier().members(groupName);
+        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
         List<Object> signings = (List<Object>) members.get("signing");
 
         Map<String, Object> signingMap = TestUtils.castObjectToListMap(signings).get(0);
@@ -262,7 +263,7 @@ public class MultisigUtils {
 
         String eid = agent.firstEntry().getKey();
         EventResult endRoleResult = client
-                .getIdentifier()
+                .identifiers()
                 .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
         opList.add(endRoleResult.op());
@@ -288,7 +289,7 @@ public class MultisigUtils {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("gid", multisigAID.getPrefix());
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 groupName,
                 aid,
@@ -318,13 +319,13 @@ public class MultisigUtils {
                 .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
-        Exchanging.ExchangeMessageResult exchangeMessageResult = client.getIpex().admit(ipexAdmitArgs);
+        Exchanging.ExchangeMessageResult exchangeMessageResult = client.ipex().admit(ipexAdmitArgs);
         Serder admit = exchangeMessageResult.exn();
         List<String> sigs = exchangeMessageResult.sigs();
         String end = exchangeMessageResult.atc();
 
 
-        client.getIpex().submitAdmit(
+        client.ipex().submitAdmit(
                 multisigAID.getName(),
                 admit,
                 sigs,
@@ -351,7 +352,7 @@ public class MultisigUtils {
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("gid", multisigAID.getPrefix());
-        client.getExchanges()
+        client.exchanges()
                 .send(aid.getName(),
                         "multisig",
                         aid,
@@ -374,7 +375,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/icp");
         }
 
-        EventResult icpResult = client.getIdentifier().create(groupName, kargs);
+        EventResult icpResult = client.identifiers().create(groupName, kargs);
         Object op = icpResult.op();
 
         Serder serder = icpResult.serder();
@@ -401,7 +402,7 @@ public class MultisigUtils {
             put("rmids", smids);
         }};
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 "multisig",
                 aid,
@@ -434,7 +435,7 @@ public class MultisigUtils {
                 .registryName(registryName)
                 .nonce(nonce)
                 .build();
-        RegistryResult vcpResult = client.getRegistries().create(createRegistryArgs);
+        RegistryResult vcpResult = client.registries().create(createRegistryArgs);
         Object op = vcpResult.op();
 
         Serder serder = vcpResult.getRegser();
@@ -454,7 +455,7 @@ public class MultisigUtils {
                 .map(States.HabState::getPrefix)
                 .toList();
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 topic,
                 aid,
@@ -498,7 +499,7 @@ public class MultisigUtils {
                 .registryName(registryName)
                 .nonce(nonce)
                 .build();
-        RegistryResult vcpResult = client.getRegistries().create(createRegistryArgs);
+        RegistryResult vcpResult = client.registries().create(createRegistryArgs);
         Object op = vcpResult.op();
 
         Serder serder = vcpResult.getRegser();
@@ -518,7 +519,7 @@ public class MultisigUtils {
                 .map(States.HabState::getPrefix)
                 .toList();
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 "multisig",
                 aid,
@@ -543,13 +544,13 @@ public class MultisigUtils {
         if (!isInitiator) {
             String msgSaid = TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
-            List<Object> res = (List<Object>) client.getGroups().getRequest(msgSaid);
+            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid);
             Map<String, Object> exn = (Map<String, Object>) ((Map<String, Object>) res.get(0)).get("exn");
             Map<String, Object> ixn = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("ixn");
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }
 
-        EventResult delResult = client.getDelegations().approve(multisigAID.getName(), anchor);
+        EventResult delResult = client.delegations().approve(multisigAID.getName(), anchor);
         Object appOp = delResult.op();
         System.out.println("Delegator " + aid.getName() + "(" + aid.getPrefix() + ") approved delegation for " +
                 multisigAID.getName() + " with anchor " + anchor);
@@ -573,7 +574,7 @@ public class MultisigUtils {
             put("smids", smids);
             put("rmids", smids);
         }};
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 multisigAID.getName(),
                 aid,
@@ -619,13 +620,13 @@ public class MultisigUtils {
                 .datetime(timestamp)
                 .build();
 
-        Exchanging.ExchangeMessageResult grantResult = client.getIpex().grant(ipexGrantArgs);
+        Exchanging.ExchangeMessageResult grantResult = client.ipex().grant(ipexGrantArgs);
 
         Serder grant = grantResult.exn();
         List<String> sigs = grantResult.sigs();
         String end = grantResult.atc();
 
-        client.getIpex().submitGrant(
+        client.ipex().submitGrant(
                 multisigAID.getName(),
                 grant,
                 sigs,
@@ -649,7 +650,7 @@ public class MultisigUtils {
         Map<String, List<Object>> gembeds = Map.of("exn", List.of(grant, atc));
         List<String> recp = otherMembersAIDs.stream().map(States.HabState::getPrefix).collect(Collectors.toList());
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 "multisig",
                 aid,
@@ -672,10 +673,10 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/iss");
         }
 
-        IssueCredentialResult credResult = client.getCredentials().issue(multisigAIDName, kargsIss);
+        IssueCredentialResult credResult = client.credentials().issue(multisigAIDName, kargsIss);
         Operation op = credResult.getOp();
 
-        States.HabState multisigAID = client.getIdentifier().get(multisigAIDName);
+        States.HabState multisigAID = client.identifiers().get(multisigAIDName);
         Keeping.Keeper keeper = client.getManager().get(multisigAID);
         List<String> sigs = keeper.sign(credResult.getAnc().getRaw().getBytes()).signatures();
         List<Siger> sigers = sigs.stream().map(Siger::new).collect(Collectors.toList());
@@ -693,7 +694,7 @@ public class MultisigUtils {
                 .map(States.HabState::getPrefix)
                 .collect(Collectors.toList());
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 aid.getName(),
                 "multisig",
                 aid,
@@ -709,8 +710,8 @@ public class MultisigUtils {
     public static Object startMultisigIncept(
             SignifyClient client,
             StartMultisigInceptArgs args
-    ) throws SodiumException, IOException, InterruptedException, DigestException {
-        States.HabState aid1 = client.getIdentifier().get(args.getLocalMemberName());
+    ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
+        States.HabState aid1 = client.identifiers().get(args.getLocalMemberName());
         List<Object> participantStates = TestUtils.getStates(client, args.getParticipants());
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
@@ -724,7 +725,7 @@ public class MultisigUtils {
         createIdentifierArgs.setStates(participantStates);
         createIdentifierArgs.setRstates(participantStates);
 
-        EventResult icpResult1 = client.getIdentifier().create(args.getGroupName(), createIdentifierArgs);
+        EventResult icpResult1 = client.identifiers().create(args.getGroupName(), createIdentifierArgs);
         Object op1 = icpResult1.op();
         Serder serder = icpResult1.serder();
 
@@ -745,7 +746,7 @@ public class MultisigUtils {
         payload.put("smids", smids);
         payload.put("rmids", smids);
 
-        client.getExchanges().send(
+        client.exchanges().send(
                 args.getLocalMemberName(),
                 args.getGroupName(),
                 aid1,

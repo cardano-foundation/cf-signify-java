@@ -1,12 +1,12 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ public class ExchangingTest extends BaseMockServerTest {
     
     @Test
     @DisplayName("should create an exchange message with no transposed attachments")
-    public void shouldCreateExchangeMessageWithNoTransposedAttachments() throws SodiumException, DigestException {
+    public void shouldCreateExchangeMessageWithNoTransposedAttachments() throws DigestException, LibsodiumException {
         String dt = "2023-08-30T17:22:54.183Z";
         
         Exchanging.ExchangeResult result = exchange(
@@ -189,7 +189,7 @@ public class ExchangingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Exchanging.Exchanges exchange = client.getExchanges();
+        Exchanging.Exchanges exchange = client.exchanges();
         int sith = 1;
         int nsith = 1;
         int sn = 0;
@@ -256,7 +256,7 @@ public class ExchangingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Exchanging.Exchanges exchanges = client.getExchanges();
+        Exchanging.Exchanges exchanges = client.exchanges();
         String exchangeId = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
         exchanges.get(exchangeId);

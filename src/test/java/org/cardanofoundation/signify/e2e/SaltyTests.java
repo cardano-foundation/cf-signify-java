@@ -42,7 +42,7 @@ class SaltyTests {
 
         CreateIdentifierArgs bran = new CreateIdentifierArgs();
         bran.setBran("0123456789abcdefghijk");
-        EventResult icpResult = client.getIdentifier().create("aid1", bran);
+        EventResult icpResult = client.identifiers().create("aid1", bran);
         Operation op = Operation.fromObject(waitOperation(client, icpResult.op()));
 
         opResponse = (HashMap<String, Object>) op.getResponse();
@@ -64,7 +64,7 @@ class SaltyTests {
         assertEquals("1", icp.getKed().get("kt"));
         assertEquals("1", icp.getKed().get("nt"));
 
-        IdentifierListResponse aidsJson = client.getIdentifier().list(0, 24);
+        IdentifierListResponse aidsJson = client.identifiers().list(0, 24);
         List<Map<String, Object>> aids = Utils.fromJson(aidsJson.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(1, aids.size());
 
@@ -82,7 +82,7 @@ class SaltyTests {
         params.setNsith("2");
         params.setBran("0123456789lmnopqrstuv");
 
-        EventResult icpResult1 = client.getIdentifier().create("aid2", params);
+        EventResult icpResult1 = client.identifiers().create("aid2", params);
         Operation op_1 = Operation.fromObject(waitOperation(client, icpResult1.op()));
         opResponse = (HashMap<String, Object>) op_1.getResponse();
         opResponseDone = op_1.isDone() ? "true" : "false";
@@ -102,7 +102,7 @@ class SaltyTests {
         assertEquals("2", icp2.getKed().get("kt"));
         assertEquals("2", icp2.getKed().get("nt"));
 
-        IdentifierListResponse aidsJson1 = client.getIdentifier().list(0, 24);
+        IdentifierListResponse aidsJson1 = client.identifiers().list(0, 24);
         List<Map<String, Object>> aids1 = Utils.fromJson(aidsJson1.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(2, aids1.size());
 
@@ -116,24 +116,24 @@ class SaltyTests {
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.salty);
-        EventResult icpResult2 = client.getIdentifier().create("aid3", kargs);
+        EventResult icpResult2 = client.identifiers().create("aid3", kargs);
         waitOperation(client, icpResult2.op());
 
-        IdentifierListResponse aidsJson2 = client.getIdentifier().list(0, 24);
+        IdentifierListResponse aidsJson2 = client.identifiers().list(0, 24);
         List<Map<String, Object>> aids2 = Utils.fromJson(aidsJson2.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(3, aids2.size());
 
         Map<String, Object> aid4 = aids2.getFirst();
         Assertions.assertEquals("aid1", aid4.get("name"));
 
-        IdentifierListResponse aidsJson3 = client.getIdentifier().list(1, 2);
+        IdentifierListResponse aidsJson3 = client.identifiers().list(1, 2);
         List<Map<String, Object>> aids3 = Utils.fromJson(aidsJson3.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(2, aids3.size());
 
         Map<String, Object> aid5 = aids3.getFirst();
         Assertions.assertEquals("aid2", aid5.get("name"));
 
-        IdentifierListResponse aidsJson4 = client.getIdentifier().list(2, 2);
+        IdentifierListResponse aidsJson4 = client.identifiers().list(2, 2);
         List<Map<String, Object>> aids4 = Utils.fromJson(aidsJson4.aids().toString(), new TypeReference<>() {});
         Assertions.assertEquals(1, aids4.size());
 
@@ -141,7 +141,7 @@ class SaltyTests {
         Assertions.assertEquals("aid3", aid6.get("name"));
 
         // Rotate
-        EventResult icpResultRotate = client.getIdentifier().rotate("aid1");
+        EventResult icpResultRotate = client.identifiers().rotate("aid1");
         Operation<Object> opRotate = waitOperation(client, icpResultRotate.op());
         Object ked = opRotate.getResponse();
         Serder rotRotate = new Serder((Map<String, Object>) ked);
@@ -154,7 +154,7 @@ class SaltyTests {
         Assertions.assertEquals("EJMovBlrBuD6BVeUsGSxLjczbLEbZU9YnTSud9K4nVzk", rotRotate.getDigers().getFirst().getQb64());
 
         // Interact
-        EventResult icpResultInteract = client.getIdentifier().interact("aid1", List.of(icp.getPre()));
+        EventResult icpResultInteract = client.identifiers().interact("aid1", List.of(icp.getPre()));
         Operation<Object> opInteract = waitOperation(client, icpResultInteract.op());
         Map<String, Object> kedInteract = (Map<String, Object>) opInteract.getResponse();
         Serder ixn = new Serder(kedInteract);
@@ -164,7 +164,7 @@ class SaltyTests {
         Assertions.assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         // Get Identifiers
-        States.HabState aidState = client.getIdentifier().get("aid1");
+        States.HabState aidState = client.identifiers().get("aid1");
         States.State stateGet = aidState.getState();
 
         Assertions.assertEquals("2", stateGet.getS());
@@ -175,7 +175,7 @@ class SaltyTests {
         Assertions.assertEquals(rotRotate.getKed().get("d"), ee.getD());
 
         // KeyEvents
-        Coring.KeyEvents events = client.getKeyEvents();
+        Coring.KeyEvents events = client.keyEvents();
         List<Map<String, Object>> log = (List<Map<String, Object>>) events.get((String) aidLast.get("prefix"));
         assertEquals(3, log.size());
 
@@ -195,12 +195,12 @@ class SaltyTests {
 
         IdentifierInfo identifierInfo = new IdentifierInfo();
         identifierInfo.setName("aid4");
-        States.HabState updatedState = client.getIdentifier().update("aid3", identifierInfo);
+        States.HabState updatedState = client.identifiers().update("aid3", identifierInfo);
         assertEquals("aid4", updatedState.getName());
 
-        States.HabState retrievedState = client.getIdentifier().get("aid4");
+        States.HabState retrievedState = client.identifiers().get("aid4");
         assertEquals("aid4", retrievedState.getName());
-        IdentifierListResponse response = client.getIdentifier().list(2, 2);
+        IdentifierListResponse response = client.identifiers().list(2, 2);
         List<Map<String, Object>> identifiers = Utils.fromJson(response.aids().toString(), new TypeReference<>() {});
         assertEquals(1, identifiers.size());
 

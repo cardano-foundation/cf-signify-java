@@ -8,10 +8,10 @@ import org.cardanofoundation.signify.cesr.Cigar;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.junit.jupiter.api.DisplayName;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -20,7 +20,7 @@ class HttpingTest {
 
     @Test
     @DisplayName("create valid Signature-Input header with signature")
-    void testSiginput() throws SodiumException {
+    void testSiginput() throws LibsodiumException {
         final String salt = "0123456789abcdef";
         final Salter salter = new Salter(RawArgs.builder().raw(salt.getBytes()).build());
         final Signer signer = salter.signer();

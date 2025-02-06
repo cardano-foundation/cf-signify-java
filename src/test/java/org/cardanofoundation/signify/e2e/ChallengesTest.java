@@ -53,9 +53,9 @@ public class ChallengesTest {
         client2.state();
 
         // Generate challenge words
-        Contacting.Challenge challenge1_small = client1.getChallenges().generate(128);
+        Contacting.Challenge challenge1_small = client1.challenges().generate(128);
         assertEquals(12, challenge1_small.words.size());
-        Contacting.Challenge challenge1_big = client1.getChallenges().generate(256);
+        Contacting.Challenge challenge1_big = client1.challenges().generate(256);
         assertEquals(24, challenge1_big.words.size());
 
         // Create two identifiers, one for each client
@@ -66,10 +66,10 @@ public class ChallengesTest {
                 "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
-        EventResult icpResult1 = client1.getIdentifier().create("alice", kargs1);
+        EventResult icpResult1 = client1.identifiers().create("alice", kargs1);
         Operation op1 = Operation.fromObject(waitOperation(client1, icpResult1.op()));
         opResponse1 = (HashMap<String, Object>) op1.getResponse();
-        EventResult rpyResult1 = client1.getIdentifier().addEndRole(
+        EventResult rpyResult1 = client1.identifiers().addEndRole(
                 "alice",
                 "agent",
                 client1.getAgent().getPre(),
@@ -84,11 +84,11 @@ public class ChallengesTest {
                 "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
-        EventResult icpResult2 = client2.getIdentifier().create("bob", kargs2);
+        EventResult icpResult2 = client2.identifiers().create("bob", kargs2);
         Operation op2 = Operation.fromObject(waitOperation(client2, icpResult2.op()));
         opResponse2 = (HashMap<String, Object>) op2.getResponse();
 
-        EventResult rpyResult2 = client2.getIdentifier().addEndRole(
+        EventResult rpyResult2 = client2.identifiers().addEndRole(
                 "bob",
                 "agent",
                 client2.getAgent().getPre(),
@@ -96,11 +96,11 @@ public class ChallengesTest {
         waitOperation(client2, rpyResult2.op());
 
         // Exchange OOBIs
-        Object oobi1 = client1.getOobis().get("alice", "agent");
+        Object oobi1 = client1.oobis().get("alice", "agent");
         Map<String, Object> oobiBody1 = (Map<String, Object>) oobi1;
         ArrayList<String> oobiResponse1 = (ArrayList<String>) oobiBody1.get("oobis");
 
-        Object oobi2 = client2.getOobis().get("bob", "agent");
+        Object oobi2 = client2.oobis().get("bob", "agent");
         Map<String, Object> oobiBody2 = (Map<String, Object>) oobi2;
         ArrayList<String> oobiResponse2 = (ArrayList<String>) oobiBody2.get("oobis");
 
@@ -108,7 +108,7 @@ public class ChallengesTest {
         resolveOobi(client2, oobiResponse1.getFirst(), "alice");
 
         // List Client 1 contacts
-        Contacting.Contacts contacts1 = client1.getContacts();
+        Contacting.Contacts contacts1 = client1.contacts();
         Contacting.Contact[] client1Contacts = contacts1.list();
         Contacting.Contact bobContact = findContact(client1Contacts, "bob");
         assert bobContact != null;
@@ -116,21 +116,21 @@ public class ChallengesTest {
         assertEquals(((List<Object>) bobContact.get("challenges")).size(), 0);
 
         // Bob responds to Alice's challenge
-        client2.getChallenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.words);
+        client2.challenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.words);
         System.out.println("Bob responded to Alice's challenge with signed words");
 
         // Alice verifies Bob's response
-        Object verifyResult = client1.getChallenges().verify((String) opResponse2.get("i"), challenge1_small.words);
+        Object verifyResult = client1.challenges().verify((String) opResponse2.get("i"), challenge1_small.words);
         Operation op = Operation.fromObject(waitOperation(client1, verifyResult));
         System.out.println("Alice verified challenge response");
         opResponse = (HashMap<String, Object>) op.getResponse();
 
         Serder exn = new Serder((Map<String, Object>) opResponse.get("exn"));
-        client1.getChallenges().responded((String) opResponse2.get("i"), (String) exn.getKed().get("d"));
+        client1.challenges().responded((String) opResponse2.get("i"), (String) exn.getKed().get("d"));
         System.out.println("Alice marked challenge response as accepted");
 
         // Check Bob's challenge in contacts
-        client1Contacts = client1.getContacts().list();
+        client1Contacts = client1.contacts().list();
         bobContact = findContact(client1Contacts, "bob");
 
         assertNotNull(bobContact);

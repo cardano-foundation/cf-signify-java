@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.*;
@@ -8,14 +7,17 @@ import org.cardanofoundation.signify.cesr.Codex.CounterCodex;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.args.CounterArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States.HabState;
 
 import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class Exchanging {
     @Getter
@@ -50,7 +52,7 @@ public class Exchanging {
             String recipient,
             String datetime,
             String dig
-        ) throws SodiumException, DigestException {
+        ) throws DigestException, LibsodiumException {
 
             Keeper<? extends KeeperParams> keeper = client.getManager().get(sender);
             ExchangeResult result = exchange(
@@ -91,7 +93,7 @@ public class Exchanging {
             Map<String, Object> payload,
             Map<String, List<Object>> embeds,
             List<String> recipients
-        ) throws SodiumException, InterruptedException, IOException, DigestException {
+        ) throws ExecutionException, InterruptedException, IOException, DigestException, LibsodiumException {
 
             for (String recipient : recipients) {
                 ExchangeMessageResult result = createExchangeMessage(
@@ -134,8 +136,7 @@ public class Exchanging {
             List<String> sigs,
             String atc,
             List<String> recipients
-        ) throws SodiumException, IOException, InterruptedException {
-
+        ) throws IOException, InterruptedException, LibsodiumException {
             String path = String.format("/identifiers/%s/exchanges", name);
             String method = "POST";
             LinkedHashMap<String, Object> data = new LinkedHashMap<>();
@@ -145,7 +146,8 @@ public class Exchanging {
             data.put("atc", atc);
             data.put("rec", recipients);
 
-            return client.fetch(path, method, data, null);
+            HttpResponse<String> res = this.client.fetch(path, method, data);
+            return Utils.fromJson(res.body(), Object.class);
         }
 
         /**
@@ -157,7 +159,8 @@ public class Exchanging {
         public Object get(String said) throws Exception {
             String path = String.format("/exchanges/%s", said);
             String method = "GET";
-            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
+            HttpResponse<String> res = this. client.fetch(path, method, null);
+            return Utils.fromJson(res.body(), Object.class);
         }
     }
 

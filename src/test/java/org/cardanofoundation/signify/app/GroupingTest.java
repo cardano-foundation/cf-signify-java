@@ -20,7 +20,7 @@ public class GroupingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Grouping.Groups groups = client.getGroups();
+        Grouping.Groups groups = client.groups();
 
         groups.sendRequest("aid1", new HashMap<>(), List.of(), "");
         RecordedRequest request = mockWebServer.takeRequest();

@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app.aiding;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
@@ -11,6 +10,7 @@ import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RotateArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
@@ -49,12 +49,11 @@ public class Identifier {
      * @param end   End index of list of notifications, defaults to 24
      * @return A Mono containing the list response
      */
-    public IdentifierListResponse list(Integer start, Integer end) throws SodiumException, InterruptedException, IOException {
-
+    public IdentifierListResponse list(Integer start, Integer end) throws InterruptedException, IOException, LibsodiumException {
         Map<String, String> extraHeaders = new LinkedHashMap<>();
         extraHeaders.put("Range", String.format("aids=%d-%d", start, end));
 
-        HttpResponse<String> response = client.fetch(
+        HttpResponse<String> response = this.client.fetch(
                 "/identifiers",
                 "GET",
                 null,
@@ -72,8 +71,12 @@ public class Identifier {
         );
     }
 
-    public IdentifierListResponse list() throws SodiumException, IOException, InterruptedException {
-        return list(0, 24);
+    public IdentifierListResponse list() throws IOException, InterruptedException, LibsodiumException {
+        return this.list(0, 24);
+    }
+
+    public IdentifierListResponse list(Integer start) throws IOException, InterruptedException, LibsodiumException {
+        return this.list(start, 24);
     }
 
     /**
@@ -82,11 +85,11 @@ public class Identifier {
      * @param name Prefix or alias of the identifier
      * @return A HabState to the identifier information
      */
-    public States.HabState get(String name) throws SodiumException, InterruptedException, IOException {
+    public States.HabState get(String name) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + URI.create(name).toASCIIString();
         final String method = "GET";
 
-        HttpResponse<String> response = client.fetch(path, method, null, null);
+        HttpResponse<String> response = this.client.fetch(path, method, null);
         return Utils.fromJson(response.body(), States.HabState.class);
     }
 
@@ -97,11 +100,11 @@ public class Identifier {
      * @param info Information to update for the given identifier
      * @return A HabState to the identifier information after updating
      */
-    public States.HabState update(String name, IdentifierInfo info) throws SodiumException, InterruptedException, IOException {
+    public States.HabState update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + name;
         final String method = "PUT";
 
-        HttpResponse<String> response = client.fetch(path, method, info, null);
+        HttpResponse<String> response = this.client.fetch(path, method, info);
         return Utils.fromJson(response.body(), States.HabState.class);
     }
 
@@ -112,7 +115,7 @@ public class Identifier {
      * @param kargs Optional parameters to create the identifier
      * @return An EventResult to the inception result
      */
-    public EventResult create(String name, CreateIdentifierArgs kargs) throws SodiumException, InterruptedException, DigestException, IOException {
+    public EventResult create(String name, CreateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
         // Assuming kargs is an instance of a class with appropriate getters
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
@@ -190,7 +193,7 @@ public class Identifier {
         xargs.put("extern_type", externType);
         xargs.put("extern", extern);
 
-        Keeper keeper = this.client.getManager().create(algo, this.client.getPidx(), xargs);
+        Keeper<?> keeper = this.client.getManager().create(algo, this.client.getPidx(), xargs);
         KeeperResult keeperResult = keeper.incept(transferable);
         Serder serder;
         if (delpre == null) {
@@ -256,7 +259,7 @@ public class Identifier {
 
         this.client.setPidx(this.client.getPidx() + 1);
 
-        HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata, null);
+        HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata);
         return new EventResult(serder, sigs, response);
     }
 
@@ -270,15 +273,15 @@ public class Identifier {
      * @param eid   Optional qb64 of endpoint provider to be authorized
      * @param stamp Optional date-time-stamp RFC-3339 profile of iso8601 datetime. Now is the default if not provided
      * @return An EventResult to the result of the authorization
-     * @throws SodiumException if there is an error in the cryptographic operations
+     * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public EventResult addEndRole(String name, String role, String eid, String stamp) throws SodiumException, InterruptedException, DigestException, IOException {
+    public EventResult addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
         States.HabState hab = this.get(name);
         String pre = hab.getPrefix();
 
         // Assuming makeEndRole is a method that returns an object with getRaw() and getKed() methods
         Serder rpy = this.makeEndRole(pre, role, eid, stamp);
-        Keeping.Keeper keeper = this.client.getManager().get(hab);
+        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
@@ -289,8 +292,7 @@ public class Identifier {
         HttpResponse<String> res = this.client.fetch(
                 "/identifiers/" + name + "/endroles",
                 "POST",
-                jsondata,
-                null
+                jsondata
         );
         return new EventResult(rpy, sigs, res);
     }
@@ -317,20 +319,17 @@ public class Identifier {
         return Eventing.reply(route, data, stamp, null, Serials.JSON);
     }
 
-
-    public EventResult interact(String name, Object data) throws SodiumException, InterruptedException, DigestException, IOException {
+    public EventResult interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
         InteractionResponse interactionResponse = this.createInteract(name, data);
         HttpResponse<String> response = this.client.fetch(
-                "/identifiers/" + name + "/events",
-                "POST",
-                interactionResponse.jsondata(),
-                null
+            "/identifiers/" + name + "/events",
+            "POST",
+            interactionResponse.jsondata()
         );
         return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), response);
-
     }
 
-    public InteractionResponse createInteract(String name, Object data) throws SodiumException, InterruptedException, DigestException, IOException {
+    public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
         States.HabState hab = this.get(name);
         String pre = hab.getPrefix();
 
@@ -343,14 +342,14 @@ public class Identifier {
         }
 
         InteractArgs interactArgs = InteractArgs.builder()
-                .pre(pre)
-                .sn(BigInteger.valueOf(sn + 1))
-                .data((List<Object>) data)
-                .dig(dig)
-                .build();
+            .pre(pre)
+            .sn(BigInteger.valueOf(sn + 1))
+            .data((List<Object>) data)
+            .dig(dig)
+            .build();
         Serder serder = Eventing.interact(interactArgs);
 
-        Keeping.Keeper keeper = this.client.getManager().get(hab);
+        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
         Keeping.SignResult sigs = keeper.sign(serder.getRaw().getBytes());
 
         Map<String, Object> jsondata = new LinkedHashMap<>();
@@ -359,11 +358,12 @@ public class Identifier {
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
-    public EventResult rotate(String name) throws SodiumException, ExecutionException, InterruptedException, DigestException, IOException {
+
+    public EventResult rotate(String name) throws ExecutionException, InterruptedException, DigestException, IOException, LibsodiumException {
         return this.rotate(name, RotateIdentifierArgs.builder().build());
     }
 
-    public EventResult rotate(String name, RotateIdentifierArgs kargs) throws SodiumException, InterruptedException, DigestException, IOException {
+    public EventResult rotate(String name, RotateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
@@ -401,10 +401,10 @@ public class Identifier {
         List<States.State> states = kargs.getStates() == null ? new ArrayList<>() : kargs.getStates();
         List<States.State> rstates = kargs.getStates() == null ? new ArrayList<>() : kargs.getRstates();
         KeeperResult keeperResult = keeper.rotate(
-                ncodes,
-                transferable,
-                states,
-                rstates
+            ncodes,
+            transferable,
+            states,
+            rstates
         );
         List<String> keys = keeperResult.verfers();
         List<String> ndigs = keeperResult.digers();
@@ -415,21 +415,21 @@ public class Identifier {
         String ilk = delegated ? Ilks.DRT.getValue() : Ilks.ROT.getValue();
 
         Serder serder = Eventing.rotate(
-                RotateArgs.builder()
-                        .pre(pre)
-                        .ilk(ilk)
-                        .keys(keys)
-                        .dig(dig)
-                        .sn(ridx)
-                        .isith(cst)
-                        .nsith(nst)
-                        .ndigs(ndigs)
-                        .toad(kargs.getToad())
-                        .wits(wits)
-                        .cuts(cuts)
-                        .adds(adds)
-                        .data(data)
-                        .build()
+            RotateArgs.builder()
+                .pre(pre)
+                .ilk(ilk)
+                .keys(keys)
+                .dig(dig)
+                .sn(ridx)
+                .isith(cst)
+                .nsith(nst)
+                .ndigs(ndigs)
+                .toad(kargs.getToad())
+                .wits(wits)
+                .cuts(cuts)
+                .adds(adds)
+                .data(data)
+                .build()
         );
 
         List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
@@ -442,10 +442,9 @@ public class Identifier {
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(
-                "/identifiers/" + name + "/events",
-                "POST",
-                jsondata,
-                null
+            "/identifiers/" + name + "/events",
+            "POST",
+            jsondata
         );
 
         return new EventResult(serder, sigs, res);
@@ -456,11 +455,10 @@ public class Identifier {
      * @param name Name of the group identifier
      * @return A list of members of the group
      */
-    public Object members(String name) throws SodiumException, InterruptedException, IOException {
+    public Object members(String name) throws LibsodiumException, InterruptedException, IOException {
         HttpResponse<String> response = this.client.fetch(
                 "/identifiers/" + name + "/members",
                 "GET",
-                null,
                 null
         );
         return Utils.fromJson(response.body(), Object.class);

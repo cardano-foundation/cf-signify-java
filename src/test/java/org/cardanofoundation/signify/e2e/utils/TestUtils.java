@@ -3,7 +3,6 @@ package org.cardanofoundation.signify.e2e.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +19,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFil
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
@@ -27,6 +27,7 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
@@ -84,16 +85,16 @@ public class TestUtils {
         // TO-DO
     }
 
-    public static void assertOperations(List<SignifyClient> clients) throws Exception {
+    public static void assertOperations(List<SignifyClient> clients) throws IOException, InterruptedException, LibsodiumException {
         for (SignifyClient client : clients) {
-            List<Operation<?>> operations = client.getOperations().list(null);
+            List<Operation<?>> operations = client.operations().list(null);
             assertEquals(0, operations.size());
         }
     }
 
-    public static void assertNotifications(List<SignifyClient> clients) throws Exception {
+    public static void assertNotifications(List<SignifyClient> clients) throws LibsodiumException, IOException, InterruptedException {
         for (SignifyClient client : clients) {
-            Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
+            Notifying.Notifications.NotificationListResponse res = client.notifications().list();
             String notesResponse = res.notes();
             List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {
             });
@@ -111,7 +112,7 @@ public class TestUtils {
 
     public static States.HabState createAidAndGetHabState(SignifyClient client, String name) throws Exception {
         getOrCreateIdentifier(client, name, null);
-        return client.getIdentifier().get(name);
+        return client.identifiers().get(name);
     }
 
     public static String createTimestamp() {
@@ -137,7 +138,7 @@ public class TestUtils {
             States.HabState issuerAid,
             States.HabState recipientAid,
             String schemaSAID
-    ) throws SodiumException, IOException, InterruptedException {
+    ) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> filter = new LinkedHashMap<>() {{
             put("-i", issuerAid.getPrefix());
             put("-s", schemaSAID);
@@ -146,25 +147,25 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder()
                 .filter(filter)
                 .build();
-        List<Object> credentialList = (List<Object>) issuerClient.getCredentials().list(credentialFilter);
+        List<Object> credentialList = (List<Object>) issuerClient.credentials().list(credentialFilter);
         assert credentialList.size() <= 1;
         return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
 
-    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws SodiumException, ExecutionException, InterruptedException, IOException, DigestException {
+    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
         try {
-            return client.getIdentifier().get(name);
+            return client.identifiers().get(name);
         } catch (Exception e) {
-            EventResult result = client.getIdentifier().create(name, kargs);
+            EventResult result = client.identifiers().create(name, kargs);
             waitOperation(client, result.op());
 
-            States.HabState aid = client.getIdentifier().get(name);
+            States.HabState aid = client.identifiers().get(name);
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
                 throw new IllegalArgumentException("Client, agent, or pre cannot be null");
             }
 
             String pre = client.getAgent().getPre();
-            EventResult op = client.getIdentifier().addEndRole(name, "agent", pre, null);
+            EventResult op = client.identifiers().addEndRole(name, "agent", pre, null);
             waitOperation(client, op.op());
 
             System.out.println(name + "AID:" + aid.getPrefix());
@@ -234,7 +235,7 @@ public class TestUtils {
         String eid;
         Object op, ops;
         try {
-            States.HabState identifier = client.getIdentifier().get(name);
+            States.HabState identifier = client.identifiers().get(name);
             id = identifier.getPrefix();
         } catch (Exception e) {
             ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -243,7 +244,7 @@ public class TestUtils {
                 kargs.setToad(env.witnessIds().size());
                 kargs.setWits(env.witnessIds());
             }
-            EventResult result = client.getIdentifier().create(name, kargs);
+            EventResult result = client.identifiers().create(name, kargs);
             op = result.op();
             op = operationToObject(waitOperation(client, op));
             if (op instanceof String) {
@@ -261,13 +262,13 @@ public class TestUtils {
                 throw new IllegalStateException("Agent or pre is null");
             }
             if (!hasEndRole(client, name, "agent", eid)) {
-                EventResult results = client.getIdentifier().addEndRole(name, "agent", eid, null);
+                EventResult results = client.identifiers().addEndRole(name, "agent", eid, null);
                 ops = results.op();
                 ops = operationToObject(waitOperation(client, ops));
             }
         }
 
-        Object oobi = client.getOobis().get(name, "agent");
+        Object oobi = client.oobis().get(name, "agent");
         String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
@@ -275,15 +276,15 @@ public class TestUtils {
         return result;
     }
 
-    public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws SodiumException, IOException, InterruptedException {
-        List<Contacting.Contact> list = Arrays.asList(client.getContacts().list(null, "alias", "^" + name + "$"));
+    public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws IOException, InterruptedException, LibsodiumException {
+        List<Contacting.Contact> list = Arrays.asList(client.contacts().list(null, "alias", "^" + name + "$"));
         if (!list.isEmpty()) {
             Contacting.Contact contact = list.getFirst();
             if (contact.getOobi().equals(oobi)) {
                 return contact.getId();
             }
         }
-        Object op = client.getOobis().resolve(oobi, name);
+        Object op = client.oobis().resolve(oobi, name);
 
         Operation<?> opBody = waitOperation(client, op);
         LinkedHashMap<String, Object> response = castObjectToLinkedHashMap(opBody.getResponse());
@@ -322,7 +323,7 @@ public class TestUtils {
     ) throws Exception {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
 
-        Object credentialList = issuerClient.getCredentials().list(credentialFilter);
+        Object credentialList = issuerClient.credentials().list(credentialFilter);
         if (credentialList instanceof List && !((List<?>) credentialList).isEmpty()) {
             Optional<?> credential = ((List<?>) credentialList).stream()
                     .filter(cred -> {
@@ -353,9 +354,9 @@ public class TestUtils {
         cData.setR(rules);
         cData.setE(source);
 
-        IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
+        IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
         waitOperation(issuerClient, issResult.getOp());
-        Object credential = issuerClient.getCredentials().get(issResult.getAcdc().getKed().get("d").toString());
+        Object credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString());
 
         return credential;
     }
@@ -363,7 +364,7 @@ public class TestUtils {
     public static List<Object> getStates(SignifyClient client, List<String> prefixes) {
         List<Object> participantStates = prefixes.stream().map(p -> {
             try {
-                return client.getKeyStates().get(p);
+                return client.keyStates().get(p);
             } catch (Exception e) {
                 throw new RuntimeException("Error fetching key states for prefix: " + p, e);
             }
@@ -396,7 +397,7 @@ public class TestUtils {
     public static void warnNotifications(List<SignifyClient> clients) throws Exception {
         int count = 0;
         for (SignifyClient client : clients) {
-            Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
+            Notifying.Notifications.NotificationListResponse res = client.notifications().list();
             String notesResponse = res.notes();
             List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {
             });
@@ -409,15 +410,15 @@ public class TestUtils {
         assertTrue(count > 0);
     }
 
-    public static void deleteOperations(SignifyClient client, Operation op) throws SodiumException, IOException, InterruptedException {
+    public static void deleteOperations(SignifyClient client, Operation op) throws IOException, InterruptedException, LibsodiumException {
         if (op.getMetadata() != null && op.getMetadata().getDepends() != null) {
             deleteOperations(client, op.getMetadata().getDepends());
         }
-        client.getOperations().delete(op.getName());
+        client.operations().delete(op.getName());
     }
 
-    public static void deleteOperation(SignifyClient client, String name) throws SodiumException, IOException, InterruptedException {
-        client.getOperations().delete(name);
+    public static void deleteOperation(SignifyClient client, String name) throws IOException, InterruptedException, LibsodiumException {
+        client.operations().delete(name);
     }
 
     public static Object getReceivedCredential(SignifyClient client, String credID) throws Exception {
@@ -427,7 +428,7 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
         credentialFilter.setFilter(filter);
 
-        Object credentialList = client.getCredentials().list(credentialFilter);
+        Object credentialList = client.credentials().list(credentialFilter);
         ArrayList<String> credentialListBody = (ArrayList<String>) credentialList;
 
         Object credential = null;
@@ -440,24 +441,24 @@ public class TestUtils {
 
     public static void markAndRemoveNotification(SignifyClient client, Notification note) {
         try {
-            client.getNotifications().mark(note.i);
+            client.notifications().mark(note.i);
         } catch (Exception e) {
             throw new RuntimeException("Error marking notification: " + note.i, e);
         } finally {
             try {
-                client.getNotifications().delete(note.i);
+                client.notifications().delete(note.i);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public static void markNotification(SignifyClient client, Notification note) throws SodiumException, IOException, InterruptedException {
-        client.getNotifications().mark(note.getI());
+    public static void markNotification(SignifyClient client, Notification note) throws IOException, InterruptedException, LibsodiumException {
+        client.notifications().mark(note.getI());
     }
 
-    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws SodiumException, IOException, InterruptedException {
-        Object op = client.getOobis().resolve(oobi, alias);
+    public static void resolveOobi(SignifyClient client, String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
+        Object op = client.oobis().resolve(oobi, alias);
         waitOperation(client, op);
     }
 
@@ -511,10 +512,9 @@ public class TestUtils {
     public static List<Notification> waitForNotifications(SignifyClient client, String route, Retry.RetryOptions retryOptions) throws Exception {
         return retry(() -> {
             try {
-                Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
+                Notifying.Notifications.NotificationListResponse response = client.notifications().list();
                 String notesResponse = response.notes();
-                List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<List<Notification>>() {
-                });
+                List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
 
                 filteredNotes = notes.stream()
                         .filter(note -> Objects.equals(route, note.a.r) && !Boolean.TRUE.equals(note.r))
@@ -532,9 +532,10 @@ public class TestUtils {
 
     public static <T> Operation<T> waitOperation(
             SignifyClient client,
-            Object op) throws SodiumException, IOException, InterruptedException {
+            Object op
+    ) throws IOException, InterruptedException, LibsodiumException {
         Operation operation = Operation.fromObject(op);
-        operation = client.getOperations().wait(operation);
+        operation = client.operations().wait(operation);
         deleteOperations(client, operation);
         return operation;
     }
@@ -566,6 +567,21 @@ public class TestUtils {
     @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> castObjectToListMap(Object object) {
         return (List<Map<String, Object>>) object;
+    }
+
+    @FunctionalInterface
+    public interface ThrowingSupplier<T> {
+        T get() throws Exception;
+    }
+
+    public static <T> Supplier<T> unchecked(ThrowingSupplier<T> supplier) {
+        return () -> {
+            try {
+                return supplier.get();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
 }

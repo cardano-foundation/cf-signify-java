@@ -4,6 +4,7 @@ import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.utils.KeyPair;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +16,12 @@ class EncrypterTest {
 
     @Test
     @DisplayName("should encrypt stuff")
-    void shouldEncryptStuff() throws SodiumException {
+    void shouldEncryptStuff() throws LibsodiumException, SodiumException {
         // (b'\x18;0\xc4\x0f*vF\xfa\xe3\xa2Eee\x1f\x96o\xce)G\x85\xe3X\x86\xda\x04\xf0\xdc\xde\x06\xc0+')
-        byte[] seed = new byte[] {
-            24, 59, 48, (byte)196, 15, 42, 118, 70, (byte)250, (byte)227, (byte)162, 69, 101, 101, 31,
-            (byte)150, 111, (byte)206, 41, 71, (byte)133, (byte)227, 88, (byte)134, (byte)218, 4, (byte)240, (byte)220, (byte)222, 6,
-            (byte)192, 43
+        byte[] seed = new byte[]{
+            24, 59, 48, (byte) 196, 15, 42, 118, 70, (byte) 250, (byte) 227, (byte) 162, 69, 101, 101, 31,
+            (byte) 150, 111, (byte) 206, 41, 71, (byte) 133, (byte) 227, 88, (byte) 134, (byte) 218, 4, (byte) 240, (byte) 220, (byte) 222, 6,
+            (byte) 192, 43
         };
         byte[] seedQb64b = new Matter(
             RawArgs.builder()
@@ -35,8 +36,8 @@ class EncrypterTest {
         );
 
         // b'6\x08d\r\xa1\xbb9\x8dp\x8d\xa0\xc0\x13J\x87r'
-        byte[] salt = new byte[] {
-            54, 8, 100, 13, (byte)161, (byte)187, 57, (byte)141, 112, (byte)141, (byte)160, (byte)192, 19, 74, (byte)135,
+        byte[] salt = new byte[]{
+            54, 8, 100, 13, (byte) 161, (byte) 187, 57, (byte) 141, 112, (byte) 141, (byte) 160, (byte) 192, 19, 74, (byte) 135,
             114
         };
         Matter saltMatter = new Matter(
@@ -51,10 +52,10 @@ class EncrypterTest {
         assertEquals("0AA2CGQNobs5jXCNoMATSody", saltQb64);
 
         // b'h,#|\x8ap"\x12\xc43t2\xa6\xe1\x18\x19\xf0f2,y\xc4\xc21@\xf5@\x15.\xa2\x1a\xcf'
-        byte[] cryptSeed = new byte[] {
-            104, 44, 35, 124, (byte)138, 112, 34, 18, (byte)196, 51, 116, 50, (byte)166, (byte)225, 24,
-            25, (byte)240, 102, 50, 44, 121, (byte)196, (byte)194, 49, 64, (byte)245, 64, 21, 46, (byte)162,
-            26, (byte)207
+        byte[] cryptSeed = new byte[]{
+            104, 44, 35, 124, (byte) 138, 112, 34, 18, (byte) 196, 51, 116, 50, (byte) 166, (byte) 225, 24,
+            25, (byte) 240, 102, 50, 44, 121, (byte) 196, (byte) 194, 49, 64, (byte) 245, 64, 21, 46, (byte) 162,
+            26, (byte) 207
         };
         Signer cryptsigner = new Signer(
             RawArgs.builder()
@@ -64,17 +65,16 @@ class EncrypterTest {
             true);
 
         KeyPair keypair = lazySodium.cryptoSignSeedKeypair(cryptSeed);
-
         byte[] pubKey = new byte[32];
         boolean convertPubKey = lazySodium.convertPublicKeyEd25519ToCurve25519(pubKey, keypair.getPublicKey().getAsBytes());
         if (!convertPubKey) {
-            throw new SodiumException("Failed to convert public key ed25519 to Curve25519");
+            throw new LibsodiumException("Failed to convert public key ed25519 to Curve25519");
         }
 
         byte[] priKey = new byte[32];
         boolean convertPriKey = lazySodium.convertSecretKeyEd25519ToCurve25519(priKey, keypair.getSecretKey().getAsBytes());
         if (!convertPriKey) {
-            throw new SodiumException("Failed to convert secret key ed25519 to Curve25519");
+            throw new LibsodiumException("Failed to convert secret key ed25519 to Curve25519");
         }
 
         assertThrows(Exception.class, () -> new Encrypter(RawArgs.builder().build(), null));

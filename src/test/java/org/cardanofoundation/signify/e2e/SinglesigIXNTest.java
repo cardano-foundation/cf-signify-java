@@ -1,9 +1,9 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.coring.Operation;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
     }
 
     @BeforeEach
-    public void getContact() throws SodiumException, IOException, InterruptedException {
+    public void getContact() throws IOException, InterruptedException, LibsodiumException {
         contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
     }
 
@@ -54,24 +54,24 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
     public void singlesig_ixn_step1() throws Exception {
         assertEquals(name1_id, contact1_id);
 
-        List<HashMap<String, Object>> keyState1List = (List<HashMap<String, Object>>) client1.getKeyStates().get(name1_id);
+        List<HashMap<String, Object>> keyState1List = (List<HashMap<String, Object>>) client1.keyStates().get(name1_id);
         assertEquals(1, keyState1List.size());
-        List<HashMap<String, Object>> keyState2List = (List<HashMap<String, Object>>) client2.getKeyStates().get(contact1_id);
+        List<HashMap<String, Object>> keyState2List = (List<HashMap<String, Object>>) client2.keyStates().get(contact1_id);
         assertEquals(keyState2List.getFirst().get("s"), keyState1List.getFirst().get("s"));
     }
 
     @Test
     public void singlesig_ixn_ixn1() throws Exception {
         // local keystate before rot
-        List<Map<String, Object>> listKeyState0 = (List<Map<String, Object>>) client1.getKeyStates().get(name1_id);
+        List<Map<String, Object>> listKeyState0 = (List<Map<String, Object>>) client1.keyStates().get(name1_id);
         assertNotNull(listKeyState0);
 
         // ixn
-        EventResult result = client1.getIdentifier().interact("name1", null);
+        EventResult result = client1.identifiers().interact("name1", null);
         waitOperation(client1, result.op());
 
         // local keystate after rot
-        List<Map<String, Object>> listKeyState1 = (List<Map<String, Object>>) client1.getKeyStates().get(name1_id);
+        List<Map<String, Object>> listKeyState1 = (List<Map<String, Object>>) client1.keyStates().get(name1_id);
         assertTrue(parseInteger(listKeyState1.getFirst().get("s").toString()) > 0);
 
         // sequence has incremented
@@ -80,7 +80,7 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
         );
 
         // remote keystate after ixn
-        List<Map<String, Object>> listKeyState2 = (List<Map<String, Object>>) client2.getKeyStates().get(contact1_id);
+        List<Map<String, Object>> listKeyState2 = (List<Map<String, Object>>) client2.keyStates().get(contact1_id);
         // remote keystate is one behind
         assertEquals(parseInteger(listKeyState2.getFirst().get("s").toString()),
                 parseInteger(listKeyState1.getFirst().get("s").toString()) - 1
@@ -88,7 +88,7 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
 
         // refresh remote keystate
         String sn = listKeyState1.getFirst().get("s").toString();
-        Object op = client2.getKeyStates().query(contact1_id, sn, null);
+        Object op = client2.keyStates().query(contact1_id, sn, null);
         op = waitOperation(client2, op);
 
         response = (HashMap<String, Object>)  Operation.fromObject(op).getResponse();

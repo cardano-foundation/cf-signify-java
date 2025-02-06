@@ -1,8 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +19,6 @@ public class TestSetupSingleClient {
     private static String name1_id;
     private static String name1_oobi;
     private static List<String> brans = Collections.singletonList("0ADF2TpptgqcDE5IQUF1HeTp");
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     public static void getClients() throws Exception {
@@ -42,9 +40,9 @@ public class TestSetupSingleClient {
     }
 
     @Test
-    public void test_setup_single_client_step2() throws SodiumException, IOException, InterruptedException {
+    public void test_setup_single_client_step2() throws IOException, InterruptedException, LibsodiumException {
         ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-        Map<String, Object> oobi = (Map<String, Object>) client.getOobis().get("name1", "witness");
+        Map<String, Object> oobi = (Map<String, Object>) client.oobis().get("name1", "witness");
         ArrayList<String> oobis = (ArrayList<String>) oobi.get("oobis");
         assertEquals(3, oobis.size());
         switch (env.preset()) {

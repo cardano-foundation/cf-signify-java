@@ -1,11 +1,12 @@
 package org.cardanofoundation.signify.app;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +30,11 @@ public class Grouping {
          * @return The list of replay messages
          * @throws Exception if the fetch operation fails
          */
-        public Object getRequest(String said) throws SodiumException, IOException, InterruptedException {
+        public Object getRequest(String said) throws LibsodiumException, IOException, InterruptedException {
             String path = "/multisig/request/" + said;
             String method = "GET";
-            return Utils.fromJson(client.fetch(path, method, null, null).body(), Object.class);
+            HttpResponse<String> response = this.client.fetch(path, method, null);
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
@@ -49,7 +51,7 @@ public class Grouping {
             Map<String, Object> exn,
             List<String> sigs,
             String atc
-        ) throws Exception {
+        ) throws LibsodiumException, IOException, InterruptedException {
             String path = "/identifiers/" + name + "/multisig/request";
             String method = "POST";
             Map<String, Object> data = new LinkedHashMap<>();
@@ -57,7 +59,8 @@ public class Grouping {
             data.put("sigs", sigs);
             data.put("atc", atc);
 
-            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+            HttpResponse<String> response = this.client.fetch(path, method, data);
+            return Utils.fromJson(response.body(), Object.class);
         }
 
         /**
@@ -79,7 +82,7 @@ public class Grouping {
             String gid,
             List<String> smids,
             List<String> rmids
-        ) throws Exception {
+        ) throws LibsodiumException, IOException, InterruptedException {
             String path = "/identifiers/" + name + "/multisig/join";
             String method = "POST";
             Map<String, Object> data = new LinkedHashMap<>();
@@ -90,7 +93,8 @@ public class Grouping {
             data.put("smids", smids);
             data.put("rmids", rmids);
 
-            return Utils.fromJson(client.fetch(path, method, data, null).body(), Object.class);
+            HttpResponse<String> response = this.client.fetch(path, method, data);
+            return Utils.fromJson(response.body(), Object.class);
         }
     }
 }

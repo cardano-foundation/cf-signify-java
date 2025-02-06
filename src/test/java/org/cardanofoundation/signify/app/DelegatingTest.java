@@ -19,7 +19,7 @@ public class DelegatingTest extends BaseMockServerTest {
         client.connect();
         cleanUpRequest();
 
-        Delegating.Delegations delegations = client.getDelegations();
+        Delegating.Delegations delegations = client.delegations();
         delegations.approve("EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao");
 
         RecordedRequest request = getRecordedRequests().getLast();
