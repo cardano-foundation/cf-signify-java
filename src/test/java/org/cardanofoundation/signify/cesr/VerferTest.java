@@ -5,7 +5,6 @@ import com.goterl.lazysodium.utils.HexMessageEncoder;
 import com.goterl.lazysodium.utils.Key;
 import com.goterl.lazysodium.utils.KeyPair;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,16 +19,10 @@ public class VerferTest {
 
     @Test
     @DisplayName("should verify digests with Ed25519")
-    public void testVerifyDigests() throws LibsodiumException {
+    public void testVerifyDigests() throws SodiumException {
 
         final byte[] seed = lazySodium.randomBytesBuf(32);
-        KeyPair keyPair;
-        try {
-            keyPair = lazySodium.cryptoSignSeedKeypair(seed);
-        } catch (SodiumException e) {
-            throw new LibsodiumException(e);
-        }
-
+        KeyPair keyPair = lazySodium.cryptoSignSeedKeypair(seed);
         final Key verkey = keyPair.getPublicKey();
         final Key sigkey = keyPair.getSecretKey();
 
@@ -44,12 +37,7 @@ public class VerferTest {
         assertEquals(verfer.getCode(), Codex.MatterCodex.Ed25519N.getValue());
 
         final String ser = "abcdefghijklmnopqrstuvwxyz0123456789";
-        String sigEncoded;
-        try {
-            sigEncoded = lazySodium.cryptoSignDetached(ser, sigkey);
-        } catch (SodiumException e) {
-            throw new LibsodiumException(e);
-        }
+        String sigEncoded = lazySodium.cryptoSignDetached(ser, sigkey);
         final byte[] sig = new HexMessageEncoder().decode(sigEncoded);
 
         assertTrue(verfer.verify(sig, ser.getBytes()));

@@ -16,7 +16,7 @@ class EncrypterTest {
 
     @Test
     @DisplayName("should encrypt stuff")
-    void shouldEncryptStuff() throws LibsodiumException {
+    void shouldEncryptStuff() throws LibsodiumException, SodiumException {
         // (b'\x18;0\xc4\x0f*vF\xfa\xe3\xa2Eee\x1f\x96o\xce)G\x85\xe3X\x86\xda\x04\xf0\xdc\xde\x06\xc0+')
         byte[] seed = new byte[]{
             24, 59, 48, (byte) 196, 15, 42, 118, 70, (byte) 250, (byte) 227, (byte) 162, 69, 101, 101, 31,
@@ -64,13 +64,7 @@ class EncrypterTest {
                 .build(),
             true);
 
-        KeyPair keypair;
-        try {
-            keypair = lazySodium.cryptoSignSeedKeypair(cryptSeed);
-        } catch (SodiumException e) {
-            throw new LibsodiumException(e);
-        }
-
+        KeyPair keypair = lazySodium.cryptoSignSeedKeypair(cryptSeed);
         byte[] pubKey = new byte[32];
         boolean convertPubKey = lazySodium.convertPublicKeyEd25519ToCurve25519(pubKey, keypair.getPublicKey().getAsBytes());
         if (!convertPubKey) {
