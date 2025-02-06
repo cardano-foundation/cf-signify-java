@@ -27,6 +27,7 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
@@ -566,6 +567,21 @@ public class TestUtils {
     @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> castObjectToListMap(Object object) {
         return (List<Map<String, Object>>) object;
+    }
+
+    @FunctionalInterface
+    public interface ThrowingSupplier<T> {
+        T get() throws Exception;
+    }
+
+    public static <T> Supplier<T> unchecked(ThrowingSupplier<T> supplier) {
+        return () -> {
+            try {
+                return supplier.get();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
 }

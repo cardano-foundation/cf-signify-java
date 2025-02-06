@@ -7,13 +7,10 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.security.DigestException;
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
@@ -98,16 +95,11 @@ public class DelegationTest {
         anchor.put("d", delegatePrefix);
 
         testSteps.step("delegator approves delegation", () -> {
-            EventResult result = retry(() -> {
-                EventResult apprDelRes;
-                try {
-                    apprDelRes = client1.delegations().approve("delegator", anchor);
-                    waitOperation(client1, apprDelRes.op());
-                } catch (IOException | InterruptedException | LibsodiumException | DigestException e) {
-                    throw new RuntimeException(e);
-                }
+            EventResult result = retry(unchecked(() -> {
+                EventResult apprDelRes = client1.delegations().approve("delegator", anchor);
+                waitOperation(client1, apprDelRes.op());
                 return apprDelRes;
-            });
+            }));
             List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");
             assertEquals(approDelResList.getFirst(), anchor);
         });
