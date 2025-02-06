@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.*;
@@ -8,6 +7,7 @@ import org.cardanofoundation.signify.app.credentialing.ipex.*;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.Retry;
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
@@ -114,32 +113,32 @@ public class CredentialsTest extends BaseIntegrationTest {
             registryArgs.setName(issuerAid.name);
             registryArgs.setRegistryName(registryName);
             try {
-                RegistryResult regResult = issuerClient.getRegistries().create(registryArgs);
+                RegistryResult regResult = issuerClient.registries().create(registryArgs);
                 waitOperation(issuerClient, regResult.op());
-            } catch (IOException | InterruptedException | SodiumException | DigestException e) {
+            } catch (IOException | InterruptedException | DigestException e) {
                 throw new RuntimeException(e);
             }
             try {
-                Object registries = issuerClient.getRegistries().list(issuerAid.name);
+                Object registries = issuerClient.registries().list(issuerAid.name);
                 List<Map<String, Object>> registriesList = castObjectToListMap(registries);
                 HashMap<String, String> registry = new HashMap<>();
                 registry.put("name", registriesList.getFirst().get("name").toString());
                 registry.put("regk", registriesList.getFirst().get("regk").toString());
                 assertEquals(1, registriesList.size());
                 assertEquals(registryName, registry.get("name"));
-            } catch (IOException | InterruptedException | SodiumException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
             try {
-                issuerClient.getRegistries().rename(issuerAid.name, registryName, updatedRegistryName);
-                Object registries = issuerClient.getRegistries().list(issuerAid.name);
+                issuerClient.registries().rename(issuerAid.name, registryName, updatedRegistryName);
+                Object registries = issuerClient.registries().list(issuerAid.name);
                 List<Map<String, Object>> registriesList = castObjectToListMap(registries);
                 updateRegistry.put("name", registriesList.getFirst().get("name").toString());
                 updateRegistry.put("regk", registriesList.getFirst().get("regk").toString());
                 assertEquals(1, registriesList.size());
                 assertEquals(updatedRegistryName, updateRegistry.get("name"));
-            } catch (IOException | InterruptedException | SodiumException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
             return updateRegistry;
@@ -147,26 +146,26 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer can get schemas", () -> {
             try {
-                Object issuerQviSchema = issuerClient.getSchemas().get(QVI_SCHEMA_SAID);
+                Object issuerQviSchema = issuerClient.schemas().get(QVI_SCHEMA_SAID);
                 LinkedHashMap<String, Object> issuerQviSchemaList = castObjectToLinkedHashMap(issuerQviSchema);
                 String issuerQviSchemaID = issuerQviSchemaList.get("$id").toString();
                 assertEquals(issuerQviSchemaID, QVI_SCHEMA_SAID);
 
-                Object issuerLeSchema = issuerClient.getSchemas().get(LE_SCHEMA_SAID);
+                Object issuerLeSchema = issuerClient.schemas().get(LE_SCHEMA_SAID);
                 LinkedHashMap<String, Object> issuerLeSchemaList = castObjectToLinkedHashMap(issuerLeSchema);
                 String issuerLeSchemaID = issuerLeSchemaList.get("$id").toString();
                 assertEquals(issuerLeSchemaID, LE_SCHEMA_SAID);
-            } catch (IOException | InterruptedException | SodiumException e) {
+            } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
         });
 
         testSteps.step("Holder can list schemas", () -> {
             try {
-                Object holderSchemas = holderClient.getSchemas().list();
+                Object holderSchemas = holderClient.schemas().list();
                 List<Map<String, Object>> holderSchemasList = castObjectToListMap(holderSchemas);
                 assertEquals(2, holderSchemasList.size());
-            } catch (IOException | InterruptedException | SodiumException e) {
+            } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -184,7 +183,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             cData.setS(QVI_SCHEMA_SAID);
             cData.setA(a);
 
-            IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
+            IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
             waitOperation(issuerClient, issResult.getOp());
             return issResult.getAcdc().getKed().get("d").toString();
         });
@@ -192,7 +191,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Issuer list credentials", () -> {
             CredentialFilter credentialFilter = CredentialFilter.builder().build();
             try {
-                Object issuerCredentials = issuerClient.getCredentials().list(credentialFilter);
+                Object issuerCredentials = issuerClient.credentials().list(credentialFilter);
                 List<Map<String, Object>> issuerCredentialsList = castObjectToListMap(issuerCredentials);
                 Object credentialsMap = issuerCredentialsList.getFirst().get("sad");
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(credentialsMap);
@@ -203,7 +202,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 assertEquals(QVI_SCHEMA_SAID, sad.get("s").toString());
                 assertEquals(issuerAid.prefix, sad.get("i").toString());
                 assertEquals("0", status.get("s").toString());
-            } catch (SodiumException | IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -214,40 +213,40 @@ public class CredentialsTest extends BaseIntegrationTest {
             CredentialFilter credentialFilter = CredentialFilter.builder().build();
             credentialFilter.setFilter(filterData);
             try {
-                List<Map<String, Object>> list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                List<Map<String, Object>> list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
                 assertEquals(1, list.size());
 
                 filterData.remove("-i");
                 filterData.put("-s", QVI_SCHEMA_SAID);
-                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
                 assertEquals(1, list.size());
 
                 filterData.remove("-s");
                 filterData.put("-a-i", holderAid.prefix);
-                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
                 assertEquals(1, list.size());
 
                 filterData.remove("-a-i");
                 filterData.put("-i", issuerAid.prefix);
                 filterData.put("-s", QVI_SCHEMA_SAID);
                 filterData.put("-a-i", holderAid.prefix);
-                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
                 assertEquals(1, list.size());
 
                 filterData.put("-i", UUID.randomUUID().toString());
                 filterData.put("-s", QVI_SCHEMA_SAID);
                 filterData.put("-a-i", holderAid.prefix);
-                list = castObjectToListMap(issuerClient.getCredentials().list(credentialFilter));
+                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
                 assertEquals(0, list.size());
 
-            } catch (SodiumException | IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
         });
 
         testSteps.step("Issuer get credential by id", () -> {
             try {
-                Object issuerCredential = issuerClient.getCredentials().get(qviCredentialId);
+                Object issuerCredential = issuerClient.credentials().get(qviCredentialId);
                 LinkedHashMap<String, Object> issuerCredentialsList = castObjectToLinkedHashMap(issuerCredential);
                 Object credentialsMap = issuerCredentialsList.get("sad");
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(credentialsMap);
@@ -257,7 +256,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 assertEquals(QVI_SCHEMA_SAID, sad.get("s").toString());
                 assertEquals(issuerAid.prefix, sad.get("i").toString());
                 assertEquals("0", status.get("s").toString());
-            } catch (SodiumException | IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -265,7 +264,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Issuer IPEX grant", () -> {
             String dt = createTimestamp();
             try {
-                Object issuerCredential = issuerClient.getCredentials().get(qviCredentialId);
+                Object issuerCredential = issuerClient.credentials().get(qviCredentialId);
                 LinkedHashMap<String, Object> issuerCredentialList = castObjectToLinkedHashMap(issuerCredential);
                 Map<String, Object> getSAD = (Map<String, Object>) issuerCredentialList.get("sad");
                 Map<String, Object> getANC = (Map<String, Object>) issuerCredentialList.get("anc");
@@ -281,11 +280,11 @@ public class CredentialsTest extends BaseIntegrationTest {
                 gArgs.setRecipient(holderAid.prefix);
                 gArgs.setDatetime(dt);
 
-                Exchanging.ExchangeMessageResult result = issuerClient.getIpex().grant(gArgs);
+                Exchanging.ExchangeMessageResult result = issuerClient.ipex().grant(gArgs);
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
-                Object op = issuerClient.getIpex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
+                Object op = issuerClient.ipex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
                 waitOperation(issuerClient, op);
-            } catch (SodiumException | IOException | InterruptedException | DigestException | ExecutionException e) {
+            } catch (IOException | InterruptedException | DigestException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -293,8 +292,8 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Holder can get the credential status before or without holding", () -> {
             Map<String, Object> state = (Map<String, Object>) Retry.retry(() -> {
                 try {
-                    return holderClient.getCredentials().state(registrys.get("regk").toString(), qviCredentialId);
-                } catch (SodiumException | IOException | InterruptedException e) {
+                    return holderClient.credentials().state(registrys.get("regk").toString(), qviCredentialId);
+                } catch (IOException | InterruptedException | LibsodiumException e) {
                     throw new RuntimeException(e);
                 }
             });
@@ -316,8 +315,8 @@ public class CredentialsTest extends BaseIntegrationTest {
                 iargs.setRecipient(issuerAid.prefix);
                 iargs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = holderClient.getIpex().admit(iargs);
-                Object op = holderClient.getIpex().submitAdmit(
+                Exchanging.ExchangeMessageResult result = holderClient.ipex().admit(iargs);
+                Object op = holderClient.ipex().submitAdmit(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
                 );
                 waitOperation(holderClient, op);
@@ -341,7 +340,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             Map<String, Object> sad, status;
             String atc;
             try {
-                Object holderCredential = holderClient.getCredentials().get(qviCredentialId);
+                Object holderCredential = holderClient.credentials().get(qviCredentialId);
                 LinkedHashMap<String, Object> holderCredentialList = castObjectToLinkedHashMap(holderCredential);
 
                 Object credentialsMap = holderCredentialList.get("sad");
@@ -369,8 +368,8 @@ public class CredentialsTest extends BaseIntegrationTest {
             args.setDatetime(createTimestamp());
 
             try {
-                Exchanging.ExchangeMessageResult result = verifierClient.getIpex().apply(args);
-                Object op = verifierClient.getIpex().submitApply(
+                Exchanging.ExchangeMessageResult result = verifierClient.ipex().apply(args);
+                Object op = verifierClient.ipex().submitApply(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(verifierClient, op);
@@ -391,7 +390,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertNotNull(holderApplyNote.a.d);
 
             try {
-                Object apply = holderClient.getExchanges().get(holderApplyNote.a.d);
+                Object apply = holderClient.exchanges().get(holderApplyNote.a.d);
                 LinkedHashMap<String, Object> applyMap = castObjectToLinkedHashMap(apply);
                 LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(applyMap.get("exn"));
                 applySaid = exn.get("d").toString();
@@ -410,7 +409,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 CredentialFilter cFilter = CredentialFilter.builder().build();
                 cFilter.setFilter(filter);
-                Object matchingCreds = holderClient.getCredentials().list(cFilter);
+                Object matchingCreds = holderClient.credentials().list(cFilter);
                 ArrayList<String> matchingCredsMap = (ArrayList<String>) matchingCreds;
                 assertEquals(1, matchingCredsMap.size());
 
@@ -426,8 +425,8 @@ public class CredentialsTest extends BaseIntegrationTest {
                 offerArgs.setApplySaid(applySaid);
                 offerArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = holderClient.getIpex().offer(offerArgs);
-                Object op = holderClient.getIpex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
+                Exchanging.ExchangeMessageResult result = holderClient.ipex().offer(offerArgs);
+                Object op = holderClient.ipex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
                 waitOperation(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -441,7 +440,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification verifierOfferNote = verifierNotifications.getFirst();
                 assertNotNull(verifierOfferNote.a.d);
 
-                Object offer = verifierClient.getExchanges().get(verifierOfferNote.a.d);
+                Object offer = verifierClient.exchanges().get(verifierOfferNote.a.d);
                 LinkedHashMap<String, Object> offerBody = castObjectToLinkedHashMap(offer);
                 LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(offerBody.get("exn"));
 
@@ -464,8 +463,8 @@ public class CredentialsTest extends BaseIntegrationTest {
                 agreeArgs.setOfferSaid(offerSaid);
                 agreeArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = verifierClient.getIpex().agree(agreeArgs);
-                Object op = verifierClient.getIpex().submitAgree(
+                Exchanging.ExchangeMessageResult result = verifierClient.ipex().agree(agreeArgs);
+                Object op = verifierClient.ipex().submitAgree(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(verifierClient, op);
@@ -481,7 +480,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification holderAgreeNote = holderNotifications.getFirst();
                 assertNotNull(holderAgreeNote.a.d);
 
-                Object agree = verifierClient.getExchanges().get(holderAgreeNote.a.d);
+                Object agree = verifierClient.exchanges().get(holderAgreeNote.a.d);
                 LinkedHashMap<String, Object> agreeBody = castObjectToLinkedHashMap(agree);
                 LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(agreeBody.get("exn"));
                 agreeSaid = exn.get("d").toString();
@@ -491,7 +490,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 markAndRemoveNotification(holderClient, holderAgreeNote);
 
-                Object holderCredential = holderClient.getCredentials().get(qviCredentialId);
+                Object holderCredential = holderClient.credentials().get(qviCredentialId);
                 LinkedHashMap<String, Object> holderCredentialBody = castObjectToLinkedHashMap(holderCredential);
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(holderCredentialBody.get("sad"));
                 LinkedHashMap<String, Object> anc = castObjectToLinkedHashMap(holderCredentialBody.get("anc"));
@@ -513,9 +512,9 @@ public class CredentialsTest extends BaseIntegrationTest {
                 grantArgs.setAgreeSaid(agreeSaid);
                 grantArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = holderClient.getIpex().grant(grantArgs);
+                Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
 
-                Object op = holderClient.getIpex().submitGrant(
+                Object op = holderClient.ipex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
                 );
                 waitOperation(holderClient, op);
@@ -531,7 +530,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification verifierGrantNote = verifierNotifications.getFirst();
                 assertNotNull(verifierGrantNote.a.d);
 
-                Object grant = holderClient.getExchanges().get(verifierGrantNote.a.d);
+                Object grant = holderClient.exchanges().get(verifierGrantNote.a.d);
                 LinkedHashMap<String, Object> grantBody = castObjectToLinkedHashMap(grant);
                 LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(grantBody.get("exn"));
                 String p = exn.get("p").toString();
@@ -545,13 +544,13 @@ public class CredentialsTest extends BaseIntegrationTest {
                 admitArgs.setRecipient(holderAid.prefix);
                 admitArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = verifierClient.getIpex().admit(admitArgs);
-                Object op = verifierClient.getIpex().submitAdmit(
+                Exchanging.ExchangeMessageResult result = verifierClient.ipex().admit(admitArgs);
+                Object op = verifierClient.ipex().submitAdmit(
                         verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(verifierClient, op);
                 markAndRemoveNotification(verifierClient, verifierGrantNote);
-                Object verifierCredential = verifierClient.getCredentials().get(qviCredentialId);
+                Object verifierCredential = verifierClient.credentials().get(qviCredentialId);
 
                 LinkedHashMap<String, Object> verifierCredentialBody = castObjectToLinkedHashMap(verifierCredential);
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(verifierCredentialBody.get("sad"));
@@ -585,10 +584,10 @@ public class CredentialsTest extends BaseIntegrationTest {
             registryArgs.setRegistryName(registryName);
 
             try {
-                RegistryResult regResult = holderClient.getRegistries().create(registryArgs);
+                RegistryResult regResult = holderClient.registries().create(registryArgs);
 
                 waitOperation(holderClient, regResult.op());
-                Object registries = holderClient.getRegistries().list(holderAid.name);
+                Object registries = holderClient.registries().list(holderAid.name);
                 List<Map<String, Object>> registriesList = castObjectToListMap(registries);
 
                 assertTrue(!registriesList.isEmpty());
@@ -600,7 +599,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         String leCredentialId = testSteps.step("Holder create LE (chained) credential", () -> {
             try {
-                Object qviCredential = holderClient.getCredentials().get(qviCredentialId);
+                Object qviCredential = holderClient.credentials().get(qviCredentialId);
                 LinkedHashMap<String, Object> qviCredentialBody = castObjectToLinkedHashMap(qviCredential);
                 LinkedHashMap<String, Object> sadBody = castObjectToLinkedHashMap(qviCredentialBody.get("sad"));
 
@@ -636,7 +635,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 cData.setR(sad);
                 cData.setE(e);
 
-                IssueCredentialResult result = holderClient.getCredentials().issue(holderAid.name, cData);
+                IssueCredentialResult result = holderClient.credentials().issue(holderAid.name, cData);
                 waitOperation(holderClient, result.getOp());
                 return result.getAcdc().getKed().get("d").toString();
             } catch (Exception e) {
@@ -647,7 +646,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("LE credential IPEX grant", () -> {
             String dt = createTimestamp();
             try {
-                Object leCredential = holderClient.getCredentials().get(leCredentialId);
+                Object leCredential = holderClient.credentials().get(leCredentialId);
 
                 LinkedHashMap<String, Object> leCredentialBody = castObjectToLinkedHashMap(leCredential);
                 assertTrue(!leCredentialBody.isEmpty());
@@ -665,8 +664,8 @@ public class CredentialsTest extends BaseIntegrationTest {
                 grantArgs.setRecipient(legalEntityAid.prefix);
                 grantArgs.setDatetime(dt);
 
-                Exchanging.ExchangeMessageResult result = holderClient.getIpex().grant(grantArgs);
-                Object op = holderClient.getIpex().submitGrant(
+                Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
+                Object op = holderClient.ipex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
                 );
                 waitOperation(holderClient, op);
@@ -687,8 +686,8 @@ public class CredentialsTest extends BaseIntegrationTest {
                 admitArgs.setRecipient(holderAid.prefix);
                 admitArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = legalEntityClient.getIpex().admit(admitArgs);
-                Object op = legalEntityClient.getIpex().submitAdmit(
+                Exchanging.ExchangeMessageResult result = legalEntityClient.ipex().admit(admitArgs);
+                Object op = legalEntityClient.ipex().submitAdmit(
                         legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(legalEntityClient, op);
@@ -711,7 +710,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             Object legalEntityCredential = retry(() -> {
                 try {
                     assertNotNull(leCredentialId);
-                    return legalEntityClient.getCredentials().get(leCredentialId);
+                    return legalEntityClient.credentials().get(leCredentialId);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -735,9 +734,9 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer revoke QVI credential", () -> {
             try {
-                RevokeCredentialResult revokeOperation = issuerClient.getCredentials().revoke(issuerAid.name, qviCredentialId, null);
+                RevokeCredentialResult revokeOperation = issuerClient.credentials().revoke(issuerAid.name, qviCredentialId, null);
                 waitOperation(issuerClient, revokeOperation.getOp());
-                Object issuerCredential = issuerClient.getCredentials().get(qviCredentialId);
+                Object issuerCredential = issuerClient.credentials().get(qviCredentialId);
 
                 LinkedHashMap<String, Object> issuerCredentialBody = castObjectToLinkedHashMap(issuerCredential);
                 LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(issuerCredentialBody.get("status"));

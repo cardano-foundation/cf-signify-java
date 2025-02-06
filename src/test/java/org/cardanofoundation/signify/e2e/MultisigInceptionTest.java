@@ -1,7 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.goterl.lazysodium.exceptions.SodiumException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
@@ -39,12 +39,12 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
         testSteps.step("Resolve oobis", () -> {
             try {
-                oobi1 = client1.getOobis().get("member1", "agent");
-                oobi2 = client2.getOobis().get("member2", "agent");
+                oobi1 = client1.oobis().get("member1", "agent");
+                oobi2 = client2.oobis().get("member2", "agent");
 
                 TestUtils.resolveOobi(client1, Utils.toList(Utils.toMap(oobi2).get("oobis")).getFirst(), "member2");
                 TestUtils.resolveOobi(client2, Utils.toList(Utils.toMap(oobi1).get("oobis")).getFirst(), "member1");
-            } catch (SodiumException | IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -70,7 +70,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 // Second member check notifications and join the multisig
                 List<Notification> notifications = TestUtils.waitForNotifications(client2, "/multisig/icp");
                 for (Notification note : notifications) {
-                    client2.getNotifications().mark(note.getI());
+                    client2.notifications().mark(note.getI());
                 }
 
                 String msgSaid = notifications.getLast().getA().getD();
@@ -89,10 +89,10 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 );
                 System.out.println("Multisig created!");
 
-                States.HabState multisig1 = client1.getIdentifier().get(groupName);
-                States.HabState multisig2 = client2.getIdentifier().get(groupName);
+                States.HabState multisig1 = client1.identifiers().get(groupName);
+                States.HabState multisig2 = client2.identifiers().get(groupName);
                 assertEquals(multisig1.getPrefix(), multisig2.getPrefix());
-                Object members = client1.getIdentifier().members(groupName);
+                Object members = client1.identifiers().members(groupName);
                 Map<String, Object> membersMap = Utils.toMap(members);
                 List<?> signing = (List<?>) membersMap.get("signing");
                 List<?> rotation = (List<?>) membersMap.get("rotation");
@@ -126,7 +126,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 // Second member check notifications and join the multisig
                 List<Notification> notifications = TestUtils.waitForNotifications(client2, "/multisig/icp");
                 for (Notification note : notifications) {
-                    client2.getNotifications().mark(note.getI());
+                    client2.notifications().mark(note.getI());
                 }
 
                 String msgSaid = notifications.getLast().getA().getD();

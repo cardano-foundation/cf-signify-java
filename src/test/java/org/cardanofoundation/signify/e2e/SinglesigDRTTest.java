@@ -53,7 +53,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         kargs.setDelpre(name1_id);
 
         EventResult result = delegate.identifiers().create("delegate1", kargs);
-        Operation op = Operation.fromObject(result.op());
+        Operation<?> op = Operation.fromObject(result.op());
         States.HabState delegate1 = delegate.identifiers().get("delegate1");
         opResponseName = op.getName();
 
@@ -99,7 +99,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
                 new WaitOperationArgs(delegate, op2)
         );
 
-        op = operationList.get(0);
+        op = operationList.getFirst();
         HashMap<String, String> opResponse = (HashMap<String, String>) op.getResponse();
         opResponseT = opResponse.get("t");
         opResponseS = opResponse.get("s");

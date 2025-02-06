@@ -181,7 +181,7 @@ public class Contacting {
             return Utils.fromJson(response.body(), Contact[].class);
         }
 
-        public Contact[] list() throws SodiumException, IOException, InterruptedException {
+        public Contact[] list() throws IOException, InterruptedException, LibsodiumException {
             return list(null, null, null);
         }
 

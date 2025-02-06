@@ -205,8 +205,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // Skip if a GEDA AID has already been incepted.
         States.HabState aidGEDAbyGAR1, aidGEDAbyGAR2;
         try {
-            aidGEDAbyGAR1 = clientGAR1.getIdentifier().get("GEDA");
-            aidGEDAbyGAR2 = clientGAR2.getIdentifier().get("GEDA");
+            aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA");
+            aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA");
         } catch (Exception e) {
             List<Object> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
             List<Object> states = rstates;
@@ -249,8 +249,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/icp");
 
-            aidGEDAbyGAR1 = clientGAR1.getIdentifier().get("GEDA");
-            aidGEDAbyGAR2 = clientGAR2.getIdentifier().get("GEDA");
+            aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA");
+            aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA");
         }
         assertEquals(aidGEDAbyGAR1.getPrefix(), aidGEDAbyGAR2.getPrefix());
         assertEquals(aidGEDAbyGAR1.getName(), aidGEDAbyGAR2.getName());
@@ -259,8 +259,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Add endpoint role authorization for all GARs' agents.
         // Skip if they have already been authorized.
-        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.getOobis().get(aidGEDA.getName(), "agent");
-        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.getOobis().get(aidGEDA.getName(), "agent");
+        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent");
+        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent");
 
         if (((List<String>) oobiGEDAbyGAR1.get("oobis")).size() == 0 || ((List<String>) oobiGEDAbyGAR2.get("oobis")).size() == 0) {
             String timestamp = TestUtils.createTimestamp();
@@ -292,8 +292,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/rpy");
 
-            oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.getOobis().get(aidGEDA.getName(), "agent");
-            oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.getOobis().get(aidGEDA.getName(), "agent");
+            oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent");
+            oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent");
         }
         assertEquals(oobiGEDAbyGAR1.get("role"), oobiGEDAbyGAR2.get("role"));
         assertEquals(getOobisIndexAt0(oobiGEDAbyGAR1), getOobisIndexAt0(oobiGEDAbyGAR2));
@@ -314,9 +314,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // Skip if a QVI AID has already been incepted.
         States.HabState aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
         try {
-            aidQVIbyQAR1 = clientQAR1.getIdentifier().get("QVI");
-            aidQVIbyQAR2 = clientQAR2.getIdentifier().get("QVI");
-            aidQVIbyQAR3 = clientQAR3.getIdentifier().get("QVI");
+            aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI");
+            aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI");
+            aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI");
         } catch (Exception exception) {
             List<Object> rstates = List.of(aidQAR1.getState(), aidQAR2.getState(), aidQAR3.getState());
             List<Object> states = List.copyOf(rstates);
@@ -399,9 +399,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/ixn");
 
             // QARs query the GEDA's key state
-            Object queryOp1 = clientQAR1.getKeyStates().query(aidGEDA.getPrefix(), "1");
-            Object queryOp2 = clientQAR2.getKeyStates().query(aidGEDA.getPrefix(), "1");
-            Object queryOp3 = clientQAR3.getKeyStates().query(aidGEDA.getPrefix(), "1");
+            Object queryOp1 = clientQAR1.keyStates().query(aidGEDA.getPrefix(), "1");
+            Object queryOp2 = clientQAR2.keyStates().query(aidGEDA.getPrefix(), "1");
+            Object queryOp3 = clientQAR3.keyStates().query(aidGEDA.getPrefix(), "1");
 
             waitOperationAsync(
                     new WaitOperationArgs(clientQAR1, multisigAIDOp1),
@@ -414,9 +414,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/icp");
 
-            aidQVIbyQAR1 = clientQAR1.getIdentifier().get("QVI");
-            aidQVIbyQAR2 = clientQAR2.getIdentifier().get("QVI");
-            aidQVIbyQAR3 = clientQAR3.getIdentifier().get("QVI");
+            aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI");
+            aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI");
+            aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI");
         }
         assertEquals(aidQVIbyQAR1.getPrefix(), aidQVIbyQAR2.getPrefix());
         assertEquals(aidQVIbyQAR1.getPrefix(), aidQVIbyQAR3.getPrefix());
@@ -508,8 +508,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // GARs creates a registry for GEDA.
         // Skip if the registry has already been created.
-        List<Map<String, Object>> gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.getRegistries().list(aidGEDA.getName());
-        List<Map<String, Object>> gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.getRegistries().list(aidGEDA.getName());
+        List<Map<String, Object>> gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
+        List<Map<String, Object>> gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
 
         if (gedaRegistrybyGAR1.size() == 0 && gedaRegistrybyGAR2.size() == 0) {
             String nonce = Coring.randomNonce();
@@ -539,8 +539,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/vcp");
-            gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.getRegistries().list(aidGEDA.getName());
-            gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.getRegistries().list(aidGEDA.getName());
+            gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
+            gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
         }
         assertEquals(gedaRegistrybyGAR1.get(0).get("name"), gedaRegistrybyGAR2.get(0).get("name"));
         assertEquals(gedaRegistrybyGAR1.get(0).get("regk"), gedaRegistrybyGAR2.get(0).get("regk"));
@@ -714,9 +714,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // Skip if a LE AID has already been incepted.
         States.HabState aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
         try {
-            aidLEbyLAR1 = clientLAR1.getIdentifier().get("LE");
-            aidLEbyLAR2 = clientLAR2.getIdentifier().get("LE");
-            aidLEbyLAR3 = clientLAR3.getIdentifier().get("LE");
+            aidLEbyLAR1 = clientLAR1.identifiers().get("LE");
+            aidLEbyLAR2 = clientLAR2.identifiers().get("LE");
+            aidLEbyLAR3 = clientLAR3.identifiers().get("LE");
         } catch (Exception e) {
             List<Object> rstates = List.of(aidLAR1.getState(), aidLAR2.getState(), aidLAR3.getState());
             List<Object> states = List.copyOf(rstates);
@@ -770,9 +770,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/icp");
 
-            aidLEbyLAR1 = clientLAR1.getIdentifier().get("LE");
-            aidLEbyLAR2 = clientLAR2.getIdentifier().get("LE");
-            aidLEbyLAR3 = clientLAR3.getIdentifier().get("LE");
+            aidLEbyLAR1 = clientLAR1.identifiers().get("LE");
+            aidLEbyLAR2 = clientLAR2.identifiers().get("LE");
+            aidLEbyLAR3 = clientLAR3.identifiers().get("LE");
         }
         assertEquals(aidLEbyLAR1.getPrefix(), aidLEbyLAR2.getPrefix());
         assertEquals(aidLEbyLAR1.getPrefix(), aidLEbyLAR3.getPrefix());
@@ -863,9 +863,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // QARs creates a registry for QVI AID.
         // Skip if the registry has already been created.
-        List<Object> qviRegistrybyQAR1 = (List<Object>) clientQAR1.getRegistries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR2 = (List<Object>) clientQAR2.getRegistries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR3 = (List<Object>) clientQAR3.getRegistries().list(aidQVI.getName());
+        List<Object> qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
+        List<Object> qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
+        List<Object> qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
         if (qviRegistrybyQAR1.size() == 0 || qviRegistrybyQAR2.size() == 0 || qviRegistrybyQAR3.size() == 0) {
             String nonce = Coring.randomNonce();
             Object registryOp1 = MultisigUtils.createRegistryMultisig(
@@ -905,9 +905,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/vcp");
-            qviRegistrybyQAR1 = (List<Object>) clientQAR1.getRegistries().list(aidQVI.getName());
-            qviRegistrybyQAR2 = (List<Object>) clientQAR2.getRegistries().list(aidQVI.getName());
-            qviRegistrybyQAR3 = (List<Object>) clientQAR3.getRegistries().list(aidQVI.getName());
+            qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
+            qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
+            qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
         }
         assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR2.get(0)).get("name"));
         assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR3.get(0)).get("name"));
@@ -1127,9 +1127,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // LARs creates a registry for LE AID.
         // Skip if the registry has already been created.
-        List<Object> leRegistrybyLAR1 = (List<Object>) clientLAR1.getRegistries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR2 = (List<Object>) clientLAR2.getRegistries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR3 = (List<Object>) clientLAR3.getRegistries().list(aidLE.getName());
+        List<Object> leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
+        List<Object> leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
+        List<Object> leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
 
         if (leRegistrybyLAR1.isEmpty() && leRegistrybyLAR2.isEmpty() && leRegistrybyLAR3.isEmpty()) {
             String nonce = Coring.randomNonce();
@@ -1170,9 +1170,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/vcp");
-            leRegistrybyLAR1 = (List<Object>) clientLAR1.getRegistries().list(aidLE.getName());
-            leRegistrybyLAR2 = (List<Object>) clientLAR2.getRegistries().list(aidLE.getName());
-            leRegistrybyLAR3 = (List<Object>) clientLAR3.getRegistries().list(aidLE.getName());
+            leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
+            leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
+            leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
         }
         assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR2.get(0)).get("name"));
         assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR3.get(0)).get("name"));

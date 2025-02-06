@@ -26,8 +26,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.cardanofoundation.signify.core.States.convertToStates;
-
 public class Keeping {
     // External module interface
     public interface ExternalModuleType {

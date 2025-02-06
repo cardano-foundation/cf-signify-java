@@ -76,7 +76,7 @@ public class CoringTest extends BaseMockServerTest {
         request = mockWebServer.takeRequest();
         assertEquals("POST", request.getMethod());
         assertEquals(url + "/queries", request.getRequestUrl().toString());
-
+        
         Map<String, Object> data = objectMapper.readValue(request.getBody().readUtf8(), new TypeReference<>() {});
         assertEquals("EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX", data.get("pre"));
         assertEquals("1", data.get("sn"));

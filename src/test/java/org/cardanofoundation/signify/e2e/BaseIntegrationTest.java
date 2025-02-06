@@ -122,7 +122,7 @@ public class BaseIntegrationTest {
     static CompletableFuture<Object> getOobisFuture(SignifyClient client, String name, String role) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return client.getOobis().get(name, role);
+                return client.oobis().get(name, role);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -132,7 +132,7 @@ public class BaseIntegrationTest {
     static CompletableFuture<Object> getKeyStateFuture(SignifyClient client, String pre, String sn) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return client.getKeyStates().query(pre, sn);
+                return client.keyStates().query(pre, sn);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

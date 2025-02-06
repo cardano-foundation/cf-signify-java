@@ -139,8 +139,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 new WaitOperationArgs(delegator2Client, otor2)
         );
 
-        States.HabState adelegatorGroupName1 = delegator1Client.getIdentifier().get(delegatorGroupName);
-        States.HabState adelegatorGroupName2 = delegator2Client.getIdentifier().get(delegatorGroupName);
+        States.HabState adelegatorGroupName1 = delegator1Client.identifiers().get(delegatorGroupName);
+        States.HabState adelegatorGroupName2 = delegator2Client.identifiers().get(delegatorGroupName);
 
         assertEquals(adelegatorGroupName1.getPrefix(), adelegatorGroupName2.getPrefix());
         assertEquals(adelegatorGroupName1.getName(), adelegatorGroupName2.getName());
@@ -175,8 +175,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
                 TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
 
-                Map<String, Object> odelegatorGroupName1 = (Map<String, Object>) delegator1Client.getOobis().get(adelegatorGroupName.getName(), "agent");
-                Map<String, Object> odelegatorGroupName2 = (Map<String, Object>) delegator2Client.getOobis().get(adelegatorGroupName.getName(), "agent");
+                Map<String, Object> odelegatorGroupName1 = (Map<String, Object>) delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent");
+                Map<String, Object> odelegatorGroupName2 = (Map<String, Object>) delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent");
 
                 assertEquals(odelegatorGroupName1.get("role"), odelegatorGroupName2.get("role"));
 
@@ -235,8 +235,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         Object opDelegatee2 = MultisigUtils.acceptMultisigIncept(delegatee2Client, acceptMultisigInceptArgs);
         System.out.println(delegatee2Name + " joined multisig, waiting for delegator...");
 
-        States.HabState agtee1 = delegatee1Client.getIdentifier().get(delegateeGroupName);
-        States.HabState agtee2 = delegatee2Client.getIdentifier().get(delegateeGroupName);
+        States.HabState agtee1 = delegatee1Client.identifiers().get(delegateeGroupName);
+        States.HabState agtee2 = delegatee2Client.identifiers().get(delegateeGroupName);
 
         assertEquals(agtee1.getPrefix(), agtee2.getPrefix());
         assertEquals(agtee1.getName(), agtee2.getName());
@@ -282,8 +282,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
             }
         });
 
-        Object queryOp1 = delegator1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
-        Object queryOp2 = delegator2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object queryOp1 = delegator1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object queryOp2 = delegator2Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
         waitOperationAsync(
                 new WaitOperationArgs(delegator1Client, queryOp1),
@@ -291,8 +291,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         );
 
         // QARs query the GEDA's key state
-        Object ksteetor1 = delegatee1Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
-        Object ksteetor2 = delegatee2Client.getKeyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object ksteetor1 = delegatee1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object ksteetor2 = delegatee2Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
         waitOperationAsync(
                 new WaitOperationArgs(delegatee1Client, ksteetor1),
@@ -302,7 +302,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         );
         System.out.println("Delegated multisig created!");
 
-        States.HabState agtee = delegatee1Client.getIdentifier().get(delegateeGroupName);
+        States.HabState agtee = delegatee1Client.identifiers().get(delegateeGroupName);
         assertEquals(agtee.getPrefix(), teepre);
 
         List<SignifyClient> clients = Arrays.asList(

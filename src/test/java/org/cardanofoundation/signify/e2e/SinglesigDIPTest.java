@@ -50,7 +50,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
         EventResult result = client2.identifiers().create("delegate1", kargs);
-        Operation op = Operation.fromObject(result.op());
+        Operation<?> op = Operation.fromObject(result.op());
         States.HabState delegate1 = client2.identifiers().get("delegate1");
         opResponseName = op.getName();
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
@@ -72,7 +72,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
                 new WaitOperationArgs(client1, op1),
                 new WaitOperationArgs(client2, op2)
         );
-        op = opList.get(0);
+        op = opList.getFirst();
 
         HashMap<String, Object> responseMap = (HashMap<String, Object>) op.getResponse();
         opResponseI = responseMap.get("i").toString();
@@ -109,7 +109,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
                 new WaitOperationArgs(client1, op1),
                 new WaitOperationArgs(client2, op2)
         );
-        op = opList.get(0);
+        op = opList.getFirst();
 
         responseMap = (HashMap<String, Object>) op.getResponse();
         opResponseI = responseMap.get("i").toString();

@@ -91,9 +91,9 @@ public class TestUtils {
         }
     }
 
-    public static void assertNotifications(List<SignifyClient> clients) throws Exception {
+    public static void assertNotifications(List<SignifyClient> clients) throws LibsodiumException, IOException, InterruptedException {
         for (SignifyClient client : clients) {
-            Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
+            Notifying.Notifications.NotificationListResponse res = client.notifications().list();
             String notesResponse = res.notes();
             List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {
             });
@@ -137,7 +137,7 @@ public class TestUtils {
             States.HabState issuerAid,
             States.HabState recipientAid,
             String schemaSAID
-    ) throws SodiumException, IOException, InterruptedException {
+    ) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> filter = new LinkedHashMap<>() {{
             put("-i", issuerAid.getPrefix());
             put("-s", schemaSAID);
@@ -146,7 +146,7 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder()
                 .filter(filter)
                 .build();
-        List<Object> credentialList = (List<Object>) issuerClient.getCredentials().list(credentialFilter);
+        List<Object> credentialList = (List<Object>) issuerClient.credentials().list(credentialFilter);
         assert credentialList.size() <= 1;
         return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
@@ -322,7 +322,7 @@ public class TestUtils {
     ) throws Exception {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
 
-        Object credentialList = issuerClient.getCredentials().list(credentialFilter);
+        Object credentialList = issuerClient.credentials().list(credentialFilter);
         if (credentialList instanceof List && !((List<?>) credentialList).isEmpty()) {
             Optional<?> credential = ((List<?>) credentialList).stream()
                     .filter(cred -> {
@@ -353,9 +353,9 @@ public class TestUtils {
         cData.setR(rules);
         cData.setE(source);
 
-        IssueCredentialResult issResult = issuerClient.getCredentials().issue(issuerAid.name, cData);
+        IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
         waitOperation(issuerClient, issResult.getOp());
-        Object credential = issuerClient.getCredentials().get(issResult.getAcdc().getKed().get("d").toString());
+        Object credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString());
 
         return credential;
     }
@@ -396,7 +396,7 @@ public class TestUtils {
     public static void warnNotifications(List<SignifyClient> clients) throws Exception {
         int count = 0;
         for (SignifyClient client : clients) {
-            Notifying.Notifications.NotificationListResponse res = client.getNotifications().list();
+            Notifying.Notifications.NotificationListResponse res = client.notifications().list();
             String notesResponse = res.notes();
             List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {
             });
@@ -416,7 +416,7 @@ public class TestUtils {
         client.operations().delete(op.getName());
     }
 
-    public static void deleteOperation(SignifyClient client, String name) throws SodiumException, IOException, InterruptedException {
+    public static void deleteOperation(SignifyClient client, String name) throws IOException, InterruptedException, LibsodiumException {
         client.operations().delete(name);
     }
 
@@ -427,7 +427,7 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
         credentialFilter.setFilter(filter);
 
-        Object credentialList = client.getCredentials().list(credentialFilter);
+        Object credentialList = client.credentials().list(credentialFilter);
         ArrayList<String> credentialListBody = (ArrayList<String>) credentialList;
 
         Object credential = null;
@@ -440,20 +440,20 @@ public class TestUtils {
 
     public static void markAndRemoveNotification(SignifyClient client, Notification note) {
         try {
-            client.getNotifications().mark(note.i);
+            client.notifications().mark(note.i);
         } catch (Exception e) {
             throw new RuntimeException("Error marking notification: " + note.i, e);
         } finally {
             try {
-                client.getNotifications().delete(note.i);
+                client.notifications().delete(note.i);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public static void markNotification(SignifyClient client, Notification note) throws SodiumException, IOException, InterruptedException {
-        client.getNotifications().mark(note.getI());
+    public static void markNotification(SignifyClient client, Notification note) throws IOException, InterruptedException, LibsodiumException {
+        client.notifications().mark(note.getI());
     }
 
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
@@ -511,10 +511,9 @@ public class TestUtils {
     public static List<Notification> waitForNotifications(SignifyClient client, String route, Retry.RetryOptions retryOptions) throws Exception {
         return retry(() -> {
             try {
-                Notifying.Notifications.NotificationListResponse response = client.getNotifications().list();
+                Notifying.Notifications.NotificationListResponse response = client.notifications().list();
                 String notesResponse = response.notes();
-                List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<List<Notification>>() {
-                });
+                List<Notification> notes = Utils.fromJson(notesResponse, new TypeReference<>() {});
 
                 filteredNotes = notes.stream()
                         .filter(note -> Objects.equals(route, note.a.r) && !Boolean.TRUE.equals(note.r))

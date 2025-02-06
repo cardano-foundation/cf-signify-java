@@ -31,18 +31,15 @@ public class Delegating {
          * @throws Exception if the fetch operation fails
          */
         public EventResult approve(String name, Object data) throws LibsodiumException, DigestException, IOException, InterruptedException {
-            InteractionResponse interactionResponse = null;
-            HttpResponse<String> res = null;
-            try {
-                interactionResponse = this.client.identifiers().createInteract(name, data);
-                res = this.client.fetch(
-                    "/identifiers/" + name + "/delegation",
-                    "POST",
-                    interactionResponse.jsondata()
-                );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            InteractionResponse interactionResponse = this.client
+                .identifiers()
+                .createInteract(name, data);
+
+            HttpResponse<String> res = this.client.fetch(
+                "/identifiers/" + name + "/delegation",
+                "POST",
+                interactionResponse.jsondata()
+            );
             return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), res);
         }
 

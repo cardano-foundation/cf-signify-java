@@ -48,7 +48,7 @@ public class RandyTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
         EventResult icpResult = client1.identifiers().create("aid1", kargs);
-        Operation op = Operation.fromObject(waitOperation(client1, icpResult.op()));
+        Operation<?> op = Operation.fromObject(waitOperation(client1, icpResult.op()));
 
         opResponse = (HashMap<String, Object>) op.getResponse();
         opResponseDone = op.isDone() ? "true" : "false";

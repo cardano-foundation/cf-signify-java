@@ -48,7 +48,7 @@ public class Notifying {
                 range.start(),
                 range.end(),
                 range.total(),
-                notes
+                notes.toString()
             );
         }
 
