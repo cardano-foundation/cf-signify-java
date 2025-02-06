@@ -1,7 +1,19 @@
 # cf-signify-java
 
 ## Overview
-This project is built using Java 21 and Gradle. 
+This project is a Java implementation of **Signify**, a library designed for "signing at the edge" within the **KERI (Key Event Receipt Infrastructure)** ecosystem. It is based on the TypeScript implementation [signify-ts](https://github.com/WebOfTrust/signify-ts) and provides similar functionality for Java developers.
+
+Signify focuses on two key functions of a KERI agent:
+1. **Key generation**: Generating cryptographic key pairs for signing and encryption.
+2. **Event signing**: Signing KERI events using the generated keys.
+
+The library uses **libsodium** for cryptographic operations, including generating Ed25519 key pairs for signing and X25519 key pairs for encrypting private keys. The encrypted keys are stored remotely, ensuring that the private keys are never exposed to the cloud agent.
+
+This project is built using **Java 21** and **Gradle** as the build tool.
+
+**Note:** For an example of how this library can be used in a backend, check out [cf-signify-java-example](https://github.com/cardano-foundation/cf-signify-java-example). This repository provides a practical implementation reference for those interested in using `cf-signify-java` in real-world applications.
+
+---
 
 ## Prerequisites
 - **Java 21**: Ensure you have Java 21 installed. You can verify your Java version by running:

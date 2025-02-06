@@ -13,7 +13,7 @@ repositories {
 }
 
 group = 'org.cardanofoundation'
-version = '1.0-SNAPSHOT'
+version = '0.1.0'
 
 def commit_id = getCheckedOutGitCommitHash()
 if (project.version.endsWith("-SNAPSHOT")) {
