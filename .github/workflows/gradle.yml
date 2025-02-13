@@ -11,70 +11,70 @@ on:
   workflow_dispatch:
 
 jobs:
-#  unit-tests:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Set up JDK
-#        uses: actions/setup-java@v4
-#        with:
-#          distribution: 'temurin'
-#          java-version: '21'
-#
-#      - name: Set up Gradle
-#        uses: gradle/actions/setup-gradle@v4
-#
-#      - name: Run Unit Tests
-#        run: ./gradlew test
-#
-#      - name: Generate Allure Report for Unit Tests
-#        run: ./gradlew allureReport
-#
-#      - name: Upload Unit Test Reports (Allure)
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: allure-unit-test-report
-#          path: build/reports/allure-report/allureReport
+  unit-tests:
+    runs-on: ubuntu-latest
 
-#  e2e-tests:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Set up JDK
-#        uses: actions/setup-java@v4
-#        with:
-#          distribution: 'temurin'
-#          java-version: '21'
-#
-#      - name: Set up Gradle
-#        uses: gradle/actions/setup-gradle@v4
-#
-#      - name: Run Docker Compose (Spin up services)
-#        run: docker compose up -d
-#
-#      - name: Run E2E Tests
-#        run: ./gradlew testE2E
-#
-#      - name: Generate Allure Report for Unit Tests
-#        run: ./gradlew allureReport
-#
-#      - name: Upload Unit Test Reports (Allure)
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: allure-e2e-test-report
-#          path: build/reports/allure-report/allureReport
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+      - name: Generate Allure Report for Unit Tests
+        run: ./gradlew allureReport
+
+      - name: Upload Unit Test Reports (Allure)
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-unit-test-report
+          path: build/reports/allure-report/allureReport
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run Docker Compose (Spin up services)
+        run: docker compose up -d
+
+      - name: Run E2E Tests
+        run: ./gradlew testE2E
+
+      - name: Generate Allure Report for Unit Tests
+        run: ./gradlew allureReport
+
+      - name: Upload Unit Test Reports (Allure)
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-e2e-test-report
+          path: build/reports/allure-report/allureReport
 
   publish-to-maven:
     runs-on: ubuntu-latest
-#    needs:
-#      - unit-tests
-#      - e2e-tests
+    needs:
+      - unit-tests
+      - e2e-tests
 
     steps:
       - name: Checkout code
