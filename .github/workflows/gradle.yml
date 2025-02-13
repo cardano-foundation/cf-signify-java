@@ -72,7 +72,7 @@ jobs:
 
   publish-to-maven:
     runs-on: ubuntu-latest
-    needs:
+#    needs:
 #      - unit-tests
 #      - e2e-tests
 
