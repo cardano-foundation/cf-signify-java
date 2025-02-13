@@ -2,13 +2,17 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 if (!name.equalsIgnoreCase("components")) {
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
 
-                withJavadocJar()
-                withSourcesJar()
+                artifact(javadocJar)
+                artifact(sourcesJar)
 
                 artifactId 'signify'
 
