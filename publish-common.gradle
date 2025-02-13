@@ -2,6 +2,15 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 if (!name.equalsIgnoreCase("components")) {
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+    javadoc {
+        options {
+            failOnError false
+        }
+    }
     publishing {
         publications {
             mavenJava(MavenPublication) {
@@ -10,6 +19,8 @@ if (!name.equalsIgnoreCase("components")) {
                 artifactId 'signify'
 
                 pom {
+                    name = 'signify'
+                    description = 'Signify is an edge client for the KERI and ACDC identity protocols.'
                     url = 'https://github.com/cardanofoundation/cf-signify-java'
                     licenses {
                         license {
@@ -53,6 +64,7 @@ ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 if (isReleaseVersion && !project.hasProperty("skipSigning")) {
     signing {
+        useGpgCmd()
         sign publishing.publications
     }
 }
