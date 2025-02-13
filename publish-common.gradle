@@ -20,7 +20,7 @@ if (!name.equalsIgnoreCase("components")) {
 
                 pom {
                     name = 'signify'
-                    description = 'signify is a Java library for verifying signed messages.'
+                    description = 'Signify is an edge client for the KERI and ACDC identity protocols.'
                     url = 'https://github.com/cardanofoundation/cf-signify-java'
                     licenses {
                         license {
