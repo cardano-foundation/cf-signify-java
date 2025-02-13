@@ -17,7 +17,6 @@ if (!name.equalsIgnoreCase("components")) {
                 from components.java
 
                 artifact(javadocJar)
-                artifact(sourcesJar)
 
                 artifactId 'signify'
 
