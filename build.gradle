@@ -186,3 +186,22 @@ tasks.register('allureE2ETestReport') {
 tasks.named('allureReport') {
     enabled = false
 }
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadoc(type: Javadoc) {
+    // configure your javadoc options here, e.g.:
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+tasks.assemble.dependsOn(tasks.sourcesJar)
+tasks.assemble.dependsOn(tasks.javadoc)
+tasks.assemble.dependsOn(tasks.javadocJar)
