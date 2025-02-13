@@ -8,6 +8,8 @@ if (!name.equalsIgnoreCase("components")) {
                 from components.java
 
                 artifactId 'signify'
+                name 'Signify'
+                description 'Signify is a Java library for verifying signed messages.'
 
                 pom {
                     url = 'https://github.com/cardanofoundation/cf-signify-java'
