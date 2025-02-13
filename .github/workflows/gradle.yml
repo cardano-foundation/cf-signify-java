@@ -106,7 +106,7 @@ jobs:
       - name: Publish package
         run: |
           ./gradlew publish \
-            "-Psigning.gnupg.keyName=AF79A015" \
+            "-Psigning.gnupg.keyId=BEFB6B63A980310BB92A65365E362818AF79A015" \
             "-Psigning.gnupg.passphrase=${{ secrets.MAVEN_CENTRAL_GPG_PASSPHRASE }}" \
             "-Psigning.secretKeyRingFile=${HOME}/.gradle/secring.gpg" \
         env:
