@@ -6,6 +6,11 @@ if (!name.equalsIgnoreCase("components")) {
         withJavadocJar()
         withSourcesJar()
     }
+    javadoc {
+        options {
+            failOnError false
+        }
+    }
     publishing {
         publications {
             mavenJava(MavenPublication) {
