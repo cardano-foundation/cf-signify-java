@@ -16,8 +16,6 @@ if (!name.equalsIgnoreCase("components")) {
             mavenJava(MavenPublication) {
                 from components.java
 
-                artifact(javadocJar)
-
                 artifactId 'signify'
 
                 pom {
