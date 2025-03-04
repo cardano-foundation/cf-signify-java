@@ -65,7 +65,7 @@ public class Credentials {
 
         Map<String, String> extraHeaders = new LinkedHashMap<>();
         if (includeCESR) {
-            extraHeaders.put("Accept", "application/cesr+json");
+            extraHeaders.put("Accept", "application/json+cesr");
         } else {
             extraHeaders.put("Accept", "application/json");
         }
@@ -164,10 +164,7 @@ public class Credentials {
         body.put("sigs", sigs);
         body.put(keeper.getAlgo().getValue(), keeper.getParams().toMap());
 
-        Map<String, String> extraHeaders = new LinkedHashMap<>();
-        extraHeaders.put("Accept", "application/json+cesr");
-
-        HttpResponse<String> response = this.client.fetch(path, method, body, extraHeaders);
+        HttpResponse<String> response = this.client.fetch(path, method, body);
         Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
 
         return new IssueCredentialResult(new Serder(acdc), new Serder(iss), anc, op);
@@ -242,10 +239,7 @@ public class Credentials {
 
         String path = "/identifiers/" + name + "/credentials/" + said;
         String method = "DELETE";
-        Map<String, String> extraHeaders = new LinkedHashMap<>();
-        extraHeaders.put("Accept", "application/json+cesr");
-
-        HttpResponse<String> response = this.client.fetch(path, method, body, extraHeaders);
+        HttpResponse<String> response = this.client.fetch(path, method, body);
         Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
 
         return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
