@@ -22,7 +22,7 @@ if (!name.equalsIgnoreCase("components")) {
                 pom {
                     name = 'signify'
                     description = 'Signify is an edge client for the KERI and ACDC identity protocols.'
-                    url = 'https://github.com/cardanofoundation/cf-signify-java'
+                    url = 'https://github.com/cardano-foundation/cf-signify-java'
                     licenses {
                         license {
                             name = 'Apache License 2.0'
@@ -36,9 +36,9 @@ if (!name.equalsIgnoreCase("components")) {
                         }
                     }
                     scm {
-                        connection = 'scm:git:git://github.com/cardanofoundation/cf-signify-java'
-                        developerConnection = 'scm:git:ssh://git@github.com/cardanofoundation/cf-signify-java'
-                        url = 'https://github.com/cardanofoundation/cf-signify-java'
+                        connection = 'scm:git:git://github.com/cardano-foundation/cf-signify-java'
+                        developerConnection = 'scm:git:ssh://git@github.com/cardano-foundation/cf-signify-java'
+                        url = 'https://github.com/cardano-foundation/cf-signify-java'
                     }
                 }
             }
@@ -46,8 +46,21 @@ if (!name.equalsIgnoreCase("components")) {
 
         repositories {
             maven {
-                name = "build"
-                url = rootProject.projectDir.path + "/build/staging-deploy"
+                name = 'build'
+                url = rootProject.projectDir.path + '/build/staging-deploy'
+            }
+
+            if (version.endsWith('SNAPSHOT')) {
+                String mavenCentralUsername = System.getenv('JRELEASER_MAVENCENTRAL_USERNAME')
+                String mavenCentralPassword = System.getenv('JRELEASER_MAVENCENTRAL_PASSWORD')
+                maven {
+                    name = 'mavenCentralSnapshot'
+                    url = 'https://central.sonatype.com/repository/maven-snapshots/'
+                    credentials {
+                        username mavenCentralUsername
+                        password mavenCentralPassword
+                    }
+                }
             }
         }
     }
@@ -65,7 +78,6 @@ if (!name.equalsIgnoreCase("components")) {
                         active = "ALWAYS"
                         url = "https://central.sonatype.com/api/v1/publisher"
                         applyMavenCentralRules = true
-                        snapshotSupported = true
                         stagingRepository("build/staging-deploy")
                     }
                 }
