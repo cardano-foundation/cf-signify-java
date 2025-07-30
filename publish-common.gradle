@@ -54,8 +54,8 @@ if (!name.equalsIgnoreCase("components")) {
                 String mavenCentralUsername = System.getenv('JRELEASER_MAVENCENTRAL_USERNAME')
                 String mavenCentralPassword = System.getenv('JRELEASER_MAVENCENTRAL_PASSWORD')
                 maven {
-                    name = 'mavenCentralSnapshot'
-                    url = 'https://central.sonatype.com/repository/maven-snapshots/'
+                    name 'mavenCentralSnapshot'
+                    url 'https://central.sonatype.com/repository/maven-snapshots/'
                     credentials {
                         username mavenCentralUsername
                         password mavenCentralPassword
@@ -68,17 +68,17 @@ if (!name.equalsIgnoreCase("components")) {
 
     jreleaser {
         signing {
-            active = "ALWAYS"
-            mode = "COMMAND"
+            active = 'ALWAYS'
+            mode = 'COMMAND'
         }
         deploy {
             maven {
                 mavenCentral {
-                    create("release-deploy") {
-                        active = "ALWAYS"
-                        url = "https://central.sonatype.com/api/v1/publisher"
+                    create('release-deploy') {
+                        active = 'ALWAYS'
+                        url = 'https://central.sonatype.com/api/v1/publisher'
                         applyMavenCentralRules = true
-                        stagingRepository("build/staging-deploy")
+                        stagingRepository('build/staging-deploy')
                     }
                 }
             }
