@@ -3,6 +3,7 @@ plugins {
     id 'java'
     id 'io.qameta.allure' version '2.11.2'
     id 'org.ajoberstar.grgit' version '5.2.0'
+    id 'org.jreleaser' version '1.19.0'
 }
 
 repositories {
@@ -13,7 +14,7 @@ repositories {
 }
 
 group = 'org.cardanofoundation'
-version = '0.1.0'
+version = '0.1.1-SNAPSHOT'
 
 def commit_id = getCheckedOutGitCommitHash()
 if (project.version.endsWith("-SNAPSHOT")) {
