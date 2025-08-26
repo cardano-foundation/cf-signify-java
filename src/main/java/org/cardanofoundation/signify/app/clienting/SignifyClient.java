@@ -61,6 +61,24 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private String bootUrl;
     private List<ExternalModule> externalModules;
 
+    private Identifier identifierInstance;
+    private Oobis oobisInstance;
+    private Operations operationsInstance;
+    private KeyEvents keyEventsInstance;
+    private KeyStates keyStatesInstance;
+    private Credentials credentialsInstance;
+    private Ipex ipexInstance;
+    private Registries registriesInstance;
+    private Schemas schemasInstance;
+    private Challenges challengesInstance;
+    private Contacts contactsInstance;
+    private Notifications notificationsInstance;
+    private Escrows escrowsInstance;
+    private Groups groupsInstance;
+    private Exchanges exchangesInstance;
+    private Delegations delegationsInstance;
+    private Config configInstance;
+
     private static final String DEFAULT_BOOT_URL = "http://localhost:3903";
 
     /**
@@ -353,7 +371,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Identifier}
      */
     public Identifier identifiers() {
-        return new Identifier(this);
+        if (identifierInstance == null) {
+            identifierInstance = new Identifier(this);
+        }
+        return identifierInstance;
     }
 
     /**
@@ -362,7 +383,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Oobis}
      */
     public Oobis oobis() {
-        return new Oobis(this);
+        if (oobisInstance == null) {
+            oobisInstance = new Oobis(this);
+        }
+        return oobisInstance;
     }
 
     /**
@@ -371,7 +395,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Operations}
      */
     public Operations operations() {
-        return new Operations(this);
+        if (operationsInstance == null) {
+            operationsInstance = new Operations(this);
+        }
+        return operationsInstance;
     }
 
     /**
@@ -380,7 +407,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {KeyEvents}
      */
     public KeyEvents keyEvents() {
-        return new KeyEvents(this);
+        if (keyEventsInstance == null) {
+            keyEventsInstance = new KeyEvents(this);
+        }
+        return keyEventsInstance;
     }
 
     /**
@@ -389,7 +419,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {KeyStates}
      */
     public KeyStates keyStates() {
-        return new KeyStates(this);
+        if (keyStatesInstance == null) {
+            keyStatesInstance = new KeyStates(this);
+        }
+        return keyStatesInstance;
     }
 
     /**
@@ -398,7 +431,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Credentials}
      */
     public Credentials credentials() {
-        return new Credentials(this);
+        if (credentialsInstance == null) {
+            credentialsInstance = new Credentials(this);
+        }
+        return credentialsInstance;
     }
 
     /**
@@ -407,7 +443,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Ipex}
      */
     public Ipex ipex() {
-        return new Ipex(this);
+        if (ipexInstance == null) {
+            ipexInstance = new Ipex(this);
+        }
+        return ipexInstance;
     }
 
     /**
@@ -416,7 +455,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Registries}
      */
     public Registries registries() {
-        return new Registries(this);
+        if (registriesInstance == null) {
+            registriesInstance = new Registries(this);
+        }
+        return registriesInstance;
     }
 
     /**
@@ -425,7 +467,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Schemas}
      */
     public Schemas schemas() {
-        return new Schemas(this);
+        if (schemasInstance == null) {
+            schemasInstance = new Schemas(this);
+        }
+        return schemasInstance;
     }
 
     /**
@@ -434,7 +479,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Challenges}
      */
     public Challenges challenges() {
-        return new Challenges(this);
+        if (challengesInstance == null) {
+            challengesInstance = new Challenges(this);
+        }
+        return challengesInstance;
     }
 
     /**
@@ -443,7 +491,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Contacts}
      */
     public Contacts contacts() {
-        return new Contacts(this);
+        if (contactsInstance == null) {
+            contactsInstance = new Contacts(this);
+        }
+        return contactsInstance;
     }
 
     /**
@@ -452,7 +503,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Notifications}
      */
     public Notifications notifications() {
-        return new Notifications(this);
+        if (notificationsInstance == null) {
+            notificationsInstance = new Notifications(this);
+        }
+        return notificationsInstance;
     }
 
     /**
@@ -461,7 +515,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Escrows}
      */
     public Escrows escrows() {
-        return new Escrows(this);
+        if (escrowsInstance == null) {
+            escrowsInstance = new Escrows(this);
+        }
+        return escrowsInstance;
     }
 
     /**
@@ -470,7 +527,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Groups}
      */
     public Groups groups() {
-        return new Groups(this);
+        if (groupsInstance == null) {
+            groupsInstance = new Groups(this);
+        }
+        return groupsInstance;
     }
 
     /**
@@ -479,7 +539,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Exchanges}
      */
     public Exchanges exchanges() {
-        return new Exchanges(this);
+        if (exchangesInstance == null) {
+            exchangesInstance = new Exchanges(this);
+        }
+        return exchangesInstance;
     }
 
     /**
@@ -488,7 +551,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Delegations}
      */
     public Delegations delegations() {
-        return new Delegations(this);
+        if (delegationsInstance == null) {
+            delegationsInstance = new Delegations(this);
+        }
+        return delegationsInstance;
     }
 
     /**
@@ -497,7 +563,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @return {Config}
      */
     public Config config() {
-        return new Config(this);
+        if (configInstance == null) {
+            configInstance = new Config(this);
+        }
+        return configInstance;
     }
 
     @Getter
