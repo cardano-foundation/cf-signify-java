@@ -7,6 +7,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
@@ -15,6 +16,7 @@ import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.concurrent.ExecutionException;
 
@@ -64,7 +66,8 @@ public class Contacting {
          * @throws Exception if the fetch operation fails
          */
         public Object respond(String name, String recipient, List<String> words) throws IOException, InterruptedException, DigestException, ExecutionException, LibsodiumException {
-            States.HabState hab = this.client.identifiers().get(name);
+            States.HabState hab = this.client.identifiers().get(name)
+                    .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
             Exchanging.Exchanges exchanges = this.client.exchanges();
 
             Map<String, Object> payload = new LinkedHashMap<>();
@@ -187,13 +190,18 @@ public class Contacting {
         /**
          * Get a contact
          * @param pre Prefix of the contact
-         * @return The contact
+         * @return Optional containing the contact if found, or empty if not found
          */
-        public Object get(String pre) throws InterruptedException, IOException, LibsodiumException {
+        public Optional<Object> get(String pre) throws InterruptedException, IOException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path, method, null);
-            return Utils.fromJson(response.body(), Object.class);
+            
+            if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                return Optional.empty();
+            }
+            
+            return Optional.of(Utils.fromJson(response.body(), Object.class));
         }
 
         /**

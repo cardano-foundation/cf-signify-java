@@ -63,7 +63,7 @@ public class DelegationTest {
         EventResult icpResult1 = client1.identifiers().create("delegator", kargs);
         waitOperation(client1, icpResult1.op());
 
-        States.HabState ator = client1.identifiers().get("delegator");
+        States.HabState ator = client1.identifiers().get("delegator").get();
         EventResult rpyResult1 = client1.identifiers().addEndRole(
                 "delegator",
                 "agent",
@@ -73,7 +73,7 @@ public class DelegationTest {
         waitOperation(client1, rpyResult1.op());
 
         // Client 2 resolves delegator OOBI
-        Map<String, Object> oobi1 = (Map<String, Object>) client1.oobis().get("delegator", "agent");
+        Map<String, Object> oobi1 = (Map<String, Object>) client1.oobis().get("delegator", "agent").get();
         ArrayList<String> listOobi1 = (ArrayList<String>) oobi1.get("oobis");
         resolveOobi(client2, listOobi1.getFirst(), "delegator");
         System.out.println("OOBI resolved");
@@ -109,7 +109,7 @@ public class DelegationTest {
 
         // Client 2 check approval
         waitOperation(client2, op2);
-        States.HabState aid2 = client2.identifiers().get("delegate");
+        States.HabState aid2 = client2.identifiers().get("delegate").get();
         assertEquals(delegatePrefix, aid2.getPrefix());
         System.out.println("Delegation approved for aid: " + aid2.getPrefix());
 
@@ -123,7 +123,7 @@ public class DelegationTest {
                 null
         );
         waitOperation(client2, rpyResult2.op());
-        Object oobis = client2.oobis().get("delegate", null);
+        Object oobis = client2.oobis().get("delegate", null).get();
         Map<String, Object> oobiBody = (Map<String, Object>) oobis;
         ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
 

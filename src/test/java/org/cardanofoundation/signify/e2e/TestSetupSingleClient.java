@@ -42,7 +42,7 @@ public class TestSetupSingleClient {
     @Test
     public void test_setup_single_client_step2() throws IOException, InterruptedException, LibsodiumException {
         ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-        Map<String, Object> oobi = (Map<String, Object>) client.oobis().get("name1", "witness");
+        Map<String, Object> oobi = (Map<String, Object>) client.oobis().get("name1", "witness").get();
         ArrayList<String> oobis = (ArrayList<String>) oobi.get("oobis");
         assertEquals(3, oobis.size());
         switch (env.preset()) {

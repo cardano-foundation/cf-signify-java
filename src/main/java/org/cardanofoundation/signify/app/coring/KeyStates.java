@@ -5,10 +5,12 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class KeyStates {
     public final SignifyClient client;
@@ -27,14 +29,19 @@ public class KeyStates {
      * Retrieve the key state for an identifier
      *
      * @param pre Identifier prefix
-     * @return A map representing the key states
+     * @return Optional containing a map representing the key states, or empty if not found
      * @throws Exception if the fetch operation fails
      */
-    public Object get(String pre) throws LibsodiumException, IOException, InterruptedException {
+    public Optional<Object> get(String pre) throws LibsodiumException, IOException, InterruptedException {
         String path = "/states?pre=" + pre;
         String method = "GET";
         HttpResponse<String> res = this.client.fetch(path, method, null);
-        return Utils.fromJson(res.body(), Object.class);
+        
+        if (res.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+        
+        return Optional.of(Utils.fromJson(res.body(), Object.class));
     }
 
     /**

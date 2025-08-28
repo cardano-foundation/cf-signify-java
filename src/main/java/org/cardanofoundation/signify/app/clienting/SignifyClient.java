@@ -281,6 +281,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             response = client.send(requestBuilder.build(),
                     HttpResponse.BodyHandlers.ofString());
 
+            if ("GET".equals(method) && response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                return response;
+            }
+
             if (200 < response.statusCode() && response.statusCode() > 300) {
                 throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
                         method, path, response.statusCode(), response.body()));

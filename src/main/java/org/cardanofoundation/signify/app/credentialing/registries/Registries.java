@@ -55,7 +55,8 @@ public class Registries {
      * @throws LibsodiumException   if a sodium exception occurs
      */
     public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        States.HabState hab = this.client.identifiers().get(args.getName());
+        States.HabState hab = this.client.identifiers().get(args.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getName()));
         String pre = hab.getPrefix();
 
         List<String> cnfg = new ArrayList<>();

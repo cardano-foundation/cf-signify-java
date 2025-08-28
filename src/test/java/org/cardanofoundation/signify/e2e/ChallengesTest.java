@@ -96,11 +96,11 @@ public class ChallengesTest {
         waitOperation(client2, rpyResult2.op());
 
         // Exchange OOBIs
-        Object oobi1 = client1.oobis().get("alice", "agent");
+        Object oobi1 = client1.oobis().get("alice", "agent").get();
         Map<String, Object> oobiBody1 = (Map<String, Object>) oobi1;
         ArrayList<String> oobiResponse1 = (ArrayList<String>) oobiBody1.get("oobis");
 
-        Object oobi2 = client2.oobis().get("bob", "agent");
+        Object oobi2 = client2.oobis().get("bob", "agent").get();
         Map<String, Object> oobiBody2 = (Map<String, Object>) oobi2;
         ArrayList<String> oobiResponse2 = (ArrayList<String>) oobiBody2.get("oobis");
 

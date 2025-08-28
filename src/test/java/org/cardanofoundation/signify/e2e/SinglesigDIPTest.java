@@ -51,11 +51,11 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         kargs.setDelpre(name1_id);
         EventResult result = client2.identifiers().create("delegate1", kargs);
         Operation<?> op = Operation.fromObject(result.op());
-        States.HabState delegate1 = client2.identifiers().get("delegate1");
+        States.HabState delegate1 = client2.identifiers().get("delegate1").get();
         opResponseName = op.getName();
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
-        delegate1 = client2.identifiers().get("delegate1");
+        delegate1 = client2.identifiers().get("delegate1").get();
         Map<String, String> seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "0");
@@ -77,7 +77,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         HashMap<String, Object> responseMap = (HashMap<String, Object>) op.getResponse();
         opResponseI = responseMap.get("i").toString();
 
-        delegate1 = client2.identifiers().get("delegate1");
+        delegate1 = client2.identifiers().get("delegate1").get();
         Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
 
         // Delegate creates identifier with default witness config
@@ -89,11 +89,11 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         op = Operation.fromObject(result.op());
         opResponseName = op.getName();
 
-        States.HabState delegate2 = client2.identifiers().get("delegate2");
+        States.HabState delegate2 = client2.identifiers().get("delegate2").get();
         Assertions.assertEquals(opResponseName, "delegation." + delegate2.getPrefix());
 
         // Delegator approves delegate
-        delegate2 = client2.identifiers().get("delegate2");
+        delegate2 = client2.identifiers().get("delegate2").get();
         seal.put("i", delegate2.getPrefix());
         seal.put("s", "0");
         seal.put("d", delegate2.getPrefix());
@@ -115,7 +115,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         opResponseI = responseMap.get("i").toString();
 
         // Delegate waits for completion
-        delegate2 = client2.identifiers().get("delegate2");
+        delegate2 = client2.identifiers().get("delegate2").get();
         Assertions.assertEquals(delegate2.getPrefix(), opResponseI);
 
         // Make sure query with seal is idempotent

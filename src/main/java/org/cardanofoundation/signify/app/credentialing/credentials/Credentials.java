@@ -47,7 +47,7 @@ public class Credentials {
         return Utils.fromJson(response.body(), Object.class);
     }
 
-    public Object get(String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Object> get(String said) throws IOException, InterruptedException, LibsodiumException {
         return this.get(said, false);
     }
 
@@ -56,12 +56,11 @@ public class Credentials {
      *
      * @param said        - SAID of the credential
      * @param includeCESR - Optional flag export the credential in CESR format
-     * @return Object to the credential
+     * @return Optional containing the credential if found, or empty if not found
      */
-    public Object get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Object> get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/" + said;
         final String method = "GET";
-
 
         Map<String, String> extraHeaders = new LinkedHashMap<>();
         if (includeCESR) {
@@ -71,7 +70,12 @@ public class Credentials {
         }
 
         HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
-        return Utils.fromJson(response.body(), Object.class);
+        
+        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+        
+        return Optional.of(Utils.fromJson(response.body(), Object.class));
     }
 
     /**
@@ -97,7 +101,8 @@ public class Credentials {
      * Issue a credential
      */
     public IssueCredentialResult issue(String name, CredentialData args) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        final States.HabState hab = this.client.identifiers().get(name);
+        final States.HabState hab = this.client.identifiers().get(name)
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
 
         final boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
         if (estOnly) {
@@ -179,13 +184,15 @@ public class Credentials {
      * @return A promise to the long-running operation
      */
     public RevokeCredentialResult revoke(String name, String said, String datetime) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        final States.HabState hab = this.client.identifiers().get(name);
+        final States.HabState hab = this.client.identifiers().get(name)
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         final String pre = hab.getPrefix();
 
         final String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         final String dt = datetime != null ? datetime : Utils.currentDateTimeString();
 
-        Map<String, Object> cred = Utils.toMap(this.get(said));
+        Map<String, Object> cred = Utils.toMap(this.get(said)
+                .orElseThrow(() -> new IllegalArgumentException("Credential not found: " + said)));
 
         // Create rev
         Map<String, Object> _rev = new LinkedHashMap<>();

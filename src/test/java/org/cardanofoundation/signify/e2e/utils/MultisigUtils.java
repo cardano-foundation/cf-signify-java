@@ -34,7 +34,8 @@ import java.util.stream.Collectors;
 public class MultisigUtils {
 
     public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
-        final States.HabState memberHab = client2.identifiers().get(args.getLocalMemberName());
+        final States.HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
         List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid());
         Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
@@ -676,7 +677,8 @@ public class MultisigUtils {
         IssueCredentialResult credResult = client.credentials().issue(multisigAIDName, kargsIss);
         Operation op = credResult.getOp();
 
-        States.HabState multisigAID = client.identifiers().get(multisigAIDName);
+        States.HabState multisigAID = client.identifiers().get(multisigAIDName)
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + multisigAIDName));
         Keeping.Keeper keeper = client.getManager().get(multisigAID);
         List<String> sigs = keeper.sign(credResult.getAnc().getRaw().getBytes()).signatures();
         List<Siger> sigers = sigs.stream().map(Siger::new).collect(Collectors.toList());
@@ -711,7 +713,8 @@ public class MultisigUtils {
             SignifyClient client,
             StartMultisigInceptArgs args
     ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
-        States.HabState aid1 = client.identifiers().get(args.getLocalMemberName());
+        States.HabState aid1 = client.identifiers().get(args.getLocalMemberName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
         List<Object> participantStates = TestUtils.getStates(client, args.getParticipants());
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
