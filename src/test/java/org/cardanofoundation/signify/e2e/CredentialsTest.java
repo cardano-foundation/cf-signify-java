@@ -292,7 +292,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Holder can get the credential status before or without holding", () -> {
             Map<String, Object> state = (Map<String, Object>) Retry.retry(() -> {
                 try {
-                    return holderClient.credentials().state(registrys.get("regk").toString(), qviCredentialId);
+                    return holderClient.credentials().state(registrys.get("regk").toString(), qviCredentialId).get();
                 } catch (IOException | InterruptedException | LibsodiumException e) {
                     throw new RuntimeException(e);
                 }

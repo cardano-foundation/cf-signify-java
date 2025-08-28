@@ -89,12 +89,17 @@ public class Credentials {
         this.client.fetch(path, method, null);
     }
 
-    public Object state(String ri, String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Object> state(String ri, String said) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/registries/" + ri + "/" + said;
         final String method = "GET";
 
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), Object.class);
+
+        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+
+        return Optional.of(Utils.fromJson(response.body(), Object.class));
     }
 
     /**
