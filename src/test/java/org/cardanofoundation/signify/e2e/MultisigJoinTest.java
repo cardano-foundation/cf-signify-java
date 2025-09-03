@@ -113,7 +113,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
-        Object response = client2.groups().getRequest(msgSaid);
+        Object response = client2.groups().getRequest(msgSaid).get();
         Map<String, Object> exn = castObjectToLinkedHashMap(
             castObjectToListMap(response).getFirst().get("exn")
         );
@@ -386,7 +386,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
-        Object response = client3.groups().getRequest(rotationNotification3);
+        Object response = client3.groups().getRequest(rotationNotification3).get();
 
         Map<String, Object> exn3 = castObjectToLinkedHashMap(
             castObjectToListMap(response).getFirst().get("exn")

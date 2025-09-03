@@ -6,10 +6,12 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Grouping {
     @Getter
@@ -27,14 +29,21 @@ public class Grouping {
         /**
          * Get group request messages
          * @param said SAID of exn message to load
-         * @return The list of replay messages
-         * @throws Exception if the fetch operation fails
+         * @return Optional containing the replay messages if found, or empty if not found
+         * @throws LibsodiumException if a Sodium error occurs
+         * @throws IOException if an I/O error occurs
+         * @throws InterruptedException if the operation is interrupted
          */
-        public Object getRequest(String said) throws LibsodiumException, IOException, InterruptedException {
+        public Optional<Object> getRequest(String said) throws LibsodiumException, IOException, InterruptedException {
             String path = "/multisig/request/" + said;
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path, method, null);
-            return Utils.fromJson(response.body(), Object.class);
+            
+            if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                return Optional.empty();
+            }
+            
+            return Optional.of(Utils.fromJson(response.body(), Object.class));
         }
 
         /**

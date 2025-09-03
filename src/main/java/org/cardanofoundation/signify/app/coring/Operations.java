@@ -7,8 +7,10 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Operations {
@@ -18,11 +20,25 @@ public class Operations {
         this.client = client;
     }
 
-    public <T> Operation<T> get(String name) throws IOException, InterruptedException, LibsodiumException {
+    /**
+     * Get operation by name
+     *
+     * @param name Name or ID of the operation to retrieve
+     * @return Optional containing the operation if found, or empty if not found
+     * @throws IOException if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @throws LibsodiumException if a Sodium error occurs
+     */
+    public <T> Optional<Operation<T>> get(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations/" + name;
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), new TypeReference<>() {});
+        
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+        
+        return Optional.of(Utils.fromJson(response.body(), new TypeReference<>() {}));
     }
 
     public List<Operation<?>> list(String type) throws IOException, InterruptedException, LibsodiumException {
@@ -62,7 +78,12 @@ public class Operations {
         int retries = 0;
 
         while (true) {
-            op = this.get(op.getName());
+            Optional<Operation<T>> opOpt = this.get(op.getName());
+            if (opOpt.isPresent()) {
+                op = opOpt.get();
+            } else {
+                throw new IllegalArgumentException("Operation not found: " + op.getName());
+            }
 
             int delay = Math.max(minSleep, Math.min(maxSleep, (int) Math.pow(2, retries) * increaseFactor));
             retries++;

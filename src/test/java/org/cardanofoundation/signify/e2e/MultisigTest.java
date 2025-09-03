@@ -544,7 +544,7 @@ public class MultisigTest extends BaseIntegrationTest {
         String msgSaid = waitAndMarkNotification(client2, "/multisig/iss");
         System.out.println("Member2 received exchange message to join the credential create event");
 
-        Object res = client2.groups().getRequest(msgSaid);
+        Object res = client2.groups().getRequest(msgSaid).get();
         Map<String, Object> exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -572,7 +572,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // Member3 check for notifications and join the create registry event
         msgSaid = waitAndMarkNotification(client3, "/multisig/iss");
         System.out.println("Member3 received exchange message to join the credential create event");
-        res = client3.groups().getRequest(msgSaid);
+        res = client3.groups().getRequest(msgSaid).get();
         exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -668,7 +668,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         msgSaid = waitAndMarkNotification(client2, "/multisig/exn");
         System.out.println("Member2 received exchange message to join the grant message");
-        res = client2.groups().getRequest(msgSaid);
+        res = client2.groups().getRequest(msgSaid).get();
         exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -716,7 +716,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         msgSaid = waitAndMarkNotification(client3, "/multisig/exn");
         System.out.println("Member3 received exchange message to join the grant message");
-        res = client3.groups().getRequest(msgSaid);
+        res = client3.groups().getRequest(msgSaid).get();
         exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -806,7 +806,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // Member2 check for notifications and join the credential create  event
         msgSaid = waitAndMarkNotification(client2, "/multisig/rev");
         System.out.println("Member2 received exchange message to join the credential revocation event");
-        res = client2.groups().getRequest(msgSaid);
+        res = client2.groups().getRequest(msgSaid).get();
 
         RevokeCredentialResult revokeRes2 = client2.credentials().revoke("multisig", credentialSaid, REVTIME);
         op2 = revokeRes2.getOp();
@@ -816,7 +816,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // Member3 check for notifications and join the create registry event
         msgSaid = waitAndMarkNotification(client3, "/multisig/rev");
         System.out.println("Member3 received exchange message to join the credential revocation event");
-        res = client3.groups().getRequest(msgSaid);
+        res = client3.groups().getRequest(msgSaid).get();
 
         RevokeCredentialResult revokeRes3 = client3.credentials().revoke("multisig", credentialSaid, REVTIME);
         op3 = revokeRes3.getOp();

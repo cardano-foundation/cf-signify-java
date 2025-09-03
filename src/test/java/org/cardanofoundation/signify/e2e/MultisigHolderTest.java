@@ -221,7 +221,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid);
+        resp = client2.groups().getRequest(msgSaid).get();
         List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) resp;
         Map<String, Object> resMap = listRes.getFirst();
         Map<String, Object> exn = (Map<String, Object>) resMap.get("exn");
@@ -327,7 +327,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid);
+        resp = client2.groups().getRequest(msgSaid).get();
         listRes = (List<HashMap<String, Object>>) resp;
         resMap = listRes.getFirst();
         exn = (Map<String, Object>) resMap.get("exn");

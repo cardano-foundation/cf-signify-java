@@ -37,7 +37,7 @@ public class MultisigUtils {
         final States.HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
-        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid());
+        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid()).get();
         Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
         Map<String, Object> exn = (Map<String, Object>) responseMap.get("exn");
         Map<String, Object> icp = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("icp");
@@ -545,7 +545,7 @@ public class MultisigUtils {
         if (!isInitiator) {
             String msgSaid = TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
-            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid);
+            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid).get();
             Map<String, Object> exn = (Map<String, Object>) ((Map<String, Object>) res.get(0)).get("exn");
             Map<String, Object> ixn = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("ixn");
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
