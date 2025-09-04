@@ -262,7 +262,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         String multisig = Utils.toMap(aids3.get(1)).get("prefix").toString();
 
-        States.HabState multisigAID = client1.identifiers().get("multisig");
+        States.HabState multisigAID = client1.identifiers().get("multisig").get();
 
         String timestamp = TestUtils.createTimestamp();
         List<Object> opList1 = MultisigUtils.addEndRoleMultisigs(
@@ -306,7 +306,7 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("End role authorization completed!");
 
         // Holder resolve multisig OOBI
-        Object oobimultisig = client1.oobis().get("multisig", "agent");
+        Object oobimultisig = client1.oobis().get("multisig", "agent").get();
         op4 = client4.oobis().resolve(getOobisIndexAt0(oobimultisig), "multisig");
         waitOperation(client4, op4);
         System.out.println("Holder resolved multisig OOBI");
@@ -364,19 +364,19 @@ public class MultisigTest extends BaseIntegrationTest {
         EventResult icpResult1 = client1.identifiers().rotate("member1");
         op1 = icpResult1.op();
         op1 = waitOperation(client1, op1);
-        aid1 = client1.identifiers().get("member1");
+        aid1 = client1.identifiers().get("member1").get();
         System.out.println("Member1 rotated keys");
 
         EventResult icpResult2 = client2.identifiers().rotate("member2");
         op2 = icpResult2.op();
         op2 = waitOperation(client2, op2);
-        aid2 = client2.identifiers().get("member2");
+        aid2 = client2.identifiers().get("member2").get();
         System.out.println("Member2 rotated keys");
 
         EventResult icpResult3 = client3.identifiers().rotate("member3");
         op3 = icpResult3.op();
         op3 = waitOperation(client3, op3);
-        aid3 = client3.identifiers().get("member3");
+        aid3 = client3.identifiers().get("member3").get();
         System.out.println("Member3 rotated keys");
 
         // Update new key states
@@ -460,13 +460,13 @@ public class MultisigTest extends BaseIntegrationTest {
                 new WaitOperationArgs(client3, op3)
         );
 
-        States.HabState hab = client1.identifiers().get("multisig");
+        States.HabState hab = client1.identifiers().get("multisig").get();
         String aid = hab.getPrefix();
 
         // Multisig Registry creation
-        aid1 = client1.identifiers().get("member1");
-        aid2 = client2.identifiers().get("member2");
-        aid3 = client3.identifiers().get("member3");
+        aid1 = client1.identifiers().get("member1").get();
+        aid2 = client2.identifiers().get("member2").get();
+        aid3 = client3.identifiers().get("member3").get();
         System.out.println("Starting multisig registry creation");
 
         String nonce = Coring.randomNonce();
@@ -544,7 +544,7 @@ public class MultisigTest extends BaseIntegrationTest {
         String msgSaid = waitAndMarkNotification(client2, "/multisig/iss");
         System.out.println("Member2 received exchange message to join the credential create event");
 
-        Object res = client2.groups().getRequest(msgSaid);
+        Object res = client2.groups().getRequest(msgSaid).get();
         Map<String, Object> exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -572,7 +572,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // Member3 check for notifications and join the create registry event
         msgSaid = waitAndMarkNotification(client3, "/multisig/iss");
         System.out.println("Member3 received exchange message to join the credential create event");
-        res = client3.groups().getRequest(msgSaid);
+        res = client3.groups().getRequest(msgSaid).get();
         exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -601,7 +601,7 @@ public class MultisigTest extends BaseIntegrationTest {
         );
         System.out.println("Multisig create credential completed!");
 
-        States.HabState m = client1.identifiers().get("multisig");
+        States.HabState m = client1.identifiers().get("multisig").get();
 
         // Update states
         op1 = client1.keyStates().query(m.getPrefix(), "4");
@@ -668,7 +668,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         msgSaid = waitAndMarkNotification(client2, "/multisig/exn");
         System.out.println("Member2 received exchange message to join the grant message");
-        res = client2.groups().getRequest(msgSaid);
+        res = client2.groups().getRequest(msgSaid).get();
         exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -716,7 +716,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         msgSaid = waitAndMarkNotification(client3, "/multisig/exn");
         System.out.println("Member3 received exchange message to join the grant message");
-        res = client3.groups().getRequest(msgSaid);
+        res = client3.groups().getRequest(msgSaid).get();
         exn = castObjectToLinkedHashMap(
                 castObjectToListMap(res).getFirst().get("exn")
         );
@@ -764,7 +764,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         msgSaid = waitAndMarkNotification(client4, "/exn/ipex/grant");
         System.out.println("Holder received exchange message with the grant message");
-        res = client4.exchanges().get(msgSaid);
+        res = client4.exchanges().get(msgSaid).get();
 
         Exchanging.ExchangeMessageResult admitResult = client4.ipex().admit(IpexAdmitArgs.builder()
                 .senderName("holder")
@@ -806,7 +806,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // Member2 check for notifications and join the credential create  event
         msgSaid = waitAndMarkNotification(client2, "/multisig/rev");
         System.out.println("Member2 received exchange message to join the credential revocation event");
-        res = client2.groups().getRequest(msgSaid);
+        res = client2.groups().getRequest(msgSaid).get();
 
         RevokeCredentialResult revokeRes2 = client2.credentials().revoke("multisig", credentialSaid, REVTIME);
         op2 = revokeRes2.getOp();
@@ -816,7 +816,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // Member3 check for notifications and join the create registry event
         msgSaid = waitAndMarkNotification(client3, "/multisig/rev");
         System.out.println("Member3 received exchange message to join the credential revocation event");
-        res = client3.groups().getRequest(msgSaid);
+        res = client3.groups().getRequest(msgSaid).get();
 
         RevokeCredentialResult revokeRes3 = client3.credentials().revoke("multisig", credentialSaid, REVTIME);
         op3 = revokeRes3.getOp();
@@ -844,8 +844,8 @@ public class MultisigTest extends BaseIntegrationTest {
             String groupName,
             IssueCredentialResult result
     ) throws Exception {
-        States.HabState leaderHab = client.identifiers().get(memberName);
-        States.HabState groupHab = client.identifiers().get(groupName);
+        States.HabState leaderHab = client.identifiers().get(memberName).get();
+        States.HabState groupHab = client.identifiers().get(groupName).get();
         Object members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
@@ -887,8 +887,8 @@ public class MultisigTest extends BaseIntegrationTest {
             Serder rev,
             Serder anc
     ) throws Exception {
-        States.HabState leaderHab = client.identifiers().get(memberName);
-        States.HabState groupHab = client.identifiers().get(groupName);
+        States.HabState leaderHab = client.identifiers().get(memberName).get();
+        States.HabState groupHab = client.identifiers().get(groupName).get();
         Object members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);

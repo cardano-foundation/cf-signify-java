@@ -54,7 +54,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
 
         EventResult result = delegate.identifiers().create("delegate1", kargs);
         Operation<?> op = Operation.fromObject(result.op());
-        States.HabState delegate1 = delegate.identifiers().get("delegate1");
+        States.HabState delegate1 = delegate.identifiers().get("delegate1").get();
         opResponseName = op.getName();
 
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
@@ -83,7 +83,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         Assertions.assertEquals(opResponseName, "delegation." + result.serder().getKed().get("d"));
 
         // delegator approves delegate
-        delegate1 = delegate.identifiers().get("delegate1");
+        delegate1 = delegate.identifiers().get("delegate1").get();
         seal = new LinkedHashMap<>();
         seal.put("i", delegate1.getPrefix());
         seal.put("s", "1");

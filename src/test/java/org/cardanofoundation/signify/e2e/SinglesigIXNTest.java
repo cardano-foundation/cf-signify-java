@@ -54,16 +54,16 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
     public void singlesig_ixn_step1() throws Exception {
         assertEquals(name1_id, contact1_id);
 
-        List<HashMap<String, Object>> keyState1List = (List<HashMap<String, Object>>) client1.keyStates().get(name1_id);
+        List<HashMap<String, Object>> keyState1List = (List<HashMap<String, Object>>) client1.keyStates().get(name1_id).get();
         assertEquals(1, keyState1List.size());
-        List<HashMap<String, Object>> keyState2List = (List<HashMap<String, Object>>) client2.keyStates().get(contact1_id);
+        List<HashMap<String, Object>> keyState2List = (List<HashMap<String, Object>>) client1.keyStates().get(contact1_id).get();
         assertEquals(keyState2List.getFirst().get("s"), keyState1List.getFirst().get("s"));
     }
 
     @Test
     public void singlesig_ixn_ixn1() throws Exception {
         // local keystate before rot
-        List<Map<String, Object>> listKeyState0 = (List<Map<String, Object>>) client1.keyStates().get(name1_id);
+        List<Map<String, Object>> listKeyState0 = (List<Map<String, Object>>) client1.keyStates().get(name1_id).get();
         assertNotNull(listKeyState0);
 
         // ixn
@@ -71,7 +71,7 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
         waitOperation(client1, result.op());
 
         // local keystate after rot
-        List<Map<String, Object>> listKeyState1 = (List<Map<String, Object>>) client1.keyStates().get(name1_id);
+        List<Map<String, Object>> listKeyState1 = (List<Map<String, Object>>) client1.keyStates().get(name1_id).get();
         assertTrue(parseInteger(listKeyState1.getFirst().get("s").toString()) > 0);
 
         // sequence has incremented
@@ -80,7 +80,7 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
         );
 
         // remote keystate after ixn
-        List<Map<String, Object>> listKeyState2 = (List<Map<String, Object>>) client2.keyStates().get(contact1_id);
+        List<Map<String, Object>> listKeyState2 = (List<Map<String, Object>>) client2.keyStates().get(contact1_id).get();
         // remote keystate is one behind
         assertEquals(parseInteger(listKeyState2.getFirst().get("s").toString()),
                 parseInteger(listKeyState1.getFirst().get("s").toString()) - 1

@@ -170,7 +170,7 @@ public class CredentialingTest extends BaseMockServerTest {
         assertEquals(sigs.get(0).length(), 88);
 
         // test state
-        credentials.state("EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df", "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo");
+        credentials.state("EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df", "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo").get();
         lastCall = getRecordedRequests().getLast();
         assertEquals("GET", lastCall.getMethod());
         assertEquals(url + "/registries/EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df/EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo", lastCall.getRequestUrl().toString());

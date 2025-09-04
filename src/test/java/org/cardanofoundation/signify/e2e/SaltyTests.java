@@ -164,7 +164,7 @@ class SaltyTests {
         Assertions.assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         // Get Identifiers
-        States.HabState aidState = client.identifiers().get("aid1");
+        States.HabState aidState = client.identifiers().get("aid1").get();
         States.State stateGet = aidState.getState();
 
         Assertions.assertEquals("2", stateGet.getS());
@@ -198,7 +198,7 @@ class SaltyTests {
         States.HabState updatedState = client.identifiers().update("aid3", identifierInfo);
         assertEquals("aid4", updatedState.getName());
 
-        States.HabState retrievedState = client.identifiers().get("aid4");
+        States.HabState retrievedState = client.identifiers().get("aid4").get();
         assertEquals("aid4", retrievedState.getName());
         IdentifierListResponse response = client.identifiers().list(2, 2);
         List<Map<String, Object>> identifiers = Utils.fromJson(response.aids().toString(), new TypeReference<>() {});

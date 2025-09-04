@@ -113,7 +113,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
-        Object response = client2.groups().getRequest(msgSaid);
+        Object response = client2.groups().getRequest(msgSaid).get();
         Map<String, Object> exn = castObjectToLinkedHashMap(
             castObjectToListMap(response).getFirst().get("exn")
         );
@@ -166,7 +166,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         EventResult endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
 
         oobiGetMultisig = new LinkedHashMap<>();
-        oobiGetMultisig = (Map<String, Object>) client1.oobis().get(nameMultisig, "agent");
+        oobiGetMultisig = (Map<String, Object>) client1.oobis().get(nameMultisig, "agent").get();
 
         waitOperationAsync(
             new WaitOperationArgs(client1, endRoleOperation1.op()),
@@ -206,8 +206,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client2, rotateResult2.op())
         );
 
-        aid1 = client1.identifiers().get(nameMember1);
-        aid2 = client2.identifiers().get(nameMember2);
+        aid1 = client1.identifiers().get(nameMember1).get();
+        aid2 = client2.identifiers().get(nameMember2).get();
 
         List<Object> updates = getKeyStateQuerAsync(
             new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "1"),
@@ -285,7 +285,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         TestUtils.waitAndMarkNotification(client2, "/multisig/rot");
         TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
 
-        States.HabState multiSigAid = client1.identifiers().get(nameMultisig);
+        States.HabState multiSigAid = client1.identifiers().get(nameMultisig).get();
 
         assertEquals(2, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -310,9 +310,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client3, rotateResult3.op())
         );
 
-        aid1 = client1.identifiers().get(nameMember1);
-        aid2 = client2.identifiers().get(nameMember2);
-        aid3 = client3.identifiers().get(nameMember3);
+        aid1 = client1.identifiers().get(nameMember1).get();
+        aid2 = client2.identifiers().get(nameMember2).get();
+        aid3 = client3.identifiers().get(nameMember3).get();
 
         List<Object> updates = getKeyStateQuerAsync(
             new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "2"),
@@ -386,7 +386,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
-        Object response = client3.groups().getRequest(rotationNotification3);
+        Object response = client3.groups().getRequest(rotationNotification3).get();
 
         Map<String, Object> exn3 = castObjectToLinkedHashMap(
             castObjectToListMap(response).getFirst().get("exn")
@@ -410,7 +410,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         waitOperation(client3, joinOperation);
 
-        States.HabState multiSigAid = client3.identifiers().get(nameMultisig);
+        States.HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
 
         assertEquals(3, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -438,7 +438,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         iargs.setWits(wits);
         iargs.setToad(wits.size());
         TestUtils.getOrCreateIdentifier(client, name, iargs);
-        return client.identifiers().get(name);
+        return client.identifiers().get(name).get();
     }
 
     public static String getOobisIndexAt0(Object oobi) {

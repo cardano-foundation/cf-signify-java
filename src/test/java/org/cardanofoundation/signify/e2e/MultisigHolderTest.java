@@ -166,10 +166,10 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         );
 
         // Multisig end role
-        aid1 = client1.identifiers().get("member1");
-        aid2 = client2.identifiers().get("member2");
+        aid1 = client1.identifiers().get("member1").get();
+        aid2 = client2.identifiers().get("member2").get();
         Object members = client1.identifiers().members("holder");
-        States.HabState ghab1 = client1.identifiers().get("holder");
+        States.HabState ghab1 = client1.identifiers().get("holder").get();
         List<Map<String, Object>> signing = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
         String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing.getFirst().get("ends")).get("agent")).keySet()).getFirst();
         String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing.get(1).get("ends")).get("agent")).keySet()).getFirst();
@@ -221,7 +221,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid);
+        resp = client2.groups().getRequest(msgSaid).get();
         List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) resp;
         Map<String, Object> resMap = listRes.getFirst();
         Map<String, Object> exn = (Map<String, Object>) resMap.get("exn");
@@ -238,7 +238,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
-        States.HabState ghab2 = client2.identifiers().get("holder");
+        States.HabState ghab2 = client2.identifiers().get("holder").get();
         Map<String, Object> ghabState2 = Utils.toMap(ghab2.getState());
         seal = Arrays.asList(
                 "SealEvent",
@@ -287,7 +287,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
-        ghab1 = client1.identifiers().get("holder");
+        ghab1 = client1.identifiers().get("holder").get();
         ghabState1 = Utils.toMap(ghab1.getState());
         seal = Arrays.asList(
                 "SealEvent",
@@ -327,7 +327,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid);
+        resp = client2.groups().getRequest(msgSaid).get();
         listRes = (List<HashMap<String, Object>>) resp;
         resMap = listRes.getFirst();
         exn = (Map<String, Object>) resMap.get("exn");
@@ -345,7 +345,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
-        ghab2 = client2.identifiers().get("holder");
+        ghab2 = client2.identifiers().get("holder").get();
         ghabState2 = Utils.toMap(ghab2.getState());
         seal = Arrays.asList(
                 "SealEvent",
@@ -387,7 +387,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("End role authorization for agent " + eid2 + " completed!");
 
         // Holder resolve multisig OOBI
-        Object oobisRes = client1.oobis().get("holder", "agent");
+        Object oobisRes = client1.oobis().get("holder", "agent").get();
         Map<String, Object> oobiBody = (Map<String, Object>) oobisRes;
         ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
 
@@ -397,9 +397,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitOperation(client3, op3);
         System.out.println("Issuer resolved multisig holder OOBI");
 
-        States.HabState holderAid = client1.identifiers().get("holder");
-        aid1 = client1.identifiers().get("member1");
-        aid2 = client2.identifiers().get("member2");
+        States.HabState holderAid = client1.identifiers().get("holder").get();
+        aid1 = client1.identifiers().get("member1").get();
+        aid2 = client2.identifiers().get("member2").get();
 
         System.out.println("Issuer starting credential issuance to holder...");
 
@@ -428,7 +428,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid = waitAndMarkNotification(client1, "/exn/ipex/grant");
         System.out.println("Member1 received /exn/ipex/grant msg with SAID: " + grantMsgSaid);
 
-        Object exnRes = client1.exchanges().get(grantMsgSaid);
+        Object exnRes = client1.exchanges().get(grantMsgSaid).get();
         recp = Stream.of(aid2.getState())
                 .map(States.State::getI)
                 .collect(Collectors.toList());
@@ -452,7 +452,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid2 = waitAndMarkNotification(client2, "/exn/ipex/grant");
         System.out.println("Member2 received /exn/ipex/grant msg with SAID: " + grantMsgSaid2);
 
-        Object exnRes2 = client2.exchanges().get(grantMsgSaid2);
+        Object exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
         assertEquals(grantMsgSaid2, grantMsgSaid);
         System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
 
@@ -496,7 +496,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
     public States.HabState createAid(SignifyClient client, String name, List<String> wits) throws Exception {
         getOrCreateIdentifier(client, name, null);
-        States.HabState aid = client.identifiers().get(name);
+        States.HabState aid = client.identifiers().get(name).get();
         System.out.println(name + "AID:" + aid.getPrefix());
         return aid;
     }
@@ -573,8 +573,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             String issuerPrefix,
             List<String> recipients
     ) throws Exception {
-        States.HabState mhab = client.identifiers().get(memberAlias);
-        States.HabState ghab = client.identifiers().get(groupName);
+        States.HabState mhab = client.identifiers().get(memberAlias).get();
+        States.HabState ghab = client.identifiers().get(groupName).get();
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
                 .builder()

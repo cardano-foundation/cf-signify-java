@@ -205,8 +205,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // Skip if a GEDA AID has already been incepted.
         States.HabState aidGEDAbyGAR1, aidGEDAbyGAR2;
         try {
-            aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA");
-            aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA");
+            aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
+            aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
         } catch (Exception e) {
             List<Object> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
             List<Object> states = rstates;
@@ -249,8 +249,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/icp");
 
-            aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA");
-            aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA");
+            aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
+            aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
         }
         assertEquals(aidGEDAbyGAR1.getPrefix(), aidGEDAbyGAR2.getPrefix());
         assertEquals(aidGEDAbyGAR1.getName(), aidGEDAbyGAR2.getName());
@@ -259,8 +259,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Add endpoint role authorization for all GARs' agents.
         // Skip if they have already been authorized.
-        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent");
-        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent");
+        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
+        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
 
         if (((List<String>) oobiGEDAbyGAR1.get("oobis")).size() == 0 || ((List<String>) oobiGEDAbyGAR2.get("oobis")).size() == 0) {
             String timestamp = TestUtils.createTimestamp();
@@ -292,8 +292,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/rpy");
 
-            oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent");
-            oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent");
+            oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
+            oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
         }
         assertEquals(oobiGEDAbyGAR1.get("role"), oobiGEDAbyGAR2.get("role"));
         assertEquals(getOobisIndexAt0(oobiGEDAbyGAR1), getOobisIndexAt0(oobiGEDAbyGAR2));
@@ -314,9 +314,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // Skip if a QVI AID has already been incepted.
         States.HabState aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
         try {
-            aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI");
-            aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI");
-            aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI");
+            aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI").get();
+            aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
+            aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI").get();
         } catch (Exception exception) {
             List<Object> rstates = List.of(aidQAR1.getState(), aidQAR2.getState(), aidQAR3.getState());
             List<Object> states = List.copyOf(rstates);
@@ -414,9 +414,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/icp");
 
-            aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI");
-            aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI");
-            aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI");
+            aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI").get();
+            aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
+            aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI").get();
         }
         assertEquals(aidQVIbyQAR1.getPrefix(), aidQVIbyQAR2.getPrefix());
         assertEquals(aidQVIbyQAR1.getPrefix(), aidQVIbyQAR3.getPrefix());
@@ -714,9 +714,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // Skip if a LE AID has already been incepted.
         States.HabState aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
         try {
-            aidLEbyLAR1 = clientLAR1.identifiers().get("LE");
-            aidLEbyLAR2 = clientLAR2.identifiers().get("LE");
-            aidLEbyLAR3 = clientLAR3.identifiers().get("LE");
+            aidLEbyLAR1 = clientLAR1.identifiers().get("LE").get();
+            aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
+            aidLEbyLAR3 = clientLAR3.identifiers().get("LE").get();
         } catch (Exception e) {
             List<Object> rstates = List.of(aidLAR1.getState(), aidLAR2.getState(), aidLAR3.getState());
             List<Object> states = List.copyOf(rstates);
@@ -770,9 +770,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/icp");
 
-            aidLEbyLAR1 = clientLAR1.identifiers().get("LE");
-            aidLEbyLAR2 = clientLAR2.identifiers().get("LE");
-            aidLEbyLAR3 = clientLAR3.identifiers().get("LE");
+            aidLEbyLAR1 = clientLAR1.identifiers().get("LE").get();
+            aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
+            aidLEbyLAR3 = clientLAR3.identifiers().get("LE").get();
         }
         assertEquals(aidLEbyLAR1.getPrefix(), aidLEbyLAR2.getPrefix());
         assertEquals(aidLEbyLAR1.getPrefix(), aidLEbyLAR3.getPrefix());

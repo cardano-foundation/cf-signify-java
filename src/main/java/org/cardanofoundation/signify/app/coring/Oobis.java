@@ -1,9 +1,11 @@
 package org.cardanofoundation.signify.app.coring;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -22,18 +24,23 @@ public class Oobis {
      *
      * @param name Name or alias of the identifier
      * @param role Authorized role
-     * @return A promise to the OOBI(s)
+     * @return Optional containing the OOBI(s) if found, or empty if not found
      * @throws JsonProcessingException if there is an error processing the JSON
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Object get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Object> get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
         if (role == null) {
             role = "agent";
         }
         String path = "/identifiers/" + name + "/oobis?role=" + role;
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), Object.class);
+        
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+        
+        return Optional.of(Utils.fromJson(response.body(), Object.class));
     }
 
     /**

@@ -112,7 +112,8 @@ public class TestUtils {
 
     public static States.HabState createAidAndGetHabState(SignifyClient client, String name) throws Exception {
         getOrCreateIdentifier(client, name, null);
-        return client.identifiers().get(name);
+        return client.identifiers().get(name)
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
     }
 
     public static String createTimestamp() {
@@ -153,13 +154,16 @@ public class TestUtils {
     }
 
     public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
-        try {
-            return client.identifiers().get(name);
-        } catch (Exception e) {
+        Optional<States.HabState> existingAID = client.identifiers().get(name);
+        if (existingAID.isPresent()) {
+            return existingAID.get();
+        } else {
             EventResult result = client.identifiers().create(name, kargs);
             waitOperation(client, result.op());
 
-            States.HabState aid = client.identifiers().get(name);
+            States.HabState aid = client.identifiers().get(name)
+                    .orElseThrow(() -> new IllegalArgumentException("Failed to create identifier: " + name));
+            
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
                 throw new IllegalArgumentException("Client, agent, or pre cannot be null");
             }
@@ -234,10 +238,12 @@ public class TestUtils {
         Object id = null;
         String eid;
         Object op, ops;
-        try {
-            States.HabState identifier = client.identifiers().get(name);
-            id = identifier.getPrefix();
-        } catch (Exception e) {
+
+        Optional<States.HabState> optionalIdentifier = client.identifiers().get(name);
+        if (optionalIdentifier.isPresent()) {
+            id = optionalIdentifier.get().getPrefix();
+            
+        } else {
             ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
             if (kargs == null) {
                 kargs = new CreateIdentifierArgs();
@@ -268,7 +274,7 @@ public class TestUtils {
             }
         }
 
-        Object oobi = client.oobis().get(name, "agent");
+        Object oobi = client.oobis().get(name, "agent").get();
         String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
@@ -356,7 +362,7 @@ public class TestUtils {
 
         IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
         waitOperation(issuerClient, issResult.getOp());
-        Object credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString());
+        Object credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
 
         return credential;
     }
@@ -364,7 +370,7 @@ public class TestUtils {
     public static List<Object> getStates(SignifyClient client, List<String> prefixes) {
         List<Object> participantStates = prefixes.stream().map(p -> {
             try {
-                return client.keyStates().get(p);
+                return client.keyStates().get(p).get();
             } catch (Exception e) {
                 throw new RuntimeException("Error fetching key states for prefix: " + p, e);
             }

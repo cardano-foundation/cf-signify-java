@@ -21,6 +21,7 @@ import org.cardanofoundation.signify.core.Manager.Algos;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
@@ -83,14 +84,19 @@ public class Identifier {
      * Get information for a managed identifier
      *
      * @param name Prefix or alias of the identifier
-     * @return A HabState to the identifier information
+     * @return An Optional containing the HabState if found, or empty if not found
      */
-    public States.HabState get(String name) throws InterruptedException, IOException, LibsodiumException {
+    public Optional<States.HabState> get(String name) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + URI.create(name).toASCIIString();
         final String method = "GET";
 
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), States.HabState.class);
+        
+        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+        
+        return Optional.of(Utils.fromJson(response.body(), States.HabState.class));
     }
 
     /**
@@ -276,7 +282,8 @@ public class Identifier {
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
     public EventResult addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        States.HabState hab = this.get(name);
+        States.HabState hab = this.get(name)
+            .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
 
         // Assuming makeEndRole is a method that returns an object with getRaw() and getKed() methods
@@ -330,7 +337,8 @@ public class Identifier {
     }
 
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        States.HabState hab = this.get(name);
+        States.HabState hab = this.get(name)
+            .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
 
         States.State state = hab.getState();
@@ -368,7 +376,8 @@ public class Identifier {
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
 
-        States.HabState hab = this.get(name);
+        States.HabState hab = this.get(name)
+            .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
         boolean delegated = !hab.getState().getDi().isEmpty();
 

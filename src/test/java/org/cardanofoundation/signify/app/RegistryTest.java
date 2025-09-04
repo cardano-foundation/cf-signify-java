@@ -15,6 +15,7 @@ import org.mockito.*;
 
 import java.net.http.HttpResponse;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -53,7 +54,7 @@ public class RegistryTest {
         when(mockedKeyManager.get(hab)).thenReturn(mockedKeeper);
         when(mockedKeeper.sign(any(byte[].class))).thenReturn(new Keeping.SignResult(Collections.singletonList("'a signature'")));
 
-        when(mockedIdentifiers.get("a name")).thenReturn(hab);
+        when(mockedIdentifiers.get("a name")).thenReturn(Optional.of(hab));
         when(mockedClient.identifiers()).thenReturn(mockedIdentifiers);
 
         when(mockedKeeper.getAlgo()).thenReturn(Manager.Algos.salty);
@@ -89,7 +90,7 @@ public class RegistryTest {
                 .windexes(Collections.emptyList())
                 .build();
 
-        when(mockedIdentifiers.get("a name")).thenReturn(hab);
+        when(mockedIdentifiers.get("a name")).thenReturn(Optional.of(hab));
         when(mockedClient.identifiers()).thenReturn(mockedIdentifiers);
 
         assertThrows(Exception.class, () -> {

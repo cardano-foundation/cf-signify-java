@@ -54,14 +54,14 @@ public class WitnessTest {
 
         EventResult icpResult1 = client1.identifiers().create("aid1", kargs);
         waitOperation(client1, icpResult1.op());
-        States.HabState aid1 = client1.identifiers().get("aid1");
+        States.HabState aid1 = client1.identifiers().get("aid1").get();
         System.out.println("AID1: " + aid1.getPrefix());
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
 
         icpResult1 = client1.identifiers().rotate("aid1");
         waitOperation(client1, icpResult1.op());
-        aid1 = client1.identifiers().get("aid1");
+        aid1 = client1.identifiers().get("aid1").get();
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
 
@@ -71,7 +71,7 @@ public class WitnessTest {
 
         icpResult1 = client1.identifiers().rotate("aid1", args);
         waitOperation(client1, icpResult1.op());
-        aid1 = client1.identifiers().get("aid1");
+        aid1 = client1.identifiers().get("aid1").get();
         assertEquals(0, aid1.getState().getB().size());
 
         // Add witness again
@@ -79,7 +79,7 @@ public class WitnessTest {
         args.setAdds(Collections.singletonList(WITNESS_AID));
         icpResult1 = client1.identifiers().rotate("aid1", args);
         waitOperation(client1, icpResult1.op());
-        aid1 = client1.identifiers().get("aid1");
+        aid1 = client1.identifiers().get("aid1").get();
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
     }

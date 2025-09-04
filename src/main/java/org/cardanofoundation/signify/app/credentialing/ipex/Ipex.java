@@ -25,7 +25,8 @@ public class Ipex {
     }
 
     public Exchanging.ExchangeMessageResult apply(IpexApplyArgs args) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        HabState hab = this.client.identifiers().get(args.getSenderName());
+        HabState hab = this.client.identifiers().get(args.getSenderName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getSenderName()));
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("m", args.getMessage() != null ? args.getMessage() : "");
         data.put("s", args.getSchemaSaid());
@@ -62,7 +63,8 @@ public class Ipex {
      * Create an IPEX offer EXN message
      */
     public Exchanging.ExchangeMessageResult offer(IpexOfferArgs args) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        HabState hab = this.client.identifiers().get(args.getSenderName());
+        HabState hab = this.client.identifiers().get(args.getSenderName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getSenderName()));
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("m", args.getMessage() != null ? args.getMessage() : "");
 
@@ -101,7 +103,8 @@ public class Ipex {
      * Create an IPEX agree EXN message
      */
     public Exchanging.ExchangeMessageResult agree(IpexAgreeArgs args) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        HabState hab = this.client.identifiers().get(args.getSenderName());
+        HabState hab = this.client.identifiers().get(args.getSenderName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getSenderName()));
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("m", args.getMessage() != null ? args.getMessage() : "");
 
@@ -136,7 +139,8 @@ public class Ipex {
      * Create an IPEX grant EXN message
      */
     public Exchanging.ExchangeMessageResult grant(IpexGrantArgs args) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        HabState hab = this.client.identifiers().get(args.getSenderName());
+        HabState hab = this.client.identifiers().get(args.getSenderName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getSenderName()));
         Map<String, Object> data = Map.of(
                 "m", args.getMessage() != null ? args.getMessage() : ""
         );
@@ -191,7 +195,8 @@ public class Ipex {
      * Create an IPEX admit EXN message
      */
     public Exchanging.ExchangeMessageResult admit(IpexAdmitArgs args) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        HabState hab = this.client.identifiers().get(args.getSenderName());
+        HabState hab = this.client.identifiers().get(args.getSenderName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getSenderName()));
         LinkedHashMap<String, Object> data = new LinkedHashMap<>();
         data.put("m", args.getMessage());
 

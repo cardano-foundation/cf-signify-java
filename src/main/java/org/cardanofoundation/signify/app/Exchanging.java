@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.States.HabState;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
@@ -154,13 +155,18 @@ public class Exchanging {
          * Get exn message by said
          *
          * @param said The said of the exn message
-         * @return The exn message
+         * @return Optional containing the exn message if found, or empty if not found
          */
-        public Object get(String said) throws Exception {
+        public Optional<Object> get(String said) throws Exception {
             String path = String.format("/exchanges/%s", said);
             String method = "GET";
-            HttpResponse<String> res = this. client.fetch(path, method, null);
-            return Utils.fromJson(res.body(), Object.class);
+            HttpResponse<String> res = this.client.fetch(path, method, null);
+            
+            if (res.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                return Optional.empty();
+            }
+            
+            return Optional.of(Utils.fromJson(res.body(), Object.class));
         }
     }
 

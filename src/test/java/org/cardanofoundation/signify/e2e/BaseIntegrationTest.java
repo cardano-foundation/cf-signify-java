@@ -111,7 +111,7 @@ public class BaseIntegrationTest {
 
     static CompletableFuture<Object> getOobisFuture(SignifyClient client, String name, String role) {
         return CompletableFuture.supplyAsync(unchecked(() -> 
-            client.oobis().get(name, role)
+            client.oobis().get(name, role).get()
         ));
     }
 

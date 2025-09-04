@@ -34,9 +34,10 @@ import java.util.stream.Collectors;
 public class MultisigUtils {
 
     public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
-        final States.HabState memberHab = client2.identifiers().get(args.getLocalMemberName());
+        final States.HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
-        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid());
+        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid()).get();
         Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
         Map<String, Object> exn = (Map<String, Object>) responseMap.get("exn");
         Map<String, Object> icp = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("icp");
@@ -544,7 +545,7 @@ public class MultisigUtils {
         if (!isInitiator) {
             String msgSaid = TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
-            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid);
+            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid).get();
             Map<String, Object> exn = (Map<String, Object>) ((Map<String, Object>) res.get(0)).get("exn");
             Map<String, Object> ixn = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("ixn");
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
@@ -676,7 +677,8 @@ public class MultisigUtils {
         IssueCredentialResult credResult = client.credentials().issue(multisigAIDName, kargsIss);
         Operation op = credResult.getOp();
 
-        States.HabState multisigAID = client.identifiers().get(multisigAIDName);
+        States.HabState multisigAID = client.identifiers().get(multisigAIDName)
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + multisigAIDName));
         Keeping.Keeper keeper = client.getManager().get(multisigAID);
         List<String> sigs = keeper.sign(credResult.getAnc().getRaw().getBytes()).signatures();
         List<Siger> sigers = sigs.stream().map(Siger::new).collect(Collectors.toList());
@@ -711,7 +713,8 @@ public class MultisigUtils {
             SignifyClient client,
             StartMultisigInceptArgs args
     ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
-        States.HabState aid1 = client.identifiers().get(args.getLocalMemberName());
+        States.HabState aid1 = client.identifiers().get(args.getLocalMemberName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
         List<Object> participantStates = TestUtils.getStates(client, args.getParticipants());
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();

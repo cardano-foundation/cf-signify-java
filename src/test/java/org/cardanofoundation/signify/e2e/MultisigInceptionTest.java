@@ -36,8 +36,8 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
         aid2 = TestUtils.getOrCreateIdentifier(client2, "member2", null)[0];
 
         testSteps.step("Resolve oobis", () -> {
-            oobi1 = client1.oobis().get("member1", "agent");
-            oobi2 = client2.oobis().get("member2", "agent");
+            oobi1 = client1.oobis().get("member1", "agent").get();
+            oobi2 = client2.oobis().get("member2", "agent").get();
 
             TestUtils.resolveOobi(client1, Utils.toList(Utils.toMap(oobi2).get("oobis")).getFirst(), "member2");
             TestUtils.resolveOobi(client2, Utils.toList(Utils.toMap(oobi1).get("oobis")).getFirst(), "member1");
@@ -83,8 +83,8 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
             );
             System.out.println("Multisig created!");
 
-            States.HabState multisig1 = client1.identifiers().get(groupName);
-            States.HabState multisig2 = client2.identifiers().get(groupName);
+            States.HabState multisig1 = client1.identifiers().get(groupName).get();
+            States.HabState multisig2 = client2.identifiers().get(groupName).get();
             assertEquals(multisig1.getPrefix(), multisig2.getPrefix());
             Object members = client1.identifiers().members(groupName);
             Map<String, Object> membersMap = Utils.toMap(members);
