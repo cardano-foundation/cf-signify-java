@@ -4,6 +4,7 @@ plugins {
     id 'io.qameta.allure' version '2.11.2'
     id 'org.ajoberstar.grgit' version '5.2.0'
     id 'org.jreleaser' version '1.19.0'
+    id("org.openapi.generator") version "7.14.0"
 }
 
 repositories {
@@ -56,6 +57,10 @@ dependencies {
     implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}"
     implementation "org.json:json:${jsonVersion}"
     implementation "org.greenbytes.http:structured-fields:${structuredFieldsVersion}"
+    // OpenAI generate model dependencies
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
+    implementation "com.google.code.gson:gson:2.11.0"
+    implementation "jakarta.annotation:jakarta.annotation-api:2.1.1"
 
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
@@ -187,3 +192,37 @@ tasks.register('allureE2ETestReport') {
 tasks.named('allureReport') {
     enabled = false
 }
+
+tasks.openApiGenerate {
+    generatorName.set("java")
+    inputSpec.set("$rootDir/spec.yaml")
+    outputDir.set("$buildDir/generated".toString())
+    modelPackage.set("org.cardanofoundation.signify.generated.keria.model")
+    invokerPackage.set("org.cardanofoundation.signify.generated.keria.model")
+//    globalProperties.set([
+//        models: ""
+//    ])
+    configOptions = [
+            library     : "resttemplate",
+            useGson     : "true",
+            useJakartaEe : "true"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+//tasks.register('copyGeneratedModels', Copy) {
+//    dependsOn tasks.openApiGenerate
+//    from("$buildDir/generated/src/main/java/org/cardanofoundation/signify/generated/keria/model")
+//    into("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+//}
+//
+//tasks.named("openApiGenerate") {
+//    finalizedBy(copyGeneratedModels)
+//}
