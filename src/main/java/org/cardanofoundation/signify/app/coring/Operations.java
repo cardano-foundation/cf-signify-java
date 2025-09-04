@@ -78,12 +78,8 @@ public class Operations {
         int retries = 0;
 
         while (true) {
-            Optional<Operation<T>> opOpt = this.get(op.getName());
-            if (opOpt.isPresent()) {
-                op = opOpt.get();
-            } else {
-                throw new IllegalArgumentException("Operation not found: " + op.getName());
-            }
+            String opName = op.getName();
+            op = this.<T>get(opName).orElseThrow(() -> new IllegalArgumentException("Operation not found: " + opName));
 
             int delay = Math.max(minSleep, Math.min(maxSleep, (int) Math.pow(2, retries) * increaseFactor));
             retries++;
