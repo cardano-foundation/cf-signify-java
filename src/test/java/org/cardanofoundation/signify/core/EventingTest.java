@@ -192,8 +192,8 @@ public class EventingTest {
                         .pre((String) serder.getKed().get("i"))
                         .ndigs((List<String>) serder.getKed().get("n"))
                         .sn(sn)
-                        .isith(1)
-                        .nsith(1)
+                        .isith(Sith.fromInteger(1))
+                        .nsith(Sith.fromInteger(1))
                         .build()
         ).getKed().get("s");
     }

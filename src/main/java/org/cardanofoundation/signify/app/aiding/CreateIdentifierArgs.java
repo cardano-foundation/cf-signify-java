@@ -6,6 +6,7 @@ import lombok.*;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.core.Manager.Algos;
 import org.cardanofoundation.signify.core.States.HabState;
+import org.cardanofoundation.signify.cesr.Sith;
 
 @Getter
 @Setter
@@ -14,8 +15,8 @@ import org.cardanofoundation.signify.core.States.HabState;
 @AllArgsConstructor
 public class CreateIdentifierArgs {
     private Boolean transferable;
-    private Object isith;
-    private Object nsith;
+    private Sith isith;
+    private Sith nsith;
     private List<String> wits;
     private Integer toad;
     private String proxy;

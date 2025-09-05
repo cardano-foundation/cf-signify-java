@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.app.aiding;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.Keeping.KeeperResult;
@@ -126,25 +127,15 @@ public class Identifier {
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
-        Object isith;
-        Object nsith;
+        Sith isith;
+        Sith nsith;
 
         if (kargs.getIsith() == null) {
-            isith = "1";
-            nsith = "1";
+            isith = Sith.fromString("1");
+            nsith = Sith.fromString("1");
         } else {
-            // String or number
-            if(!(kargs.getIsith() instanceof List<?>)) {
-                isith = kargs.getIsith().toString();
-            } else {
-                isith = kargs.getIsith();
-            }
-
-            if(!(kargs.getNsith() instanceof List<?>)) {
-                nsith = kargs.getNsith().toString();
-            } else {
-                nsith = kargs.getNsith();
-            }
+            isith = kargs.getIsith();
+            nsith = kargs.getNsith() != null ? kargs.getNsith() : isith;
         }
         List<String> wits = kargs.getWits() != null ? kargs.getWits() : new ArrayList<>();
         int toad = kargs.getToad() != null ? kargs.getToad() : 0;
@@ -169,7 +160,7 @@ public class Identifier {
 
         if (!transferable) {
             ncount = 0;
-            nsith = "0";
+            nsith = Sith.fromString("0");
             dcode = MatterCodex.Ed25519N.getValue();
         }
 
@@ -386,21 +377,25 @@ public class Identifier {
         String dig = state.getD();
         int ridx = Integer.parseInt(state.getS(), 16) + 1;
         List<String> wits = state.getB();
-        Object isith = state.getNt();
-
-        Object nsith = kargs.getNsith() != null ? kargs.getNsith() : isith;
-
-        // if isith is None:  # compute default from newly rotated verfers above
-        if (isith == null) {
-            isith = Integer.toHexString(Math.max(1, (int) Math.ceil(count / 2.0)));
-        }
-        // if nsith is None:  # compute default from newly rotated digers above
-        if (nsith == null) {
-            nsith = Integer.toHexString(Math.max(1, (int) Math.ceil(count / 2.0)));
+        
+        // Convert state.getNt() to Sith
+        Sith isith;
+        if (state.getNt() != null) {
+            isith = Sith.fromObject(state.getNt());
+        } else {
+            isith = Sith.fromString(Integer.toHexString(Math.max(1, (int) Math.ceil(count / 2.0))));
         }
 
-        Object cst = new Tholder(null, null, isith).getSith(); // current signing threshold
-        Object nst = new Tholder(null, null, nsith).getSith(); // next signing threshold
+        // Use nsith from args or default to isith
+        Sith nsith;
+        if (kargs.getNsith() != null) {
+            nsith = kargs.getNsith();
+        } else {
+            nsith = isith;
+        }
+
+        Sith cst = new Tholder(isith).getSith(); // current signing threshold
+        Sith nst = new Tholder(nsith).getSith(); // next signing threshold
 
         // Regenerate next keys to sign rotation event
         Keeper<?> keeper = this.client.getManager().get(hab);
