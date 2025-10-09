@@ -56,7 +56,9 @@ public class Credentials {
      *
      * @param said        - SAID of the credential
      * @param includeCESR - Optional flag export the credential in CESR format
-     * @return Optional containing the credential if found, or empty if not found
+     * @return Optional containing the credential if found, or empty if not found.
+     *         Returns String (raw CESR text) when includeCESR=true,
+     *         or Object (parsed JSON) when includeCESR=false
      */
     public Optional<Object> get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/" + said;
@@ -75,7 +77,7 @@ public class Credentials {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), Object.class));
+        return Optional.of(includeCESR ? response.body() : Utils.fromJson(response.body(), Object.class));
     }
 
     /**
@@ -255,5 +257,28 @@ public class Credentials {
         Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
 
         return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
+    }
+
+    /**
+     * Verify a credential and issuing event
+     *
+     * @param acdc ACDC to process and verify
+     * @param iss  Issuing event for ACDC in TEL
+     * @param atc Optional attachment string to be verified against the credential
+     * @return Operation containing the verification result
+     */
+    public Operation<?> verify(Serder acdc, Serder iss, String atc) throws IOException, InterruptedException, LibsodiumException {
+        final String path = "/credentials/verify";
+        final String method = "POST";
+        
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("acdc", acdc.getKed());
+        body.put("iss", iss.getKed());
+        if (atc != null && !atc.isEmpty()) {
+            body.put("atc", atc);
+        }
+        
+        HttpResponse<String> response = this.client.fetch(path, method, body);
+        return Operation.fromObject(Utils.fromJson(response.body(), Map.class));
     }
 }
