@@ -14,14 +14,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import java.util.concurrent.Callable;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,7 +29,7 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
     TestSteps testSteps = new TestSteps();
 
     private static SignifyClient issuerClient, verifierClient, holderClient, legalEntityClient;
-    private TestUtils.Aid issuerAid, verifierAid, holderAid, legalEntityAid;
+    private TestUtils.Aid issuerAid, holderAid, legalEntityAid;
     
     // Global variables to store QVI credential components
     private static Map<String, Object> vcpEvent;
@@ -72,7 +66,6 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
                 new CreateAidArgs(legalEntityClient, "legal-entity")
         );
         issuerAid = aids.get(0);
-        verifierAid = aids.get(1);
         holderAid = aids.get(2);
         legalEntityAid = aids.get(3);
     }
@@ -80,13 +73,11 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
     @BeforeEach
     public void getContact() {
         getOrCreateContactAsync(
-                new GetOrCreateContactArgs(issuerClient, "verifier", verifierAid.oobi),
                 new GetOrCreateContactArgs(issuerClient, "holder", holderAid.oobi),
                 new GetOrCreateContactArgs(verifierClient, "issuer", issuerAid.oobi),
                 new GetOrCreateContactArgs(verifierClient, "holder", holderAid.oobi),
                 new GetOrCreateContactArgs(holderClient, "issuer", issuerAid.oobi),
                 new GetOrCreateContactArgs(holderClient, "legal-entity", legalEntityAid.oobi),
-                new GetOrCreateContactArgs(holderClient, "verifier", verifierAid.oobi),
                 new GetOrCreateContactArgs(legalEntityClient, "holder", holderAid.oobi),
                 new GetOrCreateContactArgs(legalEntityClient, "issuer", issuerAid.oobi)
         );
@@ -128,23 +119,20 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
             CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
             registryArgs.setName(issuerAid.name);
             registryArgs.setRegistryName(registryName);
-            try {
-                RegistryResult regResult = issuerClient.registries().create(registryArgs);
-                waitOperation(issuerClient, regResult.op());
-                
-                Object registries = issuerClient.registries().list(issuerAid.name);
-                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
-                
-                registryData.put("name", registriesList.getFirst().get("name").toString());
-                registryData.put("regk", registriesList.getFirst().get("regk").toString());
-                
-                assertEquals(1, registriesList.size());
-                assertEquals(registryName, registryData.get("name"));
-                
-                return registryData;
-            } catch (IOException | InterruptedException | DigestException e) {
-                throw new RuntimeException(e);
-            }
+            
+            RegistryResult regResult = issuerClient.registries().create(registryArgs);
+            waitOperation(issuerClient, regResult.op());
+            
+            Object registries = issuerClient.registries().list(issuerAid.name);
+            List<Map<String, Object>> registriesList = castObjectToListMap(registries);
+            
+            registryData.put("name", registriesList.getFirst().get("name").toString());
+            registryData.put("regk", registriesList.getFirst().get("regk").toString());
+            
+            assertEquals(1, registriesList.size());
+            assertEquals(registryName, registryData.get("name"));
+            
+            return registryData;
         });
 
         qviCredentialId = testSteps.step("Issue QVI credential and extract components", () -> {
@@ -160,60 +148,54 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
             cData.setS(QVI_SCHEMA_SAID);
             cData.setA(a);
 
-            try {
-                IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
-                waitOperation(issuerClient, issResult.getOp());
-                String credId = issResult.getAcdc().getKed().get("d").toString();
+            IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
+            waitOperation(issuerClient, issResult.getOp());
+            String credId = issResult.getAcdc().getKed().get("d").toString();
+            
+            // Get the credential with CESR format to extract components
+            Optional<Object> credentialOpt = issuerClient.credentials().get(credId, true);
+            String credentialCesr = (String) credentialOpt.get();
+            
+            // Parse CESR data to extract VCP, ISS, and ACDC events
+            List<Map<String, Object>> cesrData = parseCESRData(credentialCesr);
+            
+            for (Map<String, Object> eventData : cesrData) {
+                Map<String, Object> event = (Map<String, Object>) eventData.get("event");
                 
-                // Get the credential with CESR format to extract components
-                Optional<Object> credentialOpt = issuerClient.credentials().get(credId, true);
-                String credentialCesr = (String) credentialOpt.get();
-                
-                // Parse CESR data to extract VCP, ISS, and ACDC events
-                List<Map<String, Object>> cesrData = parseCESRData(credentialCesr);
-                
-                for (Map<String, Object> eventData : cesrData) {
-                    Map<String, Object> event = (Map<String, Object>) eventData.get("event");
-                    
-                    // Check for event type
-                    Object eventTypeObj = event.get("t");
-                    if (eventTypeObj != null) {
-                        String eventType = eventTypeObj.toString();
-                        switch (eventType) {
-                            case "vcp":
-                                vcpEvent = event;
-                                vcpAttachment = (String) eventData.get("atc");
-                                break;
-                            case "iss":
-                                issEvent = event;
-                                issAttachment = (String) eventData.get("atc");
-                                break;
-                        }
-                    } else {
-                        // Check if this is an ACDC (credential data) without "t" field
-                        if (event.containsKey("s") && event.containsKey("a") && event.containsKey("i")) {
-                            Object schemaObj = event.get("s");
-                            if (schemaObj != null && QVI_SCHEMA_SAID.equals(schemaObj.toString())) {
-                                acdcEvent = event;
-                                // System.out.println("Extracted ACDC event");
-                            }
+                // Check for event type
+                Object eventTypeObj = event.get("t");
+                if (eventTypeObj != null) {
+                    String eventType = eventTypeObj.toString();
+                    switch (eventType) {
+                        case "vcp":
+                            vcpEvent = event;
+                            vcpAttachment = (String) eventData.get("atc");
+                            break;
+                        case "iss":
+                            issEvent = event;
+                            issAttachment = (String) eventData.get("atc");
+                            break;
+                    }
+                } else {
+                    // Check if this is an ACDC (credential data) without "t" field
+                    if (event.containsKey("s") && event.containsKey("a") && event.containsKey("i")) {
+                        Object schemaObj = event.get("s");
+                        if (schemaObj != null && QVI_SCHEMA_SAID.equals(schemaObj.toString())) {
+                            acdcEvent = event;
                         }
                     }
                 }
-                
-                // Verify all components were extracted
-                assertNotNull(vcpEvent, "VCP event should be extracted");
-                assertNotNull(vcpAttachment, "VCP attachment should be extracted");
-                assertNotNull(issEvent, "ISS event should be extracted");
-                assertNotNull(issAttachment, "ISS attachment should be extracted");
-                assertNotNull(acdcEvent, "ACDC event should be extracted");
-                
-                System.out.println("Successfully extracted all credential components");
-                return credId;
-                
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
+            
+            // Verify all components were extracted
+            assertNotNull(vcpEvent, "VCP event should be extracted");
+            assertNotNull(vcpAttachment, "VCP attachment should be extracted");
+            assertNotNull(issEvent, "ISS event should be extracted");
+            assertNotNull(issAttachment, "ISS attachment should be extracted");
+            assertNotNull(acdcEvent, "ACDC event should be extracted");
+            
+            System.out.println("Successfully extracted all credential components");
+            return credId;
         });
 
         Map<String, Object> holderRegistry = testSteps.step("Holder create registry for LE credential", () -> {
@@ -222,23 +204,18 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
             registryArgs.setName(holderAid.name);
             registryArgs.setRegistryName(registryName);
 
-            try {
-                RegistryResult regResult = holderClient.registries().create(registryArgs);
-                waitOperation(holderClient, regResult.op());
-                
-                Object registries = holderClient.registries().list(holderAid.name);
-                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
-                
-                assertTrue(!registriesList.isEmpty());
-                return registriesList.getFirst();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            RegistryResult regResult = holderClient.registries().create(registryArgs);
+            waitOperation(holderClient, regResult.op());
+            
+            Object registries = holderClient.registries().list(holderAid.name);
+            List<Map<String, Object>> registriesList = castObjectToListMap(registries);
+            
+            assertTrue(!registriesList.isEmpty());
+            return registriesList.getFirst();
         });
 
         leCredentialId = testSteps.step("Holder create LE (chained) credential and extract components", () -> {
-            try {
-                // First, holder must verify the QVI registry using VCP
+            // First, holder must verify the QVI registry using VCP
                 System.out.println("\n=== Holder Verifying QVI Registry ===");
 
                 Object op3 = holderClient.keyStates().query(issuerAid.prefix, "1");
@@ -247,23 +224,8 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
                 Serder holderVcpSerder = new Serder(vcpEvent);
                 Object holderRegistryVerifyOp = holderClient.registries().verify(holderVcpSerder, vcpAttachment);
                 
-                try {
-                    CompletableFuture<Operation<?>> future = CompletableFuture.supplyAsync(() -> {
-                        try {
-                            return waitOperation(holderClient, holderRegistryVerifyOp);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    
-                    Operation<?> holderRegistryOperation = future.get(30, TimeUnit.SECONDS);
-                    System.out.println("✓ Holder registry verification completed");
-                    System.out.println("  Registry Operation Status: " + holderRegistryOperation.isDone());
-                } catch (TimeoutException e) {
-                    System.out.println("⚠ Holder registry verification timed out after 30 seconds");
-                } catch (Exception e) {
-                    System.out.println("⚠ Holder registry verification failed: " + e.getMessage());
-                }
+                Operation<?> holderRegistryOperation = waitOperation(holderClient, holderRegistryVerifyOp);
+                assertTrue(holderRegistryOperation.isDone());
                 
                 // Second, holder must verify the QVI credential using ISS and ACDC
                 System.out.println("\n=== Holder Verifying QVI Credential ===");
@@ -273,26 +235,11 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
 
                 Serder holderAcdcSerder = new Serder(acdcEvent);
                 Serder holderIssSerder = new Serder(issEvent);
-                
-                Object holderCredentialVerifyOp = holderClient.credentials().verify(holderAcdcSerder, holderIssSerder, issAttachment);
-                
-                try {
-                    CompletableFuture<Operation<?>> future = CompletableFuture.supplyAsync(() -> {
-                        try {
-                            return waitOperation(holderClient, holderCredentialVerifyOp);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    
-                    Operation<?> holderCredentialOperation = future.get(30, TimeUnit.SECONDS);
-                    System.out.println("✓ Holder credential verification completed");
-                    System.out.println("  Credential Operation Status: " + holderCredentialOperation.isDone());
-                } catch (TimeoutException e) {
-                    System.out.println("⚠ Holder credential verification timed out after 30 seconds");
-                } catch (Exception e) {
-                    System.out.println("⚠ Holder credential verification failed: " + e.getMessage());
-                }
+
+                Object holderCredentialVerifyOp = holderClient.credentials().verify(holderAcdcSerder, holderIssSerder, null, issAttachment);
+
+                Operation<?> holderCredentialOperation = waitOperation(holderClient, holderCredentialVerifyOp);
+                assertTrue(holderCredentialOperation.isDone());
                 
                 System.out.println("✓ Holder verification steps completed, now retrieving QVI credential");
                 
@@ -410,78 +357,55 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
                 
                 System.out.println("Successfully extracted all LE credential components");
                 return leCredId;
-                
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
         });
 
-        testSteps.step("Verifier verify all registries using all VCP events", () -> {
-            try {
-                // Query all relevant key states
-                Object op4 = verifierClient.keyStates().query(holderAid.prefix, "1");
-                waitOperation(verifierClient, op4);
-                Object op5 = verifierClient.keyStates().query(issuerAid.prefix, "1");
-                waitOperation(verifierClient, op5);
-                
-                System.out.println("\n=== Verifying All VCP Events in Chain ===");
-                
-                List<Map<String, Object>> leCesrData = parseCESRData(leCredentialCesr);
-                
-                List<Map<String, Object>> allVcpEvents = new ArrayList<>();
-                List<String> allVcpAttachments = new ArrayList<>();
-                
-                for (Map<String, Object> eventData : leCesrData) {
-                    Map<String, Object> event = (Map<String, Object>) eventData.get("event");
-                    Object eventTypeObj = event.get("t");
-                    if (eventTypeObj != null && "vcp".equals(eventTypeObj.toString())) {
-                        allVcpEvents.add(event);
-                        allVcpAttachments.add((String) eventData.get("atc"));
-                    }
+        testSteps.steps("Verifier verify all registries using all VCP events", (Callable<Void>) () -> {
+            // Query all relevant key states
+            Object op4 = verifierClient.keyStates().query(holderAid.prefix, "1");
+            waitOperation(verifierClient, op4);
+            Object op5 = verifierClient.keyStates().query(issuerAid.prefix, "1");
+            waitOperation(verifierClient, op5);
+            
+            System.out.println("\n=== Verifying All VCP Events in Chain ===");
+            
+            List<Map<String, Object>> leCesrData = parseCESRData(leCredentialCesr);
+            
+            List<Map<String, Object>> allVcpEvents = new ArrayList<>();
+            List<String> allVcpAttachments = new ArrayList<>();
+            
+            for (Map<String, Object> eventData : leCesrData) {
+                Map<String, Object> event = (Map<String, Object>) eventData.get("event");
+                Object eventTypeObj = event.get("t");
+                if (eventTypeObj != null && "vcp".equals(eventTypeObj.toString())) {
+                    allVcpEvents.add(event);
+                    allVcpAttachments.add((String) eventData.get("atc"));
                 }
-                
-                // Verify each VCP event (registry) in the chain
-                for (int i = 0; i < allVcpEvents.size(); i++) {
-                    Map<String, Object> vcpEvent = allVcpEvents.get(i);
-                    String vcpAttachment = allVcpAttachments.get(i);
-                    Serder vcpSerder = new Serder(vcpEvent);
-                    Object registryVerifyOp = verifierClient.registries().verify(vcpSerder, vcpAttachment);
-                    
-                    try {
-                        CompletableFuture<Operation<?>> future = CompletableFuture.supplyAsync(() -> {
-                            try {
-                                return waitOperation(verifierClient, registryVerifyOp);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-                        
-                        Operation<?> registryOperation = future.get(30, TimeUnit.SECONDS);
-                        System.out.println("✓ VCP #" + (i + 1) + " verification completed successfully");
-                        System.out.println("  Registry Operation Status: " + registryOperation.isDone());
-                    } catch (TimeoutException e) {
-                        System.out.println("⚠ VCP #" + (i + 1) + " verification timed out after 30 seconds");
-                    } catch (Exception e) {
-                        System.out.println("⚠ VCP #" + (i + 1) + " verification failed: " + e.getMessage());
-                    }
-                }
-                
-                System.out.println("Completed verification of " + allVcpEvents.size() + " VCP events in the chain");
-                
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
+            
+            // Verify each VCP event (registry) in the chain
+            for (int i = 0; i < allVcpEvents.size(); i++) {
+                Map<String, Object> vcpEvent = allVcpEvents.get(i);
+                String vcpAttachment = allVcpAttachments.get(i);
+                Serder vcpSerder = new Serder(vcpEvent);
+                Object registryVerifyOp = verifierClient.registries().verify(vcpSerder, vcpAttachment);
+                
+                Operation<?> registryOperation = waitOperation(verifierClient, registryVerifyOp);
+                assertTrue(registryOperation.isDone());
+                System.out.println("✓ VCP #" + (i + 1) + " verification completed successfully");
+            }
+            
+            System.out.println("Completed verification of " + allVcpEvents.size() + " VCP events in the chain");
+            return null;
         });
 
-        testSteps.step("Verifier verify all credentials using all ISS and ACDC events", () -> {
-            try {
-                // Query all relevant key states
-                Object op6 = verifierClient.keyStates().query(holderAid.prefix, "1");
-                waitOperation(verifierClient, op6);
-                Object op7 = verifierClient.keyStates().query(issuerAid.prefix, "1");
-                waitOperation(verifierClient, op7);
+        testSteps.steps("Verifier verify all credentials using all ISS and ACDC events", (Callable<Void>) () -> {
+            // Query all relevant key states
+            Object op6 = verifierClient.keyStates().query(holderAid.prefix, "1");
+            waitOperation(verifierClient, op6);
+            Object op7 = verifierClient.keyStates().query(issuerAid.prefix, "1");
+            waitOperation(verifierClient, op7);
 
-                System.out.println("\n=== Verifying All ISS and ACDC Events in Chain ===");
+            System.out.println("\n=== Verifying All ISS and ACDC Events in Chain ===");
                 
                 // Parse the existing CESR data to extract ISS and ACDC events
                 List<Map<String, Object>> leCesrData = parseCESRData(leCredentialCesr);
@@ -504,38 +428,17 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
                     }
                 }
                 
-                System.out.println("Found " + allIssEvents.size() + " ISS events and " + allAcdcEvents.size() + " ACDC events");
-                
                 // Verify each credential in the chain (ISS + ACDC pairs)
                 for (int i = 0; i < Math.min(allIssEvents.size(), allAcdcEvents.size()); i++) {
                     Map<String, Object> issEvent = allIssEvents.get(i);
                     Map<String, Object> acdcEvent = allAcdcEvents.get(i);
                     String issAttachment = allIssAttachments.get(i);
-                    
-                    String credentialType = QVI_SCHEMA_SAID.equals(acdcEvent.get("s")) ? "QVI" : 
-                                          LE_SCHEMA_SAID.equals(acdcEvent.get("s")) ? "LE" : "Unknown";
                     Serder acdcSerder = new Serder(acdcEvent);
                     Serder issSerder = new Serder(issEvent);
                     
-                    Object credentialVerifyOp = verifierClient.credentials().verify(acdcSerder, issSerder, issAttachment);
-                    
-                    try {
-                        CompletableFuture<Operation<?>> future = CompletableFuture.supplyAsync(() -> {
-                            try {
-                                return waitOperation(verifierClient, credentialVerifyOp);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-                        
-                        Operation<?> credentialOperation = future.get(30, TimeUnit.SECONDS);
-                        System.out.println("✓ " + credentialType + " credential #" + (i + 1) + " verification completed successfully");
-                        System.out.println("  Credential Operation Status: " + credentialOperation.isDone());
-                    } catch (TimeoutException e) {
-                        System.out.println("⚠ " + credentialType + " credential #" + (i + 1) + " verification timed out after 30 seconds");
-                    } catch (Exception e) {
-                        System.out.println("⚠ " + credentialType + " credential #" + (i + 1) + " verification failed: " + e.getMessage());
-                    }
+                    Object credentialVerifyOp = verifierClient.credentials().verify(acdcSerder, issSerder, null, issAttachment);              
+                    Operation<?> credentialOperation = waitOperation(verifierClient, credentialVerifyOp);
+                    assertTrue(credentialOperation.isDone());
                 }
                 
                 // Verify the credential is available from verifier
@@ -544,11 +447,8 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
                 System.out.println("✓ All credentials in the chain verified successfully");
                 
                 // Check for chain information
-                System.out.println("LE Credential CESR contains QVI reference: " + leCredentialCesr.contains(qviCredentialId));
-                
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+                assertTrue(leCredentialCesr.contains(qviCredentialId));
+            return null;
         });
     }
 

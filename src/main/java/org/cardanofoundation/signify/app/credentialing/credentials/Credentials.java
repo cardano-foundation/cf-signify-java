@@ -264,18 +264,24 @@ public class Credentials {
      *
      * @param acdc ACDC to process and verify
      * @param iss  Issuing event for ACDC in TEL
-     * @param atc Optional attachment string to be verified against the credential
+     * @param acdcAtc Optional attachment string to be verified against the credential
+     * @param issAtc  Optional attachment string to be verified against the issuing event
      * @return Operation containing the verification result
      */
-    public Operation<?> verify(Serder acdc, Serder iss, String atc) throws IOException, InterruptedException, LibsodiumException {
+    public Operation<?> verify(Serder acdc, Serder iss, String acdcAtc, String issAtc) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/verify";
         final String method = "POST";
         
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("acdc", acdc.getKed());
         body.put("iss", iss.getKed());
-        if (atc != null && !atc.isEmpty()) {
-            body.put("atc", atc);
+
+        if (acdcAtc != null && !acdcAtc.isEmpty()) {
+            body.put("acdcAtc", acdcAtc);
+        }
+
+        if (issAtc != null && !issAtc.isEmpty()) {
+            body.put("issAtc", issAtc);
         }
         
         HttpResponse<String> response = this.client.fetch(path, method, body);
