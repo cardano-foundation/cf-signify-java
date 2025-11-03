@@ -7,7 +7,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistry
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryVerifyOptions;
 import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.cesr.util.CESRStreamUtil;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -153,7 +153,7 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
             String credentialCesr = issuerClient.credentials().get(credId).get();
 
             // Parse CESR data to extract VCP, ISS, and ACDC events
-            List<Map<String, Object>> cesrData = parseCESRData(credentialCesr);
+            List<Map<String, Object>> cesrData = CESRStreamUtil.parseCESRData(credentialCesr);
 
             for (Map<String, Object> eventData : cesrData) {
                 Map<String, Object> event = (Map<String, Object>) eventData.get("event");
@@ -300,7 +300,7 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
             leCredentialCesr = leCredentialCesrOpt.get();
 
             // Parse CESR data to extract VCP, ISS, and ACDC events for LE credential
-            List<Map<String, Object>> leCesrData = parseCESRData(leCredentialCesr);
+            List<Map<String, Object>> leCesrData = CESRStreamUtil.parseCESRData(leCredentialCesr);
 
             // Collect all VCP, ISS, and ACDC events for chained credential verification
             List<Map<String, Object>> allVcpEvents = new ArrayList<>();
@@ -377,7 +377,7 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
 
             System.out.println("\n=== Verifying All VCP Events in Chain ===");
 
-            List<Map<String, Object>> leCesrData = parseCESRData(leCredentialCesr);
+            List<Map<String, Object>> leCesrData = CESRStreamUtil.parseCESRData(leCredentialCesr);
 
             List<Map<String, Object>> allVcpEvents = new ArrayList<>();
             List<String> allVcpAttachments = new ArrayList<>();
@@ -423,7 +423,7 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
             System.out.println("\n=== Verifying All ISS and ACDC Events in Chain ===");
 
             // Parse the existing CESR data to extract ISS and ACDC events
-            List<Map<String, Object>> leCesrData = parseCESRData(leCredentialCesr);
+            List<Map<String, Object>> leCesrData = CESRStreamUtil.parseCESRData(leCredentialCesr);
 
             List<Map<String, Object>> allIssEvents = new ArrayList<>();
             List<String> allIssAttachments = new ArrayList<>();
@@ -476,79 +476,5 @@ public class VerifyCredentialTest extends BaseIntegrationTest {
     static class StringData {
         static final String USAGE_DISCLAIMER = "Usage of a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, does not assert that the Legal Entity is trustworthy, honest, reputable in its business dealings, safe to do business with, or compliant with any laws or that an implied or expressly intended purpose will be fulfilled.";
         static final String ISSUANCE_DISCLAIMER = "All information in a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, is accurate as of the date the validation process was complete. The vLEI Credential has been issued to the legal entity or person named in the vLEI Credential as the subject; and the qualified vLEI Issuer exercised reasonable care to perform the validation process set forth in the vLEI Ecosystem Governance Framework.";
-    }
-
-    /**
-     * Parses CESR format string into an array of events with their attachments
-     * CESR format: {json_event}{attachment}{json_event}{attachment}...
-     * 
-     * @param cesrData The CESR format string
-     * @return List of maps containing "event" and "atc" keys
-     */
-    @SuppressWarnings("unchecked")
-    public static List<Map<String, Object>> parseCESRData(String cesrData) {
-        List<Map<String, Object>> result = new ArrayList<>();
-
-        int index = 0;
-        while (index < cesrData.length()) {
-            // Find the start of JSON event (look for opening brace)
-            if (cesrData.charAt(index) == '{') {
-                // Find the end of JSON event by counting braces
-                int braceCount = 0;
-                int jsonStart = index;
-                int jsonEnd = index;
-
-                for (int i = index; i < cesrData.length(); i++) {
-                    char ch = cesrData.charAt(i);
-                    if (ch == '{') {
-                        braceCount++;
-                    } else if (ch == '}') {
-                        braceCount--;
-                        if (braceCount == 0) {
-                            jsonEnd = i + 1;
-                            break;
-                        }
-                    }
-                }
-
-                // Extract JSON event
-                String jsonEvent = cesrData.substring(jsonStart, jsonEnd);
-
-                // Find attachment data (everything until next '{' or end of string)
-                int attachmentStart = jsonEnd;
-                int attachmentEnd = cesrData.length();
-
-                for (int i = attachmentStart; i < cesrData.length(); i++) {
-                    if (cesrData.charAt(i) == '{') {
-                        attachmentEnd = i;
-                        break;
-                    }
-                }
-
-                String attachment = "";
-                if (attachmentStart < attachmentEnd) {
-                    attachment = cesrData.substring(attachmentStart, attachmentEnd);
-                }
-
-                // Parse JSON event to Object
-                try {
-                    Map<String, Object> eventObj = Utils.fromJson(jsonEvent, Map.class);
-
-                    Map<String, Object> eventMap = new LinkedHashMap<>();
-                    eventMap.put("event", eventObj);
-                    eventMap.put("atc", attachment);
-                    result.add(eventMap);
-                } catch (Exception e) {
-                    System.err.println("Failed to parse JSON event: " + jsonEvent);
-                    e.printStackTrace();
-                }
-
-                index = attachmentEnd;
-            } else {
-                index++;
-            }
-        }
-
-        return result;
     }
 }
