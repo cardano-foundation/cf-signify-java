@@ -246,7 +246,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer get credential by id", () -> {
             try {
-                Object issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+                Object issuerCredential = issuerClient.credentials().get(qviCredentialId, false).get();
                 LinkedHashMap<String, Object> issuerCredentialsList = castObjectToLinkedHashMap(issuerCredential);
                 Object credentialsMap = issuerCredentialsList.get("sad");
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(credentialsMap);
@@ -264,7 +264,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Issuer IPEX grant", () -> {
             String dt = createTimestamp();
             try {
-                Object issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+                Object issuerCredential = issuerClient.credentials().get(qviCredentialId, false).get();
                 LinkedHashMap<String, Object> issuerCredentialList = castObjectToLinkedHashMap(issuerCredential);
                 Map<String, Object> getSAD = (Map<String, Object>) issuerCredentialList.get("sad");
                 Map<String, Object> getANC = (Map<String, Object>) issuerCredentialList.get("anc");
@@ -340,7 +340,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             Map<String, Object> sad, status;
             String atc;
             try {
-                Object holderCredential = holderClient.credentials().get(qviCredentialId).get();
+                Object holderCredential = holderClient.credentials().get(qviCredentialId, false).get();
                 LinkedHashMap<String, Object> holderCredentialList = castObjectToLinkedHashMap(holderCredential);
 
                 Object credentialsMap = holderCredentialList.get("sad");
@@ -490,7 +490,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 markAndRemoveNotification(holderClient, holderAgreeNote);
 
-                Object holderCredential = holderClient.credentials().get(qviCredentialId).get();
+                Object holderCredential = holderClient.credentials().get(qviCredentialId, false).get();
                 LinkedHashMap<String, Object> holderCredentialBody = castObjectToLinkedHashMap(holderCredential);
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(holderCredentialBody.get("sad"));
                 LinkedHashMap<String, Object> anc = castObjectToLinkedHashMap(holderCredentialBody.get("anc"));
@@ -550,7 +550,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 );
                 waitOperation(verifierClient, op);
                 markAndRemoveNotification(verifierClient, verifierGrantNote);
-                Object verifierCredential = verifierClient.credentials().get(qviCredentialId).get();
+                Object verifierCredential = verifierClient.credentials().get(qviCredentialId, false).get();
 
                 LinkedHashMap<String, Object> verifierCredentialBody = castObjectToLinkedHashMap(verifierCredential);
                 LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(verifierCredentialBody.get("sad"));
@@ -599,7 +599,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         String leCredentialId = testSteps.step("Holder create LE (chained) credential", () -> {
             try {
-                Object qviCredential = holderClient.credentials().get(qviCredentialId).get();
+                Object qviCredential = holderClient.credentials().get(qviCredentialId, false).get();
                 LinkedHashMap<String, Object> qviCredentialBody = castObjectToLinkedHashMap(qviCredential);
                 LinkedHashMap<String, Object> sadBody = castObjectToLinkedHashMap(qviCredentialBody.get("sad"));
 
@@ -646,7 +646,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("LE credential IPEX grant", () -> {
             String dt = createTimestamp();
             try {
-                Object leCredential = holderClient.credentials().get(leCredentialId).get();
+                Object leCredential = holderClient.credentials().get(leCredentialId, false).get();
 
                 LinkedHashMap<String, Object> leCredentialBody = castObjectToLinkedHashMap(leCredential);
                 assertTrue(!leCredentialBody.isEmpty());
@@ -710,7 +710,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             Object legalEntityCredential = retry(() -> {
                 try {
                     assertNotNull(leCredentialId);
-                    return legalEntityClient.credentials().get(leCredentialId).get();
+                    return legalEntityClient.credentials().get(leCredentialId, false).get();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -736,7 +736,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             try {
                 RevokeCredentialResult revokeOperation = issuerClient.credentials().revoke(issuerAid.name, qviCredentialId, null);
                 waitOperation(issuerClient, revokeOperation.getOp());
-                Object issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+                Object issuerCredential = issuerClient.credentials().get(qviCredentialId, false).get();
 
                 LinkedHashMap<String, Object> issuerCredentialBody = castObjectToLinkedHashMap(issuerCredential);
                 LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(issuerCredentialBody.get("status"));

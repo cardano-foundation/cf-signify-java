@@ -47,34 +47,57 @@ public class Credentials {
         return Utils.fromJson(response.body(), Object.class);
     }
 
-    public Optional<Object> get(String said) throws IOException, InterruptedException, LibsodiumException {
-        return this.get(said, false);
+    /**
+     * Get a credential as raw CESR string.
+     */
+    public Optional<String> get(String said) throws IOException, InterruptedException, LibsodiumException {
+        return this.getCESR(said);
     }
 
     /**
-     * Get a credential
-     *
-     * @param said        - SAID of the credential
-     * @param includeCESR - Optional flag export the credential in CESR format
-     * @return Optional containing the credential if found, or empty if not found
+     * Get a credential as parsed JSON (Object) or raw CESR string depending on includeCESR.
      */
     public Optional<Object> get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
+        if (includeCESR) {
+            // For backward compatibility, but prefer getCESR for type safety
+            Optional<String> cesr = getCESR(said);
+            return cesr.map(s -> (Object) s);
+        } else {
+            return getJson(said);
+        }
+    }
+
+    /**
+     * Get a credential as raw CESR string.
+     */
+    public Optional<String> getCESR(String said) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/" + said;
         final String method = "GET";
-
         Map<String, String> extraHeaders = new LinkedHashMap<>();
-        if (includeCESR) {
-            extraHeaders.put("Accept", "application/json+cesr");
-        } else {
-            extraHeaders.put("Accept", "application/json");
-        }
+        extraHeaders.put("Accept", "application/json+cesr");
 
         HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
-        
+
         if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
             return Optional.empty();
         }
-        
+        return Optional.of(response.body());
+    }
+
+    /**
+     * Get a credential as parsed JSON (Object).
+     */
+    private Optional<Object> getJson(String said) throws IOException, InterruptedException, LibsodiumException {
+        final String path = "/credentials/" + said;
+        final String method = "GET";
+        Map<String, String> extraHeaders = new LinkedHashMap<>();
+        extraHeaders.put("Accept", "application/json");
+
+        HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
+
+        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
         return Optional.of(Utils.fromJson(response.body(), Object.class));
     }
 
@@ -196,7 +219,7 @@ public class Credentials {
         final String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         final String dt = datetime != null ? datetime : Utils.currentDateTimeString();
 
-        Map<String, Object> cred = Utils.toMap(this.get(said)
+        Map<String, Object> cred = Utils.toMap(this.get(said, false)
                 .orElseThrow(() -> new IllegalArgumentException("Credential not found: " + said)));
 
         // Create rev
@@ -255,5 +278,31 @@ public class Credentials {
         Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
 
         return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
+    }
+
+    /**
+     * Verify a credential and issuing event
+     *
+     * @param options CredentialVerifyOptions containing all verification parameters
+     * @return Operation containing the verification result
+     */
+    public Operation<?> verify(CredentialVerifyOptions options) throws IOException, InterruptedException, LibsodiumException {
+        final String path = "/credentials/verify";
+        final String method = "POST";
+        
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("acdc", options.getAcdc().getKed());
+        body.put("iss", options.getIss().getKed());
+
+        if (options.getAcdcAtc() != null && !options.getAcdcAtc().isEmpty()) {
+            body.put("acdcAtc", options.getAcdcAtc());
+        }
+
+        if (options.getIssAtc() != null && !options.getIssAtc().isEmpty()) {
+            body.put("issAtc", options.getIssAtc());
+        }
+        
+        HttpResponse<String> response = this.client.fetch(path, method, body);
+        return Operation.fromObject(Utils.fromJson(response.body(), Map.class));
     }
 }

@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.app.credentialing.registries;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
+import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.habery.TraitCodex;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
@@ -164,5 +165,28 @@ public class Registries {
 
         HttpResponse<String> response = this.client.fetch(path, method, data);
         return Utils.fromJson(response.body(), Object.class);
+    }
+
+    /**
+     * Verify a registry with optional attachment
+     *
+     * @param options RegistryVerifyOptions containing all verification parameters
+     * @return Operation containing the verification result
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @throws LibsodiumException   if a sodium exception occurs
+     */
+    public Operation<?> verify(RegistryVerifyOptions options) throws IOException, InterruptedException, LibsodiumException {
+        final String path = "/registries/verify";
+        final String method = "POST";
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("vcp", options.getVcp().getKed());
+        if (options.getAtc() != null && !options.getAtc().isEmpty()) {
+            body.put("atc", options.getAtc());
+        }
+
+        HttpResponse<String> response = this.client.fetch(path, method, body);
+        return Operation.fromObject(Utils.fromJson(response.body(), Map.class));
     }
 }
