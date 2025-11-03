@@ -47,9 +47,14 @@ public class CredentialingTest extends BaseMockServerTest {
                 null
         );
 
-        String body = reqUrl.startsWith(url + "/credentials")
-                ? MOCK_CREDENTIAL
-                : MOCK_GET_AID;
+        String body;
+        if (reqUrl.startsWith(url + "/credentials")) {
+            body = MOCK_CREDENTIAL;
+        } else if (reqUrl.startsWith(url + "/registries")) {
+            body = MOCK_REGISTRY_STATE;
+        } else {
+            body = MOCK_GET_AID;
+        }
 
         MockResponse mockResponse = new MockResponse()
                 .setResponseCode(202)

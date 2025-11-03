@@ -188,6 +188,22 @@ public class BaseMockServerTest {
             "windexes": []
         }""";
 
+    public static final String MOCK_REGISTRY_STATE = """
+        {
+            "v": "KERI10JSON000135_",
+            "i": "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo",
+            "s": "0",
+            "d": "ENf3IEYwYtFmlq5ZzoI-zFzeR7E3ZNRN2YH_0KAFbdJW",
+            "ri": "EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df",
+            "ra": {},
+            "a": {
+                "s": 2,
+                "d": "EIpgyKVF0z0Pcn2_HgbWhEKmJhOXFeD4SA62SrxYXOLt"
+            },
+            "dt": "2023-08-23T15:16:07.553000+00:00",
+            "et": "iss"
+        }""";
+
     public static final String MOCK_CREDENTIAL = """
         {
             "sad": {

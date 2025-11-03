@@ -170,23 +170,22 @@ public class Registries {
     /**
      * Verify a registry with optional attachment
      *
-     * @param vcp the VCP (Verifiable Credential Protocol) data to verify
-     * @param atc the optional attachment data (metadata)
+     * @param options RegistryVerifyOptions containing all verification parameters
      * @return Operation containing the verification result
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Operation<?> verify(Serder vcp, String atc) throws IOException, InterruptedException, LibsodiumException {
+    public Operation<?> verify(RegistryVerifyOptions options) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/registries/verify";
         final String method = "POST";
-        
+
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("vcp", vcp.getKed());
-        if (atc != null && !atc.isEmpty()) {
-            body.put("atc", atc);
+        body.put("vcp", options.getVcp().getKed());
+        if (options.getAtc() != null && !options.getAtc().isEmpty()) {
+            body.put("atc", options.getAtc());
         }
-        
+
         HttpResponse<String> response = this.client.fetch(path, method, body);
         return Operation.fromObject(Utils.fromJson(response.body(), Map.class));
     }

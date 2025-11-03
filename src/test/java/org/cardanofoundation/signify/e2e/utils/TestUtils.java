@@ -362,7 +362,7 @@ public class TestUtils {
 
         IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
         waitOperation(issuerClient, issResult.getOp());
-        Object credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
+        Object credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString(), false).get();
 
         return credential;
     }
