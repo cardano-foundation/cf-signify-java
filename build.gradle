@@ -4,6 +4,7 @@ plugins {
     id 'io.qameta.allure' version '2.11.2'
     id 'org.ajoberstar.grgit' version '5.2.0'
     id 'org.jreleaser' version '1.19.0'
+    id("org.openapi.generator") version "7.16.0"
 }
 
 repositories {
@@ -36,6 +37,8 @@ def jacksonVersion = '2.18.1'
 def bouncycastleVersion = '1.79'
 def jsonVersion = '20240303'
 def structuredFieldsVersion = '0.4'
+def jakartaAnnotationVersion = '2.1.1'
+def jacksonNullableVersion = '0.2.6'
 
 // test dependencies
 def testngVersion = '7.7.0'
@@ -56,6 +59,8 @@ dependencies {
     implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}"
     implementation "org.json:json:${jsonVersion}"
     implementation "org.greenbytes.http:structured-fields:${structuredFieldsVersion}"
+    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
+    implementation "org.openapitools:jackson-databind-nullable:${jacksonNullableVersion}"
 
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
@@ -186,4 +191,59 @@ tasks.register('allureE2ETestReport') {
 // Disable the default allureReport task if custom tasks are used
 tasks.named('allureReport') {
     enabled = false
+}
+
+tasks.openApiGenerate {
+    generatorName.set("java")
+    def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+    inputSpec.set(generatedSpec.map { it.asFile.absolutePath })
+    outputDir.set("$rootDir".toString())
+    validateSpec.set(false)
+    skipValidateSpec.set(true)
+    modelPackage.set("org.cardanofoundation.signify.generated.keria.model")
+    invokerPackage.set("org.cardanofoundation.signify.generated.keria.model")
+
+    globalProperties.set([
+        models        : "",   // generate models only
+        modelDocs     : "false",
+        modelTests    : "false",
+    ])
+
+    configOptions = [
+            library              : "resttemplate",
+            serializationLibrary : "jackson",
+            useJakartaEe         : "true",
+            dateLibrary          : "java21",
+            sourceFolder         : "src/main/java"
+    ]
+
+    nameMappings.put("A", "AUpper")
+}
+
+tasks.register("prepareOpenApiSpec") {
+    group = "openapi"
+    description = "Fetches keria OpenAPI spec from SPEC_URL"
+
+    def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+    outputs.file(generatedSpec)
+
+    doLast {
+        def specUrl = System.getenv("SPEC_URL") ?: "http://localhost:3902/spec.yaml"
+        def target = generatedSpec.get().asFile
+        target.parentFile.mkdirs()
+
+        logger.lifecycle("Downloading OpenAPI spec from ${specUrl}")
+        try {
+            target.withOutputStream { out ->
+                new URL(specUrl).withInputStream { input -> out << input }
+            }
+        } catch (Exception ex) {
+            throw new GradleException("Failed to download spec from ${specUrl}. Set SPEC_URL to a reachable spec endpoint.", ex)
+        }
+        logger.lifecycle("Spec available at ${target}")
+    }
+}
+
+tasks.named("openApiGenerate") {
+    dependsOn("prepareOpenApiSpec")
 }
