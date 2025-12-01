@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
@@ -15,6 +14,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -39,7 +39,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
     States.HabState aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
-    private List<HashMap<String, Object>> registryList, indentifierMap1, indentifierMap2;
+    private List<HashMap<String, Object>> registryList;
 
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     ArrayList<String> WITNESS_AIDS = new ArrayList<>(Arrays.asList(
@@ -141,28 +141,27 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Multisig created!");
 
         IdentifierListResponse identifiers1 = client1.identifiers().list();
-        indentifierMap1 = Utils.fromJson(identifiers1.aids().toString(), new TypeReference<>() {});
-        assertEquals(2, indentifierMap1.size());
-
+        List<Identifier> aids1 = identifiers1.aids();
+        assertEquals(2, aids1.size());
 
         IdentifierListResponse identifiers2 = client1.identifiers().list();
-        indentifierMap2 = Utils.fromJson(identifiers2.aids().toString(), new TypeReference<>() {});
-        assertEquals(2, indentifierMap2.size());
+        List<Identifier> aids2 = identifiers2.aids();
+        assertEquals(2, aids2.size());
 
         System.out.printf(
                 "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
-                Utils.toMap(indentifierMap1.get(0)).get("name"),
-                Utils.toMap(indentifierMap1.get(0)).get("prefix"),
-                Utils.toMap(indentifierMap1.get(1)).get("name"),
-                Utils.toMap(indentifierMap1.get(1)).get("prefix")
+                aids1.get(0).getName(),
+                aids1.get(0).getPrefix(),
+                aids1.get(1).getName(),
+                aids1.get(1).getPrefix()
         );
 
         System.out.printf(
                 "Client 2 managed AIDs:\n%s [%s]\n%s [%s]%n",
-                Utils.toMap(indentifierMap2.get(0)).get("name"),
-                Utils.toMap(indentifierMap2.get(0)).get("prefix"),
-                Utils.toMap(indentifierMap2.get(1)).get("name"),
-                Utils.toMap(indentifierMap2.get(1)).get("prefix")
+                aids2.get(0).getName(),
+                aids2.get(0).getPrefix(),
+                aids2.get(1).getName(),
+                aids2.get(1).getPrefix()
         );
 
         // Multisig end role

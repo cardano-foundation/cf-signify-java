@@ -18,6 +18,7 @@ import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.core.Manager.Algos;
+import org.cardanofoundation.signify.app.config.GeneratedModelMapper;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -68,7 +69,7 @@ public class Identifier {
                 range.start(),
                 range.end(),
                 range.total(),
-                response.body()
+                Arrays.asList(GeneratedModelMapper.read(response.body(), org.cardanofoundation.signify.generated.keria.model.Identifier[].class))
         );
     }
 
@@ -96,7 +97,9 @@ public class Identifier {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), States.HabState.class));
+        org.cardanofoundation.signify.generated.keria.model.Identifier identifier =
+            GeneratedModelMapper.read(response.body(), org.cardanofoundation.signify.generated.keria.model.Identifier.class);
+        return Optional.ofNullable(IdentifierModelConverter.toHabState(identifier));
     }
 
     /**
@@ -110,8 +113,14 @@ public class Identifier {
         final String path = "/identifiers/" + name;
         final String method = "PUT";
 
-        HttpResponse<String> response = this.client.fetch(path, method, info);
-        return Utils.fromJson(response.body(), States.HabState.class);
+        HttpResponse<String> response = this.client.fetch(
+            path,
+            method,
+            IdentifierPayloadMapper.buildUpdateNamePayload(info.getName())
+        );
+        org.cardanofoundation.signify.generated.keria.model.Identifier identifier =
+            GeneratedModelMapper.read(response.body(), org.cardanofoundation.signify.generated.keria.model.Identifier.class);
+        return IdentifierModelConverter.toHabState(identifier);
     }
 
     /**
@@ -253,15 +262,17 @@ public class Identifier {
             rmids = rstateDeserialized.stream().map(States.State::getI).toList();
         }
 
-        Map<String, Object> jsondata = new LinkedHashMap<>();
-        jsondata.put("name", name);
-        jsondata.put("icp", serder.getKed());
-        jsondata.put("sigs", sigs);
-        jsondata.put("proxy", proxy);
-        jsondata.put("smids", smids);
-        jsondata.put("rmids", rmids);
-
-        jsondata.put(algo.getValue(), keeper.getParams().toMap());
+        Map<String, Object> jsondata = IdentifierPayloadMapper.buildCreatePayload(
+            name,
+            serder.getKed(),
+            sigs,
+            proxy,
+            smids,
+            rmids,
+            keeper.getAlgo(),
+            keeper.getParams().toMap(),
+            extern
+        );
 
         this.client.setPidx(this.client.getPidx() + 1);
 
@@ -292,14 +303,10 @@ public class Identifier {
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
-        LinkedHashMap<String, Object> jsondata = new LinkedHashMap<>();
-        jsondata.put("rpy", rpy.getKed());
-        jsondata.put("sigs", sigs);
-
         HttpResponse<String> res = this.client.fetch(
                 "/identifiers/" + name + "/endroles",
                 "POST",
-                jsondata
+                IdentifierPayloadMapper.buildEndRolePayload(rpy.getKed(), sigs)
         );
         return new EventResult(rpy, sigs, res);
     }
