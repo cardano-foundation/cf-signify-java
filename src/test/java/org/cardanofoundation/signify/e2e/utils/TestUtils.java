@@ -12,6 +12,7 @@ import org.cardanofoundation.signify.app.Contacting;
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
+import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
@@ -21,6 +22,7 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -573,6 +575,14 @@ public class TestUtils {
     @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> castObjectToListMap(Object object) {
         return (List<Map<String, Object>>) object;
+    }
+
+    /**
+     * Convenience wrapper to access generated identifiers from list responses.
+     */
+    public static List<Identifier> identifiers(IdentifierListResponse response
+    ) {
+        return response.aids();
     }
 
     @FunctionalInterface

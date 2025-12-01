@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
@@ -25,6 +24,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -219,45 +219,45 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("Multisig created!");
 
         IdentifierListResponse identifiers1 = client1.identifiers().list();
-        List<HashMap<String, Object>> aids1 = Utils.fromJson(identifiers1.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids1 = identifiers1.aids();
         assertEquals(2, aids1.size());
-        assertEquals("member1", aids1.get(0).get("name"));
-        assertEquals("multisig", aids1.get(1).get("name"));
+        assertEquals("member1", aids1.get(0).getName());
+        assertEquals("multisig", aids1.get(1).getName());
 
         IdentifierListResponse identifiers2 = client2.identifiers().list();
-        List<HashMap<String, Object>> aids2 = Utils.fromJson(identifiers2.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids2 = identifiers2.aids();
         assertEquals(2, aids2.size());
-        assertEquals("member2", aids2.get(0).get("name"));
-        assertEquals("multisig", aids2.get(1).get("name"));
+        assertEquals("member2", aids2.get(0).getName());
+        assertEquals("multisig", aids2.get(1).getName());
 
         IdentifierListResponse identifiers3 = client3.identifiers().list();
-        List<HashMap<String, Object>> aids3 = Utils.fromJson(identifiers3.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids3 = identifiers3.aids();
         assertEquals(2, aids3.size());
-        assertEquals("member3", aids3.get(0).get("name"));
-        assertEquals("multisig", aids3.get(1).get("name"));
+        assertEquals("member3", aids3.get(0).getName());
+        assertEquals("multisig", aids3.get(1).getName());
 
         System.out.printf(
                 "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
-                Utils.toMap(aids1.get(0)).get("name"),
-                Utils.toMap(aids1.get(0)).get("prefix"),
-                Utils.toMap(aids1.get(1)).get("name"),
-                Utils.toMap(aids1.get(1)).get("prefix")
+                aids1.get(0).getName(),
+                aids1.get(0).getPrefix(),
+                aids1.get(1).getName(),
+                aids1.get(1).getPrefix()
         );
 
         System.out.printf(
                 "Client 2 managed AIDs:\n%s [%s]\n%s [%s]%n",
-                Utils.toMap(aids2.get(0)).get("name"),
-                Utils.toMap(aids2.get(0)).get("prefix"),
-                Utils.toMap(aids2.get(1)).get("name"),
-                Utils.toMap(aids2.get(1)).get("prefix")
+                aids2.get(0).getName(),
+                aids2.get(0).getPrefix(),
+                aids2.get(1).getName(),
+                aids2.get(1).getPrefix()
         );
 
         System.out.printf(
                 "Client 3 managed AIDs:\n%s [%s]\n%s [%s]%n",
-                Utils.toMap(aids3.get(0)).get("name"),
-                Utils.toMap(aids3.get(0)).get("prefix"),
-                Utils.toMap(aids3.get(1)).get("name"),
-                Utils.toMap(aids3.get(1)).get("prefix")
+                aids3.get(0).getName(),
+                aids3.get(0).getPrefix(),
+                aids3.get(1).getName(),
+                aids3.get(1).getPrefix()
         );
 
         String multisig = Utils.toMap(aids3.get(1)).get("prefix").toString();
