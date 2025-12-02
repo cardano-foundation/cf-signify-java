@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.app.aiding;
 
 import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
@@ -10,7 +11,6 @@ import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -82,14 +82,14 @@ public final class IdentifierModelConverter {
         }
         return States.SaltyState.builder()
             .sxlt(salty.getSxlt())
-            .pidx(defaultInt(salty.getPidx()))
-            .kidx(defaultInt(salty.getKidx()))
+            .pidx(salty.getPidx())
+            .kidx(salty.getKidx())
             .stem(salty.getStem())
-            .tier(salty.getTier() != null ? org.cardanofoundation.signify.cesr.Salter.Tier.valueOf(salty.getTier().getValue()) : null)
+            .tier(salty.getTier() != null ? Salter.Tier.fromString(salty.getTier().getValue()) : null)
             .dcode(salty.getDcode())
             .icodes(salty.getIcodes())
             .ncodes(salty.getNcodes())
-            .transferable(defaultBoolean(salty.getTransferable()))
+            .transferable(salty.getTransferable())
             .build();
     }
 
@@ -120,13 +120,5 @@ public final class IdentifierModelConverter {
             return defaultValue;
         }
         return nullable.get();
-    }
-
-    private static int defaultInt(Integer value) {
-        return value != null ? value : 0;
-    }
-
-    private static boolean defaultBoolean(Boolean value) {
-        return value != null && value;
     }
 }
