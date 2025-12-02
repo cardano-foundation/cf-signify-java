@@ -25,10 +25,6 @@ public final class IdentifierModelConverter {
             return null;
         }
 
-        return buildHabState(identifier, true);
-    }
-
-    private static States.HabState buildHabState(Identifier identifier, boolean includeGroup) {
         return States.HabState.builder()
             .name(identifier.getName())
             .prefix(identifier.getPrefix())
@@ -37,7 +33,7 @@ public final class IdentifierModelConverter {
             .windexes(new ArrayList<>(unwrap(identifier.getWindexes_JsonNullable(), List.of())))
             .salty(toSaltyState(identifier.getSalty()))
             .randy(toRandyState(identifier.getRandy()))
-            .group(includeGroup ? toGroupState(identifier.getGroup()) : null)
+            .group(toGroupState(identifier.getGroup()))
             .build();
     }
 
@@ -113,7 +109,7 @@ public final class IdentifierModelConverter {
         }
 
         return States.GroupState.builder()
-            .mhab(buildHabState(group.getMhab(), false)) // avoid deep recursion
+            .mhab(toHabState(group.getMhab()))
             .keys(group.getKeys())
             .ndigs(group.getNdigs())
             .build();
