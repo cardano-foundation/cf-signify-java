@@ -7,6 +7,7 @@ import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
@@ -214,8 +215,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
                     .algo(Manager.Algos.group)
-                    .isith(List.of("1/2", "1/2"))
-                    .nsith(List.of("1/2", "1/2"))
+                    .isith(Sith.fromStringWeighted(List.of("1/2", "1/2")))
+                    .nsith(Sith.fromStringWeighted(List.of("1/2", "1/2")))
                     .toad(kargsAID.getToad())
                     .wits(kargsAID.getWits())
                     .states(states)
@@ -324,8 +325,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
                     .algo(Manager.Algos.group)
-                    .isith(List.of("2/3", "1/2", "1/2"))
-                    .nsith(List.of("2/3", "1/2", "1/2"))
+                    .isith(Sith.fromStringWeighted(List.of("2/3", "1/2", "1/2")))
+                    .nsith(Sith.fromStringWeighted(List.of("2/3", "1/2", "1/2")))
                     .toad(kargsAID.getToad())
                     .wits(kargsAID.getWits())
                     .states(states)
@@ -724,8 +725,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
                     .algo(Manager.Algos.group)
-                    .isith(List.of("2/3", "1/2", "1/2"))
-                    .nsith(List.of("2/3", "1/2", "1/2"))
+                    .isith(Sith.fromStringWeighted(List.of("2/3", "1/2", "1/2")))
+                    .nsith(Sith.fromStringWeighted(List.of("2/3", "1/2", "1/2")))
                     .toad(kargsAID.getToad())
                     .wits(kargsAID.getWits())
                     .states(states)

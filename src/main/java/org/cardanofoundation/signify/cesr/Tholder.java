@@ -6,7 +6,6 @@ import org.apache.commons.math3.fraction.Fraction;
 import org.cardanofoundation.signify.cesr.Codex.BexCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
@@ -20,66 +19,46 @@ import java.util.stream.Collectors;
 @Getter
 public class Tholder {
     private boolean weighted = false;
-    private Object thold;
+    private Integer unweightedThold;
+    private List<List<Fraction>> weightedThold;
     private int size = 0;
     private CesrNumber number;
     private Function<List<Integer>, Boolean> _satisfy;
 
-    public Tholder(Object thold, Object limen, Object sith) {
-        if (thold != null) {
-            _processThold(thold);
-        } else if (limen != null) {
-            _processLimen((String) limen);
-        } else if (sith != null) {
-            _processSith(sith);
-        } else {
-            throw new EmptyMaterialException("Missing threshold expression");
-        }
+    public Tholder(Integer unweightedThold) {
+        this._processUnweighted(unweightedThold);
+    }
+
+    public Tholder(List<List<Fraction>> weightedThold) {
+        this._processWeighted(weightedThold);
+    }
+
+    public Tholder(String limen) {
+        this._processLimen(limen);
+    }
+
+    public Tholder(Sith sith) {
+        this._processSith(sith);
     }
 
     public byte[] getLimen() {
         return number != null ? number.getQb64b() : null;
     }
 
-    public Object getSith() {
+    public Sith getSith() {
         if (this.weighted) {
-            List<List<String>> sith = new ArrayList<>();
-            for (List<Fraction> clause : (List<List<Fraction>>) thold) {
-                List<String> clauseStr = new ArrayList<>();
-                for (Fraction f : clause) {
-                    if (0 < f.doubleValue() && f.doubleValue() < 1) { // fraction ratio
-                        clauseStr.add(fractionToString(f));
-                    } else { // fraction decimal
-                        if (f.getDenominator() == 1) {
-                            clauseStr.add("" + f.intValue());
-                        } else {
-                            clauseStr.add("" + f.doubleValue());
-                        }
-                    }
-                }
-                sith.add(clauseStr);
-            }
-            return sith;
+            return new Sith.WeightedSith(this.weightedThold);
         } else {
-            return Integer.toHexString((Integer) this.thold);
+            return new Sith.StringSith(Integer.toHexString(this.unweightedThold));
         }
     }
 
     public String getJson() {
-        return Utils.jsonStringify(this.getSith());
+        return Utils.jsonStringify(this.getSith().getValue());
     }
 
     public Integer getNum() {
-        return weighted ? null : (Integer) thold;
-    }
-
-    private void _processThold(Object thold) {
-        if (thold instanceof Integer) {
-            _processUnweighted((Integer) thold);
-        } else {
-            List<List<Fraction>> weightedThold = (List<List<Fraction>>) thold;
-            _processWeighted(weightedThold);
-        }
+        return weighted ? null : unweightedThold;
     }
 
     private void _processLimen(String limen) {
@@ -98,16 +77,18 @@ public class Tholder {
         }
     }
 
-    private void _processSith(Object sith) {
-        if (sith instanceof Number) {
-            this._processUnweighted(((Number) sith).intValue());
-        } else if (sith instanceof String sithStr && !sithStr.contains("[")) {
-            this._processUnweighted(Integer.parseInt(sithStr, 16));
+    private void _processSith(Sith sith) {
+        if (sith instanceof Sith.IntegerSith) {
+            this._processUnweighted(((Sith.IntegerSith) sith).getValue());
+        }  else if (sith instanceof Sith.WeightedSith) {
+            this._processWeighted(((Sith.WeightedSith) sith).getWeightedFractionValue());
+        } else if (sith instanceof Sith.StringSith && !((Sith.StringSith) sith).isWeighted()) {
+            this._processUnweighted(Integer.parseInt(((Sith.StringSith) sith).getValue(), 16));
         } else {
             List<Object> _sith;
-            if (sith instanceof String sithStr) { // json of weighted sith from cli
+            if (sith instanceof Sith.StringSith) { // json of weighted sith from cli
                 try {
-                    _sith = new ObjectMapper().readValue(sithStr, List.class); // deserialize
+                    _sith = new ObjectMapper().readValue(((Sith.StringSith) sith).getValue(), List.class); // deserialize
                 } catch (Exception e) {
                     throw new SerializeException("Error parsing sith string");
                 }
@@ -159,7 +140,7 @@ public class Tholder {
         if (thold < 0) {
             throw new InvalidValueException("Non-positive int threshold = " + thold);
         }
-        this.thold = thold;
+        this.unweightedThold = thold;
         this.weighted = false;
         this.size = thold; // used to verify that keys list size is at least size
         this._satisfy = this::_satisfyNumeric;
@@ -178,7 +159,7 @@ public class Tholder {
             }
         }
 
-        this.thold = thold;
+        this.weightedThold = thold;
         this.weighted = true;
         this.size = thold.stream()
                 .mapToInt(List::size)
@@ -199,15 +180,13 @@ public class Tholder {
     }
 
     private boolean _satisfyNumeric(List<Integer> indices) {
-        return (Integer) this.thold > 0 && indices.size() >= (Integer) this.thold; // at least one
+        return this.unweightedThold > 0 && indices.size() >= this.unweightedThold; // at least one
     }
 
     private boolean _satisfyWeighted(List<Integer> indices) {
         if (indices.isEmpty()) {
             return false;
         }
-
-        List<List<Fraction>> weightedThold = (List<List<Fraction>>) thold;
 
         Set<Integer> indexes = new TreeSet<>(indices);
         boolean[] sats = new boolean[size];
@@ -232,17 +211,5 @@ public class Tholder {
 
     public boolean satisfy(List<Integer> indices) {
         return _satisfy.apply(indices);
-    }
-
-    private String fractionToString(Fraction f) {
-        String str;
-        if (f.getDenominator() == 1) {
-            str = Integer.toString(f.getNumerator());
-        } else if (f.getNumerator() == 0) {
-            str = "0";
-        } else {
-            str = f.getNumerator() + "/" + f.getDenominator();
-        }
-        return str;
     }
 }

@@ -10,6 +10,7 @@ import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
@@ -78,8 +79,8 @@ class SaltyTests {
         CreateIdentifierArgs params = new CreateIdentifierArgs();
         params.setCount(3);
         params.setNcount(3);
-        params.setIsith("2");
-        params.setNsith("2");
+        params.setIsith(Sith.fromString("2"));
+        params.setNsith(Sith.fromString("2"));
         params.setBran("0123456789lmnopqrstuv");
 
         EventResult icpResult1 = client.identifiers().create("aid2", params);

@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.app.aiding;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.core.States;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 @Setter
 public class RotateIdentifierArgs {
     private Boolean transferable;
-    private Object nsith;
+    private Sith nsith;
     private Integer toad;
     private List<String> cuts;
     private List<String> adds;

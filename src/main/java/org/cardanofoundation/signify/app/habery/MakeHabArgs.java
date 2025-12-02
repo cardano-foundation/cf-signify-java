@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.cesr.Codex;
+import org.cardanofoundation.signify.cesr.Sith;
 
 import java.util.List;
 
@@ -16,10 +17,10 @@ public class MakeHabArgs {
     String code = Codex.MatterCodex.Blake3_256.getValue();
     @Builder.Default
     boolean transferable = true;
-    String isith;
+    Sith isith;
     @Builder.Default
     Integer icount = 1;
-    String nsith;
+    Sith nsith;
     Integer ncount;
     Integer toad;
     List<String> wits;

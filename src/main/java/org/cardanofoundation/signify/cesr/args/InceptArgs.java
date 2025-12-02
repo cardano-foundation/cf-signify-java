@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.cesr.args;
 import lombok.*;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
-
+import org.cardanofoundation.signify.cesr.Sith;
 import java.util.List;
 
 @Builder
@@ -13,9 +13,9 @@ import java.util.List;
 @Setter
 public class InceptArgs {
     List<String> keys;
-    Object isith;
+    Sith isith;
     List<String> ndigs;
-    Object nsith;
+    Sith nsith;
     Integer toad;
     List<String> wits;
     List<String> cnfg;

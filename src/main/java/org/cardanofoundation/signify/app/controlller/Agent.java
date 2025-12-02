@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.Verfer;
 import org.cardanofoundation.signify.cesr.CesrNumber;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.IlkException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
@@ -44,12 +45,12 @@ public class Agent {
         }
 
 
-        Tholder tholder = new Tholder(null, null, event.get("kt"));
+        Tholder tholder = new Tholder(Sith.fromObject(event.get("kt")));
         if (tholder.getNum() != 1) {
             throw new InvalidValueException("invalid threshold " + tholder.getNum() + ", must be 1");
         }
 
-        Tholder ntholder = new Tholder(null, null, event.get("nt"));
+        Tholder ntholder = new Tholder(Sith.fromObject(event.get("nt")));
         if (ntholder.getNum() != 1) {
             throw new InvalidValueException(
                 "invalid next threshold " + ntholder.getNum() + ", must be 1"

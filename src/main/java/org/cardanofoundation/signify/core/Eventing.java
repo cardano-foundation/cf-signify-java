@@ -67,10 +67,11 @@ public class Eventing {
         CesrNumber sner = new CesrNumber(BigInteger.ZERO);
 
         if (args.getIsith() == null) {
-            args.setIsith(Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0)));
+            args.setIsith(Sith.fromInteger(Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0))));
         }
 
-        Tholder tholder = new Tholder(null, null, args.getIsith());
+        Tholder tholder = new Tholder(args.getIsith());
+
         if (tholder.getNum() != null && tholder.getNum() < 1) {
             throw new InvalidValueException("Invalid sith = " + tholder.getNum() + " less than 1.");
         }
@@ -83,10 +84,10 @@ public class Eventing {
         }
 
         if (args.getNsith() == null) {
-            args.setNsith(Math.max(0, (int) Math.ceil(args.getNdigs().size() / 2.0)));
+            args.setNsith(Sith.fromInteger(Math.max(0, (int) Math.ceil(args.getNdigs().size() / 2.0))));
         }
 
-        Tholder ntholder = new Tholder(null, null, args.getNsith());
+        Tholder ntholder = new Tholder(args.getNsith());
         if (ntholder.getNum() != null && ntholder.getNum() < 0) {
             throw new InvalidValueException("Invalid nsith = " + ntholder.getNum() + " less than 0.");
         }
@@ -122,9 +123,9 @@ public class Eventing {
         ked.put("d", "");
         ked.put("i", "");
         ked.put("s", sner.getNumh());
-        ked.put("kt", args.getIntive() && tholder.getNum() != null ? tholder.getNum() : tholder.getSith());
+        ked.put("kt", args.getIntive() && tholder.getNum() != null ? tholder.getNum() : tholder.getSith().getValue());
         ked.put("k", args.getKeys());
-        ked.put("nt", args.getIntive() && ntholder.getNum() != null ? ntholder.getNum() : ntholder.getSith());
+        ked.put("nt", args.getIntive() && ntholder.getNum() != null ? ntholder.getNum() : ntholder.getSith().getValue());
         ked.put("n", args.getNdigs());
         ked.put("bt", args.getIntive() ? toader.getNum() : toader.getNumh());
         ked.put("b", wits);
@@ -365,14 +366,14 @@ public class Eventing {
         if (args.getIsith() == null) {
             _isith = Math.max(1, (int) Math.ceil(args.getKeys().size() / 2.0));
         } else {
-            if(args.getIsith() instanceof String) {
-                _isith = Integer.parseInt((String) args.getIsith());
+            if(args.getIsith() instanceof Sith.StringSith) {
+                _isith = Integer.parseInt(((Sith.StringSith) args.getIsith()).getValue());
             } else {
-                _isith = (int) args.getIsith();
+                _isith = ((Sith.IntegerSith) args.getIsith()).getValue();
             }
         }
 
-        Tholder tholder = new Tholder(null, null, _isith);
+        Tholder tholder = new Tholder(Sith.fromInteger(_isith));
         if (tholder.getNum() != null && tholder.getNum() < 1) {
             throw new InvalidValueException("Invalid sith = " + tholder.getNum() + "less than 1.");
         }
@@ -391,14 +392,14 @@ public class Eventing {
         if (args.getNsith() == null) {
             _nsith = Math.max(1, (int) Math.ceil(_ndigs.size() / 2.0));
         } else {
-            if(args.getNsith() instanceof String) {
-                _nsith = Integer.parseInt((String) args.getNsith());
+            if(args.getNsith() instanceof Sith.StringSith) {
+                _nsith = Integer.parseInt(((Sith.StringSith) args.getNsith()).getValue());
             } else {
-                _nsith = (int) args.getNsith();
+                _nsith = ((Sith.IntegerSith) args.getNsith()).getValue();
             }
         }
 
-        Tholder ntholder = new Tholder(null, null, _nsith);
+        Tholder ntholder = new Tholder(Sith.fromInteger(_nsith));
         if (ntholder.getNum() != null && ntholder.getNum() < 1) {
             throw new InvalidValueException("Invalid sith = " + ntholder.getNum() + "less than 1.");
         }
@@ -501,7 +502,7 @@ public class Eventing {
             tholder.getNum() != null &&
             tholder.getNum() <= MaxIntThold
                 ? Integer.toHexString(tholder.getNum())
-                : tholder.getSith());
+                : tholder.getSith().getValue());
         _ked.put("k", args.getKeys());
         _ked.put("nt",
             ntholder.getNum() != 0 &&
@@ -509,7 +510,7 @@ public class Eventing {
             ntholder.getNum() != null &&
             ntholder.getNum() <= MaxIntThold
                 ? Integer.toHexString(ntholder.getNum())
-                : ntholder.getSith());
+                : ntholder.getSith().getValue());
         _ked.put("n", _ndigs);
         _ked.put("bt",
             _toad != 0 && args.getIntive() && _toad <= MaxIntThold

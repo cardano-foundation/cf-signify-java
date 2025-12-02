@@ -80,7 +80,7 @@ public class Habery {
 
         if (!args.transferable) {
             args.ncount = 0;
-            args.nsith = "0";
+            args.nsith = Sith.fromString("0");
             args.code = Codex.MatterCodex.Ed25519N.getValue();
         }
 
@@ -98,10 +98,10 @@ public class Habery {
         args.icount = verfers.size();
         args.ncount = digers != null ? digers.size() : 0;
         if (args.isith == null) {
-            args.isith = Integer.toHexString(Math.max(1, (int) Math.ceil(args.icount / 2.0)));
+            args.isith = Sith.fromString(Integer.toHexString(Math.max(1, (int) Math.ceil(args.icount / 2.0))));
         }
         if (args.nsith == null) {
-            args.nsith = Integer.toHexString(Math.max(1, (int) Math.ceil(args.ncount / 2.0)));
+            args.nsith = Sith.fromString(Integer.toHexString(Math.max(1, (int) Math.ceil(args.ncount / 2.0))));
         }
 
         List<String> cnfg = new ArrayList<>();

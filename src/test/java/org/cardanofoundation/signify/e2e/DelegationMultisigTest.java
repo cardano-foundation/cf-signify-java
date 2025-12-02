@@ -8,6 +8,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -93,8 +94,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                     .groupName(delegatorGroupName)
                     .localMemberName(delegator1Aid.getName())
                     .participants(List.of(delegator1Aid.getPrefix(), delegator2Aid.getPrefix()))
-                    .isith(2)
-                    .nsith(2)
+                    .isith(Sith.fromInteger(2))
+                    .nsith(Sith.fromInteger(2))
                     .toad(2)
                     .wits(List.of("BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
                             "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
@@ -205,8 +206,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                     .groupName(delegateeGroupName)
                     .localMemberName(delegatee1Aid.getName())
                     .participants(List.of(delegatee1Aid.getPrefix(), delegatee2Aid.getPrefix()))
-                    .isith(2)
-                    .nsith(2)
+                    .isith(Sith.fromInteger(2))
+                    .nsith(Sith.fromInteger(2))
                     .toad(2)
                     .delpre(torpre)
                     .wits(List.of("BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",

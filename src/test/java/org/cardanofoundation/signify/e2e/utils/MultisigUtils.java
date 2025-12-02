@@ -18,6 +18,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistry
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -50,8 +51,8 @@ public class MultisigUtils {
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
         createIdentifierArgs.setAlgo(Manager.Algos.group);
         createIdentifierArgs.setMhab(memberHab);
-        createIdentifierArgs.setIsith(icp.get("kt"));
-        createIdentifierArgs.setNsith(icp.get("nt"));
+        createIdentifierArgs.setIsith(Sith.fromObject(icp.get("kt")));
+        createIdentifierArgs.setNsith(Sith.fromObject(icp.get("nt")));
         createIdentifierArgs.setToad(Integer.valueOf(icp.get("bt").toString()));
         createIdentifierArgs.setWits((List<String>) icp.get("b"));
         createIdentifierArgs.setStates(states);
@@ -781,8 +782,8 @@ public class MultisigUtils {
         private String groupName;
         private String localMemberName;
         private List<String> participants;
-        private Object isith; // Can be Integer, String, or List<String>
-        private Object nsith; // Can be Integer, String, or List<String>
+        private Sith isith;
+        private Sith nsith;
         private Integer toad;
         private List<String> wits;
         private String delpre;
