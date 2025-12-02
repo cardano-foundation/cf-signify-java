@@ -69,7 +69,7 @@ public class Identifier {
                 range.start(),
                 range.end(),
                 range.total(),
-                Arrays.asList(GeneratedModelMapper.readIdentifierArray(response.body()))
+                Arrays.asList(GeneratedModelMapper.read(response.body(), org.cardanofoundation.signify.generated.keria.model.Identifier[].class))
         );
     }
 
@@ -97,8 +97,7 @@ public class Identifier {
             return Optional.empty();
         }
         
-        var identifier = GeneratedModelMapper.readIdentifier(response.body());
-        return Optional.ofNullable(IdentifierModelConverter.toHabState(identifier));
+        return Optional.of(Utils.fromJson(response.body(), States.HabState.class));
     }
 
     /**
@@ -117,8 +116,7 @@ public class Identifier {
             method,
             IdentifierPayloadMapper.buildUpdateNamePayload(info.getName())
         );
-        var identifier = GeneratedModelMapper.readIdentifier(response.body());
-        return IdentifierModelConverter.toHabState(identifier);
+        return GeneratedModelMapper.read(response.body(), States.HabState.class);
     }
 
     /**
