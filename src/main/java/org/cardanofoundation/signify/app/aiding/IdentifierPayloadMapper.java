@@ -11,6 +11,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Helper to build request payloads for identifier endpoints using generated KERIA models.
@@ -37,12 +38,13 @@ public final class IdentifierPayloadMapper {
             .sigs(sigs)
             .extern(extern);
 
-        if (algoParams != null && algo != null) {
-            switch (algo) {
-                case salty -> request.setSalty(algoParams);
-                case randy -> request.setRandy(algoParams);
-                case group -> request.setGroup(algoParams);
-            }
+        Objects.requireNonNull(algo, "algo is required");
+        Objects.requireNonNull(algoParams, "algo params are required");
+        switch (algo) {
+            case salty -> request.setSalty(algoParams);
+            case randy -> request.setRandy(algoParams);
+            case group -> request.setGroup(algoParams);
+            default -> throw new IllegalArgumentException("Invalid algo: " + algo);
         }
 
         Map<String, Object> payload = toPayloadMap(request);
