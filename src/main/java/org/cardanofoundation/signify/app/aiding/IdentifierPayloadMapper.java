@@ -11,7 +11,8 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Helper to build request payloads for identifier endpoints using generated KERIA models.
@@ -23,14 +24,14 @@ public final class IdentifierPayloadMapper {
 
     public static Map<String, Object> buildCreatePayload(
         String name,
-        Map<String, Object> icp,
-        List<String> sigs,
-        String proxy,
-        List<String> smids,
-        List<String> rmids,
-        Algos algo,
-        Map<String, Object> algoParams,
-        Object extern
+        @Nonnull Map<String, Object> icp,
+        @Nonnull List<String> sigs,
+        @Nullable String proxy,
+        @Nullable List<String> smids,
+        @Nullable List<String> rmids,
+        @Nonnull Algos algo,
+        @Nonnull Map<String, Object> algoParams,
+        @Nullable Object extern
     ) {
         IdentifiersPostRequest request = new IdentifiersPostRequest()
             .name(name)
@@ -38,8 +39,6 @@ public final class IdentifierPayloadMapper {
             .sigs(sigs)
             .extern(extern);
 
-        Objects.requireNonNull(algo, "algo is required");
-        Objects.requireNonNull(algoParams, "algo params are required");
         switch (algo) {
             case salty -> request.setSalty(algoParams);
             case randy -> request.setRandy(algoParams);
