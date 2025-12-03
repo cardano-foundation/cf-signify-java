@@ -3,7 +3,6 @@ package org.cardanofoundation.signify.app.aiding;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.core.Manager.Algos;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
-import org.cardanofoundation.signify.generated.keria.model.IdentifiersNameExchangesPostRequest;
 import org.cardanofoundation.signify.generated.keria.model.IdentifiersNamePutRequest;
 import org.cardanofoundation.signify.generated.keria.model.IdentifiersPostRequest;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -69,35 +68,6 @@ public final class IdentifierPayloadMapper {
         return new EndrolesAidPostRequest()
             .rpy(rpy)
             .sigs(sigs);
-    }
-
-    public static Map<String, Object> buildExchangePayload(
-        String topic,
-        Object exn,
-        List<String> sigs,
-        String atc,
-        List<String> recipients
-    ) {
-        IdentifiersNameExchangesPostRequest request = new IdentifiersNameExchangesPostRequest()
-            .tpc(topic)
-            .exn(exn)
-            .sigs(sigs)
-            .atc(atc)
-            .rec(recipients);
-
-        Map<String, Object> payload = toPayloadMap(request);
-        // Drop nulls/empties to mimic original hand-built payloads.
-        payload.entrySet().removeIf(entry -> {
-            Object value = entry.getValue();
-            if (value == null) {
-                return true;
-            }
-            if (value instanceof List<?> list) {
-                return list.isEmpty();
-            }
-            return false;
-        });
-        return payload;
     }
 
     private static Map<String, Object> toPayloadMap(Object data) {
