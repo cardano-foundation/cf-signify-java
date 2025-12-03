@@ -38,12 +38,10 @@ public class KeyStateRecordDeserializer extends StdDeserializer<KeyStateRecord> 
         if (value == null) {
             return;
         }
-        // Leave arrays (kt/nt can be arrays of strings); only coerce numeric nodes.
+        // Leave arrays (kt/nt can be arrays of strings); fail fast otherwise.
         if (value.isTextual() || value.isArray()) {
             return;
         }
-        if (value.isNumber()) {
-            node.put(field, value.asText());
-        }
+        throw new IllegalArgumentException("Unexpected type for field '" + field + "': " + value.getNodeType());
     }
 }
