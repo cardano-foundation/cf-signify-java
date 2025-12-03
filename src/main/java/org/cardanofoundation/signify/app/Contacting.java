@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.concurrent.ExecutionException;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 public class Contacting {
 
@@ -66,7 +67,7 @@ public class Contacting {
          * @throws Exception if the fetch operation fails
          */
         public Object respond(String name, String recipient, List<String> words) throws IOException, InterruptedException, DigestException, ExecutionException, LibsodiumException {
-            States.HabState hab = this.client.identifiers().get(name)
+            Identifier hab = this.client.identifiers().get(name)
                     .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
             Exchanging.Exchanges exchanges = this.client.exchanges();
 

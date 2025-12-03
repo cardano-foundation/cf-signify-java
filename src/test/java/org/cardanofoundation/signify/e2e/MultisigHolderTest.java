@@ -16,11 +16,11 @@ import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultisigHolderTest extends BaseIntegrationTest {
     SignifyClient client1, client2, client3;
-    States.HabState aid1, aid2, aid3;
+    Identifier aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
     private List<HashMap<String, Object>> registryList;
@@ -62,7 +62,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         client3 = signifyClients.get(2);
 
         // Create four identifiers, one for each client
-        List<States.HabState> aids = createAidAndGetHabStateAsync(
+        List<Identifier> aids = createAidAndGetHabStateAsync(
                 new CreateAidArgs(client1, "member1"),
                 new CreateAidArgs(client2, "member2"),
                 new CreateAidArgs(client3, "issuer")
@@ -168,7 +168,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
         Object members = client1.identifiers().members("holder");
-        States.HabState ghab1 = client1.identifiers().get("holder").get();
+        Identifier ghab1 = client1.identifiers().get("holder").get();
         List<Map<String, Object>> signing = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
         String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing.getFirst().get("ends")).get("agent")).keySet()).getFirst();
         String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing.get(1).get("ends")).get("agent")).keySet()).getFirst();
@@ -202,7 +202,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
         List<String> recp = Stream.of(aid2.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         Object resp = client1.exchanges().send(
@@ -237,7 +237,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
-        States.HabState ghab2 = client2.identifiers().get("holder").get();
+        Identifier ghab2 = client2.identifiers().get("holder").get();
         Map<String, Object> ghabState2 = Utils.toMap(ghab2.getState());
         seal = Arrays.asList(
                 "SealEvent",
@@ -259,7 +259,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
         recp = Stream.of(aid1.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         resp = client2.exchanges().send(
@@ -307,7 +307,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
         recp = Stream.of(aid2.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         resp = client1.exchanges().send(
@@ -366,7 +366,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
         recp = Stream.of(aid1.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         resp = client2.exchanges().send(
@@ -396,7 +396,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitOperation(client3, op3);
         System.out.println("Issuer resolved multisig holder OOBI");
 
-        States.HabState holderAid = client1.identifiers().get("holder").get();
+        Identifier holderAid = client1.identifiers().get("holder").get();
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
 
@@ -429,7 +429,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         Object exnRes = client1.exchanges().get(grantMsgSaid).get();
         recp = Stream.of(aid2.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         LinkedHashMap<String, Object> exnResList = castObjectToLinkedHashMap(exnRes);
@@ -456,7 +456,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
 
         List<String> recp2 = Stream.of(aid1.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .toList();
 
         op2 = multisigAdmitCredential(client2,
@@ -493,9 +493,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         warnNotifications(clientList);
     }
 
-    public States.HabState createAid(SignifyClient client, String name, List<String> wits) throws Exception {
+    public Identifier createAid(SignifyClient client, String name, List<String> wits) throws Exception {
         getOrCreateIdentifier(client, name, null);
-        States.HabState aid = client.identifiers().get(name).get();
+        Identifier aid = client.identifiers().get(name).get();
         System.out.println(name + "AID:" + aid.getPrefix());
         return aid;
     }
@@ -572,8 +572,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             String issuerPrefix,
             List<String> recipients
     ) throws Exception {
-        States.HabState mhab = client.identifiers().get(memberAlias).get();
-        States.HabState ghab = client.identifiers().get(groupName).get();
+        Identifier mhab = client.identifiers().get(memberAlias).get();
+        Identifier ghab = client.identifiers().get(groupName).get();
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
                 .builder()
@@ -596,7 +596,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 List.of(issuerPrefix)
         );
 
-        States.State mstate = ghab.getState();
+        KeyStateRecord mstate = ghab.getState();
 
         Map<String, Object> sealMap = new LinkedHashMap<>();
         sealMap.put("i", ghab.getPrefix());

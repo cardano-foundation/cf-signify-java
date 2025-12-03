@@ -83,7 +83,7 @@ public class TestUtils {
         }
     }
 
-    public static void admitSinglesig(SignifyClient client, String aidName, States.HabState recipientAid) {
+    public static void admitSinglesig(SignifyClient client, String aidName, Identifier recipientAid) {
         // TO-DO
     }
 
@@ -112,7 +112,7 @@ public class TestUtils {
         return new Aid(name, prefix, oobi);
     }
 
-    public static States.HabState createAidAndGetHabState(SignifyClient client, String name) throws Exception {
+    public static Identifier createAidAndGetHabState(SignifyClient client, String name) throws Exception {
         getOrCreateIdentifier(client, name, null);
         return client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
@@ -138,8 +138,8 @@ public class TestUtils {
 
     public static Object getIssuedCredential(
             SignifyClient issuerClient,
-            States.HabState issuerAid,
-            States.HabState recipientAid,
+            Identifier issuerAid,
+            Identifier recipientAid,
             String schemaSAID
     ) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> filter = new LinkedHashMap<>() {{
@@ -155,15 +155,15 @@ public class TestUtils {
         return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
 
-    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
-        Optional<States.HabState> existingAID = client.identifiers().get(name);
+    public static Identifier getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
+        Optional<Identifier> existingAID = client.identifiers().get(name);
         if (existingAID.isPresent()) {
             return existingAID.get();
         } else {
             EventResult result = client.identifiers().create(name, kargs);
             waitOperation(client, result.op());
 
-            States.HabState aid = client.identifiers().get(name)
+            Identifier aid = client.identifiers().get(name)
                     .orElseThrow(() -> new IllegalArgumentException("Failed to create identifier: " + name));
             
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
@@ -241,7 +241,7 @@ public class TestUtils {
         String eid;
         Object op, ops;
 
-        Optional<States.HabState> optionalIdentifier = client.identifiers().get(name);
+        Optional<Identifier> optionalIdentifier = client.identifiers().get(name);
         if (optionalIdentifier.isPresent()) {
             id = optionalIdentifier.get().getPrefix();
             

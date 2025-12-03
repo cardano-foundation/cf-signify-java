@@ -13,6 +13,7 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.unchecked;
 
@@ -26,8 +27,8 @@ public class BaseIntegrationTest {
         return bootFutures.stream().map(CompletableFuture::join).toList();
     }
 
-    public static List<States.HabState> createAidAndGetHabStateAsync(CreateAidArgs... createAidArgs) {
-        List<CompletableFuture<States.HabState>> createAidFutures = new ArrayList<>();
+    public static List<Identifier> createAidAndGetHabStateAsync(CreateAidArgs... createAidArgs) {
+        List<CompletableFuture<Identifier>> createAidFutures = new ArrayList<>();
         for (CreateAidArgs createAidArg : createAidArgs) {
             createAidFutures.add(createAidAndGetHabStateFuture(createAidArg.signifyClient, createAidArg.name));
         }
@@ -83,8 +84,8 @@ public class BaseIntegrationTest {
         return createAidFutures.stream().map(CompletableFuture::join).toList();
     }
 
-    public static List<States.HabState> getOrCreateAIDAsync(CreateAidArgs... createAidArgs) {
-        List<CompletableFuture<States.HabState>> getOrCreateAIDFutures = new ArrayList<>();
+    public static List<Identifier> getOrCreateAIDAsync(CreateAidArgs... createAidArgs) {
+        List<CompletableFuture<Identifier>> getOrCreateAIDFutures = new ArrayList<>();
         for (CreateAidArgs getOrCreateAIDArg : createAidArgs) {
             getOrCreateAIDFutures.add(getOrCreateAIDFuture(getOrCreateAIDArg.signifyClient, getOrCreateAIDArg.name, getOrCreateAIDArg.args));
         }
@@ -103,7 +104,7 @@ public class BaseIntegrationTest {
         ));
     }
 
-    static CompletableFuture<States.HabState> createAidAndGetHabStateFuture(SignifyClient client, String name) {
+    static CompletableFuture<Identifier> createAidAndGetHabStateFuture(SignifyClient client, String name) {
         return CompletableFuture.supplyAsync(unchecked(() -> 
             TestUtils.createAidAndGetHabState(client, name)
         ));
@@ -140,7 +141,7 @@ public class BaseIntegrationTest {
         ));
     }
 
-    static CompletableFuture<States.HabState> getOrCreateAIDFuture(SignifyClient client, String name, CreateIdentifierArgs args) {
+    static CompletableFuture<Identifier> getOrCreateAIDFuture(SignifyClient client, String name, CreateIdentifierArgs args) {
         return CompletableFuture.supplyAsync(unchecked(() -> 
             TestUtils.getOrCreateAID(client, name, args)
         ));

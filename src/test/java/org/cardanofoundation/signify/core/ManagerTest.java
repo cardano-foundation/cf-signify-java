@@ -3,6 +3,9 @@ package org.cardanofoundation.signify.core;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -696,19 +699,18 @@ class ManagerTest {
         List<String> keys = keeperResult.verfers();
         Prefixer prefixes = new Prefixer(keys.getFirst());
 
-        States.RandyState randyState = States.RandyState.builder()
-                .nxts(keeper0.getParams().getNxts())
-                .prxs(keeper0.getParams().getPrxs())
-                .build();
-        States.HabState habState = States.HabState.builder()
-                .prefix(prefixes.getQb64())
-                .name("")
-                .state(new States.State())
-                .randy(randyState)
-                .transferable(false)
-                .windexes(Collections.emptyList())
-                .build();
-        Keeping.Keeper<?> keeper1 = manager.get(habState);
+        RandyKeyState randyKeyState = new RandyKeyState();
+        randyKeyState.setNxts(keeper0.getParams().getNxts());
+        randyKeyState.setPrxs(keeper0.getParams().getPrxs());
+
+        Identifier identifier = new Identifier();
+        identifier.setPrefix(prefixes.getQb64());
+        identifier.setName("");
+        identifier.setState(new KeyStateRecord());
+        identifier.setRandy(randyKeyState);
+        identifier.setTransferable(true);
+        identifier.setWindexes(Collections.emptyList());
+        Keeping.Keeper<?> keeper1 = manager.get(identifier);
 
         assertInstanceOf(Keeping.RandyKeeper.class, keeper1);
     }

@@ -28,6 +28,7 @@ import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -63,16 +64,16 @@ public class MultisigTest extends BaseIntegrationTest {
                 .wits(WITNESS_AIDS)
                 .toad(WITNESS_AIDS.size())
                 .build();
-        List<States.HabState> aids = createAidAndGetHabStateAsync(
+        List<Identifier> aids = createAidAndGetHabStateAsync(
                 new CreateAidArgs(client1, "member1", createIdentifierArgs),
                 new CreateAidArgs(client2, "member2", createIdentifierArgs),
                 new CreateAidArgs(client3, "member3", createIdentifierArgs),
                 new CreateAidArgs(client4, "holder", createIdentifierArgs)
         );
-        States.HabState aid1 = aids.get(0);
-        States.HabState aid2 = aids.get(1);
-        States.HabState aid3 = aids.get(2);
-        States.HabState aid4 = aids.get(3);
+        Identifier aid1 = aids.get(0);
+        Identifier aid2 = aids.get(1);
+        Identifier aid3 = aids.get(2);
+        Identifier aid4 = aids.get(3);
 
         // Exchange OOBIs
         System.out.println("Resolving OOBIs");
@@ -262,7 +263,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         String multisig = Utils.toMap(aids3.get(1)).get("prefix").toString();
 
-        States.HabState multisigAID = client1.identifiers().get("multisig").get();
+        Identifier multisigAID = client1.identifiers().get("multisig").get();
 
         String timestamp = TestUtils.createTimestamp();
         List<Object> opList1 = MultisigUtils.addEndRoleMultisigs(
@@ -405,12 +406,12 @@ public class MultisigTest extends BaseIntegrationTest {
         op4 = client4.keyStates().query(aid3.getPrefix(), "1");
         op4 = waitOperation(client4, op4);
 
-        List<States.State> rstateLst = List.of(
-                Utils.fromJson(Utils.jsonStringify(aid1State), States.State.class),
-                Utils.fromJson(Utils.jsonStringify(aid2State), States.State.class),
-                Utils.fromJson(Utils.jsonStringify(aid3State), States.State.class)
+        List<KeyStateRecord> rstateLst = List.of(
+                Utils.fromJson(Utils.jsonStringify(aid1State), KeyStateRecord.class),
+                Utils.fromJson(Utils.jsonStringify(aid2State), KeyStateRecord.class),
+                Utils.fromJson(Utils.jsonStringify(aid3State), KeyStateRecord.class)
         );
-        List<States.State> stateLst = rstateLst;
+        List<KeyStateRecord> stateLst = rstateLst;
 
         // Multisig Rotation
 
@@ -460,7 +461,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 new WaitOperationArgs(client3, op3)
         );
 
-        States.HabState hab = client1.identifiers().get("multisig").get();
+        Identifier hab = client1.identifiers().get("multisig").get();
         String aid = hab.getPrefix();
 
         // Multisig Registry creation
@@ -601,7 +602,7 @@ public class MultisigTest extends BaseIntegrationTest {
         );
         System.out.println("Multisig create credential completed!");
 
-        States.HabState m = client1.identifiers().get("multisig").get();
+        Identifier m = client1.identifiers().get("multisig").get();
 
         // Update states
         op1 = client1.keyStates().query(m.getPrefix(), "4");
@@ -652,7 +653,7 @@ public class MultisigTest extends BaseIntegrationTest {
         gembeds.put("exn", Arrays.asList(grant, atc));
 
         List<String> recp = Stream.of(aid2.getState(), aid3.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         client1.exchanges().send(
@@ -699,7 +700,7 @@ public class MultisigTest extends BaseIntegrationTest {
         gembeds = new LinkedHashMap<>();
         gembeds.put("exn", Arrays.asList(grant2, atc));
         recp = Stream.of(aid1.getState(), aid3.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         client2.exchanges().send(
@@ -747,7 +748,7 @@ public class MultisigTest extends BaseIntegrationTest {
         gembeds = new LinkedHashMap<>();
         gembeds.put("exn", Arrays.asList(grant3, atc));
         recp = Stream.of(aid1.getState(), aid2.getState())
-                .map(States.State::getI)
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         client3.exchanges().send(
@@ -844,8 +845,8 @@ public class MultisigTest extends BaseIntegrationTest {
             String groupName,
             IssueCredentialResult result
     ) throws Exception {
-        States.HabState leaderHab = client.identifiers().get(memberName).get();
-        States.HabState groupHab = client.identifiers().get(groupName).get();
+        Identifier leaderHab = client.identifiers().get(memberName).get();
+        Identifier groupHab = client.identifiers().get(groupName).get();
         Object members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
@@ -887,8 +888,8 @@ public class MultisigTest extends BaseIntegrationTest {
             Serder rev,
             Serder anc
     ) throws Exception {
-        States.HabState leaderHab = client.identifiers().get(memberName).get();
-        States.HabState groupHab = client.identifiers().get(groupName).get();
+        Identifier leaderHab = client.identifiers().get(memberName).get();
+        Identifier groupHab = client.identifiers().get(groupName).get();
         Object members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
@@ -924,9 +925,9 @@ public class MultisigTest extends BaseIntegrationTest {
 
     public static List<Object> createRegistryMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
-            States.HabState multisigAID,
+            Identifier aid,
+            List<Identifier> otherMembersAIDs,
+            Identifier multisigAID,
             String registryName,
             String nonce,
             boolean isInitiator) throws Exception {
@@ -959,7 +960,7 @@ public class MultisigTest extends BaseIntegrationTest {
         }};
 
         List<String> recp = otherMembersAIDs.stream()
-                .map(States.HabState::getPrefix)
+                .map(Identifier::getPrefix)
                 .toList();
 
         client.exchanges().send(

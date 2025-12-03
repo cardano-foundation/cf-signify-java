@@ -13,7 +13,9 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.SaltyState;
+import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -165,14 +167,14 @@ class SaltyTests {
         Assertions.assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         // Get Identifiers
-        States.HabState aidState = client.identifiers().get("aid1").get();
-        States.State stateGet = aidState.getState();
+        Identifier aidState = client.identifiers().get("aid1").get();
+        KeyStateRecord stateGet = aidState.getState();
 
         Assertions.assertEquals("2", stateGet.getS());
         Assertions.assertEquals("2", stateGet.getF());
         Assertions.assertEquals(ixn.getKed().get("d"), stateGet.getD());
 
-        States.EstablishmentState ee = stateGet.getEe();
+        StateEERecord ee = stateGet.getEe();
         Assertions.assertEquals(rotRotate.getKed().get("d"), ee.getD());
 
         // KeyEvents
@@ -196,10 +198,10 @@ class SaltyTests {
 
         IdentifierInfo identifierInfo = new IdentifierInfo();
         identifierInfo.setName("aid4");
-        States.HabState updatedState = client.identifiers().update("aid3", identifierInfo);
+        Identifier updatedState = client.identifiers().update("aid3", identifierInfo);
         assertEquals("aid4", updatedState.getName());
 
-        States.HabState retrievedState = client.identifiers().get("aid4").get();
+        Identifier retrievedState = client.identifiers().get("aid4").get();
         assertEquals("aid4", retrievedState.getName());
         IdentifierListResponse response = client.identifiers().list(2, 2);
         List<Identifier> identifiers = response.aids();
