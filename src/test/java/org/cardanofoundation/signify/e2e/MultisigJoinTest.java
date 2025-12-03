@@ -13,6 +13,8 @@ import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -27,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class MultisigJoinTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2, client3;
 
-    States.HabState aid1, aid2, aid3;
+    Identifier aid1, aid2, aid3;
     static String nameMember1 = "member1";
     static String nameMember2 = "member2";
     static String nameMember3 = "member3";
@@ -61,7 +63,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     @Test
     @Order(1)
     public void multisigJoinTest() throws Exception {
-        List<States.HabState> aids = createAidAndGetHabStateAsync(
+        List<Identifier> aids = createAidAndGetHabStateAsync(
             new CreateAidArgs(client1, nameMember1),
             new CreateAidArgs(client2, nameMember2)
         );
@@ -231,12 +233,12 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         Object aid1States = statesUpdate.get(2);
         Object aid3States = statesUpdate.get(1);
 
-        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
-        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
-        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
+        KeyStateRecord aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), KeyStateRecord.class);
+        KeyStateRecord aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), KeyStateRecord.class);
+        KeyStateRecord aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), KeyStateRecord.class);
 
-        List<States.State> states = Arrays.asList(aid1State, aid2State);
-        List<States.State> rstates = new ArrayList<>(states);
+        List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State);
+        List<KeyStateRecord> rstates = new ArrayList<>(states);
         rstates.add(aid3State);
 
         EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
@@ -264,7 +266,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             .collect(Collectors.toList());
 
         List<String> recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
+            .map(KeyStateRecord::getI)
             .collect(Collectors.toList());
 
         Map<String, Object> payload1 = new LinkedHashMap<>();
@@ -285,7 +287,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         TestUtils.waitAndMarkNotification(client2, "/multisig/rot");
         TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
 
-        States.HabState multiSigAid = client1.identifiers().get(nameMultisig).get();
+        Identifier multiSigAid = client1.identifiers().get(nameMultisig).get();
 
         assertEquals(2, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -336,11 +338,11 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         Object aid1States = statesUpdate.get(2);
         Object aid3States = statesUpdate.get(1);
 
-        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
-        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
-        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
+        KeyStateRecord aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), KeyStateRecord.class);
+        KeyStateRecord aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), KeyStateRecord.class);
+        KeyStateRecord aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), KeyStateRecord.class);
 
-        List<States.State> states = Arrays.asList(aid1State, aid2State, aid3State);
+        List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State, aid3State);
 
         EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
             .states(states)
@@ -367,7 +369,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             .collect(Collectors.toList());
 
         List<String> recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
+            .map(KeyStateRecord::getI)
             .collect(Collectors.toList());
 
         Map<String, Object> payload1 = new LinkedHashMap<>();
@@ -410,7 +412,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         waitOperation(client3, joinOperation);
 
-        States.HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
+        Identifier multiSigAid = client3.identifiers().get(nameMultisig).get();
 
         assertEquals(3, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -433,7 +435,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertNull(Utils.toMap(endRoleResult).get("error"));
     }
 
-    public static States.HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {
+    public static Identifier createAID(SignifyClient client, String name, List<String> wits) throws Exception {
         CreateIdentifierArgs iargs = new CreateIdentifierArgs();
         iargs.setWits(wits);
         iargs.setToad(wits.size());

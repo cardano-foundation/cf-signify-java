@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.*;
-import org.cardanofoundation.signify.app.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.IdentifierController;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.KeyStates;
@@ -140,7 +140,7 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(bran, data[1]);
 
         // Validate service instances
-        assertInstanceOf(Identifier.class, client.identifiers());
+        assertInstanceOf(IdentifierController.class, client.identifiers());
         assertInstanceOf(Operations.class, client.operations());
         assertInstanceOf(Coring.KeyEvents.class, client.keyEvents());
         assertInstanceOf(KeyStates.class, client.keyStates());

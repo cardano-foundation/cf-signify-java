@@ -6,6 +6,7 @@ import lombok.*;
 import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.core.Manager.Algos;
 import org.cardanofoundation.signify.core.States.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 @Getter
 @Setter
@@ -28,7 +29,7 @@ public class CreateIdentifierArgs {
     private List<Object> rstates;
     private List<Object> prxs;
     private List<Object> nxts;
-    private HabState mhab;
+    private Identifier mhab;
     private List<String> keys;
     private List<String> ndigs;
     private String bran;

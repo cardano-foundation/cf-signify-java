@@ -16,7 +16,7 @@ import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
-import org.cardanofoundation.signify.app.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.IdentifierController;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
 import org.cardanofoundation.signify.app.coring.KeyStates;
@@ -61,7 +61,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private String bootUrl;
     private List<ExternalModule> externalModules;
 
-    private Identifier identifierInstance = new Identifier(this);
+    private IdentifierController identifierControllerInstance = new IdentifierController(this);
     private Oobis oobisInstance = new Oobis(this);
     private Operations operationsInstance = new Operations(this);
     private KeyEvents keyEventsInstance = new KeyEvents(this);
@@ -374,8 +374,8 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Identifier}
      */
-    public Identifier identifiers() {
-        return identifierInstance;
+    public IdentifierController identifiers() {
+        return identifierControllerInstance;
     }
 
     /**
