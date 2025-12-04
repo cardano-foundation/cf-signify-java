@@ -69,7 +69,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid1 = aids.get(0);
         aid2 = aids.get(1);
 
-        List<Object> states = Arrays.asList(aid1.getState(), aid2.getState());
+        List<KeyStateRecord> states = Arrays.asList(aid1.getState(), aid2.getState());
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.group);
         kargs.setMhab(aid1);

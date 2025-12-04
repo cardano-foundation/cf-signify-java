@@ -163,8 +163,8 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("Member1 marked challenge response as accepted");
 
         // First member start the creation of a multisig identifier
-        List<Object> rstates = List.of(aid1.getState(), aid2.getState(), aid3.getState());
-        List<Object> states = List.copyOf(rstates);
+        List<KeyStateRecord> rstates = List.of(aid1.getState(), aid2.getState(), aid3.getState());
+        List<KeyStateRecord> states = List.copyOf(rstates);
 
         CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                 .builder()
