@@ -12,6 +12,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -208,8 +209,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
             aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
         } catch (Exception e) {
-            List<Object> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
-            List<Object> states = rstates;
+            List<KeyStateRecord> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
+            List<KeyStateRecord> states = rstates;
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
@@ -318,8 +319,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
             aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI").get();
         } catch (Exception exception) {
-            List<Object> rstates = List.of(aidQAR1.getState(), aidQAR2.getState(), aidQAR3.getState());
-            List<Object> states = List.copyOf(rstates);
+            List<KeyStateRecord> rstates = List.of(aidQAR1.getState(), aidQAR2.getState(), aidQAR3.getState());
+            List<KeyStateRecord> states = List.copyOf(rstates);
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
@@ -718,8 +719,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
             aidLEbyLAR3 = clientLAR3.identifiers().get("LE").get();
         } catch (Exception e) {
-            List<Object> rstates = List.of(aidLAR1.getState(), aidLAR2.getState(), aidLAR3.getState());
-            List<Object> states = List.copyOf(rstates);
+            List<KeyStateRecord> rstates = List.of(aidLAR1.getState(), aidLAR2.getState(), aidLAR3.getState());
+            List<KeyStateRecord> states = List.copyOf(rstates);
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()

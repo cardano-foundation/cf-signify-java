@@ -9,6 +9,7 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -45,8 +46,15 @@ public class MultisigUtils {
         List<String> smids = (List<String>) ((Map<String, Object>) exn.get("a")).get("smids");
         List<String> rmids = (List<String>) ((Map<String, Object>) exn.get("a")).get("rmids");
 
-        List<Object> states = TestUtils.getStates(client2, smids);
-        List<Object> rstates = TestUtils.getStates(client2, rmids);
+        List<KeyStateRecord> states = TestUtils.getStates(client2, smids)
+            .stream()
+            .map(rawState -> Utils.fromJson(Utils.jsonStringify(rawState), KeyStateRecord.class))
+            .collect(Collectors.toList());
+
+        List<KeyStateRecord> rstates = TestUtils.getStates(client2, rmids)
+            .stream()
+            .map(rawState -> Utils.fromJson(Utils.jsonStringify(rawState), KeyStateRecord.class))
+            .collect(Collectors.toList());
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
         createIdentifierArgs.setAlgo(Manager.Algos.group);
@@ -87,7 +95,7 @@ public class MultisigUtils {
     public static Object interactMultisig(SignifyClient client, String groupName, Identifier aid,
                                           List<Identifier> otherMemberAIDs,
                                           Object data,
-                                          List<Object> states,
+                                          List<KeyStateRecord> states,
                                           boolean isInitiator) throws Exception {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
@@ -107,14 +115,7 @@ public class MultisigUtils {
         Map<String, List<Object>> xembeds = new LinkedHashMap<>();
         xembeds.put("ixn", List.of(serder, atc));
 
-        List<String> smids = states.stream().map(state -> {
-            if (state instanceof Map<?, ?> stateMap) {
-                return stateMap.get("i").toString();
-            } else if (state instanceof KeyStateRecord stateHab) {
-                return stateHab.getI();
-            }
-            return null;
-        }).toList();
+        List<String> smids = states.stream().map(KeyStateRecord::getI).toList();
         List<String> recp = otherMemberAIDs.stream().map(Identifier::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
@@ -716,7 +717,12 @@ public class MultisigUtils {
     ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
         Identifier aid1 = client.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
-        List<Object> participantStates = TestUtils.getStates(client, args.getParticipants());
+
+        // TODO should update the TestUtils.getStates to return the KeyStateRecord[]
+        List<KeyStateRecord> participantStates = TestUtils.getStates(client, args.getParticipants())
+            .stream()
+            .map(rawState -> Utils.fromJson(Utils.jsonStringify(rawState), KeyStateRecord.class))
+            .collect(Collectors.toList());
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
         createIdentifierArgs.setAlgo(Manager.Algos.group);
@@ -742,7 +748,7 @@ public class MultisigUtils {
         embeds.put("icp", List.of(serder, atc));
 
         List<String> smids = participantStates.stream()
-                .map(state -> ((Map<String, Object>) state).get("i").toString())
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         Map<String, Object> payload = new LinkedHashMap<>();
