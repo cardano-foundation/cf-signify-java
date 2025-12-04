@@ -7,7 +7,6 @@ import org.cardanofoundation.signify.app.credentialing.registries.Registries;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.params.SaltyParams;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.BeforeEach;

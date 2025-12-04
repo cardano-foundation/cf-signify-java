@@ -6,7 +6,6 @@ import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.junit.jupiter.api.Assertions;

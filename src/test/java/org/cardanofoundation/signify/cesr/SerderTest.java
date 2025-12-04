@@ -6,8 +6,8 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ class SerderTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "A",
-            Tier.low,
+            Tier.LOW,
             true
         );
         List<String> keys = new ArrayList<>();
@@ -57,7 +57,7 @@ class SerderTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "N",
-            Tier.low,
+            Tier.LOW,
             true
         );
 
