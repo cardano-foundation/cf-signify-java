@@ -8,6 +8,7 @@ import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,11 +44,11 @@ public class ControllerTest {
         // their pubk and my encrypted account package
         // let pkg = {}
 
-        Controller controller = new Controller(passcode, Salter.Tier.low);
+        Controller controller = new Controller(passcode, Tier.LOW);
         assertEquals(controller.getPre(), "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose");
 
         passcode = "abcdefghijk0123456789";
-        controller = new Controller(passcode, Salter.Tier.low);
+        controller = new Controller(passcode, Tier.LOW);
         assertEquals(controller.getPre(), "EIIY2SgE_bqKLl2MlnREUawJ79jTuucvWwh-S6zsSUFo");
     }
 
@@ -57,8 +58,8 @@ public class ControllerTest {
         String passcode1 = Coring.randomPasscode();
         String passcode2 = Coring.randomPasscode();
 
-        Controller controller1 = new Controller(passcode1, Salter.Tier.low);
-        Controller controller2 = new Controller(passcode2, Salter.Tier.low);
+        Controller controller1 = new Controller(passcode1, Tier.LOW);
+        Controller controller2 = new Controller(passcode2, Tier.LOW);
 
         assertNotEquals(controller1.getPre(), controller2.getPre());
     }

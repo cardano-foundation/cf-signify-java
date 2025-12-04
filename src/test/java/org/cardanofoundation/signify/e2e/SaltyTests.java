@@ -9,13 +9,12 @@ import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.SaltyState;
 import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +34,7 @@ class SaltyTests {
         SignifyClient client = new SignifyClient(
                 url,
                 bran1,
-                Salter.Tier.low,
+                Tier.LOW,
                 bootUrl,
                 null
         );

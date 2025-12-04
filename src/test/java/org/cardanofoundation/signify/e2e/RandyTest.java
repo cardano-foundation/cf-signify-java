@@ -12,6 +12,7 @@ import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -37,7 +38,7 @@ public class RandyTest {
         client1 = new SignifyClient(
                 url,
                 bran,
-                Salter.Tier.low,
+                Tier.LOW,
                 bootUrl,
                 null
         );

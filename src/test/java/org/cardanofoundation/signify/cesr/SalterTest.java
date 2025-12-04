@@ -1,10 +1,10 @@
 package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ class SalterTest {
         assertArrayEquals(salter.getRaw(), raw);
         assertEquals(salter.getQb64(), "0AAwMTIzNDU2Nzg5YWJjZGVm");
 
-        Signer signer = salter.signer(MatterCodex.Ed25519_Seed.getValue(), true, "01", Tier.low, true);
+        Signer signer = salter.signer(MatterCodex.Ed25519_Seed.getValue(), true, "01", Tier.LOW, true);
         assertEquals(signer.getCode(), Codex.MatterCodex.Ed25519_Seed.getValue());
         assertEquals(signer.getRaw().length, Matter.getRawSize(signer.getCode()));
         assertEquals(signer.getVerfer().getCode(), MatterCodex.Ed25519.getValue());
@@ -35,7 +35,7 @@ class SalterTest {
         assertEquals(signer.getQb64(), "AMPsqBZxWdtYpBhrWnKYitwFa77s902Q-nX3sPTzqs0R");
         assertEquals(signer.getVerfer().getQb64(), "DFYFwZJOMNy3FknECL8tUaQZRBUyQ9xCv6F8ckG-UCrC");
 
-        signer = salter.signer(MatterCodex.Ed25519_Seed.getValue(), true, "01", Tier.low, false);
+        signer = salter.signer(MatterCodex.Ed25519_Seed.getValue(), true, "01", Tier.LOW, false);
         assertEquals(signer.getCode(), MatterCodex.Ed25519_Seed.getValue());
         assertEquals(signer.getRaw().length, Matter.getRawSize(signer.getCode()));
         assertEquals(signer.getVerfer().getCode(), MatterCodex.Ed25519.getValue());
@@ -52,13 +52,13 @@ class SalterTest {
         salter = new Salter(RawArgs.builder()
                 .code(MatterCodex.Salt_128.getValue())
                 .raw(raw)
-                .build(), Tier.low);
+                .build(), Tier.LOW);
         assertArrayEquals(salter.getRaw(), raw);
 
         byte[] stretchTierNull = salter.stretch(32, "", null, true);
-        byte[] stretchTierLow = salter.stretch(32, "", Tier.low, false);
-        byte[] stretchTierMed = salter.stretch(32, "", Tier.med, false);
-        byte[] stretchTierHigh = salter.stretch(32, "", Tier.high, false);
+        byte[] stretchTierLow = salter.stretch(32, "", Tier.LOW, false);
+        byte[] stretchTierMed = salter.stretch(32, "", Tier.MED, false);
+        byte[] stretchTierHigh = salter.stretch(32, "", Tier.HIGH, false);
 
         byte[] expectedStretchTierNull = {(byte) 0xd4, 0x40, (byte) 0xeb, (byte) 0xa6, 0x78, (byte) 0x86, (byte) 0xdf, (byte) 0x93, (byte) 0xd6, 0x43, (byte) 0xdc, (byte) 0xb8, (byte) 0xa6, (byte) 0x9b, 0x02, (byte) 0xaf, 0x68, (byte) 0xc1, 0x6d, 0x28, 0x4c, (byte) 0xd6, (byte) 0xf6, (byte) 0x86, 0x59, 0x55, 0x3e, 0x24, 0x5b, (byte) 0xf9, (byte) 0xef, (byte) 0xc0};
         assertArrayEquals(stretchTierNull, expectedStretchTierNull);

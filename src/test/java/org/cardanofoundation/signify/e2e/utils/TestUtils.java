@@ -21,7 +21,6 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 import java.io.IOException;
@@ -31,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
@@ -221,7 +221,7 @@ public class TestUtils {
             bran = randomPasscode();
         }
 
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         try {
             client.connect();
         } catch (Exception e) {

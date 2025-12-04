@@ -6,8 +6,8 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class WitnessTest {
         client1 = new SignifyClient(
                 url,
                 bran1,
-                Salter.Tier.low,
+                Tier.LOW,
                 bootUrl,
                 null
         );

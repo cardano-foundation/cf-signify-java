@@ -10,6 +10,7 @@ import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ public class IpexTest extends BaseMockServerTest {
     @DisplayName("IPEX - grant-admit flow initiated by discloser")
     void testIpexGrantAdmitFlow() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -137,7 +138,7 @@ public class IpexTest extends BaseMockServerTest {
     @DisplayName("IPEX - apply-admit flow initiated by disclosee")
     void testIpexApplyAdmitFlow() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -317,7 +318,7 @@ public class IpexTest extends BaseMockServerTest {
     @DisplayName("IPEX - discloser can create an offer without apply")
     void testIpexDiscloser() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();

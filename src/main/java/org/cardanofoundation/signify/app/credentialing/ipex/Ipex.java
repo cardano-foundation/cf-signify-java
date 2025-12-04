@@ -7,7 +7,6 @@ import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.States.HabState;
 import org.cardanofoundation.signify.cesr.Siger;
 
 import java.io.IOException;
