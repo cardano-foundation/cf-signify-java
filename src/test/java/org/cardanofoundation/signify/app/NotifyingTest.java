@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.app;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +13,7 @@ public class NotifyingTest extends BaseMockServerTest {
     @Test
     void testNotifications() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();

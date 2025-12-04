@@ -11,6 +11,7 @@ import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.net.http.HttpResponse;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 public class Coring {
     public static String randomPasscode() {
@@ -20,7 +21,7 @@ public class Coring {
             .raw(raw)
             .code(Codex.MatterCodex.Salt_128.getValue())
             .build();
-        final Salter salter = new Salter(args, Salter.Tier.low);
+        final Salter salter = new Salter(args, Tier.LOW);
 
         // https://github.com/WebOfTrust/signify-ts/issues/242
         return salter.getQb64().substring(2, 23);

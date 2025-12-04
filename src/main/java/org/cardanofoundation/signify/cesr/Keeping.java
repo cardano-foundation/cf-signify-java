@@ -15,8 +15,6 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.Manager.RandyCreator;
 import org.cardanofoundation.signify.core.Manager.SaltyCreator;
 import org.cardanofoundation.signify.core.Manager.Algos;
-import org.cardanofoundation.signify.core.States.State;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
 import java.security.DigestException;
@@ -28,6 +26,7 @@ import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
 import org.cardanofoundation.signify.generated.keria.model.SaltyState;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 public class Keeping {
     // External module interface
@@ -141,7 +140,7 @@ public class Keeping {
                         salter,
                         saltyState.getPidx(),
                         saltyState.getKidx(),
-                        Tier.fromString(saltyState.getTier().getValue()), // TODO convert TIER
+                        saltyState.getTier(),
                         saltyState.getTransferable(),
                         saltyState.getStem(),
                         null,
@@ -228,7 +227,7 @@ public class Keeping {
             this.salter = salter;
             this.pidx = pidx;
             this.kidx = kidx != null ? kidx : 0;
-            this.tier = tier != null ? tier : Tier.low;
+            this.tier = tier != null ? tier : Tier.LOW;
             this.transferable = transferable;
             this.code = code != null ? code : MatterCodex.Ed25519_Seed.getValue();
             this.count = count != null ? count : 1;
@@ -674,8 +673,8 @@ public class Keeping {
         public GroupKeeper(
                 KeyManager manager,
                 Identifier mhab,
-                List<State> states,
-                List<State> rstates,
+                List<KeyStateRecord> states,
+                List<KeyStateRecord> rstates,
                 List<String> keys,
                 List<String> ndigs
         ) {

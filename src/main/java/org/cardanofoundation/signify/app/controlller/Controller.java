@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
@@ -17,12 +16,13 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
 
 import java.math.BigInteger;
 import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 /**
  * Controller is responsible for managing signing keys for the client and agent.  The client
@@ -158,7 +158,7 @@ public class Controller {
     }
 
     public Serder derive(Object state) throws DigestException {
-        if (state != null && ((States.State) state).getEe().getS().equals("0")) {
+        if (state != null && ((KeyStateRecord) state).getEe().getS().equals("0")) {
             return Eventing.incept(InceptArgs.builder()
                 .keys(this.keys)
                 .isith("1")

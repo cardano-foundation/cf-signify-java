@@ -11,7 +11,6 @@ import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
 import java.math.BigInteger;

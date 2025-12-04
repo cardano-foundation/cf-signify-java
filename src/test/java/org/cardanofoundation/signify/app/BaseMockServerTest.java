@@ -10,6 +10,7 @@ import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.core.Httping;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -240,7 +241,7 @@ public class BaseMockServerTest {
                 "A",
                 true,
                 "agentagent-ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
-                Salter.Tier.low,
+                Tier.LOW,
                 false
         );
 

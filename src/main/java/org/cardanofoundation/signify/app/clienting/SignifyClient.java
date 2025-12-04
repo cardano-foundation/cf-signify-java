@@ -45,6 +45,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 @Getter
 @Setter
@@ -57,7 +58,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private Agent agent;
     private Authenticater authn;
     private Keeping.KeyManager manager;
-    private Salter.Tier tier;
+    private Tier tier;
     private String bootUrl;
     private List<ExternalModule> externalModules;
 
@@ -93,11 +94,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     public SignifyClient(
         String url,
         String bran,
-        Salter.Tier tier,
+        Tier tier,
         String bootUrl,
         List<ExternalModule> externalModules
     ) throws DigestException, LibsodiumException {
-        tier = tier != null ? tier : Salter.Tier.low;
+        tier = tier != null ? tier : Tier.LOW;
         this.url = url;
         if (bran.length() < 21) {
             throw new InvalidValueException("bran must be 21 characters");

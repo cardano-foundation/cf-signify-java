@@ -9,6 +9,7 @@ import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -34,14 +35,14 @@ public class DelegationTest {
         client1 = new SignifyClient(
                 url,
                 bran1,
-                Salter.Tier.low,
+                Tier.LOW,
                 bootUrl,
                 null
         );
         client2 = new SignifyClient(
                 url,
                 bran2,
-                Salter.Tier.low,
+                Tier.LOW,
                 bootUrl,
                 null
         );

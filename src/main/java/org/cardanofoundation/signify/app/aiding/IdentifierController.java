@@ -16,9 +16,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.core.Manager.Algos;
-import org.cardanofoundation.signify.app.config.GeneratedModelMapper;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -251,13 +249,13 @@ public class IdentifierController {
         List<String> rmids = null;
 
         if (states != null) {
-            List<States.State> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
-            smids = stateDeserialized.stream().map(States.State::getI).toList();
+            List<KeyStateRecord> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
+            smids = stateDeserialized.stream().map(KeyStateRecord::getI).toList();
         }
 
         if (rstates != null) {
-            List<States.State> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
-            rmids = rstateDeserialized.stream().map(States.State::getI).toList();
+            List<KeyStateRecord> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
+            rmids = rstateDeserialized.stream().map(KeyStateRecord::getI).toList();
         }
 
         Map<String, Object> jsondata = IdentifierPayloadMapper.buildCreatePayload(
