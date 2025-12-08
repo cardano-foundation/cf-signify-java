@@ -30,8 +30,11 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import org.cardanofoundation.signify.generated.keria.model.AidRecord;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.MemberEnds;
 
 public class MultisigUtils {
 
@@ -198,13 +201,12 @@ public class MultisigUtils {
         }
 
         List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
-        List<Object> signings = (List<Object>) members.get("signing");
+        GroupMember members = client.identifiers().members(groupName);
+        List<AidRecord> signings = members.getSigning();
 
-        for (Object signing : signings) {
-            Map<String, Object> signingMap = (Map<String, Object>) signing;
-            Map<String, Object> ends = (Map<String, Object>) signingMap.get("ends");
-            LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.get("agent");
+        for (AidRecord signing : signings) {
+            MemberEnds ends = signing.getEnds();
+            LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.getAgent();
 
             String eid = agent.firstEntry().getKey();
             EventResult endRoleResult = client
@@ -257,12 +259,11 @@ public class MultisigUtils {
         }
 
         List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
-        List<Object> signings = (List<Object>) members.get("signing");
+        GroupMember members = client.identifiers().members(groupName);
+        List<AidRecord> signings = members.getSigning();
 
-        Map<String, Object> signingMap = TestUtils.castObjectToListMap(signings).get(0);
-        Map<String, Object> ends = (Map<String, Object>) signingMap.get("ends");
-        LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.get("agent");
+        MemberEnds ends = signings.get(0).getEnds();
+        LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.getAgent();
 
         String eid = agent.firstEntry().getKey();
         EventResult endRoleResult = client

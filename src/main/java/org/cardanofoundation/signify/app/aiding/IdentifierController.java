@@ -26,6 +26,7 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
@@ -467,12 +468,12 @@ public class IdentifierController {
      * @param name Name of the group identifier
      * @return A list of members of the group
      */
-    public Object members(String name) throws LibsodiumException, InterruptedException, IOException {
+    public GroupMember members(String name) throws LibsodiumException, InterruptedException, IOException {
         HttpResponse<String> response = this.client.fetch(
                 "/identifiers/" + name + "/members",
                 "GET",
                 null
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), GroupMember.class);
     }
 }
