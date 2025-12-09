@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.unchecked;
 
@@ -35,8 +36,8 @@ public class BaseIntegrationTest {
 
     }
 
-    public static List<Object> getOobisAsync(GetOobisArgs... getOobisArgs) {
-        List<CompletableFuture<Object>> getOobisFutures = new ArrayList<>();
+    public static List<OOBI> getOobisAsync(GetOobisArgs... getOobisArgs) {
+        List<CompletableFuture<OOBI>> getOobisFutures = new ArrayList<>();
         for (GetOobisArgs getOobisArg : getOobisArgs) {
             getOobisFutures.add(getOobisFuture(getOobisArg.signifyClient, getOobisArg.name, getOobisArg.role));
         }
@@ -109,7 +110,7 @@ public class BaseIntegrationTest {
         ));
     }
 
-    static CompletableFuture<Object> getOobisFuture(SignifyClient client, String name, String role) {
+    static CompletableFuture<OOBI> getOobisFuture(SignifyClient client, String name, String role) {
         return CompletableFuture.supplyAsync(unchecked(() -> 
             client.oobis().get(name, role).get()
         ));

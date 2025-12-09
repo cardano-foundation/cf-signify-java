@@ -23,6 +23,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigIncept
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class MultisigHolderTest extends BaseIntegrationTest {
     SignifyClient client1, client2, client3;
     Identifier aid1, aid2, aid3;
-    Object oobi1, oobi2, oobi3;
+    OOBI oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
     private List<HashMap<String, Object>> registryList;
 
@@ -77,7 +78,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         // Exchange OOBIs
         System.out.println("Resolving OOBIs");
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
                 new GetOobisArgs(client1, "member1", "agent"),
                 new GetOobisArgs(client2, "member2", "agent"),
                 new GetOobisArgs(client3, "issuer", "agent")
@@ -86,9 +87,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         oobi2 = oobis.get(1);
         oobi3 = oobis.get(2);
 
-        oobis1 = getOobisIndexAt0(oobi1);
-        oobis2 = getOobisIndexAt0(oobi2);
-        oobis3 = getOobisIndexAt0(oobi3);
+        oobis1 = oobi1.getOobis().getFirst();
+        oobis2 = oobi2.getOobis().getFirst();
+        oobis3 = oobi3.getOobis().getFirst();
 
         Object op1 = client1.oobis().resolve(oobis2, "member2");
         op1 = waitOperation(client1, op1);
@@ -388,9 +389,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("End role authorization for agent " + eid2 + " completed!");
 
         // Holder resolve multisig OOBI
-        Object oobisRes = client1.oobis().get("holder", "agent").get();
-        Map<String, Object> oobiBody = (Map<String, Object>) oobisRes;
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
+        OOBI oobisRes = client1.oobis().get("holder", "agent").get();
+        List<String> oobisResponse = oobisRes.getOobis();
 
         String oobiMultisig = oobisResponse.getFirst().split("/agent/")[0];
 
@@ -625,11 +625,4 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 );
         return op;
     }
-
-    public String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = (Map<String, Object>) oobi;
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
-    }
-
 }

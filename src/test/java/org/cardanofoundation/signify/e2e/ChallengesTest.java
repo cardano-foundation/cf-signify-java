@@ -10,6 +10,7 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -97,13 +98,11 @@ public class ChallengesTest {
         waitOperation(client2, rpyResult2.op());
 
         // Exchange OOBIs
-        Object oobi1 = client1.oobis().get("alice", "agent").get();
-        Map<String, Object> oobiBody1 = (Map<String, Object>) oobi1;
-        ArrayList<String> oobiResponse1 = (ArrayList<String>) oobiBody1.get("oobis");
+        OOBI oobi1 = client1.oobis().get("alice", "agent").get();
+        List<String> oobiResponse1 = oobi1.getOobis();
 
-        Object oobi2 = client2.oobis().get("bob", "agent").get();
-        Map<String, Object> oobiBody2 = (Map<String, Object>) oobi2;
-        ArrayList<String> oobiResponse2 = (ArrayList<String>) oobiBody2.get("oobis");
+        OOBI oobi2 = client2.oobis().get("bob", "agent").get();
+        List<String> oobiResponse2 = oobi2.getOobis();
 
         resolveOobi(client1, oobiResponse2.getFirst(), "bob");
         resolveOobi(client2, oobiResponse1.getFirst(), "alice");

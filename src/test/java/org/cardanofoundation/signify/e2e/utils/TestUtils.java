@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
@@ -276,8 +277,8 @@ public class TestUtils {
             }
         }
 
-        Object oobi = client.oobis().get(name, "agent").get();
-        String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
+        OOBI oobi = client.oobis().get(name, "agent").get();
+        String getOobi = oobi.getOobis().getFirst();
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
         };

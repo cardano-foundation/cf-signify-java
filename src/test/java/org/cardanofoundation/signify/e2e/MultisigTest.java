@@ -30,6 +30,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -78,17 +79,17 @@ public class MultisigTest extends BaseIntegrationTest {
 
         // Exchange OOBIs
         System.out.println("Resolving OOBIs");
-        List<Object> oobisLst = getOobisAsync(
+        List<OOBI> oobisLst = getOobisAsync(
                 new GetOobisArgs(client1, "member1", "agent"),
                 new GetOobisArgs(client2, "member2", "agent"),
                 new GetOobisArgs(client3, "member3", "agent"),
                 new GetOobisArgs(client4, "holder", "agent")
         );
 
-        Object oobi1 = oobisLst.get(0);
-        Object oobi2 = oobisLst.get(1);
-        Object oobi3 = oobisLst.get(2);
-        Object oobi4 = oobisLst.get(3);
+        OOBI oobi1 = oobisLst.get(0);
+        OOBI oobi2 = oobisLst.get(1);
+        OOBI oobi3 = oobisLst.get(2);
+        OOBI oobi4 = oobisLst.get(3);
 
         String oobis1 = getOobisIndexAt0(oobi1);
         String oobis2 = getOobisIndexAt0(oobi2);
@@ -308,7 +309,7 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("End role authorization completed!");
 
         // Holder resolve multisig OOBI
-        Object oobimultisig = client1.oobis().get("multisig", "agent").get();
+        OOBI oobimultisig = client1.oobis().get("multisig", "agent").get();
         op4 = client4.oobis().resolve(getOobisIndexAt0(oobimultisig), "multisig");
         waitOperation(client4, op4);
         System.out.println("Holder resolved multisig OOBI");
@@ -834,10 +835,8 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("Multisig credential revocation completed!");
     }
 
-    public String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = Utils.toMap(oobi);
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
+    public String getOobisIndexAt0(OOBI oobi) {
+       return oobi.getOobis().getFirst();
     }
 
     public void multisigIssue(

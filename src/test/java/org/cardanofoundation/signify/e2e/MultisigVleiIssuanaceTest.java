@@ -13,6 +13,7 @@ import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -138,7 +139,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         Identifier aidLAR3 = habStates.get(7);
         Identifier aidECR = habStates.get(8);
 
-        List<Object> oobisLst = getOobisAsync(
+        List<OOBI> oobisLst = getOobisAsync(
                 new GetOobisArgs(clientGAR1, "GAR1", "agent"),
                 new GetOobisArgs(clientGAR2, "GAR2", "agent"),
                 new GetOobisArgs(clientQAR1, "QAR1", "agent"),
@@ -149,15 +150,15 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new GetOobisArgs(clientLAR3, "LAR3", "agent"),
                 new GetOobisArgs(clientECR, "ECR", "agent")
         );
-        Object oobiGAR1 = oobisLst.get(0);
-        Object oobiGAR2 = oobisLst.get(1);
-        Object oobiQAR1 = oobisLst.get(2);
-        Object oobiQAR2 = oobisLst.get(3);
-        Object oobiQAR3 = oobisLst.get(4);
-        Object oobiLAR1 = oobisLst.get(5);
-        Object oobiLAR2 = oobisLst.get(6);
-        Object oobiLAR3 = oobisLst.get(7);
-        Object oobiECR = oobisLst.get(8);
+        OOBI oobiGAR1 = oobisLst.get(0);
+        OOBI oobiGAR2 = oobisLst.get(1);
+        OOBI oobiQAR1 = oobisLst.get(2);
+        OOBI oobiQAR2 = oobisLst.get(3);
+        OOBI oobiQAR3 = oobisLst.get(4);
+        OOBI oobiLAR1 = oobisLst.get(5);
+        OOBI oobiLAR2 = oobisLst.get(6);
+        OOBI oobiLAR3 = oobisLst.get(7);
+        OOBI oobiECR = oobisLst.get(8);
 
         getOrCreateContactAsync(
                 new GetOrCreateContactArgs(clientGAR1, "GAR2", getOobisIndexAt0(oobiGAR2)),
@@ -260,10 +261,10 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Add endpoint role authorization for all GARs' agents.
         // Skip if they have already been authorized.
-        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
-        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
+        OOBI oobiGEDAbyGAR1 = clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
+        OOBI oobiGEDAbyGAR2 = clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
 
-        if (((List<String>) oobiGEDAbyGAR1.get("oobis")).size() == 0 || ((List<String>) oobiGEDAbyGAR2.get("oobis")).size() == 0) {
+        if (oobiGEDAbyGAR1.getOobis().isEmpty() || oobiGEDAbyGAR2.getOobis().isEmpty()) {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientGAR1,
@@ -293,10 +294,10 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/rpy");
 
-            oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
-            oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
+            oobiGEDAbyGAR1 = clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
+            oobiGEDAbyGAR2 = clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
         }
-        assertEquals(oobiGEDAbyGAR1.get("role"), oobiGEDAbyGAR2.get("role"));
+        assertEquals(oobiGEDAbyGAR1.getRole(), oobiGEDAbyGAR2.getRole());
         assertEquals(getOobisIndexAt0(oobiGEDAbyGAR1), getOobisIndexAt0(oobiGEDAbyGAR2));
 
         // QARs, LARs, ECR resolve GEDA's OOBI
@@ -428,18 +429,18 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Add endpoint role authorization for all QARs' agents.
         // Skip if they have already been authorized.
-        List<Object> oobiLst = getOobisAsync(
+        List<OOBI> oobiLst = getOobisAsync(
                 new GetOobisArgs(clientQAR1, aidQVI.getName(), "agent"),
                 new GetOobisArgs(clientQAR2, aidQVI.getName(), "agent"),
                 new GetOobisArgs(clientQAR3, aidQVI.getName(), "agent")
         );
-        Map<String, Object> oobiQVIbyQAR1 = (Map<String, Object>) oobiLst.get(0);
-        Map<String, Object> oobiQVIbyQAR2 = (Map<String, Object>) oobiLst.get(1);
-        Map<String, Object> oobiQVIbyQAR3 = (Map<String, Object>) oobiLst.get(2);
+        OOBI oobiQVIbyQAR1 = oobiLst.get(0);
+        OOBI oobiQVIbyQAR2 = oobiLst.get(1);
+        OOBI oobiQVIbyQAR3 = oobiLst.get(2);
 
-        if (((List<String>) oobiQVIbyQAR1.get("oobis")).size() == 0
-                || ((List<String>) oobiQVIbyQAR2.get("oobis")).size() == 0
-                || ((List<String>) oobiQVIbyQAR3.get("oobis")).size() == 0) {
+        if (oobiQVIbyQAR1.getOobis().isEmpty()
+                || oobiQVIbyQAR2.getOobis().isEmpty()
+                || oobiQVIbyQAR3.getOobis().isEmpty()) {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientQAR1,
@@ -487,12 +488,12 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new GetOobisArgs(clientQAR2, aidQVI.getName(), "agent"),
                     new GetOobisArgs(clientQAR3, aidQVI.getName(), "agent")
             );
-            oobiQVIbyQAR1 = (Map<String, Object>) oobiLst.get(0);
-            oobiQVIbyQAR2 = (Map<String, Object>) oobiLst.get(1);
-            oobiQVIbyQAR3 = (Map<String, Object>) oobiLst.get(2);
+            oobiQVIbyQAR1 = oobiLst.get(0);
+            oobiQVIbyQAR2 = oobiLst.get(1);
+            oobiQVIbyQAR3 = oobiLst.get(2);
         }
-        assertEquals(oobiQVIbyQAR1.get("role"), oobiQVIbyQAR2.get("role"));
-        assertEquals(oobiQVIbyQAR1.get("role"), oobiQVIbyQAR3.get("role"));
+        assertEquals(oobiQVIbyQAR1.getRole(), oobiQVIbyQAR2.getRole());
+        assertEquals(oobiQVIbyQAR1.getRole(), oobiQVIbyQAR3.getRole());
         assertEquals(getOobisIndexAt0(oobiQVIbyQAR1), getOobisIndexAt0(oobiQVIbyQAR2));
         assertEquals(getOobisIndexAt0(oobiQVIbyQAR1), getOobisIndexAt0(oobiQVIbyQAR3));
 
@@ -788,13 +789,13 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
                 new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
         );
-        Map<String, Object> oobiLEbyLAR1 = (Map<String, Object>) oobiLst.get(0);
-        Map<String, Object> oobiLEbyLAR2 = (Map<String, Object>) oobiLst.get(1);
-        Map<String, Object> oobiLEbyLAR3 = (Map<String, Object>) oobiLst.get(2);
+        OOBI oobiLEbyLAR1 = oobiLst.get(0);
+        OOBI oobiLEbyLAR2 = oobiLst.get(1);
+        OOBI oobiLEbyLAR3 = oobiLst.get(2);
 
-        if (((List<Object>) oobiLEbyLAR1.get("oobis")).size() == 0
-                || ((List<Object>) oobiLEbyLAR2.get("oobis")).size() == 0
-                || ((List<Object>) oobiLEbyLAR3.get("oobis")).size() == 0) {
+        if (oobiLEbyLAR1.getOobis().isEmpty()
+                || oobiLEbyLAR2.getOobis().isEmpty()
+                || oobiLEbyLAR3.getOobis().isEmpty()) {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientLAR1,
@@ -844,12 +845,12 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
                     new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
             );
-            oobiLEbyLAR1 = (Map<String, Object>) oobiLst.get(0);
-            oobiLEbyLAR2 = (Map<String, Object>) oobiLst.get(1);
-            oobiLEbyLAR3 = (Map<String, Object>) oobiLst.get(2);
+            oobiLEbyLAR1 = oobiLst.get(0);
+            oobiLEbyLAR2 = oobiLst.get(1);
+            oobiLEbyLAR3 = oobiLst.get(2);
         }
-        assertEquals(oobiLEbyLAR1.get("role"), oobiLEbyLAR2.get("role"));
-        assertEquals(oobiLEbyLAR1.get("role"), oobiLEbyLAR3.get("role"));
+        assertEquals(oobiLEbyLAR1.getRole(), oobiLEbyLAR2.getRole());
+        assertEquals(oobiLEbyLAR1.getRole(), oobiLEbyLAR3.getRole());
         assertEquals(getOobisIndexAt0(oobiLEbyLAR1), getOobisIndexAt0(oobiLEbyLAR2));
         assertEquals(getOobisIndexAt0(oobiLEbyLAR1), getOobisIndexAt0(oobiLEbyLAR3));
 
@@ -1352,9 +1353,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(ecrCredSad.get("d"), ecrCredbyECR1Sad.get("d"));
     }
 
-    public String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = (Map<String, Object>) oobi;
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
+    public String getOobisIndexAt0(OOBI oobi) {
+        return oobi.getOobis().getFirst();
     }
 }
