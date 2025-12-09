@@ -23,6 +23,8 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.generated.keria.model.AidRecord;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
@@ -846,7 +848,7 @@ public class MultisigTest extends BaseIntegrationTest {
     ) throws Exception {
         Identifier leaderHab = client.identifiers().get(memberName).get();
         Identifier groupHab = client.identifiers().get(groupName).get();
-        Object members = client.identifiers().members(groupName);
+        GroupMember members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
         Keeping.SignResult sigs = keeper.sign(result.getAnc().getRaw().getBytes());
@@ -862,10 +864,9 @@ public class MultisigTest extends BaseIntegrationTest {
         embeds.put("iss", Arrays.asList(result.getIss(), ""));
         embeds.put("anc", Arrays.asList(result.getAnc(), atc));
 
-        Map<String, Object> membersMap = Utils.toMap(members);
-        List<Map<String, Object>> signing = (List<Map<String, Object>>) membersMap.get("signing");
+        List<AidRecord> signing = members.getSigning();
         List<String> recipients = signing.stream()
-                .map(m -> m.get("aid").toString())
+                .map(AidRecord::getAid)
                 .filter(aid -> !aid.equals(leaderHab.getPrefix()))
                 .collect(Collectors.toList());
 
@@ -889,7 +890,7 @@ public class MultisigTest extends BaseIntegrationTest {
     ) throws Exception {
         Identifier leaderHab = client.identifiers().get(memberName).get();
         Identifier groupHab = client.identifiers().get(groupName).get();
-        Object members = client.identifiers().members(groupName);
+        GroupMember members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
         Keeping.SignResult sigs = keeper.sign(anc.getRaw().getBytes());
@@ -904,10 +905,9 @@ public class MultisigTest extends BaseIntegrationTest {
         embeds.put("iss", Arrays.asList(rev, ""));
         embeds.put("anc", Arrays.asList(anc, atc));
 
-        Map<String, Object> membersMap = Utils.toMap(members);
-        List<Map<String, Object>> signing = (List<Map<String, Object>>) membersMap.get("signing");
+        List<AidRecord> signing = members.getSigning();
         List<String> recipients = signing.stream()
-                .map(m -> m.get("aid").toString())
+                .map(AidRecord::getAid)
                 .filter(aid -> !aid.equals(leaderHab.getPrefix()))
                 .collect(Collectors.toList());
 

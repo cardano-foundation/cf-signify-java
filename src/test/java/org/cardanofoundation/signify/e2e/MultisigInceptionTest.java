@@ -6,6 +6,8 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.generated.keria.model.AidRecord;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.junit.jupiter.api.Test;
 
@@ -86,17 +88,16 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
             Identifier multisig1 = client1.identifiers().get(groupName).get();
             Identifier multisig2 = client2.identifiers().get(groupName).get();
             assertEquals(multisig1.getPrefix(), multisig2.getPrefix());
-            Object members = client1.identifiers().members(groupName);
-            Map<String, Object> membersMap = Utils.toMap(members);
-            List<?> signing = (List<?>) membersMap.get("signing");
-            List<?> rotation = (List<?>) membersMap.get("rotation");
+            GroupMember members = client1.identifiers().members(groupName);
+            List<AidRecord> signing = members.getSigning();
+            List<AidRecord> rotation =  members.getRotation();
 
             assertEquals(2, signing.size());
             assertEquals(2, rotation.size());
-            assertEquals(aid1, Utils.toMap(signing.get(0)).get("aid"));
-            assertEquals(aid2, Utils.toMap(signing.get(1)).get("aid"));
-            assertEquals(aid1, Utils.toMap(rotation.get(0)).get("aid"));
-            assertEquals(aid2, Utils.toMap(rotation.get(1)).get("aid"));
+            assertEquals(aid1, signing.get(0).getAid());
+            assertEquals(aid2, signing.get(1).getAid());
+            assertEquals(aid1, rotation.get(0).getAid());
+            assertEquals(aid2, rotation.get(1).getAid());
             return null;
         });
 
