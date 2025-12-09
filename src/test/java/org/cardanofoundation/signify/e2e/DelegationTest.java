@@ -9,6 +9,7 @@ import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
@@ -74,8 +75,8 @@ public class DelegationTest {
         waitOperation(client1, rpyResult1.op());
 
         // Client 2 resolves delegator OOBI
-        Map<String, Object> oobi1 = (Map<String, Object>) client1.oobis().get("delegator", "agent").get();
-        ArrayList<String> listOobi1 = (ArrayList<String>) oobi1.get("oobis");
+        OOBI oobi1 = client1.oobis().get("delegator", "agent").get();
+        List<String> listOobi1 = oobi1.getOobis();
         resolveOobi(client2, listOobi1.getFirst(), "delegator");
         System.out.println("OOBI resolved");
 
@@ -124,9 +125,8 @@ public class DelegationTest {
                 null
         );
         waitOperation(client2, rpyResult2.op());
-        Object oobis = client2.oobis().get("delegate", null).get();
-        Map<String, Object> oobiBody = (Map<String, Object>) oobis;
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
+        OOBI oobis = client2.oobis().get("delegate", null).get();
+        List<String> oobisResponse = oobis.getOobis();
 
         oobi = oobisResponse.getFirst().split("/agent/")[0];
         assertNotNull(oobi);

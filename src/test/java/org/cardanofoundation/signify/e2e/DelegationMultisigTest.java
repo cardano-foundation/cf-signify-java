@@ -8,6 +8,7 @@ import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +54,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         Identifier delegatee2Aid = aids.get(3);
 
         // Exchange OOBIs
-        List<Object> oobis = testSteps.step("Exchanging OOBIs", () ->
+        List<OOBI> oobis = testSteps.step("Exchanging OOBIs", () ->
                 getOobisAsync(
                         new GetOobisArgs(delegator1Client, delegator1Name, "agent"),
                         new GetOobisArgs(delegator2Client, delegator2Name, "agent"),
@@ -61,18 +62,18 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         new GetOobisArgs(delegatee2Client, delegatee2Name, "agent")
                 ));
 
-        Map<String, Object> delegator1Oobi = (Map<String, Object>) oobis.get(0);
-        Map<String, Object> delegator2Oobi = (Map<String, Object>) oobis.get(1);
-        Map<String, Object> delegatee1Oobi = (Map<String, Object>) oobis.get(2);
-        Map<String, Object> delegatee2Oobi = (Map<String, Object>) oobis.get(3);
+        OOBI delegator1Oobi = oobis.get(0);
+        OOBI delegator2Oobi = oobis.get(1);
+        OOBI delegatee1Oobi = oobis.get(2);
+        OOBI delegatee2Oobi = oobis.get(3);
 
         // Resolve OOBIs
         testSteps.step("Resolving OOBIs", () -> {
             resolveOobisAsync(
-                    new ResolveOobisArgs(delegator1Client, ((List<String>) delegator2Oobi.get("oobis")).get(0), delegator2Name),
-                    new ResolveOobisArgs(delegator2Client, ((List<String>) delegator1Oobi.get("oobis")).get(0), delegator1Name),
-                    new ResolveOobisArgs(delegatee1Client, ((List<String>) delegatee2Oobi.get("oobis")).get(0), delegatee2Name),
-                    new ResolveOobisArgs(delegatee2Client, ((List<String>) delegatee1Oobi.get("oobis")).get(0), delegatee1Name)
+                    new ResolveOobisArgs(delegator1Client, delegator2Oobi.getOobis().getFirst(), delegator2Name),
+                    new ResolveOobisArgs(delegator2Client, delegator1Oobi.getOobis().getFirst(), delegator1Name),
+                    new ResolveOobisArgs(delegatee1Client, delegatee2Oobi.getOobis().getFirst(), delegatee2Name),
+                    new ResolveOobisArgs(delegatee2Client, delegatee1Oobi.getOobis().getFirst(), delegatee1Name)
             );
         });
         System.out.println(
@@ -175,13 +176,13 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
                 TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
 
-                Map<String, Object> odelegatorGroupName1 = (Map<String, Object>) delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
-                Map<String, Object> odelegatorGroupName2 = (Map<String, Object>) delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
+                OOBI odelegatorGroupName1 = delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
+                OOBI odelegatorGroupName2 = delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
 
-                assertEquals(odelegatorGroupName1.get("role"), odelegatorGroupName2.get("role"));
+                assertEquals(odelegatorGroupName1.getRole(), odelegatorGroupName2.getRole());
 
-                String stringOobis1 = ((List<String>) odelegatorGroupName1.get("oobis")).get(0);
-                String stringOobis2 = ((List<String>) odelegatorGroupName2.get("oobis")).get(0);
+                String stringOobis1 = odelegatorGroupName1.getOobis().getFirst();
+                String stringOobis2 = odelegatorGroupName2.getOobis().getFirst();
 
                 assertEquals(stringOobis1, stringOobis2);
                 return stringOobis1;
