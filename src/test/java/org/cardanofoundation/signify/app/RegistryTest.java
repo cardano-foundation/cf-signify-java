@@ -43,8 +43,7 @@ public class RegistryTest {
     @Test
     @DisplayName("should create a registry")
     void shouldCreateRegistry() throws Exception {
-        Identifier hab = new Identifier();
-        hab.setPrefix("hab prefix");
+        Identifier hab = new Identifier().prefix("hab prefix");
 
         KeyStateRecord keyStateRecord = new KeyStateRecord();
         keyStateRecord.setS("0");
@@ -79,17 +78,17 @@ public class RegistryTest {
     @Test
     @DisplayName("should fail on establishment only for now")
     void shouldFailOnEstablishmentOnly() throws Exception {
-        Identifier hab = new Identifier();
-        hab.setPrefix("hab prefix");
-        hab.setName("a name");
-        hab.setTransferable(true);
-        hab.setWindexes(Collections.emptyList());
+        KeyStateRecord keyStateRecord = new KeyStateRecord()
+            .s("0")
+            .d("a digest")
+            .c(Collections.singletonList("EO"));
 
-        KeyStateRecord keyStateRecord = new KeyStateRecord();
-        keyStateRecord.setS("0");
-        keyStateRecord.setD("a digest");
-        keyStateRecord.setC(Collections.singletonList("EO"));
-        hab.setState(keyStateRecord);
+        Identifier hab = new Identifier()
+            .prefix("hab prefix")
+            .name("a name")
+            .transferable(true)
+            .windexes(Collections.emptyList())
+            .state(keyStateRecord);
 
         when(mockedIdentifiers.get("a name")).thenReturn(Optional.of(hab));
         when(mockedClient.identifiers()).thenReturn(mockedIdentifiers);
