@@ -114,7 +114,7 @@ public class IdentifierController {
         HttpResponse<String> response = this.client.fetch(
             path,
             method,
-            IdentifierPayloadMapper.buildUpdateNamePayload(info.getName())
+            info
         );
         return Utils.fromJson(response.body(), Identifier.class);
     }
@@ -258,17 +258,15 @@ public class IdentifierController {
             rmids = rstateDeserialized.stream().map(KeyStateRecord::getI).toList();
         }
 
-        Map<String, Object> jsondata = IdentifierPayloadMapper.buildCreatePayload(
-            name,
-            serder.getKed(),
-            sigs,
-            proxy,
-            smids,
-            rmids,
-            keeper.getAlgo(),
-            keeper.getParams().toMap(),
-            extern
-        );
+        Map<String, Object> jsondata = new LinkedHashMap<>();
+        jsondata.put("name", name);
+        jsondata.put("icp", serder.getKed());
+        jsondata.put("sigs", sigs);
+        jsondata.put("proxy", proxy);
+        jsondata.put("smids", smids);
+        jsondata.put("rmids", rmids);
+
+        jsondata.put(algo.getValue(), keeper.getParams().toMap());
 
         this.client.setPidx(this.client.getPidx() + 1);
 
@@ -299,10 +297,14 @@ public class IdentifierController {
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
+        LinkedHashMap<String, Object> jsondata = new LinkedHashMap<>();
+        jsondata.put("rpy", rpy.getKed());
+        jsondata.put("sigs", sigs);
+
         HttpResponse<String> res = this.client.fetch(
                 "/identifiers/" + name + "/endroles",
                 "POST",
-                IdentifierPayloadMapper.buildEndRolePayload(rpy.getKed(), sigs)
+                jsondata
         );
         return new EventResult(rpy, sigs, res);
     }
