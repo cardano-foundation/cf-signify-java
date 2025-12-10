@@ -704,13 +704,14 @@ class ManagerTest {
         randyKeyState.setNxts(keeper0.getParams().getNxts());
         randyKeyState.setPrxs(keeper0.getParams().getPrxs());
 
-        Identifier identifier = new Identifier();
-        identifier.setPrefix(prefixes.getQb64());
-        identifier.setName("");
-        identifier.setState(new KeyStateRecord());
-        identifier.setRandy(randyKeyState);
-        identifier.setTransferable(true);
-        identifier.setWindexes(Collections.emptyList());
+        Identifier identifier = new Identifier()
+            .prefix(prefixes.getQb64())
+            .name("")
+            .state(new KeyStateRecord())
+            .randy(randyKeyState)
+            .transferable(true)
+            .windexes(Collections.emptyList());
+
         Keeping.Keeper<?> keeper1 = manager.get(identifier);
 
         assertInstanceOf(Keeping.RandyKeeper.class, keeper1);
