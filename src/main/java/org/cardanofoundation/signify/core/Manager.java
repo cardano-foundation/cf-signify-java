@@ -125,7 +125,8 @@ public class Manager {
 
     public Tier getTier() {
       String tier = this.ks.getGbls("tier");
-      return Tier.fromValue(tier == null ? Tier.LOW.getValue() : tier);
+      if (tier == null) return null;
+      return Tier.fromValue(tier);
     }
 
     public void setTier(Tier tier) {
