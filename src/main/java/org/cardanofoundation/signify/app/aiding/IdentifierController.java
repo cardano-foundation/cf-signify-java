@@ -26,6 +26,7 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
@@ -297,14 +298,14 @@ public class IdentifierController {
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
-        LinkedHashMap<String, Object> jsondata = new LinkedHashMap<>();
-        jsondata.put("rpy", rpy.getKed());
-        jsondata.put("sigs", sigs);
+        EndrolesAidPostRequest endrolesAidPostRequest = new EndrolesAidPostRequest()
+            .rpy(rpy.getKed())
+            .sigs(sigs);
 
         HttpResponse<String> res = this.client.fetch(
                 "/identifiers/" + name + "/endroles",
                 "POST",
-                jsondata
+                endrolesAidPostRequest
         );
         return new EventResult(rpy, sigs, res);
     }
