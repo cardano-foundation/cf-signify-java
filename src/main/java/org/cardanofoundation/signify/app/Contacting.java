@@ -10,22 +10,18 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
-import java.util.HashMap;
 import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.concurrent.ExecutionException;
+
+import org.cardanofoundation.signify.generated.keria.model.Challenge;
+import org.cardanofoundation.signify.generated.keria.model.Contact;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 public class Contacting {
-
-    @Getter
-    public static class Challenge {
-        public List<String> words;
-    }
 
     @Getter
     public static class Challenges {
@@ -121,28 +117,6 @@ public class Contacting {
     }
 
     @Getter
-    public static class Contact {
-        private String alias;
-        private String oobi;
-        private String id;
-        private Map<String, Object> additionalProperties = new HashMap<>();
-
-        @JsonAnySetter
-        public void setAdditionalProperty(String key, Object value) {
-            additionalProperties.put(key, value);
-        }
-
-        public <T> T get(String key) {
-            return switch (key) {
-                case "alias" -> (T) alias;
-                case "oobi" -> (T) oobi;
-                case "id" -> (T) id;
-                default -> (T) additionalProperties.get(key);
-            };
-        }
-    }
-
-    @Getter
     public static class Contacts {
         private final SignifyClient client;
 
@@ -192,7 +166,7 @@ public class Contacting {
          * @param pre Prefix of the contact
          * @return Optional containing the contact if found, or empty if not found
          */
-        public Optional<Object> get(String pre) throws InterruptedException, IOException, LibsodiumException {
+        public Optional<Contact> get(String pre) throws InterruptedException, IOException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path, method, null);
@@ -201,7 +175,7 @@ public class Contacting {
                 return Optional.empty();
             }
             
-            return Optional.of(Utils.fromJson(response.body(), Object.class));
+            return Optional.of(Utils.fromJson(response.body(), Contact.class));
         }
 
         /**
@@ -210,11 +184,11 @@ public class Contacting {
          * @param info Information about the contact
          * @return Result of the addition
          */
-        public Object add(String pre, Map<String, Object> info) throws IOException, InterruptedException, LibsodiumException {
+        public Contact add(String pre, Map<String, Object> info) throws IOException, InterruptedException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "POST";
             HttpResponse<String> response = this.client.fetch(path, method, info);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(response.body(), Contact.class);
         }
 
         /**
@@ -233,11 +207,11 @@ public class Contacting {
          * @param info Updated information about the contact
          * @return Result of the update
          */
-        public Object update(String pre, Object info) throws IOException, InterruptedException, LibsodiumException {
+        public Contact update(String pre, Object info) throws IOException, InterruptedException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "PUT";
             HttpResponse<String> response = this.client.fetch(path, method, info);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(response.body(), Contact.class);
         }
     }
 }
