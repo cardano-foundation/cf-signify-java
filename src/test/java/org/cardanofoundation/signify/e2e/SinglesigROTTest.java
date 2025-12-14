@@ -5,6 +5,7 @@ import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,27 +56,23 @@ public class SinglesigROTTest extends BaseIntegrationTest {
     public void singlesig_rot_step1() throws Exception {
         assertEquals(name1_id, contact1_id);
 
-        List<Map<String, Object>> keyState1List = (List<Map<String, Object>>) client1.keyStates().get(name1_id).get();
-        assertEquals(1, keyState1List.size());
-
-        List<Map<String, Object>> keyState2List = (List<Map<String, Object>>) client1.keyStates().get(contact1_id).get();
-        assertEquals(1, keyState2List.size());
+        KeyStateRecord keyState1 = client1.keyStates().get(name1_id).get();
+        KeyStateRecord keyState2 = client1.keyStates().get(contact1_id).get();
 
         // local and remote keystate sequence match
-        assertEquals(keyState1List.getFirst().get("s"), keyState2List.getFirst().get("s"));
+        assertEquals(keyState1.getS(), keyState2.getS());
     }
 
     @Test
     public void singlesig_rot_rot1() throws Exception {
         // local keystate before rot
-        List<Map<String, Object>> listKeyState0 = (List<Map<String, Object>>) client1.keyStates().get(name1_id).get();
-        assertNotNull(listKeyState0);
+        KeyStateRecord keyStateRecord0 = client1.keyStates().get(name1_id).get();
 
-        ArrayList<String> responseList = (ArrayList<String>) listKeyState0.getFirst().get("k");
+        List<String> responseList = keyStateRecord0.getK();
         assertEquals(1, responseList.size());
         responseList.get(0);
 
-        responseList = (ArrayList<String>) listKeyState0.getFirst().get("n");
+        responseList = keyStateRecord0.getN();
         assertEquals(1, responseList.size());
 
         // rot
@@ -84,44 +81,35 @@ public class SinglesigROTTest extends BaseIntegrationTest {
         waitOperation(client1, result.op());
 
         // local keystate after rot
-        List<Map<String, Object>> listKeyState1 = (List<Map<String, Object>>) client1.keyStates().get(name1_id).get();
-        assertTrue(parseInteger(listKeyState1.getFirst().get("s").toString()) > 0);
+        KeyStateRecord keyStateRecord1 = client1.keyStates().get(name1_id).get();
+        assertTrue(parseInteger(keyStateRecord1.getS()) > 0);
 
         // sequence has incremented
-        assertEquals(parseInteger(listKeyState1.getFirst().get("s").toString()),
-                parseInteger(listKeyState0.getFirst().get("s").toString()) + 1
+        assertEquals(parseInteger(keyStateRecord1.getS()),
+                parseInteger(keyStateRecord0.getS()) + 1
         );
         // current keys changed
-        assertNotEquals(listKeyState1.getFirst().get("k"),
-                listKeyState0.getFirst().get("k")
-        );
+        assertNotEquals(keyStateRecord1.getK(), keyStateRecord0.getK());
         // next key hashes changed
-        assertNotEquals(listKeyState1.getFirst().get("n"),
-                listKeyState0.getFirst().get("n")
-        );
+        assertNotEquals(keyStateRecord1.getN(), keyStateRecord0.getN());
 
         // remote keystate after rot
-        List<Map<String, Object>> listKeyState2 = (List<Map<String, Object>>) client2.keyStates().get(contact1_id).get();
-        assertEquals(parseInteger(listKeyState2.getFirst().get("s").toString()),
-                parseInteger(listKeyState1.getFirst().get("s").toString()) - 1
+        KeyStateRecord keyStateRecord2 = client2.keyStates().get(contact1_id).get();
+
+        assertEquals(parseInteger(keyStateRecord2.getS()),
+                parseInteger(keyStateRecord1.getS()) - 1
         );
 
         // refresh remote keystate
-        String sn = listKeyState1.getFirst().get("s").toString();
+        String sn = keyStateRecord1.getS();
         Operation op = Operation.fromObject(client2.keyStates().query(contact1_id, sn, null));
         op = waitOperation(client2, op);
         response = (HashMap<String, Object>) op.getResponse();
 
         HashMap<String, Object> keyState3 = response;
         // local and remote keystate match
-        assertEquals(keyState3.get("s"),
-                listKeyState1.getFirst().get("s")
-        );
-        assertEquals(keyState3.get("k"),
-                listKeyState1.getFirst().get("k")
-        );
-        assertEquals(keyState3.get("n"),
-                listKeyState1.getFirst().get("n")
-        );
+        assertEquals(keyState3.get("s"), keyStateRecord1.getS());
+        assertEquals(keyState3.get("k"), keyStateRecord1.getK());
+        assertEquals(keyState3.get("n"), keyStateRecord1.getN());
     }
 }
