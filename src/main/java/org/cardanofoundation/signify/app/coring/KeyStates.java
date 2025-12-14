@@ -1,10 +1,7 @@
 package org.cardanofoundation.signify.app.coring;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
@@ -41,8 +38,24 @@ public class KeyStates {
         if (res.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             return Optional.empty();
         }
-        
-        return Optional.of(Utils.fromJson(res.body(), KeyStateRecord.class));
+
+        String body = res.body();
+        if (body == null || body.isBlank()) {
+            return Optional.empty();
+        }
+
+        // Note: KERIA can return either a single object or an array
+        // Check if response is an array or single object
+        String trimmed = body.trim();
+        if (trimmed.startsWith("[")) {
+            KeyStateRecord[] records = Utils.fromJson(body, KeyStateRecord[].class);
+            if (records == null || records.length == 0) {
+                return Optional.empty();
+            }
+            return Optional.of(records[0]);
+        } else {
+            return Optional.of(Utils.fromJson(body, KeyStateRecord.class));
+        }
     }
 
     /**
