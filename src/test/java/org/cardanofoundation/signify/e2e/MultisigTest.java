@@ -140,7 +140,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // First member challenge the other members with a random list of words
         // List of words should be passed to the other members out of band
         // The other members should do the same challenge/response flow, not shown here for brevity
-        List<String> words = client1.challenges().generate(128).words;
+        List<String> words = client1.challenges().generate(128).getWords();
         System.out.println("Member1 generated challenge words: " + words);
 
         client2.challenges().respond("member2", aid1.getPrefix(), words);

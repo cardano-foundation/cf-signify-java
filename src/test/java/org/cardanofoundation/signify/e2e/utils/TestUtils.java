@@ -21,6 +21,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.Contact;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 import java.io.IOException;
@@ -286,9 +287,9 @@ public class TestUtils {
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws IOException, InterruptedException, LibsodiumException {
-        List<Contacting.Contact> list = Arrays.asList(client.contacts().list(null, "alias", "^" + name + "$"));
+        List<Contact> list = Arrays.asList(client.contacts().list(null, "alias", "^" + name + "$"));
         if (!list.isEmpty()) {
-            Contacting.Contact contact = list.getFirst();
+            Contact contact = list.getFirst();
             if (contact.getOobi().equals(oobi)) {
                 return contact.getId();
             }

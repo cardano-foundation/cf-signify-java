@@ -10,6 +10,8 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import org.cardanofoundation.signify.generated.keria.model.Challenge;
+import org.cardanofoundation.signify.generated.keria.model.Contact;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
@@ -55,10 +57,10 @@ public class ChallengesTest {
         client2.state();
 
         // Generate challenge words
-        Contacting.Challenge challenge1_small = client1.challenges().generate(128);
-        assertEquals(12, challenge1_small.words.size());
-        Contacting.Challenge challenge1_big = client1.challenges().generate(256);
-        assertEquals(24, challenge1_big.words.size());
+        Challenge challenge1_small = client1.challenges().generate(128);
+        assertEquals(12, challenge1_small.getWords().size());
+        Challenge challenge1_big = client1.challenges().generate(256);
+        assertEquals(24, challenge1_big.getWords().size());
 
         // Create two identifiers, one for each client
         CreateIdentifierArgs kargs1 = new CreateIdentifierArgs();
@@ -109,18 +111,18 @@ public class ChallengesTest {
 
         // List Client 1 contacts
         Contacting.Contacts contacts1 = client1.contacts();
-        Contacting.Contact[] client1Contacts = contacts1.list();
-        Contacting.Contact bobContact = findContact(client1Contacts, "bob");
+        Contact[] client1Contacts = contacts1.list();
+        Contact bobContact = findContact(client1Contacts, "bob");
         assert bobContact != null;
         assertEquals("bob", bobContact.getAlias());
-        assertEquals(((List<Object>) bobContact.get("challenges")).size(), 0);
+        assertEquals(0, bobContact.getChallenges().size());
 
         // Bob responds to Alice's challenge
-        client2.challenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.words);
+        client2.challenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.getWords());
         System.out.println("Bob responded to Alice's challenge with signed words");
 
         // Alice verifies Bob's response
-        Object verifyResult = client1.challenges().verify((String) opResponse2.get("i"), challenge1_small.words);
+        Object verifyResult = client1.challenges().verify((String) opResponse2.get("i"), challenge1_small.getWords());
         Operation op = Operation.fromObject(waitOperation(client1, verifyResult));
         System.out.println("Alice verified challenge response");
         opResponse = (HashMap<String, Object>) op.getResponse();
@@ -134,16 +136,15 @@ public class ChallengesTest {
         bobContact = findContact(client1Contacts, "bob");
 
         assertNotNull(bobContact);
-        Object challenges = bobContact.get("challenges");
-        assertInstanceOf(List.class, challenges);
-        assertTrue((Boolean) Utils.toMap(((List<?>) challenges).getFirst()).get("authenticated"));
+        List<Challenge> challenges = bobContact.getChallenges();
+        assertTrue(challenges.getFirst().getAuthenticated());
 
         List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
         assertOperations(clientList);
     }
 
-    private static Contacting.Contact findContact(Contacting.Contact[] contacts, String alias) {
-        for (Contacting.Contact contact : contacts) {
+    private static Contact findContact(Contact[] contacts, String alias) {
+        for (Contact contact : contacts) {
             if (alias.equals(contact.getAlias())) {
                 return contact;
             }
