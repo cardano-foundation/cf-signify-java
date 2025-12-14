@@ -189,6 +189,101 @@ public class BaseMockServerTest {
             "windexes": []
         }""";
 
+    public static final String MOCK_KEY_STATE = """
+        {
+            "vn": [1, 0],
+            "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+            "s": "0",
+            "p": "",
+            "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+            "f": "0",
+            "dt": "2023-08-21T22:30:46.473545+00:00",
+            "et": "icp",
+            "kt": "1",
+            "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+            "nt": "1",
+            "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+            "bt": "0",
+            "b": [],
+            "c": [],
+            "ee": {
+                "s": "0",
+                "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "br": [],
+                "ba": []
+            },
+            "di": ""
+        }""";
+
+    public static final String MOCK_KEY_STATES_ARRAY = """
+        [
+            {
+                "vn": [1, 0],
+                "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "s": "0",
+                "p": "",
+                "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "f": "0",
+                "dt": "2023-08-21T22:30:46.473545+00:00",
+                "et": "icp",
+                "kt": "1",
+                "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+                "nt": "1",
+                "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+                "bt": "0",
+                "b": [],
+                "c": [],
+                "ee": {
+                    "s": "0",
+                    "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                    "br": [],
+                    "ba": []
+                },
+                "di": ""
+            },
+            {
+                "vn": [1, 0],
+                "i": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "s": "0",
+                "p": "",
+                "d": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "f": "0",
+                "dt": "2023-08-21T22:30:46.473545+00:00",
+                "et": "icp",
+                "kt": "1",
+                "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+                "nt": "1",
+                "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+                "bt": "0",
+                "b": [],
+                "c": [],
+                "ee": {
+                    "s": "0",
+                    "d": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                    "br": [],
+                    "ba": []
+                },
+                "di": ""
+            }
+        ]""";
+
+    public static final String MOCK_KEY_EVENT = """
+        {
+            "v": "KERI10JSON00012b_",
+            "t": "icp",
+            "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+            "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+            "s": "0",
+            "kt": "1",
+            "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+            "nt": "1",
+            "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+            "bt": "0",
+            "b": [],
+            "c": [],
+            "a": []
+        }""";
+
     public static final String MOCK_CREDENTIAL = """
         {
             "sad": {
@@ -253,9 +348,19 @@ public class BaseMockServerTest {
                 null
         );
 
-        String body = reqUrl.startsWith(url + "/identifiers/aid1/credentials")
-                ? MOCK_CREDENTIAL
-                : MOCK_GET_AID;
+        String body;
+        if (reqUrl.startsWith(url + "/identifiers/aid1/credentials")) {
+            body = MOCK_CREDENTIAL;
+        } else if (reqUrl.startsWith(url + "/events")) {
+            body = MOCK_KEY_EVENT;
+        } else if (reqUrl.startsWith(url + "/states")) {
+            // Return array if multiple prefixes in query params, single object otherwise
+            String query = req.getRequestUrl().query();
+            long preCount = query != null ? query.split("pre=").length - 1 : 0;
+            body = preCount > 1 ? MOCK_KEY_STATES_ARRAY : MOCK_KEY_STATE;
+        } else {
+            body = MOCK_GET_AID;
+        }
 
         MockResponse mockResponse = new MockResponse()
                 .setResponseCode(202)
