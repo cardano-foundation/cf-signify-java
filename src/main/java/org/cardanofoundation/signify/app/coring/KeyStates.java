@@ -1,16 +1,17 @@
 package org.cardanofoundation.signify.app.coring;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class KeyStates {
     public final SignifyClient client;
@@ -32,7 +33,7 @@ public class KeyStates {
      * @return Optional containing a map representing the key states, or empty if not found
      * @throws Exception if the fetch operation fails
      */
-    public Optional<Object> get(String pre) throws LibsodiumException, IOException, InterruptedException {
+    public Optional<KeyStateRecord> get(String pre) throws LibsodiumException, IOException, InterruptedException {
         String path = "/states?pre=" + pre;
         String method = "GET";
         HttpResponse<String> res = this.client.fetch(path, method, null);
@@ -41,21 +42,18 @@ public class KeyStates {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(res.body(), Object.class));
+        return Optional.of(Utils.fromJson(res.body(), KeyStateRecord.class));
     }
 
     /**
      * Retrieve the key state for a list of identifiers
-     *
-     * @param pres List of identifier prefixes
-     * @return A map representing the key states
-     * @throws Exception if the fetch operation fails
      */
-    public Object list(List<String> pres) throws LibsodiumException, IOException, InterruptedException {
+    public List<KeyStateRecord> list(List<String> pres) throws LibsodiumException, IOException, InterruptedException {
         String path = "/states?" + String.join("&", pres.stream().map(pre -> "pre=" + pre).toArray(String[]::new));
         String method = "GET";
         HttpResponse<String> res = this.client.fetch(path, method, null);
-        return Utils.fromJson(res.body(), Object.class);
+
+        return Arrays.asList(Utils.fromJson(res.body(), KeyStateRecord[].class));
     }
 
     /**

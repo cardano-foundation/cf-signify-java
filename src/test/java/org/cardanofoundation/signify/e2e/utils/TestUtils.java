@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
@@ -369,23 +371,8 @@ public class TestUtils {
         return credential;
     }
 
-    public static List<Object> getStates(SignifyClient client, List<String> prefixes) {
-        List<Object> participantStates = prefixes.stream().map(p -> {
-            try {
-                return client.keyStates().get(p).get();
-            } catch (Exception e) {
-                throw new RuntimeException("Error fetching key states for prefix: " + p, e);
-            }
-        }).toList();
-        return participantStates.stream().map(s -> {
-            if (s instanceof List<?>) {
-                return ((List<?>) s).get(0);
-            } else if (s instanceof Object) {
-                return ((Object[]) s)[0];
-            } else {
-                throw new IllegalArgumentException("Unexpected type: " + s.getClass());
-            }
-        }).collect(Collectors.toList());
+    public static List<KeyStateRecord> getStates(SignifyClient client, List<String> prefixes) throws IOException, InterruptedException {
+        return client.keyStates().list(prefixes);
     }
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
