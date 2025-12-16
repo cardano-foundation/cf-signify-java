@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -510,8 +511,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // GARs creates a registry for GEDA.
         // Skip if the registry has already been created.
-        List<Map<String, Object>> gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
-        List<Map<String, Object>> gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
+        List<Registry> gedaRegistrybyGAR1 = clientGAR1.registries().list(aidGEDA.getName());
+        List<Registry> gedaRegistrybyGAR2 = clientGAR2.registries().list(aidGEDA.getName());
 
         if (gedaRegistrybyGAR1.size() == 0 && gedaRegistrybyGAR2.size() == 0) {
             String nonce = Coring.randomNonce();
@@ -541,13 +542,13 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/vcp");
-            gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
-            gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
+            gedaRegistrybyGAR1 = clientGAR1.registries().list(aidGEDA.getName());
+            gedaRegistrybyGAR2 = clientGAR2.registries().list(aidGEDA.getName());
         }
-        assertEquals(gedaRegistrybyGAR1.get(0).get("name"), gedaRegistrybyGAR2.get(0).get("name"));
-        assertEquals(gedaRegistrybyGAR1.get(0).get("regk"), gedaRegistrybyGAR2.get(0).get("regk"));
+        assertEquals(gedaRegistrybyGAR1.get(0).getName(), gedaRegistrybyGAR2.get(0).getName());
+        assertEquals(gedaRegistrybyGAR1.get(0).getRegk(), gedaRegistrybyGAR2.get(0).getRegk());
 
-        Map<String, Object> gedaRegistry = gedaRegistrybyGAR1.get(0);
+        Registry gedaRegistry = gedaRegistrybyGAR1.get(0);
         // GEDA issues a QVI vLEI credential to the QVI AID.
         // Skip if the credential has already been issued.
         Map<String, Object> qviCredbyGAR1 = (Map<String, Object>) TestUtils.getIssuedCredential(
@@ -573,7 +574,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             CredentialData kargsIss = CredentialData.builder()
                     .i(aidGEDA.getPrefix())
-                    .ri(gedaRegistry.get("regk").toString())
+                    .ri(gedaRegistry.getRegk())
                     .s(QVI_SCHEMA_SAID)
                     .a(kargsSub)
                     .build();
@@ -865,9 +866,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // QARs creates a registry for QVI AID.
         // Skip if the registry has already been created.
-        List<Object> qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
+        List<Registry> qviRegistrybyQAR1 = clientQAR1.registries().list(aidQVI.getName());
+        List<Registry> qviRegistrybyQAR2 = clientQAR2.registries().list(aidQVI.getName());
+        List<Registry> qviRegistrybyQAR3 = clientQAR3.registries().list(aidQVI.getName());
         if (qviRegistrybyQAR1.size() == 0 || qviRegistrybyQAR2.size() == 0 || qviRegistrybyQAR3.size() == 0) {
             String nonce = Coring.randomNonce();
             Object registryOp1 = MultisigUtils.createRegistryMultisig(
@@ -907,16 +908,16 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/vcp");
-            qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
-            qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
-            qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
+            qviRegistrybyQAR1 = clientQAR1.registries().list(aidQVI.getName());
+            qviRegistrybyQAR2 = clientQAR2.registries().list(aidQVI.getName());
+            qviRegistrybyQAR3 = clientQAR3.registries().list(aidQVI.getName());
         }
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR2.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR3.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("regk"), castObjectToLinkedHashMap(qviRegistrybyQAR2.get(0)).get("regk"));
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("regk"), castObjectToLinkedHashMap(qviRegistrybyQAR3.get(0)).get("regk"));
+        assertEquals(qviRegistrybyQAR1.get(0).getName(), qviRegistrybyQAR2.get(0).getName());
+        assertEquals(qviRegistrybyQAR1.get(0).getName(), qviRegistrybyQAR3.get(0).getName());
+        assertEquals(qviRegistrybyQAR1.get(0).getRegk(), qviRegistrybyQAR2.get(0).getRegk());
+        assertEquals(qviRegistrybyQAR1.get(0).getRegk(), qviRegistrybyQAR3.get(0).getRegk());
 
-        Map<String, Object> qviRegistry = castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0));
+        Registry qviRegistry = qviRegistrybyQAR1.get(0);
 
         // QVI issues a LE vLEI credential to the LE.
         // Skip if the credential has already been issued.
@@ -960,7 +961,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             CredentialData kargsIss = CredentialData.builder()
                     .i(aidQVI.getPrefix())
-                    .ri(qviRegistry.get("regk").toString())
+                    .ri(qviRegistry.getRegk())
                     .s(LE_SCHEMA_SAID)
                     .a(kargsSub)
                     .e(leCredSource)
@@ -1129,9 +1130,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // LARs creates a registry for LE AID.
         // Skip if the registry has already been created.
-        List<Object> leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
+        List<Registry> leRegistrybyLAR1 = clientLAR1.registries().list(aidLE.getName());
+        List<Registry> leRegistrybyLAR2 = clientLAR2.registries().list(aidLE.getName());
+        List<Registry> leRegistrybyLAR3 = clientLAR3.registries().list(aidLE.getName());
 
         if (leRegistrybyLAR1.isEmpty() && leRegistrybyLAR2.isEmpty() && leRegistrybyLAR3.isEmpty()) {
             String nonce = Coring.randomNonce();
@@ -1172,16 +1173,16 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/vcp");
-            leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
-            leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
-            leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
+            leRegistrybyLAR1 = clientLAR1.registries().list(aidLE.getName());
+            leRegistrybyLAR2 = clientLAR2.registries().list(aidLE.getName());
+            leRegistrybyLAR3 = clientLAR3.registries().list(aidLE.getName());
         }
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR2.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR3.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("regk"), castObjectToLinkedHashMap(leRegistrybyLAR2.get(0)).get("regk"));
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("regk"), castObjectToLinkedHashMap(leRegistrybyLAR3.get(0)).get("regk"));
+        assertEquals(leRegistrybyLAR1.get(0).getName(), leRegistrybyLAR2.get(0).getName());
+        assertEquals(leRegistrybyLAR1.get(0).getName(), leRegistrybyLAR3.get(0).getName());
+        assertEquals(leRegistrybyLAR1.get(0).getRegk(), leRegistrybyLAR2.get(0).getRegk());
+        assertEquals(leRegistrybyLAR1.get(0).getRegk(), leRegistrybyLAR3.get(0).getRegk());
 
-        Map<String, Object> leRegistry = castObjectToLinkedHashMap(leRegistrybyLAR1.get(0));
+        Registry leRegistry = leRegistrybyLAR1.get(0);
 
         // LE issues a ECR vLEI credential to the ECR Person.
         // Skip if the credential has already been issued.
@@ -1225,7 +1226,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             CredentialData kargsIss = CredentialData.builder()
                     .u(new Salter().getQb64())
                     .i(aidLE.getPrefix())
-                    .ri(leRegistry.get("regk").toString())
+                    .ri(leRegistry.getRegk())
                     .s(ECR_SCHEMA_SAID)
                     .a(kargsSub)
                     .e(ecrCredSource)
