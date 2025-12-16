@@ -259,6 +259,7 @@ public class IdentifierController {
             rmids = rstateDeserialized.stream().map(KeyStateRecord::getI).toList();
         }
 
+        // TODO use generated model request IdentifiersPostRequest, when it supports dynamic fields (proxy, smids, rmids)
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("name", name);
         jsondata.put("icp", serder.getKed());
