@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
+import org.cardanofoundation.signify.generated.keria.model.Schema;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -139,15 +140,11 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer can get schemas", () -> {
             try {
-                Object issuerQviSchema = issuerClient.schemas().get(QVI_SCHEMA_SAID).get();
-                LinkedHashMap<String, Object> issuerQviSchemaList = castObjectToLinkedHashMap(issuerQviSchema);
-                String issuerQviSchemaID = issuerQviSchemaList.get("$id").toString();
-                assertEquals(issuerQviSchemaID, QVI_SCHEMA_SAID);
+                Schema issuerQviSchema = issuerClient.schemas().get(QVI_SCHEMA_SAID).get();
+                assertEquals(QVI_SCHEMA_SAID, issuerQviSchema.get$Id());
 
-                Object issuerLeSchema = issuerClient.schemas().get(LE_SCHEMA_SAID).get();
-                LinkedHashMap<String, Object> issuerLeSchemaList = castObjectToLinkedHashMap(issuerLeSchema);
-                String issuerLeSchemaID = issuerLeSchemaList.get("$id").toString();
-                assertEquals(issuerLeSchemaID, LE_SCHEMA_SAID);
+                Schema issuerLeSchema = issuerClient.schemas().get(LE_SCHEMA_SAID).get();
+                assertEquals(LE_SCHEMA_SAID, issuerLeSchema.get$Id());
             } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
@@ -155,8 +152,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Holder can list schemas", () -> {
             try {
-                Object holderSchemas = holderClient.schemas().list();
-                List<Map<String, Object>> holderSchemasList = castObjectToListMap(holderSchemas);
+                List<Schema> holderSchemasList = holderClient.schemas().list();
                 assertEquals(2, holderSchemasList.size());
             } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
