@@ -18,6 +18,7 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 
@@ -38,11 +39,11 @@ public class Registries {
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object list(String name) throws IOException, InterruptedException, LibsodiumException {
+    public List<Registry> list(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries";
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), Object.class);
+        return Arrays.asList(Utils.fromJson(response.body(), Registry[].class));
     }
 
     /**
@@ -155,7 +156,7 @@ public class Registries {
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
+    public Registry rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries/" + registryName;
         String method = "PUT";
 
@@ -163,6 +164,6 @@ public class Registries {
         data.put("name", newName);
 
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), Registry.class);
     }
 }

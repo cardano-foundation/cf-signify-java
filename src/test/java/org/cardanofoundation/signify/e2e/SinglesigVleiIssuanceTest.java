@@ -11,6 +11,7 @@ import org.cardanofoundation.signify.e2e.utils.IssuerRegistry;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -558,10 +559,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
         IssuerRegistry registry = IssuerRegistry.builder().build();
-        Object registries = client.registries().list(aid.name);
-        ArrayList<String> registriesBody = (ArrayList<String>) registries;
-        if (!registriesBody.isEmpty()) {
-            assertEquals(1, registriesBody.size());
+        List<Registry> registries = client.registries().list(aid.name);
+        if (!registries.isEmpty()) {
+            assertEquals(1, registries.size());
         } else {
             CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
             registryArgs.setName(aid.name);
@@ -571,10 +571,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             waitOperation(client, regResult.op());
             registries = client.registries().list(aid.name);
 
-            registriesBody = (ArrayList<String>) registries;
-            LinkedHashMap<String, Object> registryBody = castObjectToLinkedHashMap(registriesBody.getFirst());
-            registry.setName(registryBody.get("name").toString());
-            registry.setRegk(registryBody.get("regk").toString());
+            Registry registryBody = registries.getFirst();
+            registry.setName(registryBody.getName());
+            registry.setRegk(registryBody.getRegk());
         }
         return registry;
     }

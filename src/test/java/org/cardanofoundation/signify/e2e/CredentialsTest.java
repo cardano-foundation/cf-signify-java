@@ -13,6 +13,7 @@ import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,10 +105,9 @@ public class CredentialsTest extends BaseIntegrationTest {
             );
         });
 
-        HashMap<String, Object> registrys = testSteps.step("Create registry", () -> {
+        Registry registrys = testSteps.step("Create registry", () -> {
             String registryName = "vLEI-test-registry";
             String updatedRegistryName = "vLEI-test-registry-1";
-            HashMap<String, Object> updateRegistry = new HashMap<>();
 
             CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
             registryArgs.setName(issuerAid.name);
@@ -119,29 +119,22 @@ public class CredentialsTest extends BaseIntegrationTest {
                 throw new RuntimeException(e);
             }
             try {
-                Object registries = issuerClient.registries().list(issuerAid.name);
-                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
-                HashMap<String, String> registry = new HashMap<>();
-                registry.put("name", registriesList.getFirst().get("name").toString());
-                registry.put("regk", registriesList.getFirst().get("regk").toString());
+                List<Registry> registriesList = issuerClient.registries().list(issuerAid.name);
                 assertEquals(1, registriesList.size());
-                assertEquals(registryName, registry.get("name"));
+                assertEquals(registryName, registriesList.getFirst().getName());
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
             try {
                 issuerClient.registries().rename(issuerAid.name, registryName, updatedRegistryName);
-                Object registries = issuerClient.registries().list(issuerAid.name);
-                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
-                updateRegistry.put("name", registriesList.getFirst().get("name").toString());
-                updateRegistry.put("regk", registriesList.getFirst().get("regk").toString());
+                List<Registry> registriesList = issuerClient.registries().list(issuerAid.name);
                 assertEquals(1, registriesList.size());
-                assertEquals(updatedRegistryName, updateRegistry.get("name"));
+                assertEquals(updatedRegistryName, registriesList.getFirst().getName());
+                return registriesList.getFirst();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            return updateRegistry;
         });
 
         testSteps.step("Issuer can get schemas", () -> {
@@ -179,7 +172,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             a.setAdditionalProperties(vcdata);
 
             CredentialData cData = CredentialData.builder().build();
-            cData.setRi(registrys.get("regk").toString());
+            cData.setRi(registrys.getRegk());
             cData.setS(QVI_SCHEMA_SAID);
             cData.setA(a);
 
@@ -292,14 +285,14 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Holder can get the credential status before or without holding", () -> {
             Map<String, Object> state = (Map<String, Object>) Retry.retry(() -> {
                 try {
-                    return holderClient.credentials().state(registrys.get("regk").toString(), qviCredentialId).get();
+                    return holderClient.credentials().state(registrys.getRegk(), qviCredentialId).get();
                 } catch (IOException | InterruptedException | LibsodiumException e) {
                     throw new RuntimeException(e);
                 }
             });
 
             assertEquals(qviCredentialId, state.get("i"));
-            assertEquals(registrys.get("regk").toString(), state.get("ri"));
+            assertEquals(registrys.getRegk(), state.get("ri"));
             assertEquals(CoreUtil.Ilks.ISS.getValue(), state.get("et"));
         });
 
@@ -577,7 +570,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             }
         });
 
-        Map<String, Object> holderRegistry = testSteps.step("Holder create registry for LE credential", () -> {
+        Registry holderRegistry = testSteps.step("Holder create registry for LE credential", () -> {
             String registryName = "vLEI-test-registry";
             CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
             registryArgs.setName(holderAid.name);
@@ -587,10 +580,9 @@ public class CredentialsTest extends BaseIntegrationTest {
                 RegistryResult regResult = holderClient.registries().create(registryArgs);
 
                 waitOperation(holderClient, regResult.op());
-                Object registries = holderClient.registries().list(holderAid.name);
-                List<Map<String, Object>> registriesList = castObjectToListMap(registries);
+                List<Registry> registriesList = holderClient.registries().list(holderAid.name);
 
-                assertTrue(!registriesList.isEmpty());
+                assertFalse(registriesList.isEmpty());
                 return registriesList.getFirst();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -630,7 +622,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 CredentialData cData = CredentialData.builder().build();
                 cData.setA(cSubject);
-                cData.setRi(holderRegistry.get("regk").toString());
+                cData.setRi(holderRegistry.getRegk());
                 cData.setS(LE_SCHEMA_SAID);
                 cData.setR(sad);
                 cData.setE(e);

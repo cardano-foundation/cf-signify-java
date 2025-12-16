@@ -17,6 +17,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
@@ -42,7 +43,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
     Identifier aid1, aid2, aid3;
     OOBI oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
-    private List<HashMap<String, Object>> registryList;
+    private List<Registry> registryList;
 
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     ArrayList<String> WITNESS_AIDS = new ArrayList<>(Arrays.asList(
@@ -404,10 +405,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         System.out.println("Issuer starting credential issuance to holder...");
 
-        Object registires = client3.registries().list("issuer");
-        List<HashMap<String, Object>> listRegistries = (List<HashMap<String, Object>>) registires;
-        Map<String, Object> registryMap = listRegistries.getFirst();
-        String regk = registryMap.get("regk").toString();
+        List<Registry> listRegistries = client3.registries().list("issuer");
+        Registry registry = listRegistries.getFirst();
+        String regk = registry.getRegk();
 
         CredentialSubject subject = CredentialSubject.builder()
                 .i(holderAid.getPrefix())
@@ -502,7 +502,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         return aid;
     }
 
-    public Object createRegistry(SignifyClient client, String name, String registryName) throws Exception {
+    public Registry createRegistry(SignifyClient client, String name, String registryName) throws Exception {
         CreateRegistryArgs args = CreateRegistryArgs.builder()
                 .name(name)
                 .registryName(registryName)
@@ -512,13 +512,12 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         Object op = result.op();
         waitOperation(client, op);
 
-        Object registries = client.registries().list(name);
-        registryList = (List<HashMap<String, Object>>) registries;
-        HashMap<String, Object> opResponseName = registryList.getFirst();
+        registryList = client.registries().list(name);
+        Registry registry = registryList.getFirst();
 
         assertEquals(1, registryList.size());
-        assertEquals(registryName, opResponseName.get("name"));
-        return opResponseName;
+        assertEquals(registryName, registry.getName());
+        return registry;
     }
 
     public Object issueCredential(

@@ -78,7 +78,13 @@ public class CredentialState {
   public enum EtEnum {
     BIS(String.valueOf("bis")),
     
-    BRV(String.valueOf("brv"));
+    BRV(String.valueOf("brv")),
+
+    VCP(String.valueOf("vcp")),
+
+    ISS(String.valueOf("iss")),
+
+    REV(String.valueOf("rev"));
 
     private String value;
 
