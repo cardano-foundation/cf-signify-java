@@ -6,8 +6,8 @@ import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +54,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
 
         EventResult result = delegate.identifiers().create("delegate1", kargs);
         Operation<?> op = Operation.fromObject(result.op());
-        States.HabState delegate1 = delegate.identifiers().get("delegate1").get();
+        Identifier delegate1 = delegate.identifiers().get("delegate1").get();
         opResponseName = op.getName();
 
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());

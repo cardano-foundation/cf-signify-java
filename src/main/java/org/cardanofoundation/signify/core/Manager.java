@@ -8,10 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 @Getter
 public class Manager {
@@ -33,7 +33,7 @@ public class Manager {
         args.algo = args.algo == null ? Algos.salty : args.algo;
 
         String salt = args.salter != null ? args.salter.getQb64() : null;
-        args.tier = args.tier == null ? Tier.low.name() : args.tier;
+        args.tier = args.tier == null ? Tier.LOW : args.tier;
 
         if (this.getPidx() == null) {
             this.setPidx(args.pidx);
@@ -123,12 +123,14 @@ public class Manager {
         }
     }
 
-    public String getTier() {
-        return this.ks.getGbls("tier");
+    public Tier getTier() {
+      String tier = this.ks.getGbls("tier");
+      if (tier == null) return null;
+      return Tier.fromValue(tier);
     }
 
-    public void setTier(String tier) {
-        this.ks.pinGbls("tier", tier);
+    public void setTier(Tier tier) {
+        this.ks.pinGbls("tier", tier.getValue());
     }
 
     public Algos getAlgo() {
@@ -218,7 +220,7 @@ public class Manager {
         int ridx = 0;
         int kidx = 0;
 
-        Creator creator = new Creatory(args.algo).make(args.salt, Tier.fromString(args.tier), args.stem);
+        Creator creator = new Creatory(args.algo).make(args.salt, args.tier, args.stem);
 
         if (args.icodes == null) {
             if (args.icount < 0) {
@@ -275,7 +277,7 @@ public class Manager {
                         : this.encrypter.encrypt(creator.salt().getBytes()).getQb64();
 
         pp.stem = creator.stem();
-        pp.tier = creator.tier() != null ? creator.tier().name() : "";
+        pp.tier = creator.tier();
 
         String dt = new Date().toString();
         PubLot nw = new PubLot();
@@ -469,7 +471,7 @@ public class Manager {
             salt = this.getSalt();
         }
 
-        Creator creator = new Creatory(pp.algo).make(salt, Tier.fromString(pp.tier), pp.stem);
+        Creator creator = new Creatory(pp.algo).make(salt, pp.tier, pp.stem);
 
         if (args.ncodes == null) {
             if (args.ncount < 0) {
@@ -570,7 +572,7 @@ public class Manager {
                             ppt.code,
                             verfer.isTransferable(),
                             ppt.path,
-                            Tier.fromString(ppt.tier),
+                            ppt.tier,
                             ppt.temp
                     );
 
@@ -596,7 +598,7 @@ public class Manager {
                             ppt.code,
                             verfer.isTransferable(),
                             ppt.path,
-                            Tier.fromString(ppt.tier),
+                            ppt.tier,
                             ppt.temp
                     );
                     signers.add(signer);
@@ -791,7 +793,7 @@ public class Manager {
         private Algos algo;
         private String salt;
         private String stem;
-        private String tier;
+        private Tier tier;
         @Builder.Default
         private boolean rooted = true;
         @Builder.Default
@@ -816,7 +818,7 @@ public class Manager {
         Integer pidx;
         Algos algo;
         Salter salter;
-        String tier;
+        Tier tier;
     }
 
     public static class PubLot {
@@ -837,7 +839,7 @@ public class Manager {
         Algos algo = Algos.salty; // salty default uses indices and salt to create new key pairs
         String salt = ""; // empty salt used for salty algo
         String stem = ""; // default unique path stem for salty algo
-        String tier = ""; // security tier for stretch index salty algo
+        Tier tier; // security tier for stretch index salty algo
     }
 
     public static class PubSet {
@@ -847,7 +849,7 @@ public class Manager {
     public static class PubPath {
         String path = "";
         String code = "";
-        String tier = Tier.high.name();
+        Tier tier = Tier.HIGH;
         boolean temp = false;
     }
 
@@ -940,7 +942,7 @@ public class Manager {
             RawArgs rawArgs = RawArgs.builder()
                     .code(MatterCodex.Salt_128.getValue())
                     .build();
-            this.salter = new Salter(rawArgs, Tier.low);
+            this.salter = new Salter(rawArgs, Tier.LOW);
             this.stem = "";
         }
 

@@ -16,7 +16,6 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.core.Manager.Algos;
 
 import java.io.IOException;
@@ -27,11 +26,14 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
 
-public class Identifier {
+public class IdentifierController {
     public final IdentifierDeps client;
 
     /**
@@ -39,7 +41,7 @@ public class Identifier {
      *
      * @param client the client dependencies
      */
-    public Identifier(IdentifierDeps client) {
+    public IdentifierController(IdentifierDeps client) {
         this.client = client;
     }
 
@@ -68,7 +70,7 @@ public class Identifier {
                 range.start(),
                 range.end(),
                 range.total(),
-                response.body()
+                Arrays.asList(Utils.fromJson(response.body(), Identifier[].class))
         );
     }
 
@@ -86,7 +88,7 @@ public class Identifier {
      * @param name Prefix or alias of the identifier
      * @return An Optional containing the HabState if found, or empty if not found
      */
-    public Optional<States.HabState> get(String name) throws InterruptedException, IOException, LibsodiumException {
+    public Optional<Identifier> get(String name) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + URI.create(name).toASCIIString();
         final String method = "GET";
 
@@ -96,7 +98,7 @@ public class Identifier {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), States.HabState.class));
+        return Optional.of(Utils.fromJson(response.body(), Identifier.class));
     }
 
     /**
@@ -106,12 +108,16 @@ public class Identifier {
      * @param info Information to update for the given identifier
      * @return A HabState to the identifier information after updating
      */
-    public States.HabState update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
+    public Identifier update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + name;
         final String method = "PUT";
 
-        HttpResponse<String> response = this.client.fetch(path, method, info);
-        return Utils.fromJson(response.body(), States.HabState.class);
+        HttpResponse<String> response = this.client.fetch(
+            path,
+            method,
+            info
+        );
+        return Utils.fromJson(response.body(), Identifier.class);
     }
 
     /**
@@ -244,15 +250,16 @@ public class Identifier {
         List<String> rmids = null;
 
         if (states != null) {
-            List<States.State> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
-            smids = stateDeserialized.stream().map(States.State::getI).toList();
+            List<KeyStateRecord> stateDeserialized = Utils.fromJson(Utils.jsonStringify(states), new TypeReference<>() {});
+            smids = stateDeserialized.stream().map(KeyStateRecord::getI).toList();
         }
 
         if (rstates != null) {
-            List<States.State> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
-            rmids = rstateDeserialized.stream().map(States.State::getI).toList();
+            List<KeyStateRecord> rstateDeserialized = Utils.fromJson(Utils.jsonStringify(rstates), new TypeReference<>() {});
+            rmids = rstateDeserialized.stream().map(KeyStateRecord::getI).toList();
         }
 
+        // TODO use generated model request IdentifiersPostRequest, when it supports dynamic fields (proxy, smids, rmids)
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("name", name);
         jsondata.put("icp", serder.getKed());
@@ -282,7 +289,7 @@ public class Identifier {
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
     public EventResult addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        States.HabState hab = this.get(name)
+        Identifier hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
 
@@ -292,14 +299,14 @@ public class Identifier {
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
-        LinkedHashMap<String, Object> jsondata = new LinkedHashMap<>();
-        jsondata.put("rpy", rpy.getKed());
-        jsondata.put("sigs", sigs);
+        EndrolesAidPostRequest endrolesAidPostRequest = new EndrolesAidPostRequest()
+            .rpy(rpy.getKed())
+            .sigs(sigs);
 
         HttpResponse<String> res = this.client.fetch(
                 "/identifiers/" + name + "/endroles",
                 "POST",
-                jsondata
+                endrolesAidPostRequest
         );
         return new EventResult(rpy, sigs, res);
     }
@@ -337,11 +344,11 @@ public class Identifier {
     }
 
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        States.HabState hab = this.get(name)
+        Identifier hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
 
-        States.State state = hab.getState();
+        KeyStateRecord state = hab.getState();
         int sn = Integer.parseInt(state.getS(), 16);
         String dig = state.getD();
 
@@ -376,12 +383,12 @@ public class Identifier {
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
 
-        States.HabState hab = this.get(name)
+        Identifier hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
         boolean delegated = !hab.getState().getDi().isEmpty();
 
-        States.State state = hab.getState();
+        KeyStateRecord state = hab.getState();
         int count = state.getK().size();
         String dig = state.getD();
         int ridx = Integer.parseInt(state.getS(), 16) + 1;
@@ -407,8 +414,8 @@ public class Identifier {
         // Create new keys for next digests
         List<String> ncodes = kargs.getNcodes() != null ? kargs.getNcodes() : Collections.nCopies(ncount, ncode);
 
-        List<States.State> states = kargs.getStates() == null ? new ArrayList<>() : kargs.getStates();
-        List<States.State> rstates = kargs.getStates() == null ? new ArrayList<>() : kargs.getRstates();
+        List<KeyStateRecord> states = kargs.getStates() == null ? new ArrayList<>() : kargs.getStates();
+        List<KeyStateRecord> rstates = kargs.getStates() == null ? new ArrayList<>() : kargs.getRstates();
         KeeperResult keeperResult = keeper.rotate(
             ncodes,
             transferable,
@@ -446,8 +453,8 @@ public class Identifier {
         Map<String, Object> jsondata = new LinkedHashMap<>();
         jsondata.put("rot", serder.getKed());
         jsondata.put("sigs", sigs);
-        jsondata.put("smids", !states.isEmpty() ? states.stream().map(States.State::getI).toList() : null);
-        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(States.State::getI).toList() : null);
+        jsondata.put("smids", !states.isEmpty() ? states.stream().map(KeyStateRecord::getI).toList() : null);
+        jsondata.put("rmids", !rstates.isEmpty() ? rstates.stream().map(KeyStateRecord::getI).toList() : null);
         jsondata.put(keeper.getAlgo().toString(), keeper.getParams().toMap());
 
         HttpResponse<String> res = this.client.fetch(

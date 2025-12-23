@@ -15,16 +15,18 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.Manager.RandyCreator;
 import org.cardanofoundation.signify.core.Manager.SaltyCreator;
 import org.cardanofoundation.signify.core.Manager.Algos;
-import org.cardanofoundation.signify.core.States;
-import org.cardanofoundation.signify.core.States.HabState;
-import org.cardanofoundation.signify.core.States.State;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
 import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
+import org.cardanofoundation.signify.generated.keria.model.SaltyState;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 public class Keeping {
     // External module interface
@@ -44,8 +46,8 @@ public class Keeping {
         KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
-                List<State> states,
-                List<State> rstates
+                List<KeyStateRecord> states,
+                List<KeyStateRecord> rstates
         ) throws DigestException, LibsodiumException;
 
         SignResult sign(
@@ -118,7 +120,7 @@ public class Keeping {
                 );
                 case group -> new GroupKeeper(
                         this,
-                        (HabState) kargs.get("mhab"),
+                        (Identifier) kargs.get("mhab"),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("states")), new TypeReference<>() {}),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("rstates")), new TypeReference<>() {}),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("keys")), new TypeReference<>() {}),
@@ -128,29 +130,31 @@ public class Keeping {
             };
         }
 
-        public Keeper<? extends KeeperParams> get(HabState aid) throws LibsodiumException {
-            if (aid.containsKey(Algos.salty.getValue())) {
-                States.SaltyState kargs = (States.SaltyState) aid.get(Algos.salty.getValue());
+        public Keeper<? extends KeeperParams> get(Identifier aid) throws LibsodiumException {
+            SaltyState saltyState = aid.getSalty();
+            RandyKeyState randyState = aid.getRandy();
+            GroupKeyState groupKeyState = aid.getGroup();
+
+            if (saltyState != null) {
                 return new SaltyKeeper(
                         salter,
-                        kargs.getPidx(),
-                        kargs.getKidx(),
-                        kargs.getTier(),
-                        kargs.isTransferable(),
-                        kargs.getStem(),
+                        saltyState.getPidx(),
+                        saltyState.getKidx(),
+                        saltyState.getTier(),
+                        saltyState.getTransferable(),
+                        saltyState.getStem(),
                         null,
                         null,
-                        kargs.getIcodes(),
+                        saltyState.getIcodes(),
                         null,
                         null,
-                        kargs.getNcodes(),
-                        kargs.getDcode(),
+                        saltyState.getNcodes(),
+                        saltyState.getDcode(),
                         null,
-                        kargs.getSxlt()
+                        saltyState.getSxlt()
                 );
-            } else if (aid.containsKey(Algos.randy.getValue())) {
+            } else if (randyState != null) {
                 Prefixer pre = new Prefixer(aid.getPrefix());
-                States.RandyState kargs = (States.RandyState) aid.get(Algos.randy.getValue());
                 return new RandyKeeper(
                         salter,
                         null,
@@ -161,18 +165,17 @@ public class Keeping {
                         null,
                         List.of(),
                         null,
-                        kargs.getPrxs(),
-                        kargs.getNxts()
+                        randyState.getPrxs(),
+                        randyState.getNxts()
                 );
-            } else if (aid.containsKey(Algos.group.name())) {
-                States.GroupState kargs = (States.GroupState) aid.get(Algos.group.name());
+            } else if (groupKeyState != null) {
                 return new GroupKeeper(
                         this,
-                        kargs.getMhab(),
+                        groupKeyState.getMhab(),
                         null,
                         null,
-                        kargs.getKeys(),
-                        kargs.getNdigs()
+                        groupKeyState.getKeys(),
+                        groupKeyState.getNdigs()
                 );
             } else {
                 throw new UnsupportedOperationException("Algo not allowed yet");
@@ -224,7 +227,7 @@ public class Keeping {
             this.salter = salter;
             this.pidx = pidx;
             this.kidx = kidx != null ? kidx : 0;
-            this.tier = tier != null ? tier : Tier.low;
+            this.tier = tier != null ? tier : Tier.LOW;
             this.transferable = transferable;
             this.code = code != null ? code : MatterCodex.Ed25519_Seed.getValue();
             this.count = count != null ? count : 1;
@@ -347,8 +350,8 @@ public class Keeping {
         public KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
-                List<State> states,
-                List<State> rstates
+                List<KeyStateRecord> states,
+                List<KeyStateRecord> rstates
         ) throws DigestException, LibsodiumException {
             this.ncodes = ncodes;
             this.transferable = transferable;
@@ -566,8 +569,8 @@ public class Keeping {
         public KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
-                List<State> states,
-                List<State> rstates
+                List<KeyStateRecord> states,
+                List<KeyStateRecord> rstates
         ) throws DigestException, LibsodiumException {
             this.ncodes = ncodes;
             this.transferable = transferable;
@@ -661,7 +664,7 @@ public class Keeping {
     @Getter
     public static class GroupKeeper implements Keeper<GroupParams> {
         private final KeyManager manager;
-        private final HabState mhab;
+        private final Identifier mhab;
         private final Algos algo = Algos.group;
         private final List<Signer> signers;
         private List<String> gkeys;
@@ -669,9 +672,9 @@ public class Keeping {
 
         public GroupKeeper(
                 KeyManager manager,
-                HabState mhab,
-                List<State> states,
-                List<State> rstates,
+                Identifier mhab,
+                List<KeyStateRecord> states,
+                List<KeyStateRecord> rstates,
                 List<String> keys,
                 List<String> ndigs
         ) {
@@ -716,8 +719,8 @@ public class Keeping {
         public KeeperResult rotate(
                 List<String> ncodes,
                 boolean transferable,
-                List<State> states,
-                List<State> rstates
+                List<KeyStateRecord> states,
+                List<KeyStateRecord> rstates
         ) {
             this.gkeys = states.stream()
                     .map(state -> state.getK().getFirst())
