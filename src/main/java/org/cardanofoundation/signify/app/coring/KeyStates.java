@@ -39,23 +39,12 @@ public class KeyStates {
             return Optional.empty();
         }
 
-        String body = res.body();
-        if (body == null || body.isBlank()) {
+        // Note: KERIA always returns an array (at least empty array, or array with length 1 for single identifier)
+        KeyStateRecord[] records = Utils.fromJson(res.body(), KeyStateRecord[].class);
+        if (records.length == 0) {
             return Optional.empty();
         }
-
-        // Note: KERIA can return either a single object or an array
-        // Check if response is an array or single object
-        String trimmed = body.trim();
-        if (trimmed.startsWith("[")) {
-            KeyStateRecord[] records = Utils.fromJson(body, KeyStateRecord[].class);
-            if (records == null || records.length == 0) {
-                return Optional.empty();
-            }
-            return Optional.of(records[0]);
-        } else {
-            return Optional.of(Utils.fromJson(body, KeyStateRecord.class));
-        }
+        return Optional.of(records[0]);
     }
 
     /**
