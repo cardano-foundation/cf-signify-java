@@ -354,10 +354,10 @@ public class BaseMockServerTest {
         } else if (reqUrl.startsWith(url + "/events")) {
             body = MOCK_KEY_EVENT;
         } else if (reqUrl.startsWith(url + "/states")) {
-            // Return array if multiple prefixes in query params, single object otherwise
+            // KERIA always returns an array (at least empty array, or array with items)
             String query = req.getRequestUrl().query();
             long preCount = query != null ? query.split("pre=").length - 1 : 0;
-            body = preCount > 1 ? MOCK_KEY_STATES_ARRAY : MOCK_KEY_STATE;
+            body = preCount > 1 ? MOCK_KEY_STATES_ARRAY : "[" + MOCK_KEY_STATE + "]";
         } else {
             body = MOCK_GET_AID;
         }
