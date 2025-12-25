@@ -24,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.IssueCredentialRequestSource;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * IssueCredentialRequest
@@ -38,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IssueCredentialRequest.JSON_PROPERTY_PRIVATE
 })
 @JsonTypeName("issueCredential_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class IssueCredentialRequest {
   public static final String JSON_PROPERTY_REGISTRY = "registry";
   @jakarta.annotation.Nullable
@@ -71,6 +74,19 @@ public class IssueCredentialRequest {
   public IssueCredentialRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public IssueCredentialRequest(@JsonProperty(JSON_PROPERTY_REGISTRY) String registry, @JsonProperty(JSON_PROPERTY_RECIPIENT) String recipient, @JsonProperty(JSON_PROPERTY_SCHEMA) String schema, @JsonProperty(JSON_PROPERTY_RULES) Object rules, @JsonProperty(JSON_PROPERTY_SOURCE) IssueCredentialRequestSource source, @JsonProperty(JSON_PROPERTY_CREDENTIAL_DATA) Object credentialData, @JsonProperty(JSON_PROPERTY_PRIVATE) Boolean _private) {
+    this.registry = registry;
+    this.recipient = recipient;
+    this.schema = schema;
+    this.rules = rules;
+    this.source = source;
+    this.credentialData = credentialData;
+    this._private = _private;
+  }
+
   public IssueCredentialRequest registry(@jakarta.annotation.Nullable String registry) {
     
     this.registry = registry;
@@ -82,6 +98,7 @@ public class IssueCredentialRequest {
    * @return registry
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_REGISTRY, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -107,6 +124,7 @@ public class IssueCredentialRequest {
    * @return recipient
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RECIPIENT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -132,6 +150,7 @@ public class IssueCredentialRequest {
    * @return schema
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SCHEMA, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -157,6 +176,7 @@ public class IssueCredentialRequest {
    * @return rules
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RULES, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -182,6 +202,8 @@ public class IssueCredentialRequest {
    * @return source
    */
   @jakarta.annotation.Nullable
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_SOURCE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -207,6 +229,7 @@ public class IssueCredentialRequest {
    * @return credentialData
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_CREDENTIAL_DATA, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -232,6 +255,7 @@ public class IssueCredentialRequest {
    * @return _private
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_PRIVATE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

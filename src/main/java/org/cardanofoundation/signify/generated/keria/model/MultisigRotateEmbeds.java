@@ -24,20 +24,36 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Rot;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * MultisigRotateEmbeds
  */
 @JsonPropertyOrder({
-  MultisigRotateEmbeds.JSON_PROPERTY_ROT
+  MultisigRotateEmbeds.JSON_PROPERTY_ROT,
+  MultisigRotateEmbeds.JSON_PROPERTY_D
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class MultisigRotateEmbeds {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public class MultisigRotateEmbeds implements ExnEmbeds {
   public static final String JSON_PROPERTY_ROT = "rot";
   @jakarta.annotation.Nonnull
   private Rot rot;
 
+  public static final String JSON_PROPERTY_D = "d";
+  @jakarta.annotation.Nonnull
+  private String d;
+
   public MultisigRotateEmbeds() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public MultisigRotateEmbeds(@JsonProperty(JSON_PROPERTY_ROT) Rot rot, @JsonProperty(JSON_PROPERTY_D) String d) {
+    this.rot = rot;
+    this.d = d;
   }
 
   public MultisigRotateEmbeds rot(@jakarta.annotation.Nonnull Rot rot) {
@@ -51,6 +67,9 @@ public class MultisigRotateEmbeds {
    * @return rot
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ROT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,6 +84,33 @@ public class MultisigRotateEmbeds {
     this.rot = rot;
   }
 
+  public MultisigRotateEmbeds d(@jakarta.annotation.Nonnull String d) {
+    
+    this.d = d;
+    return this;
+  }
+
+  /**
+   * Get d
+   * @return d
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getD() {
+    return d;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setD(@jakarta.annotation.Nonnull String d) {
+    this.d = d;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -75,12 +121,13 @@ public class MultisigRotateEmbeds {
       return false;
     }
     MultisigRotateEmbeds multisigRotateEmbeds = (MultisigRotateEmbeds) o;
-    return Objects.equals(this.rot, multisigRotateEmbeds.rot);
+    return Objects.equals(this.rot, multisigRotateEmbeds.rot) &&
+        Objects.equals(this.d, multisigRotateEmbeds.d);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rot);
+    return Objects.hash(rot, d);
   }
 
   @Override
@@ -88,6 +135,7 @@ public class MultisigRotateEmbeds {
     StringBuilder sb = new StringBuilder();
     sb.append("class MultisigRotateEmbeds {\n");
     sb.append("    rot: ").append(toIndentedString(rot)).append("\n");
+    sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -28,6 +28,13 @@ def getCheckedOutGitCommitHash() {
 
 apply from: './publish-common.gradle'
 
+// Java toolchain configuration - Use Java 21 for modern features
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 def lombokVersion = '1.18.30'
 def lazysodiumVersion = '5.1.4'
 def jnaVersion = '5.15.0'
@@ -39,6 +46,8 @@ def jsonVersion = '20240303'
 def structuredFieldsVersion = '0.4'
 def jakartaAnnotationVersion = '2.1.1'
 def jacksonNullableVersion = '0.2.6'
+def jakartaValidationVersion = '3.0.2'
+def hibernateValidatorVersion = '8.0.1.Final'
 
 // test dependencies
 def testngVersion = '7.7.0'
@@ -61,6 +70,10 @@ dependencies {
     implementation "org.greenbytes.http:structured-fields:${structuredFieldsVersion}"
     implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
     implementation "org.openapitools:jackson-databind-nullable:${jacksonNullableVersion}"
+
+    // Jakarta Validation for generated models (required when useBeanValidation=true)
+    implementation "jakarta.validation:jakarta.validation-api:${jakartaValidationVersion}"
+    implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
 
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
@@ -214,10 +227,24 @@ tasks.openApiGenerate {
             serializationLibrary : "jackson",
             useJakartaEe         : "true",
             dateLibrary          : "java21",
-            sourceFolder         : "src/main/java"
+            sourceFolder         : "src/main/java",
+
+            // ====== oneOf Handling ======
+            // Generate interfaces for oneOf schemas - creates TypeScript-like union types
+            useOneOfInterfaces   : "true",      // Generates interfaces instead of flat classes (TypeScript-like)
+            legacyDiscriminatorBehavior: "false",
+
+            // ====== Reduce Boilerplate ======
+            hideGenerationTimestamp: "true",
+            openApiNullable      : "false",     // Don't use JsonNullable wrapper
+
+            // ====== Code Quality & Validation ======
+            generateConstructorWithAllArgs: "true",
+            performBeanValidation: "true",      // Requires jakarta.validation dependencies
+            useBeanValidation    : "true",      // Requires jakarta.validation dependencies
     ]
 
-    nameMappings.put("A", "AUpper")
+//    nameMappings.put("A", "AUpper")
 }
 
 tasks.register("prepareOpenApiSpec") {

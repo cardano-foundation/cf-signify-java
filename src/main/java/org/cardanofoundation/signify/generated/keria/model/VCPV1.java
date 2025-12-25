@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * VCPV1
@@ -43,7 +46,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   VCPV1.JSON_PROPERTY_N
 })
 @JsonTypeName("VCP_V_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class VCPV1 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
@@ -88,6 +91,22 @@ public class VCPV1 {
   public VCPV1() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public VCPV1(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_T) String t, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_II) String ii, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_C) List<String> c, @JsonProperty(JSON_PROPERTY_BT) String bt, @JsonProperty(JSON_PROPERTY_B) List<String> b, @JsonProperty(JSON_PROPERTY_N) String n) {
+    this.v = v;
+    this.t = t;
+    this.d = d;
+    this.i = i;
+    this.ii = ii;
+    this.s = s;
+    this.c = c;
+    this.bt = bt;
+    this.b = b;
+    this.n = n;
+  }
+
   public VCPV1 v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -99,6 +118,8 @@ public class VCPV1 {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -124,6 +145,8 @@ public class VCPV1 {
    * @return t
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_T, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -149,6 +172,8 @@ public class VCPV1 {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -174,6 +199,8 @@ public class VCPV1 {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -199,6 +226,8 @@ public class VCPV1 {
    * @return ii
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_II, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -224,6 +253,8 @@ public class VCPV1 {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -257,6 +288,8 @@ public class VCPV1 {
    * @return c
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_C, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -282,6 +315,8 @@ public class VCPV1 {
    * @return bt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_BT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -315,6 +350,8 @@ public class VCPV1 {
    * @return b
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_B, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -340,6 +377,8 @@ public class VCPV1 {
    * @return n
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_N, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

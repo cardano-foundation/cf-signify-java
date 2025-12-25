@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * IdentifiersPostRequest
@@ -40,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdentifiersPostRequest.JSON_PROPERTY_EXTERN
 })
 @JsonTypeName("_identifiers_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class IdentifiersPostRequest {
   public static final String JSON_PROPERTY_ICP = "icp";
   @jakarta.annotation.Nullable
@@ -73,6 +76,19 @@ public class IdentifiersPostRequest {
   public IdentifiersPostRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public IdentifiersPostRequest(@JsonProperty(JSON_PROPERTY_ICP) Object icp, @JsonProperty(JSON_PROPERTY_NAME) String name, @JsonProperty(JSON_PROPERTY_SIGS) List<String> sigs, @JsonProperty(JSON_PROPERTY_GROUP) Object group, @JsonProperty(JSON_PROPERTY_SALTY) Object salty, @JsonProperty(JSON_PROPERTY_RANDY) Object randy, @JsonProperty(JSON_PROPERTY_EXTERN) Object extern) {
+    this.icp = icp;
+    this.name = name;
+    this.sigs = sigs;
+    this.group = group;
+    this.salty = salty;
+    this.randy = randy;
+    this.extern = extern;
+  }
+
   public IdentifiersPostRequest icp(@jakarta.annotation.Nullable Object icp) {
     
     this.icp = icp;
@@ -84,6 +100,7 @@ public class IdentifiersPostRequest {
    * @return icp
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_ICP, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -109,6 +126,7 @@ public class IdentifiersPostRequest {
    * @return name
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_NAME, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -142,6 +160,7 @@ public class IdentifiersPostRequest {
    * @return sigs
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SIGS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -167,6 +186,7 @@ public class IdentifiersPostRequest {
    * @return group
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_GROUP, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -192,6 +212,7 @@ public class IdentifiersPostRequest {
    * @return salty
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SALTY, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -217,6 +238,7 @@ public class IdentifiersPostRequest {
    * @return randy
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RANDY, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -242,6 +264,7 @@ public class IdentifiersPostRequest {
    * @return extern
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_EXTERN, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Challenge response
@@ -35,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ChallengesVerifySourcePutRequest.JSON_PROPERTY_SAID
 })
 @JsonTypeName("_challenges_verify__source__put_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class ChallengesVerifySourcePutRequest {
   public static final String JSON_PROPERTY_AID = "aid";
   @jakarta.annotation.Nullable
@@ -46,6 +49,14 @@ public class ChallengesVerifySourcePutRequest {
   private List<String> said = new ArrayList<>();
 
   public ChallengesVerifySourcePutRequest() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public ChallengesVerifySourcePutRequest(@JsonProperty(JSON_PROPERTY_AID) String aid, @JsonProperty(JSON_PROPERTY_SAID) List<String> said) {
+    this.aid = aid;
+    this.said = said;
   }
 
   public ChallengesVerifySourcePutRequest aid(@jakarta.annotation.Nullable String aid) {
@@ -59,6 +70,7 @@ public class ChallengesVerifySourcePutRequest {
    * @return aid
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_AID, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -92,6 +104,7 @@ public class ChallengesVerifySourcePutRequest {
    * @return said
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SAID, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

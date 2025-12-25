@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * VerifyCredentialRequest
@@ -32,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   VerifyCredentialRequest.JSON_PROPERTY_ISS
 })
 @JsonTypeName("verifyCredential_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class VerifyCredentialRequest {
   public static final String JSON_PROPERTY_ACDC = "acdc";
   @jakarta.annotation.Nonnull
@@ -43,6 +46,14 @@ public class VerifyCredentialRequest {
   private Object iss;
 
   public VerifyCredentialRequest() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public VerifyCredentialRequest(@JsonProperty(JSON_PROPERTY_ACDC) Object acdc, @JsonProperty(JSON_PROPERTY_ISS) Object iss) {
+    this.acdc = acdc;
+    this.iss = iss;
   }
 
   public VerifyCredentialRequest acdc(@jakarta.annotation.Nonnull Object acdc) {
@@ -56,6 +67,8 @@ public class VerifyCredentialRequest {
    * @return acdc
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ACDC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -81,6 +94,8 @@ public class VerifyCredentialRequest {
    * @return iss
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ISS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

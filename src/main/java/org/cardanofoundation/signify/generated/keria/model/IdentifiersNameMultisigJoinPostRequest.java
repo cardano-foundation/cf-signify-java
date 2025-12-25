@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * IdentifiersNameMultisigJoinPostRequest
@@ -38,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdentifiersNameMultisigJoinPostRequest.JSON_PROPERTY_RMIDS
 })
 @JsonTypeName("_identifiers__name__multisig_join_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class IdentifiersNameMultisigJoinPostRequest {
   public static final String JSON_PROPERTY_ROT = "rot";
   @jakarta.annotation.Nullable
@@ -63,6 +66,17 @@ public class IdentifiersNameMultisigJoinPostRequest {
   public IdentifiersNameMultisigJoinPostRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public IdentifiersNameMultisigJoinPostRequest(@JsonProperty(JSON_PROPERTY_ROT) Object rot, @JsonProperty(JSON_PROPERTY_SIGS) List<String> sigs, @JsonProperty(JSON_PROPERTY_GID) String gid, @JsonProperty(JSON_PROPERTY_SMIDS) List<String> smids, @JsonProperty(JSON_PROPERTY_RMIDS) List<String> rmids) {
+    this.rot = rot;
+    this.sigs = sigs;
+    this.gid = gid;
+    this.smids = smids;
+    this.rmids = rmids;
+  }
+
   public IdentifiersNameMultisigJoinPostRequest rot(@jakarta.annotation.Nullable Object rot) {
     
     this.rot = rot;
@@ -74,6 +88,7 @@ public class IdentifiersNameMultisigJoinPostRequest {
    * @return rot
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_ROT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -107,6 +122,7 @@ public class IdentifiersNameMultisigJoinPostRequest {
    * @return sigs
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SIGS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -132,6 +148,7 @@ public class IdentifiersNameMultisigJoinPostRequest {
    * @return gid
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_GID, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -165,6 +182,7 @@ public class IdentifiersNameMultisigJoinPostRequest {
    * @return smids
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SMIDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -198,6 +216,7 @@ public class IdentifiersNameMultisigJoinPostRequest {
    * @return rmids
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RMIDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * OobisPostRequest
@@ -33,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   OobisPostRequest.JSON_PROPERTY_RPY
 })
 @JsonTypeName("_oobis_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class OobisPostRequest {
   public static final String JSON_PROPERTY_OOBIALIAS = "oobialias";
   @jakarta.annotation.Nullable
@@ -50,6 +53,15 @@ public class OobisPostRequest {
   public OobisPostRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public OobisPostRequest(@JsonProperty(JSON_PROPERTY_OOBIALIAS) String oobialias, @JsonProperty(JSON_PROPERTY_URL) String url, @JsonProperty(JSON_PROPERTY_RPY) Object rpy) {
+    this.oobialias = oobialias;
+    this.url = url;
+    this.rpy = rpy;
+  }
+
   public OobisPostRequest oobialias(@jakarta.annotation.Nullable String oobialias) {
     
     this.oobialias = oobialias;
@@ -61,6 +73,7 @@ public class OobisPostRequest {
    * @return oobialias
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_OOBIALIAS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -86,6 +99,7 @@ public class OobisPostRequest {
    * @return url
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_URL, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -111,6 +125,7 @@ public class OobisPostRequest {
    * @return rpy
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RPY, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
