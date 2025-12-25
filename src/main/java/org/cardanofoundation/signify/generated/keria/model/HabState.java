@@ -25,12 +25,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.openapitools.jackson.nullable.JsonNullable;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.openapitools.jackson.nullable.JsonNullable;
-import java.util.NoSuchElementException;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * HabState
@@ -43,7 +42,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   HabState.JSON_PROPERTY_TRANSFERABLE,
   HabState.JSON_PROPERTY_WINDEXES
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class HabState {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
@@ -63,13 +62,25 @@ public class HabState {
 
   public static final String JSON_PROPERTY_TRANSFERABLE = "transferable";
   @jakarta.annotation.Nullable
-  private JsonNullable<Boolean> transferable = JsonNullable.<Boolean>undefined();
+  private Boolean transferable;
 
   public static final String JSON_PROPERTY_WINDEXES = "windexes";
   @jakarta.annotation.Nullable
-  private JsonNullable<List<String>> windexes = JsonNullable.<List<String>>undefined();
+  private List<String> windexes;
 
   public HabState() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public HabState(@JsonProperty(JSON_PROPERTY_NAME) String name, @JsonProperty(JSON_PROPERTY_PREFIX) String prefix, @JsonProperty(JSON_PROPERTY_ICP_DT) String icpDt, @JsonProperty(JSON_PROPERTY_STATE) KeyStateRecord state, @JsonProperty(JSON_PROPERTY_TRANSFERABLE) Boolean transferable, @JsonProperty(JSON_PROPERTY_WINDEXES) List<String> windexes) {
+    this.name = name;
+    this.prefix = prefix;
+    this.icpDt = icpDt;
+    this.state = state;
+    this.transferable = transferable;
+    this.windexes = windexes;
   }
 
   public HabState name(@jakarta.annotation.Nonnull String name) {
@@ -83,6 +94,8 @@ public class HabState {
    * @return name
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NAME, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -108,6 +121,8 @@ public class HabState {
    * @return prefix
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_PREFIX, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -133,6 +148,8 @@ public class HabState {
    * @return icpDt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ICP_DT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -158,6 +175,9 @@ public class HabState {
    * @return state
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -173,8 +193,8 @@ public class HabState {
   }
 
   public HabState transferable(@jakarta.annotation.Nullable Boolean transferable) {
-    this.transferable = JsonNullable.<Boolean>of(transferable);
     
+    this.transferable = transferable;
     return this;
   }
 
@@ -183,43 +203,32 @@ public class HabState {
    * @return transferable
    */
   @jakarta.annotation.Nullable
-  @JsonIgnore
-
-  public Boolean getTransferable() {
-        return transferable.orElse(null);
-  }
 
   @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<Boolean> getTransferable_JsonNullable() {
+  public Boolean getTransferable() {
     return transferable;
   }
-  
-  @JsonProperty(JSON_PROPERTY_TRANSFERABLE)
-  public void setTransferable_JsonNullable(JsonNullable<Boolean> transferable) {
+
+
+  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setTransferable(@jakarta.annotation.Nullable Boolean transferable) {
     this.transferable = transferable;
   }
 
-  public void setTransferable(@jakarta.annotation.Nullable Boolean transferable) {
-    this.transferable = JsonNullable.<Boolean>of(transferable);
-  }
-
   public HabState windexes(@jakarta.annotation.Nullable List<String> windexes) {
-    this.windexes = JsonNullable.<List<String>>of(windexes);
     
+    this.windexes = windexes;
     return this;
   }
 
   public HabState addWindexesItem(String windexesItem) {
-    if (this.windexes == null || !this.windexes.isPresent()) {
-      this.windexes = JsonNullable.<List<String>>of(new ArrayList<>());
+    if (this.windexes == null) {
+      this.windexes = new ArrayList<>();
     }
-    try {
-      this.windexes.get().add(windexesItem);
-    } catch (java.util.NoSuchElementException e) {
-      // this can never happen, as we make sure above that the value is present
-    }
+    this.windexes.add(windexesItem);
     return this;
   }
 
@@ -228,26 +237,19 @@ public class HabState {
    * @return windexes
    */
   @jakarta.annotation.Nullable
-  @JsonIgnore
-
-  public List<String> getWindexes() {
-        return windexes.orElse(null);
-  }
 
   @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<List<String>> getWindexes_JsonNullable() {
+  public List<String> getWindexes() {
     return windexes;
   }
-  
-  @JsonProperty(JSON_PROPERTY_WINDEXES)
-  public void setWindexes_JsonNullable(JsonNullable<List<String>> windexes) {
-    this.windexes = windexes;
-  }
 
+
+  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setWindexes(@jakarta.annotation.Nullable List<String> windexes) {
-    this.windexes = JsonNullable.<List<String>>of(windexes);
+    this.windexes = windexes;
   }
 
 
@@ -264,24 +266,13 @@ public class HabState {
         Objects.equals(this.prefix, habState.prefix) &&
         Objects.equals(this.icpDt, habState.icpDt) &&
         Objects.equals(this.state, habState.state) &&
-        equalsNullable(this.transferable, habState.transferable) &&
-        equalsNullable(this.windexes, habState.windexes);
-  }
-
-  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
-    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
+        Objects.equals(this.transferable, habState.transferable) &&
+        Objects.equals(this.windexes, habState.windexes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, prefix, icpDt, state, hashCodeNullable(transferable), hashCodeNullable(windexes));
-  }
-
-  private static <T> int hashCodeNullable(JsonNullable<T> a) {
-    if (a == null) {
-      return 1;
-    }
-    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
+    return Objects.hash(name, prefix, icpDt, state, transferable, windexes);
   }
 
   @Override

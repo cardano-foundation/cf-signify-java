@@ -27,6 +27,9 @@ import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * SaltyState
@@ -42,7 +45,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   SaltyState.JSON_PROPERTY_NCODES,
   SaltyState.JSON_PROPERTY_TRANSFERABLE
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class SaltyState {
   public static final String JSON_PROPERTY_TIER = "tier";
   @jakarta.annotation.Nonnull
@@ -83,6 +86,21 @@ public class SaltyState {
   public SaltyState() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public SaltyState(@JsonProperty(JSON_PROPERTY_TIER) Tier tier, @JsonProperty(JSON_PROPERTY_SXLT) String sxlt, @JsonProperty(JSON_PROPERTY_PIDX) Integer pidx, @JsonProperty(JSON_PROPERTY_KIDX) Integer kidx, @JsonProperty(JSON_PROPERTY_STEM) String stem, @JsonProperty(JSON_PROPERTY_DCODE) String dcode, @JsonProperty(JSON_PROPERTY_ICODES) List<String> icodes, @JsonProperty(JSON_PROPERTY_NCODES) List<String> ncodes, @JsonProperty(JSON_PROPERTY_TRANSFERABLE) Boolean transferable) {
+    this.tier = tier;
+    this.sxlt = sxlt;
+    this.pidx = pidx;
+    this.kidx = kidx;
+    this.stem = stem;
+    this.dcode = dcode;
+    this.icodes = icodes;
+    this.ncodes = ncodes;
+    this.transferable = transferable;
+  }
+
   public SaltyState tier(@jakarta.annotation.Nonnull Tier tier) {
     
     this.tier = tier;
@@ -94,6 +112,9 @@ public class SaltyState {
    * @return tier
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_TIER, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -119,6 +140,7 @@ public class SaltyState {
    * @return sxlt
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SXLT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -144,6 +166,7 @@ public class SaltyState {
    * @return pidx
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_PIDX, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -169,6 +192,7 @@ public class SaltyState {
    * @return kidx
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_KIDX, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -194,6 +218,7 @@ public class SaltyState {
    * @return stem
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_STEM, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -219,6 +244,7 @@ public class SaltyState {
    * @return dcode
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_DCODE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -252,6 +278,8 @@ public class SaltyState {
    * @return icodes
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ICODES, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -285,6 +313,8 @@ public class SaltyState {
    * @return ncodes
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NCODES, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -310,6 +340,7 @@ public class SaltyState {
    * @return transferable
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

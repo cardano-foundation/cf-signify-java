@@ -24,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Registry
@@ -34,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Registry.JSON_PROPERTY_PRE,
   Registry.JSON_PROPERTY_STATE
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Registry {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
@@ -55,6 +58,16 @@ public class Registry {
   public Registry() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public Registry(@JsonProperty(JSON_PROPERTY_NAME) String name, @JsonProperty(JSON_PROPERTY_REGK) String regk, @JsonProperty(JSON_PROPERTY_PRE) String pre, @JsonProperty(JSON_PROPERTY_STATE) CredentialState state) {
+    this.name = name;
+    this.regk = regk;
+    this.pre = pre;
+    this.state = state;
+  }
+
   public Registry name(@jakarta.annotation.Nonnull String name) {
     
     this.name = name;
@@ -66,6 +79,8 @@ public class Registry {
    * @return name
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NAME, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -91,6 +106,8 @@ public class Registry {
    * @return regk
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_REGK, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -116,6 +133,8 @@ public class Registry {
    * @return pre
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_PRE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -141,6 +160,9 @@ public class Registry {
    * @return state
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

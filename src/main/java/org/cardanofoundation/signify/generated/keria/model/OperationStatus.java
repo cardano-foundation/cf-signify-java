@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * OperationStatus
@@ -34,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   OperationStatus.JSON_PROPERTY_MESSAGE,
   OperationStatus.JSON_PROPERTY_DETAILS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class OperationStatus {
   public static final String JSON_PROPERTY_CODE = "code";
   @jakarta.annotation.Nonnull
@@ -51,6 +54,15 @@ public class OperationStatus {
   public OperationStatus() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public OperationStatus(@JsonProperty(JSON_PROPERTY_CODE) Integer code, @JsonProperty(JSON_PROPERTY_MESSAGE) String message, @JsonProperty(JSON_PROPERTY_DETAILS) Map<String, Object> details) {
+    this.code = code;
+    this.message = message;
+    this.details = details;
+  }
+
   public OperationStatus code(@jakarta.annotation.Nonnull Integer code) {
     
     this.code = code;
@@ -62,6 +74,8 @@ public class OperationStatus {
    * @return code
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_CODE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -87,6 +101,8 @@ public class OperationStatus {
    * @return message
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_MESSAGE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -120,6 +136,7 @@ public class OperationStatus {
    * @return details
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_DETAILS, required = false)
   @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
 

@@ -28,6 +28,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.ACDCAttributes;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ACDCV2OneOf
@@ -44,8 +47,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ACDCV2OneOf.JSON_PROPERTY_A
 })
 @JsonTypeName("ACDC_V_2_oneOf")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class ACDCV2OneOf {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public class ACDCV2OneOf implements ACDCV2 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -85,6 +88,21 @@ public class ACDCV2OneOf {
   public ACDCV2OneOf() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public ACDCV2OneOf(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_U) String u, @JsonProperty(JSON_PROPERTY_RD) String rd, @JsonProperty(JSON_PROPERTY_E) String e, @JsonProperty(JSON_PROPERTY_R) String r, @JsonProperty(JSON_PROPERTY_A) ACDCAttributes a) {
+    this.v = v;
+    this.d = d;
+    this.i = i;
+    this.s = s;
+    this.u = u;
+    this.rd = rd;
+    this.e = e;
+    this.r = r;
+    this.a = a;
+  }
+
   public ACDCV2OneOf v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -96,6 +114,8 @@ public class ACDCV2OneOf {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -121,6 +141,8 @@ public class ACDCV2OneOf {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -146,6 +168,8 @@ public class ACDCV2OneOf {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -171,6 +195,8 @@ public class ACDCV2OneOf {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -196,6 +222,7 @@ public class ACDCV2OneOf {
    * @return u
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_U, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -221,6 +248,7 @@ public class ACDCV2OneOf {
    * @return rd
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RD, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -246,6 +274,7 @@ public class ACDCV2OneOf {
    * @return e
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_E, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -271,6 +300,7 @@ public class ACDCV2OneOf {
    * @return r
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_R, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -296,6 +326,8 @@ public class ACDCV2OneOf {
    * @return a
    */
   @jakarta.annotation.Nullable
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_A, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * OOBI
@@ -34,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   OOBI.JSON_PROPERTY_ROLE,
   OOBI.JSON_PROPERTY_OOBIS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class OOBI {
   /**
    * Gets or Sets role
@@ -96,6 +99,14 @@ public class OOBI {
   public OOBI() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public OOBI(@JsonProperty(JSON_PROPERTY_ROLE) RoleEnum role, @JsonProperty(JSON_PROPERTY_OOBIS) List<String> oobis) {
+    this.role = role;
+    this.oobis = oobis;
+  }
+
   public OOBI role(@jakarta.annotation.Nonnull RoleEnum role) {
     
     this.role = role;
@@ -107,6 +118,8 @@ public class OOBI {
    * @return role
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ROLE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -140,6 +153,8 @@ public class OOBI {
    * @return oobis
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_OOBIS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

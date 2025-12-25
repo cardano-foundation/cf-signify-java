@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * MemberEnds
@@ -40,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   MemberEnds.JSON_PROPERTY_PEER,
   MemberEnds.JSON_PROPERTY_MAILBOX
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class MemberEnds {
   public static final String JSON_PROPERTY_AGENT = "agent";
   @jakarta.annotation.Nullable
@@ -81,6 +84,21 @@ public class MemberEnds {
   public MemberEnds() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public MemberEnds(@JsonProperty(JSON_PROPERTY_AGENT) Map<String, String> agent, @JsonProperty(JSON_PROPERTY_CONTROLLER) Map<String, String> controller, @JsonProperty(JSON_PROPERTY_WITNESS) Map<String, String> witness, @JsonProperty(JSON_PROPERTY_REGISTRAR) Map<String, String> registrar, @JsonProperty(JSON_PROPERTY_WATCHER) Map<String, String> watcher, @JsonProperty(JSON_PROPERTY_JUDGE) Map<String, String> judge, @JsonProperty(JSON_PROPERTY_JUROR) Map<String, String> juror, @JsonProperty(JSON_PROPERTY_PEER) Map<String, String> peer, @JsonProperty(JSON_PROPERTY_MAILBOX) Map<String, String> mailbox) {
+    this.agent = agent;
+    this.controller = controller;
+    this.witness = witness;
+    this.registrar = registrar;
+    this.watcher = watcher;
+    this.judge = judge;
+    this.juror = juror;
+    this.peer = peer;
+    this.mailbox = mailbox;
+  }
+
   public MemberEnds agent(@jakarta.annotation.Nullable Map<String, String> agent) {
     
     this.agent = agent;
@@ -100,6 +118,7 @@ public class MemberEnds {
    * @return agent
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_AGENT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -133,6 +152,7 @@ public class MemberEnds {
    * @return controller
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_CONTROLLER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -166,6 +186,7 @@ public class MemberEnds {
    * @return witness
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_WITNESS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -199,6 +220,7 @@ public class MemberEnds {
    * @return registrar
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_REGISTRAR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -232,6 +254,7 @@ public class MemberEnds {
    * @return watcher
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_WATCHER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -265,6 +288,7 @@ public class MemberEnds {
    * @return judge
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_JUDGE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -298,6 +322,7 @@ public class MemberEnds {
    * @return juror
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_JUROR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -331,6 +356,7 @@ public class MemberEnds {
    * @return peer
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_PEER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -364,6 +390,7 @@ public class MemberEnds {
    * @return mailbox
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_MAILBOX, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
