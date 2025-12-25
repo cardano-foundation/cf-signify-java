@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ACDC edge or edge group for chained credentials
@@ -32,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IssueCredentialRequestSource.JSON_PROPERTY_S
 })
 @JsonTypeName("issueCredential_request_source")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class IssueCredentialRequestSource {
   public static final String JSON_PROPERTY_D = "d";
   @jakarta.annotation.Nullable
@@ -43,6 +46,14 @@ public class IssueCredentialRequestSource {
   private String s;
 
   public IssueCredentialRequestSource() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public IssueCredentialRequestSource(@JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_S) String s) {
+    this.d = d;
+    this.s = s;
   }
 
   public IssueCredentialRequestSource d(@jakarta.annotation.Nullable String d) {
@@ -56,6 +67,7 @@ public class IssueCredentialRequestSource {
    * @return d
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_D, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -81,6 +93,7 @@ public class IssueCredentialRequestSource {
    * @return s
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_S, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

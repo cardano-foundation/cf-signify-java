@@ -27,6 +27,9 @@ import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * KeyStateRecord
@@ -50,7 +53,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   KeyStateRecord.JSON_PROPERTY_EE,
   KeyStateRecord.JSON_PROPERTY_DI
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class KeyStateRecord {
   public static final String JSON_PROPERTY_VN = "vn";
   @jakarta.annotation.Nullable
@@ -123,6 +126,29 @@ public class KeyStateRecord {
   public KeyStateRecord() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public KeyStateRecord(@JsonProperty(JSON_PROPERTY_VN) List<Integer> vn, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_P) String p, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_F) String f, @JsonProperty(JSON_PROPERTY_DT) String dt, @JsonProperty(JSON_PROPERTY_ET) String et, @JsonProperty(JSON_PROPERTY_KT) String kt, @JsonProperty(JSON_PROPERTY_K) List<String> k, @JsonProperty(JSON_PROPERTY_NT) String nt, @JsonProperty(JSON_PROPERTY_N) List<String> n, @JsonProperty(JSON_PROPERTY_BT) String bt, @JsonProperty(JSON_PROPERTY_B) List<String> b, @JsonProperty(JSON_PROPERTY_C) List<String> c, @JsonProperty(JSON_PROPERTY_EE) StateEERecord ee, @JsonProperty(JSON_PROPERTY_DI) String di) {
+    this.vn = vn;
+    this.i = i;
+    this.s = s;
+    this.p = p;
+    this.d = d;
+    this.f = f;
+    this.dt = dt;
+    this.et = et;
+    this.kt = kt;
+    this.k = k;
+    this.nt = nt;
+    this.n = n;
+    this.bt = bt;
+    this.b = b;
+    this.c = c;
+    this.ee = ee;
+    this.di = di;
+  }
+
   public KeyStateRecord vn(@jakarta.annotation.Nullable List<Integer> vn) {
     
     this.vn = vn;
@@ -142,6 +168,7 @@ public class KeyStateRecord {
    * @return vn
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_VN, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -167,6 +194,7 @@ public class KeyStateRecord {
    * @return i
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_I, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -192,6 +220,7 @@ public class KeyStateRecord {
    * @return s
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_S, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -217,6 +246,7 @@ public class KeyStateRecord {
    * @return p
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_P, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -242,6 +272,7 @@ public class KeyStateRecord {
    * @return d
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_D, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -267,6 +298,7 @@ public class KeyStateRecord {
    * @return f
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_F, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -292,6 +324,7 @@ public class KeyStateRecord {
    * @return dt
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -317,6 +350,7 @@ public class KeyStateRecord {
    * @return et
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_ET, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -342,6 +376,7 @@ public class KeyStateRecord {
    * @return kt
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_KT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -375,6 +410,8 @@ public class KeyStateRecord {
    * @return k
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_K, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -400,6 +437,7 @@ public class KeyStateRecord {
    * @return nt
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_NT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -433,6 +471,8 @@ public class KeyStateRecord {
    * @return n
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_N, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -458,6 +498,7 @@ public class KeyStateRecord {
    * @return bt
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_BT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -491,6 +532,8 @@ public class KeyStateRecord {
    * @return b
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_B, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -524,6 +567,8 @@ public class KeyStateRecord {
    * @return c
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_C, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -549,6 +594,9 @@ public class KeyStateRecord {
    * @return ee
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_EE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -574,6 +622,7 @@ public class KeyStateRecord {
    * @return di
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_DI, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

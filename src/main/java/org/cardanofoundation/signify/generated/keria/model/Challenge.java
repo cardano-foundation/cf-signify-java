@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Challenge
@@ -36,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Challenge.JSON_PROPERTY_SAID,
   Challenge.JSON_PROPERTY_AUTHENTICATED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Challenge {
   public static final String JSON_PROPERTY_WORDS = "words";
   @jakarta.annotation.Nonnull
@@ -55,6 +58,16 @@ public class Challenge {
   private Boolean authenticated;
 
   public Challenge() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public Challenge(@JsonProperty(JSON_PROPERTY_WORDS) List<String> words, @JsonProperty(JSON_PROPERTY_DT) String dt, @JsonProperty(JSON_PROPERTY_SAID) String said, @JsonProperty(JSON_PROPERTY_AUTHENTICATED) Boolean authenticated) {
+    this.words = words;
+    this.dt = dt;
+    this.said = said;
+    this.authenticated = authenticated;
   }
 
   public Challenge words(@jakarta.annotation.Nonnull List<String> words) {
@@ -76,6 +89,8 @@ public class Challenge {
    * @return words
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_WORDS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -101,6 +116,7 @@ public class Challenge {
    * @return dt
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -126,6 +142,7 @@ public class Challenge {
    * @return said
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SAID, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -151,6 +168,7 @@ public class Challenge {
    * @return authenticated
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_AUTHENTICATED, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

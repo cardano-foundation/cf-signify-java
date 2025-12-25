@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * IdentifiersNameExchangesPostRequest
@@ -38,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdentifiersNameExchangesPostRequest.JSON_PROPERTY_TPC
 })
 @JsonTypeName("_identifiers__name__exchanges_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class IdentifiersNameExchangesPostRequest {
   public static final String JSON_PROPERTY_EXN = "exn";
   @jakarta.annotation.Nullable
@@ -63,6 +66,17 @@ public class IdentifiersNameExchangesPostRequest {
   public IdentifiersNameExchangesPostRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public IdentifiersNameExchangesPostRequest(@JsonProperty(JSON_PROPERTY_EXN) Object exn, @JsonProperty(JSON_PROPERTY_SIGS) List<String> sigs, @JsonProperty(JSON_PROPERTY_ATC) Object atc, @JsonProperty(JSON_PROPERTY_REC) List<String> rec, @JsonProperty(JSON_PROPERTY_TPC) String tpc) {
+    this.exn = exn;
+    this.sigs = sigs;
+    this.atc = atc;
+    this.rec = rec;
+    this.tpc = tpc;
+  }
+
   public IdentifiersNameExchangesPostRequest exn(@jakarta.annotation.Nullable Object exn) {
     
     this.exn = exn;
@@ -74,6 +88,7 @@ public class IdentifiersNameExchangesPostRequest {
    * @return exn
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_EXN, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -107,6 +122,7 @@ public class IdentifiersNameExchangesPostRequest {
    * @return sigs
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SIGS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -132,6 +148,7 @@ public class IdentifiersNameExchangesPostRequest {
    * @return atc
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_ATC, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -165,6 +182,7 @@ public class IdentifiersNameExchangesPostRequest {
    * @return rec
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_REC, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -190,6 +208,7 @@ public class IdentifiersNameExchangesPostRequest {
    * @return tpc
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_TPC, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

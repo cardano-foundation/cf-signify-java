@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Schema
@@ -44,7 +47,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Schema.JSON_PROPERTY_ADDITIONAL_PROPERTIES,
   Schema.JSON_PROPERTY_REQUIRED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Schema {
   public static final String JSON_PROPERTY_$_ID = "$id";
   @jakarta.annotation.Nonnull
@@ -89,6 +92,22 @@ public class Schema {
   public Schema() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public Schema(@JsonProperty(JSON_PROPERTY_$_ID) String $id, @JsonProperty(JSON_PROPERTY_$_SCHEMA) String $schema, @JsonProperty(JSON_PROPERTY_TITLE) String title, @JsonProperty(JSON_PROPERTY_DESCRIPTION) String description, @JsonProperty(JSON_PROPERTY_TYPE) String type, @JsonProperty(JSON_PROPERTY_CREDENTIAL_TYPE) String credentialType, @JsonProperty(JSON_PROPERTY_VERSION) String version, @JsonProperty(JSON_PROPERTY_PROPERTIES) Map<String, Object> properties, @JsonProperty(JSON_PROPERTY_ADDITIONAL_PROPERTIES) Boolean additionalProperties, @JsonProperty(JSON_PROPERTY_REQUIRED) List<String> required) {
+    this.$id = $id;
+    this.$schema = $schema;
+    this.title = title;
+    this.description = description;
+    this.type = type;
+    this.credentialType = credentialType;
+    this.version = version;
+    this.properties = properties;
+    this.additionalProperties = additionalProperties;
+    this.required = required;
+  }
+
   public Schema $id(@jakarta.annotation.Nonnull String $id) {
     
     this.$id = $id;
@@ -100,6 +119,8 @@ public class Schema {
    * @return $id
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_$_ID, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -125,6 +146,8 @@ public class Schema {
    * @return $schema
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_$_SCHEMA, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -150,6 +173,8 @@ public class Schema {
    * @return title
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_TITLE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -175,6 +200,8 @@ public class Schema {
    * @return description
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_DESCRIPTION, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -200,6 +227,8 @@ public class Schema {
    * @return type
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_TYPE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -225,6 +254,8 @@ public class Schema {
    * @return credentialType
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_CREDENTIAL_TYPE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -250,6 +281,8 @@ public class Schema {
    * @return version
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_VERSION, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -280,6 +313,8 @@ public class Schema {
    * @return properties
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_PROPERTIES, required = true)
   @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
 
@@ -305,6 +340,8 @@ public class Schema {
    * @return additionalProperties
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ADDITIONAL_PROPERTIES, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -338,6 +375,8 @@ public class Schema {
    * @return required
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_REQUIRED, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

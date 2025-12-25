@@ -24,20 +24,36 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.VCPV1;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * MultisigRegistryInceptEmbeds
  */
 @JsonPropertyOrder({
-  MultisigRegistryInceptEmbeds.JSON_PROPERTY_VCP
+  MultisigRegistryInceptEmbeds.JSON_PROPERTY_VCP,
+  MultisigRegistryInceptEmbeds.JSON_PROPERTY_D
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class MultisigRegistryInceptEmbeds {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public class MultisigRegistryInceptEmbeds implements ExnEmbeds {
   public static final String JSON_PROPERTY_VCP = "vcp";
   @jakarta.annotation.Nonnull
   private VCPV1 vcp;
 
+  public static final String JSON_PROPERTY_D = "d";
+  @jakarta.annotation.Nonnull
+  private String d;
+
   public MultisigRegistryInceptEmbeds() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public MultisigRegistryInceptEmbeds(@JsonProperty(JSON_PROPERTY_VCP) VCPV1 vcp, @JsonProperty(JSON_PROPERTY_D) String d) {
+    this.vcp = vcp;
+    this.d = d;
   }
 
   public MultisigRegistryInceptEmbeds vcp(@jakarta.annotation.Nonnull VCPV1 vcp) {
@@ -51,6 +67,9 @@ public class MultisigRegistryInceptEmbeds {
    * @return vcp
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_VCP, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,6 +84,33 @@ public class MultisigRegistryInceptEmbeds {
     this.vcp = vcp;
   }
 
+  public MultisigRegistryInceptEmbeds d(@jakarta.annotation.Nonnull String d) {
+    
+    this.d = d;
+    return this;
+  }
+
+  /**
+   * Get d
+   * @return d
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getD() {
+    return d;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setD(@jakarta.annotation.Nonnull String d) {
+    this.d = d;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -75,12 +121,13 @@ public class MultisigRegistryInceptEmbeds {
       return false;
     }
     MultisigRegistryInceptEmbeds multisigRegistryInceptEmbeds = (MultisigRegistryInceptEmbeds) o;
-    return Objects.equals(this.vcp, multisigRegistryInceptEmbeds.vcp);
+    return Objects.equals(this.vcp, multisigRegistryInceptEmbeds.vcp) &&
+        Objects.equals(this.d, multisigRegistryInceptEmbeds.d);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(vcp);
+    return Objects.hash(vcp, d);
   }
 
   @Override
@@ -88,6 +135,7 @@ public class MultisigRegistryInceptEmbeds {
     StringBuilder sb = new StringBuilder();
     sb.append("class MultisigRegistryInceptEmbeds {\n");
     sb.append("    vcp: ").append(toIndentedString(vcp)).append("\n");
+    sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("}");
     return sb.toString();
   }
