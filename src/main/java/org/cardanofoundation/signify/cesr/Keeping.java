@@ -261,23 +261,14 @@ public class Keeping {
                 this.bran = null;
                 this.sxlt = sxlt;
                 Cipher ciph = new Cipher(this.sxlt);
-                Object decrypted = this.decrypter.decrypt(null, ciph, null);
+                DecryptResult decrypted = this.decrypter.decrypt(null, ciph, null);
 
-                if (ciph.getCode().equals(MatterCodex.X25519_Cipher_Salt.getValue())) {
-                    this.creator = new Manager.SaltyCreator(
-                            ((Salter) decrypted).getQb64(),
-                            tier,
-                            this.stem
-                    );
-                } else if (ciph.getCode().equals(MatterCodex.X25519_Cipher_Seed.getValue())) {
-                    this.creator = new Manager.SaltyCreator(
-                            ((Signer) decrypted).getQb64(),
-                            tier,
-                            this.stem
-                    );
-                } else {
-                    throw new UnexpectedCodeException("Unsupported cipher text code = " + ciph.getCode());
-                }
+                // Use map() to get qb64 from either Salter or Signer
+                String qb64 = decrypted.map(
+                    Salter::getQb64,
+                    Signer::getQb64
+                );
+                this.creator = new Manager.SaltyCreator(qb64, tier, this.stem);
             }
 
             this.signers = this.creator.create(
@@ -508,11 +499,14 @@ public class Keeping {
 
             this.signers = new ArrayList<>();
             for (String prx : this.prxs) {
-                this.signers.add((Signer) this.decrypter.decrypt(
+                DecryptResult result = this.decrypter.decrypt(
                         new Cipher(prx).getQb64b(),
                         null,
                         this.transferable
-                ));
+                );
+                Signer decryptedSigner = result.getSigner()
+                    .orElseThrow(() -> new UnexpectedCodeException("Expected DecryptedSigner but got DecryptedSalter"));
+                this.signers.add(decryptedSigner);
             }
         }
 
@@ -576,11 +570,13 @@ public class Keeping {
             List<String> verfers = new ArrayList<>();
 
             for (String ntx : this.nxts) {
-                Signer signer = (Signer) this.decrypter.decrypt(
+                DecryptResult result = this.decrypter.decrypt(
                         null,
                         new Cipher(ntx),
                         this.transferable
                 );
+                Signer signer = result.getSigner()
+                    .orElseThrow(() -> new UnexpectedCodeException("Expected DecryptedSigner but got DecryptedSalter"));
                 verfers.add(signer.getVerfer().getQb64());
             }
 
@@ -610,11 +606,13 @@ public class Keeping {
         ) throws LibsodiumException {
             List<Signer> signers = new ArrayList<>();
             for (String prx : this.prxs) {
-                Signer signer = (Signer) this.decrypter.decrypt(
+                DecryptResult result = this.decrypter.decrypt(
                         new Cipher(prx).getQb64b(),
                         null,
                         this.transferable
                 );
+                Signer signer = result.getSigner()
+                    .orElseThrow(() -> new UnexpectedCodeException("Expected DecryptedSigner but got DecryptedSalter"));
                 signers.add(signer);
             }
 

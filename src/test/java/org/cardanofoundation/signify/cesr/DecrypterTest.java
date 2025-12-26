@@ -120,60 +120,122 @@ public class DecrypterTest {
         assertEquals("OLCFxqMz1z1UUS0TEJnvZP_zXHcuYdQsSGBWdOZeY5VQ", decrypter.getQb64());
         assertArrayEquals(priKey, decrypter.getRaw());
 
-        // Decrypt seed cipher using ser
-        Signer designer = (Signer) decrypter.decrypt(
+        // ===== APPROACH 1: Pattern Matching with Switch (Java 17+) =====
+        // This is the cleanest approach - no casting needed!
+        DecryptResult result = decrypter.decrypt(
             seedcipher.getQb64b(),
             null,
             signer.getVerfer().isTransferable()
         );
-        assertArrayEquals(designer.getQb64b(), seedQb64b);
-        assertEquals(Codex.MatterCodex.Ed25519_Seed.getValue(), designer.getCode());
-        assertEquals(Codex.MatterCodex.Ed25519.getValue(), designer.getVerfer().getCode());
-        assertTrue(signer.getVerfer().isTransferable());
 
-        // Decrypt seed cipher using cipher
-        designer = (Signer) decrypter.decrypt(
+        switch (result) {
+            case DecryptResult.DecryptedSigner(var designer) -> {
+                // designer is automatically extracted and typed as Signer
+                assertArrayEquals(designer.getQb64b(), seedQb64b);
+                assertEquals(Codex.MatterCodex.Ed25519_Seed.getValue(), designer.getCode());
+                assertEquals(Codex.MatterCodex.Ed25519.getValue(), designer.getVerfer().getCode());
+                assertTrue(signer.getVerfer().isTransferable());
+            }
+            case DecryptResult.DecryptedSalter(var salterResult) -> {
+                fail("Expected DecryptedSigner, got DecryptedSalter");
+            }
+        }
+
+        // ===== APPROACH 2: Pattern Matching with instanceof (Java 16+) =====
+        result = decrypter.decrypt(
             null,
             seedcipher,
             signer.getVerfer().isTransferable()
         );
-        assertArrayEquals(designer.getQb64b(), seedQb64b);
-        assertEquals(Codex.MatterCodex.Ed25519_Seed.getValue(), designer.getCode());
-        assertEquals(Codex.MatterCodex.Ed25519.getValue(), designer.getVerfer().getCode());
-        assertTrue(signer.getVerfer().isTransferable());
+
+        if (result instanceof DecryptResult.DecryptedSigner(var designer)) {
+            // designer is automatically extracted and typed as Signer
+            assertArrayEquals(designer.getQb64b(), seedQb64b);
+            assertEquals(Codex.MatterCodex.Ed25519_Seed.getValue(), designer.getCode());
+            assertEquals(Codex.MatterCodex.Ed25519.getValue(), designer.getVerfer().getCode());
+            assertTrue(signer.getVerfer().isTransferable());
+        } else {
+            fail("Expected DecryptedSigner");
+        }
 
         // Create cipher of salt
         Cipher saltcipher = encrypter.encrypt(saltQb64b);
         assertEquals(Codex.MatterCodex.X25519_Cipher_Salt.getValue(), saltcipher.getCode());
 
-        // Decrypt salt cipher using ser
-        Salter desalter = (Salter) decrypter.decrypt(saltcipher.getQb64b(), null);
-        assertArrayEquals(desalter.getQb64b(), saltQb64b);
-        assertEquals(Codex.MatterCodex.Salt_128.getValue(), desalter.getCode());
+        // ===== APPROACH 3: Using map() for functional transformation =====
+        result = decrypter.decrypt(saltcipher.getQb64b(), null);
 
-        // Decrypt salt cipher using cipher
-        desalter = (Salter) decrypter.decrypt(null, saltcipher);
+        String qb64Result = result.map(
+            s -> s.getQb64(),  // If Salter
+            s -> s.getQb64()   // If Signer
+        );
+        assertEquals(saltQb64, qb64Result);
+
+        // ===== APPROACH 4: Using handle() for visitor pattern =====
+        result = decrypter.decrypt(null, saltcipher);
+
+        result.handle(
+            desalter -> {
+                // Handle Salter case
+                assertArrayEquals(desalter.getQb64b(), saltQb64b);
+                assertEquals(Codex.MatterCodex.Salt_128.getValue(), desalter.getCode());
+            },
+            designer -> {
+                // Handle Signer case
+                fail("Expected Salter, got Signer");
+            }
+        );
+
+        // ===== APPROACH 5: Using Optional-based extraction =====
+        result = decrypter.decrypt(saltcipher.getQb64b(), null);
+
+        result.getSalter().ifPresent(desalter -> {
+            assertArrayEquals(desalter.getQb64b(), saltQb64b);
+            assertEquals(Codex.MatterCodex.Salt_128.getValue(), desalter.getCode());
+        });
+
+        // Or with orElseThrow
+        Salter desalter = result.getSalter().orElseThrow();
         assertArrayEquals(desalter.getQb64b(), saltQb64b);
-        assertEquals(Codex.MatterCodex.Salt_128.getValue(), desalter.getCode());
+
+        // ===== APPROACH 6: Type checking before extraction =====
+        result = decrypter.decrypt(null, saltcipher);
+
+        if (result.isSalter()) {
+            Salter s = result.getSalter().orElseThrow();
+            assertArrayEquals(s.getQb64b(), saltQb64b);
+            assertEquals(Codex.MatterCodex.Salt_128.getValue(), s.getCode());
+        }
 
         // Use previously stored fully qualified seed cipher with different nonce
         // get from seedCipher above
         String cipherSeed = "PM9jOGWNYfjM_oLXJNaQ8UlFSAV5ACjsUY7J16xfzrlpc9Ve3A5WYrZ4o_NHtP5lhp78Usspl9fyFdnCdItNd5JyqZ6dt8SXOt6TOqOCs-gy0obrwFkPPqBvVkEw";
-        designer = (Signer) decrypter.decrypt(
+        result = decrypter.decrypt(
             cipherSeed.getBytes(),
             null,
             signer.getVerfer().isTransferable()
         );
-        assertArrayEquals(designer.getQb64b(), seedQb64b);
-        assertEquals(Codex.MatterCodex.Ed25519_Seed.getValue(), designer.getCode());
-        assertEquals(Codex.MatterCodex.Ed25519.getValue(), designer.getVerfer().getCode());
+
+        // Using pattern matching - cleanest approach
+        if (result instanceof DecryptResult.DecryptedSigner(var designer)) {
+            assertArrayEquals(designer.getQb64b(), seedQb64b);
+            assertEquals(Codex.MatterCodex.Ed25519_Seed.getValue(), designer.getCode());
+            assertEquals(Codex.MatterCodex.Ed25519.getValue(), designer.getVerfer().getCode());
+        }
 
         // Use previously stored fully qualified salt cipher with different nonce
         // get from saltCipher above
         String cipherSalt = "1AAHjlR2QR9J5Et67Wy-ZaVdTryN6T6ohg44r73GLRPnHw-5S3ABFkhWyIwLOI6TXUB_5CT13S8JvknxLxBaF8ANPK9FSOPD8tYu";
-        desalter = (Salter) decrypter.decrypt(cipherSalt.getBytes(), null);
-        assertArrayEquals(desalter.getQb64b(), saltQb64b);
-        assertEquals(Codex.MatterCodex.Salt_128.getValue(), desalter.getCode());
+        result = decrypter.decrypt(cipherSalt.getBytes(), null);
+
+        // Using pattern matching with switch
+        switch (result) {
+            case DecryptResult.DecryptedSalter(var s) -> {
+                assertArrayEquals(s.getQb64b(), saltQb64b);
+                assertEquals(Codex.MatterCodex.Salt_128.getValue(), s.getCode());
+            }
+            case DecryptResult.DecryptedSigner(var s) -> fail("Expected Salter");
+        }
 
         // Create new decrypter but use seed parameter to init priKey
         decrypter = new Decrypter(RawArgs.builder().build(), cryptsigner.getQb64b());
@@ -182,7 +244,10 @@ public class DecrypterTest {
         assertArrayEquals(priKey, decrypter.getRaw());
 
         // Decrypt cipherSalt
-        desalter = (Salter) decrypter.decrypt(saltcipher.getQb64b(), null);
+        result = decrypter.decrypt(saltcipher.getQb64b(), null);
+
+        // Using getSalter() with orElseThrow - simple and clean
+        desalter = result.getSalter().orElseThrow();
         assertArrayEquals(desalter.getQb64b(), saltQb64b);
         assertEquals(Codex.MatterCodex.Salt_128.getValue(), desalter.getCode());
     }
