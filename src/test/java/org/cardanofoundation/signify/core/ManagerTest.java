@@ -220,7 +220,12 @@ class ManagerTest {
         assertEquals(manager.getTier(), Salter.Tier.low.name());
 
         Cipher saltCipher0 = new Cipher(manager.getKs().getGbls("salt"));
-        assertEquals(((Matter) saltCipher0.decrypt(null, seed0b)).getQb64(), salt);
+        DecryptResult result0 = saltCipher0.decrypt(null, seed0b);
+        String decryptedSalt = switch (result0) {
+            case DecryptResult.DecryptedSalter(Salter s) -> s.getQb64();
+            case DecryptResult.DecryptedSigner(Signer sig) -> sig.getQb64();
+        };
+        assertEquals(decryptedSalt, salt);
 
         Manager.ManagerInceptArgs managerInceptArgs = Manager.ManagerInceptArgs.builder()
                 .salt(salt)
@@ -240,7 +245,12 @@ class ManagerTest {
         Manager.PrePrm pp = manager.getKs().getPrms(spre);
         assertEquals(pp.pidx, 0);
         assertEquals(pp.algo, Manager.Algos.salty);
-        assertEquals(((Matter) manager.getDecrypter().decrypt(pp.salt.getBytes(), null)).getQb64(), salt);
+        DecryptResult result1 = manager.getDecrypter().decrypt(pp.salt.getBytes(), null);
+        String decryptedSalt1 = switch (result1) {
+            case DecryptResult.DecryptedSalter(Salter s) -> s.getQb64();
+            case DecryptResult.DecryptedSigner(Signer sig) -> sig.getQb64();
+        };
+        assertEquals(decryptedSalt1, salt);
         assertEquals(pp.stem, "");
         assertEquals(pp.tier, Salter.Tier.low.name());
 
@@ -360,7 +370,12 @@ class ManagerTest {
         pp = manager.getKs().getPrms(spre);
         assertEquals(pp.pidx, 0);
         assertEquals(pp.algo, Manager.Algos.salty);
-        assertEquals(((Matter) manager.getDecrypter().decrypt(pp.salt.getBytes(), null)).getQb64(), salt);
+        DecryptResult result2 = manager.getDecrypter().decrypt(pp.salt.getBytes(), null);
+        String decryptedSalt2 = switch (result2) {
+            case DecryptResult.DecryptedSalter(Salter s) -> s.getQb64();
+            case DecryptResult.DecryptedSigner(Signer sig) -> sig.getQb64();
+        };
+        assertEquals(decryptedSalt2, salt);
         assertEquals(pp.stem, "");
         assertEquals(pp.tier, Salter.Tier.low.name());
 
@@ -518,7 +533,12 @@ class ManagerTest {
         pp = manager.getKs().getPrms(spre);
         assertEquals(pp.pidx, 3);
         assertEquals(pp.algo, Manager.Algos.salty);
-        assertEquals(((Matter) manager.getDecrypter().decrypt(pp.salt.getBytes(), null)).getQb64(), salt);
+        DecryptResult result3 = manager.getDecrypter().decrypt(pp.salt.getBytes(), null);
+        String decryptedSalt3 = switch (result3) {
+            case DecryptResult.DecryptedSalter(Salter s) -> s.getQb64();
+            case DecryptResult.DecryptedSigner(Signer sig) -> sig.getQb64();
+        };
+        assertEquals(decryptedSalt3, salt);
         assertEquals(pp.stem, stem);
         assertEquals(pp.tier, Salter.Tier.low.name());
 

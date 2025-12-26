@@ -35,7 +35,7 @@ public class Decrypter extends Matter {
         }
     }
 
-    public Object decrypt(byte[] ser, Cipher cipher, Boolean transferable) throws LibsodiumException {
+    public DecryptResult decrypt(byte[] ser, Cipher cipher, Boolean transferable) throws LibsodiumException {
         if (ser == null && cipher == null) {
             throw new EmptyMaterialException("Neither ser nor matter are provided.");
         }
@@ -47,11 +47,11 @@ public class Decrypter extends Matter {
         return decrypter.decrypt(cipher, this.getRaw(), transferable != null && transferable);
     }
 
-    public Object decrypt(byte[] ser, Cipher cipher) throws LibsodiumException {
+    public DecryptResult decrypt(byte[] ser, Cipher cipher) throws LibsodiumException {
         return decrypt(ser, cipher, false);
     }
 
-    private Object _x25519(Cipher cipher, byte[] priKey, Boolean transferable) throws LibsodiumException {
+    private DecryptResult _x25519(Cipher cipher, byte[] priKey, Boolean transferable) throws LibsodiumException {
         Key pubKey = lazySodium.cryptoScalarMultBase(Key.fromBytes(priKey));
         byte[] plain = new byte[cipher.getRaw().length - CRYPTO_BOX_SEAL_BYTES];
         boolean success = lazySodium.cryptoBoxSealOpen(
@@ -65,9 +65,9 @@ public class Decrypter extends Matter {
             throw new LibsodiumException("Decryption failed");
         }
         if (cipher.getCode().equals(Codex.MatterCodex.X25519_Cipher_Salt.getValue())) {
-            return new Salter(plain);
+            return new DecryptResult.DecryptedSalter(new Salter(plain));
         } else if (cipher.getCode().equals(Codex.MatterCodex.X25519_Cipher_Seed.getValue())) {
-            return new Signer(plain, transferable != null && transferable);
+            return new DecryptResult.DecryptedSigner(new Signer(plain, transferable != null && transferable));
         } else {
             throw new UnexpectedCodeException("Unsupported cipher text code = " + cipher.getCode());
         }
@@ -75,6 +75,6 @@ public class Decrypter extends Matter {
 
     @FunctionalInterface
     private interface DecrypterFunction {
-        Object decrypt(Cipher cipher, byte[] priKey, Boolean transferable) throws LibsodiumException;
+        DecryptResult decrypt(Cipher cipher, byte[] priKey, Boolean transferable) throws LibsodiumException;
     }
 }

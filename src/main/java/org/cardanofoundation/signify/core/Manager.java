@@ -111,7 +111,12 @@ public class Manager {
             return this.salt;
         } else {
             String salt = this.ks.getGbls("salt");
-            return ((Matter) this.decrypter.decrypt(salt.getBytes(), null)).getQb64();
+            DecryptResult result = this.decrypter.decrypt(salt.getBytes(), null);
+            // Use map() to extract qb64 regardless of type
+            return result.map(
+                Salter::getQb64,
+                Signer::getQb64
+            );
         }
     }
 
@@ -464,7 +469,11 @@ public class Manager {
                 // If you provded a Salt for an AID but don't have encryption, pitch a fit
                 throw new RuntimeException("Invalid configuration: AID salt with no encryption");
             }
-            salt = ((Matter) this.decrypter.decrypt(salt.getBytes(), null)).getQb64();
+            DecryptResult result = this.decrypter.decrypt(salt.getBytes(), null);
+            salt = result.map(
+                Salter::getQb64,
+                Signer::getQb64
+            );
         } else {
             salt = this.getSalt();
         }
@@ -1122,7 +1131,9 @@ public class Manager {
             List<Map.Entry<String, Signer>> entries = new ArrayList<>();
             for (Map.Entry<String, byte[]> entry : pris.entrySet()) {
                 Verfer verfer = new Verfer(entry.getKey());
-                Signer signer = (Signer) decrypter.decrypt(entry.getValue(), null, verfer.isTransferable());
+                DecryptResult result = decrypter.decrypt(entry.getValue(), null, verfer.isTransferable());
+                Signer signer = result.getSigner()
+                    .orElseThrow(() -> new RuntimeException("Expected DecryptedSigner but got DecryptedSalter"));
                 entries.add(new AbstractMap.SimpleEntry<>(entry.getKey(), signer));
             }
             return entries;
@@ -1148,7 +1159,9 @@ public class Manager {
                 return null;
             }
             Verfer verfer = new Verfer(pubKey);
-            return (Signer) decrypter.decrypt(val, null, verfer.isTransferable());
+            DecryptResult result = decrypter.decrypt(val, null, verfer.isTransferable());
+            return result.getSigner()
+                .orElseThrow(() -> new RuntimeException("Expected DecryptedSigner but got DecryptedSalter"));
         }
 
         public boolean pinPths(String pubKey, PubPath val) {

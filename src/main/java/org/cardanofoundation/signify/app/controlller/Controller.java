@@ -11,6 +11,7 @@ import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.args.RotateArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.exceptions.validation.ValidationException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
@@ -248,7 +249,10 @@ public class Controller {
             if (aid.containsKey("salty")) {
                 Map<String, Object> salty = Utils.toMap(aid.get("salty"));
                 Cipher cipher = new Cipher(salty.get("sxlt").toString());
-                String dnxt = ((Salter) decrypter.decrypt(null, cipher)).getQb64();
+                DecryptResult result = decrypter.decrypt(null, cipher);
+                String dnxt = result.getSalter()
+                    .map(Salter::getQb64)
+                    .orElseThrow(() -> new UnexpectedCodeException("Expected DecryptedSalter but got DecryptedSigner"));
 
                 // Now we have the AID salt, use it to verify against the current public keys
                 Manager.SaltyCreator acreator = new Manager.SaltyCreator(
@@ -293,7 +297,9 @@ public class Controller {
 
                 for (String prx : prxs) {
                     Cipher cipher = new Cipher(prx);
-                    Signer dsigner = (Signer) decrypter.decrypt(null, cipher, true);
+                    DecryptResult result = decrypter.decrypt(null, cipher, true);
+                    Signer dsigner = result.getSigner()
+                        .orElseThrow(() -> new UnexpectedCodeException("Expected DecryptedSigner but got DecryptedSalter"));
                     signers.add(dsigner);
                     nprxs.add(encrypter.encrypt(dsigner.getQb64().getBytes()).getQb64());
                 }
@@ -333,7 +339,10 @@ public class Controller {
 
     public String recrypt(String enc, Decrypter decrypter, Encrypter encrypter) throws LibsodiumException {
         Cipher cipher = new Cipher(enc);
-        String dnxt = ((Salter) decrypter.decrypt(null, cipher)).getQb64();
+        DecryptResult result = decrypter.decrypt(null, cipher);
+        String dnxt = result.getSalter()
+            .map(Salter::getQb64)
+            .orElseThrow(() -> new UnexpectedCodeException("Expected DecryptedSalter but got DecryptedSigner"));
         return encrypter.encrypt(dnxt.getBytes()).getQb64();
     }
 

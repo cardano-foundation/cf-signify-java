@@ -16,7 +16,7 @@ public class Cipher extends Matter {
         super(qb64b);
     }
 
-    public Object decrypt(byte[] prikey, byte[] seed) throws LibsodiumException {
+    public DecryptResult decrypt(byte[] prikey, byte[] seed) throws LibsodiumException {
         Decrypter decrypter;
         if(prikey != null) {
             decrypter =  new Decrypter(new String(prikey));
