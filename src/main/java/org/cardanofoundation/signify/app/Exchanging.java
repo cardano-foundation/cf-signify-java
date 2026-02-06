@@ -225,10 +225,6 @@ public class Exchanging {
             e = Saider.saidify(e).sad();
         }
 
-        Map<String, Object> attrs = new LinkedHashMap<>();
-        attrs.put("i", recipient);
-        attrs.putAll(payload);
-
         Map<String, Object> _ked = new LinkedHashMap<>();
         _ked.put("v", vs);
         _ked.put("t", ilk);
@@ -239,7 +235,7 @@ public class Exchanging {
         _ked.put("dt", dt);
         _ked.put("r", route);
         _ked.put("q", q);
-        _ked.put("a", attrs);
+        _ked.put("a", payload);
         _ked.put("e", e);
 
         Map<String, Object> ked = Saider.saidify(_ked).sad();
