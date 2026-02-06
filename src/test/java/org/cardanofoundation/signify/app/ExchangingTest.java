@@ -37,8 +37,8 @@ public class ExchangingTest extends BaseMockServerTest {
         byte[] end = result.end();
         
         Map<String, Object> expectedKed = new LinkedHashMap<>();
-        expectedKed.put("a", Map.of("i", ""));
-        expectedKed.put("d", "EPWm8LWxxQXmXlB8gbTZKDy7NIwXxpx49N_ZYTa5QkJV");
+        expectedKed.put("a", new HashMap<>());
+        expectedKed.put("d", "EKxDkCyDQzcC9DG8-CyvAPCndUsC_XQ70rmqEcGsLA4-");
         expectedKed.put("dt", "2023-08-30T17:22:54.183Z");
         expectedKed.put("e", new HashMap<>());
         expectedKed.put("i", "test");
@@ -47,7 +47,7 @@ public class ExchangingTest extends BaseMockServerTest {
         expectedKed.put("r", "/multisig/vcp");
         expectedKed.put("rp", "");
         expectedKed.put("t", "exn");
-        expectedKed.put("v", "KERI10JSON0000bf_");
+        expectedKed.put("v", "KERI10JSON0000b9_");
 
         assertEquals(expectedKed, exn.getKed());
         assertArrayEquals(new byte[0], end);
@@ -161,16 +161,16 @@ public class ExchangingTest extends BaseMockServerTest {
         embeddedData.put("icp", icpData);
         embeddedData.put("vcp", vcpData);
 
-        expectedFinalKed.put("v", "KERI10JSON00021b_");
+        expectedFinalKed.put("v", "KERI10JSON000215_");
         expectedFinalKed.put("t", "exn");
-        expectedFinalKed.put("d", "EOK2xNjB5xlSvizCUrkFKbdF4j1nsGpvt6TR1HL0wvaY");
+        expectedFinalKed.put("d", "EBov2eDqMMfnQ2ubdM795wt6FA9TUw6iHLSEHVzL1wTL");
         expectedFinalKed.put("i", "test");
         expectedFinalKed.put("rp", "");
         expectedFinalKed.put("p", "");
         expectedFinalKed.put("dt", "2023-08-30T17:22:54.183Z");
         expectedFinalKed.put("r", "/multisig/vcp");
         expectedFinalKed.put("q", new LinkedHashMap<>());
-        expectedFinalKed.put("a", Map.of("i", ""));
+        expectedFinalKed.put("a", new HashMap<>());
         expectedFinalKed.put("e", embeddedData);
 
         assertEquals(expectedFinalKed, exn.getKed());
