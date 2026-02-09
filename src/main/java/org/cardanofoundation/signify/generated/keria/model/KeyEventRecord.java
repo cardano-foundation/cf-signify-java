@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * KeyEventRecord
@@ -30,13 +33,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   KeyEventRecord.JSON_PROPERTY_ATC
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class KeyEventRecord {
   public static final String JSON_PROPERTY_ATC = "atc";
   @jakarta.annotation.Nonnull
   private String atc;
 
   public KeyEventRecord() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public KeyEventRecord(@JsonProperty(JSON_PROPERTY_ATC) String atc) {
+    this.atc = atc;
   }
 
   public KeyEventRecord atc(@jakarta.annotation.Nonnull String atc) {
@@ -50,6 +60,8 @@ public class KeyEventRecord {
    * @return atc
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

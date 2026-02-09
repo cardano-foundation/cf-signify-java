@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Seal
@@ -32,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Seal.JSON_PROPERTY_D,
   Seal.JSON_PROPERTY_I
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Seal {
   public static final String JSON_PROPERTY_S = "s";
   @jakarta.annotation.Nonnull
@@ -49,6 +52,15 @@ public class Seal {
   public Seal() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public Seal(@JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i) {
+    this.s = s;
+    this.d = d;
+    this.i = i;
+  }
+
   public Seal s(@jakarta.annotation.Nonnull String s) {
     
     this.s = s;
@@ -60,6 +72,8 @@ public class Seal {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -85,6 +99,8 @@ public class Seal {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -110,6 +126,7 @@ public class Seal {
    * @return i
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_I, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

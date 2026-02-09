@@ -22,23 +22,72 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * IdentifierOneOf1
  */
 @JsonPropertyOrder({
-  IdentifierOneOf1.JSON_PROPERTY_RANDY
+  IdentifierOneOf1.JSON_PROPERTY_RANDY,
+  IdentifierOneOf1.JSON_PROPERTY_NAME,
+  IdentifierOneOf1.JSON_PROPERTY_PREFIX,
+  IdentifierOneOf1.JSON_PROPERTY_ICP_DT,
+  IdentifierOneOf1.JSON_PROPERTY_STATE,
+  IdentifierOneOf1.JSON_PROPERTY_TRANSFERABLE,
+  IdentifierOneOf1.JSON_PROPERTY_WINDEXES
 })
 @JsonTypeName("Identifier_oneOf_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class IdentifierOneOf1 {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public class IdentifierOneOf1 implements Identifier {
   public static final String JSON_PROPERTY_RANDY = "randy";
   @jakarta.annotation.Nonnull
   private RandyKeyState randy;
 
+  public static final String JSON_PROPERTY_NAME = "name";
+  @jakarta.annotation.Nonnull
+  private String name;
+
+  public static final String JSON_PROPERTY_PREFIX = "prefix";
+  @jakarta.annotation.Nonnull
+  private String prefix;
+
+  public static final String JSON_PROPERTY_ICP_DT = "icp_dt";
+  @jakarta.annotation.Nonnull
+  private String icpDt;
+
+  public static final String JSON_PROPERTY_STATE = "state";
+  @jakarta.annotation.Nonnull
+  private KeyStateRecord state;
+
+  public static final String JSON_PROPERTY_TRANSFERABLE = "transferable";
+  @jakarta.annotation.Nullable
+  private Boolean transferable;
+
+  public static final String JSON_PROPERTY_WINDEXES = "windexes";
+  @jakarta.annotation.Nullable
+  private List<String> windexes;
+
   public IdentifierOneOf1() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public IdentifierOneOf1(@JsonProperty(JSON_PROPERTY_RANDY) RandyKeyState randy, @JsonProperty(JSON_PROPERTY_NAME) String name, @JsonProperty(JSON_PROPERTY_PREFIX) String prefix, @JsonProperty(JSON_PROPERTY_ICP_DT) String icpDt, @JsonProperty(JSON_PROPERTY_STATE) KeyStateRecord state, @JsonProperty(JSON_PROPERTY_TRANSFERABLE) Boolean transferable, @JsonProperty(JSON_PROPERTY_WINDEXES) List<String> windexes) {
+    this.randy = randy;
+    this.name = name;
+    this.prefix = prefix;
+    this.icpDt = icpDt;
+    this.state = state;
+    this.transferable = transferable;
+    this.windexes = windexes;
   }
 
   public IdentifierOneOf1 randy(@jakarta.annotation.Nonnull RandyKeyState randy) {
@@ -52,6 +101,9 @@ public class IdentifierOneOf1 {
    * @return randy
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_RANDY, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -66,6 +118,175 @@ public class IdentifierOneOf1 {
     this.randy = randy;
   }
 
+  public IdentifierOneOf1 name(@jakarta.annotation.Nonnull String name) {
+    
+    this.name = name;
+    return this;
+  }
+
+  /**
+   * Get name
+   * @return name
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_NAME, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getName() {
+    return name;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_NAME, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setName(@jakarta.annotation.Nonnull String name) {
+    this.name = name;
+  }
+
+  public IdentifierOneOf1 prefix(@jakarta.annotation.Nonnull String prefix) {
+    
+    this.prefix = prefix;
+    return this;
+  }
+
+  /**
+   * Get prefix
+   * @return prefix
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_PREFIX, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getPrefix() {
+    return prefix;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_PREFIX, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setPrefix(@jakarta.annotation.Nonnull String prefix) {
+    this.prefix = prefix;
+  }
+
+  public IdentifierOneOf1 icpDt(@jakarta.annotation.Nonnull String icpDt) {
+    
+    this.icpDt = icpDt;
+    return this;
+  }
+
+  /**
+   * Get icpDt
+   * @return icpDt
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_ICP_DT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getIcpDt() {
+    return icpDt;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_ICP_DT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setIcpDt(@jakarta.annotation.Nonnull String icpDt) {
+    this.icpDt = icpDt;
+  }
+
+  public IdentifierOneOf1 state(@jakarta.annotation.Nonnull KeyStateRecord state) {
+    
+    this.state = state;
+    return this;
+  }
+
+  /**
+   * Get state
+   * @return state
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
+  @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public KeyStateRecord getState() {
+    return state;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setState(@jakarta.annotation.Nonnull KeyStateRecord state) {
+    this.state = state;
+  }
+
+  public IdentifierOneOf1 transferable(@jakarta.annotation.Nullable Boolean transferable) {
+    
+    this.transferable = transferable;
+    return this;
+  }
+
+  /**
+   * Get transferable
+   * @return transferable
+   */
+  @jakarta.annotation.Nullable
+
+  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getTransferable() {
+    return transferable;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setTransferable(@jakarta.annotation.Nullable Boolean transferable) {
+    this.transferable = transferable;
+  }
+
+  public IdentifierOneOf1 windexes(@jakarta.annotation.Nullable List<String> windexes) {
+    
+    this.windexes = windexes;
+    return this;
+  }
+
+  public IdentifierOneOf1 addWindexesItem(String windexesItem) {
+    if (this.windexes == null) {
+      this.windexes = new ArrayList<>();
+    }
+    this.windexes.add(windexesItem);
+    return this;
+  }
+
+  /**
+   * Get windexes
+   * @return windexes
+   */
+  @jakarta.annotation.Nullable
+
+  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public List<String> getWindexes() {
+    return windexes;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setWindexes(@jakarta.annotation.Nullable List<String> windexes) {
+    this.windexes = windexes;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -76,12 +297,18 @@ public class IdentifierOneOf1 {
       return false;
     }
     IdentifierOneOf1 identifierOneOf1 = (IdentifierOneOf1) o;
-    return Objects.equals(this.randy, identifierOneOf1.randy);
+    return Objects.equals(this.randy, identifierOneOf1.randy) &&
+        Objects.equals(this.name, identifierOneOf1.name) &&
+        Objects.equals(this.prefix, identifierOneOf1.prefix) &&
+        Objects.equals(this.icpDt, identifierOneOf1.icpDt) &&
+        Objects.equals(this.state, identifierOneOf1.state) &&
+        Objects.equals(this.transferable, identifierOneOf1.transferable) &&
+        Objects.equals(this.windexes, identifierOneOf1.windexes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(randy);
+    return Objects.hash(randy, name, prefix, icpDt, state, transferable, windexes);
   }
 
   @Override
@@ -89,6 +316,12 @@ public class IdentifierOneOf1 {
     StringBuilder sb = new StringBuilder();
     sb.append("class IdentifierOneOf1 {\n");
     sb.append("    randy: ").append(toIndentedString(randy)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    prefix: ").append(toIndentedString(prefix)).append("\n");
+    sb.append("    icpDt: ").append(toIndentedString(icpDt)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    transferable: ").append(toIndentedString(transferable)).append("\n");
+    sb.append("    windexes: ").append(toIndentedString(windexes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

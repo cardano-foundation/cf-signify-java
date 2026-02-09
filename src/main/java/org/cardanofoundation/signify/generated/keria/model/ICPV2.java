@@ -27,6 +27,9 @@ import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.ICPV1Kt;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ICPV2
@@ -47,8 +50,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ICPV2.JSON_PROPERTY_A
 })
 @JsonTypeName("ICP_V_2")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class ICPV2 {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public class ICPV2 implements ControllerEe, CredentialAnc, Icp {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -104,6 +107,25 @@ public class ICPV2 {
   public ICPV2() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public ICPV2(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_T) String t, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_KT) ICPV1Kt kt, @JsonProperty(JSON_PROPERTY_K) List<String> k, @JsonProperty(JSON_PROPERTY_NT) ICPV1Kt nt, @JsonProperty(JSON_PROPERTY_N) List<String> n, @JsonProperty(JSON_PROPERTY_BT) String bt, @JsonProperty(JSON_PROPERTY_B) List<String> b, @JsonProperty(JSON_PROPERTY_C) List<String> c, @JsonProperty(JSON_PROPERTY_A) Object a) {
+    this.v = v;
+    this.t = t;
+    this.d = d;
+    this.i = i;
+    this.s = s;
+    this.kt = kt;
+    this.k = k;
+    this.nt = nt;
+    this.n = n;
+    this.bt = bt;
+    this.b = b;
+    this.c = c;
+    this.a = a;
+  }
+
   public ICPV2 v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -115,6 +137,8 @@ public class ICPV2 {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -140,6 +164,8 @@ public class ICPV2 {
    * @return t
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_T, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -165,6 +191,8 @@ public class ICPV2 {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -190,6 +218,8 @@ public class ICPV2 {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -215,6 +245,8 @@ public class ICPV2 {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -240,6 +272,9 @@ public class ICPV2 {
    * @return kt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_KT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -273,6 +308,8 @@ public class ICPV2 {
    * @return k
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_K, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -298,6 +335,9 @@ public class ICPV2 {
    * @return nt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_NT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -331,6 +371,8 @@ public class ICPV2 {
    * @return n
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_N, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -356,6 +398,8 @@ public class ICPV2 {
    * @return bt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_BT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -389,6 +433,8 @@ public class ICPV2 {
    * @return b
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_B, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -422,6 +468,8 @@ public class ICPV2 {
    * @return c
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_C, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -447,6 +495,8 @@ public class ICPV2 {
    * @return a
    */
   @jakarta.annotation.Nullable
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_A, required = false)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

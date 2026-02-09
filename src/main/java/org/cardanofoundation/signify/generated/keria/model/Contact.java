@@ -33,6 +33,9 @@ import org.cardanofoundation.signify.generated.keria.model.MemberEnds;
 import org.cardanofoundation.signify.generated.keria.model.WellKnown;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Contact
@@ -45,7 +48,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Contact.JSON_PROPERTY_CHALLENGES,
   Contact.JSON_PROPERTY_WELL_KNOWNS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Contact {
   public static final String JSON_PROPERTY_ID = "id";
   @jakarta.annotation.Nonnull
@@ -65,13 +68,25 @@ public class Contact {
 
   public static final String JSON_PROPERTY_CHALLENGES = "challenges";
   @jakarta.annotation.Nullable
-  private List<Challenge> challenges = new ArrayList<>();
+  private List<@Valid Challenge> challenges = new ArrayList<>();
 
   public static final String JSON_PROPERTY_WELL_KNOWNS = "wellKnowns";
   @jakarta.annotation.Nullable
-  private List<WellKnown> wellKnowns = new ArrayList<>();
+  private List<@Valid WellKnown> wellKnowns = new ArrayList<>();
 
   public Contact() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public Contact(@JsonProperty(JSON_PROPERTY_ID) String id, @JsonProperty(JSON_PROPERTY_ALIAS) String alias, @JsonProperty(JSON_PROPERTY_OOBI) String oobi, @JsonProperty(JSON_PROPERTY_ENDS) MemberEnds ends, @JsonProperty(JSON_PROPERTY_CHALLENGES) List<@Valid Challenge> challenges, @JsonProperty(JSON_PROPERTY_WELL_KNOWNS) List<@Valid WellKnown> wellKnowns) {
+    this.id = id;
+    this.alias = alias;
+    this.oobi = oobi;
+    this.ends = ends;
+    this.challenges = challenges;
+    this.wellKnowns = wellKnowns;
   }
 
   public Contact id(@jakarta.annotation.Nonnull String id) {
@@ -85,6 +100,8 @@ public class Contact {
    * @return id
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ID, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -110,6 +127,7 @@ public class Contact {
    * @return alias
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_ALIAS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -135,6 +153,7 @@ public class Contact {
    * @return oobi
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_OOBI, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -160,6 +179,8 @@ public class Contact {
    * @return ends
    */
   @jakarta.annotation.Nullable
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -174,7 +195,7 @@ public class Contact {
     this.ends = ends;
   }
 
-  public Contact challenges(@jakarta.annotation.Nullable List<Challenge> challenges) {
+  public Contact challenges(@jakarta.annotation.Nullable List<@Valid Challenge> challenges) {
     
     this.challenges = challenges;
     return this;
@@ -193,21 +214,23 @@ public class Contact {
    * @return challenges
    */
   @jakarta.annotation.Nullable
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_CHALLENGES, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public List<Challenge> getChallenges() {
+  public List<@Valid Challenge> getChallenges() {
     return challenges;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_CHALLENGES, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setChallenges(@jakarta.annotation.Nullable List<Challenge> challenges) {
+  public void setChallenges(@jakarta.annotation.Nullable List<@Valid Challenge> challenges) {
     this.challenges = challenges;
   }
 
-  public Contact wellKnowns(@jakarta.annotation.Nullable List<WellKnown> wellKnowns) {
+  public Contact wellKnowns(@jakarta.annotation.Nullable List<@Valid WellKnown> wellKnowns) {
     
     this.wellKnowns = wellKnowns;
     return this;
@@ -226,17 +249,19 @@ public class Contact {
    * @return wellKnowns
    */
   @jakarta.annotation.Nullable
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_WELL_KNOWNS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public List<WellKnown> getWellKnowns() {
+  public List<@Valid WellKnown> getWellKnowns() {
     return wellKnowns;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_WELL_KNOWNS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWellKnowns(@jakarta.annotation.Nullable List<WellKnown> wellKnowns) {
+  public void setWellKnowns(@jakarta.annotation.Nullable List<@Valid WellKnown> wellKnowns) {
     this.wellKnowns = wellKnowns;
   }
 

@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * QueriesPostRequest
@@ -33,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   QueriesPostRequest.JSON_PROPERTY_SN
 })
 @JsonTypeName("_queries_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class QueriesPostRequest {
   public static final String JSON_PROPERTY_PRE = "pre";
   @jakarta.annotation.Nonnull
@@ -50,6 +53,15 @@ public class QueriesPostRequest {
   public QueriesPostRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public QueriesPostRequest(@JsonProperty(JSON_PROPERTY_PRE) String pre, @JsonProperty(JSON_PROPERTY_ANCHOR) String anchor, @JsonProperty(JSON_PROPERTY_SN) String sn) {
+    this.pre = pre;
+    this.anchor = anchor;
+    this.sn = sn;
+  }
+
   public QueriesPostRequest pre(@jakarta.annotation.Nonnull String pre) {
     
     this.pre = pre;
@@ -61,6 +73,8 @@ public class QueriesPostRequest {
    * @return pre
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_PRE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -86,6 +100,7 @@ public class QueriesPostRequest {
    * @return anchor
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_ANCHOR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -111,6 +126,7 @@ public class QueriesPostRequest {
    * @return sn
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SN, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

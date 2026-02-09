@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * RevokeCredentialRequest
@@ -37,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   RevokeCredentialRequest.JSON_PROPERTY_SIGS
 })
 @JsonTypeName("revokeCredential_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class RevokeCredentialRequest {
   public static final String JSON_PROPERTY_REV = "rev";
   @jakarta.annotation.Nullable
@@ -58,6 +61,16 @@ public class RevokeCredentialRequest {
   public RevokeCredentialRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public RevokeCredentialRequest(@JsonProperty(JSON_PROPERTY_REV) String rev, @JsonProperty(JSON_PROPERTY_IXN) String ixn, @JsonProperty(JSON_PROPERTY_ROT) String rot, @JsonProperty(JSON_PROPERTY_SIGS) List<String> sigs) {
+    this.rev = rev;
+    this.ixn = ixn;
+    this.rot = rot;
+    this.sigs = sigs;
+  }
+
   public RevokeCredentialRequest rev(@jakarta.annotation.Nullable String rev) {
     
     this.rev = rev;
@@ -69,6 +82,7 @@ public class RevokeCredentialRequest {
    * @return rev
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_REV, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -94,6 +108,7 @@ public class RevokeCredentialRequest {
    * @return ixn
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_IXN, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -119,6 +134,7 @@ public class RevokeCredentialRequest {
    * @return rot
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_ROT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -152,6 +168,7 @@ public class RevokeCredentialRequest {
    * @return sigs
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SIGS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

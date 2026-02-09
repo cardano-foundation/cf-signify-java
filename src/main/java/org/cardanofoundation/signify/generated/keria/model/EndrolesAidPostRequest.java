@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * EndrolesAidPostRequest
@@ -35,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EndrolesAidPostRequest.JSON_PROPERTY_SIGS
 })
 @JsonTypeName("_endroles__aid__post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class EndrolesAidPostRequest {
   public static final String JSON_PROPERTY_RPY = "rpy";
   @jakarta.annotation.Nullable
@@ -46,6 +49,14 @@ public class EndrolesAidPostRequest {
   private List<String> sigs = new ArrayList<>();
 
   public EndrolesAidPostRequest() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public EndrolesAidPostRequest(@JsonProperty(JSON_PROPERTY_RPY) Object rpy, @JsonProperty(JSON_PROPERTY_SIGS) List<String> sigs) {
+    this.rpy = rpy;
+    this.sigs = sigs;
   }
 
   public EndrolesAidPostRequest rpy(@jakarta.annotation.Nullable Object rpy) {
@@ -59,6 +70,7 @@ public class EndrolesAidPostRequest {
    * @return rpy
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RPY, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -92,6 +104,7 @@ public class EndrolesAidPostRequest {
    * @return sigs
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SIGS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

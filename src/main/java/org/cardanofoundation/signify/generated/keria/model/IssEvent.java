@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * IssEvent
@@ -36,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IssEvent.JSON_PROPERTY_RI,
   IssEvent.JSON_PROPERTY_DT
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class IssEvent {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
@@ -104,6 +107,19 @@ public class IssEvent {
   public IssEvent() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public IssEvent(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_T) TEnum t, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_RI) String ri, @JsonProperty(JSON_PROPERTY_DT) String dt) {
+    this.v = v;
+    this.t = t;
+    this.d = d;
+    this.i = i;
+    this.s = s;
+    this.ri = ri;
+    this.dt = dt;
+  }
+
   public IssEvent v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -115,6 +131,8 @@ public class IssEvent {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -140,6 +158,8 @@ public class IssEvent {
    * @return t
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_T, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -165,6 +185,8 @@ public class IssEvent {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -190,6 +212,8 @@ public class IssEvent {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -215,6 +239,8 @@ public class IssEvent {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -240,6 +266,8 @@ public class IssEvent {
    * @return ri
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_RI, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -265,6 +293,8 @@ public class IssEvent {
    * @return dt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
