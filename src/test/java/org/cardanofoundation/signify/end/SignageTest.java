@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.end;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -253,7 +254,7 @@ class SignageTest {
         return salter.signer(Codex.MatterCodex.Ed25519_Seed.getValue(),
                 true,
                 name,
-                Salter.Tier.low,
+                Tier.LOW,
                 temp);
     }
 }

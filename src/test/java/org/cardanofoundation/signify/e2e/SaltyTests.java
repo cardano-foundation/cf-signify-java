@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierInfo;
@@ -10,9 +9,12 @@ import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.SaltyState;
+import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +34,7 @@ class SaltyTests {
         SignifyClient client = new SignifyClient(
                 url,
                 bran1,
-                Salter.Tier.low,
+                Tier.LOW,
                 bootUrl,
                 null
         );
@@ -65,15 +67,15 @@ class SaltyTests {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aidsJson = client.identifiers().list(0, 24);
-        List<Map<String, Object>> aids = Utils.fromJson(aidsJson.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids = aidsJson.aids();
         Assertions.assertEquals(1, aids.size());
 
-        Map<String, Object> aidLast = aids.removeLast();
-        Assertions.assertEquals("aid1", aidLast.get("name"));
-        Map<String, Object> salty = (Map<String, Object>) aidLast.get("salty");
-        Assertions.assertEquals(0, salty.get("pidx"));
-        Assertions.assertEquals("signify:aid", salty.get("stem"));
-        Assertions.assertEquals(icp.getPre(), aidLast.get("prefix"));
+        Identifier aidLast = aids.getFirst();
+        Assertions.assertEquals("aid1", aidLast.getName());
+        SaltyState salty = aidLast.getSalty();
+        Assertions.assertEquals(0, salty.getPidx());
+        Assertions.assertEquals("signify:aid", salty.getStem());
+        Assertions.assertEquals(icp.getPre(), aidLast.getPrefix());
 
         CreateIdentifierArgs params = new CreateIdentifierArgs();
         params.setCount(3);
@@ -103,16 +105,16 @@ class SaltyTests {
         assertEquals("2", icp2.getKed().get("nt"));
 
         IdentifierListResponse aidsJson1 = client.identifiers().list(0, 24);
-        List<Map<String, Object>> aids1 = Utils.fromJson(aidsJson1.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids1 = aidsJson1.aids();
         Assertions.assertEquals(2, aids1.size());
 
-        Map<String, Object> aid3 = aids1.removeLast();
-        Assertions.assertEquals("aid2", aid3.get("name"));
+        Identifier aid3 = aids1.getLast();
+        Assertions.assertEquals("aid2", aid3.getName());
 
-        Map<String, Object> salty1 = (Map<String, Object>) aid3.get("salty");
-        Assertions.assertEquals(1, salty1.get("pidx"));
-        Assertions.assertEquals("signify:aid", salty1.get("stem"));
-        Assertions.assertEquals(icp2.getPre(), aid3.get("prefix"));
+        SaltyState salty1 = aid3.getSalty();
+        Assertions.assertEquals(1, salty1.getPidx());
+        Assertions.assertEquals("signify:aid", salty1.getStem());
+        Assertions.assertEquals(icp2.getPre(), aid3.getPrefix());
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.salty);
@@ -120,25 +122,25 @@ class SaltyTests {
         waitOperation(client, icpResult2.op());
 
         IdentifierListResponse aidsJson2 = client.identifiers().list(0, 24);
-        List<Map<String, Object>> aids2 = Utils.fromJson(aidsJson2.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids2 = aidsJson2.aids();
         Assertions.assertEquals(3, aids2.size());
 
-        Map<String, Object> aid4 = aids2.getFirst();
-        Assertions.assertEquals("aid1", aid4.get("name"));
+        Identifier aid4 = aids2.getFirst();
+        Assertions.assertEquals("aid1", aid4.getName());
 
         IdentifierListResponse aidsJson3 = client.identifiers().list(1, 2);
-        List<Map<String, Object>> aids3 = Utils.fromJson(aidsJson3.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids3 = aidsJson3.aids();
         Assertions.assertEquals(2, aids3.size());
 
-        Map<String, Object> aid5 = aids3.getFirst();
-        Assertions.assertEquals("aid2", aid5.get("name"));
+        Identifier aid5 = aids3.getFirst();
+        Assertions.assertEquals("aid2", aid5.getName());
 
         IdentifierListResponse aidsJson4 = client.identifiers().list(2, 2);
-        List<Map<String, Object>> aids4 = Utils.fromJson(aidsJson4.aids().toString(), new TypeReference<>() {});
+        List<Identifier> aids4 = aidsJson4.aids();
         Assertions.assertEquals(1, aids4.size());
 
-        Map<String, Object> aid6 = aids4.getFirst();
-        Assertions.assertEquals("aid3", aid6.get("name"));
+        Identifier aid6 = aids4.getFirst();
+        Assertions.assertEquals("aid3", aid6.getName());
 
         // Rotate
         EventResult icpResultRotate = client.identifiers().rotate("aid1");
@@ -164,19 +166,19 @@ class SaltyTests {
         Assertions.assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         // Get Identifiers
-        States.HabState aidState = client.identifiers().get("aid1").get();
-        States.State stateGet = aidState.getState();
+        Identifier aidState = client.identifiers().get("aid1").get();
+        KeyStateRecord stateGet = aidState.getState();
 
         Assertions.assertEquals("2", stateGet.getS());
         Assertions.assertEquals("2", stateGet.getF());
         Assertions.assertEquals(ixn.getKed().get("d"), stateGet.getD());
 
-        States.EstablishmentState ee = stateGet.getEe();
+        StateEERecord ee = stateGet.getEe();
         Assertions.assertEquals(rotRotate.getKed().get("d"), ee.getD());
 
         // KeyEvents
         Coring.KeyEvents events = client.keyEvents();
-        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get((String) aidLast.get("prefix"));
+        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get(aidLast.getPrefix());
         assertEquals(3, log.size());
 
         Serder serder = new Serder((Map<String, Object>) log.getFirst().get("ked"));
@@ -195,17 +197,17 @@ class SaltyTests {
 
         IdentifierInfo identifierInfo = new IdentifierInfo();
         identifierInfo.setName("aid4");
-        States.HabState updatedState = client.identifiers().update("aid3", identifierInfo);
+        Identifier updatedState = client.identifiers().update("aid3", identifierInfo);
         assertEquals("aid4", updatedState.getName());
 
-        States.HabState retrievedState = client.identifiers().get("aid4").get();
+        Identifier retrievedState = client.identifiers().get("aid4").get();
         assertEquals("aid4", retrievedState.getName());
         IdentifierListResponse response = client.identifiers().list(2, 2);
-        List<Map<String, Object>> identifiers = Utils.fromJson(response.aids().toString(), new TypeReference<>() {});
+        List<Identifier> identifiers = response.aids();
         assertEquals(1, identifiers.size());
 
-        Map<String, Object> firstIdentifier = identifiers.getFirst();
-        assertEquals("aid4", firstIdentifier.get("name"));
+        Identifier firstIdentifier = identifiers.getFirst();
+        assertEquals("aid4", firstIdentifier.getName());
 
     }
 }

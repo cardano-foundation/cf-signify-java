@@ -3,11 +3,11 @@ package org.cardanofoundation.signify.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         SignifyClient delegatee2Client = signifyClients.get(3);
 
         // Create delegator and delegatee identifiers clients
-        List<States.HabState> aids = testSteps.step("Creating single sig aids", () ->
+        List<Identifier> aids = testSteps.step("Creating single sig aids", () ->
                 createAidAndGetHabStateAsync(
                         new CreateAidArgs(delegator1Client, delegator1Name),
                         new CreateAidArgs(delegator2Client, delegator2Name),
@@ -47,10 +47,10 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         new CreateAidArgs(delegatee2Client, delegatee2Name))
         );
 
-        States.HabState delegator1Aid = aids.get(0);
-        States.HabState delegator2Aid = aids.get(1);
-        States.HabState delegatee1Aid = aids.get(2);
-        States.HabState delegatee2Aid = aids.get(3);
+        Identifier delegator1Aid = aids.get(0);
+        Identifier delegator2Aid = aids.get(1);
+        Identifier delegatee1Aid = aids.get(2);
+        Identifier delegatee2Aid = aids.get(3);
 
         // Exchange OOBIs
         List<Object> oobis = testSteps.step("Exchanging OOBIs", () ->
@@ -139,13 +139,13 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 new WaitOperationArgs(delegator2Client, otor2)
         );
 
-        States.HabState adelegatorGroupName1 = delegator1Client.identifiers().get(delegatorGroupName).get();
-        States.HabState adelegatorGroupName2 = delegator2Client.identifiers().get(delegatorGroupName).get();
+        Identifier adelegatorGroupName1 = delegator1Client.identifiers().get(delegatorGroupName).get();
+        Identifier adelegatorGroupName2 = delegator2Client.identifiers().get(delegatorGroupName).get();
 
         assertEquals(adelegatorGroupName1.getPrefix(), adelegatorGroupName2.getPrefix());
         assertEquals(adelegatorGroupName1.getName(), adelegatorGroupName2.getName());
 
-        States.HabState adelegatorGroupName = adelegatorGroupName1;
+        Identifier adelegatorGroupName = adelegatorGroupName1;
 
         //Resolve delegator OOBI
         String delegatorGroupNameOobi = testSteps.step(String.format("Add and resolve delegator OOBI %s(%s)", delegatorGroupName, adelegatorGroupName.getPrefix()), () -> {
@@ -235,8 +235,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         Object opDelegatee2 = MultisigUtils.acceptMultisigIncept(delegatee2Client, acceptMultisigInceptArgs);
         System.out.println(delegatee2Name + " joined multisig, waiting for delegator...");
 
-        States.HabState agtee1 = delegatee1Client.identifiers().get(delegateeGroupName).get();
-        States.HabState agtee2 = delegatee2Client.identifiers().get(delegateeGroupName).get();
+        Identifier agtee1 = delegatee1Client.identifiers().get(delegateeGroupName).get();
+        Identifier agtee2 = delegatee2Client.identifiers().get(delegateeGroupName).get();
 
         assertEquals(agtee1.getPrefix(), agtee2.getPrefix());
         assertEquals(agtee1.getName(), agtee2.getName());
@@ -302,7 +302,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         );
         System.out.println("Delegated multisig created!");
 
-        States.HabState agtee = delegatee1Client.identifiers().get(delegateeGroupName).get();
+        Identifier agtee = delegatee1Client.identifiers().get(delegateeGroupName).get();
         assertEquals(agtee.getPrefix(), teepre);
 
         List<SignifyClient> clients = Arrays.asList(

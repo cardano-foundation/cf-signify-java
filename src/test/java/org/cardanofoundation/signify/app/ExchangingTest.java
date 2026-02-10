@@ -2,12 +2,12 @@ package org.cardanofoundation.signify.app;
 
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -67,7 +67,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "A",
-            Tier.low,
+            Tier.LOW,
             true
         );
         List<String> keys = Collections.singletonList(skp0.getVerfer().getQb64());
@@ -76,7 +76,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "N",
-            Tier.low,
+            Tier.LOW,
             true
         );
         
@@ -184,7 +184,7 @@ public class ExchangingTest extends BaseMockServerTest {
     @DisplayName("Send from events")
     void sendFromEvents() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -205,7 +205,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "A",
-            Tier.low,
+            Tier.LOW,
             true
         );
         List<String> keys = Collections.singletonList(skp0.getVerfer().getQb64());
@@ -214,7 +214,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "N",
-            Tier.low,
+            Tier.LOW,
             true
         );
 
@@ -251,7 +251,7 @@ public class ExchangingTest extends BaseMockServerTest {
     @DisplayName("Get exchange")
     void getExchange() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();

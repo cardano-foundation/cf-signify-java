@@ -3,6 +3,10 @@ package org.cardanofoundation.signify.core;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -217,7 +221,7 @@ class ManagerTest {
         assertEquals(manager.getAlgo(), Manager.Algos.salty);
         assertEquals(manager.getSalt(), salt);
         assertEquals(manager.getPidx(), 0);
-        assertEquals(manager.getTier(), Salter.Tier.low.name());
+        assertEquals(manager.getTier(), Tier.LOW);
 
         Cipher saltCipher0 = new Cipher(manager.getKs().getGbls("salt"));
         assertEquals(((Matter) saltCipher0.decrypt(null, seed0b)).getQb64(), salt);
@@ -242,7 +246,7 @@ class ManagerTest {
         assertEquals(pp.algo, Manager.Algos.salty);
         assertEquals(((Matter) manager.getDecrypter().decrypt(pp.salt.getBytes(), null)).getQb64(), salt);
         assertEquals(pp.stem, "");
-        assertEquals(pp.tier, Salter.Tier.low.name());
+        assertEquals(pp.tier, Tier.LOW);
 
         Manager.PreSit ps = manager.getKs().getSits(spre);
         assertEquals(ps.old.pubs, Collections.emptyList());
@@ -362,7 +366,7 @@ class ManagerTest {
         assertEquals(pp.algo, Manager.Algos.salty);
         assertEquals(((Matter) manager.getDecrypter().decrypt(pp.salt.getBytes(), null)).getQb64(), salt);
         assertEquals(pp.stem, "");
-        assertEquals(pp.tier, Salter.Tier.low.name());
+        assertEquals(pp.tier, Tier.LOW);
 
         ps = manager.getKs().getSits(spre);
         assertEquals(ps.old.pubs.getFirst(), "DB-fH5uto5o5XHZjNN3_W3PdT4MIyTCmQWDzMxMZV2kI");
@@ -442,7 +446,7 @@ class ManagerTest {
         assertEquals(pp.algo, Manager.Algos.randy);
         assertEquals(pp.salt, "");
         assertEquals(pp.stem, "");
-        assertEquals(pp.tier, "");
+        assertEquals(pp.tier, null);
 
         ps = manager.getKs().getSits(rpre);
         assertEquals(ps.old.pubs, Collections.emptyList());
@@ -520,7 +524,7 @@ class ManagerTest {
         assertEquals(pp.algo, Manager.Algos.salty);
         assertEquals(((Matter) manager.getDecrypter().decrypt(pp.salt.getBytes(), null)).getQb64(), salt);
         assertEquals(pp.stem, stem);
-        assertEquals(pp.tier, Salter.Tier.low.name());
+        assertEquals(pp.tier, Tier.LOW);
 
         ps = manager.getKs().getSits(spre);
         assertEquals(ps.old.pubs, Collections.emptyList());
@@ -612,7 +616,7 @@ class ManagerTest {
         Manager.PubPath ppt = manager.getKs().getPths(ps.new_.pubs.getFirst());
         assertEquals(ppt.path, "0");
         assertEquals(ppt.code, "A");
-        assertEquals(ppt.tier, "low");
+        assertEquals(ppt.tier, Tier.LOW);
         assertTrue(ppt.temp);
 
         List<String> digs = digers.stream().map(Diger::getQb64).toList();
@@ -647,7 +651,7 @@ class ManagerTest {
         assertEquals(pp.algo, Manager.Algos.salty);
         assertEquals(pp.salt, "");
         assertEquals(pp.stem, "");
-        assertEquals(pp.tier, Salter.Tier.low.name());
+        assertEquals(pp.tier, Tier.LOW);
 
         ps = manager.getKs().getSits(spre);
         assertEquals(ps.old.pubs.getFirst(), "DB-fH5uto5o5XHZjNN3_W3PdT4MIyTCmQWDzMxMZV2kI");
@@ -671,7 +675,7 @@ class ManagerTest {
         ppt = manager.getKs().getPths(ps.new_.pubs.getFirst());
         assertEquals(ppt.path, "0");
         assertEquals(ppt.code, "A");
-        assertEquals(ppt.tier, "low");
+        assertEquals(ppt.tier, Tier.LOW);
         assertTrue(ppt.temp);
 
         psigers = (List<Object>) manager.sign(Manager.SignArgs.builder().ser(serb).pubs(ps.new_.pubs).build());
@@ -696,19 +700,19 @@ class ManagerTest {
         List<String> keys = keeperResult.verfers();
         Prefixer prefixes = new Prefixer(keys.getFirst());
 
-        States.RandyState randyState = States.RandyState.builder()
-                .nxts(keeper0.getParams().getNxts())
-                .prxs(keeper0.getParams().getPrxs())
-                .build();
-        States.HabState habState = States.HabState.builder()
-                .prefix(prefixes.getQb64())
-                .name("")
-                .state(new States.State())
-                .randy(randyState)
-                .transferable(false)
-                .windexes(Collections.emptyList())
-                .build();
-        Keeping.Keeper<?> keeper1 = manager.get(habState);
+        RandyKeyState randyKeyState = new RandyKeyState();
+        randyKeyState.setNxts(keeper0.getParams().getNxts());
+        randyKeyState.setPrxs(keeper0.getParams().getPrxs());
+
+        Identifier identifier = new Identifier()
+            .prefix(prefixes.getQb64())
+            .name("")
+            .state(new KeyStateRecord())
+            .randy(randyKeyState)
+            .transferable(true)
+            .windexes(Collections.emptyList());
+
+        Keeping.Keeper<?> keeper1 = manager.get(identifier);
 
         assertInstanceOf(Keeping.RandyKeeper.class, keeper1);
     }

@@ -12,6 +12,7 @@ import org.cardanofoundation.signify.app.Contacting;
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
+import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
@@ -20,7 +21,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -29,6 +30,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
@@ -81,7 +85,7 @@ public class TestUtils {
         }
     }
 
-    public static void admitSinglesig(SignifyClient client, String aidName, States.HabState recipientAid) {
+    public static void admitSinglesig(SignifyClient client, String aidName, Identifier recipientAid) {
         // TO-DO
     }
 
@@ -110,7 +114,7 @@ public class TestUtils {
         return new Aid(name, prefix, oobi);
     }
 
-    public static States.HabState createAidAndGetHabState(SignifyClient client, String name) throws Exception {
+    public static Identifier createAidAndGetHabState(SignifyClient client, String name) throws Exception {
         getOrCreateIdentifier(client, name, null);
         return client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
@@ -136,8 +140,8 @@ public class TestUtils {
 
     public static Object getIssuedCredential(
             SignifyClient issuerClient,
-            States.HabState issuerAid,
-            States.HabState recipientAid,
+            Identifier issuerAid,
+            Identifier recipientAid,
             String schemaSAID
     ) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> filter = new LinkedHashMap<>() {{
@@ -153,15 +157,15 @@ public class TestUtils {
         return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
 
-    public static States.HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
-        Optional<States.HabState> existingAID = client.identifiers().get(name);
+    public static Identifier getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
+        Optional<Identifier> existingAID = client.identifiers().get(name);
         if (existingAID.isPresent()) {
             return existingAID.get();
         } else {
             EventResult result = client.identifiers().create(name, kargs);
             waitOperation(client, result.op());
 
-            States.HabState aid = client.identifiers().get(name)
+            Identifier aid = client.identifiers().get(name)
                     .orElseThrow(() -> new IllegalArgumentException("Failed to create identifier: " + name));
             
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
@@ -219,7 +223,7 @@ public class TestUtils {
             bran = randomPasscode();
         }
 
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         try {
             client.connect();
         } catch (Exception e) {
@@ -239,7 +243,7 @@ public class TestUtils {
         String eid;
         Object op, ops;
 
-        Optional<States.HabState> optionalIdentifier = client.identifiers().get(name);
+        Optional<Identifier> optionalIdentifier = client.identifiers().get(name);
         if (optionalIdentifier.isPresent()) {
             id = optionalIdentifier.get().getPrefix();
             
@@ -367,23 +371,8 @@ public class TestUtils {
         return credential;
     }
 
-    public static List<Object> getStates(SignifyClient client, List<String> prefixes) {
-        List<Object> participantStates = prefixes.stream().map(p -> {
-            try {
-                return client.keyStates().get(p).get();
-            } catch (Exception e) {
-                throw new RuntimeException("Error fetching key states for prefix: " + p, e);
-            }
-        }).toList();
-        return participantStates.stream().map(s -> {
-            if (s instanceof List<?>) {
-                return ((List<?>) s).get(0);
-            } else if (s instanceof Object) {
-                return ((Object[]) s)[0];
-            } else {
-                throw new IllegalArgumentException("Unexpected type: " + s.getClass());
-            }
-        }).collect(Collectors.toList());
+    public static List<KeyStateRecord> getStates(SignifyClient client, List<String> prefixes) throws IOException, InterruptedException {
+        return client.keyStates().list(prefixes);
     }
 
     public static Boolean hasEndRole(SignifyClient client, String alias, String role, String eid) throws Exception {
@@ -573,6 +562,14 @@ public class TestUtils {
     @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> castObjectToListMap(Object object) {
         return (List<Map<String, Object>>) object;
+    }
+
+    /**
+     * Convenience wrapper to access generated identifiers from list responses.
+     */
+    public static List<Identifier> identifiers(IdentifierListResponse response
+    ) {
+        return response.aids();
     }
 
     @FunctionalInterface

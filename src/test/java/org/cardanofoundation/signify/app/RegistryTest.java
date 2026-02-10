@@ -1,13 +1,14 @@
 package org.cardanofoundation.signify.app;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.IdentifierController;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.params.SaltyParams;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ public class RegistryTest {
     @Mock
     private SignifyClient mockedClient;
     @Mock
-    private Identifier mockedIdentifiers;
+    private IdentifierController mockedIdentifiers;
     @Mock
     private Keeping.KeyManager mockedKeyManager;
     @Mock
@@ -42,13 +43,12 @@ public class RegistryTest {
     @Test
     @DisplayName("should create a registry")
     void shouldCreateRegistry() throws Exception {
-        States.HabState hab = States.HabState.builder()
-                .prefix("hab prefix")
-                .state(States.State.builder()
-                        .s("0")
-                        .d("a digest")
-                        .build())
-                .build();
+        Identifier hab = new Identifier().prefix("hab prefix");
+
+        KeyStateRecord keyStateRecord = new KeyStateRecord();
+        keyStateRecord.setS("0");
+        keyStateRecord.setD("a digest");
+        hab.setState(keyStateRecord);
 
         when(mockedClient.getManager()).thenReturn(mockedKeyManager);
         when(mockedKeyManager.get(hab)).thenReturn(mockedKeeper);
@@ -78,17 +78,17 @@ public class RegistryTest {
     @Test
     @DisplayName("should fail on establishment only for now")
     void shouldFailOnEstablishmentOnly() throws Exception {
-        States.HabState hab = States.HabState.builder()
-                .prefix("hab prefix")
-                .state(States.State.builder()
-                        .s("0")
-                        .d("a digest")
-                        .c(Collections.singletonList("EO"))
-                        .build())
-                .name("a name")
-                .transferable(true)
-                .windexes(Collections.emptyList())
-                .build();
+        KeyStateRecord keyStateRecord = new KeyStateRecord()
+            .s("0")
+            .d("a digest")
+            .c(Collections.singletonList("EO"));
+
+        Identifier hab = new Identifier()
+            .prefix("hab prefix")
+            .name("a name")
+            .transferable(true)
+            .windexes(Collections.emptyList())
+            .state(keyStateRecord);
 
         when(mockedIdentifiers.get("a name")).thenReturn(Optional.of(hab));
         when(mockedClient.identifiers()).thenReturn(mockedIdentifiers);

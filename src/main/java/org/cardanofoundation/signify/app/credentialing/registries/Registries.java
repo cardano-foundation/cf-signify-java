@@ -10,7 +10,6 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.core.Vdring;
 
 import java.io.IOException;
@@ -18,6 +17,7 @@ import java.math.BigInteger;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 
@@ -55,7 +55,7 @@ public class Registries {
      * @throws LibsodiumException   if a sodium exception occurs
      */
     public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        States.HabState hab = this.client.identifiers().get(args.getName())
+        Identifier hab = this.client.identifiers().get(args.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getName()));
         String pre = hab.getPrefix();
 
@@ -122,7 +122,7 @@ public class Registries {
      * @throws LibsodiumException   if a sodium exception occurs
      */
     private HttpResponse<String> createFromEvents(
-        States.HabState hab,
+        Identifier hab,
         String name,
         String registryName,
         Map<String, Object> vcp,

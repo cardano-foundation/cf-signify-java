@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.signify.app.config.GeneratedModelConfig;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.CounterArgs;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
@@ -18,8 +19,7 @@ public class Utils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        GeneratedModelConfig.configure(objectMapper);
     }
 
     public static byte[] intToBytes(BigInteger value, int size) {

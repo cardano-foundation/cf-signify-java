@@ -8,10 +8,11 @@ import org.cardanofoundation.signify.app.credentialing.credentials.CredentialDat
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -116,7 +117,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 .wits(env.witnessIds())
                 .build();
 
-        List<States.HabState> habStates = createAidAndGetHabStateAsync(
+        List<Identifier> habStates = createAidAndGetHabStateAsync(
                 new CreateAidArgs(clientGAR1, "GAR1", kargsAID),
                 new CreateAidArgs(clientGAR2, "GAR2", kargsAID),
                 new CreateAidArgs(clientQAR1, "QAR1", kargsAID),
@@ -127,15 +128,15 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new CreateAidArgs(clientLAR3, "LAR3", kargsAID),
                 new CreateAidArgs(clientECR, "ECR", kargsAID)
         );
-        States.HabState aidGAR1 = habStates.get(0);
-        States.HabState aidGAR2 = habStates.get(1);
-        States.HabState aidQAR1 = habStates.get(2);
-        States.HabState aidQAR2 = habStates.get(3);
-        States.HabState aidQAR3 = habStates.get(4);
-        States.HabState aidLAR1 = habStates.get(5);
-        States.HabState aidLAR2 = habStates.get(6);
-        States.HabState aidLAR3 = habStates.get(7);
-        States.HabState aidECR = habStates.get(8);
+        Identifier aidGAR1 = habStates.get(0);
+        Identifier aidGAR2 = habStates.get(1);
+        Identifier aidQAR1 = habStates.get(2);
+        Identifier aidQAR2 = habStates.get(3);
+        Identifier aidQAR3 = habStates.get(4);
+        Identifier aidLAR1 = habStates.get(5);
+        Identifier aidLAR2 = habStates.get(6);
+        Identifier aidLAR3 = habStates.get(7);
+        Identifier aidECR = habStates.get(8);
 
         List<Object> oobisLst = getOobisAsync(
                 new GetOobisArgs(clientGAR1, "GAR1", "agent"),
@@ -203,13 +204,13 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the GEDA.
         // Skip if a GEDA AID has already been incepted.
-        States.HabState aidGEDAbyGAR1, aidGEDAbyGAR2;
+        Identifier aidGEDAbyGAR1, aidGEDAbyGAR2;
         try {
             aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
             aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
         } catch (Exception e) {
-            List<Object> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
-            List<Object> states = rstates;
+            List<KeyStateRecord> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
+            List<KeyStateRecord> states = rstates;
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
@@ -255,7 +256,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(aidGEDAbyGAR1.getPrefix(), aidGEDAbyGAR2.getPrefix());
         assertEquals(aidGEDAbyGAR1.getName(), aidGEDAbyGAR2.getName());
 
-        States.HabState aidGEDA = aidGEDAbyGAR1;
+        Identifier aidGEDA = aidGEDAbyGAR1;
 
         // Add endpoint role authorization for all GARs' agents.
         // Skip if they have already been authorized.
@@ -312,14 +313,14 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the QVI.
         // Skip if a QVI AID has already been incepted.
-        States.HabState aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
+        Identifier aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
         try {
             aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI").get();
             aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
             aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI").get();
         } catch (Exception exception) {
-            List<Object> rstates = List.of(aidQAR1.getState(), aidQAR2.getState(), aidQAR3.getState());
-            List<Object> states = List.copyOf(rstates);
+            List<KeyStateRecord> rstates = List.of(aidQAR1.getState(), aidQAR2.getState(), aidQAR3.getState());
+            List<KeyStateRecord> states = List.copyOf(rstates);
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
@@ -423,7 +424,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(aidQVIbyQAR1.getName(), aidQVIbyQAR2.getName());
         assertEquals(aidQVIbyQAR1.getName(), aidQVIbyQAR3.getName());
 
-        States.HabState aidQVI = aidQVIbyQAR1;
+        Identifier aidQVI = aidQVIbyQAR1;
 
         // Add endpoint role authorization for all QARs' agents.
         // Skip if they have already been authorized.
@@ -712,14 +713,14 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the LE.
         // Skip if a LE AID has already been incepted.
-        States.HabState aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
+        Identifier aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
         try {
             aidLEbyLAR1 = clientLAR1.identifiers().get("LE").get();
             aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
             aidLEbyLAR3 = clientLAR3.identifiers().get("LE").get();
         } catch (Exception e) {
-            List<Object> rstates = List.of(aidLAR1.getState(), aidLAR2.getState(), aidLAR3.getState());
-            List<Object> states = List.copyOf(rstates);
+            List<KeyStateRecord> rstates = List.of(aidLAR1.getState(), aidLAR2.getState(), aidLAR3.getState());
+            List<KeyStateRecord> states = List.copyOf(rstates);
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                     .builder()
@@ -779,7 +780,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(aidLEbyLAR1.getName(), aidLEbyLAR2.getName());
         assertEquals(aidLEbyLAR1.getName(), aidLEbyLAR3.getName());
 
-        States.HabState aidLE = aidLEbyLAR1;
+        Identifier aidLE = aidLEbyLAR1;
         // Add endpoint role authorization for all LARs' agents.
         // Skip if they have already been authorized.
         oobiLst = getOobisAsync(
