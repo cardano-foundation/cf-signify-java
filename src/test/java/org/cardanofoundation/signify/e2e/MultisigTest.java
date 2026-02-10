@@ -20,6 +20,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
@@ -169,8 +170,8 @@ public class MultisigTest extends BaseIntegrationTest {
         CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
                 .builder()
                 .algo(Manager.Algos.group)
-                .isith(3)
-                .nsith(3)
+                .isith(Sith.fromInteger(3))
+                .nsith(Sith.fromInteger(3))
                 .toad(aid1.getState().getB().size())
                 .wits(aid1.getState().getB())
                 .states(states)

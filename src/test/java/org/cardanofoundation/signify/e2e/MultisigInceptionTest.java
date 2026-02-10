@@ -7,6 +7,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -51,8 +52,8 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 .localMemberName("member1")
                 .participants(Arrays.asList(aid1, aid2))
                 .toad(2)
-                .isith(2)
-                .nsith(2)
+                .isith(Sith.fromInteger(2))
+                .nsith(Sith.fromInteger(2))
                 .wits(Arrays.asList(
                     "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
                     "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
@@ -107,8 +108,8 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
                 .localMemberName("member1")
                 .participants(List.of(aid1, aid2))
                 .toad(0)
-                .isith(2)
-                .nsith(2)
+                .isith(Sith.fromInteger(2))
+                .nsith(Sith.fromInteger(2))
                 .wits(new ArrayList<>())
                 .build()
             );

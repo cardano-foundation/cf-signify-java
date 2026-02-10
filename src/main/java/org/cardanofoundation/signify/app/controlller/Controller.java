@@ -103,8 +103,8 @@ public class Controller {
         if (stateMap.isEmpty() || ee.get("s").equals("0")) {
             InceptArgs args = InceptArgs.builder()
                 .keys(this.keys)
-                .isith("1")
-                .nsith("1")
+                .isith(Sith.fromString("1"))
+                .nsith(Sith.fromString("1"))
                 .ndigs(this.ndigs)
                 .code(MatterCodex.Blake3_256.getValue())
                 .toad(0)
@@ -161,8 +161,8 @@ public class Controller {
         if (state != null && ((States.State) state).getEe().getS().equals("0")) {
             return Eventing.incept(InceptArgs.builder()
                 .keys(this.keys)
-                .isith("1")
-                .nsith("1")
+                .isith(Sith.fromString("1"))
+                .nsith(Sith.fromString("1"))
                 .ndigs(this.ndigs)
                 .code(MatterCodex.Blake3_256.getValue())
                 .toad(0)
@@ -227,8 +227,8 @@ public class Controller {
                 .pre(this.getPre())
                 .keys(this.keys)
                 .dig((String) this.serder.getKed().get("d"))
-                .isith(Arrays.asList("1", "0"))
-                .nsith("1")
+                .isith(Sith.fromStringWeighted(Arrays.asList("1", "0")))
+                .nsith(Sith.fromString("1"))
                 .ndigs(this.ndigs)
             .build());
 

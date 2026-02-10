@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistry
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
+import org.cardanofoundation.signify.cesr.Sith;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.States;
@@ -117,8 +118,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 "holder",
                 aid1.getName(),
                 Arrays.asList(aid1.getPrefix(), aid2.getPrefix()),
-                2,
-                2,
+                Sith.fromInteger(2),
+                Sith.fromInteger(2),
                 aid1.getState().getB().size(),
                 aid1.getState().getB(),
                 null

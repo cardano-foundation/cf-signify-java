@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import org.cardanofoundation.signify.cesr.Sith;
 
 import java.util.List;
 
@@ -18,9 +19,9 @@ public class RotateArgs {
     String dig;
     String ilk;
     Integer sn;
-    Object isith;
+    Sith isith;
     List<String> ndigs;
-    Object nsith;
+    Sith nsith;
     Integer toad;
     List<String> wits;
     List<String> cuts;
