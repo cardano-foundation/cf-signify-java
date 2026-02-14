@@ -150,8 +150,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
     /**
      * Get state of the agent and the client
+     *
+     * @return Optional containing the State if the agent exists, or empty if not found
      */
-    public State state() throws Exception {
+    public Optional<State> state() throws Exception {
         String caid = controller != null ? controller.getPre() : null;
         if (caid == null) {
             throw new IllegalArgumentException("Controller not initialized");
@@ -167,7 +169,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-            throw new IllegalArgumentException("Agent does not exist for controller " + caid);
+            return Optional.empty();
         }
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK
@@ -177,22 +179,20 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         Map<String, Object> data = Utils.fromJson(response.body(), new TypeReference<>() {});
 
-        return State.builder()
+        return Optional.of(State.builder()
             .agent(data.getOrDefault(SignifyFields.AGENT.getValue(), null))
             .controller(data.getOrDefault(SignifyFields.CONTROLLER.getValue(), null))
             .ridx((Integer) data.getOrDefault(SignifyFields.RIDX.getValue(), 0))
             .pidx((Integer) data.getOrDefault(SignifyFields.PIDX.getValue(), 0))
-            .build();
+            .build());
     }
 
     /**
      * Connect to a KERIA agent
      */
     public void connect() throws Exception {
-        State state = state();
-        if (state == null) {
-            throw new RuntimeException("State not initialized");
-        }
+        State state = state()
+            .orElseThrow(() -> new IllegalArgumentException("Agent not booted — call boot() first"));
         this.pidx = state.getPidx();
 
         // Create controller representing the local client AID

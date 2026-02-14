@@ -176,7 +176,7 @@ class SaltyTests {
 
         // KeyEvents
         Coring.KeyEvents events = client.keyEvents();
-        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get((String) aidLast.get("prefix"));
+        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get((String) aidLast.get("prefix")).orElseThrow();
         assertEquals(3, log.size());
 
         Serder serder = new Serder((Map<String, Object>) log.getFirst().get("ked"));
