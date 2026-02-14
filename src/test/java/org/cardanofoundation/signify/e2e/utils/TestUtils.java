@@ -541,7 +541,7 @@ public class TestUtils {
             Object op
     ) throws IOException, InterruptedException, LibsodiumException {
         Operation operation = Operation.fromObject(op);
-        operation = client.operations().wait(operation);
+        operation = OperationWaiter.wait(client.operations(), operation);
         deleteOperations(client, operation);
         return operation;
     }
