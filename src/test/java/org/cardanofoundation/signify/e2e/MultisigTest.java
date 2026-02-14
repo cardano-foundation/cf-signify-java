@@ -26,6 +26,7 @@ import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
+import org.cardanofoundation.signify.e2e.utils.OperationWaiter;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.junit.jupiter.api.Test;
@@ -980,7 +981,7 @@ public class MultisigTest extends BaseIntegrationTest {
             Object op) throws IOException, InterruptedException, LibsodiumException {
         Operation operation = Operation.fromObject(op);
         String name = operation.getName();
-        operation = client.operations().wait(operation);
+        operation = OperationWaiter.wait(client.operations(), operation);
         TestUtils.deleteOperations(client, operation);
         TestUtils.deleteOperation(client, name);
         return operation;
