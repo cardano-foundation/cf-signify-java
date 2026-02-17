@@ -90,7 +90,7 @@ public class RandyTest {
 
         Coring.KeyEvents events = client1.keyEvents();
 
-        List<Map<String, Object>> logList = (List<Map<String, Object>>) events.get(opResponsePrefix).orElseThrow();
+        List<Map<String, Object>> logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
         assertEquals(2, logList.size());
 
         icpResult = client1.identifiers().rotate("aid1");
@@ -111,7 +111,7 @@ public class RandyTest {
                 rot.getVerfers().getFirst().getQb64b());
         assertEquals(dig.getQb64(), icp.getDigers().getFirst().getQb64());
 
-        logList = (List<Map<String, Object>>) events.get(opResponsePrefix).orElseThrow();
+        logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
         assertEquals(3, logList.size());
         assertOperations(Collections.singletonList(client1));
     }

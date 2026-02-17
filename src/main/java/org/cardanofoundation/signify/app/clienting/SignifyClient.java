@@ -191,8 +191,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * Connect to a KERIA agent
      */
     public void connect() throws Exception {
+        String caid = controller != null ? controller.getPre() : "unknown";
         State state = state()
-            .orElseThrow(() -> new IllegalArgumentException("Agent not booted — call boot() first"));
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Agent not booted for controller " + caid + " \u2014 call boot() first"));
         this.pidx = state.getPidx();
 
         // Create controller representing the local client AID

@@ -10,9 +10,7 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
-import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
-import java.util.Optional;
 
 public class Coring {
     public static String randomPasscode() {
@@ -55,19 +53,14 @@ public class Coring {
         /**
          * Retrieve the key events for an identifier
          * @param pre Identifier prefix
-         * @return Optional containing the key events if found, or empty if not found
+         * @return A list representing the key events (empty list if none found)
          * @throws Exception if the fetch operation fails
          */
-        public Optional<Object> get(String pre) throws Exception {
+        public Object get(String pre) throws Exception {
             String path = "/events?pre=" + pre;
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
-
-            if (res.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                return Optional.empty();
-            }
-
-            return Optional.of(Utils.fromJson(res.body(), Object.class));
+            return Utils.fromJson(res.body(), Object.class);
         }
     }
 
@@ -85,19 +78,14 @@ public class Coring {
 
         /**
          * Retrieve the agent configuration
-         * @return Optional containing the config if found, or empty if not found
+         * @return The agent configuration
          * @throws Exception if the fetch operation fails
          */
-        public Optional<Object> get() throws Exception {
+        public Object get() throws Exception {
             String path = "/config";
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
-
-            if (res.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                return Optional.empty();
-            }
-
-            return Optional.of(Utils.fromJson(res.body(), Object.class));
+            return Utils.fromJson(res.body(), Object.class);
         }
     }
 }
