@@ -220,12 +220,10 @@ public class TestUtils {
         }
 
         SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
-        try {
-            client.connect();
-        } catch (Exception e) {
+        if (client.state().isEmpty()) {
             client.boot();
-            client.connect();
         }
+        client.connect();
         System.out.println("Client: " +
                 Map.of("agent", client.getAgent() != null ? client.getAgent().getPre() : null,
                         "controller", client.getController().getPre()
