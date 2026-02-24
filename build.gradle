@@ -62,6 +62,13 @@ dependencies {
     implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
     implementation "org.openapitools:jackson-databind-nullable:${jacksonNullableVersion}"
 
+    // Jakarta Validation for generated models (required when useBeanValidation=true)
+    implementation "jakarta.validation:jakarta.validation-api:${jakartaValidationVersion}"
+    implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
+
+    // YAML parsing for build scripts
+    implementation "org.yaml:snakeyaml:2.2"
+
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebVersion}"
@@ -214,7 +221,23 @@ tasks.openApiGenerate {
             serializationLibrary : "jackson",
             useJakartaEe         : "true",
             dateLibrary          : "java21",
-            sourceFolder         : "src/main/java"
+            sourceFolder         : "src/main/java",
+
+            // ====== oneOf Handling ======
+            // Generate interfaces for oneOf schemas - creates TypeScript-like union types
+            useOneOfInterfaces   : "true",      // Generates interfaces instead of flat classes (TypeScript-like)
+            legacyDiscriminatorBehavior: "false",
+            
+            useSealedInterfaces  : "true",      // Enable sealed interfaces for oneOf (Java 21+)
+
+            // ====== Reduce Boilerplate ======
+            hideGenerationTimestamp: "true",
+            openApiNullable      : "false",     // Don't use JsonNullable wrapper
+
+            // ====== Code Quality & Validation ======
+            generateConstructorWithAllArgs: "true",
+            performBeanValidation: "true",      // Requires jakarta.validation dependencies
+            useBeanValidation    : "true",      // Requires jakarta.validation dependencies
     ]
 
     nameMappings.put("A", "AUpper")
@@ -244,6 +267,11 @@ tasks.register("prepareOpenApiSpec") {
     }
 }
 
+
+// Apply Sealed Interfaces Processing
+apply from: 'gradle/sealed-interfaces.gradle'
+
 tasks.named("openApiGenerate") {
     dependsOn("prepareOpenApiSpec")
+    finalizedBy("makeSealedInterfaces")
 }
