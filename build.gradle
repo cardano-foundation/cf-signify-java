@@ -75,6 +75,9 @@ dependencies {
     implementation "jakarta.validation:jakarta.validation-api:${jakartaValidationVersion}"
     implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
 
+    // YAML parsing for build scripts
+    implementation "org.yaml:snakeyaml:2.2"
+
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebVersion}"
@@ -233,6 +236,8 @@ tasks.openApiGenerate {
             // Generate interfaces for oneOf schemas - creates TypeScript-like union types
             useOneOfInterfaces   : "true",      // Generates interfaces instead of flat classes (TypeScript-like)
             legacyDiscriminatorBehavior: "false",
+            
+            useSealedInterfaces  : "true",      // Enable sealed interfaces for oneOf (Java 21+)
 
             // ====== Reduce Boilerplate ======
             hideGenerationTimestamp: "true",
@@ -271,6 +276,11 @@ tasks.register("prepareOpenApiSpec") {
     }
 }
 
+
+// Apply Sealed Interfaces Processing
+apply from: 'gradle/sealed-interfaces.gradle'
+
 tasks.named("openApiGenerate") {
     dependsOn("prepareOpenApiSpec")
+    finalizedBy("makeSealedInterfaces")
 }
