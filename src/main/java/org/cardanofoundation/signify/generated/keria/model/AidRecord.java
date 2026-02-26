@@ -24,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.MemberEnds;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * AidRecord
@@ -32,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AidRecord.JSON_PROPERTY_AID,
   AidRecord.JSON_PROPERTY_ENDS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class AidRecord {
   public static final String JSON_PROPERTY_AID = "aid";
   @jakarta.annotation.Nonnull
@@ -43,6 +46,14 @@ public class AidRecord {
   private MemberEnds ends;
 
   public AidRecord() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public AidRecord(@JsonProperty(JSON_PROPERTY_AID) String aid, @JsonProperty(JSON_PROPERTY_ENDS) MemberEnds ends) {
+    this.aid = aid;
+    this.ends = ends;
   }
 
   public AidRecord aid(@jakarta.annotation.Nonnull String aid) {
@@ -56,6 +67,8 @@ public class AidRecord {
    * @return aid
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_AID, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -81,6 +94,9 @@ public class AidRecord {
    * @return ends
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ENDS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

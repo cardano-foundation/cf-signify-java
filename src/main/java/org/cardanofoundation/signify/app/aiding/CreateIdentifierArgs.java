@@ -4,7 +4,7 @@ import java.util.List;
 
 import lombok.*;
 import org.cardanofoundation.signify.core.Manager.Algos;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 
@@ -29,7 +29,7 @@ public class CreateIdentifierArgs {
     private List<KeyStateRecord> rstates;
     private List<Object> prxs;
     private List<Object> nxts;
-    private Identifier mhab;
+    private HabState mhab;
     private List<String> keys;
     private List<String> ndigs;
     private String bran;

@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * EndRole
@@ -32,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EndRole.JSON_PROPERTY_ROLE,
   EndRole.JSON_PROPERTY_EID
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class EndRole {
   public static final String JSON_PROPERTY_CID = "cid";
   @jakarta.annotation.Nonnull
@@ -49,6 +52,15 @@ public class EndRole {
   public EndRole() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public EndRole(@JsonProperty(JSON_PROPERTY_CID) String cid, @JsonProperty(JSON_PROPERTY_ROLE) String role, @JsonProperty(JSON_PROPERTY_EID) String eid) {
+    this.cid = cid;
+    this.role = role;
+    this.eid = eid;
+  }
+
   public EndRole cid(@jakarta.annotation.Nonnull String cid) {
     
     this.cid = cid;
@@ -60,6 +72,8 @@ public class EndRole {
    * @return cid
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_CID, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -85,6 +99,8 @@ public class EndRole {
    * @return role
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ROLE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -110,6 +126,8 @@ public class EndRole {
    * @return eid
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_EID, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

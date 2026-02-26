@@ -11,7 +11,8 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitAndMarkNotif
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings("unchecked")
 public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -117,7 +119,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 .wits(env.witnessIds())
                 .build();
 
-        List<Identifier> habStates = createAidAndGetHabStateAsync(
+        List<HabState> habStates = createAidAndGetHabStateAsync(
                 new CreateAidArgs(clientGAR1, "GAR1", kargsAID),
                 new CreateAidArgs(clientGAR2, "GAR2", kargsAID),
                 new CreateAidArgs(clientQAR1, "QAR1", kargsAID),
@@ -128,15 +130,15 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new CreateAidArgs(clientLAR3, "LAR3", kargsAID),
                 new CreateAidArgs(clientECR, "ECR", kargsAID)
         );
-        Identifier aidGAR1 = habStates.get(0);
-        Identifier aidGAR2 = habStates.get(1);
-        Identifier aidQAR1 = habStates.get(2);
-        Identifier aidQAR2 = habStates.get(3);
-        Identifier aidQAR3 = habStates.get(4);
-        Identifier aidLAR1 = habStates.get(5);
-        Identifier aidLAR2 = habStates.get(6);
-        Identifier aidLAR3 = habStates.get(7);
-        Identifier aidECR = habStates.get(8);
+        HabState aidGAR1 = habStates.get(0);
+        HabState aidGAR2 = habStates.get(1);
+        HabState aidQAR1 = habStates.get(2);
+        HabState aidQAR2 = habStates.get(3);
+        HabState aidQAR3 = habStates.get(4);
+        HabState aidLAR1 = habStates.get(5);
+        HabState aidLAR2 = habStates.get(6);
+        HabState aidLAR3 = habStates.get(7);
+        HabState aidECR = habStates.get(8);
 
         List<Object> oobisLst = getOobisAsync(
                 new GetOobisArgs(clientGAR1, "GAR1", "agent"),
@@ -204,12 +206,12 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the GEDA.
         // Skip if a GEDA AID has already been incepted.
-        Identifier aidGEDAbyGAR1, aidGEDAbyGAR2;
+        HabState aidGEDAbyGAR1, aidGEDAbyGAR2;
         try {
             aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
             aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
         } catch (Exception e) {
-            List<KeyStateRecord> rstates = List.of(aidGAR1.getState(), aidGAR2.getState());
+            List<KeyStateRecord> rstates = List.of(HabStateUtil.getHabState(aidGAR1), HabStateUtil.getHabState(aidGAR2));
             List<KeyStateRecord> states = rstates;
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
@@ -253,21 +255,21 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
             aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
         }
-        assertEquals(aidGEDAbyGAR1.getPrefix(), aidGEDAbyGAR2.getPrefix());
-        assertEquals(aidGEDAbyGAR1.getName(), aidGEDAbyGAR2.getName());
+        assertEquals(HabStateUtil.getHabPrefix(aidGEDAbyGAR1), HabStateUtil.getHabPrefix(aidGEDAbyGAR2));
+        assertEquals(HabStateUtil.getHabName(aidGEDAbyGAR1), HabStateUtil.getHabName(aidGEDAbyGAR2));
 
-        Identifier aidGEDA = aidGEDAbyGAR1;
+        HabState aidGEDA = aidGEDAbyGAR1;
 
         // Add endpoint role authorization for all GARs' agents.
         // Skip if they have already been authorized.
-        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
-        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
+        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(HabStateUtil.getHabName(aidGEDA), "agent").get();
+        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(HabStateUtil.getHabName(aidGEDA), "agent").get();
 
         if (((List<String>) oobiGEDAbyGAR1.get("oobis")).size() == 0 || ((List<String>) oobiGEDAbyGAR2.get("oobis")).size() == 0) {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientGAR1,
-                    aidGEDA.getName(),
+                    HabStateUtil.getHabName(aidGEDA),
                     aidGAR1,
                     List.of(aidGAR2),
                     aidGEDA,
@@ -277,7 +279,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             List<Object> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientGAR2,
-                    aidGEDA.getName(),
+                    HabStateUtil.getHabName(aidGEDA),
                     aidGAR2,
                     List.of(aidGAR1),
                     aidGEDA,
@@ -293,8 +295,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/rpy");
 
-            oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
-            oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
+                        oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(HabStateUtil.getHabName(aidGEDA), "agent").get();
+                        oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(HabStateUtil.getHabName(aidGEDA), "agent").get();
         }
         assertEquals(oobiGEDAbyGAR1.get("role"), oobiGEDAbyGAR2.get("role"));
         assertEquals(getOobisIndexAt0(oobiGEDAbyGAR1), getOobisIndexAt0(oobiGEDAbyGAR2));
@@ -302,24 +304,24 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // QARs, LARs, ECR resolve GEDA's OOBI
         String oobiGEDA = getOobisIndexAt0(oobiGEDAbyGAR1).split("/agent/")[0];
         getOrCreateContactAsync(
-                new GetOrCreateContactArgs(clientQAR1, aidGEDA.getName(), oobiGEDA),
-                new GetOrCreateContactArgs(clientQAR2, aidGEDA.getName(), oobiGEDA),
-                new GetOrCreateContactArgs(clientQAR3, aidGEDA.getName(), oobiGEDA),
-                new GetOrCreateContactArgs(clientLAR1, aidGEDA.getName(), oobiGEDA),
-                new GetOrCreateContactArgs(clientLAR2, aidGEDA.getName(), oobiGEDA),
-                new GetOrCreateContactArgs(clientLAR3, aidGEDA.getName(), oobiGEDA),
-                new GetOrCreateContactArgs(clientECR, aidGEDA.getName(), oobiGEDA)
+                new GetOrCreateContactArgs(clientQAR1, HabStateUtil.getHabName(aidGEDA), oobiGEDA),
+                new GetOrCreateContactArgs(clientQAR2, HabStateUtil.getHabName(aidGEDA), oobiGEDA),
+                new GetOrCreateContactArgs(clientQAR3, HabStateUtil.getHabName(aidGEDA), oobiGEDA),
+                new GetOrCreateContactArgs(clientLAR1, HabStateUtil.getHabName(aidGEDA), oobiGEDA),
+                new GetOrCreateContactArgs(clientLAR2, HabStateUtil.getHabName(aidGEDA), oobiGEDA),
+                new GetOrCreateContactArgs(clientLAR3, HabStateUtil.getHabName(aidGEDA), oobiGEDA),
+                new GetOrCreateContactArgs(clientECR, HabStateUtil.getHabName(aidGEDA), oobiGEDA)
         );
 
         // Create a multisig AID for the QVI.
         // Skip if a QVI AID has already been incepted.
-        Identifier aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
+        HabState aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
         try {
             aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI").get();
             aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
             aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI").get();
         } catch (Exception exception) {
-            List<KeyStateRecord> rstates = List.of(aidQAR1.getState(), aidQAR2.getState(), aidQAR3.getState());
+            List<KeyStateRecord> rstates = List.of(HabStateUtil.getHabState(aidQAR1), HabStateUtil.getHabState(aidQAR2), HabStateUtil.getHabState(aidQAR3));
             List<KeyStateRecord> states = List.copyOf(rstates);
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
@@ -331,7 +333,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .wits(kargsAID.getWits())
                     .states(states)
                     .rstates(rstates)
-                    .delpre(aidGEDA.getPrefix())
+                    .delpre(HabStateUtil.getHabPrefix(aidGEDA))
                     .build();
 
             kargsMultisigAID.setMhab(aidQAR1);
@@ -400,9 +402,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/ixn");
 
             // QARs query the GEDA's key state
-            Object queryOp1 = clientQAR1.keyStates().query(aidGEDA.getPrefix(), "1");
-            Object queryOp2 = clientQAR2.keyStates().query(aidGEDA.getPrefix(), "1");
-            Object queryOp3 = clientQAR3.keyStates().query(aidGEDA.getPrefix(), "1");
+            Object queryOp1 = clientQAR1.keyStates().query(HabStateUtil.getHabPrefix(aidGEDA), "1");
+            Object queryOp2 = clientQAR2.keyStates().query(HabStateUtil.getHabPrefix(aidGEDA), "1");
+            Object queryOp3 = clientQAR3.keyStates().query(HabStateUtil.getHabPrefix(aidGEDA), "1");
 
             waitOperationAsync(
                     new WaitOperationArgs(clientQAR1, multisigAIDOp1),
@@ -419,19 +421,19 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
             aidQVIbyQAR3 = clientQAR3.identifiers().get("QVI").get();
         }
-        assertEquals(aidQVIbyQAR1.getPrefix(), aidQVIbyQAR2.getPrefix());
-        assertEquals(aidQVIbyQAR1.getPrefix(), aidQVIbyQAR3.getPrefix());
-        assertEquals(aidQVIbyQAR1.getName(), aidQVIbyQAR2.getName());
-        assertEquals(aidQVIbyQAR1.getName(), aidQVIbyQAR3.getName());
+        assertEquals(HabStateUtil.getHabPrefix(aidQVIbyQAR1), HabStateUtil.getHabPrefix(aidQVIbyQAR2));
+        assertEquals(HabStateUtil.getHabPrefix(aidQVIbyQAR1), HabStateUtil.getHabPrefix(aidQVIbyQAR3));
+        assertEquals(HabStateUtil.getHabName(aidQVIbyQAR1), HabStateUtil.getHabName(aidQVIbyQAR2));
+        assertEquals(HabStateUtil.getHabName(aidQVIbyQAR1), HabStateUtil.getHabName(aidQVIbyQAR3));
 
-        Identifier aidQVI = aidQVIbyQAR1;
+        HabState aidQVI = aidQVIbyQAR1;
 
         // Add endpoint role authorization for all QARs' agents.
         // Skip if they have already been authorized.
         List<Object> oobiLst = getOobisAsync(
-                new GetOobisArgs(clientQAR1, aidQVI.getName(), "agent"),
-                new GetOobisArgs(clientQAR2, aidQVI.getName(), "agent"),
-                new GetOobisArgs(clientQAR3, aidQVI.getName(), "agent")
+                new GetOobisArgs(clientQAR1, HabStateUtil.getHabName(aidQVI), "agent"),
+                new GetOobisArgs(clientQAR2, HabStateUtil.getHabName(aidQVI), "agent"),
+                new GetOobisArgs(clientQAR3, HabStateUtil.getHabName(aidQVI), "agent")
         );
         Map<String, Object> oobiQVIbyQAR1 = (Map<String, Object>) oobiLst.get(0);
         Map<String, Object> oobiQVIbyQAR2 = (Map<String, Object>) oobiLst.get(1);
@@ -443,7 +445,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientQAR1,
-                    aidQVI.getName(),
+                    HabStateUtil.getHabName(aidQVI),
                     aidQAR1,
                     List.of(aidQAR2, aidQAR3),
                     aidQVI,
@@ -452,7 +454,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
             List<Object> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientQAR2,
-                    aidQVI.getName(),
+                    HabStateUtil.getHabName(aidQVI),
                     aidQAR2,
                     List.of(aidQAR1, aidQAR3),
                     aidQVI,
@@ -462,7 +464,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             List<Object> opList3 = MultisigUtils.addEndRoleMultisig(
                     clientQAR3,
-                    aidQVI.getName(),
+                    HabStateUtil.getHabName(aidQVI),
                     aidQAR3,
                     List.of(aidQAR1, aidQAR2),
                     aidQVI,
@@ -483,9 +485,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientQAR2, "/multisig/rpy");
 
             oobiLst = getOobisAsync(
-                    new GetOobisArgs(clientQAR1, aidQVI.getName(), "agent"),
-                    new GetOobisArgs(clientQAR2, aidQVI.getName(), "agent"),
-                    new GetOobisArgs(clientQAR3, aidQVI.getName(), "agent")
+                    new GetOobisArgs(clientQAR1, HabStateUtil.getHabName(aidQVI), "agent"),
+                    new GetOobisArgs(clientQAR2, HabStateUtil.getHabName(aidQVI), "agent"),
+                    new GetOobisArgs(clientQAR3, HabStateUtil.getHabName(aidQVI), "agent")
             );
             oobiQVIbyQAR1 = (Map<String, Object>) oobiLst.get(0);
             oobiQVIbyQAR2 = (Map<String, Object>) oobiLst.get(1);
@@ -499,18 +501,18 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // GARs, LARs, ECR resolve QVI AID's OOBI
         String oobiQVI = getOobisIndexAt0(oobiQVIbyQAR1).split("/agent/")[0];
         getOrCreateContactAsync(
-                new GetOrCreateContactArgs(clientGAR1, aidQVI.getName(), oobiQVI),
-                new GetOrCreateContactArgs(clientGAR2, aidQVI.getName(), oobiQVI),
-                new GetOrCreateContactArgs(clientLAR1, aidQVI.getName(), oobiQVI),
-                new GetOrCreateContactArgs(clientLAR2, aidQVI.getName(), oobiQVI),
-                new GetOrCreateContactArgs(clientLAR3, aidQVI.getName(), oobiQVI),
-                new GetOrCreateContactArgs(clientECR, aidQVI.getName(), oobiQVI)
+                new GetOrCreateContactArgs(clientGAR1, HabStateUtil.getHabName(aidQVI), oobiQVI),
+                new GetOrCreateContactArgs(clientGAR2, HabStateUtil.getHabName(aidQVI), oobiQVI),
+                new GetOrCreateContactArgs(clientLAR1, HabStateUtil.getHabName(aidQVI), oobiQVI),
+                new GetOrCreateContactArgs(clientLAR2, HabStateUtil.getHabName(aidQVI), oobiQVI),
+                new GetOrCreateContactArgs(clientLAR3, HabStateUtil.getHabName(aidQVI), oobiQVI),
+                new GetOrCreateContactArgs(clientECR, HabStateUtil.getHabName(aidQVI), oobiQVI)
         );
 
         // GARs creates a registry for GEDA.
         // Skip if the registry has already been created.
-        List<Map<String, Object>> gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
-        List<Map<String, Object>> gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
+        List<Map<String, Object>> gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(HabStateUtil.getHabName(aidGEDA));
+        List<Map<String, Object>> gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(HabStateUtil.getHabName(aidGEDA));
 
         if (gedaRegistrybyGAR1.size() == 0 && gedaRegistrybyGAR2.size() == 0) {
             String nonce = Coring.randomNonce();
@@ -540,8 +542,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/vcp");
-            gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
-            gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
+                        gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(HabStateUtil.getHabName(aidGEDA));
+                        gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(HabStateUtil.getHabName(aidGEDA));
         }
         assertEquals(gedaRegistrybyGAR1.get(0).get("name"), gedaRegistrybyGAR2.get(0).get("name"));
         assertEquals(gedaRegistrybyGAR1.get(0).get("regk"), gedaRegistrybyGAR2.get(0).get("regk"));
@@ -565,13 +567,13 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         if (qviCredbyGAR1 == null || qviCredbyGAR2 == null) {
             CredentialData.CredentialSubject kargsSub = CredentialData.CredentialSubject.builder()
-                    .i(aidQVI.getPrefix())
+                    .i(HabStateUtil.getHabPrefix(aidQVI))
                     .dt(TestUtils.createTimestamp())
                     .additionalProperties(qviData)
                     .build();
 
             CredentialData kargsIss = CredentialData.builder()
-                    .i(aidGEDA.getPrefix())
+                    .i(HabStateUtil.getHabPrefix(aidGEDA))
                     .ri(gedaRegistry.get("regk").toString())
                     .s(QVI_SCHEMA_SAID)
                     .a(kargsSub)
@@ -581,7 +583,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientGAR1,
                     aidGAR1,
                     List.of(aidGAR2),
-                    aidGEDA.getName(),
+                    HabStateUtil.getHabName(aidGEDA),
                     kargsIss,
                     true
             );
@@ -590,7 +592,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientGAR2,
                     aidGAR2,
                     List.of(aidGAR1),
-                    aidGEDA.getName(),
+                    HabStateUtil.getHabName(aidGEDA),
                     kargsIss,
                     false
             );
@@ -646,8 +648,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         Map<String, Object> qviCredbyGAR2Sad = castObjectToLinkedHashMap(qviCredbyGAR2.get("sad"));
         assertEquals(qviCredbyGAR1Sad.get("d"), qviCredbyGAR2Sad.get("d"));
         assertEquals(qviCredbyGAR1Sad.get("s"), QVI_SCHEMA_SAID);
-        assertEquals(qviCredbyGAR1Sad.get("i"), aidGEDA.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(qviCredbyGAR1Sad.get("a")).get("i"), aidQVI.getPrefix());
+        assertEquals(qviCredbyGAR1Sad.get("i"), HabStateUtil.getHabPrefix(aidGEDA));
+        assertEquals(castObjectToLinkedHashMap(qviCredbyGAR1Sad.get("a")).get("i"), HabStateUtil.getHabPrefix(aidQVI));
         assertEquals(castObjectToLinkedHashMap(qviCredbyGAR1.get("status")).get("s"), "0");
         assertNotNull(qviCredbyGAR1.get("atc"));
 
@@ -713,13 +715,13 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the LE.
         // Skip if a LE AID has already been incepted.
-        Identifier aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
+        HabState aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
         try {
             aidLEbyLAR1 = clientLAR1.identifiers().get("LE").get();
             aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
             aidLEbyLAR3 = clientLAR3.identifiers().get("LE").get();
         } catch (Exception e) {
-            List<KeyStateRecord> rstates = List.of(aidLAR1.getState(), aidLAR2.getState(), aidLAR3.getState());
+            List<KeyStateRecord> rstates = List.of(HabStateUtil.getHabState(aidLAR1), HabStateUtil.getHabState(aidLAR2), HabStateUtil.getHabState(aidLAR3));
             List<KeyStateRecord> states = List.copyOf(rstates);
 
             CreateIdentifierArgs kargsMultisigAID = CreateIdentifierArgs
@@ -775,18 +777,18 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
             aidLEbyLAR3 = clientLAR3.identifiers().get("LE").get();
         }
-        assertEquals(aidLEbyLAR1.getPrefix(), aidLEbyLAR2.getPrefix());
-        assertEquals(aidLEbyLAR1.getPrefix(), aidLEbyLAR3.getPrefix());
-        assertEquals(aidLEbyLAR1.getName(), aidLEbyLAR2.getName());
-        assertEquals(aidLEbyLAR1.getName(), aidLEbyLAR3.getName());
+        assertEquals(HabStateUtil.getHabPrefix(aidLEbyLAR1), HabStateUtil.getHabPrefix(aidLEbyLAR2));
+        assertEquals(HabStateUtil.getHabPrefix(aidLEbyLAR1), HabStateUtil.getHabPrefix(aidLEbyLAR3));
+        assertEquals(HabStateUtil.getHabName(aidLEbyLAR1), HabStateUtil.getHabName(aidLEbyLAR2));
+        assertEquals(HabStateUtil.getHabName(aidLEbyLAR1), HabStateUtil.getHabName(aidLEbyLAR3));
 
-        Identifier aidLE = aidLEbyLAR1;
+        HabState aidLE = aidLEbyLAR1;
         // Add endpoint role authorization for all LARs' agents.
         // Skip if they have already been authorized.
         oobiLst = getOobisAsync(
-                new GetOobisArgs(clientLAR1, aidLE.getName(), "agent"),
-                new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
-                new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
+                new GetOobisArgs(clientLAR1, HabStateUtil.getHabName(aidLE), "agent"),
+                new GetOobisArgs(clientLAR2, HabStateUtil.getHabName(aidLE), "agent"),
+                new GetOobisArgs(clientLAR3, HabStateUtil.getHabName(aidLE), "agent")
         );
         Map<String, Object> oobiLEbyLAR1 = (Map<String, Object>) oobiLst.get(0);
         Map<String, Object> oobiLEbyLAR2 = (Map<String, Object>) oobiLst.get(1);
@@ -798,7 +800,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientLAR1,
-                    aidLE.getName(),
+                    HabStateUtil.getHabName(aidLE),
                     aidLAR1,
                     List.of(aidLAR2, aidLAR3),
                     aidLE,
@@ -808,7 +810,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             List<Object> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientLAR2,
-                    aidLE.getName(),
+                    HabStateUtil.getHabName(aidLE),
                     aidLAR2,
                     List.of(aidLAR1, aidLAR3),
                     aidLE,
@@ -818,7 +820,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             List<Object> opList3 = MultisigUtils.addEndRoleMultisig(
                     clientLAR3,
-                    aidLE.getName(),
+                    HabStateUtil.getHabName(aidLE),
                     aidLAR3,
                     List.of(aidLAR1, aidLAR2),
                     aidLE,
@@ -840,9 +842,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientLAR2, "/multisig/rpy");
 
             oobiLst = getOobisAsync(
-                    new GetOobisArgs(clientLAR1, aidLE.getName(), "agent"),
-                    new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
-                    new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
+                    new GetOobisArgs(clientLAR1, HabStateUtil.getHabName(aidLE), "agent"),
+                    new GetOobisArgs(clientLAR2, HabStateUtil.getHabName(aidLE), "agent"),
+                    new GetOobisArgs(clientLAR3, HabStateUtil.getHabName(aidLE), "agent")
             );
             oobiLEbyLAR1 = (Map<String, Object>) oobiLst.get(0);
             oobiLEbyLAR2 = (Map<String, Object>) oobiLst.get(1);
@@ -856,17 +858,17 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         // QARs, ECR resolve LE AID's OOBI
         String oobiLE = getOobisIndexAt0(oobiLEbyLAR1).split("/agent/")[0];
         getOrCreateContactAsync(
-                new GetOrCreateContactArgs(clientQAR1, aidLE.getName(), oobiLE),
-                new GetOrCreateContactArgs(clientQAR2, aidLE.getName(), oobiLE),
-                new GetOrCreateContactArgs(clientQAR3, aidLE.getName(), oobiLE),
-                new GetOrCreateContactArgs(clientECR, aidLE.getName(), oobiLE)
+                new GetOrCreateContactArgs(clientQAR1, HabStateUtil.getHabName(aidLE), oobiLE),
+                new GetOrCreateContactArgs(clientQAR2, HabStateUtil.getHabName(aidLE), oobiLE),
+                new GetOrCreateContactArgs(clientQAR3, HabStateUtil.getHabName(aidLE), oobiLE),
+                new GetOrCreateContactArgs(clientECR, HabStateUtil.getHabName(aidLE), oobiLE)
         );
 
         // QARs creates a registry for QVI AID.
         // Skip if the registry has already been created.
-        List<Object> qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
+        List<Object> qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(HabStateUtil.getHabName(aidQVI));
+        List<Object> qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(HabStateUtil.getHabName(aidQVI));
+        List<Object> qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(HabStateUtil.getHabName(aidQVI));
         if (qviRegistrybyQAR1.size() == 0 || qviRegistrybyQAR2.size() == 0 || qviRegistrybyQAR3.size() == 0) {
             String nonce = Coring.randomNonce();
             Object registryOp1 = MultisigUtils.createRegistryMultisig(
@@ -906,9 +908,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/vcp");
-            qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
-            qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
-            qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
+            qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(HabStateUtil.getHabName(aidQVI));
+            qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(HabStateUtil.getHabName(aidQVI));
+            qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(HabStateUtil.getHabName(aidQVI));
         }
         assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR2.get(0)).get("name"));
         assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR3.get(0)).get("name"));
@@ -952,13 +954,13 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             ).sad();
 
             CredentialData.CredentialSubject kargsSub = CredentialData.CredentialSubject.builder()
-                    .i(aidLE.getPrefix())
+                    .i(HabStateUtil.getHabPrefix(aidLE))
                     .dt(TestUtils.createTimestamp())
                     .additionalProperties(leData)
                     .build();
 
             CredentialData kargsIss = CredentialData.builder()
-                    .i(aidQVI.getPrefix())
+                    .i(HabStateUtil.getHabPrefix(aidQVI))
                     .ri(qviRegistry.get("regk").toString())
                     .s(LE_SCHEMA_SAID)
                     .a(kargsSub)
@@ -970,7 +972,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientQAR1,
                     aidQAR1,
                     List.of(aidQAR2, aidQAR3),
-                    aidQVI.getName(),
+                    HabStateUtil.getHabName(aidQVI),
                     kargsIss,
                     true
             );
@@ -979,7 +981,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientQAR2,
                     aidQAR2,
                     List.of(aidQAR1, aidQAR3),
-                    aidQVI.getName(),
+                    HabStateUtil.getHabName(aidQVI),
                     kargsIss,
                     false
             );
@@ -988,7 +990,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientQAR3,
                     aidQAR3,
                     List.of(aidQAR1, aidQAR2),
-                    aidQVI.getName(),
+                    HabStateUtil.getHabName(aidQVI),
                     kargsIss,
                     false
             );
@@ -1061,8 +1063,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(leCredbyQAR1Sad.get("d"), leCredbyQAR2Sad.get("d"));
         assertEquals(leCredbyQAR1Sad.get("d"), leCredbyQAR3Sad.get("d"));
         assertEquals(leCredbyQAR1Sad.get("s"), LE_SCHEMA_SAID);
-        assertEquals(leCredbyQAR1Sad.get("i"), aidQVI.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(leCredbyQAR1Sad.get("a")).get("i"), aidLE.getPrefix());
+        assertEquals(leCredbyQAR1Sad.get("i"), HabStateUtil.getHabPrefix(aidQVI));
+        assertEquals(castObjectToLinkedHashMap(leCredbyQAR1Sad.get("a")).get("i"), HabStateUtil.getHabPrefix(aidLE));
         assertEquals(castObjectToLinkedHashMap(leCredbyQAR1.get("status")).get("s"), "0");
         assertNotNull(leCredbyQAR1.get("atc"));
 
@@ -1128,9 +1130,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // LARs creates a registry for LE AID.
         // Skip if the registry has already been created.
-        List<Object> leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
+        List<Object> leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(HabStateUtil.getHabName(aidLE));
+        List<Object> leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(HabStateUtil.getHabName(aidLE));
+        List<Object> leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(HabStateUtil.getHabName(aidLE));
 
         if (leRegistrybyLAR1.isEmpty() && leRegistrybyLAR2.isEmpty() && leRegistrybyLAR3.isEmpty()) {
             String nonce = Coring.randomNonce();
@@ -1171,9 +1173,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/vcp");
-            leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
-            leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
-            leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
+                        leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(HabStateUtil.getHabName(aidLE));
+                        leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(HabStateUtil.getHabName(aidLE));
+                        leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(HabStateUtil.getHabName(aidLE));
         }
         assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR2.get(0)).get("name"));
         assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR3.get(0)).get("name"));
@@ -1215,7 +1217,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             ).sad();
 
             CredentialData.CredentialSubject kargsSub = CredentialData.CredentialSubject.builder()
-                    .i(aidECR.getPrefix())
+                    .i(HabStateUtil.getHabPrefix(aidECR))
                     .dt(TestUtils.createTimestamp())
                     .u(new Salter().getQb64())
                     .additionalProperties(ecrData)
@@ -1223,7 +1225,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             CredentialData kargsIss = CredentialData.builder()
                     .u(new Salter().getQb64())
-                    .i(aidLE.getPrefix())
+                    .i(HabStateUtil.getHabPrefix(aidLE))
                     .ri(leRegistry.get("regk").toString())
                     .s(ECR_SCHEMA_SAID)
                     .a(kargsSub)
@@ -1235,7 +1237,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientLAR1,
                     aidLAR1,
                     List.of(aidLAR2, aidLAR3),
-                    aidLE.getName(),
+                    HabStateUtil.getHabName(aidLE),
                     kargsIss,
                     true
             );
@@ -1244,7 +1246,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientLAR2,
                     aidLAR2,
                     List.of(aidLAR1, aidLAR3),
-                    aidLE.getName(),
+                    HabStateUtil.getHabName(aidLE),
                     kargsIss,
                     false
             );
@@ -1253,7 +1255,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     clientLAR3,
                     aidLAR3,
                     List.of(aidLAR1, aidLAR2),
-                    aidLE.getName(),
+                    HabStateUtil.getHabName(aidLE),
                     kargsIss,
                     false
             );
@@ -1323,8 +1325,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(ecrCredbyLAR1Sad.get("d"), ecrCredbyLAR2Sad.get("d"));
         assertEquals(ecrCredbyLAR1Sad.get("d"), ecrCredbyLAR3Sad.get("d"));
         assertEquals(ecrCredbyLAR1Sad.get("s"), ECR_SCHEMA_SAID);
-        assertEquals(ecrCredbyLAR1Sad.get("i"), aidLE.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(ecrCredbyLAR1Sad.get("a")).get("i"), aidECR.getPrefix());
+        assertEquals(ecrCredbyLAR1Sad.get("i"), HabStateUtil.getHabPrefix(aidLE));
+        assertEquals(castObjectToLinkedHashMap(ecrCredbyLAR1Sad.get("a")).get("i"), HabStateUtil.getHabPrefix(aidECR));
         assertEquals(castObjectToLinkedHashMap(ecrCredbyLAR1.get("status")).get("s"), "0");
         assertNotNull(ecrCredbyLAR1.get("atc"));
 
@@ -1339,7 +1341,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         if (ecrCredbyECR1 == null) {
             TestUtils.admitSinglesig(
                     clientECR,
-                    aidECR.getName(),
+                    HabStateUtil.getHabName(aidECR),
                     aidLE
             );
             TestUtils.waitAndMarkNotification(clientLAR1, "/exn/ipex/admit");

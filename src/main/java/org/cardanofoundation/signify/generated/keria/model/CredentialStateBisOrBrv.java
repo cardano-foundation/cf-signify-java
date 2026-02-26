@@ -25,6 +25,9 @@ import org.cardanofoundation.signify.generated.keria.model.RaFields;
 import org.cardanofoundation.signify.generated.keria.model.Seal;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * CredentialStateBisOrBrv
@@ -40,8 +43,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CredentialStateBisOrBrv.JSON_PROPERTY_ET,
   CredentialStateBisOrBrv.JSON_PROPERTY_RA
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class CredentialStateBisOrBrv {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class CredentialStateBisOrBrv implements CredentialState {
   public static final String JSON_PROPERTY_VN = "vn";
   @jakarta.annotation.Nullable
   private Object vn = null;
@@ -116,6 +119,21 @@ public class CredentialStateBisOrBrv {
   public CredentialStateBisOrBrv() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public CredentialStateBisOrBrv(@JsonProperty(JSON_PROPERTY_VN) Object vn, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_RI) String ri, @JsonProperty(JSON_PROPERTY_A) Seal a, @JsonProperty(JSON_PROPERTY_DT) String dt, @JsonProperty(JSON_PROPERTY_ET) EtEnum et, @JsonProperty(JSON_PROPERTY_RA) RaFields ra) {
+    this.vn = vn;
+    this.i = i;
+    this.s = s;
+    this.d = d;
+    this.ri = ri;
+    this.a = a;
+    this.dt = dt;
+    this.et = et;
+    this.ra = ra;
+  }
+
   public CredentialStateBisOrBrv vn(@jakarta.annotation.Nullable Object vn) {
     
     this.vn = vn;
@@ -127,6 +145,8 @@ public class CredentialStateBisOrBrv {
    * @return vn
    */
   @jakarta.annotation.Nullable
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_VN, required = false)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -152,6 +172,8 @@ public class CredentialStateBisOrBrv {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -177,6 +199,8 @@ public class CredentialStateBisOrBrv {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -202,6 +226,8 @@ public class CredentialStateBisOrBrv {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -227,6 +253,8 @@ public class CredentialStateBisOrBrv {
    * @return ri
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_RI, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -252,6 +280,9 @@ public class CredentialStateBisOrBrv {
    * @return a
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_A, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -277,6 +308,8 @@ public class CredentialStateBisOrBrv {
    * @return dt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -302,6 +335,8 @@ public class CredentialStateBisOrBrv {
    * @return et
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ET, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -327,6 +362,9 @@ public class CredentialStateBisOrBrv {
    * @return ra
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_RA, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

@@ -50,7 +50,8 @@ tasks.register("makeSealedInterfaces") {
                     if (variant?.'$ref') {
                         def refName = variant.'$ref'.split('/').last()
                         variants << project.ext.transformSchemaName.call(refName)
-                    } else if (variant?.type == 'object') {
+                    } else if (variant?.type == 'object' || (variant?.properties || variant?.required)) {
+                        // Detect explicit object type OR implicit objects (those with properties/required without type)
                         hasInlineObjects = true
                     }
                 }

@@ -27,8 +27,13 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf1;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf2;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf3;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -70,7 +75,7 @@ public class IdentifierController {
                 range.start(),
                 range.end(),
                 range.total(),
-                Arrays.asList(Utils.fromJson(response.body(), Identifier[].class))
+                Arrays.asList(Utils.fromJson(response.body(), HabState[].class))
         );
     }
 
@@ -88,7 +93,7 @@ public class IdentifierController {
      * @param name Prefix or alias of the identifier
      * @return An Optional containing the HabState if found, or empty if not found
      */
-    public Optional<Identifier> get(String name) throws InterruptedException, IOException, LibsodiumException {
+    public Optional<HabState> get(String name) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + URI.create(name).toASCIIString();
         final String method = "GET";
 
@@ -98,7 +103,14 @@ public class IdentifierController {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), Identifier.class));
+        // Use the same approach as Operations.get() - deserialize as Map first, then process
+        try {
+            Map<String, Object> responseMap = Utils.fromJson(response.body(), new TypeReference<Map<String, Object>>() {});
+            HabState habState = deserializeHabStateFromMap(responseMap);
+            return Optional.of(habState);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to deserialize HabState from response: " + response.body(), e);
+        }
     }
 
     /**
@@ -108,7 +120,7 @@ public class IdentifierController {
      * @param info Information to update for the given identifier
      * @return A HabState to the identifier information after updating
      */
-    public Identifier update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
+    public HabState update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + name;
         final String method = "PUT";
 
@@ -117,7 +129,7 @@ public class IdentifierController {
             method,
             info
         );
-        return Utils.fromJson(response.body(), Identifier.class);
+        return Utils.fromJson(response.body(), HabState.class);
     }
 
     /**
@@ -289,9 +301,9 @@ public class IdentifierController {
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
     public EventResult addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        Identifier hab = this.get(name)
+        HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        String pre = hab.getPrefix();
+        String pre = HabStateUtil.getHabPrefix(hab);
 
         // Assuming makeEndRole is a method that returns an object with getRaw() and getKed() methods
         Serder rpy = this.makeEndRole(pre, role, eid, stamp);
@@ -344,11 +356,11 @@ public class IdentifierController {
     }
 
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        Identifier hab = this.get(name)
+        HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        String pre = hab.getPrefix();
+        String pre = HabStateUtil.getHabPrefix(hab);
 
-        KeyStateRecord state = hab.getState();
+        KeyStateRecord state = HabStateUtil.getHabState(hab);
         int sn = Integer.parseInt(state.getS(), 16);
         String dig = state.getD();
 
@@ -383,12 +395,12 @@ public class IdentifierController {
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
 
-        Identifier hab = this.get(name)
+        HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        String pre = hab.getPrefix();
-        boolean delegated = !hab.getState().getDi().isEmpty();
+        String pre = HabStateUtil.getHabPrefix(hab);
+        boolean delegated = !HabStateUtil.getHabState(hab).getDi().isEmpty();
 
-        KeyStateRecord state = hab.getState();
+        KeyStateRecord state = HabStateUtil.getHabState(hab);
         int count = state.getK().size();
         String dig = state.getD();
         int ridx = Integer.parseInt(state.getS(), 16) + 1;
@@ -478,5 +490,72 @@ public class IdentifierController {
                 null
         );
         return Utils.fromJson(response.body(), Object.class);
+    }
+
+    /**
+     * Helper method to deserialize HabState from a Map object.
+     * Directly creates the appropriate HabState implementation without relying on Jackson deserialization.
+     */
+    private HabState deserializeHabStateFromMap(Map<String, Object> responseMap) {
+        try {
+            // Determine which implementation based on discriminator field and manually create it
+            if (responseMap.containsKey("salty")) {
+                // Create HabStateOneOf manually from the Map data
+                HabStateOneOf result = new HabStateOneOf();
+                
+                if (responseMap.containsKey("name")) {
+                    result.setName((String) responseMap.get("name"));
+                }
+                if (responseMap.containsKey("prefix")) {
+                    result.setPrefix((String) responseMap.get("prefix"));
+                }
+                if (responseMap.containsKey("icp_dt")) {
+                    result.setIcpDt((String) responseMap.get("icp_dt"));
+                }
+                if (responseMap.containsKey("transferable")) {
+                    result.setTransferable((Boolean) responseMap.get("transferable"));
+                }
+                if (responseMap.containsKey("windexes")) {
+                    @SuppressWarnings("unchecked")
+                    List<Object> windexesObj = (List<Object>) responseMap.get("windexes");
+                    List<String> windexes = windexesObj.stream()
+                            .map(Object::toString)
+                            .collect(java.util.stream.Collectors.toList());
+                    result.setWindexes(windexes);
+                }
+                
+                // Handle nested objects using JSON conversion
+                if (responseMap.containsKey("salty")) {
+                    String saltyJson = Utils.jsonStringify(responseMap.get("salty"));
+                    var salty = Utils.fromJson(saltyJson, 
+                        org.cardanofoundation.signify.generated.keria.model.SaltyState.class);
+                    result.setSalty(salty);
+                }
+                if (responseMap.containsKey("state")) {
+                    String stateJson = Utils.jsonStringify(responseMap.get("state"));
+                    var state = Utils.fromJson(stateJson, 
+                        org.cardanofoundation.signify.generated.keria.model.KeyStateRecord.class);
+                    result.setState(state);
+                }
+                
+                return result;
+            } else {
+                // For other discriminator types, fall back to JSON conversion
+                // These are less common, so we can handle them separately if needed
+                String jsonString = Utils.jsonStringify(responseMap);
+                if (responseMap.containsKey("randy")) {
+                    return Utils.fromJson(jsonString, HabStateOneOf1.class);
+                } else if (responseMap.containsKey("group")) {
+                    return Utils.fromJson(jsonString, HabStateOneOf2.class);  
+                } else if (responseMap.containsKey("extern")) {
+                    return Utils.fromJson(jsonString, HabStateOneOf3.class);
+                } else {
+                    // Default fallback - create empty HabStateOneOf
+                    return new HabStateOneOf();
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to deserialize HabState from Map: " + responseMap, e);
+        }
     }
 }

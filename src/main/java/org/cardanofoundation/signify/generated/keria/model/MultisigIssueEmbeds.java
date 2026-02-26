@@ -25,16 +25,20 @@ import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.ISSV1;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * MultisigIssueEmbeds
  */
 @JsonPropertyOrder({
   MultisigIssueEmbeds.JSON_PROPERTY_ACDC,
-  MultisigIssueEmbeds.JSON_PROPERTY_ISS
+  MultisigIssueEmbeds.JSON_PROPERTY_ISS,
+  MultisigIssueEmbeds.JSON_PROPERTY_D
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class MultisigIssueEmbeds {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class MultisigIssueEmbeds implements ExnEmbeds {
   public static final String JSON_PROPERTY_ACDC = "acdc";
   @jakarta.annotation.Nonnull
   private CredentialSad acdc;
@@ -43,7 +47,20 @@ public class MultisigIssueEmbeds {
   @jakarta.annotation.Nonnull
   private ISSV1 iss;
 
+  public static final String JSON_PROPERTY_D = "d";
+  @jakarta.annotation.Nonnull
+  private String d;
+
   public MultisigIssueEmbeds() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public MultisigIssueEmbeds(@JsonProperty(JSON_PROPERTY_ACDC) CredentialSad acdc, @JsonProperty(JSON_PROPERTY_ISS) ISSV1 iss, @JsonProperty(JSON_PROPERTY_D) String d) {
+    this.acdc = acdc;
+    this.iss = iss;
+    this.d = d;
   }
 
   public MultisigIssueEmbeds acdc(@jakarta.annotation.Nonnull CredentialSad acdc) {
@@ -57,6 +74,9 @@ public class MultisigIssueEmbeds {
    * @return acdc
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ACDC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -82,6 +102,9 @@ public class MultisigIssueEmbeds {
    * @return iss
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ISS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -96,6 +119,33 @@ public class MultisigIssueEmbeds {
     this.iss = iss;
   }
 
+  public MultisigIssueEmbeds d(@jakarta.annotation.Nonnull String d) {
+    
+    this.d = d;
+    return this;
+  }
+
+  /**
+   * Get d
+   * @return d
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getD() {
+    return d;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setD(@jakarta.annotation.Nonnull String d) {
+    this.d = d;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -107,12 +157,13 @@ public class MultisigIssueEmbeds {
     }
     MultisigIssueEmbeds multisigIssueEmbeds = (MultisigIssueEmbeds) o;
     return Objects.equals(this.acdc, multisigIssueEmbeds.acdc) &&
-        Objects.equals(this.iss, multisigIssueEmbeds.iss);
+        Objects.equals(this.iss, multisigIssueEmbeds.iss) &&
+        Objects.equals(this.d, multisigIssueEmbeds.d);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(acdc, iss);
+    return Objects.hash(acdc, iss, d);
   }
 
   @Override
@@ -121,6 +172,7 @@ public class MultisigIssueEmbeds {
     sb.append("class MultisigIssueEmbeds {\n");
     sb.append("    acdc: ").append(toIndentedString(acdc)).append("\n");
     sb.append("    iss: ").append(toIndentedString(iss)).append("\n");
+    sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("}");
     return sb.toString();
   }

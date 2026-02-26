@@ -28,6 +28,13 @@ def getCheckedOutGitCommitHash() {
 
 apply from: './publish-common.gradle'
 
+// Java toolchain configuration - Use Java 21 for modern features
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 def lombokVersion = '1.18.30'
 def lazysodiumVersion = '5.1.4'
 def jnaVersion = '5.15.0'
@@ -39,6 +46,8 @@ def jsonVersion = '20240303'
 def structuredFieldsVersion = '0.4'
 def jakartaAnnotationVersion = '2.1.1'
 def jacksonNullableVersion = '0.2.6'
+def jakartaValidationVersion = '3.0.2'
+def hibernateValidatorVersion = '8.0.1.Final'
 
 // test dependencies
 def testngVersion = '7.7.0'
@@ -240,7 +249,7 @@ tasks.openApiGenerate {
             useBeanValidation    : "true",      // Requires jakarta.validation dependencies
     ]
 
-    nameMappings.put("A", "AUpper")
+//    nameMappings.put("A", "AUpper")
 }
 
 tasks.register("prepareOpenApiSpec") {

@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Challenge response
@@ -35,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ChallengesNamePostRequest.JSON_PROPERTY_WORDS
 })
 @JsonTypeName("_challenges__name__post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class ChallengesNamePostRequest {
   public static final String JSON_PROPERTY_RECIPIENT = "recipient";
   @jakarta.annotation.Nullable
@@ -46,6 +49,14 @@ public class ChallengesNamePostRequest {
   private List<String> words = new ArrayList<>();
 
   public ChallengesNamePostRequest() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public ChallengesNamePostRequest(@JsonProperty(JSON_PROPERTY_RECIPIENT) String recipient, @JsonProperty(JSON_PROPERTY_WORDS) List<String> words) {
+    this.recipient = recipient;
+    this.words = words;
   }
 
   public ChallengesNamePostRequest recipient(@jakarta.annotation.Nullable String recipient) {
@@ -59,6 +70,7 @@ public class ChallengesNamePostRequest {
    * @return recipient
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RECIPIENT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -92,6 +104,7 @@ public class ChallengesNamePostRequest {
    * @return words
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_WORDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

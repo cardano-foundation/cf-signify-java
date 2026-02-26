@@ -32,6 +32,9 @@ import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 import org.cardanofoundation.signify.generated.keria.model.IssEvent;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Credential
@@ -49,7 +52,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Credential.JSON_PROPERTY_ANC,
   Credential.JSON_PROPERTY_ANCATC
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Credential {
   public static final String JSON_PROPERTY_SAD = "sad";
   @jakarta.annotation.Nonnull
@@ -98,6 +101,23 @@ public class Credential {
   public Credential() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public Credential(@JsonProperty(JSON_PROPERTY_SAD) CredentialSad sad, @JsonProperty(JSON_PROPERTY_ATC) String atc, @JsonProperty(JSON_PROPERTY_ISS) IssEvent iss, @JsonProperty(JSON_PROPERTY_ISSATC) String issatc, @JsonProperty(JSON_PROPERTY_PRE) String pre, @JsonProperty(JSON_PROPERTY_SCHEMA) Schema schema, @JsonProperty(JSON_PROPERTY_CHAINS) List<Map<String, Object>> chains, @JsonProperty(JSON_PROPERTY_STATUS) CredentialState status, @JsonProperty(JSON_PROPERTY_ANCHOR) Anchor anchor, @JsonProperty(JSON_PROPERTY_ANC) CredentialAnc anc, @JsonProperty(JSON_PROPERTY_ANCATC) String ancatc) {
+    this.sad = sad;
+    this.atc = atc;
+    this.iss = iss;
+    this.issatc = issatc;
+    this.pre = pre;
+    this.schema = schema;
+    this.chains = chains;
+    this.status = status;
+    this.anchor = anchor;
+    this.anc = anc;
+    this.ancatc = ancatc;
+  }
+
   public Credential sad(@jakarta.annotation.Nonnull CredentialSad sad) {
     
     this.sad = sad;
@@ -109,6 +129,9 @@ public class Credential {
    * @return sad
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_SAD, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -134,6 +157,8 @@ public class Credential {
    * @return atc
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -159,6 +184,9 @@ public class Credential {
    * @return iss
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ISS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -184,6 +212,8 @@ public class Credential {
    * @return issatc
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ISSATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -209,6 +239,8 @@ public class Credential {
    * @return pre
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_PRE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -234,6 +266,9 @@ public class Credential {
    * @return schema
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_SCHEMA, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -267,6 +302,9 @@ public class Credential {
    * @return chains
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_CHAINS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -292,6 +330,9 @@ public class Credential {
    * @return status
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_STATUS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -317,6 +358,9 @@ public class Credential {
    * @return anchor
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ANCHOR, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -342,6 +386,9 @@ public class Credential {
    * @return anc
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ANC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -367,6 +414,8 @@ public class Credential {
    * @return ancatc
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ANCATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

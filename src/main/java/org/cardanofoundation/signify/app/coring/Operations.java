@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -38,14 +39,18 @@ public class Operations {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), new TypeReference<>() {}));
+        // Deserialize as Map first, then convert to Operation to properly handle HabState responses
+        Map<String, Object> operationMap = Utils.fromJson(response.body(), new TypeReference<>() {});
+        return Optional.of(Operation.fromObject(operationMap));
     }
 
     public List<Operation<?>> list(String type) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), new TypeReference<>() {});
+        // Deserialize as array of Maps first, then convert to Operations to properly handle HabState responses
+        List<Map<String, Object>> operationMaps = Utils.fromJson(response.body(), new TypeReference<>() {});
+        return operationMaps.stream().map(Operation::<Object>fromObject).collect(java.util.stream.Collectors.toList());
     }
 
     public void delete(String name) throws IOException, InterruptedException, LibsodiumException {

@@ -5,8 +5,8 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
@@ -55,16 +55,16 @@ public class WitnessTest {
 
         EventResult icpResult1 = client1.identifiers().create("aid1", kargs);
         waitOperation(client1, icpResult1.op());
-        Identifier aid1 = client1.identifiers().get("aid1").get();
-        System.out.println("AID1: " + aid1.getPrefix());
-        assertEquals(1, aid1.getState().getB().size());
-        assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
+        HabState aid1 = client1.identifiers().get("aid1").get();
+        System.out.println("AID1: " + HabStateUtil.getHabPrefix(aid1));
+        assertEquals(1, HabStateUtil.getHabState(aid1).getB().size());
+        assertEquals(WITNESS_AID, HabStateUtil.getHabState(aid1).getB().getFirst());
 
         icpResult1 = client1.identifiers().rotate("aid1");
         waitOperation(client1, icpResult1.op());
         aid1 = client1.identifiers().get("aid1").get();
-        assertEquals(1, aid1.getState().getB().size());
-        assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
+        assertEquals(1, HabStateUtil.getHabState(aid1).getB().size());
+        assertEquals(WITNESS_AID, HabStateUtil.getHabState(aid1).getB().getFirst());
 
         // Remove witness
         RotateIdentifierArgs args = RotateIdentifierArgs.builder().build();
@@ -73,7 +73,7 @@ public class WitnessTest {
         icpResult1 = client1.identifiers().rotate("aid1", args);
         waitOperation(client1, icpResult1.op());
         aid1 = client1.identifiers().get("aid1").get();
-        assertEquals(0, aid1.getState().getB().size());
+        assertEquals(0, HabStateUtil.getHabState(aid1).getB().size());
 
         // Add witness again
         args.setCuts(null);
@@ -81,7 +81,7 @@ public class WitnessTest {
         icpResult1 = client1.identifiers().rotate("aid1", args);
         waitOperation(client1, icpResult1.op());
         aid1 = client1.identifiers().get("aid1").get();
-        assertEquals(1, aid1.getState().getB().size());
-        assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
+        assertEquals(1, HabStateUtil.getHabState(aid1).getB().size());
+        assertEquals(WITNESS_AID, HabStateUtil.getHabState(aid1).getB().getFirst());
     }
 }

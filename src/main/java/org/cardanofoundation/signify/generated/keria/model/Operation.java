@@ -24,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.OperationStatus;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Operation
@@ -35,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Operation.JSON_PROPERTY_METADATA,
   Operation.JSON_PROPERTY_RESPONSE
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Operation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
@@ -60,6 +63,17 @@ public class Operation {
   public Operation() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public Operation(@JsonProperty(JSON_PROPERTY_NAME) String name, @JsonProperty(JSON_PROPERTY_ERROR) OperationStatus error, @JsonProperty(JSON_PROPERTY_DONE) Boolean done, @JsonProperty(JSON_PROPERTY_METADATA) Object metadata, @JsonProperty(JSON_PROPERTY_RESPONSE) Object response) {
+    this.name = name;
+    this.error = error;
+    this.done = done;
+    this.metadata = metadata;
+    this.response = response;
+  }
+
   public Operation name(@jakarta.annotation.Nonnull String name) {
     
     this.name = name;
@@ -71,6 +85,8 @@ public class Operation {
    * @return name
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NAME, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -96,6 +112,8 @@ public class Operation {
    * @return error
    */
   @jakarta.annotation.Nullable
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ERROR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -121,6 +139,7 @@ public class Operation {
    * @return done
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_DONE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -146,6 +165,7 @@ public class Operation {
    * @return metadata
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_METADATA, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -171,6 +191,7 @@ public class Operation {
    * @return response
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_RESPONSE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

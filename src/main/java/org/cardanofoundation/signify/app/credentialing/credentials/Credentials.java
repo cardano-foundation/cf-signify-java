@@ -17,7 +17,9 @@ import java.math.BigInteger;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 
 public class Credentials {
 
@@ -106,10 +108,16 @@ public class Credentials {
      * Issue a credential
      */
     public IssueCredentialResult issue(String name, CredentialData args) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        final Identifier hab = this.client.identifiers().get(name)
+        final HabState hab = this.client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
 
-        final boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
+        final String habPrefix = HabStateUtil.getHabPrefix(hab);
+        final String habName = HabStateUtil.getHabName(hab);
+        final KeyStateRecord state = HabStateUtil.getHabState(hab);
+        final String stateS = state.getS();
+        final String stateD = state.getD();
+
+        final boolean estOnly = state.getC() != null && state.getC().contains("EO");
         if (estOnly) {
             throw new UnsupportedOperationException("Establishment only not implemented");
         }
@@ -129,7 +137,7 @@ public class Credentials {
         sad.put("v", CoreUtil.versify(CoreUtil.Ident.ACDC, null, CoreUtil.Serials.JSON, 0));
         sad.put("d", "");
         sad.put("u", args.getU());
-        sad.put("i", args.getI() == null ? hab.getPrefix() : args.getI());
+        sad.put("i", args.getI() == null ? habPrefix : args.getI());
         sad.put("ri", args.getRi());
         sad.put("s", args.getS());
         sad.put("a", subject);
@@ -151,21 +159,21 @@ public class Credentials {
         interactData.put("i", iss.get("i"));
         interactData.put("s", iss.get("s"));
         interactData.put("d", iss.get("d"));
-        final int sn = Integer.parseInt(hab.getState().getS(), 16);
+        final int sn = Integer.parseInt(stateS, 16);
 
 
         InteractArgs interactArgs = InteractArgs.builder()
-                .pre(hab.getPrefix())
+                .pre(habPrefix)
                 .sn(BigInteger.valueOf(sn + 1))
                 .data(Collections.singletonList(interactData))
-                .dig(hab.getState().getD())
+                .dig(stateD)
                 .build();
 
         Serder anc = Eventing.interact(interactArgs);
 
         List<String> sigs = keeper.sign(anc.getRaw().getBytes()).signatures();
 
-        String path = "/identifiers/" + hab.getName() + "/credentials";
+        String path = "/identifiers/" + habName + "/credentials";
         String method = "POST";
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("acdc", acdc);
@@ -189,9 +197,10 @@ public class Credentials {
      * @return A promise to the long-running operation
      */
     public RevokeCredentialResult revoke(String name, String said, String datetime) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        final Identifier hab = this.client.identifiers().get(name)
+        final HabState hab = this.client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        final String pre = hab.getPrefix();
+        final String pre = HabStateUtil.getHabPrefix(hab);
+        final KeyStateRecord habState = HabStateUtil.getHabState(hab);
 
         final String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         final String dt = datetime != null ? datetime : Utils.currentDateTimeString();
@@ -216,10 +225,10 @@ public class Credentials {
         Map<String, Object> ixn;
         List<String> sigs;
 
-        final boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
+        final boolean estOnly = habState.getC() != null && habState.getC().contains("EO");
 
-        final int sn = Integer.parseInt(hab.getState().getS(), 16);
-        final String dig = hab.getState().getD();
+        final int sn = Integer.parseInt(habState.getS(), 16);
+        final String dig = habState.getD();
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("i", rev.get("i"));

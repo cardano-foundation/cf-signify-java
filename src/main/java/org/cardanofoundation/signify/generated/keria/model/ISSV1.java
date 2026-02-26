@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ISSV1
@@ -37,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ISSV1.JSON_PROPERTY_DT
 })
 @JsonTypeName("ISS_V_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class ISSV1 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
@@ -70,6 +73,19 @@ public class ISSV1 {
   public ISSV1() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public ISSV1(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_T) String t, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_RI) String ri, @JsonProperty(JSON_PROPERTY_DT) String dt) {
+    this.v = v;
+    this.t = t;
+    this.d = d;
+    this.i = i;
+    this.s = s;
+    this.ri = ri;
+    this.dt = dt;
+  }
+
   public ISSV1 v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -81,6 +97,8 @@ public class ISSV1 {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -106,6 +124,8 @@ public class ISSV1 {
    * @return t
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_T, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -131,6 +151,8 @@ public class ISSV1 {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -156,6 +178,8 @@ public class ISSV1 {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -181,6 +205,8 @@ public class ISSV1 {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -206,6 +232,8 @@ public class ISSV1 {
    * @return ri
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_RI, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -231,6 +259,8 @@ public class ISSV1 {
    * @return dt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
