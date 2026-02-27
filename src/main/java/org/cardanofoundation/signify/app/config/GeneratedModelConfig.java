@@ -11,8 +11,10 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import org.cardanofoundation.signify.app.aiding.KeyStateRecordKtDeserializer;
+import org.cardanofoundation.signify.app.aiding.KeyStateRecordDeserializer;
 import org.cardanofoundation.signify.app.aiding.HabStateDeserializer;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKtString;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKtListString;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
@@ -66,7 +68,8 @@ public final class GeneratedModelConfig {
 
     private static Module generatedModule() {
         SimpleModule module = new SimpleModule("GeneratedModelModule");
-        // Register deserializers for sealed interfaces
+        // Register deserializers for sealed interfaces and complex types
+        // NOTE: KeyStateRecordDeserializer is NOT registered because it causes infinite recursion
         module.addDeserializer(KeyStateRecordKt.class, new KeyStateRecordKtDeserializer());
         // Also register concrete implementations to ensure they can be deserialized
         module.addDeserializer(KeyStateRecordKtString.class, new StdDeserializer<KeyStateRecordKtString>(KeyStateRecordKtString.class) {
