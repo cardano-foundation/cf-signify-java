@@ -14,6 +14,7 @@ import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateClien
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("unchecked")
 public class TestSetupSingleClient {
     private static SignifyClient client;
     private static String name1_id;

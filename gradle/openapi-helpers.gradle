@@ -1,0 +1,189 @@
+// Reusable functions for processing OpenAPI specs and generated code
+
+/**
+ * Transform schema names to match OpenAPI Generator conventions
+ */
+ext.transformSchemaName = { String schemaName ->
+    return schemaName.replaceAll('_', '')
+}
+
+/**
+ * Inject Jackson @JsonTypeInfo and @JsonSubTypes annotations for property-based discriminator
+ * This enables Jackson to automatically deserialize sealed interfaces based on which property exists
+ */
+ext.injectJacksonDiscriminator = { String content, String interfaceName, Map<String, String> mappings ->
+    // Build @JsonSubTypes annotation entries
+    def subTypesEntries = mappings.collect { propertyName, className ->
+        "    @JsonSubTypes.Type(value = ${className}.class, name = \"${propertyName}\")"
+    }.join(",\n")
+    
+    // Build the complete annotation block  
+    def annotationBlock = """@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION
+)
+@JsonSubTypes({
+${subTypesEntries}
+})
+"""
+    
+    // Remove existing @JsonTypeInfo annotation if present (OpenAPI Generator adds one with empty property)
+    // This handles both single-line and multi-line @JsonTypeInfo annotations
+    content = content.replaceAll(
+        /(?s)@JsonTypeInfo\s*\([^)]*\)\s*\n/,
+        ''
+    )
+    
+    // Also remove @JsonSubTypes if present (to avoid duplicates)
+    content = content.replaceAll(
+        /(?s)@JsonSubTypes\s*\(\{[^}]*\}\)\s*\n/,
+        ''
+    )
+    
+    // Inject before @JsonIgnoreProperties or before the interface declaration
+    def injectionPattern = /(@JsonIgnoreProperties)/
+    if (content =~ injectionPattern) {
+        // Inject before existing @JsonIgnoreProperties
+        content = content.replaceFirst(
+            injectionPattern,
+            "${annotationBlock}\$1"
+        )
+    } else {
+        // Inject before the interface declaration
+        content = content.replaceFirst(
+            /(public sealed interface ${interfaceName})/,
+            "${annotationBlock}\$1"
+        )
+    }
+    
+    // Ensure required imports are present
+    def imports = [
+        'com.fasterxml.jackson.annotation.JsonTypeInfo',
+        'com.fasterxml.jackson.annotation.JsonSubTypes'
+    ]
+    
+    imports.each { importClass ->
+        if (!content.contains("import ${importClass};")) {
+            // Add import after the last existing jackson import or after package
+            if (content.contains('import com.fasterxml.jackson.annotation.')) {
+                content = content.replaceFirst(
+                    /(import com\.fasterxml\.jackson\.annotation\.[^;]+;)(?!\nimport com\.fasterxml\.jackson\.annotation\.)/,
+                    "\$1\nimport ${importClass};"
+                )
+            } else {
+                content = content.replaceFirst(
+                    /(package [^;]+;)/,
+                    "\$1\nimport ${importClass};"
+                )
+            }
+        }
+    }
+    
+    return content
+}
+
+/**
+ * Analyze a oneOf variant and determine its type information
+ */
+ext.analyzeVariantType = { variant, interfaceName, idx ->
+    def typeName = ""
+    def javaType = ""
+    
+    if (variant?.'$ref') {
+        // Reference to another schema
+        def refName = variant.'$ref'.split('/').last()
+        def transformedName = ext.transformSchemaName(refName)
+        typeName = transformedName
+        javaType = transformedName
+    } else if (variant?.type == 'string') {
+        typeName = "String"
+        javaType = "String"
+    } else if (variant?.type == 'integer') {
+        typeName = "Integer"
+        javaType = "Integer"
+    } else if (variant?.type == 'number') {
+        typeName = "Double"
+        javaType = "Double"
+    } else if (variant?.type == 'boolean') {
+        typeName = "Boolean"
+        javaType = "Boolean"
+    } else if (variant?.type == 'array') {
+        // Handle arrays recursively
+        def itemsType = variant?.items
+        if (itemsType?.type == 'string') {
+            typeName = "ListString"
+            javaType = "List<String>"
+        } else if (itemsType?.type == 'integer') {
+            typeName = "ListInteger"
+            javaType = "List<Integer>"
+        } else if (itemsType?.type == 'number') {
+            typeName = "ListDouble"
+            javaType = "List<Double>"
+        } else if (itemsType?.type == 'boolean') {
+            typeName = "ListBoolean"
+            javaType = "List<Boolean>"
+        } else if (itemsType?.type == 'array') {
+            // Nested array
+            if (itemsType?.items?.type == 'string') {
+                typeName = "ListListString"
+                javaType = "List<List<String>>"
+            } else if (itemsType?.items?.type == 'integer') {
+                typeName = "ListListInteger"
+                javaType = "List<List<Integer>>"
+            } else if (itemsType?.items?.type == 'number') {
+                typeName = "ListListDouble"
+                javaType = "List<List<Double>>"
+            } else if (itemsType?.items?.type == 'boolean') {
+                typeName = "ListListBoolean"
+                javaType = "List<List<Boolean>>"
+            } else {
+                typeName = "ListList${itemsType?.items?.type?.capitalize() ?: 'Object'}"
+                javaType = "List<List<Object>>"
+            }
+        } else if (itemsType?.'$ref') {
+            def refName = itemsType.'$ref'.split('/').last()
+            typeName = "List${refName}"
+            javaType = "List<${refName}>"
+        } else {
+            typeName = "List${itemsType?.type?.capitalize() ?: 'Object'}"
+            javaType = "List<Object>"
+        }
+    } else if (variant?.type == 'object') {
+        typeName = "Object${idx}"
+        javaType = "Object"
+    } else {
+        typeName = "Variant${idx}"
+        javaType = "Object"
+    }
+    
+    return [
+        variantName: "${interfaceName}${typeName}",
+        javaType: javaType,
+        typeName: typeName
+    ]
+}
+
+/**
+ * Generate a record implementation for a oneOf variant
+ */
+ext.generateVariantRecord = { descriptor, interfaceName ->
+    def imports = []
+    if (descriptor.javaType.contains('List')) {
+        imports << "import java.util.List;"
+    }
+    
+    def importsSection = imports.isEmpty() ? "" : "\n${imports.join('\n')}"
+    
+    return """package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;${importsSection}
+
+/**
+ * ${descriptor.typeName} variant for ${interfaceName}
+ */
+public record ${descriptor.variantName}(@JsonValue ${descriptor.javaType} value) implements ${interfaceName} {
+    @JsonCreator
+    public ${descriptor.variantName} {}
+}
+"""
+}

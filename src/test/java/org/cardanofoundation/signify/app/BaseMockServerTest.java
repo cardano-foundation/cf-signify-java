@@ -150,6 +150,7 @@ public class BaseMockServerTest {
         {
             "name": "aid1",
             "prefix": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+            "icp_dt": "2023-08-21T22:30:46.473545+00:00",
             "salty": {
                 "sxlt": "1AAHnNQTkD0yxOC9tSz_ukbB2e-qhDTStH18uCsi5PCwOyXLONDR3MeKwWv_AVJKGKGi6xiBQH25_R1RXLS2OuK3TN3ovoUKH7-A",
                 "pidx": 0,
@@ -349,7 +350,13 @@ public class BaseMockServerTest {
         );
 
         String body;
-        if (reqUrl.startsWith(url + "/identifiers/aid1/credentials")) {
+        if (req.getMethod().equals("GET") && reqUrl.matches(".*/" + "identifiers" + "/[^/]+(\\?.*)?$")) {
+            // Handle GET /identifiers/{name} requests (single identifier lookup)
+            body = MOCK_GET_AID;
+        } else if (req.getMethod().equals("POST") && reqUrl.matches(".*/" + "identifiers" + "/[^/]+/exchanges(\\?.*)?$")) {
+            // Handle POST /identifiers/{name}/exchanges requests
+            body = "{}";
+        } else if (req.getMethod().equals("GET") && reqUrl.contains("/identifiers/") && reqUrl.contains("/credentials")) {
             body = MOCK_CREDENTIAL;
         } else if (reqUrl.startsWith(url + "/events")) {
             body = MOCK_KEY_EVENT;

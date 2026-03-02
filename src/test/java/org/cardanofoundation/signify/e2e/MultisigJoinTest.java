@@ -12,7 +12,8 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.*;
 
@@ -24,11 +25,12 @@ import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@SuppressWarnings("unchecked")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MultisigJoinTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2, client3;
 
-    Identifier aid1, aid2, aid3;
+    HabState aid1, aid2, aid3;
     static String nameMember1 = "member1";
     static String nameMember2 = "member2";
     static String nameMember3 = "member3";
@@ -62,21 +64,21 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     @Test
     @Order(1)
     public void multisigJoinTest() throws Exception {
-        List<Identifier> aids = createAidAndGetHabStateAsync(
+        List<HabState> aids = createAidAndGetHabStateAsync(
             new CreateAidArgs(client1, nameMember1),
             new CreateAidArgs(client2, nameMember2)
         );
         aid1 = aids.get(0);
         aid2 = aids.get(1);
 
-        List<KeyStateRecord> states = Arrays.asList(aid1.getState(), aid2.getState());
+        List<KeyStateRecord> states = Arrays.asList(HabStateUtil.getHabState(aid1), HabStateUtil.getHabState(aid2));
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.group);
         kargs.setMhab(aid1);
         kargs.setIsith(1);
         kargs.setNsith(1);
-        kargs.setToad(aid1.getState().getB().size());
-        kargs.setWits(aid1.getState().getB());
+        kargs.setToad(HabStateUtil.getHabState(aid1).getB().size());
+        kargs.setWits(HabStateUtil.getHabState(aid1).getB());
         kargs.setStates(states);
         kargs.setRstates(states);
 
@@ -94,9 +96,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         Map<String, List<Object>> embeds = new LinkedHashMap<>();
         embeds.put("icp", Arrays.asList(serder, atc));
 
-        List<String> smids = Collections.singletonList(aid2.getState().getI());
+        List<String> smids = Collections.singletonList(HabStateUtil.getHabState(aid2).getI());
 
-        List<String> recipients = Collections.singletonList(aid2.getState().getI());
+        List<String> recipients = Collections.singletonList(HabStateUtil.getHabState(aid2).getI());
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("gid", serder.getPre());
@@ -136,7 +138,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         Object createMultisig2 = icpResult2.op();
 
-        List<Operation> op = waitOperationAsync(
+        List<Operation<?>> op = waitOperationAsync(
             new WaitOperationArgs(client1, createMultisig1),
             new WaitOperationArgs(client2, createMultisig2)
         );
@@ -149,10 +151,10 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         Map<String, Object> multisigRes2 = castObjectToLinkedHashMap(
             Utils.toMap(createMultisig2).get("response"));
 
-        assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes1.get("k")).getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes1.get("k")).get(1));
-        assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).get(1));
+        assertEquals(HabStateUtil.getHabState(aid1).getK().getFirst(), Utils.toList(multisigRes1.get("k")).getFirst());
+        assertEquals(HabStateUtil.getHabState(aid2).getK().getFirst(), Utils.toList(multisigRes1.get("k")).get(1));
+        assertEquals(HabStateUtil.getHabState(aid1).getK().getFirst(), Utils.toList(multisigRes2.get("k")).getFirst());
+        assertEquals(HabStateUtil.getHabState(aid2).getK().getFirst(), Utils.toList(multisigRes2.get("k")).get(1));
 
         Map<String, Object> membersAgent1 = (Map<String, Object>) client1.identifiers().members(nameMultisig);
         Map<String, Object> membersAgent2 = (Map<String, Object>) client2.identifiers().members(nameMultisig);
@@ -211,16 +213,16 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid2 = client2.identifiers().get(nameMember2).get();
 
         List<Object> updates = getKeyStateQuerAsync(
-            new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "1"),
-            new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "0"),
-            new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "1"),
-            new GetKeyStateQueryArgs(client2, aid3.getPrefix(), "0"),
-            new GetKeyStateQueryArgs(client3, aid1.getPrefix(), "1"),
-            new GetKeyStateQueryArgs(client3, aid2.getPrefix(), "1")
+            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid2), "1"),
+            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid3), "0"),
+            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid1), "1"),
+            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid3), "0"),
+            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid1), "1"),
+            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid2), "1")
 
         );
 
-        List<Operation> statesUpdate = waitOperationAsync(
+        List<Operation<?>> statesUpdate = waitOperationAsync(
             new WaitOperationArgs(client1, updates.get(0)),
             new WaitOperationArgs(client1, updates.get(1)),
             new WaitOperationArgs(client2, updates.get(2)),
@@ -264,7 +266,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             .map(state -> Utils.toMap(state).get("i").toString())
             .collect(Collectors.toList());
 
-        List<String> recp = Stream.of(aid2.getState(), aid3.getState())
+        List<String> recp = Stream.of(HabStateUtil.getHabState(aid2), HabStateUtil.getHabState(aid3))
             .map(KeyStateRecord::getI)
             .collect(Collectors.toList());
 
@@ -286,16 +288,16 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         TestUtils.waitAndMarkNotification(client2, "/multisig/rot");
         TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
 
-        Identifier multiSigAid = client1.identifiers().get(nameMultisig).get();
+        HabState multiSigAid = client1.identifiers().get(nameMultisig).get();
 
-        assertEquals(2, multiSigAid.getState().getK().size());
-        assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), multiSigAid.getState().getK().get(1));
+        assertEquals(2, HabStateUtil.getHabState(multiSigAid).getK().size());
+        assertEquals(HabStateUtil.getHabState(aid1).getK().getFirst(), HabStateUtil.getHabState(multiSigAid).getK().getFirst());
+        assertEquals(HabStateUtil.getHabState(aid2).getK().getFirst(), HabStateUtil.getHabState(multiSigAid).getK().get(1));
 
-        assertEquals(3, multiSigAid.getState().getN().size());
-        assertEquals(aid1.getState().getN().getFirst(), multiSigAid.getState().getN().getFirst());
-        assertEquals(aid2.getState().getN().getFirst(), multiSigAid.getState().getN().get(1));
-        assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
+        assertEquals(3, HabStateUtil.getHabState(multiSigAid).getN().size());
+        assertEquals(HabStateUtil.getHabState(aid1).getN().getFirst(), HabStateUtil.getHabState(multiSigAid).getN().getFirst());
+        assertEquals(HabStateUtil.getHabState(aid2).getN().getFirst(), HabStateUtil.getHabState(multiSigAid).getN().get(1));
+        assertEquals(HabStateUtil.getHabState(aid3).getN().getFirst(), HabStateUtil.getHabState(multiSigAid).getN().get(2));
     }
 
     @Test
@@ -316,16 +318,16 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid3 = client3.identifiers().get(nameMember3).get();
 
         List<Object> updates = getKeyStateQuerAsync(
-            new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "2"),
-            new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "1"),
-            new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "2"),
-            new GetKeyStateQueryArgs(client2, aid3.getPrefix(), "1"),
-            new GetKeyStateQueryArgs(client3, aid1.getPrefix(), "2"),
-            new GetKeyStateQueryArgs(client3, aid2.getPrefix(), "2")
+            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid2), "2"),
+            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid3), "1"),
+            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid1), "2"),
+            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid3), "1"),
+            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid1), "2"),
+            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid2), "2")
 
         );
 
-        List<Operation> statesUpdate = waitOperationAsync(
+        List<Operation<?>> statesUpdate = waitOperationAsync(
             new WaitOperationArgs(client1, updates.get(0)),
             new WaitOperationArgs(client1, updates.get(1)),
             new WaitOperationArgs(client2, updates.get(2)),
@@ -367,7 +369,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             .map(state -> Utils.toMap(state).get("i").toString())
             .collect(Collectors.toList());
 
-        List<String> recp = Stream.of(aid2.getState(), aid3.getState())
+        List<String> recp = Stream.of(HabStateUtil.getHabState(aid2), HabStateUtil.getHabState(aid3))
             .map(KeyStateRecord::getI)
             .collect(Collectors.toList());
 
@@ -411,17 +413,17 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         waitOperation(client3, joinOperation);
 
-        Identifier multiSigAid = client3.identifiers().get(nameMultisig).get();
+        HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
 
-        assertEquals(3, multiSigAid.getState().getK().size());
-        assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), multiSigAid.getState().getK().get(1));
-        assertEquals(aid3.getState().getK().getFirst(), multiSigAid.getState().getK().get(2));
+        assertEquals(3, HabStateUtil.getHabState(multiSigAid).getK().size());
+        assertEquals(HabStateUtil.getHabState(aid1).getK().getFirst(), HabStateUtil.getHabState(multiSigAid).getK().getFirst());
+        assertEquals(HabStateUtil.getHabState(aid2).getK().getFirst(), HabStateUtil.getHabState(multiSigAid).getK().get(1));
+        assertEquals(HabStateUtil.getHabState(aid3).getK().getFirst(), HabStateUtil.getHabState(multiSigAid).getK().get(2));
 
-        assertEquals(3, multiSigAid.getState().getN().size());
-        assertEquals(aid1.getState().getN().getFirst(), multiSigAid.getState().getN().getFirst());
-        assertEquals(aid2.getState().getN().getFirst(), multiSigAid.getState().getN().get(1));
-        assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
+        assertEquals(3, HabStateUtil.getHabState(multiSigAid).getN().size());
+        assertEquals(HabStateUtil.getHabState(aid1).getN().getFirst(), HabStateUtil.getHabState(multiSigAid).getN().getFirst());
+        assertEquals(HabStateUtil.getHabState(aid2).getN().getFirst(), HabStateUtil.getHabState(multiSigAid).getN().get(1));
+        assertEquals(HabStateUtil.getHabState(aid3).getN().getFirst(), HabStateUtil.getHabState(multiSigAid).getN().get(2));
 
         Object members = client3.identifiers().members(nameMultisig);
         List<Map<String, Object>> signing3 = castObjectToListMap(Utils.toMap(members).get("signing"));
@@ -434,7 +436,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertNull(Utils.toMap(endRoleResult).get("error"));
     }
 
-    public static Identifier createAID(SignifyClient client, String name, List<String> wits) throws Exception {
+    public static HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {
         CreateIdentifierArgs iargs = new CreateIdentifierArgs();
         iargs.setWits(wits);
         iargs.setToad(wits.size());

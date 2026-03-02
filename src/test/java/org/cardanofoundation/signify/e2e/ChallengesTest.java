@@ -6,14 +6,11 @@ import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -21,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 
+@SuppressWarnings("unchecked")
 public class ChallengesTest {
-    private static final Logger log = LoggerFactory.getLogger(ChallengesTest.class);
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
@@ -68,7 +65,7 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         EventResult icpResult1 = client1.identifiers().create("alice", kargs1);
-        Operation op1 = Operation.fromObject(waitOperation(client1, icpResult1.op()));
+        Operation<?> op1 = Operation.fromObject(waitOperation(client1, icpResult1.op()));
         opResponse1 = (HashMap<String, Object>) op1.getResponse();
         EventResult rpyResult1 = client1.identifiers().addEndRole(
                 "alice",
@@ -86,7 +83,7 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         EventResult icpResult2 = client2.identifiers().create("bob", kargs2);
-        Operation op2 = Operation.fromObject(waitOperation(client2, icpResult2.op()));
+        Operation<?> op2 = Operation.fromObject(waitOperation(client2, icpResult2.op()));
         opResponse2 = (HashMap<String, Object>) op2.getResponse();
 
         EventResult rpyResult2 = client2.identifiers().addEndRole(
@@ -122,7 +119,7 @@ public class ChallengesTest {
 
         // Alice verifies Bob's response
         Object verifyResult = client1.challenges().verify((String) opResponse2.get("i"), challenge1_small.words);
-        Operation op = Operation.fromObject(waitOperation(client1, verifyResult));
+        Operation<?> op = Operation.fromObject(waitOperation(client1, verifyResult));
         System.out.println("Alice verified challenge response");
         opResponse = (HashMap<String, Object>) op.getResponse();
 

@@ -1,0 +1,323 @@
+// Post-process OpenAPI-generated code to make interfaces sealed (Java 21+)
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.yaml:snakeyaml:2.2"
+    }
+}
+
+apply from: "${rootProject.projectDir}/gradle/openapi-helpers.gradle"
+
+tasks.register("makeSealedInterfaces") {
+    group = "openapi"
+    description = "Post-process generated interfaces to make them sealed (Java 21)"
+    
+    dependsOn("openApiGenerate")
+    
+    doLast {
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+        def specFile = generatedSpec.get().asFile
+        
+        if (!specFile.exists()) {
+            logger.warn("OpenAPI spec file not found at ${specFile.absolutePath}")
+            return
+        }
+        
+        // Parse OpenAPI Spec and Detect oneOf Patterns
+        def yaml = new org.yaml.snakeyaml.Yaml()
+        def spec = yaml.load(specFile.text)
+        def schemas = spec?.components?.schemas ?: [:]
+        
+        // Build set of schema-level oneOf names (for nested detection)
+        def schemaLevelOneOfNames = [] as Set
+        schemas.each { schemaName, schemaDef ->
+            if (schemaDef?.oneOf) {
+                schemaLevelOneOfNames << project.ext.transformSchemaName.call(schemaName)
+            }
+        }
+        
+        // Detect schema-level oneOf (e.g., Exn with variants EXNV1, EXNV2)
+        def schemaLevelOneOfs = [:]
+        schemas.each { schemaName, schemaDef ->
+            if (schemaDef?.oneOf) {
+                def variants = []
+                def hasInlineObjects = false
+                
+                schemaDef.oneOf.eachWithIndex { variant, idx ->
+                    if (variant?.'$ref') {
+                        def refName = variant.'$ref'.split('/').last()
+                        variants << project.ext.transformSchemaName.call(refName)
+                    } else if (variant?.type == 'object' || (variant?.properties || variant?.required)) {
+                        // Detect explicit object type OR implicit objects (those with properties/required without type)
+                        hasInlineObjects = true
+                    }
+                }
+                
+                if (hasInlineObjects) {
+                    def transformedName = project.ext.transformSchemaName.call(schemaName)
+                    modelDir.listFiles().findAll { 
+                        it.name.startsWith("${transformedName}OneOf") && it.name.endsWith(".java") 
+                    }.each { file ->
+                        def className = file.name.replace(".java", "")
+                        variants << className
+                    }
+                }
+                
+                if (!variants.isEmpty()) {
+                    schemaLevelOneOfs[schemaName] = variants
+                }
+            }
+        }
+        
+        // Detect property-level oneOf (e.g., kt/nt fields with oneOf in properties)
+        def propertyLevelOneOfs = [:]
+        schemas.each { schemaName, schemaDef ->
+            schemaDef?.properties?.each { propName, propDef ->
+                if (propDef?.oneOf) {
+                    def interfaceName = "${schemaName}${propName.capitalize()}"
+                    def variantDescriptors = []
+                    def schemaRefVariants = []
+                    
+                    propDef.oneOf.eachWithIndex { variant, idx ->
+                        def descriptor = project.ext.analyzeVariantType.call(variant, interfaceName, idx)
+                        if (descriptor) {
+                            if (schemaLevelOneOfNames.contains(descriptor.javaType)) {
+                                schemaRefVariants << descriptor.javaType
+                            } else {
+                                variantDescriptors << descriptor
+                            }
+                        }
+                    }
+                    
+                    if (!variantDescriptors.isEmpty() || !schemaRefVariants.isEmpty()) {
+                        propertyLevelOneOfs[interfaceName] = [
+                            wrapperVariants: variantDescriptors,
+                            schemaRefVariants: schemaRefVariants
+                        ]
+                    }
+                }
+            }
+        }
+        
+
+        // Automatically detect discriminator mappings for sealed interfaces
+        // by inspecting each variant class to find its unique property
+        def autoDetectDiscriminators = { String interfaceName, List<String> variantNames ->
+            def mappings = [:]
+            
+            variantNames.each { variantName ->
+                def variantFile = new File(modelDir, "${variantName}.java")
+                if (variantFile.exists()) {
+                    def variantContent = variantFile.text
+                    
+                    // Extract JSON property names from the variant class
+                    // Look for: public static final String JSON_PROPERTY_XXX = "xxx";
+                    def propertyPattern = /public static final String JSON_PROPERTY_(\w+)\s*=\s*"([^"]+)";/
+                    def matcher = variantContent =~ propertyPattern
+                    
+                    if (matcher) {
+                        // Find properties that are NOT common across all variants (name, prefix, etc.)
+                        // These are likely discriminator properties
+                        def commonProperties = ['NAME', 'PREFIX', 'ICP_DT', 'TRANSFERABLE', 'WINDEXES', 'STATE']
+                        
+                        matcher.each { match ->
+                            def propertyConstant = match[1]
+                            def propertyJsonName = match[2]
+                            
+                            // Skip common properties - look for unique ones
+                            if (!commonProperties.contains(propertyConstant.toUpperCase())) {
+                                // This is likely a discriminator property (e.g., "salty", "randy", "group", "extern")
+                                mappings[propertyJsonName] = variantName
+                                logger.debug("  Detected discriminator: ${propertyJsonName} -> ${variantName}")
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return mappings
+        }
+
+        // Process Schema-Level Sealed Interfaces
+        schemaLevelOneOfs.each { schemaName, permittedTypes ->
+            def transformedSchemaName = project.ext.transformSchemaName.call(schemaName)
+            logger.lifecycle("Processing schema: ${schemaName} -> ${transformedSchemaName}")
+            def file = new File(modelDir, "${transformedSchemaName}.java")
+            
+            if (file.exists()) {
+                def content = file.text
+                
+                content = content.replaceAll(
+                    "public interface ${transformedSchemaName}",
+                    "public sealed interface ${transformedSchemaName}"
+                )
+                
+                // Add permits clause (handles both "interface Name{" and "interface Name extends Parent{")
+                def permitsClause = "\n    permits ${permittedTypes.join(', ')} "
+                content = content.replaceAll(
+                    "(public sealed interface ${transformedSchemaName}(?:\\s+extends\\s+\\w+)?)\\s*\\{",
+                    "\$1${permitsClause}{"
+                )
+                
+                // Auto-detect and inject Jackson discriminator annotations
+                def discriminatorMappings = autoDetectDiscriminators(transformedSchemaName, permittedTypes)
+                
+                if (!discriminatorMappings.isEmpty()) {
+                    logger.lifecycle("Auto-detected discriminators for ${transformedSchemaName}: ${discriminatorMappings.keySet().join(', ')}")
+                    content = project.ext.injectJacksonDiscriminator.call(
+                        content, 
+                        transformedSchemaName, 
+                        discriminatorMappings
+                    )
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${transformedSchemaName}")
+                } else {
+                    logger.debug("No discriminators detected for ${transformedSchemaName} - may not need @JsonTypeInfo")
+                }
+                
+                file.text = content
+                logger.lifecycle("✓ Made ${transformedSchemaName}.java sealed with permits: ${permittedTypes.join(', ')}")
+                
+                permittedTypes.each { variantName ->
+                    def variantFile = new File(modelDir, "${variantName}.java")
+                    if (variantFile.exists()) {
+                        def variantContent = variantFile.text
+                        
+                        variantContent = variantContent.replaceAll(
+                            "public class ${variantName}",
+                            "public final class ${variantName}"
+                        )
+                        
+                        variantContent = variantContent.replaceAll(
+                            "(public final class ${variantName})\\s+implements\\s+[^{]+\\{",
+                            "\$1 implements ${transformedSchemaName} {"
+                        )
+                        variantContent = variantContent.replaceAll(
+                            "(public final class ${variantName})\\s*\\{",
+                            "\$1 implements ${transformedSchemaName} {"
+                        )
+                        
+                        variantFile.text = variantContent
+                    }
+                }
+            }
+        }
+        
+
+        // Process Property-Level OneOf Unions
+        propertyLevelOneOfs.each { interfaceName, config ->
+            def interfaceFile = new File(modelDir, "${interfaceName}.java")
+            
+            if (interfaceFile.exists()) {
+                def wrapperVariants = config.wrapperVariants ?: []
+                def schemaRefVariants = config.schemaRefVariants ?: []
+                def variantNames = wrapperVariants.collect { it.variantName } + schemaRefVariants
+                
+                def content = interfaceFile.text
+                content = content.replaceAll(
+                    /public interface ${interfaceName}/,
+                    "public sealed interface ${interfaceName}\n    permits ${variantNames.join(', ')}"
+                )
+                
+                // Auto-detect and inject Jackson discriminator annotations for property-level sealed interfaces
+                def discriminatorMappings = autoDetectDiscriminators(interfaceName, variantNames)
+                
+                if (!discriminatorMappings.isEmpty()) {
+                    logger.lifecycle("Auto-detected discriminators for ${interfaceName}: ${discriminatorMappings.keySet().join(', ')}")
+                    content = project.ext.injectJacksonDiscriminator.call(
+                        content, 
+                        interfaceName, 
+                        discriminatorMappings
+                    )
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${interfaceName}")
+                } else {
+                    logger.debug("No discriminators detected for ${interfaceName} - may not need @JsonTypeInfo")
+                }
+                
+                interfaceFile.text = content
+                logger.lifecycle("✓ Made ${interfaceName} sealed with permits: ${variantNames.join(', ')}")
+                
+                // Create concrete record implementations for wrapper variants
+                wrapperVariants.each { descriptor ->
+                    def variantFile = new File(modelDir, "${descriptor.variantName}.java")
+                    def variantContent = project.ext.generateVariantRecord.call(descriptor, interfaceName)
+                    variantFile.text = variantContent
+                    logger.lifecycle("  ✓ Created ${descriptor.variantName}.java (${descriptor.javaType})")
+                }
+            }
+        }
+        
+
+        // Remove Unauthorized Implementations
+        def sealedInterfaceNames = (schemaLevelOneOfs.keySet() + propertyLevelOneOfs.keySet())
+            .collect { project.ext.transformSchemaName.call(it) }
+        
+        def allPermittedTypes = [:]
+        schemaLevelOneOfs.each { schemaName, permittedTypes ->
+            def transformedName = project.ext.transformSchemaName.call(schemaName)
+            allPermittedTypes[transformedName] = permittedTypes
+        }
+        propertyLevelOneOfs.each { interfaceName, config ->
+            def wrapperVariants = config.wrapperVariants ?: []
+            def schemaRefVariants = config.schemaRefVariants ?: []
+            def variantNames = wrapperVariants.collect { it.variantName } + schemaRefVariants
+            allPermittedTypes[interfaceName] = variantNames
+        }
+        
+        // Remove unauthorized sealed interface implementations
+        modelDir.listFiles().findAll { it.name.endsWith(".java") }.each { file ->
+            def content = file.text
+            def className = file.name.replace(".java", "")
+            
+            def implementedSealedInterfaces = []
+            sealedInterfaceNames.each { sealedName ->
+                if (content.contains("implements") && content.contains(sealedName)) {
+                    implementedSealedInterfaces << sealedName
+                }
+            }
+            
+            if (!implementedSealedInterfaces.isEmpty()) {
+                def unauthorizedInterfaces = []
+                implementedSealedInterfaces.each { sealedName ->
+                    def permittedTypes = allPermittedTypes[sealedName] ?: []
+                    if (!permittedTypes.contains(className)) {
+                        unauthorizedInterfaces << sealedName
+                    }
+                }
+                
+                if (!unauthorizedInterfaces.isEmpty()) {
+                    unauthorizedInterfaces.each { sealedName ->
+                        content = content.replaceAll(
+                            "(implements\\s+)${sealedName},\\s*",
+                            '$1'
+                        )
+                        content = content.replaceAll(
+                            ",\\s*${sealedName}",
+                            ''
+                        )
+                        content = content.replaceAll(
+                            "(implements\\s+)${sealedName}(\\s*\\{)",
+                            '$1$2'
+                        )
+                        content = content.replaceAll(
+                            /implements\s+\{/,
+                            '{'
+                        )
+                    }
+                }
+                
+                def originalContent = content
+                content = content.replaceAll(
+                    /(?m)^public class (\w+)/,
+                    'public final class $1'
+                )
+                
+                if (content != originalContent) {
+                    file.text = content
+                }
+            }
+        }
+    }
+}

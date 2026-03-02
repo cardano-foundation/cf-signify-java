@@ -1,6 +1,8 @@
 package org.cardanofoundation.signify.app.coring;
 
 import lombok.*;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import java.util.List;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.util.Map;
@@ -40,7 +42,7 @@ public class Operation<T> {
                 .metadata(convertMetadata(map.get("metadata")))
                 .done(map.containsKey("done") && (boolean) map.get("done"))
                 .error(map.getOrDefault("error", null))
-                .response(map.containsKey("response") ? (R) map.get("response") : null);
+                .response(map.containsKey("response") ? deserializeResponse((R) map.get("response")) : null);
         } else if(obj instanceof String) { // json string
             Map<String, Object> mapObj = Utils.fromJson((String) obj, Map.class);
             return fromObject(mapObj);
@@ -70,5 +72,20 @@ public class Operation<T> {
                 .build();
         }
         throw new IllegalArgumentException("Metadata object is neither a Metadata instance nor a Map");
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <R> R deserializeResponse(R response) {
+        if (response instanceof Map<?, ?> map) {
+            // Check if this looks like a HabState response
+            if (map.containsKey("name") && map.containsKey("prefix") && 
+                (map.containsKey("salty") || map.containsKey("randy") || 
+                 map.containsKey("group") || map.containsKey("extern"))) {
+                // Deserialize as HabState
+                String json = Utils.jsonStringify(map);
+                return (R) Utils.fromJson(json, HabState.class);
+            }
+        }
+        return response;
     }
 }

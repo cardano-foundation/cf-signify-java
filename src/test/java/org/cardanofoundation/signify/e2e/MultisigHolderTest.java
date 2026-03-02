@@ -14,7 +14,8 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
@@ -34,9 +35,10 @@ import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisi
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("unchecked")
 public class MultisigHolderTest extends BaseIntegrationTest {
     SignifyClient client1, client2, client3;
-    Identifier aid1, aid2, aid3;
+        HabState aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
     private List<HashMap<String, Object>> registryList;
@@ -62,7 +64,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         client3 = signifyClients.get(2);
 
         // Create four identifiers, one for each client
-        List<Identifier> aids = createAidAndGetHabStateAsync(
+        List<HabState> aids = createAidAndGetHabStateAsync(
                 new CreateAidArgs(client1, "member1"),
                 new CreateAidArgs(client2, "member2"),
                 new CreateAidArgs(client3, "issuer")
@@ -115,12 +117,12 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         // First member start the creation of a multisig identifier
         op1 = startMultisigIncept(client1, new StartMultisigInceptArgs(
                 "holder",
-                aid1.getName(),
-                Arrays.asList(aid1.getPrefix(), aid2.getPrefix()),
+                HabStateUtil.getHabName(aid1),
+                Arrays.asList(HabStateUtil.getHabPrefix(aid1), HabStateUtil.getHabPrefix(aid2)),
                 2,
                 2,
-                aid1.getState().getB().size(),
-                aid1.getState().getB(),
+                HabStateUtil.getHabState(aid1).getB().size(),
+                HabStateUtil.getHabState(aid1).getB(),
                 null
         ));
         System.out.println("Member1 initiated multisig, waiting for others to join...");
@@ -130,7 +132,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Member2 received exchange message to join multisig");
         op2 = acceptMultisigIncept(client2, new AcceptMultisigInceptArgs(
                 "holder",
-                aid2.getName(),
+                HabStateUtil.getHabName(aid2),
                 msgSaid
         ));
         System.out.println("Member2 joined multisig, waiting for others...");
@@ -141,34 +143,34 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Multisig created!");
 
         IdentifierListResponse identifiers1 = client1.identifiers().list();
-        List<Identifier> aids1 = identifiers1.aids();
+        List<HabState> aids1 = identifiers1.aids();
         assertEquals(2, aids1.size());
 
         IdentifierListResponse identifiers2 = client1.identifiers().list();
-        List<Identifier> aids2 = identifiers2.aids();
+        List<HabState> aids2 = identifiers2.aids();
         assertEquals(2, aids2.size());
 
         System.out.printf(
                 "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
-                aids1.get(0).getName(),
-                aids1.get(0).getPrefix(),
-                aids1.get(1).getName(),
-                aids1.get(1).getPrefix()
+                HabStateUtil.getHabName(aids1.get(0)),
+                HabStateUtil.getHabPrefix(aids1.get(0)),
+                HabStateUtil.getHabName(aids1.get(1)),
+                HabStateUtil.getHabPrefix(aids1.get(1))
         );
 
         System.out.printf(
                 "Client 2 managed AIDs:\n%s [%s]\n%s [%s]%n",
-                aids2.get(0).getName(),
-                aids2.get(0).getPrefix(),
-                aids2.get(1).getName(),
-                aids2.get(1).getPrefix()
+                HabStateUtil.getHabName(aids2.get(0)),
+                HabStateUtil.getHabPrefix(aids2.get(0)),
+                HabStateUtil.getHabName(aids2.get(1)),
+                HabStateUtil.getHabPrefix(aids2.get(1))
         );
 
         // Multisig end role
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
         Object members = client1.identifiers().members("holder");
-        Identifier ghab1 = client1.identifiers().get("holder").get();
+        HabState ghab1 = client1.identifiers().get("holder").get();
         List<Map<String, Object>> signing = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
         String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing.getFirst().get("ends")).get("agent")).keySet()).getFirst();
         String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing.get(1).get("ends")).get("agent")).keySet()).getFirst();
@@ -182,11 +184,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         Serder rpy = endRoleRes.serder();
         List<String> sigs = endRoleRes.sigs();
 
-        Map<String, Object> ghabState1 = Utils.toMap(ghab1.getState());
+        Map<String, Object> ghabState1 = Utils.toMap(HabStateUtil.getHabState(ghab1));
         List<Object> seal = Arrays.asList(
                 "SealEvent",
                 Map.of(
-                        "i", ghab1.getPrefix(),
+                        "i", HabStateUtil.getHabPrefix(ghab1),
                         "s", Utils.toMap(ghabState1.get("ee")).get("s"),
                         "d", Utils.toMap(ghabState1.get("ee")).get("d")
                 )
@@ -201,7 +203,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         Map<String, List<Object>> roleembeds = new LinkedHashMap<>();
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
-        List<String> recp = Stream.of(aid2.getState())
+        List<String> recp = Stream.of(HabStateUtil.getHabState(aid2))
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
@@ -210,7 +212,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 "multisig",
                 aid1,
                 "/multisig/rpy",
-                Map.of("gid", ghab1.getPrefix()),
+                Map.of("gid", HabStateUtil.getHabPrefix(ghab1)),
                 roleembeds,
                 recp
         );
@@ -237,12 +239,12 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
-        Identifier ghab2 = client2.identifiers().get("holder").get();
-        Map<String, Object> ghabState2 = Utils.toMap(ghab2.getState());
+        HabState ghab2 = client2.identifiers().get("holder").get();
+        Map<String, Object> ghabState2 = Utils.toMap(HabStateUtil.getHabState(ghab2));
         seal = Arrays.asList(
                 "SealEvent",
                 Map.of(
-                        "i", ghab2.getPrefix(),
+                        "i", HabStateUtil.getHabPrefix(ghab2),
                         "s", Utils.toMap(ghabState2.get("ee")).get("s"),
                         "d", Utils.toMap(ghabState2.get("ee")).get("d")
                 )
@@ -258,7 +260,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         roleembeds = new LinkedHashMap<>();
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
-        recp = Stream.of(aid1.getState())
+        recp = Stream.of(HabStateUtil.getHabState(aid1))
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
@@ -267,7 +269,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 "multisig",
                 aid2,
                 "/multisig/rpy",
-                Map.of("gid", ghab2.getPrefix()),
+                Map.of("gid", HabStateUtil.getHabPrefix(ghab2)),
                 roleembeds,
                 recp
         );
@@ -287,11 +289,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         sigs = endRoleRes.sigs();
 
         ghab1 = client1.identifiers().get("holder").get();
-        ghabState1 = Utils.toMap(ghab1.getState());
+        ghabState1 = Utils.toMap(HabStateUtil.getHabState(ghab1));
         seal = Arrays.asList(
                 "SealEvent",
                 Map.of(
-                        "i", ghab1.getPrefix(),
+                        "i", HabStateUtil.getHabPrefix(ghab1),
                         "s", Utils.toMap(ghabState1.get("ee")).get("s"),
                         "d", Utils.toMap(ghabState1.get("ee")).get("d")
                 )
@@ -306,7 +308,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         roleembeds = new LinkedHashMap<>();
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
-        recp = Stream.of(aid2.getState())
+        recp = Stream.of(HabStateUtil.getHabState(aid2))
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
@@ -315,7 +317,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 "multisig",
                 aid1,
                 "/multisig/rpy",
-                Map.of("gid", ghab1.getPrefix()),
+                Map.of("gid", HabStateUtil.getHabPrefix(ghab1)),
                 roleembeds,
                 recp
         );
@@ -345,11 +347,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         sigs = endRoleRes.sigs();
 
         ghab2 = client2.identifiers().get("holder").get();
-        ghabState2 = Utils.toMap(ghab2.getState());
+        ghabState2 = Utils.toMap(HabStateUtil.getHabState(ghab2));
         seal = Arrays.asList(
                 "SealEvent",
                 Map.of(
-                        "i", ghab2.getPrefix(),
+                        "i", HabStateUtil.getHabPrefix(ghab2),
                         "s", Utils.toMap(ghabState2.get("ee")).get("s"),
                         "d", Utils.toMap(ghabState2.get("ee")).get("d")
                 )
@@ -365,7 +367,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         roleembeds = new LinkedHashMap<>();
         roleembeds.put("rpy", Arrays.asList(rpy, atc));
 
-        recp = Stream.of(aid1.getState())
+        recp = Stream.of(HabStateUtil.getHabState(aid1))
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
@@ -374,7 +376,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 "multisig",
                 aid2,
                 "/multisig/rpy",
-                Map.of("gid", ghab2.getPrefix()),
+                Map.of("gid", HabStateUtil.getHabPrefix(ghab2)),
                 roleembeds,
                 recp
         );
@@ -396,7 +398,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitOperation(client3, op3);
         System.out.println("Issuer resolved multisig holder OOBI");
 
-        Identifier holderAid = client1.identifiers().get("holder").get();
+        HabState holderAid = client1.identifiers().get("holder").get();
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
 
@@ -408,7 +410,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String regk = registryMap.get("regk").toString();
 
         CredentialSubject subject = CredentialSubject.builder()
-                .i(holderAid.getPrefix())
+                                .i(HabStateUtil.getHabPrefix(holderAid))
                 .additionalProperties(new HashMap<>() {{
                     put("LEI", "5493001KJTIIGC8Y1R17");
                 }})
@@ -428,7 +430,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Member1 received /exn/ipex/grant msg with SAID: " + grantMsgSaid);
 
         Object exnRes = client1.exchanges().get(grantMsgSaid).get();
-        recp = Stream.of(aid2.getState())
+        recp = Stream.of(HabStateUtil.getHabState(aid2))
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
@@ -455,7 +457,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         assertEquals(grantMsgSaid2, grantMsgSaid);
         System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
 
-        List<String> recp2 = Stream.of(aid1.getState())
+        List<String> recp2 = Stream.of(HabStateUtil.getHabState(aid1))
                 .map(KeyStateRecord::getI)
                 .toList();
 
@@ -493,10 +495,10 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         warnNotifications(clientList);
     }
 
-    public Identifier createAid(SignifyClient client, String name, List<String> wits) throws Exception {
+        public HabState createAid(SignifyClient client, String name, List<String> wits) throws Exception {
         getOrCreateIdentifier(client, name, null);
-        Identifier aid = client.identifiers().get(name).get();
-        System.out.println(name + "AID:" + aid.getPrefix());
+                HabState aid = client.identifiers().get(name).get();
+                System.out.println(name + "AID:" + HabStateUtil.getHabPrefix(aid));
         return aid;
     }
 
@@ -572,8 +574,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             String issuerPrefix,
             List<String> recipients
     ) throws Exception {
-        Identifier mhab = client.identifiers().get(memberAlias).get();
-        Identifier ghab = client.identifiers().get(groupName).get();
+        HabState mhab = client.identifiers().get(memberAlias).get();
+        HabState ghab = client.identifiers().get(groupName).get();
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
                 .builder()
@@ -596,10 +598,10 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 List.of(issuerPrefix)
         );
 
-        KeyStateRecord mstate = ghab.getState();
+        KeyStateRecord mstate = HabStateUtil.getHabState(ghab);
 
         Map<String, Object> sealMap = new LinkedHashMap<>();
-        sealMap.put("i", ghab.getPrefix());
+        sealMap.put("i", HabStateUtil.getHabPrefix(ghab));
         sealMap.put("s", mstate.getEe().getS());
         sealMap.put("d", mstate.getEe().getD());
 
@@ -613,11 +615,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         gembeds.put("exn", List.of(admit, atc));
 
         client.exchanges()
-                .send(mhab.getName(),
+                .send(HabStateUtil.getHabName(mhab),
                         "multisig",
                         mhab,
                         "/multisig/exn",
-                        Map.of("gid", ghab.getPrefix()),
+                        Map.of("gid", HabStateUtil.getHabPrefix(ghab)),
                         gembeds,
                         recipients
                 );

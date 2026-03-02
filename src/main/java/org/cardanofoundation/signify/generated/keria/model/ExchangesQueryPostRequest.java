@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ExchangesQueryPostRequest
@@ -34,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExchangesQueryPostRequest.JSON_PROPERTY_LIMIT
 })
 @JsonTypeName("_exchanges_query_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class ExchangesQueryPostRequest {
   public static final String JSON_PROPERTY_FILTER = "filter";
   @jakarta.annotation.Nullable
@@ -55,6 +58,16 @@ public class ExchangesQueryPostRequest {
   public ExchangesQueryPostRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public ExchangesQueryPostRequest(@JsonProperty(JSON_PROPERTY_FILTER) Object filter, @JsonProperty(JSON_PROPERTY_SORT) Object sort, @JsonProperty(JSON_PROPERTY_SKIP) Integer skip, @JsonProperty(JSON_PROPERTY_LIMIT) Integer limit) {
+    this.filter = filter;
+    this.sort = sort;
+    this.skip = skip;
+    this.limit = limit;
+  }
+
   public ExchangesQueryPostRequest filter(@jakarta.annotation.Nullable Object filter) {
     
     this.filter = filter;
@@ -66,6 +79,7 @@ public class ExchangesQueryPostRequest {
    * @return filter
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_FILTER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -91,6 +105,7 @@ public class ExchangesQueryPostRequest {
    * @return sort
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SORT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -116,6 +131,7 @@ public class ExchangesQueryPostRequest {
    * @return skip
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_SKIP, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -141,6 +157,7 @@ public class ExchangesQueryPostRequest {
    * @return limit
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_LIMIT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

@@ -11,13 +11,14 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Vdring;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 
@@ -55,16 +56,16 @@ public class Registries {
      * @throws LibsodiumException   if a sodium exception occurs
      */
     public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        Identifier hab = this.client.identifiers().get(args.getName())
+        HabState hab = this.client.identifiers().get(args.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getName()));
-        String pre = hab.getPrefix();
+        String pre = HabStateUtil.getHabPrefix(hab);
 
         List<String> cnfg = new ArrayList<>();
         if (Boolean.TRUE.equals(args.getNoBackers())) {
             cnfg.add(TraitCodex.NoBackers.getValue());
         }
 
-        boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
+        boolean estOnly = HabStateUtil.getHabState(hab).getC() != null && HabStateUtil.getHabState(hab).getC().contains("EO");
         if (estOnly) {
             cnfg.add(TraitCodex.EstOnly.getValue());
         }
@@ -81,8 +82,8 @@ public class Registries {
         if (estOnly) {
             throw new UnsupportedOperationException("Establishment only not implemented");
         } else {
-            int sn = Integer.parseInt(hab.getState().getS(), 16);
-            String dig = hab.getState().getD();
+            int sn = Integer.parseInt(HabStateUtil.getHabState(hab).getS(), 16);
+            String dig = HabStateUtil.getHabState(hab).getD();
 
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("i", regser.getPre());
@@ -99,7 +100,7 @@ public class Registries {
                     .build();
 
             Serder serder = Eventing.interact(interactArgs);
-            Keeping.Keeper keeper = this.client.getManager().get(hab);
+            Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
             List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
 
             HttpResponse<String> res = this.createFromEvents(hab, args.getName(), args.getRegistryName(), regser.getKed(), serder.getKed(), sigs);
@@ -122,7 +123,7 @@ public class Registries {
      * @throws LibsodiumException   if a sodium exception occurs
      */
     private HttpResponse<String> createFromEvents(
-        Identifier hab,
+        HabState hab,
         String name,
         String registryName,
         Map<String, Object> vcp,

@@ -7,7 +7,8 @@ import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,10 +22,10 @@ import java.util.Map;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
 
+@SuppressWarnings("unchecked")
 public class SinglesigDRTTest extends BaseIntegrationTest {
     private static SignifyClient delegator, delegate;
     private static String name1_id, name1_oobi;
-    private static String contact1_id;
     private String opResponseName, opResponseT, opResponseS;
 
     @BeforeAll
@@ -43,7 +44,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
 
     @BeforeEach
     public void getContact() throws IOException, InterruptedException, LibsodiumException {
-        contact1_id = TestUtils.getOrCreateContact(delegate, "contact1", name1_oobi);
+        TestUtils.getOrCreateContact(delegate, "contact1", name1_oobi);
     }
 
     @Test
@@ -54,16 +55,16 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
 
         EventResult result = delegate.identifiers().create("delegate1", kargs);
         Operation<?> op = Operation.fromObject(result.op());
-        Identifier delegate1 = delegate.identifiers().get("delegate1").get();
+        HabState delegate1 = delegate.identifiers().get("delegate1").get();
         opResponseName = op.getName();
 
-        Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
+        Assertions.assertEquals(opResponseName, "delegation." + HabStateUtil.getHabPrefix(delegate1));
 
         // delegator approves delegate
         Map<String, String> seal = new LinkedHashMap<>();
-        seal.put("i", delegate1.getPrefix());
+        seal.put("i", HabStateUtil.getHabPrefix(delegate1));
         seal.put("s", "0");
-        seal.put("d", delegate1.getPrefix());
+        seal.put("d", HabStateUtil.getHabPrefix(delegate1));
 
         result = delegator.identifiers().interact("name1", seal);
         Object op1 = result.op();
@@ -85,15 +86,15 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         // delegator approves delegate
         delegate1 = delegate.identifiers().get("delegate1").get();
         seal = new LinkedHashMap<>();
-        seal.put("i", delegate1.getPrefix());
+        seal.put("i", HabStateUtil.getHabPrefix(delegate1));
         seal.put("s", "1");
-        seal.put("d", delegate1.getState().getD());
+        seal.put("d", HabStateUtil.getHabState(delegate1).getD());
 
         result = delegator.identifiers().interact("name1", seal);
         op1 = result.op();
         op2 = delegate.keyStates().query(name1_id, "2", null);
 
-        List<Operation> operationList = waitOperationAsync(
+        List<Operation<?>> operationList = waitOperationAsync(
                 new WaitOperationArgs(delegate, op),
                 new WaitOperationArgs(delegator, op1),
                 new WaitOperationArgs(delegate, op2)

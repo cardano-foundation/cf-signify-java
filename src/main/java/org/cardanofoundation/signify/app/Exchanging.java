@@ -18,9 +18,12 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+
+import org.cardanofoundation.signify.generated.keria.model.*;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 
 public class Exchanging {
+
     @Getter
     public static class Exchanges {
         public final SignifyClient client;
@@ -46,7 +49,7 @@ public class Exchanging {
          * @return array containing [Serder, signatures, attachment]
          */
         public ExchangeMessageResult createExchangeMessage(
-            Identifier sender,
+            HabState sender,
             String route,
             Map<String, Object> payload,
             Map<String, List<Object>> embeds,
@@ -59,7 +62,7 @@ public class Exchanging {
             ExchangeResult result = exchange(
                 route,
                 payload,
-                sender.getPrefix(),
+                HabStateUtil.getHabPrefix(sender),
                 recipient,
                 datetime,
                 dig,
@@ -89,7 +92,7 @@ public class Exchanging {
         public Object send(
             String name,
             String topic,
-            Identifier sender,
+            HabState sender,
             String route,
             Map<String, Object> payload,
             Map<String, List<Object>> embeds,

@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * RenameRegistryRequest
@@ -31,13 +34,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   RenameRegistryRequest.JSON_PROPERTY_NAME
 })
 @JsonTypeName("renameRegistry_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class RenameRegistryRequest {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nullable
   private String name;
 
   public RenameRegistryRequest() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public RenameRegistryRequest(@JsonProperty(JSON_PROPERTY_NAME) String name) {
+    this.name = name;
   }
 
   public RenameRegistryRequest name(@jakarta.annotation.Nullable String name) {
@@ -51,6 +61,7 @@ public class RenameRegistryRequest {
    * @return name
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_NAME, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

@@ -11,6 +11,9 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeExcepti
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKtListString;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKtString;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -99,6 +102,13 @@ public class Tholder {
     }
 
     private void _processSith(Object sith) {
+        // Unwrap KeyStateRecordKt sealed interface to get actual value
+        if (sith instanceof KeyStateRecordKtString ktString) {
+            sith = ktString.value();
+        } else if (sith instanceof KeyStateRecordKtListString ktList) {
+            sith = ktList.value();
+        }
+        
         if (sith instanceof Number) {
             this._processUnweighted(((Number) sith).intValue());
         } else if (sith instanceof String sithStr && !sithStr.contains("[")) {

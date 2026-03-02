@@ -9,8 +9,8 @@ import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @Slf4j
+@SuppressWarnings("unchecked")
 public class RandyTest {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
@@ -64,10 +65,10 @@ public class RandyTest {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aids = client1.identifiers().list(0, 24);
-        List<Identifier> aidsList = aids.aids();
-        for (Identifier aid1 : aidsList) {
-            opResponseName = aid1.getName();
-            opResponsePrefix = aid1.getPrefix();
+        List<HabState> aidsList = aids.aids();
+        for (HabState aid1 : aidsList) {
+            opResponseName = HabStateUtil.getHabName(aid1);
+            opResponsePrefix = HabStateUtil.getHabPrefix(aid1);
         }
         assertEquals(1, aidsList.size());
 
@@ -84,8 +85,8 @@ public class RandyTest {
 
         aids = client1.identifiers().list(0, 24);
         aidsList = aids.aids();
-        for (Identifier aid1 : aidsList) {
-            opResponsePrefix = aid1.getPrefix();
+        for (HabState aid1 : aidsList) {
+            opResponsePrefix = HabStateUtil.getHabPrefix(aid1);
         }
         assertEquals(1, aidsList.size());
 

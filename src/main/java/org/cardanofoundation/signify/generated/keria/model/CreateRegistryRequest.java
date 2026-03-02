@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * CreateRegistryRequest
@@ -40,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateRegistryRequest.JSON_PROPERTY_EST_ONLY
 })
 @JsonTypeName("createRegistry_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class CreateRegistryRequest {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
@@ -73,6 +76,19 @@ public class CreateRegistryRequest {
   public CreateRegistryRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public CreateRegistryRequest(@JsonProperty(JSON_PROPERTY_NAME) String name, @JsonProperty(JSON_PROPERTY_ALIAS) String alias, @JsonProperty(JSON_PROPERTY_TOAD) Integer toad, @JsonProperty(JSON_PROPERTY_NONCE) String nonce, @JsonProperty(JSON_PROPERTY_NO_BACKERS) Boolean noBackers, @JsonProperty(JSON_PROPERTY_BAKS) List<String> baks, @JsonProperty(JSON_PROPERTY_EST_ONLY) Boolean estOnly) {
+    this.name = name;
+    this.alias = alias;
+    this.toad = toad;
+    this.nonce = nonce;
+    this.noBackers = noBackers;
+    this.baks = baks;
+    this.estOnly = estOnly;
+  }
+
   public CreateRegistryRequest name(@jakarta.annotation.Nonnull String name) {
     
     this.name = name;
@@ -84,6 +100,8 @@ public class CreateRegistryRequest {
    * @return name
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NAME, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -109,6 +127,8 @@ public class CreateRegistryRequest {
    * @return alias
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ALIAS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -134,6 +154,8 @@ public class CreateRegistryRequest {
    * @return toad
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_TOAD, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -159,6 +181,8 @@ public class CreateRegistryRequest {
    * @return nonce
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NONCE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -184,6 +208,7 @@ public class CreateRegistryRequest {
    * @return noBackers
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_NO_BACKERS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -217,6 +242,8 @@ public class CreateRegistryRequest {
    * @return baks
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_BAKS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -242,6 +269,7 @@ public class CreateRegistryRequest {
    * @return estOnly
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_EST_ONLY, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
