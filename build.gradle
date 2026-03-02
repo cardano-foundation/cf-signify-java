@@ -284,3 +284,6 @@ tasks.named("openApiGenerate") {
     dependsOn("prepareOpenApiSpec")
     finalizedBy("makeSealedInterfaces")
 }
+
+compileJava.dependsOn("makeSealedInterfaces")
+sourcesJar.dependsOn("makeSealedInterfaces")
