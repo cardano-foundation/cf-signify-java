@@ -103,9 +103,48 @@ tasks.register("makeSealedInterfaces") {
         }
         
 
+        // Automatically detect discriminator mappings for sealed interfaces
+        // by inspecting each variant class to find its unique property
+        def autoDetectDiscriminators = { String interfaceName, List<String> variantNames ->
+            def mappings = [:]
+            
+            variantNames.each { variantName ->
+                def variantFile = new File(modelDir, "${variantName}.java")
+                if (variantFile.exists()) {
+                    def variantContent = variantFile.text
+                    
+                    // Extract JSON property names from the variant class
+                    // Look for: public static final String JSON_PROPERTY_XXX = "xxx";
+                    def propertyPattern = /public static final String JSON_PROPERTY_(\w+)\s*=\s*"([^"]+)";/
+                    def matcher = variantContent =~ propertyPattern
+                    
+                    if (matcher) {
+                        // Find properties that are NOT common across all variants (name, prefix, etc.)
+                        // These are likely discriminator properties
+                        def commonProperties = ['NAME', 'PREFIX', 'ICP_DT', 'TRANSFERABLE', 'WINDEXES', 'STATE']
+                        
+                        matcher.each { match ->
+                            def propertyConstant = match[1]
+                            def propertyJsonName = match[2]
+                            
+                            // Skip common properties - look for unique ones
+                            if (!commonProperties.contains(propertyConstant.toUpperCase())) {
+                                // This is likely a discriminator property (e.g., "salty", "randy", "group", "extern")
+                                mappings[propertyJsonName] = variantName
+                                logger.debug("  Detected discriminator: ${propertyJsonName} -> ${variantName}")
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return mappings
+        }
+
         // Process Schema-Level Sealed Interfaces
         schemaLevelOneOfs.each { schemaName, permittedTypes ->
             def transformedSchemaName = project.ext.transformSchemaName.call(schemaName)
+            logger.lifecycle("Processing schema: ${schemaName} -> ${transformedSchemaName}")
             def file = new File(modelDir, "${transformedSchemaName}.java")
             
             if (file.exists()) {
@@ -122,6 +161,21 @@ tasks.register("makeSealedInterfaces") {
                     "(public sealed interface ${transformedSchemaName}(?:\\s+extends\\s+\\w+)?)\\s*\\{",
                     "\$1${permitsClause}{"
                 )
+                
+                // Auto-detect and inject Jackson discriminator annotations
+                def discriminatorMappings = autoDetectDiscriminators(transformedSchemaName, permittedTypes)
+                
+                if (!discriminatorMappings.isEmpty()) {
+                    logger.lifecycle("Auto-detected discriminators for ${transformedSchemaName}: ${discriminatorMappings.keySet().join(', ')}")
+                    content = project.ext.injectJacksonDiscriminator.call(
+                        content, 
+                        transformedSchemaName, 
+                        discriminatorMappings
+                    )
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${transformedSchemaName}")
+                } else {
+                    logger.debug("No discriminators detected for ${transformedSchemaName} - may not need @JsonTypeInfo")
+                }
                 
                 file.text = content
                 logger.lifecycle("✓ Made ${transformedSchemaName}.java sealed with permits: ${permittedTypes.join(', ')}")
@@ -166,6 +220,22 @@ tasks.register("makeSealedInterfaces") {
                     /public interface ${interfaceName}/,
                     "public sealed interface ${interfaceName}\n    permits ${variantNames.join(', ')}"
                 )
+                
+                // Auto-detect and inject Jackson discriminator annotations for property-level sealed interfaces
+                def discriminatorMappings = autoDetectDiscriminators(interfaceName, variantNames)
+                
+                if (!discriminatorMappings.isEmpty()) {
+                    logger.lifecycle("Auto-detected discriminators for ${interfaceName}: ${discriminatorMappings.keySet().join(', ')}")
+                    content = project.ext.injectJacksonDiscriminator.call(
+                        content, 
+                        interfaceName, 
+                        discriminatorMappings
+                    )
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${interfaceName}")
+                } else {
+                    logger.debug("No discriminators detected for ${interfaceName} - may not need @JsonTypeInfo")
+                }
+                
                 interfaceFile.text = content
                 logger.lifecycle("✓ Made ${interfaceName} sealed with permits: ${variantNames.join(', ')}")
                 

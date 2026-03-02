@@ -26,7 +26,6 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf;
@@ -34,12 +33,6 @@ import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf1;
 import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf2;
 import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf3;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
-import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
-import org.cardanofoundation.signify.generated.keria.model.SaltyState;
-import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
-import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
-import org.cardanofoundation.signify.generated.keria.model.ExternState;
 import org.cardanofoundation.signify.app.util.HabStateUtil;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
@@ -78,24 +71,12 @@ public class IdentifierController {
         String contentRange = response.headers().firstValue("content-range").orElse(null);
         Httping.RangeInfo range = parseRangeHeaders(contentRange, "aids");
 
-        // Deserialize array of HabState objects using the same Map-based approach
-        // because HabState is a sealed interface that Jackson can't deserialize directly
-        try {
-            List<Map<String, Object>> responseList = Utils.fromJson(response.body(), new TypeReference<List<Map<String, Object>>>() {});
-            List<HabState> habStates = new ArrayList<>();
-            for (Map<String, Object> itemMap : responseList) {
-                HabState habState = deserializeHabStateFromMap(itemMap);
-                habStates.add(habState);
-            }
-            return new IdentifierListResponse(
-                    range.start(),
-                    range.end(),
-                    range.total(),
-                    habStates
-            );
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to deserialize HabState array from response: " + response.body(), e);
-        }
+        return new IdentifierListResponse(
+                range.start(),
+                range.end(),
+                range.total(),
+                Arrays.asList(Utils.fromJson(response.body(), HabState[].class))
+        );
     }
 
     public IdentifierListResponse list() throws IOException, InterruptedException, LibsodiumException {
@@ -122,14 +103,7 @@ public class IdentifierController {
             return Optional.empty();
         }
         
-        // Use the same approach as Operations.get() - deserialize as Map first, then process
-        try {
-            Map<String, Object> responseMap = Utils.fromJson(response.body(), new TypeReference<Map<String, Object>>() {});
-            HabState habState = deserializeHabStateFromMap(responseMap);
-            return Optional.of(habState);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to deserialize HabState from response: " + response.body(), e);
-        }
+        return Optional.of(Utils.fromJson(response.body(), HabState.class));
     }
 
     /**
@@ -148,14 +122,7 @@ public class IdentifierController {
             method,
             info
         );
-        
-        // Use the same Map-based approach as get() to handle sealed interface deserialization
-        try {
-            Map<String, Object> responseMap = Utils.fromJson(response.body(), new TypeReference<Map<String, Object>>() {});
-            return deserializeHabStateFromMap(responseMap);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to deserialize HabState from update response: " + response.body(), e);
-        }
+        return Utils.fromJson(response.body(), HabState.class);
     }
 
     /**
@@ -516,271 +483,5 @@ public class IdentifierController {
                 null
         );
         return Utils.fromJson(response.body(), Object.class);
-    }
-
-    /**
-     * Helper method to deserialize HabState from a Map object.
-     * Deserializes KeyStateRecord by manually setting simple fields from a Map.
-     * Complex fields (kt, nt) are skipped as they are polymorphic and cause deserialization issues.
-     * The ee field is deserialized as StateEERecord.
-     */
-    private KeyStateRecord deserializeKeyStateRecord(Object stateObj) {
-        String stateJson = Utils.jsonStringify(stateObj);
-        Map<String, Object> stateMap = Utils.fromJson(stateJson, new TypeReference<Map<String, Object>>() {});
-        
-        KeyStateRecord state = new KeyStateRecord();
-        
-        // Set simple string fields
-        if (stateMap.containsKey("i")) state.setI((String) stateMap.get("i"));
-        if (stateMap.containsKey("s")) state.setS((String) stateMap.get("s"));
-        if (stateMap.containsKey("p")) state.setP((String) stateMap.get("p"));
-        if (stateMap.containsKey("d")) state.setD((String) stateMap.get("d"));
-        if (stateMap.containsKey("f")) state.setF((String) stateMap.get("f"));
-        if (stateMap.containsKey("dt")) state.setDt((String) stateMap.get("dt"));
-        if (stateMap.containsKey("et")) state.setEt((String) stateMap.get("et"));
-        if (stateMap.containsKey("bt")) state.setBt((String) stateMap.get("bt"));
-        if (stateMap.containsKey("di")) state.setDi((String) stateMap.get("di"));
-        
-        // Handle list fields
-        if (stateMap.containsKey("vn")) {
-            @SuppressWarnings("unchecked")
-            List<Integer> vn = (List<Integer>) stateMap.get("vn");
-            state.setVn(vn);
-        }
-        if (stateMap.containsKey("k")) {
-            @SuppressWarnings("unchecked")
-            List<String> k = (List<String>) stateMap.get("k");
-            state.setK(k);
-        }
-        if (stateMap.containsKey("n")) {
-            @SuppressWarnings("unchecked")
-            List<String> n = (List<String>) stateMap.get("n");
-            state.setN(n);
-        }
-        if (stateMap.containsKey("b")) {
-            @SuppressWarnings("unchecked")
-            List<String> b = (List<String>) stateMap.get("b");
-            state.setB(b);
-        }
-        if (stateMap.containsKey("c")) {
-            @SuppressWarnings("unchecked")
-            List<String> c = (List<String>) stateMap.get("c");
-            state.setC(c);
-        }
-        
-        // Handle ee field (StateEERecord)
-        if (stateMap.containsKey("ee")) {
-            try {
-                Object ee = stateMap.get("ee");
-                if (ee instanceof Map) {
-                    Map<String, Object> eeMap = (Map<String, Object>) ee;
-                    StateEERecord eeRecord = new StateEERecord();
-                    if (eeMap.containsKey("s")) eeRecord.setS((String) eeMap.get("s"));
-                    if (eeMap.containsKey("d")) eeRecord.setD((String) eeMap.get("d"));
-                    if (eeMap.containsKey("br")) {
-                        @SuppressWarnings("unchecked")
-                        List<String> br = (List<String>) eeMap.get("br");
-                        if (br != null) {
-                            eeRecord.setBr(new ArrayList<>(br));
-                        }
-                    }
-                    if (eeMap.containsKey("ba")) {
-                        @SuppressWarnings("unchecked")
-                        List<String> ba = (List<String>) eeMap.get("ba");
-                        if (ba != null) {
-                            eeRecord.setBa(new ArrayList<>(ba));
-                        }
-                    }
-                    state.setEe(eeRecord);
-                }
-            } catch (Exception eeError) {
-                // If ee deserialization fails, leave it as null
-                // The application might still work without it
-            }
-        }
-        
-        // NOTE: kt and nt fields are skipped because they are polymorphic (String or List<String>)
-        // and cause Jackson deserialization failures.
-        
-        return state;
-    }
-
-    private HabState deserializeHabStateFromMap(Map<String, Object> responseMap) {
-        try {
-            // Determine which implementation based on discriminator field and manually create it
-            if (responseMap.containsKey("salty")) {
-                // Create HabStateOneOf manually from the Map data
-                HabStateOneOf result = new HabStateOneOf();
-                
-                if (responseMap.containsKey("name")) {
-                    result.setName((String) responseMap.get("name"));
-                }
-                if (responseMap.containsKey("prefix")) {
-                    result.setPrefix((String) responseMap.get("prefix"));
-                }
-                if (responseMap.containsKey("icp_dt")) {
-                    result.setIcpDt((String) responseMap.get("icp_dt"));
-                }
-                if (responseMap.containsKey("transferable")) {
-                    result.setTransferable((Boolean) responseMap.get("transferable"));
-                }
-                if (responseMap.containsKey("windexes")) {
-                    @SuppressWarnings("unchecked")
-                    List<Object> windexesObj = (List<Object>) responseMap.get("windexes");
-                    List<String> windexes = windexesObj.stream()
-                            .map(Object::toString)
-                            .collect(Collectors.toList());
-                    result.setWindexes(windexes);
-                }
-                
-                // Handle nested objects using JSON conversion
-                if (responseMap.containsKey("salty")) {
-                    String saltyJson = Utils.jsonStringify(responseMap.get("salty"));
-                    var salty = Utils.fromJson(saltyJson, SaltyState.class);
-                    result.setSalty(salty);
-                }
-                if (responseMap.containsKey("state")) {
-                    KeyStateRecord state = deserializeKeyStateRecord(responseMap.get("state"));
-                    result.setState(state);
-                }
-
-                return result;
-            } else if (responseMap.containsKey("randy")) {
-                // Create HabStateOneOf1 for randy identifiers
-                HabStateOneOf1 result = new HabStateOneOf1();
-                
-                if (responseMap.containsKey("name")) {
-                    result.setName((String) responseMap.get("name"));
-                }
-                if (responseMap.containsKey("prefix")) {
-                    result.setPrefix((String) responseMap.get("prefix"));
-                }
-                if (responseMap.containsKey("icp_dt")) {
-                    result.setIcpDt((String) responseMap.get("icp_dt"));
-                }
-                if (responseMap.containsKey("transferable")) {
-                    result.setTransferable((Boolean) responseMap.get("transferable"));
-                }
-                if (responseMap.containsKey("windexes")) {
-                    @SuppressWarnings("unchecked")
-                    List<Object> windexesObj = (List<Object>) responseMap.get("windexes");
-                    List<String> windexes = windexesObj.stream()
-                            .map(Object::toString)
-                            .collect(Collectors.toList());
-                    result.setWindexes(windexes);
-                }
-                
-                // Handle nested objects using JSON conversion
-                if (responseMap.containsKey("randy")) {
-                    String randyJson = Utils.jsonStringify(responseMap.get("randy"));
-                    var randy = Utils.fromJson(randyJson, RandyKeyState.class);
-                    result.setRandy(randy);
-                }
-                if (responseMap.containsKey("state")) {
-                    KeyStateRecord state = deserializeKeyStateRecord(responseMap.get("state"));
-                    result.setState(state);
-                }
-
-                return result;
-            } else if (responseMap.containsKey("group")) {
-                // Create HabStateOneOf2 for group identifiers
-                HabStateOneOf2 result = new HabStateOneOf2();
-                
-                if (responseMap.containsKey("name")) {
-                    result.setName((String) responseMap.get("name"));
-                }
-                if (responseMap.containsKey("prefix")) {
-                    result.setPrefix((String) responseMap.get("prefix"));
-                }
-                if (responseMap.containsKey("icp_dt")) {
-                    result.setIcpDt((String) responseMap.get("icp_dt"));
-                }
-                if (responseMap.containsKey("transferable")) {
-                    result.setTransferable((Boolean) responseMap.get("transferable"));
-                }
-                if (responseMap.containsKey("windexes")) {
-                    @SuppressWarnings("unchecked")
-                    List<Object> windexesObj = (List<Object>) responseMap.get("windexes");
-                    List<String> windexes = windexesObj.stream()
-                            .map(Object::toString)
-                            .collect(Collectors.toList());
-                    result.setWindexes(windexes);
-                }
-                
-                // Handle nested objects using JSON conversion
-                if (responseMap.containsKey("group")) {
-                    String groupJson = Utils.jsonStringify(responseMap.get("group"));
-                    // IMPORTANT: The groupJson contains an "mhab" field which is a HabState (sealed interface)
-                    // Jackson can't deserialize sealed interfaces properly, so we need to extract and 
-                    // deserialize mhab separately before Jackson tries to handle it
-                    Map<String, Object> groupMap = Utils.fromJson(groupJson, new TypeReference<Map<String, Object>>() {});
-                    Object mhabObj = groupMap.get("mhab");
-                    GroupKeyState group;
-                    
-                    if (mhabObj != null) {
-                        // Recursively deserialize the mhab as a HabState
-                        Map<String, Object> mhabMap = Utils.fromJson(Utils.jsonStringify(mhabObj), 
-                            new TypeReference<Map<String, Object>>() {});
-                        HabState deserializedMhab = deserializeHabStateFromMap(mhabMap);
-                        
-                        // Now deserialize the rest of the group object
-                        group = Utils.fromJson(groupJson, GroupKeyState.class);
-                        // Override the mhab with our properly deserialized version
-                        group.setMhab(deserializedMhab);
-                    } else {
-                        throw new IllegalStateException("GroupKeyState 'mhab' field is missing or null in the JSON response");
-                    }
-                    
-                    result.setGroup(group);
-                }
-                if (responseMap.containsKey("state")) {
-                    KeyStateRecord state = deserializeKeyStateRecord(responseMap.get("state"));
-                    result.setState(state);
-                }
-
-                return result;
-            } else if (responseMap.containsKey("extern")) {
-                // Create HabStateOneOf3 for extern identifiers
-                HabStateOneOf3 result = new HabStateOneOf3();
-                
-                if (responseMap.containsKey("name")) {
-                    result.setName((String) responseMap.get("name"));
-                }
-                if (responseMap.containsKey("prefix")) {
-                    result.setPrefix((String) responseMap.get("prefix"));
-                }
-                if (responseMap.containsKey("icp_dt")) {
-                    result.setIcpDt((String) responseMap.get("icp_dt"));
-                }
-                if (responseMap.containsKey("transferable")) {
-                    result.setTransferable((Boolean) responseMap.get("transferable"));
-                }
-                if (responseMap.containsKey("windexes")) {
-                    @SuppressWarnings("unchecked")
-                    List<Object> windexesObj = (List<Object>) responseMap.get("windexes");
-                    List<String> windexes = windexesObj.stream()
-                            .map(Object::toString)
-                            .collect(Collectors.toList());
-                    result.setWindexes(windexes);
-                }
-                
-                // Handle nested objects using JSON conversion
-                if (responseMap.containsKey("extern")) {
-                    String externJson = Utils.jsonStringify(responseMap.get("extern"));
-                    var extern = Utils.fromJson(externJson, ExternState.class);
-                    result.setExtern(extern);
-                }
-                if (responseMap.containsKey("state")) {
-                    KeyStateRecord state = deserializeKeyStateRecord(responseMap.get("state"));
-                    result.setState(state);
-                }
-
-                return result;
-            } else {
-                throw new IllegalStateException("Unknown HabState discriminator. Response keys: " + responseMap.keySet());
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to deserialize HabState from Map: " + responseMap, e);
-        }
     }
 }

@@ -89,8 +89,7 @@ public final class GeneratedModelConfig {
             }
         });
         
-
-        module.addDeserializer(HabState.class, new HabStateDeserializer());
+        // Note: HabState no longer needs custom deserializer - Jackson's @JsonTypeInfo(use = DEDUCTION) handles it
         
         return module;
     }
