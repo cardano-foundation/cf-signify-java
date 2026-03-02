@@ -8,9 +8,7 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.fasterxml.jackson.databind.deser.impl.ObjectIdReader;
 import org.cardanofoundation.signify.app.aiding.KeyStateRecordKtDeserializer;
-import org.cardanofoundation.signify.app.aiding.HabStateDeserializer;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 import java.util.Iterator;
 
@@ -20,7 +18,6 @@ import java.util.Iterator;
 public class SealedInterfaceModifier extends BeanDeserializerModifier {
     
     private static final KeyStateRecordKtDeserializer ktDeserializer = new KeyStateRecordKtDeserializer();
-    private static final HabStateDeserializer habDeserializer = new HabStateDeserializer();
 
     @Override
     public BeanDeserializerBuilder updateBuilder(DeserializationConfig config,
@@ -35,10 +32,6 @@ public class SealedInterfaceModifier extends BeanDeserializerModifier {
                 if (prop.getType().getRawClass() == KeyStateRecordKt.class) {
                     // Replace the deserializer for this property
                     SettableBeanProperty newProp = prop.withValueDeserializer(ktDeserializer);
-                    builder.addOrReplaceProperty(newProp, true);
-                } else if (prop.getType().getRawClass() == HabState.class) {
-                    // Replace the deserializer for this property
-                    SettableBeanProperty newProp = prop.withValueDeserializer(habDeserializer);
                     builder.addOrReplaceProperty(newProp, true);
                 }
             }
