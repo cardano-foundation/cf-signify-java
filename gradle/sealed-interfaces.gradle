@@ -233,7 +233,25 @@ tasks.register("makeSealedInterfaces") {
                     )
                     logger.lifecycle("✓ Added Jackson discriminator annotations to ${interfaceName}")
                 } else {
-                    logger.debug("No discriminators detected for ${interfaceName} - may not need @JsonTypeInfo")
+                    // For simple String|List polymorphic interfaces, generate a custom deserializer
+                    def isStringListPolymorphic = variantNames.size() == 2 && 
+                        (variantNames.contains("${interfaceName}String") && variantNames.contains("${interfaceName}ListString"))
+                    
+                    if (isStringListPolymorphic) {
+                        def deserializerContent = project.ext.generatePolymorphicDeserializer.call(interfaceName, variantNames)
+                        def deserializerFile = new File(modelDir, "../aiding/${interfaceName}Deserializer.java")
+                        deserializerFile.parentFile.mkdirs()
+                        deserializerFile.text = deserializerContent
+                        logger.lifecycle("✓ Generated deserializer for polymorphic ${interfaceName}")
+                        
+                        // Also generate MixIn for this interface
+                        def mixInContent = project.ext.generatePolymorphicMixIn.call(interfaceName)
+                        def mixInFile = new File(modelDir, "../aiding/${interfaceName}MixIn.java")
+                        mixInFile.text = mixInContent
+                        logger.lifecycle("✓ Generated MixIn for polymorphic ${interfaceName}")
+                    } else {
+                        logger.debug("No discriminators detected for ${interfaceName} - may not need @JsonTypeInfo")
+                    }
                 }
                 
                 interfaceFile.text = content
