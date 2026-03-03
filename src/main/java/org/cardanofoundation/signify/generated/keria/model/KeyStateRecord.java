@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
 import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -50,7 +51,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   KeyStateRecord.JSON_PROPERTY_EE,
   KeyStateRecord.JSON_PROPERTY_DI
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class KeyStateRecord {
   public static final String JSON_PROPERTY_VN = "vn";
   @jakarta.annotation.Nullable
@@ -85,16 +86,16 @@ public class KeyStateRecord {
   private String et = "";
 
   public static final String JSON_PROPERTY_KT = "kt";
-  @jakarta.annotation.Nullable
-  private String kt = "0";
+  @jakarta.annotation.Nonnull
+  private KeyStateRecordKt kt;
 
   public static final String JSON_PROPERTY_K = "k";
   @jakarta.annotation.Nonnull
   private List<String> k = new ArrayList<>();
 
   public static final String JSON_PROPERTY_NT = "nt";
-  @jakarta.annotation.Nullable
-  private String nt = "0";
+  @jakarta.annotation.Nonnull
+  private KeyStateRecordKt nt;
 
   public static final String JSON_PROPERTY_N = "n";
   @jakarta.annotation.Nonnull
@@ -331,7 +332,7 @@ public class KeyStateRecord {
     this.et = et;
   }
 
-  public KeyStateRecord kt(@jakarta.annotation.Nullable String kt) {
+  public KeyStateRecord kt(@jakarta.annotation.Nonnull KeyStateRecordKt kt) {
     
     this.kt = kt;
     return this;
@@ -341,18 +342,18 @@ public class KeyStateRecord {
    * Get kt
    * @return kt
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_KT, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_KT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getKt() {
+  public KeyStateRecordKt getKt() {
     return kt;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_KT, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKt(@jakarta.annotation.Nullable String kt) {
+  @JsonProperty(value = JSON_PROPERTY_KT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setKt(@jakarta.annotation.Nonnull KeyStateRecordKt kt) {
     this.kt = kt;
   }
 
@@ -389,7 +390,7 @@ public class KeyStateRecord {
     this.k = k;
   }
 
-  public KeyStateRecord nt(@jakarta.annotation.Nullable String nt) {
+  public KeyStateRecord nt(@jakarta.annotation.Nonnull KeyStateRecordKt nt) {
     
     this.nt = nt;
     return this;
@@ -399,18 +400,18 @@ public class KeyStateRecord {
    * Get nt
    * @return nt
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_NT, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_NT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getNt() {
+  public KeyStateRecordKt getNt() {
     return nt;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_NT, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setNt(@jakarta.annotation.Nullable String nt) {
+  @JsonProperty(value = JSON_PROPERTY_NT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setNt(@jakarta.annotation.Nonnull KeyStateRecordKt nt) {
     this.nt = nt;
   }
 

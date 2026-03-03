@@ -214,7 +214,8 @@ tasks.openApiGenerate {
             serializationLibrary : "jackson",
             useJakartaEe         : "true",
             dateLibrary          : "java21",
-            sourceFolder         : "src/main/java"
+            sourceFolder         : "src/main/java",
+            hideGenerationTimestamp: "true"
     ]
 
     nameMappings.put("A", "AUpper")
