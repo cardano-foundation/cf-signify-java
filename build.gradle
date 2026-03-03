@@ -210,12 +210,13 @@ tasks.openApiGenerate {
     ])
 
     configOptions = [
-            library              : "resttemplate",
-            serializationLibrary : "jackson",
-            useJakartaEe         : "true",
-            dateLibrary          : "java21",
-            sourceFolder         : "src/main/java",
-            hideGenerationTimestamp: "true"
+            library                  : "restclient",
+            serializationLibrary     : "jackson",
+            useJakartaEe             : "true",
+            dateLibrary              : "java21",
+            sourceFolder             : "src/main/java",
+            hideGenerationTimestamp  : "true",
+            openApiNullable          : "false",
     ]
 
     nameMappings.put("A", "AUpper")

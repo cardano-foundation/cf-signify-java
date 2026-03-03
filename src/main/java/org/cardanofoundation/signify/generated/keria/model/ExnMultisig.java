@@ -24,10 +24,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.HashMap;
 import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.openapitools.jackson.nullable.JsonNullable;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.openapitools.jackson.nullable.JsonNullable;
-import java.util.NoSuchElementException;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -53,15 +49,15 @@ public class ExnMultisig {
 
   public static final String JSON_PROPERTY_GROUP_NAME = "groupName";
   @jakarta.annotation.Nullable
-  private JsonNullable<String> groupName = JsonNullable.<String>undefined();
+  private String groupName;
 
   public static final String JSON_PROPERTY_MEMBER_NAME = "memberName";
   @jakarta.annotation.Nullable
-  private JsonNullable<String> memberName = JsonNullable.<String>undefined();
+  private String memberName;
 
   public static final String JSON_PROPERTY_SENDER = "sender";
   @jakarta.annotation.Nullable
-  private JsonNullable<String> sender = JsonNullable.<String>undefined();
+  private String sender;
 
   public ExnMultisig() {
   }
@@ -122,8 +118,8 @@ public class ExnMultisig {
   }
 
   public ExnMultisig groupName(@jakarta.annotation.Nullable String groupName) {
-    this.groupName = JsonNullable.<String>of(groupName);
     
+    this.groupName = groupName;
     return this;
   }
 
@@ -132,31 +128,23 @@ public class ExnMultisig {
    * @return groupName
    */
   @jakarta.annotation.Nullable
-  @JsonIgnore
-
-  public String getGroupName() {
-        return groupName.orElse(null);
-  }
-
   @JsonProperty(value = JSON_PROPERTY_GROUP_NAME, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<String> getGroupName_JsonNullable() {
+  public String getGroupName() {
     return groupName;
   }
-  
-  @JsonProperty(JSON_PROPERTY_GROUP_NAME)
-  public void setGroupName_JsonNullable(JsonNullable<String> groupName) {
+
+
+  @JsonProperty(value = JSON_PROPERTY_GROUP_NAME, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setGroupName(@jakarta.annotation.Nullable String groupName) {
     this.groupName = groupName;
   }
 
-  public void setGroupName(@jakarta.annotation.Nullable String groupName) {
-    this.groupName = JsonNullable.<String>of(groupName);
-  }
-
   public ExnMultisig memberName(@jakarta.annotation.Nullable String memberName) {
-    this.memberName = JsonNullable.<String>of(memberName);
     
+    this.memberName = memberName;
     return this;
   }
 
@@ -165,31 +153,23 @@ public class ExnMultisig {
    * @return memberName
    */
   @jakarta.annotation.Nullable
-  @JsonIgnore
-
-  public String getMemberName() {
-        return memberName.orElse(null);
-  }
-
   @JsonProperty(value = JSON_PROPERTY_MEMBER_NAME, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<String> getMemberName_JsonNullable() {
+  public String getMemberName() {
     return memberName;
   }
-  
-  @JsonProperty(JSON_PROPERTY_MEMBER_NAME)
-  public void setMemberName_JsonNullable(JsonNullable<String> memberName) {
+
+
+  @JsonProperty(value = JSON_PROPERTY_MEMBER_NAME, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setMemberName(@jakarta.annotation.Nullable String memberName) {
     this.memberName = memberName;
   }
 
-  public void setMemberName(@jakarta.annotation.Nullable String memberName) {
-    this.memberName = JsonNullable.<String>of(memberName);
-  }
-
   public ExnMultisig sender(@jakarta.annotation.Nullable String sender) {
-    this.sender = JsonNullable.<String>of(sender);
     
+    this.sender = sender;
     return this;
   }
 
@@ -198,26 +178,18 @@ public class ExnMultisig {
    * @return sender
    */
   @jakarta.annotation.Nullable
-  @JsonIgnore
-
-  public String getSender() {
-        return sender.orElse(null);
-  }
-
   @JsonProperty(value = JSON_PROPERTY_SENDER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<String> getSender_JsonNullable() {
+  public String getSender() {
     return sender;
   }
-  
-  @JsonProperty(JSON_PROPERTY_SENDER)
-  public void setSender_JsonNullable(JsonNullable<String> sender) {
-    this.sender = sender;
-  }
 
+
+  @JsonProperty(value = JSON_PROPERTY_SENDER, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setSender(@jakarta.annotation.Nullable String sender) {
-    this.sender = JsonNullable.<String>of(sender);
+    this.sender = sender;
   }
 
 
@@ -232,25 +204,14 @@ public class ExnMultisig {
     ExnMultisig exnMultisig = (ExnMultisig) o;
     return Objects.equals(this.exn, exnMultisig.exn) &&
         Objects.equals(this.paths, exnMultisig.paths) &&
-        equalsNullable(this.groupName, exnMultisig.groupName) &&
-        equalsNullable(this.memberName, exnMultisig.memberName) &&
-        equalsNullable(this.sender, exnMultisig.sender);
-  }
-
-  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
-    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
+        Objects.equals(this.groupName, exnMultisig.groupName) &&
+        Objects.equals(this.memberName, exnMultisig.memberName) &&
+        Objects.equals(this.sender, exnMultisig.sender);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(exn, paths, hashCodeNullable(groupName), hashCodeNullable(memberName), hashCodeNullable(sender));
-  }
-
-  private static <T> int hashCodeNullable(JsonNullable<T> a) {
-    if (a == null) {
-      return 1;
-    }
-    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
+    return Objects.hash(exn, paths, groupName, memberName, sender);
   }
 
   @Override
