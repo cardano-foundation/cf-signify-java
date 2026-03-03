@@ -56,7 +56,7 @@ public class WitnessTest {
         EventResult icpResult1 = client1.identifiers().create("aid1", kargs);
         waitOperation(client1, icpResult1.op());
         HabState aid1 = client1.identifiers().get("aid1").get();
-        System.out.println("AID1: " + HabStateUtil.getHabPrefix(aid1));
+        System.out.println("AID1: " + aid1.getPrefix());
         assertEquals(1, HabStateUtil.getHabState(aid1).getB().size());
         assertEquals(WITNESS_AID, HabStateUtil.getHabState(aid1).getB().getFirst());
 

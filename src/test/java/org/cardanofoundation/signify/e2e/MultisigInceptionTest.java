@@ -86,7 +86,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
             HabState multisig1 = client1.identifiers().get(groupName).get();
             HabState multisig2 = client2.identifiers().get(groupName).get();
-            assertEquals(HabStateUtil.getHabPrefix(multisig1), HabStateUtil.getHabPrefix(multisig2));
+            assertEquals(multisig1.getPrefix(), multisig2.getPrefix());
             Object members = client1.identifiers().members(groupName);
             Map<String, Object> membersMap = Utils.toMap(members);
             List<?> signing = (List<?>) membersMap.get("signing");

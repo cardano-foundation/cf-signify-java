@@ -67,8 +67,8 @@ public class RandyTest {
         IdentifierListResponse aids = client1.identifiers().list(0, 24);
         List<HabState> aidsList = aids.aids();
         for (HabState aid1 : aidsList) {
-            opResponseName = HabStateUtil.getHabName(aid1);
-            opResponsePrefix = HabStateUtil.getHabPrefix(aid1);
+            opResponseName = aid1.getName();
+            opResponsePrefix = aid1.getPrefix();
         }
         assertEquals(1, aidsList.size());
 
@@ -86,7 +86,7 @@ public class RandyTest {
         aids = client1.identifiers().list(0, 24);
         aidsList = aids.aids();
         for (HabState aid1 : aidsList) {
-            opResponsePrefix = HabStateUtil.getHabPrefix(aid1);
+            opResponsePrefix = aid1.getPrefix();
         }
         assertEquals(1, aidsList.size());
 

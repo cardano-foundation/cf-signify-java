@@ -296,7 +296,7 @@ public class IdentifierController {
     public EventResult addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        String pre = HabStateUtil.getHabPrefix(hab);
+        String pre = hab.getPrefix();
 
         // Assuming makeEndRole is a method that returns an object with getRaw() and getKed() methods
         Serder rpy = this.makeEndRole(pre, role, eid, stamp);
@@ -351,7 +351,7 @@ public class IdentifierController {
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        String pre = HabStateUtil.getHabPrefix(hab);
+        String pre = hab.getPrefix();
 
         KeyStateRecord state = HabStateUtil.getHabState(hab);
         int sn = Integer.parseInt(state.getS(), 16);
@@ -390,7 +390,7 @@ public class IdentifierController {
 
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        String pre = HabStateUtil.getHabPrefix(hab);
+        String pre = hab.getPrefix();
         boolean delegated = !HabStateUtil.getHabState(hab).getDi().isEmpty();
 
         KeyStateRecord state = HabStateUtil.getHabState(hab);

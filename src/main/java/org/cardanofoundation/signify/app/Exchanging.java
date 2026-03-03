@@ -62,7 +62,7 @@ public class Exchanging {
             ExchangeResult result = exchange(
                 route,
                 payload,
-                HabStateUtil.getHabPrefix(sender),
+                sender.getPrefix(),
                 recipient,
                 datetime,
                 dig,

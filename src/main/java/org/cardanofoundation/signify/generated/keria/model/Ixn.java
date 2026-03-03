@@ -51,5 +51,13 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface Ixn
     permits IXNV1, IXNV2 {
+
+    String getV();
+    String getT();
+    String getD();
+    String getI();
+    String getS();
+    String getP();
+    Object getA();
 }
 

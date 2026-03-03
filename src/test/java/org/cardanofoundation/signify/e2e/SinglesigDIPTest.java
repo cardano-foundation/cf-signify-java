@@ -54,13 +54,13 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         Operation<?> op = Operation.fromObject(result.op());
         HabState delegate1 = client2.identifiers().get("delegate1").get();
         opResponseName = op.getName();
-        Assertions.assertEquals(opResponseName, "delegation." + HabStateUtil.getHabPrefix(delegate1));
+        Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
         delegate1 = client2.identifiers().get("delegate1").get();
         Map<String, String> seal = new LinkedHashMap<>();
-        seal.put("i", HabStateUtil.getHabPrefix(delegate1));
+        seal.put("i", delegate1.getPrefix());
         seal.put("s", "0");
-        seal.put("d", HabStateUtil.getHabPrefix(delegate1));
+        seal.put("d", delegate1.getPrefix());
 
         result = client1.identifiers().interact("name1", seal);
         Object op1 = result.op();
@@ -79,7 +79,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         opResponseI = responseMap.get("i").toString();
 
         delegate1 = client2.identifiers().get("delegate1").get();
-        Assertions.assertEquals(HabStateUtil.getHabPrefix(delegate1), opResponseI);
+        Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
 
         // Delegate creates identifier with default witness config
         ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
@@ -91,13 +91,13 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         opResponseName = op.getName();
 
         HabState delegate2 = client2.identifiers().get("delegate2").get();
-        Assertions.assertEquals(opResponseName, "delegation." + HabStateUtil.getHabPrefix(delegate2));
+        Assertions.assertEquals(opResponseName, "delegation." + delegate2.getPrefix());
 
         // Delegator approves delegate
         delegate2 = client2.identifiers().get("delegate2").get();
-        seal.put("i", HabStateUtil.getHabPrefix(delegate2));
+        seal.put("i", delegate2.getPrefix());
         seal.put("s", "0");
-        seal.put("d", HabStateUtil.getHabPrefix(delegate2));
+        seal.put("d", delegate2.getPrefix());
 
         result = client1.identifiers().interact("name1", seal);
         op1 = result.op();
@@ -117,7 +117,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
 
         // Delegate waits for completion
         delegate2 = client2.identifiers().get("delegate2").get();
-        Assertions.assertEquals(HabStateUtil.getHabPrefix(delegate2), opResponseI);
+        Assertions.assertEquals(delegate2.getPrefix(), opResponseI);
 
         // Make sure query with seal is idempotent
         op = Operation.fromObject(client2.keyStates().query(name1_id, null, seal));

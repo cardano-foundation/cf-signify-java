@@ -80,7 +80,7 @@ public class MultisigUtils {
         Map<String, List<Object>> embeds = new LinkedHashMap<>();
         embeds.put("icp", List.of(serder, atc));
 
-        List<String> recipients = smids.stream().filter(smid -> !smid.equals(HabStateUtil.getHabPrefix(memberHab))).toList();
+        List<String> recipients = smids.stream().filter(smid -> !smid.equals(memberHab.getPrefix())).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("gid", serder.getPre());
@@ -117,7 +117,7 @@ public class MultisigUtils {
         xembeds.put("ixn", List.of(serder, atc));
 
         List<String> smids = states.stream().map(KeyStateRecord::getI).toList();
-        List<String> recp = otherMemberAIDs.stream().map(HabStateUtil::getHabPrefix).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -126,7 +126,7 @@ public class MultisigUtils {
         }};
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 groupName,
                 aid,
                 "/multisig/ixn",
@@ -169,7 +169,7 @@ public class MultisigUtils {
             }
             return null;
         }).toList();
-        List<String> recp = otherMemberAIDs.stream().map(HabStateUtil::getHabPrefix).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -178,7 +178,7 @@ public class MultisigUtils {
         }};
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 groupName,
                 aid,
                 route,
@@ -210,7 +210,7 @@ public class MultisigUtils {
             String eid = agent.firstEntry().getKey();
             EventResult endRoleResult = client
                     .identifiers()
-                    .addEndRole(HabStateUtil.getHabName(multisigAID), "agent", eid, timestamp);
+                    .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
             opList.add(endRoleResult.op());
 
@@ -219,7 +219,7 @@ public class MultisigUtils {
             KeyStateRecord ghapState1 = HabStateUtil.getHabState(multisigAID);
 
             Map<String, Object> seal2 = new LinkedHashMap<>();
-            seal2.put("i", HabStateUtil.getHabPrefix(multisigAID));
+            seal2.put("i", multisigAID.getPrefix());
             seal2.put("s", ghapState1.getEe().getS());
             seal2.put("d", ghapState1.getEe().getD());
             List<Object> seal = List.of("SealEvent", seal2);
@@ -230,13 +230,13 @@ public class MultisigUtils {
             Map<String, List<Object>> roleEmbeds = new LinkedHashMap<>();
             roleEmbeds.put("rpy", List.of(rpy, atc));
 
-            List<String> recp = otherMemberAIDs.stream().map(HabStateUtil::getHabPrefix).toList();
+            List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
             Map<String, Object> payload = new LinkedHashMap<>();
-            payload.put("gid", HabStateUtil.getHabPrefix(multisigAID));
+            payload.put("gid", multisigAID.getPrefix());
 
             client.exchanges().send(
-                    HabStateUtil.getHabName(aid),
+                    aid.getName(),
                     groupName,
                     aid,
                     "/multisig/rpy",
@@ -268,7 +268,7 @@ public class MultisigUtils {
         String eid = agent.firstEntry().getKey();
         EventResult endRoleResult = client
                 .identifiers()
-                .addEndRole(HabStateUtil.getHabName(multisigAID), "agent", eid, timestamp);
+                .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
         opList.add(endRoleResult.op());
 
@@ -277,7 +277,7 @@ public class MultisigUtils {
         KeyStateRecord ghapState1 = HabStateUtil.getHabState(multisigAID);
 
         Map<String, Object> seal2 = new LinkedHashMap<>();
-        seal2.put("i", HabStateUtil.getHabPrefix(multisigAID));
+        seal2.put("i", multisigAID.getPrefix());
         seal2.put("s", ghapState1.getEe().getS());
         seal2.put("d", ghapState1.getEe().getD());
         List<Object> seal = List.of("SealEvent", seal2);
@@ -288,13 +288,13 @@ public class MultisigUtils {
         Map<String, List<Object>> roleEmbeds = new LinkedHashMap<>();
         roleEmbeds.put("rpy", List.of(rpy, atc));
 
-        List<String> recp = otherMemberAIDs.stream().map(HabStateUtil::getHabPrefix).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("gid", HabStateUtil.getHabPrefix(multisigAID));
+        payload.put("gid", multisigAID.getPrefix());
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 groupName,
                 aid,
                 "/multisig/rpy",
@@ -317,10 +317,10 @@ public class MultisigUtils {
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
                 .builder()
-                .senderName(HabStateUtil.getHabName(multisigAID))
+                .senderName(multisigAID.getName())
                 .message("")
                 .grantSaid(grantMsgSaid)
-                .recipient(HabStateUtil.getHabPrefix(recipientAID))
+                .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
         Exchanging.ExchangeMessageResult exchangeMessageResult = client.ipex().admit(ipexAdmitArgs);
@@ -330,17 +330,17 @@ public class MultisigUtils {
 
 
         client.ipex().submitAdmit(
-                HabStateUtil.getHabName(multisigAID),
+                multisigAID.getName(),
                 admit,
                 sigs,
                 end,
-                List.of(HabStateUtil.getHabPrefix(recipientAID))
+                List.of(recipientAID.getPrefix())
         );
 
         KeyStateRecord mstate = HabStateUtil.getHabState(multisigAID);
 
         Map<String, Object> sealMap = new LinkedHashMap<>();
-        sealMap.put("i", HabStateUtil.getHabPrefix(multisigAID));
+        sealMap.put("i", multisigAID.getPrefix());
         sealMap.put("s", mstate.getEe().getS());
         sealMap.put("d", mstate.getEe().getD());
         List<Object> seal = List.of("SealEvent", sealMap);
@@ -352,12 +352,12 @@ public class MultisigUtils {
         Map<String, List<Object>> gembeds = new LinkedHashMap<>();
         gembeds.put("exn", List.of(admit, atc));
 
-        List<String> recp = otherMemberAIDs.stream().map(HabStateUtil::getHabPrefix).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("gid", HabStateUtil.getHabPrefix(multisigAID));
+        payload.put("gid", multisigAID.getPrefix());
         client.exchanges()
-                .send(HabStateUtil.getHabName(aid),
+                .send(aid.getName(),
                         "multisig",
                         aid,
                         "/multisig/exn",
@@ -398,7 +398,7 @@ public class MultisigUtils {
                     }
                     return null;
                 }).toList();
-        List<String> recp = otherMembersAIDs.stream().map(HabStateUtil::getHabPrefix).toList();
+        List<String> recp = otherMembersAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -407,7 +407,7 @@ public class MultisigUtils {
         }};
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 "multisig",
                 aid,
                 "/multisig/icp",
@@ -435,7 +435,7 @@ public class MultisigUtils {
 
         CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
                 .builder()
-                .name(HabStateUtil.getHabName(multisigAID))
+                .name(multisigAID.getName())
                 .registryName(registryName)
                 .nonce(nonce)
                 .build();
@@ -456,15 +456,15 @@ public class MultisigUtils {
         }};
 
         List<String> recp = otherMembersAIDs.stream()
-                .map(HabStateUtil::getHabPrefix)
+                .map(HabState::getPrefix)
                 .toList();
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 topic,
                 aid,
                 "/multisig/vcp",
-                Map.of("gid", HabStateUtil.getHabPrefix(multisigAID)),
+                Map.of("gid", multisigAID.getPrefix()),
                 regbeds,
                 recp
         );
@@ -499,7 +499,7 @@ public class MultisigUtils {
 
         CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
                 .builder()
-                .name(HabStateUtil.getHabName(multisigAID))
+                .name(multisigAID.getName())
                 .registryName(registryName)
                 .nonce(nonce)
                 .build();
@@ -520,15 +520,15 @@ public class MultisigUtils {
         }};
 
         List<String> recp = otherMembersAIDs.stream()
-                .map(HabStateUtil::getHabPrefix)
+                .map(HabState::getPrefix)
                 .toList();
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 "multisig",
                 aid,
                 "/multisig/vcp",
-                Map.of("gid", HabStateUtil.getHabPrefix(multisigAID)),
+                Map.of("gid", multisigAID.getPrefix()),
                 regbeds,
                 recp
         );
@@ -547,17 +547,17 @@ public class MultisigUtils {
 
         if (!isInitiator) {
             String msgSaid = TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
-            System.out.println(HabStateUtil.getHabName(aid) + "(" + HabStateUtil.getHabPrefix(aid) + ") received exchange message to join the interaction event");
+            System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
             List<Object> res = (List<Object>) client.groups().getRequest(msgSaid).get();
             Map<String, Object> exn = (Map<String, Object>) ((Map<String, Object>) res.get(0)).get("exn");
             Map<String, Object> ixn = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("ixn");
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }
 
-        EventResult delResult = client.delegations().approve(HabStateUtil.getHabName(multisigAID), anchor);
+        EventResult delResult = client.delegations().approve(multisigAID.getName(), anchor);
         Object appOp = delResult.op();
-        System.out.println("Delegator " + HabStateUtil.getHabName(aid) + "(" + HabStateUtil.getHabPrefix(aid) + ") approved delegation for " +
-                HabStateUtil.getHabName(multisigAID) + " with anchor " + anchor);
+        System.out.println("Delegator " + aid.getName() + "(" + aid.getPrefix() + ") approved delegation for " +
+                multisigAID.getName() + " with anchor " + anchor);
 
         assert Utils.jsonStringify(((List<Object>) delResult.serder().getKed().get("a")).get(0)).equals(Utils.jsonStringify(anchor));
 
@@ -568,10 +568,10 @@ public class MultisigUtils {
         String atc = ims.substring(serder.getSize());
         Map<String, List<Object>> xembeds = Map.of("ixn", List.of(serder, atc));
         List<String> smids = new ArrayList<>();
-        smids.add(HabStateUtil.getHabPrefix(aid));
-        smids.addAll(otherMembersAIDs.stream().map(HabStateUtil::getHabPrefix).toList());
+        smids.add(aid.getPrefix());
+        smids.addAll(otherMembersAIDs.stream().map(HabState::getPrefix).toList());
 
-        List<String> recp = otherMembersAIDs.stream().map(HabStateUtil::getHabPrefix).toList();
+        List<String> recp = otherMembersAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -579,8 +579,8 @@ public class MultisigUtils {
             put("rmids", smids);
         }};
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
-                HabStateUtil.getHabName(multisigAID),
+                aid.getName(),
+                multisigAID.getName(),
                 aid,
                 "/multisig/ixn",
                 payload,
@@ -589,9 +589,9 @@ public class MultisigUtils {
         );
 
         if (isInitiator) {
-            System.out.println(HabStateUtil.getHabName(aid) + "(" + HabStateUtil.getHabPrefix(aid) + ") initiates delegation interaction event, waiting for others to join...");
+            System.out.println(aid.getName() + "(" + aid.getPrefix() + ") initiates delegation interaction event, waiting for others to join...");
         } else {
-            System.out.println(HabStateUtil.getHabName(aid) + "(" + HabStateUtil.getHabPrefix(aid) + ") joins interaction event");
+            System.out.println(aid.getName() + "(" + aid.getPrefix() + ") joins interaction event");
         }
 
         return appOp;
@@ -616,11 +616,11 @@ public class MultisigUtils {
         Map<String, Object> iss = (Map<String, Object>) ((Map<String, Object>) credential).get("iss");
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
-                .senderName(HabStateUtil.getHabName(multisigAID))
+                .senderName(multisigAID.getName())
                 .acdc(new Serder(sad))
                 .anc(new Serder(anc))
                 .iss(new Serder(iss))
-                .recipient(HabStateUtil.getHabPrefix(recipientAID))
+                .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
 
@@ -631,16 +631,16 @@ public class MultisigUtils {
         String end = grantResult.atc();
 
         client.ipex().submitGrant(
-                HabStateUtil.getHabName(multisigAID),
+                multisigAID.getName(),
                 grant,
                 sigs,
                 end,
-                List.of(HabStateUtil.getHabPrefix(recipientAID))
+                List.of(recipientAID.getPrefix())
         );
 
         KeyStateRecord mstate = HabStateUtil.getHabState(multisigAID);
         Map<String, Object> sealMap = new LinkedHashMap<>() {{
-            put("i", HabStateUtil.getHabPrefix(multisigAID));
+            put("i", multisigAID.getPrefix());
             put("s", mstate.getEe().getS());
             put("d", mstate.getEe().getD());
         }};
@@ -652,14 +652,14 @@ public class MultisigUtils {
         String atc = gims.substring(grant.getSize()) + end;
 
         Map<String, List<Object>> gembeds = Map.of("exn", List.of(grant, atc));
-        List<String> recp = otherMembersAIDs.stream().map(HabStateUtil::getHabPrefix).collect(Collectors.toList());
+        List<String> recp = otherMembersAIDs.stream().map(HabState::getPrefix).collect(Collectors.toList());
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 "multisig",
                 aid,
                 "/multisig/exn",
-                Map.of("gid", HabStateUtil.getHabPrefix(multisigAID)),
+                Map.of("gid", multisigAID.getPrefix()),
                 gembeds,
                 recp
         );
@@ -696,15 +696,15 @@ public class MultisigUtils {
 
 
         List<String> recp = otherMembersAIDs.stream()
-                .map(HabStateUtil::getHabPrefix)
+                .map(HabState::getPrefix)
                 .collect(Collectors.toList());
 
         client.exchanges().send(
-                HabStateUtil.getHabName(aid),
+                aid.getName(),
                 "multisig",
                 aid,
                 "/multisig/iss",
-                Map.of("gid", HabStateUtil.getHabPrefix(multisigAID)),
+                Map.of("gid", multisigAID.getPrefix()),
                 embeds,
                 recp
         );

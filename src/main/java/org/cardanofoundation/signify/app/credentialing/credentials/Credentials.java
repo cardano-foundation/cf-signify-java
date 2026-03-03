@@ -111,8 +111,8 @@ public class Credentials {
         final HabState hab = this.client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
 
-        final String habPrefix = HabStateUtil.getHabPrefix(hab);
-        final String habName = HabStateUtil.getHabName(hab);
+        final String habPrefix = hab.getPrefix();
+        final String habName = hab.getName();
         final KeyStateRecord state = HabStateUtil.getHabState(hab);
         final String stateS = state.getS();
         final String stateD = state.getD();
@@ -199,7 +199,7 @@ public class Credentials {
     public RevokeCredentialResult revoke(String name, String said, String datetime) throws IOException, InterruptedException, DigestException, LibsodiumException {
         final HabState hab = this.client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        final String pre = HabStateUtil.getHabPrefix(hab);
+        final String pre = hab.getPrefix();
         final KeyStateRecord habState = HabStateUtil.getHabState(hab);
 
         final String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);

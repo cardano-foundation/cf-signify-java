@@ -69,5 +69,7 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface ExnEmbeds
     permits MultisigInceptEmbeds, MultisigRotateEmbeds, MultisigInteractEmbeds, MultisigRegistryInceptEmbeds, MultisigIssueEmbeds, MultisigRevokeEmbeds, MultisigRpyEmbeds, MultisigExnEmbeds {
+
+    String getD();
 }
 

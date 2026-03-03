@@ -55,5 +55,13 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface CredentialState
     permits CredentialStateIssOrRev, CredentialStateBisOrBrv {
+
+    Object getVn();
+    String getI();
+    String getS();
+    String getD();
+    String getRi();
+    Seal getA();
+    String getDt();
 }
 

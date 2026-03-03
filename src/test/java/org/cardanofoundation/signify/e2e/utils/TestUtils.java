@@ -146,9 +146,9 @@ public class TestUtils {
             String schemaSAID
     ) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> filter = new LinkedHashMap<>() {{
-            put("-i", HabStateUtil.getHabPrefix(issuerAid));
+            put("-i", issuerAid.getPrefix());
             put("-s", schemaSAID);
-            put("-a-i", HabStateUtil.getHabPrefix(recipientAid));
+            put("-a-i", recipientAid.getPrefix());
         }};
         CredentialFilter credentialFilter = CredentialFilter.builder()
                 .filter(filter)
@@ -177,7 +177,7 @@ public class TestUtils {
             EventResult op = client.identifiers().addEndRole(name, "agent", pre, null);
             waitOperation(client, op.op());
 
-            System.out.println(name + "AID:" + HabStateUtil.getHabPrefix(aid));
+            System.out.println(name + "AID:" + aid.getPrefix());
             return aid;
         }
     }
@@ -246,7 +246,7 @@ public class TestUtils {
 
         Optional<HabState> optionalIdentifier = client.identifiers().get(name);
         if (optionalIdentifier.isPresent()) {
-            id = HabStateUtil.getHabPrefix(optionalIdentifier.get());
+            id = optionalIdentifier.get().getPrefix();
             
         } else {
             ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);

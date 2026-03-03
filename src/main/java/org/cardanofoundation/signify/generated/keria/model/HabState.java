@@ -58,5 +58,11 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface HabState
     permits HabStateOneOf1, HabStateOneOf, HabStateOneOf3, HabStateOneOf2 {
+
+    String getName();
+    String getPrefix();
+    String getIcpDt();
+    KeyStateRecord getState();
+    Boolean getTransferable();
 }
 

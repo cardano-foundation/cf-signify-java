@@ -77,23 +77,23 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
             );
         });
         System.out.println(
-                delegator1Name + "(" + HabStateUtil.getHabPrefix(delegator1Aid) + ") and " +
-                        delegatee1Name + "(" + HabStateUtil.getHabPrefix(delegatee1Aid) + ") resolved " +
-                        delegator2Name + "(" + HabStateUtil.getHabPrefix(delegator2Aid) + ") and " +
-                        delegatee2Name + "(" + HabStateUtil.getHabPrefix(delegatee2Aid) + ") OOBIs and vice versa"
+                delegator1Name + "(" + delegator1Aid.getPrefix() + ") and " +
+                        delegatee1Name + "(" + delegatee1Aid.getPrefix() + ") resolved " +
+                        delegator2Name + "(" + delegator2Aid.getPrefix() + ") and " +
+                        delegatee2Name + "(" + delegatee2Aid.getPrefix() + ") OOBIs and vice versa"
         );
 
         // First member start the creation of a multisig identifier
         // Create a multisig AID for the GEDA.
         // Skip if a GEDA AID has already been incepted.
         Object otor1Object = testSteps.step(String.format("%s(%s) initiated delegator multisig, waiting for %s(%s) to join...",
-                delegator1Name, HabStateUtil.getHabPrefix(delegator1Aid), delegator2Name, HabStateUtil.getHabPrefix(delegator2Aid)), () -> {
+                delegator1Name, delegator1Aid.getPrefix(), delegator2Name, delegator2Aid.getPrefix()), () -> {
 
             MultisigUtils.StartMultisigInceptArgs startMultisigInceptArgs = MultisigUtils.StartMultisigInceptArgs
                     .builder()
                     .groupName(delegatorGroupName)
-                    .localMemberName(HabStateUtil.getHabName(delegator1Aid))
-                    .participants(List.of(HabStateUtil.getHabPrefix(delegator1Aid), HabStateUtil.getHabPrefix(delegator2Aid)))
+                    .localMemberName(delegator1Aid.getName())
+                    .participants(List.of(delegator1Aid.getPrefix(), delegator2Aid.getPrefix()))
                     .isith(2)
                     .nsith(2)
                     .toad(2)
@@ -125,7 +125,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         MultisigUtils.AcceptMultisigInceptArgs acceptMultisigInceptArgs =
                 MultisigUtils.AcceptMultisigInceptArgs
                         .builder()
-                        .localMemberName(HabStateUtil.getHabName(delegator2Aid))
+                        .localMemberName(delegator2Aid.getName())
                         .groupName(delegatorGroupName)
                         .msgSaid(ntor.getA().getD())
                         .build();
@@ -143,13 +143,13 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         HabState adelegatorGroupName1 = delegator1Client.identifiers().get(delegatorGroupName).get();
         HabState adelegatorGroupName2 = delegator2Client.identifiers().get(delegatorGroupName).get();
 
-        assertEquals(HabStateUtil.getHabPrefix(adelegatorGroupName1), HabStateUtil.getHabPrefix(adelegatorGroupName2));
-        assertEquals(HabStateUtil.getHabName(adelegatorGroupName1), HabStateUtil.getHabName(adelegatorGroupName2));
+        assertEquals(adelegatorGroupName1.getPrefix(), adelegatorGroupName2.getPrefix());
+        assertEquals(adelegatorGroupName1.getName(), adelegatorGroupName2.getName());
 
         HabState adelegatorGroupName = adelegatorGroupName1;
 
         //Resolve delegator OOBI
-                String delegatorGroupNameOobi = testSteps.step(String.format("Add and resolve delegator OOBI %s(%s)", delegatorGroupName, HabStateUtil.getHabPrefix(adelegatorGroupName)), () -> {
+                String delegatorGroupNameOobi = testSteps.step(String.format("Add and resolve delegator OOBI %s(%s)", delegatorGroupName, adelegatorGroupName.getPrefix()), () -> {
             String timestamp = createTimestamp();
             try {
                 List<Object> opList1 = MultisigUtils.addEndRoleMultisig(delegator1Client,
@@ -176,8 +176,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
                 TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
 
-                Map<String, Object> odelegatorGroupName1 = (Map<String, Object>) delegator1Client.oobis().get(HabStateUtil.getHabName(adelegatorGroupName), "agent").get();
-                Map<String, Object> odelegatorGroupName2 = (Map<String, Object>) delegator2Client.oobis().get(HabStateUtil.getHabName(adelegatorGroupName), "agent").get();
+                Map<String, Object> odelegatorGroupName1 = (Map<String, Object>) delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
+                Map<String, Object> odelegatorGroupName2 = (Map<String, Object>) delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
 
                 assertEquals(odelegatorGroupName1.get("role"), odelegatorGroupName2.get("role"));
 
@@ -199,13 +199,13 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 new GetOrCreateContactArgs(delegatee2Client, delegateeGroupName, oobiGtor)
         );
 
-        Object opDelegatee1 = testSteps.step(delegatee1Name + "(" + HabStateUtil.getHabPrefix(delegatee1Aid) + ") initiated delegatee multisig, waiting for "
-                + delegatee2Name + "(" + HabStateUtil.getHabPrefix(delegatee2Aid) + ") to join...", () -> {
+        Object opDelegatee1 = testSteps.step(delegatee1Name + "(" + delegatee1Aid.getPrefix() + ") initiated delegatee multisig, waiting for "
+                + delegatee2Name + "(" + delegatee2Aid.getPrefix() + ") to join...", () -> {
             MultisigUtils.StartMultisigInceptArgs startMultisigInceptArgs = MultisigUtils.StartMultisigInceptArgs
                     .builder()
                     .groupName(delegateeGroupName)
-                    .localMemberName(HabStateUtil.getHabName(delegatee1Aid))
-                    .participants(List.of(HabStateUtil.getHabPrefix(delegatee1Aid), HabStateUtil.getHabPrefix(delegatee2Aid)))
+                    .localMemberName(delegatee1Aid.getName())
+                    .participants(List.of(delegatee1Aid.getPrefix(), delegatee2Aid.getPrefix()))
                     .isith(2)
                     .nsith(2)
                     .toad(2)
@@ -229,7 +229,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         acceptMultisigInceptArgs =
                 MultisigUtils.AcceptMultisigInceptArgs
                         .builder()
-                        .localMemberName(HabStateUtil.getHabName(delegatee2Aid))
+                        .localMemberName(delegatee2Aid.getName())
                         .groupName(delegateeGroupName)
                         .msgSaid(ntee.getA().getD())
                         .build();
@@ -239,8 +239,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         HabState agtee1 = delegatee1Client.identifiers().get(delegateeGroupName).get();
         HabState agtee2 = delegatee2Client.identifiers().get(delegateeGroupName).get();
 
-        assertEquals(HabStateUtil.getHabPrefix(agtee1), HabStateUtil.getHabPrefix(agtee2));
-        assertEquals(HabStateUtil.getHabName(agtee1), HabStateUtil.getHabName(agtee2));
+        assertEquals(agtee1.getPrefix(), agtee2.getPrefix());
+        assertEquals(agtee1.getName(), agtee2.getName());
 
         String teepre = Operation.fromObject(opDelegatee1).getName().split("\\.")[1];
         assertEquals(teepre, Operation.fromObject(opDelegatee2).getName().split("\\.")[1]);
@@ -283,8 +283,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
             }
         });
 
-        Object queryOp1 = delegator1Client.keyStates().query(HabStateUtil.getHabPrefix(adelegatorGroupName), "1", null);
-        Object queryOp2 = delegator2Client.keyStates().query(HabStateUtil.getHabPrefix(adelegatorGroupName), "1", null);
+        Object queryOp1 = delegator1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object queryOp2 = delegator2Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
         waitOperationAsync(
                 new WaitOperationArgs(delegator1Client, queryOp1),
@@ -292,8 +292,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         );
 
         // QARs query the GEDA's key state
-        Object ksteetor1 = delegatee1Client.keyStates().query(HabStateUtil.getHabPrefix(adelegatorGroupName), "1", null);
-        Object ksteetor2 = delegatee2Client.keyStates().query(HabStateUtil.getHabPrefix(adelegatorGroupName), "1", null);
+        Object ksteetor1 = delegatee1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        Object ksteetor2 = delegatee2Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
 
         waitOperationAsync(
                 new WaitOperationArgs(delegatee1Client, ksteetor1),
@@ -304,7 +304,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         System.out.println("Delegated multisig created!");
 
         HabState agtee = delegatee1Client.identifiers().get(delegateeGroupName).get();
-        assertEquals(HabStateUtil.getHabPrefix(agtee), teepre);
+        assertEquals(agtee.getPrefix(), teepre);
 
         List<SignifyClient> clients = Arrays.asList(
                 delegator1Client,

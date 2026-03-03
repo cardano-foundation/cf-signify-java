@@ -55,5 +55,15 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface ACDCV2 extends CredentialSad
     permits ACDCV2OneOf {
+
+    String getV();
+    String getD();
+    String getI();
+    String getS();
+    String getU();
+    String getRd();
+    String getE();
+    String getR();
+    ACDCAttributes getA();
 }
 

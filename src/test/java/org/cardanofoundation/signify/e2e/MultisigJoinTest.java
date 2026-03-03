@@ -213,12 +213,12 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid2 = client2.identifiers().get(nameMember2).get();
 
         List<Object> updates = getKeyStateQuerAsync(
-            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid2), "1"),
-            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid3), "0"),
-            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid1), "1"),
-            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid3), "0"),
-            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid1), "1"),
-            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid2), "1")
+            new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "1"),
+            new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "0"),
+            new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "1"),
+            new GetKeyStateQueryArgs(client2, aid3.getPrefix(), "0"),
+            new GetKeyStateQueryArgs(client3, aid1.getPrefix(), "1"),
+            new GetKeyStateQueryArgs(client3, aid2.getPrefix(), "1")
 
         );
 
@@ -318,12 +318,12 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid3 = client3.identifiers().get(nameMember3).get();
 
         List<Object> updates = getKeyStateQuerAsync(
-            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid2), "2"),
-            new GetKeyStateQueryArgs(client1, HabStateUtil.getHabPrefix(aid3), "1"),
-            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid1), "2"),
-            new GetKeyStateQueryArgs(client2, HabStateUtil.getHabPrefix(aid3), "1"),
-            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid1), "2"),
-            new GetKeyStateQueryArgs(client3, HabStateUtil.getHabPrefix(aid2), "2")
+            new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "2"),
+            new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "1"),
+            new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "2"),
+            new GetKeyStateQueryArgs(client2, aid3.getPrefix(), "1"),
+            new GetKeyStateQueryArgs(client3, aid1.getPrefix(), "2"),
+            new GetKeyStateQueryArgs(client3, aid2.getPrefix(), "2")
 
         );
 

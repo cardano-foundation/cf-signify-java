@@ -63,5 +63,16 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface Rot
     permits ROTV1, ROTV2 {
+
+    String getV();
+    String getT();
+    String getD();
+    String getI();
+    String getS();
+    String getP();
+    ICPV1Kt getKt();
+    ICPV1Kt getNt();
+    String getBt();
+    Object getA();
 }
 

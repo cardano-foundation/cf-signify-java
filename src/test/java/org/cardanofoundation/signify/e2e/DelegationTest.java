@@ -80,7 +80,7 @@ public class DelegationTest {
 
         // Client 2 creates delegate AID
         CreateIdentifierArgs delpre = new CreateIdentifierArgs();
-        delpre.setDelpre(HabStateUtil.getHabPrefix(ator));
+        delpre.setDelpre(ator.getPrefix());
         EventResult icpResult2 = client2.identifiers().create("delegate", delpre);
         Operation<?> op2 = Operation.fromObject(icpResult2.op());
         opResponseName = op2.getName();
@@ -104,14 +104,14 @@ public class DelegationTest {
             assertEquals(approDelResList.getFirst(), anchor);
         });
 
-        Object op3 = client2.keyStates().query(HabStateUtil.getHabPrefix(ator), "1", null);
+        Object op3 = client2.keyStates().query(ator.getPrefix(), "1", null);
         waitOperation(client2, op3);
 
         // Client 2 check approval
         waitOperation(client2, op2);
         HabState aid2 = client2.identifiers().get("delegate").get();
-        assertEquals(delegatePrefix, HabStateUtil.getHabPrefix(aid2));
-        System.out.println("Delegation approved for aid: " + HabStateUtil.getHabPrefix(aid2));
+        assertEquals(delegatePrefix, aid2.getPrefix());
+        System.out.println("Delegation approved for aid: " + aid2.getPrefix());
 
         List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
         assertOperations(clientList);
@@ -131,6 +131,6 @@ public class DelegationTest {
         assertNotNull(oobi);
 
         contactId = getOrCreateContact(client1, "delegate", oobi);
-        assertEquals(HabStateUtil.getHabPrefix(aid2), contactId);
+        assertEquals(aid2.getPrefix(), contactId);
     }
 }

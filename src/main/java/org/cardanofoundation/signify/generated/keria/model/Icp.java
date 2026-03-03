@@ -61,5 +61,15 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface Icp
     permits ICPV1, ICPV2 {
+
+    String getV();
+    String getT();
+    String getD();
+    String getI();
+    String getS();
+    ICPV1Kt getKt();
+    ICPV1Kt getNt();
+    String getBt();
+    Object getA();
 }
 

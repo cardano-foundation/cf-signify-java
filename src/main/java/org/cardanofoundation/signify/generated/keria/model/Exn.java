@@ -58,5 +58,14 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface Exn
     permits EXNV1, EXNV2 {
+
+    String getV();
+    String getT();
+    String getD();
+    String getI();
+    String getP();
+    String getDt();
+    String getR();
+    Object getA();
 }
 

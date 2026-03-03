@@ -58,7 +58,7 @@ public class Registries {
     public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException {
         HabState hab = this.client.identifiers().get(args.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getName()));
-        String pre = HabStateUtil.getHabPrefix(hab);
+        String pre = hab.getPrefix();
 
         List<String> cnfg = new ArrayList<>();
         if (Boolean.TRUE.equals(args.getNoBackers())) {

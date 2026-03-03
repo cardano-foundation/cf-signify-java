@@ -51,5 +51,12 @@ import org.hibernate.validator.constraints.*;
 )
 public sealed interface Rpy
     permits RPYV1, RPYV2 {
+
+    String getV();
+    String getT();
+    String getD();
+    String getDt();
+    String getR();
+    Object getA();
 }
 
