@@ -75,9 +75,6 @@ dependencies {
     implementation "jakarta.validation:jakarta.validation-api:${jakartaValidationVersion}"
     implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
 
-    // YAML parsing for build scripts
-    implementation "org.yaml:snakeyaml:2.2"
-
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebVersion}"
@@ -284,6 +281,3 @@ tasks.named("openApiGenerate") {
     dependsOn("prepareOpenApiSpec")
     finalizedBy("makeSealedInterfaces")
 }
-
-compileJava.dependsOn("makeSealedInterfaces")
-sourcesJar.dependsOn("makeSealedInterfaces")
