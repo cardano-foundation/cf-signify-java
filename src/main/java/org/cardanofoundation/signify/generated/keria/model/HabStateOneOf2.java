@@ -21,48 +21,49 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.REVV1;
+import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * MultisigRevokeEmbeds
+ * HabStateOneOf2
  */
 @JsonPropertyOrder({
-  MultisigRevokeEmbeds.JSON_PROPERTY_REV
+  HabStateOneOf2.JSON_PROPERTY_GROUP
 })
+@JsonTypeName("HabState_oneOf_2")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class MultisigRevokeEmbeds {
-  public static final String JSON_PROPERTY_REV = "rev";
+public class HabStateOneOf2 {
+  public static final String JSON_PROPERTY_GROUP = "group";
   @jakarta.annotation.Nonnull
-  private REVV1 rev;
+  private GroupKeyState group;
 
-  public MultisigRevokeEmbeds() {
+  public HabStateOneOf2() {
   }
 
-  public MultisigRevokeEmbeds rev(@jakarta.annotation.Nonnull REVV1 rev) {
+  public HabStateOneOf2 group(@jakarta.annotation.Nonnull GroupKeyState group) {
     
-    this.rev = rev;
+    this.group = group;
     return this;
   }
 
   /**
-   * Get rev
-   * @return rev
+   * Get group
+   * @return group
    */
   @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
+  @JsonProperty(value = JSON_PROPERTY_GROUP, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public REVV1 getRev() {
-    return rev;
+  public GroupKeyState getGroup() {
+    return group;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
+  @JsonProperty(value = JSON_PROPERTY_GROUP, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRev(@jakarta.annotation.Nonnull REVV1 rev) {
-    this.rev = rev;
+  public void setGroup(@jakarta.annotation.Nonnull GroupKeyState group) {
+    this.group = group;
   }
 
 
@@ -74,20 +75,20 @@ public class MultisigRevokeEmbeds {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    MultisigRevokeEmbeds multisigRevokeEmbeds = (MultisigRevokeEmbeds) o;
-    return Objects.equals(this.rev, multisigRevokeEmbeds.rev);
+    HabStateOneOf2 habStateOneOf2 = (HabStateOneOf2) o;
+    return Objects.equals(this.group, habStateOneOf2.group);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rev);
+    return Objects.hash(group);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class MultisigRevokeEmbeds {\n");
-    sb.append("    rev: ").append(toIndentedString(rev)).append("\n");
+    sb.append("class HabStateOneOf2 {\n");
+    sb.append("    group: ").append(toIndentedString(group)).append("\n");
     sb.append("}");
     return sb.toString();
   }

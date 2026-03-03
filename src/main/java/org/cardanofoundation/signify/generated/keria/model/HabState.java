@@ -24,11 +24,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.cardanofoundation.signify.generated.keria.model.ExternState;
+import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf1;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf2;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf3;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.openapitools.jackson.nullable.JsonNullable;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.openapitools.jackson.nullable.JsonNullable;
-import java.util.NoSuchElementException;
+import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
+import org.cardanofoundation.signify.generated.keria.model.SaltyState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -41,9 +45,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   HabState.JSON_PROPERTY_ICP_DT,
   HabState.JSON_PROPERTY_STATE,
   HabState.JSON_PROPERTY_TRANSFERABLE,
-  HabState.JSON_PROPERTY_WINDEXES
+  HabState.JSON_PROPERTY_WINDEXES,
+  HabState.JSON_PROPERTY_SALTY,
+  HabState.JSON_PROPERTY_RANDY,
+  HabState.JSON_PROPERTY_GROUP,
+  HabState.JSON_PROPERTY_EXTERN
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class HabState {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
@@ -62,12 +70,28 @@ public class HabState {
   private KeyStateRecord state;
 
   public static final String JSON_PROPERTY_TRANSFERABLE = "transferable";
-  @jakarta.annotation.Nullable
-  private JsonNullable<Boolean> transferable = JsonNullable.<Boolean>undefined();
+  @jakarta.annotation.Nonnull
+  private Boolean transferable;
 
   public static final String JSON_PROPERTY_WINDEXES = "windexes";
-  @jakarta.annotation.Nullable
-  private JsonNullable<List<String>> windexes = JsonNullable.<List<String>>undefined();
+  @jakarta.annotation.Nonnull
+  private List<String> windexes = new ArrayList<>();
+
+  public static final String JSON_PROPERTY_SALTY = "salty";
+  @jakarta.annotation.Nonnull
+  private SaltyState salty;
+
+  public static final String JSON_PROPERTY_RANDY = "randy";
+  @jakarta.annotation.Nonnull
+  private RandyKeyState randy;
+
+  public static final String JSON_PROPERTY_GROUP = "group";
+  @jakarta.annotation.Nonnull
+  private GroupKeyState group;
+
+  public static final String JSON_PROPERTY_EXTERN = "extern";
+  @jakarta.annotation.Nonnull
+  private ExternState extern;
 
   public HabState() {
   }
@@ -172,9 +196,9 @@ public class HabState {
     this.state = state;
   }
 
-  public HabState transferable(@jakarta.annotation.Nullable Boolean transferable) {
-    this.transferable = JsonNullable.<Boolean>of(transferable);
+  public HabState transferable(@jakarta.annotation.Nonnull Boolean transferable) {
     
+    this.transferable = transferable;
     return this;
   }
 
@@ -182,44 +206,32 @@ public class HabState {
    * Get transferable
    * @return transferable
    */
-  @jakarta.annotation.Nullable
-  @JsonIgnore
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
   public Boolean getTransferable() {
-        return transferable.orElse(null);
-  }
-
-  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public JsonNullable<Boolean> getTransferable_JsonNullable() {
     return transferable;
   }
-  
-  @JsonProperty(JSON_PROPERTY_TRANSFERABLE)
-  public void setTransferable_JsonNullable(JsonNullable<Boolean> transferable) {
+
+
+  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setTransferable(@jakarta.annotation.Nonnull Boolean transferable) {
     this.transferable = transferable;
   }
 
-  public void setTransferable(@jakarta.annotation.Nullable Boolean transferable) {
-    this.transferable = JsonNullable.<Boolean>of(transferable);
-  }
-
-  public HabState windexes(@jakarta.annotation.Nullable List<String> windexes) {
-    this.windexes = JsonNullable.<List<String>>of(windexes);
+  public HabState windexes(@jakarta.annotation.Nonnull List<String> windexes) {
     
+    this.windexes = windexes;
     return this;
   }
 
   public HabState addWindexesItem(String windexesItem) {
-    if (this.windexes == null || !this.windexes.isPresent()) {
-      this.windexes = JsonNullable.<List<String>>of(new ArrayList<>());
+    if (this.windexes == null) {
+      this.windexes = new ArrayList<>();
     }
-    try {
-      this.windexes.get().add(windexesItem);
-    } catch (java.util.NoSuchElementException e) {
-      // this can never happen, as we make sure above that the value is present
-    }
+    this.windexes.add(windexesItem);
     return this;
   }
 
@@ -227,27 +239,119 @@ public class HabState {
    * Get windexes
    * @return windexes
    */
-  @jakarta.annotation.Nullable
-  @JsonIgnore
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
   public List<String> getWindexes() {
-        return windexes.orElse(null);
-  }
-
-  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public JsonNullable<List<String>> getWindexes_JsonNullable() {
     return windexes;
   }
-  
-  @JsonProperty(JSON_PROPERTY_WINDEXES)
-  public void setWindexes_JsonNullable(JsonNullable<List<String>> windexes) {
+
+
+  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setWindexes(@jakarta.annotation.Nonnull List<String> windexes) {
     this.windexes = windexes;
   }
 
-  public void setWindexes(@jakarta.annotation.Nullable List<String> windexes) {
-    this.windexes = JsonNullable.<List<String>>of(windexes);
+  public HabState salty(@jakarta.annotation.Nonnull SaltyState salty) {
+    
+    this.salty = salty;
+    return this;
+  }
+
+  /**
+   * Get salty
+   * @return salty
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_SALTY, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public SaltyState getSalty() {
+    return salty;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_SALTY, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setSalty(@jakarta.annotation.Nonnull SaltyState salty) {
+    this.salty = salty;
+  }
+
+  public HabState randy(@jakarta.annotation.Nonnull RandyKeyState randy) {
+    
+    this.randy = randy;
+    return this;
+  }
+
+  /**
+   * Get randy
+   * @return randy
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_RANDY, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public RandyKeyState getRandy() {
+    return randy;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_RANDY, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setRandy(@jakarta.annotation.Nonnull RandyKeyState randy) {
+    this.randy = randy;
+  }
+
+  public HabState group(@jakarta.annotation.Nonnull GroupKeyState group) {
+    
+    this.group = group;
+    return this;
+  }
+
+  /**
+   * Get group
+   * @return group
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_GROUP, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public GroupKeyState getGroup() {
+    return group;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_GROUP, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setGroup(@jakarta.annotation.Nonnull GroupKeyState group) {
+    this.group = group;
+  }
+
+  public HabState extern(@jakarta.annotation.Nonnull ExternState extern) {
+    
+    this.extern = extern;
+    return this;
+  }
+
+  /**
+   * Get extern
+   * @return extern
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_EXTERN, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public ExternState getExtern() {
+    return extern;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_EXTERN, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setExtern(@jakarta.annotation.Nonnull ExternState extern) {
+    this.extern = extern;
   }
 
 
@@ -264,24 +368,17 @@ public class HabState {
         Objects.equals(this.prefix, habState.prefix) &&
         Objects.equals(this.icpDt, habState.icpDt) &&
         Objects.equals(this.state, habState.state) &&
-        equalsNullable(this.transferable, habState.transferable) &&
-        equalsNullable(this.windexes, habState.windexes);
-  }
-
-  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
-    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
+        Objects.equals(this.transferable, habState.transferable) &&
+        Objects.equals(this.windexes, habState.windexes) &&
+        Objects.equals(this.salty, habState.salty) &&
+        Objects.equals(this.randy, habState.randy) &&
+        Objects.equals(this.group, habState.group) &&
+        Objects.equals(this.extern, habState.extern);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, prefix, icpDt, state, hashCodeNullable(transferable), hashCodeNullable(windexes));
-  }
-
-  private static <T> int hashCodeNullable(JsonNullable<T> a) {
-    if (a == null) {
-      return 1;
-    }
-    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
+    return Objects.hash(name, prefix, icpDt, state, transferable, windexes, salty, randy, group, extern);
   }
 
   @Override
@@ -294,6 +391,10 @@ public class HabState {
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    transferable: ").append(toIndentedString(transferable)).append("\n");
     sb.append("    windexes: ").append(toIndentedString(windexes)).append("\n");
+    sb.append("    salty: ").append(toIndentedString(salty)).append("\n");
+    sb.append("    randy: ").append(toIndentedString(randy)).append("\n");
+    sb.append("    group: ").append(toIndentedString(group)).append("\n");
+    sb.append("    extern: ").append(toIndentedString(extern)).append("\n");
     sb.append("}");
     return sb.toString();
   }

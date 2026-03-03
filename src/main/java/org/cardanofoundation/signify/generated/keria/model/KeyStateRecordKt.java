@@ -16,53 +16,20 @@ package org.cardanofoundation.signify.generated.keria.model;
 import java.util.Objects;
 import java.util.Arrays;
 import java.util.Locale;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.REVV1;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * MultisigRevokeEmbeds
+ * KeyStateRecordKt
  */
 @JsonPropertyOrder({
-  MultisigRevokeEmbeds.JSON_PROPERTY_REV
 })
+@JsonTypeName("KeyStateRecord_kt")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class MultisigRevokeEmbeds {
-  public static final String JSON_PROPERTY_REV = "rev";
-  @jakarta.annotation.Nonnull
-  private REVV1 rev;
-
-  public MultisigRevokeEmbeds() {
-  }
-
-  public MultisigRevokeEmbeds rev(@jakarta.annotation.Nonnull REVV1 rev) {
-    
-    this.rev = rev;
-    return this;
-  }
-
-  /**
-   * Get rev
-   * @return rev
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public REVV1 getRev() {
-    return rev;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRev(@jakarta.annotation.Nonnull REVV1 rev) {
-    this.rev = rev;
+public class KeyStateRecordKt {
+  public KeyStateRecordKt() {
   }
 
 
@@ -74,20 +41,18 @@ public class MultisigRevokeEmbeds {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    MultisigRevokeEmbeds multisigRevokeEmbeds = (MultisigRevokeEmbeds) o;
-    return Objects.equals(this.rev, multisigRevokeEmbeds.rev);
+    return true;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rev);
+    return Objects.hash();
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class MultisigRevokeEmbeds {\n");
-    sb.append("    rev: ").append(toIndentedString(rev)).append("\n");
+    sb.append("class KeyStateRecordKt {\n");
     sb.append("}");
     return sb.toString();
   }

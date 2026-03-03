@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExchangesQueryPostRequest.JSON_PROPERTY_LIMIT
 })
 @JsonTypeName("_exchanges_query_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class ExchangesQueryPostRequest {
   public static final String JSON_PROPERTY_FILTER = "filter";
   @jakarta.annotation.Nullable

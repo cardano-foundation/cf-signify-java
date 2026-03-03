@@ -21,48 +21,49 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.REVV1;
+import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * MultisigRevokeEmbeds
+ * HabStateOneOf1
  */
 @JsonPropertyOrder({
-  MultisigRevokeEmbeds.JSON_PROPERTY_REV
+  HabStateOneOf1.JSON_PROPERTY_RANDY
 })
+@JsonTypeName("HabState_oneOf_1")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class MultisigRevokeEmbeds {
-  public static final String JSON_PROPERTY_REV = "rev";
+public class HabStateOneOf1 {
+  public static final String JSON_PROPERTY_RANDY = "randy";
   @jakarta.annotation.Nonnull
-  private REVV1 rev;
+  private RandyKeyState randy;
 
-  public MultisigRevokeEmbeds() {
+  public HabStateOneOf1() {
   }
 
-  public MultisigRevokeEmbeds rev(@jakarta.annotation.Nonnull REVV1 rev) {
+  public HabStateOneOf1 randy(@jakarta.annotation.Nonnull RandyKeyState randy) {
     
-    this.rev = rev;
+    this.randy = randy;
     return this;
   }
 
   /**
-   * Get rev
-   * @return rev
+   * Get randy
+   * @return randy
    */
   @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
+  @JsonProperty(value = JSON_PROPERTY_RANDY, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public REVV1 getRev() {
-    return rev;
+  public RandyKeyState getRandy() {
+    return randy;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
+  @JsonProperty(value = JSON_PROPERTY_RANDY, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRev(@jakarta.annotation.Nonnull REVV1 rev) {
-    this.rev = rev;
+  public void setRandy(@jakarta.annotation.Nonnull RandyKeyState randy) {
+    this.randy = randy;
   }
 
 
@@ -74,20 +75,20 @@ public class MultisigRevokeEmbeds {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    MultisigRevokeEmbeds multisigRevokeEmbeds = (MultisigRevokeEmbeds) o;
-    return Objects.equals(this.rev, multisigRevokeEmbeds.rev);
+    HabStateOneOf1 habStateOneOf1 = (HabStateOneOf1) o;
+    return Objects.equals(this.randy, habStateOneOf1.randy);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rev);
+    return Objects.hash(randy);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class MultisigRevokeEmbeds {\n");
-    sb.append("    rev: ").append(toIndentedString(rev)).append("\n");
+    sb.append("class HabStateOneOf1 {\n");
+    sb.append("    randy: ").append(toIndentedString(randy)).append("\n");
     sb.append("}");
     return sb.toString();
   }

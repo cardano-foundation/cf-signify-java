@@ -21,48 +21,49 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.REVV1;
+import org.cardanofoundation.signify.generated.keria.model.SaltyState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * MultisigRevokeEmbeds
+ * HabStateOneOf
  */
 @JsonPropertyOrder({
-  MultisigRevokeEmbeds.JSON_PROPERTY_REV
+  HabStateOneOf.JSON_PROPERTY_SALTY
 })
+@JsonTypeName("HabState_oneOf")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class MultisigRevokeEmbeds {
-  public static final String JSON_PROPERTY_REV = "rev";
+public class HabStateOneOf {
+  public static final String JSON_PROPERTY_SALTY = "salty";
   @jakarta.annotation.Nonnull
-  private REVV1 rev;
+  private SaltyState salty;
 
-  public MultisigRevokeEmbeds() {
+  public HabStateOneOf() {
   }
 
-  public MultisigRevokeEmbeds rev(@jakarta.annotation.Nonnull REVV1 rev) {
+  public HabStateOneOf salty(@jakarta.annotation.Nonnull SaltyState salty) {
     
-    this.rev = rev;
+    this.salty = salty;
     return this;
   }
 
   /**
-   * Get rev
-   * @return rev
+   * Get salty
+   * @return salty
    */
   @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
+  @JsonProperty(value = JSON_PROPERTY_SALTY, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public REVV1 getRev() {
-    return rev;
+  public SaltyState getSalty() {
+    return salty;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_REV, required = true)
+  @JsonProperty(value = JSON_PROPERTY_SALTY, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRev(@jakarta.annotation.Nonnull REVV1 rev) {
-    this.rev = rev;
+  public void setSalty(@jakarta.annotation.Nonnull SaltyState salty) {
+    this.salty = salty;
   }
 
 
@@ -74,20 +75,20 @@ public class MultisigRevokeEmbeds {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    MultisigRevokeEmbeds multisigRevokeEmbeds = (MultisigRevokeEmbeds) o;
-    return Objects.equals(this.rev, multisigRevokeEmbeds.rev);
+    HabStateOneOf habStateOneOf = (HabStateOneOf) o;
+    return Objects.equals(this.salty, habStateOneOf.salty);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rev);
+    return Objects.hash(salty);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class MultisigRevokeEmbeds {\n");
-    sb.append("    rev: ").append(toIndentedString(rev)).append("\n");
+    sb.append("class HabStateOneOf {\n");
+    sb.append("    salty: ").append(toIndentedString(salty)).append("\n");
     sb.append("}");
     return sb.toString();
   }

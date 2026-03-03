@@ -25,29 +25,38 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * IdentifiersNamePutRequest
+ * HabStateBase
  */
 @JsonPropertyOrder({
-  IdentifiersNamePutRequest.JSON_PROPERTY_NAME
+  HabStateBase.JSON_PROPERTY_NAME,
+  HabStateBase.JSON_PROPERTY_PREFIX,
+  HabStateBase.JSON_PROPERTY_ICP_DT
 })
-@JsonTypeName("_identifiers__name__put_request")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class IdentifiersNamePutRequest {
+public class HabStateBase {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;
 
-  public IdentifiersNamePutRequest() {
+  public static final String JSON_PROPERTY_PREFIX = "prefix";
+  @jakarta.annotation.Nonnull
+  private String prefix;
+
+  public static final String JSON_PROPERTY_ICP_DT = "icp_dt";
+  @jakarta.annotation.Nonnull
+  private String icpDt;
+
+  public HabStateBase() {
   }
 
-  public IdentifiersNamePutRequest name(@jakarta.annotation.Nonnull String name) {
+  public HabStateBase name(@jakarta.annotation.Nonnull String name) {
     
     this.name = name;
     return this;
   }
 
   /**
-   * The new human-readable name for the identifier.
+   * Get name
    * @return name
    */
   @jakarta.annotation.Nonnull
@@ -65,6 +74,56 @@ public class IdentifiersNamePutRequest {
     this.name = name;
   }
 
+  public HabStateBase prefix(@jakarta.annotation.Nonnull String prefix) {
+    
+    this.prefix = prefix;
+    return this;
+  }
+
+  /**
+   * Get prefix
+   * @return prefix
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_PREFIX, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getPrefix() {
+    return prefix;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_PREFIX, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setPrefix(@jakarta.annotation.Nonnull String prefix) {
+    this.prefix = prefix;
+  }
+
+  public HabStateBase icpDt(@jakarta.annotation.Nonnull String icpDt) {
+    
+    this.icpDt = icpDt;
+    return this;
+  }
+
+  /**
+   * Get icpDt
+   * @return icpDt
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_ICP_DT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getIcpDt() {
+    return icpDt;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_ICP_DT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setIcpDt(@jakarta.annotation.Nonnull String icpDt) {
+    this.icpDt = icpDt;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -74,20 +133,24 @@ public class IdentifiersNamePutRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    IdentifiersNamePutRequest identifiersNamePutRequest = (IdentifiersNamePutRequest) o;
-    return Objects.equals(this.name, identifiersNamePutRequest.name);
+    HabStateBase habStateBase = (HabStateBase) o;
+    return Objects.equals(this.name, habStateBase.name) &&
+        Objects.equals(this.prefix, habStateBase.prefix) &&
+        Objects.equals(this.icpDt, habStateBase.icpDt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return Objects.hash(name, prefix, icpDt);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class IdentifiersNamePutRequest {\n");
+    sb.append("class HabStateBase {\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    prefix: ").append(toIndentedString(prefix)).append("\n");
+    sb.append("    icpDt: ").append(toIndentedString(icpDt)).append("\n");
     sb.append("}");
     return sb.toString();
   }
