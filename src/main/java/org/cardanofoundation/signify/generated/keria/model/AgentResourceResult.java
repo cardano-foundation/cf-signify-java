@@ -23,10 +23,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Controller;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.openapitools.jackson.nullable.JsonNullable;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.openapitools.jackson.nullable.JsonNullable;
-import java.util.NoSuchElementException;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -56,11 +52,11 @@ public class AgentResourceResult {
 
   public static final String JSON_PROPERTY_RIDX = "ridx";
   @jakarta.annotation.Nullable
-  private JsonNullable<Integer> ridx = JsonNullable.<Integer>undefined();
+  private Integer ridx;
 
   public static final String JSON_PROPERTY_SXLT = "sxlt";
   @jakarta.annotation.Nullable
-  private JsonNullable<String> sxlt = JsonNullable.<String>undefined();
+  private String sxlt;
 
   public AgentResourceResult() {
   }
@@ -141,8 +137,8 @@ public class AgentResourceResult {
   }
 
   public AgentResourceResult ridx(@jakarta.annotation.Nullable Integer ridx) {
-    this.ridx = JsonNullable.<Integer>of(ridx);
     
+    this.ridx = ridx;
     return this;
   }
 
@@ -151,31 +147,23 @@ public class AgentResourceResult {
    * @return ridx
    */
   @jakarta.annotation.Nullable
-  @JsonIgnore
-
-  public Integer getRidx() {
-        return ridx.orElse(null);
-  }
-
   @JsonProperty(value = JSON_PROPERTY_RIDX, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<Integer> getRidx_JsonNullable() {
+  public Integer getRidx() {
     return ridx;
   }
-  
-  @JsonProperty(JSON_PROPERTY_RIDX)
-  public void setRidx_JsonNullable(JsonNullable<Integer> ridx) {
+
+
+  @JsonProperty(value = JSON_PROPERTY_RIDX, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setRidx(@jakarta.annotation.Nullable Integer ridx) {
     this.ridx = ridx;
   }
 
-  public void setRidx(@jakarta.annotation.Nullable Integer ridx) {
-    this.ridx = JsonNullable.<Integer>of(ridx);
-  }
-
   public AgentResourceResult sxlt(@jakarta.annotation.Nullable String sxlt) {
-    this.sxlt = JsonNullable.<String>of(sxlt);
     
+    this.sxlt = sxlt;
     return this;
   }
 
@@ -184,26 +172,18 @@ public class AgentResourceResult {
    * @return sxlt
    */
   @jakarta.annotation.Nullable
-  @JsonIgnore
-
-  public String getSxlt() {
-        return sxlt.orElse(null);
-  }
-
   @JsonProperty(value = JSON_PROPERTY_SXLT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<String> getSxlt_JsonNullable() {
+  public String getSxlt() {
     return sxlt;
   }
-  
-  @JsonProperty(JSON_PROPERTY_SXLT)
-  public void setSxlt_JsonNullable(JsonNullable<String> sxlt) {
-    this.sxlt = sxlt;
-  }
 
+
+  @JsonProperty(value = JSON_PROPERTY_SXLT, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setSxlt(@jakarta.annotation.Nullable String sxlt) {
-    this.sxlt = JsonNullable.<String>of(sxlt);
+    this.sxlt = sxlt;
   }
 
 
@@ -219,24 +199,13 @@ public class AgentResourceResult {
     return Objects.equals(this.agent, agentResourceResult.agent) &&
         Objects.equals(this.controller, agentResourceResult.controller) &&
         Objects.equals(this.pidx, agentResourceResult.pidx) &&
-        equalsNullable(this.ridx, agentResourceResult.ridx) &&
-        equalsNullable(this.sxlt, agentResourceResult.sxlt);
-  }
-
-  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
-    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
+        Objects.equals(this.ridx, agentResourceResult.ridx) &&
+        Objects.equals(this.sxlt, agentResourceResult.sxlt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(agent, controller, pidx, hashCodeNullable(ridx), hashCodeNullable(sxlt));
-  }
-
-  private static <T> int hashCodeNullable(JsonNullable<T> a) {
-    if (a == null) {
-      return 1;
-    }
-    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
+    return Objects.hash(agent, controller, pidx, ridx, sxlt);
   }
 
   @Override
