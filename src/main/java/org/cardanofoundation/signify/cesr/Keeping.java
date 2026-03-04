@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
 import org.cardanofoundation.signify.generated.keria.model.SaltyState;
@@ -120,7 +120,7 @@ public class Keeping {
                 );
                 case group -> new GroupKeeper(
                         this,
-                        (Identifier) kargs.get("mhab"),
+                        (HabState) kargs.get("mhab"),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("states")), new TypeReference<>() {}),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("rstates")), new TypeReference<>() {}),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("keys")), new TypeReference<>() {}),
@@ -130,7 +130,7 @@ public class Keeping {
             };
         }
 
-        public Keeper<? extends KeeperParams> get(Identifier aid) throws LibsodiumException {
+        public Keeper<? extends KeeperParams> get(HabState aid) throws LibsodiumException {
             SaltyState saltyState = aid.getSalty();
             RandyKeyState randyState = aid.getRandy();
             GroupKeyState groupKeyState = aid.getGroup();
@@ -664,7 +664,7 @@ public class Keeping {
     @Getter
     public static class GroupKeeper implements Keeper<GroupParams> {
         private final KeyManager manager;
-        private final Identifier mhab;
+        private final HabState mhab;
         private final Algos algo = Algos.group;
         private final List<Signer> signers;
         private List<String> gkeys;
@@ -672,7 +672,7 @@ public class Keeping {
 
         public GroupKeeper(
                 KeyManager manager,
-                Identifier mhab,
+                HabState mhab,
                 List<KeyStateRecord> states,
                 List<KeyStateRecord> rstates,
                 List<String> keys,

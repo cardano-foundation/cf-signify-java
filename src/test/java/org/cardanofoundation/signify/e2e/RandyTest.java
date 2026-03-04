@@ -10,7 +10,7 @@ import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
@@ -64,8 +64,8 @@ public class RandyTest {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aids = client1.identifiers().list(0, 24);
-        List<Identifier> aidsList = aids.aids();
-        for (Identifier aid1 : aidsList) {
+        List<HabState> aidsList = aids.aids();
+        for (HabState aid1 : aidsList) {
             opResponseName = aid1.getName();
             opResponsePrefix = aid1.getPrefix();
         }
@@ -84,7 +84,7 @@ public class RandyTest {
 
         aids = client1.identifiers().list(0, 24);
         aidsList = aids.aids();
-        for (Identifier aid1 : aidsList) {
+        for (HabState aid1 : aidsList) {
             opResponsePrefix = aid1.getPrefix();
         }
         assertEquals(1, aidsList.size());

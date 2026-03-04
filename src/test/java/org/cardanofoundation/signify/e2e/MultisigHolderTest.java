@@ -14,7 +14,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultisigHolderTest extends BaseIntegrationTest {
     SignifyClient client1, client2, client3;
-    Identifier aid1, aid2, aid3;
+    HabState aid1, aid2, aid3;
     Object oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
     private List<HashMap<String, Object>> registryList;
@@ -62,7 +62,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         client3 = signifyClients.get(2);
 
         // Create four identifiers, one for each client
-        List<Identifier> aids = createAidAndGetHabStateAsync(
+        List<HabState> aids = createAidAndGetHabStateAsync(
                 new CreateAidArgs(client1, "member1"),
                 new CreateAidArgs(client2, "member2"),
                 new CreateAidArgs(client3, "issuer")
@@ -141,11 +141,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Multisig created!");
 
         IdentifierListResponse identifiers1 = client1.identifiers().list();
-        List<Identifier> aids1 = identifiers1.aids();
+        List<HabState> aids1 = identifiers1.aids();
         assertEquals(2, aids1.size());
 
         IdentifierListResponse identifiers2 = client1.identifiers().list();
-        List<Identifier> aids2 = identifiers2.aids();
+        List<HabState> aids2 = identifiers2.aids();
         assertEquals(2, aids2.size());
 
         System.out.printf(
@@ -168,7 +168,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
         Object members = client1.identifiers().members("holder");
-        Identifier ghab1 = client1.identifiers().get("holder").get();
+        HabState ghab1 = client1.identifiers().get("holder").get();
         List<Map<String, Object>> signing = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
         String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing.getFirst().get("ends")).get("agent")).keySet()).getFirst();
         String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing.get(1).get("ends")).get("agent")).keySet()).getFirst();
@@ -237,7 +237,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
-        Identifier ghab2 = client2.identifiers().get("holder").get();
+        HabState ghab2 = client2.identifiers().get("holder").get();
         Map<String, Object> ghabState2 = Utils.toMap(ghab2.getState());
         seal = Arrays.asList(
                 "SealEvent",
@@ -396,7 +396,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitOperation(client3, op3);
         System.out.println("Issuer resolved multisig holder OOBI");
 
-        Identifier holderAid = client1.identifiers().get("holder").get();
+        HabState holderAid = client1.identifiers().get("holder").get();
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
 
@@ -493,9 +493,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         warnNotifications(clientList);
     }
 
-    public Identifier createAid(SignifyClient client, String name, List<String> wits) throws Exception {
+    public HabState createAid(SignifyClient client, String name, List<String> wits) throws Exception {
         getOrCreateIdentifier(client, name, null);
-        Identifier aid = client.identifiers().get(name).get();
+        HabState aid = client.identifiers().get(name).get();
         System.out.println(name + "AID:" + aid.getPrefix());
         return aid;
     }
@@ -572,8 +572,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             String issuerPrefix,
             List<String> recipients
     ) throws Exception {
-        Identifier mhab = client.identifiers().get(memberAlias).get();
-        Identifier ghab = client.identifiers().get(groupName).get();
+        HabState mhab = client.identifiers().get(memberAlias).get();
+        HabState ghab = client.identifiers().get(groupName).get();
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
                 .builder()

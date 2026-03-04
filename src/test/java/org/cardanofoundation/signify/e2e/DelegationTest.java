@@ -8,7 +8,7 @@ import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +64,7 @@ public class DelegationTest {
         EventResult icpResult1 = client1.identifiers().create("delegator", kargs);
         waitOperation(client1, icpResult1.op());
 
-        Identifier ator = client1.identifiers().get("delegator").get();
+        HabState ator = client1.identifiers().get("delegator").get();
         EventResult rpyResult1 = client1.identifiers().addEndRole(
                 "delegator",
                 "agent",
@@ -110,7 +110,7 @@ public class DelegationTest {
 
         // Client 2 check approval
         waitOperation(client2, op2);
-        Identifier aid2 = client2.identifiers().get("delegate").get();
+        HabState aid2 = client2.identifiers().get("delegate").get();
         assertEquals(delegatePrefix, aid2.getPrefix());
         System.out.println("Delegation approved for aid: " + aid2.getPrefix());
 

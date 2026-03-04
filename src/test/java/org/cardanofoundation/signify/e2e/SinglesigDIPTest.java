@@ -7,7 +7,7 @@ import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.*;
 
@@ -51,7 +51,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         kargs.setDelpre(name1_id);
         EventResult result = client2.identifiers().create("delegate1", kargs);
         Operation<?> op = Operation.fromObject(result.op());
-        Identifier delegate1 = client2.identifiers().get("delegate1").get();
+        HabState delegate1 = client2.identifiers().get("delegate1").get();
         opResponseName = op.getName();
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
@@ -89,7 +89,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         op = Operation.fromObject(result.op());
         opResponseName = op.getName();
 
-        Identifier delegate2 = client2.identifiers().get("delegate2").get();
+        HabState delegate2 = client2.identifiers().get("delegate2").get();
         Assertions.assertEquals(opResponseName, "delegation." + delegate2.getPrefix());
 
         // Delegator approves delegate

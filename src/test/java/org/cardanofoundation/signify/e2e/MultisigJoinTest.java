@@ -12,7 +12,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.*;
 
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class MultisigJoinTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2, client3;
 
-    Identifier aid1, aid2, aid3;
+    HabState aid1, aid2, aid3;
     static String nameMember1 = "member1";
     static String nameMember2 = "member2";
     static String nameMember3 = "member3";
@@ -62,7 +62,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     @Test
     @Order(1)
     public void multisigJoinTest() throws Exception {
-        List<Identifier> aids = createAidAndGetHabStateAsync(
+        List<HabState> aids = createAidAndGetHabStateAsync(
             new CreateAidArgs(client1, nameMember1),
             new CreateAidArgs(client2, nameMember2)
         );
@@ -286,7 +286,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         TestUtils.waitAndMarkNotification(client2, "/multisig/rot");
         TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
 
-        Identifier multiSigAid = client1.identifiers().get(nameMultisig).get();
+        HabState multiSigAid = client1.identifiers().get(nameMultisig).get();
 
         assertEquals(2, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -411,7 +411,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         waitOperation(client3, joinOperation);
 
-        Identifier multiSigAid = client3.identifiers().get(nameMultisig).get();
+        HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
 
         assertEquals(3, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -434,7 +434,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertNull(Utils.toMap(endRoleResult).get("error"));
     }
 
-    public static Identifier createAID(SignifyClient client, String name, List<String> wits) throws Exception {
+    public static HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {
         CreateIdentifierArgs iargs = new CreateIdentifierArgs();
         iargs.setWits(wits);
         iargs.setToad(wits.size());

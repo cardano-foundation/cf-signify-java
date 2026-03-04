@@ -7,7 +7,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.Registries;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.params.SaltyParams;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class RegistryTest {
@@ -43,7 +45,7 @@ public class RegistryTest {
     @Test
     @DisplayName("should create a registry")
     void shouldCreateRegistry() throws Exception {
-        Identifier hab = new Identifier().prefix("hab prefix");
+        HabState hab = new HabState().prefix("hab prefix");
 
         KeyStateRecord keyStateRecord = new KeyStateRecord();
         keyStateRecord.setS("0");
@@ -83,7 +85,7 @@ public class RegistryTest {
             .d("a digest")
             .c(Collections.singletonList("EO"));
 
-        Identifier hab = new Identifier()
+        HabState hab = new HabState()
             .prefix("hab prefix")
             .name("a name")
             .transferable(true)

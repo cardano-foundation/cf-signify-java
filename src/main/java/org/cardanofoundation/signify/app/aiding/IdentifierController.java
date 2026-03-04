@@ -27,7 +27,7 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
@@ -70,7 +70,7 @@ public class IdentifierController {
                 range.start(),
                 range.end(),
                 range.total(),
-                Arrays.asList(Utils.fromJson(response.body(), Identifier[].class))
+                Arrays.asList(Utils.fromJson(response.body(), HabState[].class))
         );
     }
 
@@ -88,7 +88,7 @@ public class IdentifierController {
      * @param name Prefix or alias of the identifier
      * @return An Optional containing the HabState if found, or empty if not found
      */
-    public Optional<Identifier> get(String name) throws InterruptedException, IOException, LibsodiumException {
+    public Optional<HabState> get(String name) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + URI.create(name).toASCIIString();
         final String method = "GET";
 
@@ -98,7 +98,7 @@ public class IdentifierController {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), Identifier.class));
+        return Optional.of(Utils.fromJson(response.body(), HabState.class));
     }
 
     /**
@@ -108,7 +108,7 @@ public class IdentifierController {
      * @param info Information to update for the given identifier
      * @return A HabState to the identifier information after updating
      */
-    public Identifier update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
+    public HabState update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
         final String path = "/identifiers/" + name;
         final String method = "PUT";
 
@@ -117,7 +117,7 @@ public class IdentifierController {
             method,
             info
         );
-        return Utils.fromJson(response.body(), Identifier.class);
+        return Utils.fromJson(response.body(), HabState.class);
     }
 
     /**
@@ -289,7 +289,7 @@ public class IdentifierController {
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
     public EventResult addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        Identifier hab = this.get(name)
+        HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
 
@@ -344,7 +344,7 @@ public class IdentifierController {
     }
 
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        Identifier hab = this.get(name)
+        HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
 
@@ -383,7 +383,7 @@ public class IdentifierController {
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
 
-        Identifier hab = this.get(name)
+        HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
         boolean delegated = !hab.getState().getDi().isEmpty();

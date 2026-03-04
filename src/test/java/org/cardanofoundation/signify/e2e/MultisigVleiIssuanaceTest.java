@@ -11,7 +11,7 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -117,7 +117,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 .wits(env.witnessIds())
                 .build();
 
-        List<Identifier> habStates = createAidAndGetHabStateAsync(
+        List<HabState> habStates = createAidAndGetHabStateAsync(
                 new CreateAidArgs(clientGAR1, "GAR1", kargsAID),
                 new CreateAidArgs(clientGAR2, "GAR2", kargsAID),
                 new CreateAidArgs(clientQAR1, "QAR1", kargsAID),
@@ -128,15 +128,15 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new CreateAidArgs(clientLAR3, "LAR3", kargsAID),
                 new CreateAidArgs(clientECR, "ECR", kargsAID)
         );
-        Identifier aidGAR1 = habStates.get(0);
-        Identifier aidGAR2 = habStates.get(1);
-        Identifier aidQAR1 = habStates.get(2);
-        Identifier aidQAR2 = habStates.get(3);
-        Identifier aidQAR3 = habStates.get(4);
-        Identifier aidLAR1 = habStates.get(5);
-        Identifier aidLAR2 = habStates.get(6);
-        Identifier aidLAR3 = habStates.get(7);
-        Identifier aidECR = habStates.get(8);
+        HabState aidGAR1 = habStates.get(0);
+        HabState aidGAR2 = habStates.get(1);
+        HabState aidQAR1 = habStates.get(2);
+        HabState aidQAR2 = habStates.get(3);
+        HabState aidQAR3 = habStates.get(4);
+        HabState aidLAR1 = habStates.get(5);
+        HabState aidLAR2 = habStates.get(6);
+        HabState aidLAR3 = habStates.get(7);
+        HabState aidECR = habStates.get(8);
 
         List<Object> oobisLst = getOobisAsync(
                 new GetOobisArgs(clientGAR1, "GAR1", "agent"),
@@ -204,7 +204,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the GEDA.
         // Skip if a GEDA AID has already been incepted.
-        Identifier aidGEDAbyGAR1, aidGEDAbyGAR2;
+        HabState aidGEDAbyGAR1, aidGEDAbyGAR2;
         try {
             aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
             aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
@@ -256,7 +256,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(aidGEDAbyGAR1.getPrefix(), aidGEDAbyGAR2.getPrefix());
         assertEquals(aidGEDAbyGAR1.getName(), aidGEDAbyGAR2.getName());
 
-        Identifier aidGEDA = aidGEDAbyGAR1;
+        HabState aidGEDA = aidGEDAbyGAR1;
 
         // Add endpoint role authorization for all GARs' agents.
         // Skip if they have already been authorized.
@@ -313,7 +313,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the QVI.
         // Skip if a QVI AID has already been incepted.
-        Identifier aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
+        HabState aidQVIbyQAR1, aidQVIbyQAR2, aidQVIbyQAR3;
         try {
             aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI").get();
             aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
@@ -424,7 +424,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(aidQVIbyQAR1.getName(), aidQVIbyQAR2.getName());
         assertEquals(aidQVIbyQAR1.getName(), aidQVIbyQAR3.getName());
 
-        Identifier aidQVI = aidQVIbyQAR1;
+        HabState aidQVI = aidQVIbyQAR1;
 
         // Add endpoint role authorization for all QARs' agents.
         // Skip if they have already been authorized.
@@ -713,7 +713,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Create a multisig AID for the LE.
         // Skip if a LE AID has already been incepted.
-        Identifier aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
+        HabState aidLEbyLAR1, aidLEbyLAR2, aidLEbyLAR3;
         try {
             aidLEbyLAR1 = clientLAR1.identifiers().get("LE").get();
             aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
@@ -780,7 +780,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         assertEquals(aidLEbyLAR1.getName(), aidLEbyLAR2.getName());
         assertEquals(aidLEbyLAR1.getName(), aidLEbyLAR3.getName());
 
-        Identifier aidLE = aidLEbyLAR1;
+        HabState aidLE = aidLEbyLAR1;
         // Add endpoint role authorization for all LARs' agents.
         // Skip if they have already been authorized.
         oobiLst = getOobisAsync(

@@ -6,7 +6,7 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +55,7 @@ public class WitnessTest {
 
         EventResult icpResult1 = client1.identifiers().create("aid1", kargs);
         waitOperation(client1, icpResult1.op());
-        Identifier aid1 = client1.identifiers().get("aid1").get();
+        HabState aid1 = client1.identifiers().get("aid1").get();
         System.out.println("AID1: " + aid1.getPrefix());
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());

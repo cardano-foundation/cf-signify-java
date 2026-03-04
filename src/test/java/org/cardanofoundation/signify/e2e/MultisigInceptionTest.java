@@ -6,7 +6,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -83,8 +83,8 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
             );
             System.out.println("Multisig created!");
 
-            Identifier multisig1 = client1.identifiers().get(groupName).get();
-            Identifier multisig2 = client2.identifiers().get(groupName).get();
+            HabState multisig1 = client1.identifiers().get(groupName).get();
+            HabState multisig2 = client2.identifiers().get(groupName).get();
             assertEquals(multisig1.getPrefix(), multisig2.getPrefix());
             Object members = client1.identifiers().members(groupName);
             Map<String, Object> membersMap = Utils.toMap(members);

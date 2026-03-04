@@ -7,7 +7,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         SignifyClient delegatee2Client = signifyClients.get(3);
 
         // Create delegator and delegatee identifiers clients
-        List<Identifier> aids = testSteps.step("Creating single sig aids", () ->
+        List<HabState> aids = testSteps.step("Creating single sig aids", () ->
                 createAidAndGetHabStateAsync(
                         new CreateAidArgs(delegator1Client, delegator1Name),
                         new CreateAidArgs(delegator2Client, delegator2Name),
@@ -47,10 +47,10 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         new CreateAidArgs(delegatee2Client, delegatee2Name))
         );
 
-        Identifier delegator1Aid = aids.get(0);
-        Identifier delegator2Aid = aids.get(1);
-        Identifier delegatee1Aid = aids.get(2);
-        Identifier delegatee2Aid = aids.get(3);
+        HabState delegator1Aid = aids.get(0);
+        HabState delegator2Aid = aids.get(1);
+        HabState delegatee1Aid = aids.get(2);
+        HabState delegatee2Aid = aids.get(3);
 
         // Exchange OOBIs
         List<Object> oobis = testSteps.step("Exchanging OOBIs", () ->
@@ -139,13 +139,13 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 new WaitOperationArgs(delegator2Client, otor2)
         );
 
-        Identifier adelegatorGroupName1 = delegator1Client.identifiers().get(delegatorGroupName).get();
-        Identifier adelegatorGroupName2 = delegator2Client.identifiers().get(delegatorGroupName).get();
+        HabState adelegatorGroupName1 = delegator1Client.identifiers().get(delegatorGroupName).get();
+        HabState adelegatorGroupName2 = delegator2Client.identifiers().get(delegatorGroupName).get();
 
         assertEquals(adelegatorGroupName1.getPrefix(), adelegatorGroupName2.getPrefix());
         assertEquals(adelegatorGroupName1.getName(), adelegatorGroupName2.getName());
 
-        Identifier adelegatorGroupName = adelegatorGroupName1;
+        HabState adelegatorGroupName = adelegatorGroupName1;
 
         //Resolve delegator OOBI
         String delegatorGroupNameOobi = testSteps.step(String.format("Add and resolve delegator OOBI %s(%s)", delegatorGroupName, adelegatorGroupName.getPrefix()), () -> {
@@ -235,8 +235,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         Object opDelegatee2 = MultisigUtils.acceptMultisigIncept(delegatee2Client, acceptMultisigInceptArgs);
         System.out.println(delegatee2Name + " joined multisig, waiting for delegator...");
 
-        Identifier agtee1 = delegatee1Client.identifiers().get(delegateeGroupName).get();
-        Identifier agtee2 = delegatee2Client.identifiers().get(delegateeGroupName).get();
+        HabState agtee1 = delegatee1Client.identifiers().get(delegateeGroupName).get();
+        HabState agtee2 = delegatee2Client.identifiers().get(delegateeGroupName).get();
 
         assertEquals(agtee1.getPrefix(), agtee2.getPrefix());
         assertEquals(agtee1.getName(), agtee2.getName());
@@ -302,7 +302,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         );
         System.out.println("Delegated multisig created!");
 
-        Identifier agtee = delegatee1Client.identifiers().get(delegateeGroupName).get();
+        HabState agtee = delegatee1Client.identifiers().get(delegateeGroupName).get();
         assertEquals(agtee.getPrefix(), teepre);
 
         List<SignifyClient> clients = Arrays.asList(

@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.core;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
@@ -704,7 +704,7 @@ class ManagerTest {
         randyKeyState.setNxts(keeper0.getParams().getNxts());
         randyKeyState.setPrxs(keeper0.getParams().getPrxs());
 
-        Identifier identifier = new Identifier()
+        HabState identifier = new HabState()
             .prefix(prefixes.getQb64())
             .name("")
             .state(new KeyStateRecord())
