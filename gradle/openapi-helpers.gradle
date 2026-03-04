@@ -82,6 +82,26 @@ ${subTypesEntries}
 }
 
 /**
+ * Fix JsonTypeInfo annotation for enum-based discriminators
+ * When enums are used as discriminators, change from NAME-based (empty property)
+ * to DEDUCTION-based to let Jackson figure out the correct variant
+ */
+ext.fixEnumBasedDiscriminator = { String content, String enumDiscriminatorPropertyName ->
+    // Replace the empty-property JsonTypeInfo with DEDUCTION mode
+    // This allows Jackson to automatically detect which sealed subtype to use
+    // based on the available properties and their types
+    
+    def oldPattern = /@JsonTypeInfo\s*\(\s*use\s*=\s*JsonTypeInfo\.Id\.NAME\s*,\s*include\s*=\s*JsonTypeInfo\.As\.PROPERTY\s*,\s*property\s*=\s*""\s*,\s*visible\s*=\s*true\s*\)/
+    def newAnnotation = """@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION
+)"""
+    
+    content = content.replaceAll(oldPattern, newAnnotation)
+    
+    return content
+}
+
+/**
  * Analyze a oneOf variant and determine its type information
  */
 ext.analyzeVariantType = { variant, interfaceName, idx ->

@@ -78,24 +78,99 @@ ext.collectOneOfContext = { File modelDir, File specFile ->
 
 ext.autoDetectDiscriminators = { File modelDir, String interfaceName, List<String> variantNames ->
     def mappings = [:]
+    def enumDiscriminatorProperty = null
+    def allVariantProperties = [] as List
+    def variantEnumValues = [:] as Map // property -> [variant -> set of enum values]
+    
+    // Collect all properties and enum values from each variant (only from existing files)
     variantNames.each { variantName ->
         def variantFile = new File(modelDir, "${variantName}.java")
         if (variantFile.exists()) {
             def variantContent = variantFile.text
             def propertyPattern = /public static final String JSON_PROPERTY_(\w+)\s*=\s*"([^"]+)";/
             def matcher = variantContent =~ propertyPattern
-            if (matcher) {
-                def commonProperties = ['NAME', 'PREFIX', 'ICP_DT', 'TRANSFERABLE', 'WINDEXES', 'STATE']
-                matcher.each { match ->
-                    def propertyConstant = match[1]
-                    def propertyJsonName = match[2]
-                    if (!commonProperties.contains(propertyConstant.toUpperCase())) {
-                        mappings[propertyJsonName] = variantName
+            def variantProps = [:]
+            matcher.each { match ->
+                def propertyConstant = match[1]
+                def propertyJsonName = match[2]
+                variantProps[propertyConstant] = propertyJsonName
+                
+                // Extract enum values for this property
+                // Pattern: public enum PROPERTY_NAMEEnum { VALUE1(...), VALUE2(...), ... }
+                // Handle both ET -> EtEnum and NAME -> NameEnum patterns
+                // Convert property constant to enum class name: ET -> EtEnum, NAME -> NameEnum
+                def enumClassPattern = propertyConstant.length() == 1 ? 
+                    propertyConstant.toUpperCase() : 
+                    propertyConstant.substring(0, 1).toUpperCase() + propertyConstant.substring(1).toLowerCase()
+                enumClassPattern = enumClassPattern + 'Enum'
+                
+                // Use (?s) flag to enable DOTALL mode so . matches newlines
+                def enumPattern = /(?s)public\s+enum\s+${enumClassPattern}\s*\{([^}]+)\}/
+                def enumMatcher = variantContent =~ enumPattern
+                if (enumMatcher && enumMatcher.size() > 0) {
+                    def enumBody = enumMatcher[0][1]
+                    // Extract enum constants: "VALUE1(String.valueOf("x")), VALUE2(String.valueOf("y"))"
+                    def enumConstants = enumBody.split(',').collect { rawEnum ->
+                        rawEnum.trim().split('\\(|;')[0].trim()
+                    }.findAll { it && !it.isEmpty() }
+                    
+                    if (!enumConstants.isEmpty()) {
+                        if (!variantEnumValues[propertyConstant]) {
+                            variantEnumValues[propertyConstant] = [:]
+                        }
+                        variantEnumValues[propertyConstant][variantName] = enumConstants as Set
                     }
+                }
+            }
+            allVariantProperties << [name: variantName, props: variantProps]
+        }
+    }
+    
+    // If no variants with files found, return empty mappings (property-level inline variants)
+    if (allVariantProperties.isEmpty()) {
+        return mappings
+    }
+    
+    // Find common properties (present in ALL variants)
+    def commonProperties = [] as Set
+    commonProperties = allVariantProperties[0].props.keySet() as Set
+    allVariantProperties.drop(1).each { variantData ->
+        commonProperties = commonProperties.intersect(variantData.props.keySet())
+    }
+    
+    // Find variant-specific properties (not common to all)
+    allVariantProperties.each { variantData ->
+        def variantName = variantData.name
+        def variantProps = variantData.props
+        variantProps.each { propertyConstant, propertyJsonName ->
+            if (!commonProperties.contains(propertyConstant)) {
+                mappings[propertyJsonName] = variantName
+            }
+        }
+    }
+    
+    // Check common properties for variant-discriminating enum values
+    // A property with different enum values across variants is a discriminator
+    commonProperties.each { propConstant ->
+        if (variantEnumValues[propConstant] && variantEnumValues[propConstant].size() == allVariantProperties.size()) {
+            def enumValuesByVariant = variantEnumValues[propConstant]
+            
+            // Check if different variants have different enum values
+            def enumValuesSets = enumValuesByVariant.values().toList()
+            if (enumValuesSets.size() > 1) {
+                def allIdentical = enumValuesSets.drop(1).every { it == enumValuesSets[0] }
+                
+                // If not all variants have identical enum values, it's a discriminator
+                if (!allIdentical) {
+                    // Store the property for use in JSON type info injection
+                    enumDiscriminatorProperty = allVariantProperties[0].props[propConstant]
+                    mappings['__enumDiscriminatorProperty__'] = enumDiscriminatorProperty
+                    // For enum-based discriminators, don't add to mappings - Jackson DEDUCTION will handle it
                 }
             }
         }
     }
+    
     return mappings
 }
 
@@ -188,8 +263,17 @@ ext.processSchemaLevelOneOfs = { File modelDir, Map schemaLevelOneOfs ->
             content = content.replaceAll("(public sealed interface ${transformedSchemaName}(?:\\s+extends\\s+\\w+)?)\\s*\\{", "\$1${permitsClause}{")
             def discriminatorMappings = project.ext.autoDetectDiscriminators.call(modelDir, transformedSchemaName, permittedTypes)
             if (!discriminatorMappings.isEmpty()) {
-                content = project.ext.injectJacksonDiscriminator.call(content, transformedSchemaName, discriminatorMappings)
-                logger.lifecycle("✓ Added Jackson discriminator annotations to ${transformedSchemaName}")
+                // Check if this is an enum-based discriminator
+                def enumDiscriminatorProperty = discriminatorMappings.remove('__enumDiscriminatorProperty__')
+                if (enumDiscriminatorProperty) {
+                    // Fix the JsonTypeInfo annotation to use DEDUCTION instead of NAME with empty property
+                    content = project.ext.fixEnumBasedDiscriminator.call(content, enumDiscriminatorProperty)
+                    logger.lifecycle("✓ Fixed enum-based discriminator (${enumDiscriminatorProperty}) in ${transformedSchemaName}")
+                } else if (!discriminatorMappings.isEmpty()) {
+                    // Regular property-based discriminator
+                    content = project.ext.injectJacksonDiscriminator.call(content, transformedSchemaName, discriminatorMappings)
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${transformedSchemaName}")
+                }
             }
             file.text = content
             
@@ -229,8 +313,17 @@ ext.processPropertyLevelOneOfs = { File modelDir, Map propertyLevelOneOfs ->
             content = content.replaceAll(/public interface ${interfaceName}/, "public sealed interface ${interfaceName}\n    permits ${variantNames.join(', ')}")
             def discriminatorMappings = project.ext.autoDetectDiscriminators.call(modelDir, interfaceName, variantNames)
             if (!discriminatorMappings.isEmpty()) {
-                content = project.ext.injectJacksonDiscriminator.call(content, interfaceName, discriminatorMappings)
-                logger.lifecycle("✓ Added Jackson discriminator annotations to ${interfaceName}")
+                // Check if this is an enum-based discriminator
+                def enumDiscriminatorProperty = discriminatorMappings.remove('__enumDiscriminatorProperty__')
+                if (enumDiscriminatorProperty) {
+                    // Fix the JsonTypeInfo annotation to use DEDUCTION instead of NAME with empty property
+                    content = project.ext.fixEnumBasedDiscriminator.call(content, enumDiscriminatorProperty)
+                    logger.lifecycle("✓ Fixed enum-based discriminator (${enumDiscriminatorProperty}) in ${interfaceName}")
+                } else if (!discriminatorMappings.isEmpty()) {
+                    // Regular property-based discriminator
+                    content = project.ext.injectJacksonDiscriminator.call(content, interfaceName, discriminatorMappings)
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${interfaceName}")
+                }
             } else {
                 def isStringListPolymorphic = variantNames.size() == 2 && (variantNames.contains("${interfaceName}String") && variantNames.contains("${interfaceName}ListString"))
                 if (isStringListPolymorphic) {
