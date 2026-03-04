@@ -21,7 +21,8 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -85,7 +86,7 @@ public class TestUtils {
         }
     }
 
-    public static void admitSinglesig(SignifyClient client, String aidName, Identifier recipientAid) {
+    public static void admitSinglesig(SignifyClient client, String aidName, HabState recipientAid) {
         // TO-DO
     }
 
@@ -114,10 +115,10 @@ public class TestUtils {
         return new Aid(name, prefix, oobi);
     }
 
-    public static Identifier createAidAndGetHabState(SignifyClient client, String name) throws Exception {
+    public static HabState createAidAndGetHabState(SignifyClient client, String name) throws Exception {
         getOrCreateIdentifier(client, name, null);
         return client.identifiers().get(name)
-                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
+                .orElseThrow(() -> new IllegalArgumentException("HabState not found: " + name));
     }
 
     public static String createTimestamp() {
@@ -140,8 +141,8 @@ public class TestUtils {
 
     public static Object getIssuedCredential(
             SignifyClient issuerClient,
-            Identifier issuerAid,
-            Identifier recipientAid,
+            HabState issuerAid,
+            HabState recipientAid,
             String schemaSAID
     ) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> filter = new LinkedHashMap<>() {{
@@ -157,15 +158,15 @@ public class TestUtils {
         return credentialList.isEmpty() ? null : credentialList.getFirst();
     }
 
-    public static Identifier getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
-        Optional<Identifier> existingAID = client.identifiers().get(name);
+    public static HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
+        Optional<HabState> existingAID = client.identifiers().get(name);
         if (existingAID.isPresent()) {
             return existingAID.get();
         } else {
             EventResult result = client.identifiers().create(name, kargs);
             waitOperation(client, result.op());
 
-            Identifier aid = client.identifiers().get(name)
+            HabState aid = client.identifiers().get(name)
                     .orElseThrow(() -> new IllegalArgumentException("Failed to create identifier: " + name));
             
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
@@ -243,7 +244,7 @@ public class TestUtils {
         String eid;
         Object op, ops;
 
-        Optional<Identifier> optionalIdentifier = client.identifiers().get(name);
+        Optional<HabState> optionalIdentifier = client.identifiers().get(name);
         if (optionalIdentifier.isPresent()) {
             id = optionalIdentifier.get().getPrefix();
             
@@ -567,7 +568,7 @@ public class TestUtils {
     /**
      * Convenience wrapper to access generated identifiers from list responses.
      */
-    public static List<Identifier> identifiers(IdentifierListResponse response
+    public static List<HabState> identifiers(IdentifierListResponse response
     ) {
         return response.aids();
     }

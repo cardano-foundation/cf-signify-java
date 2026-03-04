@@ -27,6 +27,9 @@ import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.ICPV1Kt;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * DRTV2
@@ -49,8 +52,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DRTV2.JSON_PROPERTY_A
 })
 @JsonTypeName("DRT_V_2")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class DRTV2 {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class DRTV2 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -114,6 +117,27 @@ public class DRTV2 {
   public DRTV2() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public DRTV2(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_T) String t, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_P) String p, @JsonProperty(JSON_PROPERTY_KT) ICPV1Kt kt, @JsonProperty(JSON_PROPERTY_K) List<String> k, @JsonProperty(JSON_PROPERTY_NT) ICPV1Kt nt, @JsonProperty(JSON_PROPERTY_N) List<String> n, @JsonProperty(JSON_PROPERTY_BT) String bt, @JsonProperty(JSON_PROPERTY_BR) List<String> br, @JsonProperty(JSON_PROPERTY_BA) List<String> ba, @JsonProperty(JSON_PROPERTY_C) List<String> c, @JsonProperty(JSON_PROPERTY_A) Object a) {
+    this.v = v;
+    this.t = t;
+    this.d = d;
+    this.i = i;
+    this.s = s;
+    this.p = p;
+    this.kt = kt;
+    this.k = k;
+    this.nt = nt;
+    this.n = n;
+    this.bt = bt;
+    this.br = br;
+    this.ba = ba;
+    this.c = c;
+    this.a = a;
+  }
+
   public DRTV2 v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -125,6 +149,8 @@ public class DRTV2 {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -150,6 +176,8 @@ public class DRTV2 {
    * @return t
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_T, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -175,6 +203,8 @@ public class DRTV2 {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -200,6 +230,8 @@ public class DRTV2 {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -225,6 +257,8 @@ public class DRTV2 {
    * @return s
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_S, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -250,6 +284,8 @@ public class DRTV2 {
    * @return p
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_P, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -275,6 +311,9 @@ public class DRTV2 {
    * @return kt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_KT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -308,6 +347,8 @@ public class DRTV2 {
    * @return k
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_K, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -333,6 +374,9 @@ public class DRTV2 {
    * @return nt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_NT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -366,6 +410,8 @@ public class DRTV2 {
    * @return n
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_N, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -391,6 +437,8 @@ public class DRTV2 {
    * @return bt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_BT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -424,6 +472,8 @@ public class DRTV2 {
    * @return br
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_BR, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -457,6 +507,8 @@ public class DRTV2 {
    * @return ba
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_BA, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -490,6 +542,8 @@ public class DRTV2 {
    * @return c
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_C, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -515,6 +569,8 @@ public class DRTV2 {
    * @return a
    */
   @jakarta.annotation.Nullable
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_A, required = false)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

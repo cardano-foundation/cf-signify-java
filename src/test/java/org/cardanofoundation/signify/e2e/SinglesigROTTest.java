@@ -13,12 +13,12 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 
+@SuppressWarnings("unchecked")
 public class SinglesigROTTest extends BaseIntegrationTest {
     static SignifyClient client1, client2;
     static String contact1_id;
@@ -102,7 +102,7 @@ public class SinglesigROTTest extends BaseIntegrationTest {
 
         // refresh remote keystate
         String sn = keyStateRecord1.getS();
-        Operation op = Operation.fromObject(client2.keyStates().query(contact1_id, sn, null));
+        Operation<?> op = Operation.fromObject(client2.keyStates().query(contact1_id, sn, null));
         op = waitOperation(client2, op);
         response = (HashMap<String, Object>) op.getResponse();
 

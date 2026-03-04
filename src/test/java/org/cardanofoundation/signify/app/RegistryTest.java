@@ -7,8 +7,9 @@ import org.cardanofoundation.signify.app.credentialing.registries.Registries;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.params.SaltyParams;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.SaltyState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class RegistryTest {
 
     @Mock
@@ -30,7 +32,7 @@ public class RegistryTest {
     @Mock
     private Keeping.KeyManager mockedKeyManager;
     @Mock
-    private Keeping.Keeper mockedKeeper;
+    private Keeping.Keeper<?> mockedKeeper;
     @InjectMocks
     private Registries registries;
 
@@ -43,22 +45,31 @@ public class RegistryTest {
     @Test
     @DisplayName("should create a registry")
     void shouldCreateRegistry() throws Exception {
-        Identifier hab = new Identifier().prefix("hab prefix");
-
         KeyStateRecord keyStateRecord = new KeyStateRecord();
         keyStateRecord.setS("0");
         keyStateRecord.setD("a digest");
-        hab.setState(keyStateRecord);
+
+        SaltyState saltyState = new SaltyState();
+
+        HabStateOneOf hab = new HabStateOneOf()
+            .salty(saltyState)
+            .prefix("hab prefix")
+            .name("a name")
+            .transferable(true)
+            .windexes(Collections.emptyList())
+            .state(keyStateRecord);
 
         when(mockedClient.getManager()).thenReturn(mockedKeyManager);
-        when(mockedKeyManager.get(hab)).thenReturn(mockedKeeper);
+        Keeping.Keeper keeper = mockedKeeper;
+        when(mockedKeyManager.get(hab)).thenReturn(keeper);
         when(mockedKeeper.sign(any(byte[].class))).thenReturn(new Keeping.SignResult(Collections.singletonList("'a signature'")));
 
         when(mockedIdentifiers.get("a name")).thenReturn(Optional.of(hab));
         when(mockedClient.identifiers()).thenReturn(mockedIdentifiers);
 
         when(mockedKeeper.getAlgo()).thenReturn(Manager.Algos.salty);
-        when(mockedKeeper.getParams()).thenReturn(SaltyParams.builder().build());
+        org.cardanofoundation.signify.cesr.params.KeeperParams params = SaltyParams.builder().build();
+        doReturn(params).when(mockedKeeper).getParams();
 
         HttpResponse<String> mockedResponse = mock(HttpResponse.class);
         when(mockedClient.fetch(eq("/identifiers/a name/registries"), eq("POST"), any(), any()))
@@ -83,7 +94,10 @@ public class RegistryTest {
             .d("a digest")
             .c(Collections.singletonList("EO"));
 
-        Identifier hab = new Identifier()
+        SaltyState saltyState = new SaltyState();
+
+        HabStateOneOf hab = new HabStateOneOf()
+            .salty(saltyState)
             .prefix("hab prefix")
             .name("a name")
             .transferable(true)

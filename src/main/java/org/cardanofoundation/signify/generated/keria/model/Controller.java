@@ -25,6 +25,9 @@ import org.cardanofoundation.signify.generated.keria.model.ControllerEe;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * Controller
@@ -33,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Controller.JSON_PROPERTY_STATE,
   Controller.JSON_PROPERTY_EE
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class Controller {
   public static final String JSON_PROPERTY_STATE = "state";
   @jakarta.annotation.Nonnull
@@ -44,6 +47,14 @@ public class Controller {
   private ControllerEe ee;
 
   public Controller() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public Controller(@JsonProperty(JSON_PROPERTY_STATE) KeyStateRecord state, @JsonProperty(JSON_PROPERTY_EE) ControllerEe ee) {
+    this.state = state;
+    this.ee = ee;
   }
 
   public Controller state(@jakarta.annotation.Nonnull KeyStateRecord state) {
@@ -57,6 +68,9 @@ public class Controller {
    * @return state
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -82,6 +96,9 @@ public class Controller {
    * @return ee
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_EE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

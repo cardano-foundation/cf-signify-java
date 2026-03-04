@@ -7,10 +7,10 @@ import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.SaltyState;
 import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
@@ -22,10 +22,11 @@ import java.util.*;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("unchecked")
 class SaltyTests {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
-    private String opResponseDone, opResponsePrefix;
+    private String opResponseDone;
     private HashMap<String, Object> opResponse;
 
     @Test
@@ -45,7 +46,7 @@ class SaltyTests {
         CreateIdentifierArgs bran = new CreateIdentifierArgs();
         bran.setBran("0123456789abcdefghijk");
         EventResult icpResult = client.identifiers().create("aid1", bran);
-        Operation op = Operation.fromObject(waitOperation(client, icpResult.op()));
+        Operation<?> op = Operation.fromObject(waitOperation(client, icpResult.op()));
 
         opResponse = (HashMap<String, Object>) op.getResponse();
         opResponseDone = op.isDone() ? "true" : "false";
@@ -67,12 +68,12 @@ class SaltyTests {
         assertEquals("1", icp.getKed().get("nt"));
 
         IdentifierListResponse aidsJson = client.identifiers().list(0, 24);
-        List<Identifier> aids = aidsJson.aids();
+        List<HabState> aids = aidsJson.aids();
         Assertions.assertEquals(1, aids.size());
 
-        Identifier aidLast = aids.getFirst();
+        HabState aidLast = aids.getFirst();
         Assertions.assertEquals("aid1", aidLast.getName());
-        SaltyState salty = aidLast.getSalty();
+        SaltyState salty = HabStateUtil.getHabSalty(aidLast);
         Assertions.assertEquals(0, salty.getPidx());
         Assertions.assertEquals("signify:aid", salty.getStem());
         Assertions.assertEquals(icp.getPre(), aidLast.getPrefix());
@@ -85,7 +86,7 @@ class SaltyTests {
         params.setBran("0123456789lmnopqrstuv");
 
         EventResult icpResult1 = client.identifiers().create("aid2", params);
-        Operation op_1 = Operation.fromObject(waitOperation(client, icpResult1.op()));
+        Operation<?> op_1 = Operation.fromObject(waitOperation(client, icpResult1.op()));
         opResponse = (HashMap<String, Object>) op_1.getResponse();
         opResponseDone = op_1.isDone() ? "true" : "false";
         HashMap<String, Object> aid2 = opResponse;
@@ -105,13 +106,13 @@ class SaltyTests {
         assertEquals("2", icp2.getKed().get("nt"));
 
         IdentifierListResponse aidsJson1 = client.identifiers().list(0, 24);
-        List<Identifier> aids1 = aidsJson1.aids();
+        List<HabState> aids1 = aidsJson1.aids();
         Assertions.assertEquals(2, aids1.size());
 
-        Identifier aid3 = aids1.getLast();
+        HabState aid3 = aids1.getLast();
         Assertions.assertEquals("aid2", aid3.getName());
 
-        SaltyState salty1 = aid3.getSalty();
+        SaltyState salty1 = HabStateUtil.getHabSalty(aid3);
         Assertions.assertEquals(1, salty1.getPidx());
         Assertions.assertEquals("signify:aid", salty1.getStem());
         Assertions.assertEquals(icp2.getPre(), aid3.getPrefix());
@@ -122,24 +123,24 @@ class SaltyTests {
         waitOperation(client, icpResult2.op());
 
         IdentifierListResponse aidsJson2 = client.identifiers().list(0, 24);
-        List<Identifier> aids2 = aidsJson2.aids();
+        List<HabState> aids2 = aidsJson2.aids();
         Assertions.assertEquals(3, aids2.size());
 
-        Identifier aid4 = aids2.getFirst();
+        HabState aid4 = aids2.getFirst();
         Assertions.assertEquals("aid1", aid4.getName());
 
         IdentifierListResponse aidsJson3 = client.identifiers().list(1, 2);
-        List<Identifier> aids3 = aidsJson3.aids();
+        List<HabState> aids3 = aidsJson3.aids();
         Assertions.assertEquals(2, aids3.size());
 
-        Identifier aid5 = aids3.getFirst();
+        HabState aid5 = aids3.getFirst();
         Assertions.assertEquals("aid2", aid5.getName());
 
         IdentifierListResponse aidsJson4 = client.identifiers().list(2, 2);
-        List<Identifier> aids4 = aidsJson4.aids();
+        List<HabState> aids4 = aidsJson4.aids();
         Assertions.assertEquals(1, aids4.size());
 
-        Identifier aid6 = aids4.getFirst();
+        HabState aid6 = aids4.getFirst();
         Assertions.assertEquals("aid3", aid6.getName());
 
         // Rotate
@@ -166,8 +167,8 @@ class SaltyTests {
         Assertions.assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
         // Get Identifiers
-        Identifier aidState = client.identifiers().get("aid1").get();
-        KeyStateRecord stateGet = aidState.getState();
+        HabState aidState = client.identifiers().get("aid1").get();
+        KeyStateRecord stateGet = HabStateUtil.getHabState(aidState);
 
         Assertions.assertEquals("2", stateGet.getS());
         Assertions.assertEquals("2", stateGet.getF());
@@ -197,16 +198,16 @@ class SaltyTests {
 
         IdentifierInfo identifierInfo = new IdentifierInfo();
         identifierInfo.setName("aid4");
-        Identifier updatedState = client.identifiers().update("aid3", identifierInfo);
+        HabState updatedState = client.identifiers().update("aid3", identifierInfo);
         assertEquals("aid4", updatedState.getName());
 
-        Identifier retrievedState = client.identifiers().get("aid4").get();
+        HabState retrievedState = client.identifiers().get("aid4").get();
         assertEquals("aid4", retrievedState.getName());
         IdentifierListResponse response = client.identifiers().list(2, 2);
-        List<Identifier> identifiers = response.aids();
+        List<HabState> identifiers = response.aids();
         assertEquals(1, identifiers.size());
 
-        Identifier firstIdentifier = identifiers.getFirst();
+        HabState firstIdentifier = identifiers.getFirst();
         assertEquals("aid4", firstIdentifier.getName());
 
     }

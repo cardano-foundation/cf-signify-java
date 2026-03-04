@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * RPYV1
@@ -36,8 +39,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   RPYV1.JSON_PROPERTY_A
 })
 @JsonTypeName("RPY_V_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class RPYV1 {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class RPYV1 implements Rpy {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -65,6 +68,18 @@ public class RPYV1 {
   public RPYV1() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public RPYV1(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_T) String t, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_DT) String dt, @JsonProperty(JSON_PROPERTY_R) String r, @JsonProperty(JSON_PROPERTY_A) Object a) {
+    this.v = v;
+    this.t = t;
+    this.d = d;
+    this.dt = dt;
+    this.r = r;
+    this.a = a;
+  }
+
   public RPYV1 v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -76,6 +91,8 @@ public class RPYV1 {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -101,6 +118,8 @@ public class RPYV1 {
    * @return t
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_T, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -126,6 +145,8 @@ public class RPYV1 {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -151,6 +172,8 @@ public class RPYV1 {
    * @return dt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -176,6 +199,8 @@ public class RPYV1 {
    * @return r
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_R, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -201,6 +226,8 @@ public class RPYV1 {
    * @return a
    */
   @jakarta.annotation.Nullable
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_A, required = false)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

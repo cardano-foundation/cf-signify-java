@@ -26,6 +26,9 @@ import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ExchangeResource
@@ -34,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExchangeResource.JSON_PROPERTY_EXN,
   ExchangeResource.JSON_PROPERTY_PATHED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class ExchangeResource {
   public static final String JSON_PROPERTY_EXN = "exn";
   @jakarta.annotation.Nonnull
@@ -45,6 +48,14 @@ public class ExchangeResource {
   private Map<String, Object> pathed = new HashMap<>();
 
   public ExchangeResource() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public ExchangeResource(@JsonProperty(JSON_PROPERTY_EXN) Exn exn, @JsonProperty(JSON_PROPERTY_PATHED) Map<String, Object> pathed) {
+    this.exn = exn;
+    this.pathed = pathed;
   }
 
   public ExchangeResource exn(@jakarta.annotation.Nonnull Exn exn) {
@@ -58,6 +69,9 @@ public class ExchangeResource {
    * @return exn
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_EXN, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -88,6 +102,8 @@ public class ExchangeResource {
    * @return pathed
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_PATHED, required = true)
   @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
 

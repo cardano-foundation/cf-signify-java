@@ -24,20 +24,36 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Rpy;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * MultisigRpyEmbeds
  */
 @JsonPropertyOrder({
-  MultisigRpyEmbeds.JSON_PROPERTY_RPY
+  MultisigRpyEmbeds.JSON_PROPERTY_RPY,
+  MultisigRpyEmbeds.JSON_PROPERTY_D
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class MultisigRpyEmbeds {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class MultisigRpyEmbeds implements ExnEmbeds {
   public static final String JSON_PROPERTY_RPY = "rpy";
   @jakarta.annotation.Nonnull
   private Rpy rpy;
 
+  public static final String JSON_PROPERTY_D = "d";
+  @jakarta.annotation.Nonnull
+  private String d;
+
   public MultisigRpyEmbeds() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public MultisigRpyEmbeds(@JsonProperty(JSON_PROPERTY_RPY) Rpy rpy, @JsonProperty(JSON_PROPERTY_D) String d) {
+    this.rpy = rpy;
+    this.d = d;
   }
 
   public MultisigRpyEmbeds rpy(@jakarta.annotation.Nonnull Rpy rpy) {
@@ -51,6 +67,9 @@ public class MultisigRpyEmbeds {
    * @return rpy
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_RPY, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,6 +84,33 @@ public class MultisigRpyEmbeds {
     this.rpy = rpy;
   }
 
+  public MultisigRpyEmbeds d(@jakarta.annotation.Nonnull String d) {
+    
+    this.d = d;
+    return this;
+  }
+
+  /**
+   * Get d
+   * @return d
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getD() {
+    return d;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setD(@jakarta.annotation.Nonnull String d) {
+    this.d = d;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -75,12 +121,13 @@ public class MultisigRpyEmbeds {
       return false;
     }
     MultisigRpyEmbeds multisigRpyEmbeds = (MultisigRpyEmbeds) o;
-    return Objects.equals(this.rpy, multisigRpyEmbeds.rpy);
+    return Objects.equals(this.rpy, multisigRpyEmbeds.rpy) &&
+        Objects.equals(this.d, multisigRpyEmbeds.d);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rpy);
+    return Objects.hash(rpy, d);
   }
 
   @Override
@@ -88,6 +135,7 @@ public class MultisigRpyEmbeds {
     StringBuilder sb = new StringBuilder();
     sb.append("class MultisigRpyEmbeds {\n");
     sb.append("    rpy: ").append(toIndentedString(rpy)).append("\n");
+    sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("}");
     return sb.toString();
   }

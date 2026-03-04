@@ -27,6 +27,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ACDCAttributes
@@ -36,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ACDCAttributes.JSON_PROPERTY_I,
   ACDCAttributes.JSON_PROPERTY_U
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class ACDCAttributes {
   public static final String JSON_PROPERTY_DT = "dt";
   @jakarta.annotation.Nullable
@@ -53,6 +56,15 @@ public class ACDCAttributes {
   public ACDCAttributes() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public ACDCAttributes(@JsonProperty(JSON_PROPERTY_DT) String dt, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_U) String u) {
+    this.dt = dt;
+    this.i = i;
+    this.u = u;
+  }
+
   public ACDCAttributes dt(@jakarta.annotation.Nullable String dt) {
     
     this.dt = dt;
@@ -64,6 +76,7 @@ public class ACDCAttributes {
    * @return dt
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,6 +102,7 @@ public class ACDCAttributes {
    * @return i
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_I, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -114,6 +128,7 @@ public class ACDCAttributes {
    * @return u
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_U, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

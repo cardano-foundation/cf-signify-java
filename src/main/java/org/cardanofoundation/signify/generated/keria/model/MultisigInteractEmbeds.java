@@ -24,20 +24,36 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Ixn;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * MultisigInteractEmbeds
  */
 @JsonPropertyOrder({
-  MultisigInteractEmbeds.JSON_PROPERTY_IXN
+  MultisigInteractEmbeds.JSON_PROPERTY_IXN,
+  MultisigInteractEmbeds.JSON_PROPERTY_D
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class MultisigInteractEmbeds {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class MultisigInteractEmbeds implements ExnEmbeds {
   public static final String JSON_PROPERTY_IXN = "ixn";
   @jakarta.annotation.Nonnull
   private Ixn ixn;
 
+  public static final String JSON_PROPERTY_D = "d";
+  @jakarta.annotation.Nonnull
+  private String d;
+
   public MultisigInteractEmbeds() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public MultisigInteractEmbeds(@JsonProperty(JSON_PROPERTY_IXN) Ixn ixn, @JsonProperty(JSON_PROPERTY_D) String d) {
+    this.ixn = ixn;
+    this.d = d;
   }
 
   public MultisigInteractEmbeds ixn(@jakarta.annotation.Nonnull Ixn ixn) {
@@ -51,6 +67,9 @@ public class MultisigInteractEmbeds {
    * @return ixn
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_IXN, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,6 +84,33 @@ public class MultisigInteractEmbeds {
     this.ixn = ixn;
   }
 
+  public MultisigInteractEmbeds d(@jakarta.annotation.Nonnull String d) {
+    
+    this.d = d;
+    return this;
+  }
+
+  /**
+   * Get d
+   * @return d
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getD() {
+    return d;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setD(@jakarta.annotation.Nonnull String d) {
+    this.d = d;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -75,12 +121,13 @@ public class MultisigInteractEmbeds {
       return false;
     }
     MultisigInteractEmbeds multisigInteractEmbeds = (MultisigInteractEmbeds) o;
-    return Objects.equals(this.ixn, multisigInteractEmbeds.ixn);
+    return Objects.equals(this.ixn, multisigInteractEmbeds.ixn) &&
+        Objects.equals(this.d, multisigInteractEmbeds.d);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ixn);
+    return Objects.hash(ixn, d);
   }
 
   @Override
@@ -88,6 +135,7 @@ public class MultisigInteractEmbeds {
     StringBuilder sb = new StringBuilder();
     sb.append("class MultisigInteractEmbeds {\n");
     sb.append("    ixn: ").append(toIndentedString(ixn)).append("\n");
+    sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("}");
     return sb.toString();
   }

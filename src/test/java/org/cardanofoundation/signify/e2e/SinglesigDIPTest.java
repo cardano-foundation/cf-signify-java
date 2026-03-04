@@ -7,7 +7,8 @@ import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.*;
 
@@ -19,9 +20,9 @@ import java.util.Map;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 
+@SuppressWarnings("unchecked")
 class SinglesigDIPTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2;
-    private static String contact1_id;
     private static String name1_id, name1_oobi;
 
     @BeforeAll
@@ -40,7 +41,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
 
     @BeforeEach
     public void getContact() throws IOException, InterruptedException, LibsodiumException {
-        contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
+        TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
     }
 
     @Test
@@ -51,7 +52,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         kargs.setDelpre(name1_id);
         EventResult result = client2.identifiers().create("delegate1", kargs);
         Operation<?> op = Operation.fromObject(result.op());
-        Identifier delegate1 = client2.identifiers().get("delegate1").get();
+        HabState delegate1 = client2.identifiers().get("delegate1").get();
         opResponseName = op.getName();
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
 
@@ -67,7 +68,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         // Refresh keystate to sn=1
         Object op2 = client2.keyStates().query(name1_id, "1", null);
 
-        List<Operation> opList = waitOperationAsync(
+        List<Operation<?>> opList = waitOperationAsync(
                 new WaitOperationArgs(client2, op),
                 new WaitOperationArgs(client1, op1),
                 new WaitOperationArgs(client2, op2)
@@ -89,7 +90,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         op = Operation.fromObject(result.op());
         opResponseName = op.getName();
 
-        Identifier delegate2 = client2.identifiers().get("delegate2").get();
+        HabState delegate2 = client2.identifiers().get("delegate2").get();
         Assertions.assertEquals(opResponseName, "delegation." + delegate2.getPrefix());
 
         // Delegator approves delegate

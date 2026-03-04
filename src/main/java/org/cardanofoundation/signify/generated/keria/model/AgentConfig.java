@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * AgentConfig
@@ -33,13 +36,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   AgentConfig.JSON_PROPERTY_IURLS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class AgentConfig {
   public static final String JSON_PROPERTY_IURLS = "iurls";
   @jakarta.annotation.Nullable
   private List<String> iurls = new ArrayList<>();
 
   public AgentConfig() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public AgentConfig(@JsonProperty(JSON_PROPERTY_IURLS) List<String> iurls) {
+    this.iurls = iurls;
   }
 
   public AgentConfig iurls(@jakarta.annotation.Nullable List<String> iurls) {
@@ -61,6 +71,7 @@ public class AgentConfig {
    * @return iurls
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_IURLS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

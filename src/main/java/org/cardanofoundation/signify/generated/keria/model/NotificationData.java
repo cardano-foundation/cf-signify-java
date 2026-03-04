@@ -27,6 +27,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * NotificationData
@@ -36,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   NotificationData.JSON_PROPERTY_D,
   NotificationData.JSON_PROPERTY_M
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class NotificationData {
   public static final String JSON_PROPERTY_R = "r";
   @jakarta.annotation.Nullable
@@ -53,6 +56,15 @@ public class NotificationData {
   public NotificationData() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public NotificationData(@JsonProperty(JSON_PROPERTY_R) String r, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_M) String m) {
+    this.r = r;
+    this.d = d;
+    this.m = m;
+  }
+
   public NotificationData r(@jakarta.annotation.Nullable String r) {
     
     this.r = r;
@@ -64,6 +76,7 @@ public class NotificationData {
    * @return r
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_R, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -89,6 +102,7 @@ public class NotificationData {
    * @return d
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_D, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -114,6 +128,7 @@ public class NotificationData {
    * @return m
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_M, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

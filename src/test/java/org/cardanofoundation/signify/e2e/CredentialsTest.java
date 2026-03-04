@@ -26,6 +26,7 @@ import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("unchecked")
 public class CredentialsTest extends BaseIntegrationTest {
     private ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     private String QVI_SCHEMA_SAID = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";

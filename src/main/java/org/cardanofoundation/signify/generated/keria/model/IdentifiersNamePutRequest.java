@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * IdentifiersNamePutRequest
@@ -31,13 +34,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdentifiersNamePutRequest.JSON_PROPERTY_NAME
 })
 @JsonTypeName("_identifiers__name__put_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class IdentifiersNamePutRequest {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;
 
   public IdentifiersNamePutRequest() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public IdentifiersNamePutRequest(@JsonProperty(JSON_PROPERTY_NAME) String name) {
+    this.name = name;
   }
 
   public IdentifiersNamePutRequest name(@jakarta.annotation.Nonnull String name) {
@@ -51,6 +61,8 @@ public class IdentifiersNamePutRequest {
    * @return name
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NAME, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

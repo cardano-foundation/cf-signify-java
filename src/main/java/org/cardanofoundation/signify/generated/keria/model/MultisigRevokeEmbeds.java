@@ -24,20 +24,36 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.REVV1;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * MultisigRevokeEmbeds
  */
 @JsonPropertyOrder({
-  MultisigRevokeEmbeds.JSON_PROPERTY_REV
+  MultisigRevokeEmbeds.JSON_PROPERTY_REV,
+  MultisigRevokeEmbeds.JSON_PROPERTY_D
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class MultisigRevokeEmbeds {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class MultisigRevokeEmbeds implements ExnEmbeds {
   public static final String JSON_PROPERTY_REV = "rev";
   @jakarta.annotation.Nonnull
   private REVV1 rev;
 
+  public static final String JSON_PROPERTY_D = "d";
+  @jakarta.annotation.Nonnull
+  private String d;
+
   public MultisigRevokeEmbeds() {
+  }
+
+  /**
+   * Constructor with all args parameters
+   */
+  public MultisigRevokeEmbeds(@JsonProperty(JSON_PROPERTY_REV) REVV1 rev, @JsonProperty(JSON_PROPERTY_D) String d) {
+    this.rev = rev;
+    this.d = d;
   }
 
   public MultisigRevokeEmbeds rev(@jakarta.annotation.Nonnull REVV1 rev) {
@@ -51,6 +67,9 @@ public class MultisigRevokeEmbeds {
    * @return rev
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_REV, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -65,6 +84,33 @@ public class MultisigRevokeEmbeds {
     this.rev = rev;
   }
 
+  public MultisigRevokeEmbeds d(@jakarta.annotation.Nonnull String d) {
+    
+    this.d = d;
+    return this;
+  }
+
+  /**
+   * Get d
+   * @return d
+   */
+  @jakarta.annotation.Nonnull
+  @NotNull
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getD() {
+    return d;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_D, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setD(@jakarta.annotation.Nonnull String d) {
+    this.d = d;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -75,12 +121,13 @@ public class MultisigRevokeEmbeds {
       return false;
     }
     MultisigRevokeEmbeds multisigRevokeEmbeds = (MultisigRevokeEmbeds) o;
-    return Objects.equals(this.rev, multisigRevokeEmbeds.rev);
+    return Objects.equals(this.rev, multisigRevokeEmbeds.rev) &&
+        Objects.equals(this.d, multisigRevokeEmbeds.d);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rev);
+    return Objects.hash(rev, d);
   }
 
   @Override
@@ -88,6 +135,7 @@ public class MultisigRevokeEmbeds {
     StringBuilder sb = new StringBuilder();
     sb.append("class MultisigRevokeEmbeds {\n");
     sb.append("    rev: ").append(toIndentedString(rev)).append("\n");
+    sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("}");
     return sb.toString();
   }

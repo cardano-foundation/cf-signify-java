@@ -1,0 +1,299 @@
+// Reusable functions for processing OpenAPI specs and generated code
+
+/**
+ * Transform schema names to match OpenAPI Generator conventions
+ */
+ext.transformSchemaName = { String schemaName ->
+    return schemaName.replaceAll('_', '')
+}
+
+/**
+ * Inject Jackson @JsonTypeInfo and @JsonSubTypes annotations for property-based discriminator
+ * This enables Jackson to automatically deserialize sealed interfaces based on which property exists
+ */
+ext.injectJacksonDiscriminator = { String content, String interfaceName, Map<String, String> mappings ->
+    // Build @JsonSubTypes annotation entries
+    def subTypesEntries = mappings.collect { propertyName, className ->
+        "    @JsonSubTypes.Type(value = ${className}.class, name = \"${propertyName}\")"
+    }.join(",\n")
+    
+    // Build the complete annotation block  
+    def annotationBlock = """@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION
+)
+@JsonSubTypes({
+${subTypesEntries}
+})
+"""
+    
+    // Remove existing @JsonTypeInfo annotation if present (OpenAPI Generator adds one with empty property)
+    // This handles both single-line and multi-line @JsonTypeInfo annotations
+    content = content.replaceAll(
+        /(?s)@JsonTypeInfo\s*\([^)]*\)\s*\n/,
+        ''
+    )
+    
+    // Also remove @JsonSubTypes if present (to avoid duplicates)
+    content = content.replaceAll(
+        /(?s)@JsonSubTypes\s*\(\{[^}]*\}\)\s*\n/,
+        ''
+    )
+    
+    // Inject before @JsonIgnoreProperties or before the interface declaration
+    def injectionPattern = /(@JsonIgnoreProperties)/
+    if (content =~ injectionPattern) {
+        // Inject before existing @JsonIgnoreProperties
+        content = content.replaceFirst(
+            injectionPattern,
+            "${annotationBlock}\$1"
+        )
+    } else {
+        // Inject before the interface declaration
+        content = content.replaceFirst(
+            /(public sealed interface ${interfaceName})/,
+            "${annotationBlock}\$1"
+        )
+    }
+    
+    // Ensure required imports are present
+    def imports = [
+        'com.fasterxml.jackson.annotation.JsonTypeInfo',
+        'com.fasterxml.jackson.annotation.JsonSubTypes'
+    ]
+    
+    imports.each { importClass ->
+        if (!content.contains("import ${importClass};")) {
+            // Add import after the last existing jackson import or after package
+            if (content.contains('import com.fasterxml.jackson.annotation.')) {
+                content = content.replaceFirst(
+                    /(import com\.fasterxml\.jackson\.annotation\.[^;]+;)(?!\nimport com\.fasterxml\.jackson\.annotation\.)/,
+                    "\$1\nimport ${importClass};"
+                )
+            } else {
+                content = content.replaceFirst(
+                    /(package [^;]+;)/,
+                    "\$1\nimport ${importClass};"
+                )
+            }
+        }
+    }
+    
+    return content
+}
+
+/**
+ * Fix JsonTypeInfo annotation for enum-based discriminators
+ * When enums are used as discriminators, change from NAME-based (empty property)
+ * to DEDUCTION-based to let Jackson figure out the correct variant
+ */
+ext.fixEnumBasedDiscriminator = { String content, String enumDiscriminatorPropertyName ->
+    // Replace the empty-property JsonTypeInfo with DEDUCTION mode
+    // This allows Jackson to automatically detect which sealed subtype to use
+    // based on the available properties and their types
+    
+    def oldPattern = /@JsonTypeInfo\s*\(\s*use\s*=\s*JsonTypeInfo\.Id\.NAME\s*,\s*include\s*=\s*JsonTypeInfo\.As\.PROPERTY\s*,\s*property\s*=\s*""\s*,\s*visible\s*=\s*true\s*\)/
+    def newAnnotation = """@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION
+)"""
+    
+    content = content.replaceAll(oldPattern, newAnnotation)
+    
+    return content
+}
+
+/**
+ * Analyze a oneOf variant and determine its type information
+ */
+ext.analyzeVariantType = { variant, interfaceName, idx ->
+    def typeName = ""
+    def javaType = ""
+    
+    if (variant?.'$ref') {
+        // Reference to another schema
+        def refName = variant.'$ref'.split('/').last()
+        def transformedName = ext.transformSchemaName(refName)
+        typeName = transformedName
+        javaType = transformedName
+    } else if (variant?.type == 'string') {
+        typeName = "String"
+        javaType = "String"
+    } else if (variant?.type == 'integer') {
+        typeName = "Integer"
+        javaType = "Integer"
+    } else if (variant?.type == 'number') {
+        typeName = "Double"
+        javaType = "Double"
+    } else if (variant?.type == 'boolean') {
+        typeName = "Boolean"
+        javaType = "Boolean"
+    } else if (variant?.type == 'array') {
+        // Handle arrays recursively
+        def itemsType = variant?.items
+        if (itemsType?.type == 'string') {
+            typeName = "ListString"
+            javaType = "List<String>"
+        } else if (itemsType?.type == 'integer') {
+            typeName = "ListInteger"
+            javaType = "List<Integer>"
+        } else if (itemsType?.type == 'number') {
+            typeName = "ListDouble"
+            javaType = "List<Double>"
+        } else if (itemsType?.type == 'boolean') {
+            typeName = "ListBoolean"
+            javaType = "List<Boolean>"
+        } else if (itemsType?.type == 'array') {
+            // Nested array
+            if (itemsType?.items?.type == 'string') {
+                typeName = "ListListString"
+                javaType = "List<List<String>>"
+            } else if (itemsType?.items?.type == 'integer') {
+                typeName = "ListListInteger"
+                javaType = "List<List<Integer>>"
+            } else if (itemsType?.items?.type == 'number') {
+                typeName = "ListListDouble"
+                javaType = "List<List<Double>>"
+            } else if (itemsType?.items?.type == 'boolean') {
+                typeName = "ListListBoolean"
+                javaType = "List<List<Boolean>>"
+            } else {
+                typeName = "ListList${itemsType?.items?.type?.capitalize() ?: 'Object'}"
+                javaType = "List<List<Object>>"
+            }
+        } else if (itemsType?.'$ref') {
+            def refName = itemsType.'$ref'.split('/').last()
+            typeName = "List${refName}"
+            javaType = "List<${refName}>"
+        } else {
+            typeName = "List${itemsType?.type?.capitalize() ?: 'Object'}"
+            javaType = "List<Object>"
+        }
+    } else if (variant?.type == 'object') {
+        typeName = "Object${idx}"
+        javaType = "Object"
+    } else {
+        typeName = "Variant${idx}"
+        javaType = "Object"
+    }
+    
+    return [
+        variantName: "${interfaceName}${typeName}",
+        javaType: javaType,
+        typeName: typeName
+    ]
+}
+
+/**
+ * Generate a record implementation for a oneOf variant
+ */
+ext.generateVariantRecord = { descriptor, interfaceName ->
+    def imports = []
+    if (descriptor.javaType.contains('List')) {
+        imports << "import java.util.List;"
+    }
+    
+    def importsSection = imports.isEmpty() ? "" : "\n${imports.join('\n')}"
+    
+    def valueType = descriptor.javaType.contains('List') ? "List<String>" : "String"
+    
+    return """package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonValue;${importsSection}
+
+/**
+ * ${descriptor.typeName} variant for ${interfaceName}
+ */
+public record ${descriptor.variantName}(
+    @JsonValue
+    ${valueType} value
+) implements ${interfaceName} {
+}
+"""
+}
+
+/**
+ * Generate a custom deserializer for polymorphic sealed interfaces (String or List<String>).
+ * This enables automatic deserialization of fields that can be either a string or array.
+ */
+ext.generatePolymorphicDeserializer = { String interfaceName, List<String> variantNames ->
+    def stringVariantName = "${interfaceName}String"
+    def listVariantName = "${interfaceName}ListString"
+    
+    return """package org.cardanofoundation.signify.generated.keria.aiding;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.cardanofoundation.signify.generated.keria.model.${interfaceName};
+import org.cardanofoundation.signify.generated.keria.model.${stringVariantName};
+import org.cardanofoundation.signify.generated.keria.model.${listVariantName};
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Auto-generated deserializer for ${interfaceName} sealed interface.
+ * Handles polymorphic deserialization of fields that can be either a string or array.
+ * 
+ * This class was generated by the Gradle sealed-interfaces task and should not be edited manually.
+ */
+public class ${interfaceName}Deserializer extends StdDeserializer<${interfaceName}> {
+
+    public ${interfaceName}Deserializer() {
+        super(${interfaceName}.class);
+    }
+
+    @Override
+    public ${interfaceName} deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        JsonNode node = p.getCodec().readTree(p);
+        
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        
+        if (node.isTextual()) {
+            // String variant
+            return new ${stringVariantName}(node.asText());
+        }
+        
+        if (node.isNumber()) {
+            // Number should be converted to string variant
+            return new ${stringVariantName}(node.asText());
+        }
+        
+        if (node.isArray()) {
+            // Array variant
+            List<String> values = new ArrayList<>();
+            node.forEach(item -> values.add(item.asText()));
+            return new ${listVariantName}(values);
+        }
+        
+        throw new IllegalArgumentException("Unexpected type for ${interfaceName}: " + node.getNodeType());
+    }
+}
+"""
+}
+
+/**
+ * Generate a MixIn interface to override @JsonTypeInfo for polymorphic sealed interfaces.
+ * This disables automatic Jackson type handling so custom deserializers can take over.
+ */
+ext.generatePolymorphicMixIn = { String interfaceName ->
+    return """package org.cardanofoundation.signify.generated.keria.aiding;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+/**
+ * MixIn to remove @JsonTypeInfo annotation from ${interfaceName} sealed interface.
+ * By applying this MixIn, Jackson will not try to validate type information,
+ * allowing our custom deserializer to handle the deserialization.
+ * 
+ * Auto-generated by the Gradle sealed-interfaces task.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NONE, include = JsonTypeInfo.As.PROPERTY, property = "")
+public interface ${interfaceName}MixIn {
+}
+"""
+}
+

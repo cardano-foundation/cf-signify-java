@@ -28,46 +28,58 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.ACDCV1OneOf1A;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * ACDCV1OneOf1
  */
 @JsonPropertyOrder({
-  ACDCV1OneOf1.JSON_PROPERTY_A_UPPER
+  ACDCV1OneOf1.JSON_PROPERTY_A
 })
 @JsonTypeName("ACDC_V_1_oneOf_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class ACDCV1OneOf1 {
-  public static final String JSON_PROPERTY_A_UPPER = "A";
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class ACDCV1OneOf1 implements ACDCV1 {
+  public static final String JSON_PROPERTY_A = "A";
   @jakarta.annotation.Nullable
-  private ACDCV1OneOf1A AUpper;
+  private ACDCV1OneOf1A A;
 
   public ACDCV1OneOf1() {
   }
 
-  public ACDCV1OneOf1 AUpper(@jakarta.annotation.Nullable ACDCV1OneOf1A AUpper) {
+  /**
+   * Constructor with all args parameters
+   */
+  public ACDCV1OneOf1(@JsonProperty(JSON_PROPERTY_A) ACDCV1OneOf1A A) {
+    this.A = A;
+  }
+
+  public ACDCV1OneOf1 A(@jakarta.annotation.Nullable ACDCV1OneOf1A A) {
     
-    this.AUpper = AUpper;
+    this.A = A;
     return this;
   }
 
   /**
-   * Get AUpper
-   * @return AUpper
+   * Get A
+   * @return A
    */
   @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_A_UPPER, required = false)
+  @Valid
+
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public ACDCV1OneOf1A getAUpper() {
-    return AUpper;
+  public ACDCV1OneOf1A getA() {
+    return A;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_A_UPPER, required = false)
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAUpper(@jakarta.annotation.Nullable ACDCV1OneOf1A AUpper) {
-    this.AUpper = AUpper;
+  public void setA(@jakarta.annotation.Nullable ACDCV1OneOf1A A) {
+    this.A = A;
   }
 
   /**
@@ -123,20 +135,20 @@ public class ACDCV1OneOf1 {
       return false;
     }
     ACDCV1OneOf1 acDCV1OneOf1 = (ACDCV1OneOf1) o;
-    return Objects.equals(this.AUpper, acDCV1OneOf1.AUpper) &&
+    return Objects.equals(this.A, acDCV1OneOf1.A) &&
         Objects.equals(this.additionalProperties, acDCV1OneOf1.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(AUpper, additionalProperties);
+    return Objects.hash(A, additionalProperties);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ACDCV1OneOf1 {\n");
-    sb.append("    AUpper: ").append(toIndentedString(AUpper)).append("\n");
+    sb.append("    A: ").append(toIndentedString(A)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();

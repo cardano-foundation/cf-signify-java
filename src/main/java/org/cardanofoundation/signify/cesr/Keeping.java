@@ -22,7 +22,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf1;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf2;
+import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf3;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
 import org.cardanofoundation.signify.generated.keria.model.SaltyState;
@@ -120,7 +124,7 @@ public class Keeping {
                 );
                 case group -> new GroupKeeper(
                         this,
-                        (Identifier) kargs.get("mhab"),
+                        (HabState) kargs.get("mhab"),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("states")), new TypeReference<>() {}),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("rstates")), new TypeReference<>() {}),
                         Utils.fromJson(Utils.jsonStringify(kargs.get("keys")), new TypeReference<>() {}),
@@ -130,12 +134,11 @@ public class Keeping {
             };
         }
 
-        public Keeper<? extends KeeperParams> get(Identifier aid) throws LibsodiumException {
-            SaltyState saltyState = aid.getSalty();
-            RandyKeyState randyState = aid.getRandy();
-            GroupKeyState groupKeyState = aid.getGroup();
+        public Keeper<? extends KeeperParams> get(HabState aid) throws LibsodiumException {
 
-            if (saltyState != null) {
+            
+            if (aid instanceof HabStateOneOf saltyImpl) {
+                SaltyState saltyState = saltyImpl.getSalty();
                 return new SaltyKeeper(
                         salter,
                         saltyState.getPidx(),
@@ -153,8 +156,9 @@ public class Keeping {
                         null,
                         saltyState.getSxlt()
                 );
-            } else if (randyState != null) {
-                Prefixer pre = new Prefixer(aid.getPrefix());
+            } else if (aid instanceof HabStateOneOf1 randyImpl) {
+                RandyKeyState randyState = randyImpl.getRandy();
+                Prefixer pre = new Prefixer(randyImpl.getPrefix());
                 return new RandyKeeper(
                         salter,
                         null,
@@ -168,7 +172,8 @@ public class Keeping {
                         randyState.getPrxs(),
                         randyState.getNxts()
                 );
-            } else if (groupKeyState != null) {
+            } else if (aid instanceof HabStateOneOf2 groupImpl) {
+                GroupKeyState groupKeyState = groupImpl.getGroup();
                 return new GroupKeeper(
                         this,
                         groupKeyState.getMhab(),
@@ -664,7 +669,7 @@ public class Keeping {
     @Getter
     public static class GroupKeeper implements Keeper<GroupParams> {
         private final KeyManager manager;
-        private final Identifier mhab;
+        private final HabState mhab;
         private final Algos algo = Algos.group;
         private final List<Signer> signers;
         private List<String> gkeys;
@@ -672,7 +677,7 @@ public class Keeping {
 
         public GroupKeeper(
                 KeyManager manager,
-                Identifier mhab,
+                HabState mhab,
                 List<KeyStateRecord> states,
                 List<KeyStateRecord> rstates,
                 List<String> keys,
@@ -740,12 +745,25 @@ public class Keeping {
                 List<Integer> indices,
                 List<Integer> ondices
         ) throws LibsodiumException {
-            if (mhab.getState() == null) {
+            // Extract state from the appropriate HabState implementation
+            KeyStateRecord state = null;
+            
+            if (mhab instanceof HabStateOneOf saltyImpl) {
+                state = saltyImpl.getState();
+            } else if (mhab instanceof HabStateOneOf1 randyImpl) {
+                state = randyImpl.getState();
+            } else if (mhab instanceof HabStateOneOf2 groupImpl) {
+                state = groupImpl.getState();
+            } else if (mhab instanceof HabStateOneOf3 externImpl) {
+                state = externImpl.getState();
+            }
+            
+            if (state == null) {
                 throw new IllegalStateException("No state in mhab");
             }
 
-            String key = mhab.getState().getK().getFirst();
-            String ndig = mhab.getState().getN().getFirst();
+            String key = state.getK().getFirst();
+            String ndig = state.getN().getFirst();
 
             int csi = gkeys.indexOf(key);
             int pni = gdigs.indexOf(ndig);

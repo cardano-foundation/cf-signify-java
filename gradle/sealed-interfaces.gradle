@@ -1,0 +1,518 @@
+// Post-process OpenAPI-generated code to make interfaces sealed (Java 21+)
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.yaml:snakeyaml:2.2"
+    }
+}
+
+apply from: "${rootProject.projectDir}/gradle/openapi-helpers.gradle"
+
+ext.collectOneOfContext = { File modelDir, File specFile ->
+    def yaml = new org.yaml.snakeyaml.Yaml()
+    def spec = yaml.load(specFile.text)
+    def schemas = spec?.components?.schemas ?: [:]
+    def schemaLevelOneOfNames = [] as Set
+    schemas.each { schemaName, schemaDef ->
+        if (schemaDef?.oneOf) {
+            schemaLevelOneOfNames << project.ext.transformSchemaName.call(schemaName)
+        }
+    }
+    def schemaLevelOneOfs = [:]
+    schemas.each { schemaName, schemaDef ->
+        if (schemaDef?.oneOf) {
+            def variants = []
+            def hasInlineObjects = false
+            schemaDef.oneOf.eachWithIndex { variant, idx ->
+                if (variant?.'$ref') {
+                    def refName = variant.'$ref'.split('/').last()
+                    variants << project.ext.transformSchemaName.call(refName)
+                } else if (variant?.type == 'object' || (variant?.properties || variant?.required)) {
+                    hasInlineObjects = true
+                }
+            }
+            if (hasInlineObjects) {
+                def transformedName = project.ext.transformSchemaName.call(schemaName)
+                modelDir.listFiles().findAll {
+                    it.name.startsWith("${transformedName}OneOf") && it.name.endsWith(".java")
+                }.each { file ->
+                    def className = file.name.replace(".java", "")
+                    variants << className
+                }
+            }
+            if (!variants.isEmpty()) {
+                schemaLevelOneOfs[schemaName] = variants
+            }
+        }
+    }
+    def propertyLevelOneOfs = [:]
+    schemas.each { schemaName, schemaDef ->
+        schemaDef?.properties?.each { propName, propDef ->
+            if (propDef?.oneOf) {
+                def interfaceName = "${schemaName}${propName.capitalize()}"
+                def variantDescriptors = []
+                def schemaRefVariants = []
+                propDef.oneOf.eachWithIndex { variant, idx ->
+                    def descriptor = project.ext.analyzeVariantType.call(variant, interfaceName, idx)
+                    if (descriptor) {
+                        if (schemaLevelOneOfNames.contains(descriptor.javaType)) {
+                            schemaRefVariants << descriptor.javaType
+                        } else {
+                            variantDescriptors << descriptor
+                        }
+                    }
+                }
+                if (!variantDescriptors.isEmpty() || !schemaRefVariants.isEmpty()) {
+                    propertyLevelOneOfs[interfaceName] = [
+                        wrapperVariants: variantDescriptors,
+                        schemaRefVariants: schemaRefVariants
+                    ]
+                }
+            }
+        }
+    }
+    return [schemaLevelOneOfs: schemaLevelOneOfs, propertyLevelOneOfs: propertyLevelOneOfs]
+}
+
+ext.autoDetectDiscriminators = { File modelDir, String interfaceName, List<String> variantNames ->
+    def mappings = [:]
+    def enumDiscriminatorProperty = null
+    def allVariantProperties = [] as List
+    def variantEnumValues = [:] as Map // property -> [variant -> set of enum values]
+    
+    // Collect all properties and enum values from each variant (only from existing files)
+    variantNames.each { variantName ->
+        def variantFile = new File(modelDir, "${variantName}.java")
+        if (variantFile.exists()) {
+            def variantContent = variantFile.text
+            def propertyPattern = /public static final String JSON_PROPERTY_(\w+)\s*=\s*"([^"]+)";/
+            def matcher = variantContent =~ propertyPattern
+            def variantProps = [:]
+            matcher.each { match ->
+                def propertyConstant = match[1]
+                def propertyJsonName = match[2]
+                variantProps[propertyConstant] = propertyJsonName
+                
+                // Extract enum values for this property
+                // Pattern: public enum PROPERTY_NAMEEnum { VALUE1(...), VALUE2(...), ... }
+                // Handle both ET -> EtEnum and NAME -> NameEnum patterns
+                // Convert property constant to enum class name: ET -> EtEnum, NAME -> NameEnum
+                def enumClassPattern = propertyConstant.length() == 1 ? 
+                    propertyConstant.toUpperCase() : 
+                    propertyConstant.substring(0, 1).toUpperCase() + propertyConstant.substring(1).toLowerCase()
+                enumClassPattern = enumClassPattern + 'Enum'
+                
+                // Use (?s) flag to enable DOTALL mode so . matches newlines
+                def enumPattern = /(?s)public\s+enum\s+${enumClassPattern}\s*\{([^}]+)\}/
+                def enumMatcher = variantContent =~ enumPattern
+                if (enumMatcher && enumMatcher.size() > 0) {
+                    def enumBody = enumMatcher[0][1]
+                    // Extract enum constants: "VALUE1(String.valueOf("x")), VALUE2(String.valueOf("y"))"
+                    def enumConstants = enumBody.split(',').collect { rawEnum ->
+                        rawEnum.trim().split('\\(|;')[0].trim()
+                    }.findAll { it && !it.isEmpty() }
+                    
+                    if (!enumConstants.isEmpty()) {
+                        if (!variantEnumValues[propertyConstant]) {
+                            variantEnumValues[propertyConstant] = [:]
+                        }
+                        variantEnumValues[propertyConstant][variantName] = enumConstants as Set
+                    }
+                }
+            }
+            allVariantProperties << [name: variantName, props: variantProps]
+        }
+    }
+    
+    // If no variants with files found, return empty mappings (property-level inline variants)
+    if (allVariantProperties.isEmpty()) {
+        return mappings
+    }
+    
+    // Find common properties (present in ALL variants)
+    def commonProperties = [] as Set
+    commonProperties = allVariantProperties[0].props.keySet() as Set
+    allVariantProperties.drop(1).each { variantData ->
+        commonProperties = commonProperties.intersect(variantData.props.keySet())
+    }
+    
+    // Find variant-specific properties (not common to all)
+    allVariantProperties.each { variantData ->
+        def variantName = variantData.name
+        def variantProps = variantData.props
+        variantProps.each { propertyConstant, propertyJsonName ->
+            if (!commonProperties.contains(propertyConstant)) {
+                mappings[propertyJsonName] = variantName
+            }
+        }
+    }
+    
+    // Check common properties for variant-discriminating enum values
+    // A property with different enum values across variants is a discriminator
+    commonProperties.each { propConstant ->
+        if (variantEnumValues[propConstant] && variantEnumValues[propConstant].size() == allVariantProperties.size()) {
+            def enumValuesByVariant = variantEnumValues[propConstant]
+            
+            // Check if different variants have different enum values
+            def enumValuesSets = enumValuesByVariant.values().toList()
+            if (enumValuesSets.size() > 1) {
+                def allIdentical = enumValuesSets.drop(1).every { it == enumValuesSets[0] }
+                
+                // If not all variants have identical enum values, it's a discriminator
+                if (!allIdentical) {
+                    // Store the property for use in JSON type info injection
+                    enumDiscriminatorProperty = allVariantProperties[0].props[propConstant]
+                    mappings['__enumDiscriminatorProperty__'] = enumDiscriminatorProperty
+                    // For enum-based discriminators, don't add to mappings - Jackson DEDUCTION will handle it
+                }
+            }
+        }
+    }
+    
+    return mappings
+}
+
+ext.detectCommonMethods = { File modelDir, List<String> variantNames ->
+    if (variantNames.isEmpty()) return [:]
+    def commonMethodSignatures = null
+    variantNames.each { variantName ->
+        def variantFile = new File(modelDir, "${variantName}.java")
+        if (variantFile.exists()) {
+            def variantContent = variantFile.text
+            
+            // Remove inner class/enum content to avoid detecting their methods
+            def cleanedContent = variantContent.replaceAll(/(?s)public\s+(?:static\s+)?(?:final\s+)?(?:enum|class|interface)\s+\w+\s*\{[^}]*(?:\{[^}]*\}[^}]*)*\}/, '')
+            
+            def methodPattern = /public\s+(\w+(?:<[^>]+>)?)\s+(\w+)\s*\(\s*\)\s*\{/
+            def matcher = cleanedContent =~ methodPattern
+            def variantMethods = [:] as LinkedHashMap
+            matcher.each { match ->
+                def returnType = match[1]
+                def methodName = match[2]
+                // Only include primitive types, String, and generated model types without generics
+                def isPrimitiveType = returnType in ['String', 'int', 'boolean', 'Boolean', 'Integer', 'Long', 'Double', 'Float', 'List', 'Map']
+                def isSimpleType = returnType.matches(/^[A-Z]\w+$/) && !returnType.contains('Enum')
+                def isSafeType = isPrimitiveType || isSimpleType
+                if (!(methodName in ['hashCode', 'equals', 'toString', 'getClass', 'getValue']) &&
+                    !returnType.contains('<') &&
+                    !returnType.contains('Enum') &&
+                    isSafeType) {
+                    variantMethods[methodName] = returnType
+                }
+            }
+            if (commonMethodSignatures == null) {
+                commonMethodSignatures = variantMethods
+            } else {
+                commonMethodSignatures = commonMethodSignatures.findAll { k, v -> variantMethods.containsKey(k) && variantMethods[k] == v }
+            }
+        }
+    }
+    return commonMethodSignatures ?: [:]
+}
+
+ext.injectCommonMethodsIntoInterface = { File interfaceFile, Map<String, String> commonMethods ->
+    if (commonMethods.isEmpty()) return false
+    def content = interfaceFile.text
+    def originalContent = content
+    def insertPoint = content.lastIndexOf('}')
+    if (insertPoint == -1) return false
+    
+    // Check which methods already exist to avoid duplicates
+    def methodsToAdd = commonMethods.findAll { methodName, returnType ->
+        !content.contains("${returnType} ${methodName}();")
+    }
+    
+    if (methodsToAdd.isEmpty()) return false
+    
+    def methodDeclarations = methodsToAdd.collect { methodName, returnType ->
+        "    ${returnType} ${methodName}();"
+    }.join('\n')
+    content = content.substring(0, insertPoint) + '\n' + methodDeclarations + '\n' + content.substring(insertPoint)
+    interfaceFile.text = content
+    return content != originalContent
+}
+
+ext.cleanupStaleUnionGeneratedArtifacts = { File modelDir, Set<String> expectedArtifactNames ->
+    def aidingDir = new File(modelDir, "../aiding")
+    def autoGeneratedMarker = "Auto-generated by the Gradle sealed-interfaces task"
+    [modelDir, aidingDir].each { dir ->
+        if (!dir.exists()) return
+        dir.listFiles()?.findAll { it.name.endsWith(".java") }?.each { file ->
+            if (expectedArtifactNames.contains(file.name)) return
+            def content = file.text
+            def isAutoGeneratedUnionArtifact = content.contains(autoGeneratedMarker) || content.contains("Auto-generated deserializer for")
+            if (isAutoGeneratedUnionArtifact) {
+                if (file.delete()) {
+                    logger.lifecycle("✓ Removed stale generated artifact: ${file.name}")
+                }
+            }
+        }
+    }
+}
+
+ext.processSchemaLevelOneOfs = { File modelDir, Map schemaLevelOneOfs ->
+    schemaLevelOneOfs.each { schemaName, permittedTypes ->
+        def transformedSchemaName = project.ext.transformSchemaName.call(schemaName)
+        def file = new File(modelDir, "${transformedSchemaName}.java")
+        if (file.exists()) {
+            def content = file.text
+            content = content.replaceAll("public interface ${transformedSchemaName}", "public sealed interface ${transformedSchemaName}")
+            def permitsClause = "\n    permits ${permittedTypes.join(', ')} "
+            content = content.replaceAll("(public sealed interface ${transformedSchemaName}(?:\\s+extends\\s+\\w+)?)\\s*\\{", "\$1${permitsClause}{")
+            def discriminatorMappings = project.ext.autoDetectDiscriminators.call(modelDir, transformedSchemaName, permittedTypes)
+            if (!discriminatorMappings.isEmpty()) {
+                // Check if this is an enum-based discriminator
+                def enumDiscriminatorProperty = discriminatorMappings.remove('__enumDiscriminatorProperty__')
+                if (enumDiscriminatorProperty) {
+                    // Fix the JsonTypeInfo annotation to use DEDUCTION instead of NAME with empty property
+                    content = project.ext.fixEnumBasedDiscriminator.call(content, enumDiscriminatorProperty)
+                    logger.lifecycle("✓ Fixed enum-based discriminator (${enumDiscriminatorProperty}) in ${transformedSchemaName}")
+                } else if (!discriminatorMappings.isEmpty()) {
+                    // Regular property-based discriminator
+                    content = project.ext.injectJacksonDiscriminator.call(content, transformedSchemaName, discriminatorMappings)
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${transformedSchemaName}")
+                }
+            }
+            file.text = content
+            
+            // Automatically detect and inject common methods for all sealed interfaces
+            def commonMethods = project.ext.detectCommonMethods.call(modelDir, permittedTypes)
+            if (!commonMethods.isEmpty()) {
+                if (project.ext.injectCommonMethodsIntoInterface.call(file, commonMethods)) {
+                    def methodList = commonMethods.collect { name, type -> "${name}()" }.join(', ')
+                    logger.lifecycle("✓ Injected common methods into ${transformedSchemaName}: ${methodList}")
+                }
+            }
+            
+            logger.lifecycle("✓ Made ${transformedSchemaName}.java sealed with permits: ${permittedTypes.join(', ')}")
+            permittedTypes.each { variantName ->
+                def variantFile = new File(modelDir, "${variantName}.java")
+                if (variantFile.exists()) {
+                    def variantContent = variantFile.text
+                    variantContent = variantContent.replaceAll("public class ${variantName}", "public final class ${variantName}")
+                    variantContent = variantContent.replaceAll("(public final class ${variantName})\\s+implements\\s+[^{]+\\{", "\$1 implements ${transformedSchemaName} {")
+                    variantContent = variantContent.replaceAll("(public final class ${variantName})\\s*\\{", "\$1 implements ${transformedSchemaName} {")
+                    variantFile.text = variantContent
+                }
+            }
+        }
+    }
+}
+
+ext.processPropertyLevelOneOfs = { File modelDir, Map propertyLevelOneOfs ->
+    def expectedGeneratedArtifacts = [] as Set
+    propertyLevelOneOfs.each { interfaceName, config ->
+        def interfaceFile = new File(modelDir, "${interfaceName}.java")
+        if (interfaceFile.exists()) {
+            def wrapperVariants = config.wrapperVariants ?: []
+            def schemaRefVariants = config.schemaRefVariants ?: []
+            def variantNames = wrapperVariants.collect { it.variantName } + schemaRefVariants
+            def content = interfaceFile.text
+            content = content.replaceAll(/public interface ${interfaceName}/, "public sealed interface ${interfaceName}\n    permits ${variantNames.join(', ')}")
+            def discriminatorMappings = project.ext.autoDetectDiscriminators.call(modelDir, interfaceName, variantNames)
+            if (!discriminatorMappings.isEmpty()) {
+                // Check if this is an enum-based discriminator
+                def enumDiscriminatorProperty = discriminatorMappings.remove('__enumDiscriminatorProperty__')
+                if (enumDiscriminatorProperty) {
+                    // Fix the JsonTypeInfo annotation to use DEDUCTION instead of NAME with empty property
+                    content = project.ext.fixEnumBasedDiscriminator.call(content, enumDiscriminatorProperty)
+                    logger.lifecycle("✓ Fixed enum-based discriminator (${enumDiscriminatorProperty}) in ${interfaceName}")
+                } else if (!discriminatorMappings.isEmpty()) {
+                    // Regular property-based discriminator
+                    content = project.ext.injectJacksonDiscriminator.call(content, interfaceName, discriminatorMappings)
+                    logger.lifecycle("✓ Added Jackson discriminator annotations to ${interfaceName}")
+                }
+            } else {
+                def isStringListPolymorphic = variantNames.size() == 2 && (variantNames.contains("${interfaceName}String") && variantNames.contains("${interfaceName}ListString"))
+                if (isStringListPolymorphic) {
+                    def deserializerFile = new File(modelDir, "../aiding/${interfaceName}Deserializer.java")
+                    deserializerFile.parentFile.mkdirs()
+                    deserializerFile.text = project.ext.generatePolymorphicDeserializer.call(interfaceName, variantNames)
+                    expectedGeneratedArtifacts << deserializerFile.name
+                    logger.lifecycle("✓ Generated deserializer for polymorphic ${interfaceName}")
+                    def mixInFile = new File(modelDir, "../aiding/${interfaceName}MixIn.java")
+                    mixInFile.text = project.ext.generatePolymorphicMixIn.call(interfaceName)
+                    expectedGeneratedArtifacts << mixInFile.name
+                    logger.lifecycle("✓ Generated MixIn for polymorphic ${interfaceName}")
+                }
+            }
+            interfaceFile.text = content
+            // Note: Common method detection is complex due to type compatibility
+            // Only inject for manually curated sealed interfaces where we're certain
+            logger.lifecycle("✓ Made ${interfaceName} sealed with permits: ${variantNames.join(', ')}")
+            wrapperVariants.each { descriptor ->
+                def variantFile = new File(modelDir, "${descriptor.variantName}.java")
+                variantFile.text = project.ext.generateVariantRecord.call(descriptor, interfaceName)
+                expectedGeneratedArtifacts << variantFile.name
+                logger.lifecycle("  ✓ Created ${descriptor.variantName}.java (${descriptor.javaType})")
+            }
+        }
+    }
+    def javaFiles = modelDir.listFiles()?.findAll { it.name.endsWith(".java") } ?: []
+    javaFiles.each { interfaceFile ->
+        def content = interfaceFile.text
+        def matcher = content =~ /public sealed interface\s+(\w+)[\s\S]*?permits\s+([^\{]+)\{/
+        if (!matcher.find()) return
+        def interfaceName = matcher.group(1)
+        def permitted = matcher.group(2).replaceAll(/\s+/,' ').split(',').collect { it.trim() }.findAll { it }
+        def stringVariantName = "${interfaceName}String"
+        def listVariantName = "${interfaceName}ListString"
+        def isStringListPolymorphic = permitted.any { it == stringVariantName } && permitted.any { it == listVariantName }
+        if (!isStringListPolymorphic) return
+        logger.lifecycle("  Processing String|List polymorphic interface: ${interfaceName}")
+        def stringVariantFile = new File(modelDir, "${stringVariantName}.java")
+        if (!stringVariantFile.exists()) {
+            stringVariantFile.text = project.ext.generateVariantRecord.call([variantName: stringVariantName, javaType: "String", typeName: "String"], interfaceName)
+            logger.lifecycle("  ✓ Recreated missing ${stringVariantName}.java (String)")
+        }
+        expectedGeneratedArtifacts << stringVariantFile.name
+        def listVariantFile = new File(modelDir, "${listVariantName}.java")
+        if (!listVariantFile.exists()) {
+            listVariantFile.text = project.ext.generateVariantRecord.call([variantName: listVariantName, javaType: "List<String>", typeName: "ListString"], interfaceName)
+            logger.lifecycle("  ✓ Recreated missing ${listVariantName}.java (List<String>)")
+        }
+        expectedGeneratedArtifacts << listVariantFile.name
+        def deserializerFile = new File(modelDir, "../aiding/${interfaceName}Deserializer.java")
+        if (!deserializerFile.exists()) {
+            deserializerFile.parentFile.mkdirs()
+            deserializerFile.text = project.ext.generatePolymorphicDeserializer.call(interfaceName, [stringVariantName, listVariantName])
+            logger.lifecycle("✓ Recreated missing deserializer for polymorphic ${interfaceName}")
+        }
+        expectedGeneratedArtifacts << deserializerFile.name
+        def mixInFile = new File(modelDir, "../aiding/${interfaceName}MixIn.java")
+        if (!mixInFile.exists()) {
+            mixInFile.text = project.ext.generatePolymorphicMixIn.call(interfaceName)
+            logger.lifecycle("✓ Recreated missing MixIn for polymorphic ${interfaceName}")
+        }
+        expectedGeneratedArtifacts << mixInFile.name
+    }
+    return expectedGeneratedArtifacts
+}
+
+ext.cleanupUnauthorizedSealedImplementations = { File modelDir, Map schemaLevelOneOfs, Map propertyLevelOneOfs ->
+    def sealedInterfaceNames = (schemaLevelOneOfs.keySet() + propertyLevelOneOfs.keySet()).collect { project.ext.transformSchemaName.call(it) }
+    def allPermittedTypes = [:]
+    schemaLevelOneOfs.each { schemaName, permittedTypes ->
+        allPermittedTypes[project.ext.transformSchemaName.call(schemaName)] = permittedTypes
+    }
+    propertyLevelOneOfs.each { interfaceName, config ->
+        def variantNames = (config.wrapperVariants?.collect { it.variantName } ?: []) + (config.schemaRefVariants ?: [])
+        allPermittedTypes[interfaceName] = variantNames
+    }
+    modelDir.listFiles().findAll { it.name.endsWith(".java") }.each { file ->
+        def content = file.text
+        def className = file.name.replace(".java", "")
+        def implementedSealedInterfaces = []
+        sealedInterfaceNames.each { sealedName ->
+            if (content.contains("implements") && content.contains(sealedName)) {
+                implementedSealedInterfaces << sealedName
+            }
+        }
+        if (!implementedSealedInterfaces.isEmpty()) {
+            def unauthorizedInterfaces = implementedSealedInterfaces.findAll { sealedName ->
+                !(allPermittedTypes[sealedName] ?: []).contains(className)
+            }
+            if (!unauthorizedInterfaces.isEmpty()) {
+                unauthorizedInterfaces.each { sealedName ->
+                    content = content.replaceAll("(implements\\s+)${sealedName},\\s*", '$1')
+                    content = content.replaceAll(",\\s*${sealedName}", '')
+                    content = content.replaceAll("(implements\\s+)${sealedName}(\\s*\\{)", '$1$2')
+                    content = content.replaceAll(/implements\s+\{/, '{')
+                }
+            }
+            def originalContent = content
+            content = content.replaceAll(/(?m)^public class (\w+)/, 'public final class $1')
+            if (content != originalContent) {
+                file.text = content
+            }
+        }
+    }
+}
+
+tasks.register("scanOneOfDefinitions") {
+    group = "openapi"
+    description = "Scan and report oneOf definitions in OpenAPI spec (no code generation)"
+    dependsOn("prepareOpenApiSpec")
+    doLast {
+        def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+        def specFile = generatedSpec.get().asFile
+        if (!specFile.exists()) {
+            logger.warn("OpenAPI spec file not found at ${specFile.absolutePath}")
+            return
+        }
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def context = project.ext.collectOneOfContext.call(modelDir, specFile)
+        logger.lifecycle("oneOf summary: schema-level=${context.schemaLevelOneOfs.size()}, property-level=${context.propertyLevelOneOfs.size()}")
+    }
+}
+
+tasks.register("patchSchemaLevelSealed") {
+    group = "openapi"
+    description = "Phase 1: patch schema-level oneOf interfaces to sealed"
+    dependsOn("openApiGenerate")
+    doLast {
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+        def specFile = generatedSpec.get().asFile
+        if (!specFile.exists()) {
+            logger.warn("OpenAPI spec file not found at ${specFile.absolutePath}")
+            return
+        }
+        def context = project.ext.collectOneOfContext.call(modelDir, specFile)
+        project.ext.processSchemaLevelOneOfs.call(modelDir, context.schemaLevelOneOfs)
+    }
+}
+
+tasks.register("patchPropertyLevelUnions") {
+    group = "openapi"
+    description = "Phase 2: create sealed interfaces for property-level oneOf"
+    dependsOn("patchSchemaLevelSealed")
+    doLast {
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+        def specFile = generatedSpec.get().asFile
+        if (!specFile.exists()) {
+            logger.warn("OpenAPI spec file not found at ${specFile.absolutePath}")
+            return
+        }
+        def context = project.ext.collectOneOfContext.call(modelDir, specFile)
+        def expectedGeneratedArtifacts = project.ext.processPropertyLevelOneOfs.call(modelDir, context.propertyLevelOneOfs)
+        project.ext.generatedUnionExpectedArtifacts = expectedGeneratedArtifacts
+    }
+}
+
+tasks.register("cleanupUnauthorizedImplementations") {
+    group = "openapi"
+    description = "Phase 3: cleanup unauthorized sealed interface implementations"
+    dependsOn("patchPropertyLevelUnions")
+    doLast {
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+        def specFile = generatedSpec.get().asFile
+        if (!specFile.exists()) {
+            logger.warn("OpenAPI spec file not found at ${specFile.absolutePath}")
+            return
+        }
+        def context = project.ext.collectOneOfContext.call(modelDir, specFile)
+        project.ext.cleanupUnauthorizedSealedImplementations.call(modelDir, context.schemaLevelOneOfs, context.propertyLevelOneOfs)
+    }
+}
+
+tasks.register("cleanupStaleUnionArtifacts") {
+    group = "openapi"
+    description = "Phase 4: cleanup stale auto-generated union artifacts"
+    dependsOn("cleanupUnauthorizedImplementations")
+    doLast {
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def expectedArtifacts = project.ext.generatedUnionExpectedArtifacts ?: [] as Set
+        project.ext.cleanupStaleUnionGeneratedArtifacts.call(modelDir, expectedArtifacts)
+    }
+}
+
+tasks.register("makeSealedInterfaces") {
+    group = "openapi"
+    description = "Post-process generated interfaces to make them sealed (all phases)"
+    dependsOn("cleanupStaleUnionArtifacts")
+}

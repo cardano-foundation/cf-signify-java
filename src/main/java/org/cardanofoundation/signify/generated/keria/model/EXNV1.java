@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * EXNV1
@@ -43,8 +46,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EXNV1.JSON_PROPERTY_E
 })
 @JsonTypeName("EXN_V_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
-public class EXNV1 {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public final class EXNV1 implements Exn {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -92,6 +95,23 @@ public class EXNV1 {
   public EXNV1() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public EXNV1(@JsonProperty(JSON_PROPERTY_V) String v, @JsonProperty(JSON_PROPERTY_T) String t, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_I) String i, @JsonProperty(JSON_PROPERTY_RP) String rp, @JsonProperty(JSON_PROPERTY_P) String p, @JsonProperty(JSON_PROPERTY_DT) String dt, @JsonProperty(JSON_PROPERTY_R) String r, @JsonProperty(JSON_PROPERTY_Q) Map<String, Object> q, @JsonProperty(JSON_PROPERTY_A) Object a, @JsonProperty(JSON_PROPERTY_E) Map<String, Object> e) {
+    this.v = v;
+    this.t = t;
+    this.d = d;
+    this.i = i;
+    this.rp = rp;
+    this.p = p;
+    this.dt = dt;
+    this.r = r;
+    this.q = q;
+    this.a = a;
+    this.e = e;
+  }
+
   public EXNV1 v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
@@ -103,6 +123,8 @@ public class EXNV1 {
    * @return v
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_V, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -128,6 +150,8 @@ public class EXNV1 {
    * @return t
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_T, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -153,6 +177,8 @@ public class EXNV1 {
    * @return d
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_D, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -178,6 +204,8 @@ public class EXNV1 {
    * @return i
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_I, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -203,6 +231,8 @@ public class EXNV1 {
    * @return rp
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_RP, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -228,6 +258,8 @@ public class EXNV1 {
    * @return p
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_P, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -253,6 +285,8 @@ public class EXNV1 {
    * @return dt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_DT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -278,6 +312,8 @@ public class EXNV1 {
    * @return r
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_R, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -308,6 +344,8 @@ public class EXNV1 {
    * @return q
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_Q, required = true)
   @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
 
@@ -333,6 +371,8 @@ public class EXNV1 {
    * @return a
    */
   @jakarta.annotation.Nullable
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_A, required = false)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -363,6 +403,8 @@ public class EXNV1 {
    * @return e
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_E, required = true)
   @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
 

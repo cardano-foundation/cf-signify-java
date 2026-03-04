@@ -17,6 +17,7 @@ import java.util.List;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("unchecked")
 public class SinglesigIXNTest extends BaseIntegrationTest {
     static SignifyClient client1, client2;
     static String name1_id, name1_oobi;

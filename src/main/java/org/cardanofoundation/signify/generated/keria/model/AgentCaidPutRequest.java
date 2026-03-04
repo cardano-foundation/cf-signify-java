@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * AgentCaidPutRequest
@@ -37,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AgentCaidPutRequest.JSON_PROPERTY_KEYS
 })
 @JsonTypeName("_agent__caid__put_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class AgentCaidPutRequest {
   public static final String JSON_PROPERTY_ROT = "rot";
   @jakarta.annotation.Nonnull
@@ -58,6 +61,16 @@ public class AgentCaidPutRequest {
   public AgentCaidPutRequest() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public AgentCaidPutRequest(@JsonProperty(JSON_PROPERTY_ROT) Object rot, @JsonProperty(JSON_PROPERTY_SIGS) List<String> sigs, @JsonProperty(JSON_PROPERTY_SXLT) String sxlt, @JsonProperty(JSON_PROPERTY_KEYS) Object keys) {
+    this.rot = rot;
+    this.sigs = sigs;
+    this.sxlt = sxlt;
+    this.keys = keys;
+  }
+
   public AgentCaidPutRequest rot(@jakarta.annotation.Nonnull Object rot) {
     
     this.rot = rot;
@@ -69,6 +82,8 @@ public class AgentCaidPutRequest {
    * @return rot
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_ROT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -102,6 +117,8 @@ public class AgentCaidPutRequest {
    * @return sigs
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_SIGS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -127,6 +144,8 @@ public class AgentCaidPutRequest {
    * @return sxlt
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_SXLT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -152,6 +171,7 @@ public class AgentCaidPutRequest {
    * @return keys
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_KEYS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 

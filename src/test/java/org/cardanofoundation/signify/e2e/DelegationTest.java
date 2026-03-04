@@ -1,14 +1,13 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.app.util.HabStateUtil;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +18,12 @@ import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings("unchecked")
 public class DelegationTest {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
     private String opResponseName;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private TestSteps testSteps = new TestSteps();
     String oobi, contactId;
 
@@ -64,7 +63,7 @@ public class DelegationTest {
         EventResult icpResult1 = client1.identifiers().create("delegator", kargs);
         waitOperation(client1, icpResult1.op());
 
-        Identifier ator = client1.identifiers().get("delegator").get();
+        HabState ator = client1.identifiers().get("delegator").get();
         EventResult rpyResult1 = client1.identifiers().addEndRole(
                 "delegator",
                 "agent",
@@ -83,7 +82,7 @@ public class DelegationTest {
         CreateIdentifierArgs delpre = new CreateIdentifierArgs();
         delpre.setDelpre(ator.getPrefix());
         EventResult icpResult2 = client2.identifiers().create("delegate", delpre);
-        Operation op2 = Operation.fromObject(icpResult2.op());
+        Operation<?> op2 = Operation.fromObject(icpResult2.op());
         opResponseName = op2.getName();
         String delegatePrefix = opResponseName.split("\\.")[1];
         System.out.println("Delegate's prefix: " + delegatePrefix);
@@ -110,7 +109,7 @@ public class DelegationTest {
 
         // Client 2 check approval
         waitOperation(client2, op2);
-        Identifier aid2 = client2.identifiers().get("delegate").get();
+        HabState aid2 = client2.identifiers().get("delegate").get();
         assertEquals(delegatePrefix, aid2.getPrefix());
         System.out.println("Delegation approved for aid: " + aid2.getPrefix());
 

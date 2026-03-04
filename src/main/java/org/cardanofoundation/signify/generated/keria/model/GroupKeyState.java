@@ -24,9 +24,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.Identifier;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * GroupKeyState
@@ -36,11 +39,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GroupKeyState.JSON_PROPERTY_KEYS,
   GroupKeyState.JSON_PROPERTY_NDIGS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class GroupKeyState {
   public static final String JSON_PROPERTY_MHAB = "mhab";
   @jakarta.annotation.Nonnull
-  private Identifier mhab;
+  private HabState mhab;
 
   public static final String JSON_PROPERTY_KEYS = "keys";
   @jakarta.annotation.Nonnull
@@ -53,7 +56,16 @@ public class GroupKeyState {
   public GroupKeyState() {
   }
 
-  public GroupKeyState mhab(@jakarta.annotation.Nonnull Identifier mhab) {
+  /**
+   * Constructor with all args parameters
+   */
+  public GroupKeyState(@JsonProperty(JSON_PROPERTY_MHAB) HabState mhab, @JsonProperty(JSON_PROPERTY_KEYS) List<String> keys, @JsonProperty(JSON_PROPERTY_NDIGS) List<String> ndigs) {
+    this.mhab = mhab;
+    this.keys = keys;
+    this.ndigs = ndigs;
+  }
+
+  public GroupKeyState mhab(@jakarta.annotation.Nonnull HabState mhab) {
     
     this.mhab = mhab;
     return this;
@@ -64,17 +76,20 @@ public class GroupKeyState {
    * @return mhab
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_MHAB, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Identifier getMhab() {
+  public HabState getMhab() {
     return mhab;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_MHAB, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setMhab(@jakarta.annotation.Nonnull Identifier mhab) {
+  public void setMhab(@jakarta.annotation.Nonnull HabState mhab) {
     this.mhab = mhab;
   }
 
@@ -97,6 +112,8 @@ public class GroupKeyState {
    * @return keys
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_KEYS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -130,6 +147,8 @@ public class GroupKeyState {
    * @return ndigs
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+
   @JsonProperty(value = JSON_PROPERTY_NDIGS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 

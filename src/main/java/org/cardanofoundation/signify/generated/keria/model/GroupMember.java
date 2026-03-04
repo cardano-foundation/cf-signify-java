@@ -27,6 +27,9 @@ import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * GroupMember
@@ -35,20 +38,28 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   GroupMember.JSON_PROPERTY_SIGNING,
   GroupMember.JSON_PROPERTY_ROTATION
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class GroupMember {
   public static final String JSON_PROPERTY_SIGNING = "signing";
   @jakarta.annotation.Nonnull
-  private List<AidRecord> signing = new ArrayList<>();
+  private List<@Valid AidRecord> signing = new ArrayList<>();
 
   public static final String JSON_PROPERTY_ROTATION = "rotation";
   @jakarta.annotation.Nonnull
-  private List<AidRecord> rotation = new ArrayList<>();
+  private List<@Valid AidRecord> rotation = new ArrayList<>();
 
   public GroupMember() {
   }
 
-  public GroupMember signing(@jakarta.annotation.Nonnull List<AidRecord> signing) {
+  /**
+   * Constructor with all args parameters
+   */
+  public GroupMember(@JsonProperty(JSON_PROPERTY_SIGNING) List<@Valid AidRecord> signing, @JsonProperty(JSON_PROPERTY_ROTATION) List<@Valid AidRecord> rotation) {
+    this.signing = signing;
+    this.rotation = rotation;
+  }
+
+  public GroupMember signing(@jakarta.annotation.Nonnull List<@Valid AidRecord> signing) {
     
     this.signing = signing;
     return this;
@@ -67,21 +78,24 @@ public class GroupMember {
    * @return signing
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_SIGNING, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public List<AidRecord> getSigning() {
+  public List<@Valid AidRecord> getSigning() {
     return signing;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_SIGNING, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setSigning(@jakarta.annotation.Nonnull List<AidRecord> signing) {
+  public void setSigning(@jakarta.annotation.Nonnull List<@Valid AidRecord> signing) {
     this.signing = signing;
   }
 
-  public GroupMember rotation(@jakarta.annotation.Nonnull List<AidRecord> rotation) {
+  public GroupMember rotation(@jakarta.annotation.Nonnull List<@Valid AidRecord> rotation) {
     
     this.rotation = rotation;
     return this;
@@ -100,17 +114,20 @@ public class GroupMember {
    * @return rotation
    */
   @jakarta.annotation.Nonnull
+  @NotNull
+  @Valid
+
   @JsonProperty(value = JSON_PROPERTY_ROTATION, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public List<AidRecord> getRotation() {
+  public List<@Valid AidRecord> getRotation() {
     return rotation;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_ROTATION, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRotation(@jakarta.annotation.Nonnull List<AidRecord> rotation) {
+  public void setRotation(@jakarta.annotation.Nonnull List<@Valid AidRecord> rotation) {
     this.rotation = rotation;
   }
 

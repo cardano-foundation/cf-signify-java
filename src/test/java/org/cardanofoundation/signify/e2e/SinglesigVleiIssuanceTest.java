@@ -19,6 +19,7 @@ import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("unchecked")
 public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
     String vleiServerUrl = env.vleiServerUrl();

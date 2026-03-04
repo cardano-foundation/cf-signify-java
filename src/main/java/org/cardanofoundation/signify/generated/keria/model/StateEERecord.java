@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.hibernate.validator.constraints.*;
 
 /**
  * StateEERecord
@@ -36,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   StateEERecord.JSON_PROPERTY_BR,
   StateEERecord.JSON_PROPERTY_BA
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-11-27T15:07:13.177027+07:00[Asia/Ho_Chi_Minh]", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class StateEERecord {
   public static final String JSON_PROPERTY_S = "s";
   @jakarta.annotation.Nullable
@@ -57,6 +60,16 @@ public class StateEERecord {
   public StateEERecord() {
   }
 
+  /**
+   * Constructor with all args parameters
+   */
+  public StateEERecord(@JsonProperty(JSON_PROPERTY_S) String s, @JsonProperty(JSON_PROPERTY_D) String d, @JsonProperty(JSON_PROPERTY_BR) List<Object> br, @JsonProperty(JSON_PROPERTY_BA) List<Object> ba) {
+    this.s = s;
+    this.d = d;
+    this.br = br;
+    this.ba = ba;
+  }
+
   public StateEERecord s(@jakarta.annotation.Nullable String s) {
     
     this.s = s;
@@ -68,6 +81,7 @@ public class StateEERecord {
    * @return s
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_S, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -93,6 +107,7 @@ public class StateEERecord {
    * @return d
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_D, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -126,6 +141,7 @@ public class StateEERecord {
    * @return br
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_BR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
@@ -159,6 +175,7 @@ public class StateEERecord {
    * @return ba
    */
   @jakarta.annotation.Nullable
+
   @JsonProperty(value = JSON_PROPERTY_BA, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
