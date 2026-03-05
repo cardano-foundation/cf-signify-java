@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.cardanofoundation.signify.app.aiding.KeyStateRecordDeserializer;
+import org.cardanofoundation.signify.app.config.jackson.KeyStateRecordMixin;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 
@@ -18,6 +18,7 @@ public final class GeneratedModelConfig {
 
     public static ObjectMapper mapper() {
         ObjectMapper mapper = baseMapper();
+        mapper.addMixIn(KeyStateRecord.class, KeyStateRecordMixin.class);
         mapper.registerModule(generatedModule());
         return mapper;
     }
@@ -28,6 +29,7 @@ public final class GeneratedModelConfig {
     public static void configure(ObjectMapper mapper) {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.addMixIn(KeyStateRecord.class, KeyStateRecordMixin.class);
         mapper.registerModule(new JsonNullableModule());
         mapper.registerModule(generatedModule());
     }
@@ -46,7 +48,6 @@ public final class GeneratedModelConfig {
 
     private static Module generatedModule() {
         SimpleModule module = new SimpleModule("GeneratedModelModule");
-        module.addDeserializer(KeyStateRecord.class, new KeyStateRecordDeserializer());
         return module;
     }
 }
