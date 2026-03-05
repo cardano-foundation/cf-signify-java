@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.cardanofoundation.signify.app.config.KeyStateRecordKtDeserializer;
 
 /**
  * KeyStateRecordKt
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
 })
 @JsonTypeName("KeyStateRecord_kt")
+@JsonDeserialize(using = KeyStateRecordKtDeserializer.class)
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class KeyStateRecordKt {
   public KeyStateRecordKt() {

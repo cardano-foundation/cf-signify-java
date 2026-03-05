@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.cardanofoundation.signify.app.config.jackson.KeyStateRecordMixin;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 
