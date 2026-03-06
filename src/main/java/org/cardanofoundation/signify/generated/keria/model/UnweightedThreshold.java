@@ -21,36 +21,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.UnweightedThreshold;
-import org.cardanofoundation.signify.generated.keria.model.WeightedThreshold;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * KeyStateRecordKt
+ * UnweightedThreshold
  */
 @JsonPropertyOrder({
-  KeyStateRecordKt.JSON_PROPERTY_VALUE,
-  KeyStateRecordKt.JSON_PROPERTY_ITEMS
+  UnweightedThreshold.JSON_PROPERTY_VALUE
 })
-@JsonTypeName("KeyStateRecord_kt")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class KeyStateRecordKt {
+public class UnweightedThreshold {
   public static final String JSON_PROPERTY_VALUE = "value";
   @jakarta.annotation.Nonnull
   private String value;
 
-  public static final String JSON_PROPERTY_ITEMS = "items";
-  @jakarta.annotation.Nonnull
-  private List<String> items = new ArrayList<>();
-
-  public KeyStateRecordKt() {
+  public UnweightedThreshold() {
   }
 
-  public KeyStateRecordKt value(@jakarta.annotation.Nonnull String value) {
+  public UnweightedThreshold value(@jakarta.annotation.Nonnull String value) {
     
     this.value = value;
     return this;
@@ -75,39 +64,6 @@ public class KeyStateRecordKt {
     this.value = value;
   }
 
-  public KeyStateRecordKt items(@jakarta.annotation.Nonnull List<String> items) {
-    
-    this.items = items;
-    return this;
-  }
-
-  public KeyStateRecordKt addItemsItem(String itemsItem) {
-    if (this.items == null) {
-      this.items = new ArrayList<>();
-    }
-    this.items.add(itemsItem);
-    return this;
-  }
-
-  /**
-   * Get items
-   * @return items
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_ITEMS, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public List<String> getItems() {
-    return items;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_ITEMS, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setItems(@jakarta.annotation.Nonnull List<String> items) {
-    this.items = items;
-  }
-
 
   @Override
   public boolean equals(Object o) {
@@ -117,22 +73,20 @@ public class KeyStateRecordKt {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    KeyStateRecordKt keyStateRecordKt = (KeyStateRecordKt) o;
-    return Objects.equals(this.value, keyStateRecordKt.value) &&
-        Objects.equals(this.items, keyStateRecordKt.items);
+    UnweightedThreshold unweightedThreshold = (UnweightedThreshold) o;
+    return Objects.equals(this.value, unweightedThreshold.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(value, items);
+    return Objects.hash(value);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class KeyStateRecordKt {\n");
+    sb.append("class UnweightedThreshold {\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
-    sb.append("    items: ").append(toIndentedString(items)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -24,64 +24,31 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.UnweightedThreshold;
-import org.cardanofoundation.signify.generated.keria.model.WeightedThreshold;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * KeyStateRecordKt
+ * WeightedThreshold
  */
 @JsonPropertyOrder({
-  KeyStateRecordKt.JSON_PROPERTY_VALUE,
-  KeyStateRecordKt.JSON_PROPERTY_ITEMS
+  WeightedThreshold.JSON_PROPERTY_ITEMS
 })
-@JsonTypeName("KeyStateRecord_kt")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class KeyStateRecordKt {
-  public static final String JSON_PROPERTY_VALUE = "value";
-  @jakarta.annotation.Nonnull
-  private String value;
-
+public class WeightedThreshold {
   public static final String JSON_PROPERTY_ITEMS = "items";
   @jakarta.annotation.Nonnull
   private List<String> items = new ArrayList<>();
 
-  public KeyStateRecordKt() {
+  public WeightedThreshold() {
   }
 
-  public KeyStateRecordKt value(@jakarta.annotation.Nonnull String value) {
-    
-    this.value = value;
-    return this;
-  }
-
-  /**
-   * Get value
-   * @return value
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_VALUE, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getValue() {
-    return value;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_VALUE, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setValue(@jakarta.annotation.Nonnull String value) {
-    this.value = value;
-  }
-
-  public KeyStateRecordKt items(@jakarta.annotation.Nonnull List<String> items) {
+  public WeightedThreshold items(@jakarta.annotation.Nonnull List<String> items) {
     
     this.items = items;
     return this;
   }
 
-  public KeyStateRecordKt addItemsItem(String itemsItem) {
+  public WeightedThreshold addItemsItem(String itemsItem) {
     if (this.items == null) {
       this.items = new ArrayList<>();
     }
@@ -117,21 +84,19 @@ public class KeyStateRecordKt {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    KeyStateRecordKt keyStateRecordKt = (KeyStateRecordKt) o;
-    return Objects.equals(this.value, keyStateRecordKt.value) &&
-        Objects.equals(this.items, keyStateRecordKt.items);
+    WeightedThreshold weightedThreshold = (WeightedThreshold) o;
+    return Objects.equals(this.items, weightedThreshold.items);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(value, items);
+    return Objects.hash(items);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class KeyStateRecordKt {\n");
-    sb.append("    value: ").append(toIndentedString(value)).append("\n");
+    sb.append("class WeightedThreshold {\n");
     sb.append("    items: ").append(toIndentedString(items)).append("\n");
     sb.append("}");
     return sb.toString();
