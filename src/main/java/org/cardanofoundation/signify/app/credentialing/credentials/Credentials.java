@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app.credentialing.credentials;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -14,10 +15,14 @@ import org.cardanofoundation.signify.core.Eventing;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 
 public class Credentials {
 
@@ -31,9 +36,9 @@ public class Credentials {
      * List credentials
      *
      * @param kargs Optional parameters to filter the credentials
-     * @return Object to the list of credentials
+     * @return List of credentials
      */
-    public Object list(CredentialFilter kargs) throws IOException, InterruptedException, LibsodiumException {
+    public List<Credential> list(CredentialFilter kargs) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/query";
 
         Map<String, Object> data = new LinkedHashMap<>();
@@ -44,10 +49,10 @@ public class Credentials {
 
         final String method = "POST";
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), new TypeReference<List<Credential>>() {});
     }
 
-    public Optional<Object> get(String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Credential> get(String said) throws IOException, InterruptedException, LibsodiumException {
         return this.get(said, false);
     }
 
@@ -58,7 +63,7 @@ public class Credentials {
      * @param includeCESR - Optional flag export the credential in CESR format
      * @return Optional containing the credential if found, or empty if not found
      */
-    public Optional<Object> get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Credential> get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/credentials/" + said;
         final String method = "GET";
 
@@ -75,7 +80,7 @@ public class Credentials {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), Object.class));
+        return Optional.of(Utils.fromJson(response.body(), Credential.class));
     }
 
     /**
@@ -89,7 +94,7 @@ public class Credentials {
         this.client.fetch(path, method, null);
     }
 
-    public Optional<Object> state(String ri, String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<CredentialState> state(String ri, String said) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/registries/" + ri + "/" + said;
         final String method = "GET";
 
@@ -99,7 +104,7 @@ public class Credentials {
             return Optional.empty();
         }
 
-        return Optional.of(Utils.fromJson(response.body(), Object.class));
+        return Optional.of(Utils.fromJson(response.body(), CredentialState.class));
     }
 
     /**
