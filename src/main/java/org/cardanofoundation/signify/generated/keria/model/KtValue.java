@@ -41,4 +41,12 @@ public final class KtValue extends KeyStateRecordKt {
     public List<String> getWeightedThreshold() {
         return weightedThreshold;
     }
+
+    /**
+     * Returns the raw value expected by CESR utilities such as {@code Tholder}:
+     * a {@code String} for unweighted, or a {@code List<String>} for weighted.
+     */
+    public Object raw() {
+        return isWeighted() ? weightedThreshold : unweightedThreshold;
+    }
 }
