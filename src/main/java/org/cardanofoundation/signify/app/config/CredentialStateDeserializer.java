@@ -54,9 +54,11 @@ public class CredentialStateDeserializer extends JsonDeserializer<CredentialStat
             switch (et) {
                 case "bis", "brv" -> {
                     CredentialStateBisOrBrv.EtEnum.fromValue(et);
+                    out.setEt(CredentialState.EtEnum.fromValue(et));
                 }
                 case "iss", "rev" -> {
                     CredentialStateIssOrRev.EtEnum.fromValue(et);
+                    out.setEt(CredentialState.EtEnum.fromValue(et));
                 }
                 default -> {
                     // leave unset for unknown future values

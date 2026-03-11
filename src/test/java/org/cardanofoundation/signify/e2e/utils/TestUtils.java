@@ -21,6 +21,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 import java.io.IOException;
@@ -152,7 +153,7 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder()
                 .filter(filter)
                 .build();
-        List<Object> credentialList = (List<Object>) issuerClient.credentials().list(credentialFilter);
+        List<Credential> credentialList = issuerClient.credentials().list(credentialFilter);
         assert credentialList.size() <= 1;
         return credentialList.isEmpty() ? null : credentialList.getFirst();
     }

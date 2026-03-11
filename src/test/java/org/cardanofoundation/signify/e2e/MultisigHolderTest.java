@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -472,7 +473,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitOperation(client2, op2);
 
         CredentialFilter args = CredentialFilter.builder().build();
-        List<Map<String, Object>> creds1 = (List<Map<String, Object>>) client1.credentials().list(args);
+        List<Credential> creds1 = client1.credentials().list(args);
         System.out.println("Member1 has " + creds1.size() + " credential");
 
         int retryCount = 0;
@@ -480,7 +481,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             retryCount++;
             System.out.println(" retry-" + retryCount + ": No credentials yet...");
 
-            creds1 = (List<Map<String, Object>>) client1.credentials().list(args);
+            creds1 = client1.credentials().list(args);
             if (!creds1.isEmpty()) break;
 
             TimeUnit.SECONDS.sleep(1);

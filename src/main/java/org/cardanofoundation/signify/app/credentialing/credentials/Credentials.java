@@ -15,10 +15,8 @@ import org.cardanofoundation.signify.core.Eventing;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
@@ -49,11 +47,16 @@ public class Credentials {
 
         final String method = "POST";
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), new TypeReference<List<Credential>>() {});
+    String normalizedJson = normalizeCredentialEtForGeneratedModel(response.body());
+    return Utils.fromJson(normalizedJson, new TypeReference<List<Credential>>() {});
     }
 
     public Optional<Credential> get(String said) throws IOException, InterruptedException, LibsodiumException {
         return this.get(said, false);
+    }
+
+    public Optional<Map<String, Object>> getAsMap(String said) throws IOException, InterruptedException, LibsodiumException {
+        return this.getAsMap(said, false);
     }
 
     /**
@@ -75,12 +78,74 @@ public class Credentials {
         }
 
         HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
-        
         if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
             return Optional.empty();
         }
-        
-        return Optional.of(Utils.fromJson(response.body(), Credential.class));
+
+        String normalizedJson = normalizeCredentialEtForGeneratedModel(response.body());
+        Credential cred = Utils.fromJson(normalizedJson, Credential.class);
+        return Optional.of(cred);
+    }
+
+    public Optional<Map<String, Object>> getAsMap(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
+        final String path = "/credentials/" + said;
+        final String method = "GET";
+
+        Map<String, String> extraHeaders = new LinkedHashMap<>();
+        if (includeCESR) {
+            extraHeaders.put("Accept", "application/json+cesr");
+        } else {
+            extraHeaders.put("Accept", "application/json");
+        }
+
+        HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
+        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+
+        return Optional.of(Utils.fromJson(response.body(), new TypeReference<LinkedHashMap<String, Object>>() {}));
+    }
+
+    private static String normalizeCredentialEtForGeneratedModel(String rawJson) {
+        Object parsed = Utils.fromJson(rawJson, Object.class);
+        normalizeCredentialEtNode(parsed);
+        return Utils.jsonStringify(parsed);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void normalizeCredentialEtNode(Object node) {
+        if (node instanceof List<?> list) {
+            for (Object item : list) {
+                normalizeCredentialEtNode(item);
+            }
+            return;
+        }
+
+        if (!(node instanceof Map<?, ?>)) {
+            return;
+        }
+
+        Map<String, Object> map = (Map<String, Object>) node;
+
+        Object statusObj = map.get("status");
+        if (statusObj instanceof Map<?, ?> statusMapRaw) {
+            Map<String, Object> statusMap = (Map<String, Object>) statusMapRaw;
+            Object etObj = statusMap.get("et");
+            if (etObj instanceof String et) {
+                if ("iss".equals(et)) {
+                    statusMap.put("et", "bis");
+                } else if ("rev".equals(et)) {
+                    statusMap.put("et", "brv");
+                }
+            }
+        }
+
+        Object chainsObj = map.get("chains");
+        if (chainsObj instanceof List<?> chains) {
+            for (Object chain : chains) {
+                normalizeCredentialEtNode(chain);
+            }
+        }
     }
 
     /**
@@ -104,7 +169,25 @@ public class Credentials {
             return Optional.empty();
         }
 
-        return Optional.of(Utils.fromJson(response.body(), CredentialState.class));
+        String normalizedJson = normalizeCredentialStateEtForGeneratedModel(response.body());
+        return Optional.of(Utils.fromJson(normalizedJson, CredentialState.class));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String normalizeCredentialStateEtForGeneratedModel(String rawJson) {
+        Object parsed = Utils.fromJson(rawJson, Object.class);
+        if (parsed instanceof Map<?, ?> mapRaw) {
+            Map<String, Object> map = (Map<String, Object>) mapRaw;
+            Object etObj = map.get("et");
+            if (etObj instanceof String et) {
+                if ("iss".equals(et)) {
+                    map.put("et", "bis");
+                } else if ("rev".equals(et)) {
+                    map.put("et", "brv");
+                }
+            }
+        }
+        return Utils.jsonStringify(parsed);
     }
 
     /**
