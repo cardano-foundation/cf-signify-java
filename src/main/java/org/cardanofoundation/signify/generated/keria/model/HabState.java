@@ -66,15 +66,15 @@ public class HabState {
   private String icpDt;
 
   public static final String JSON_PROPERTY_STATE = "state";
-  @jakarta.annotation.Nonnull
+  @jakarta.annotation.Nullable
   private KeyStateRecord state;
 
   public static final String JSON_PROPERTY_TRANSFERABLE = "transferable";
-  @jakarta.annotation.Nonnull
+  @jakarta.annotation.Nullable
   private Boolean transferable;
 
   public static final String JSON_PROPERTY_WINDEXES = "windexes";
-  @jakarta.annotation.Nonnull
+  @jakarta.annotation.Nullable
   private List<String> windexes = new ArrayList<>();
 
   public static final String JSON_PROPERTY_SALTY = "salty";
@@ -171,7 +171,7 @@ public class HabState {
     this.icpDt = icpDt;
   }
 
-  public HabState state(@jakarta.annotation.Nonnull KeyStateRecord state) {
+  public HabState state(@jakarta.annotation.Nullable KeyStateRecord state) {
     
     this.state = state;
     return this;
@@ -181,22 +181,22 @@ public class HabState {
    * Get state
    * @return state
    */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_STATE, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
   public KeyStateRecord getState() {
     return state;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setState(@jakarta.annotation.Nonnull KeyStateRecord state) {
+  @JsonProperty(value = JSON_PROPERTY_STATE, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setState(@jakarta.annotation.Nullable KeyStateRecord state) {
     this.state = state;
   }
 
-  public HabState transferable(@jakarta.annotation.Nonnull Boolean transferable) {
+  public HabState transferable(@jakarta.annotation.Nullable Boolean transferable) {
     
     this.transferable = transferable;
     return this;
@@ -206,22 +206,22 @@ public class HabState {
    * Get transferable
    * @return transferable
    */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
   public Boolean getTransferable() {
     return transferable;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setTransferable(@jakarta.annotation.Nonnull Boolean transferable) {
+  @JsonProperty(value = JSON_PROPERTY_TRANSFERABLE, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setTransferable(@jakarta.annotation.Nullable Boolean transferable) {
     this.transferable = transferable;
   }
 
-  public HabState windexes(@jakarta.annotation.Nonnull List<String> windexes) {
+  public HabState windexes(@jakarta.annotation.Nullable List<String> windexes) {
     
     this.windexes = windexes;
     return this;
@@ -239,18 +239,18 @@ public class HabState {
    * Get windexes
    * @return windexes
    */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
   public List<String> getWindexes() {
     return windexes;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setWindexes(@jakarta.annotation.Nonnull List<String> windexes) {
+  @JsonProperty(value = JSON_PROPERTY_WINDEXES, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setWindexes(@jakarta.annotation.Nullable List<String> windexes) {
     this.windexes = windexes;
   }
 

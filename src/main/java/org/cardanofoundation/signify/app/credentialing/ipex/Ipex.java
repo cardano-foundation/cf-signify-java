@@ -7,7 +7,6 @@ import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.States.HabState;
 import org.cardanofoundation.signify.cesr.Siger;
 
 import java.io.IOException;
@@ -16,6 +15,7 @@ import java.security.DigestException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Ipex {
     private final SignifyClient client;

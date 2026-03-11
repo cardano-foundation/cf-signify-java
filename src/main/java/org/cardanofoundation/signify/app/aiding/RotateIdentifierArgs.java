@@ -3,9 +3,9 @@ package org.cardanofoundation.signify.app.aiding;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.core.States;
 
 import java.util.List;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
 @Builder
 @Getter
@@ -20,6 +20,6 @@ public class RotateIdentifierArgs {
     private String ncode;
     private Integer ncount;
     private List<String> ncodes;
-    private List<States.State> states;
-    private List<States.State> rstates;
+    private List<KeyStateRecord> states;
+    private List<KeyStateRecord> rstates;
 }

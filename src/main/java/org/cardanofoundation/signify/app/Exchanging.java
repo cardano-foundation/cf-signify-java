@@ -11,7 +11,6 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.States.HabState;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -19,6 +18,7 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Exchanging {
     @Getter
