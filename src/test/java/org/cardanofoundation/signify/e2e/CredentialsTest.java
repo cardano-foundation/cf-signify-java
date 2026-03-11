@@ -646,12 +646,12 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("LE credential IPEX grant", () -> {
             String dt = createTimestamp();
             try {
-            Map<String, Object> leCredential = holderClient.credentials().getAsMap(leCredentialId)
-                .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
+                Credential leCredential = holderClient.credentials().get(leCredentialId)
+                    .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
 
-            LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(leCredential.get("sad"));
-            LinkedHashMap<String, Object> anc = castObjectToLinkedHashMap(leCredential.get("anc"));
-            LinkedHashMap<String, Object> iss = castObjectToLinkedHashMap(leCredential.get("iss"));
+                LinkedHashMap<String, Object> sad = buildSadMap(leCredential.getSad());
+                LinkedHashMap<String, Object> anc = buildAncMap(leCredential.getAnc());
+                LinkedHashMap<String, Object> iss = buildIssMap(leCredential.getIss());
 
                 IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
                 grantArgs.setSenderName(holderAid.name);
@@ -705,28 +705,27 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Legal Entity has chained credential", () -> {
-            Object legalEntityCredential = retry(() -> {
+            Credential legalEntityCredential = retry(() -> {
                 try {
                     assertNotNull(leCredentialId);
-                    return legalEntityClient.credentials().getAsMap(leCredentialId)
+                    return legalEntityClient.credentials().get(leCredentialId)
                             .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             });
-            LinkedHashMap<String, Object> legalEntityCredentialBody = castObjectToLinkedHashMap(legalEntityCredential);
-            LinkedHashMap<String, Object> sad = castObjectToLinkedHashMap(legalEntityCredentialBody.get("sad"));
-            LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(sad.get("a"));
-            LinkedHashMap<String, Object> status = castObjectToLinkedHashMap(legalEntityCredentialBody.get("status"));
-            List<Map<String, Object>> chains = castObjectToListMap(legalEntityCredentialBody.get("chains"));
+            CredentialSad sad = legalEntityCredential.getSad();
+            Map<String, Object> aMap = Utils.toMap(sad.getA());
+            CredentialState status = legalEntityCredential.getStatus();
+            List<Map<String, Object>> chains = legalEntityCredential.getChains();
             LinkedHashMap<String, Object> chainsBody = castObjectToLinkedHashMap(chains.getFirst());
             LinkedHashMap<String, Object> sadInChains = castObjectToLinkedHashMap(chainsBody.get("sad"));
-            String atc = legalEntityCredentialBody.get("atc").toString();
+            String atc = legalEntityCredential.getAtc();
 
-            assertEquals(LE_SCHEMA_SAID, sad.get("s").toString());
-            assertEquals(holderAid.prefix, sad.get("i").toString());
-            assertEquals(legalEntityAid.prefix, a.get("i").toString());
-            assertEquals("0", status.get("s").toString());
+            assertEquals(LE_SCHEMA_SAID, sad.getS());
+            assertEquals(holderAid.prefix, sad.getI());
+            assertEquals(legalEntityAid.prefix, aMap.get("i").toString());
+            assertEquals("0", status.getS());
             assertEquals(qviCredentialId, sadInChains.get("d").toString());
             assertNotNull(atc);
         });
@@ -773,8 +772,8 @@ public class CredentialsTest extends BaseIntegrationTest {
             sad.put("a", a);
         }
 
-        if (sadObj.getE() != null) sad.put("e", sadObj.getE());
-        if (sadObj.getR() != null) sad.put("r", sadObj.getR());
+        if (sadObj.getE() != null) sad.put("e", tryParseJsonObject(sadObj.getE()));
+        if (sadObj.getR() != null) sad.put("r", tryParseJsonObject(sadObj.getR()));
         return sad;
     }
 
@@ -800,5 +799,17 @@ public class CredentialsTest extends BaseIntegrationTest {
         iss.put("ri", issObj.getRi());
         iss.put("dt", issObj.getDt());
         return iss;
+    }
+
+    private static Object tryParseJsonObject(String s) {
+        try {
+            Object parsed = Utils.fromJson(s, Object.class);
+            if (parsed instanceof Map || parsed instanceof List) {
+                return parsed;
+            }
+            return s;
+        } catch (Exception ignored) {
+            return s;
+        }
     }
 }

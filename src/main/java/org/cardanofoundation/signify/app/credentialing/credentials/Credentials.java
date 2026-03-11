@@ -55,10 +55,6 @@ public class Credentials {
         return this.get(said, false);
     }
 
-    public Optional<Map<String, Object>> getAsMap(String said) throws IOException, InterruptedException, LibsodiumException {
-        return this.getAsMap(said, false);
-    }
-
     /**
      * Get a credential
      *
@@ -85,25 +81,6 @@ public class Credentials {
         String normalizedJson = normalizeCredentialEtForGeneratedModel(response.body());
         Credential cred = Utils.fromJson(normalizedJson, Credential.class);
         return Optional.of(cred);
-    }
-
-    public Optional<Map<String, Object>> getAsMap(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
-        final String path = "/credentials/" + said;
-        final String method = "GET";
-
-        Map<String, String> extraHeaders = new LinkedHashMap<>();
-        if (includeCESR) {
-            extraHeaders.put("Accept", "application/json+cesr");
-        } else {
-            extraHeaders.put("Accept", "application/json");
-        }
-
-        HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
-        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
-            return Optional.empty();
-        }
-
-        return Optional.of(Utils.fromJson(response.body(), new TypeReference<LinkedHashMap<String, Object>>() {}));
     }
 
     private static String normalizeCredentialEtForGeneratedModel(String rawJson) {
@@ -137,6 +114,19 @@ public class Credentials {
                 } else if ("rev".equals(et)) {
                     statusMap.put("et", "brv");
                 }
+            }
+        }
+
+        Object credSadObj = map.get("sad");
+        if (credSadObj instanceof Map<?, ?> credSadMapRaw) {
+            Map<String, Object> credSadMap = (Map<String, Object>) credSadMapRaw;
+            Object eObj = credSadMap.get("e");
+            if (eObj instanceof Map || eObj instanceof List) {
+                credSadMap.put("e", Utils.jsonStringify(eObj));
+            }
+            Object rObj = credSadMap.get("r");
+            if (rObj instanceof Map || rObj instanceof List) {
+                credSadMap.put("r", Utils.jsonStringify(rObj));
             }
         }
 
