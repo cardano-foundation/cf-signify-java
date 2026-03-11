@@ -20,7 +20,6 @@ public final class GeneratedModelConfig {
 
     public static ObjectMapper mapper() {
         ObjectMapper mapper = baseMapper();
-        mapper.addMixIn(KeyStateRecord.class, KeyStateRecordMixin.class);
         mapper.addMixIn(CredentialState.class, CredentialStateMixin.class);
         mapper.addMixIn(Credential.class, CredentialMixin.class);
         mapper.registerModule(generatedModule());
@@ -33,7 +32,6 @@ public final class GeneratedModelConfig {
     public static void configure(ObjectMapper mapper) {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.addMixIn(KeyStateRecord.class, KeyStateRecordMixin.class);
         mapper.addMixIn(CredentialState.class, CredentialStateMixin.class);
         mapper.addMixIn(Credential.class, CredentialMixin.class);
         mapper.registerModule(new JsonNullableModule());
