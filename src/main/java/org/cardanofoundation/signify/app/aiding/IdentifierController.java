@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.KtValue;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -393,7 +394,7 @@ public class IdentifierController {
         String dig = state.getD();
         int ridx = Integer.parseInt(state.getS(), 16) + 1;
         List<String> wits = state.getB();
-        Object isith = state.getNt();
+        Object isith = ((KtValue) state.getNt()).raw();
 
         Object nsith = kargs.getNsith() != null ? kargs.getNsith() : isith;
 
@@ -415,7 +416,7 @@ public class IdentifierController {
         List<String> ncodes = kargs.getNcodes() != null ? kargs.getNcodes() : Collections.nCopies(ncount, ncode);
 
         List<KeyStateRecord> states = kargs.getStates() == null ? new ArrayList<>() : kargs.getStates();
-        List<KeyStateRecord> rstates = kargs.getStates() == null ? new ArrayList<>() : kargs.getRstates();
+        List<KeyStateRecord> rstates = kargs.getRstates() == null ? new ArrayList<>() : kargs.getRstates();
         KeeperResult keeperResult = keeper.rotate(
             ncodes,
             transferable,
