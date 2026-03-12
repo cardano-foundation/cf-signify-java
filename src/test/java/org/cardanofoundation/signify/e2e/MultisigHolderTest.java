@@ -15,6 +15,8 @@ import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
+import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -528,15 +530,14 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         IssueCredentialResult result = client.credentials().issue(name, data);
         waitOperation(client, result.getOp());
 
-        Object creds = client.credentials().list(CredentialFilter.builder().build());
-        List<HashMap<String, Object>> listCreds = (List<HashMap<String, Object>>) creds;
-        Map<String, Object> credMap = listCreds.getFirst();
-        Map<String, Object> credSad = (Map<String, Object>) credMap.get("sad");
-        Map<String, Object> credStatus = (Map<String, Object>) credMap.get("status");
+        List<Credential> listCreds = client.credentials().list(CredentialFilter.builder().build());
+        Credential cred = listCreds.getFirst();
+        CredentialSad credSad = cred.getSad();
+        CredentialState credStatus = cred.getStatus();
 
         assertEquals(1, listCreds.size());
-        assertEquals(data.getS(), credSad.get("s"));
-        assertEquals("0", credStatus.get("s"));
+        assertEquals(data.getS(), credSad.getS());
+        assertEquals("0", credStatus.getS());
 
         String dt = createTimestamp();
 
@@ -562,7 +563,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         }
 
         System.out.println("Grant message sent");
-        return listCreds.getFirst();
+                return cred;
     }
 
     public Object multisigAdmitCredential(

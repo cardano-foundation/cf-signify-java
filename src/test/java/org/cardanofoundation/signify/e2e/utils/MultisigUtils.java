@@ -30,7 +30,12 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.CredentialAnc;
+import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.IssEvent;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
 public class MultisigUtils {
@@ -602,7 +607,7 @@ public class MultisigUtils {
             List<HabState> otherMembersAIDs,
             HabState multisigAID,
             HabState recipientAID,
-            Object credential,
+            Credential credential,
             String timestamp,
             boolean isInitiator) throws Exception {
 
@@ -610,15 +615,18 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
 
-        Map<String, Object> sad = (Map<String, Object>) ((Map<String, Object>) credential).get("sad");
-        Map<String, Object> anc = (Map<String, Object>) ((Map<String, Object>) credential).get("anc");
-        Map<String, Object> iss = (Map<String, Object>) ((Map<String, Object>) credential).get("iss");
+        CredentialSad sad = credential.getSad();
+        CredentialAnc anc = credential.getAnc();
+        IssEvent iss = credential.getIss();
+        LinkedHashMap<String, Object> sadMap = buildSadMap(sad);
+        LinkedHashMap<String, Object> ancMap = buildAncMap(anc);
+        LinkedHashMap<String, Object> issMap = buildIssMap(iss);
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
                 .senderName(multisigAID.getName())
-                .acdc(new Serder(sad))
-                .anc(new Serder(anc))
-                .iss(new Serder(iss))
+            .acdc(new Serder(sadMap))
+            .anc(new Serder(ancMap))
+            .iss(new Serder(issMap))
                 .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
@@ -711,6 +719,69 @@ public class MultisigUtils {
         return op;
     }
 
+    private static LinkedHashMap<String, Object> buildSadMap(CredentialSad sadObj) {
+        LinkedHashMap<String, Object> sad = new LinkedHashMap<>();
+        sad.put("v", sadObj.getV());
+        sad.put("d", sadObj.getD());
+        sad.put("i", sadObj.getI());
+        if (sadObj.getRi() != null) sad.put("ri", sadObj.getRi());
+        sad.put("s", sadObj.getS());
+
+        if (sadObj.getA() != null) {
+            LinkedHashMap<String, Object> a = new LinkedHashMap<>();
+            Map<String, Object> aMap = Utils.toMap(sadObj.getA());
+            if (aMap.containsKey("d")) a.put("d", aMap.get("d"));
+            if (aMap.containsKey("i")) a.put("i", aMap.get("i"));
+            if (aMap.containsKey("dt")) a.put("dt", aMap.get("dt"));
+            aMap.forEach((key, value) -> {
+                if (!key.equals("d") && !key.equals("i") && !key.equals("dt")) {
+                    a.put(key, value);
+                }
+            });
+            sad.put("a", a);
+        }
+
+        if (sadObj.getE() != null) sad.put("e", tryParseJsonObject(sadObj.getE()));
+        if (sadObj.getR() != null) sad.put("r", tryParseJsonObject(sadObj.getR()));
+        return sad;
+    }
+
+    private static LinkedHashMap<String, Object> buildAncMap(CredentialAnc ancObj) {
+        LinkedHashMap<String, Object> anc = new LinkedHashMap<>();
+        anc.put("v", ancObj.getV());
+        anc.put("t", ancObj.getT());
+        anc.put("d", ancObj.getD());
+        anc.put("i", ancObj.getI());
+        anc.put("s", ancObj.getS());
+        anc.put("p", ancObj.getP());
+        if (ancObj.getA() != null) anc.put("a", ancObj.getA());
+        return anc;
+    }
+
+    private static LinkedHashMap<String, Object> buildIssMap(IssEvent issObj) {
+        LinkedHashMap<String, Object> iss = new LinkedHashMap<>();
+        iss.put("v", issObj.getV());
+        iss.put("t", issObj.getT());
+        iss.put("d", issObj.getD());
+        iss.put("i", issObj.getI());
+        iss.put("s", issObj.getS());
+        iss.put("ri", issObj.getRi());
+        iss.put("dt", issObj.getDt());
+        return iss;
+    }
+
+    private static Object tryParseJsonObject(String s) {
+        try {
+            Object parsed = Utils.fromJson(s, Object.class);
+            if (parsed instanceof Map || parsed instanceof List) {
+                return parsed;
+            }
+            return s;
+        } catch (Exception ignored) {
+            return s;
+        }
+    }
+
     public static Object startMultisigIncept(
             SignifyClient client,
             StartMultisigInceptArgs args
@@ -768,7 +839,6 @@ public class MultisigUtils {
 
         return op1;
     }
-
 
     @Getter
     @Setter
