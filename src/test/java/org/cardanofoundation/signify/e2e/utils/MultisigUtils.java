@@ -719,10 +719,11 @@ public class MultisigUtils {
         return op;
     }
 
-    private static LinkedHashMap<String, Object> buildSadMap(CredentialSad sadObj) {
+    public static LinkedHashMap<String, Object> buildSadMap(CredentialSad sadObj) {
         LinkedHashMap<String, Object> sad = new LinkedHashMap<>();
         sad.put("v", sadObj.getV());
         sad.put("d", sadObj.getD());
+        if (sadObj.getU() != null) sad.put("u", sadObj.getU());
         sad.put("i", sadObj.getI());
         if (sadObj.getRi() != null) sad.put("ri", sadObj.getRi());
         sad.put("s", sadObj.getS());
@@ -746,7 +747,7 @@ public class MultisigUtils {
         return sad;
     }
 
-    private static LinkedHashMap<String, Object> buildAncMap(CredentialAnc ancObj) {
+    public static LinkedHashMap<String, Object> buildAncMap(CredentialAnc ancObj) {
         LinkedHashMap<String, Object> anc = new LinkedHashMap<>();
         anc.put("v", ancObj.getV());
         anc.put("t", ancObj.getT());
@@ -758,7 +759,7 @@ public class MultisigUtils {
         return anc;
     }
 
-    private static LinkedHashMap<String, Object> buildIssMap(IssEvent issObj) {
+    public static LinkedHashMap<String, Object> buildIssMap(IssEvent issObj) {
         LinkedHashMap<String, Object> iss = new LinkedHashMap<>();
         iss.put("v", issObj.getV());
         iss.put("t", issObj.getT());
