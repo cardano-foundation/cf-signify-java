@@ -418,20 +418,8 @@ public class TestUtils {
     }
 
     public static Credential getReceivedCredential(SignifyClient client, String credID) throws Exception {
-        Map<String, Object> filter = new LinkedHashMap<>();
-        filter.put("-d", credID);
-
-        CredentialFilter credentialFilter = CredentialFilter.builder().build();
-        credentialFilter.setFilter(filter);
-
-        List<Credential> credentialList = client.credentials().list(credentialFilter);
-
-        Credential credential = null;
-        if (!credentialList.isEmpty()) {
-            assertEquals(1, credentialList.size());
-            credential = (Credential) credentialList.get(0);
-        }
-        return credential;
+        // @TODO - focnnor: Refactor calling functions to expect Optional, not null - probably remove indirection too.
+        return client.credentials().get(credID).orElse(null);
     }
 
     public static void markAndRemoveNotification(SignifyClient client, Notification note) {
