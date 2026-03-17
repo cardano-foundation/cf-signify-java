@@ -9,7 +9,6 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -32,12 +31,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.cardanofoundation.signify.generated.keria.model.Credential;
-import org.cardanofoundation.signify.generated.keria.model.CredentialAnc;
-import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.IssEvent;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
+@SuppressWarnings("unchecked")
 public class MultisigUtils {
 
     public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
@@ -615,12 +612,11 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
 
-        CredentialSad sad = credential.getSad();
-        CredentialAnc anc = credential.getAnc();
-        IssEvent iss = credential.getIss();
-        LinkedHashMap<String, Object> sadMap = buildSadMap(sad);
-        LinkedHashMap<String, Object> ancMap = buildAncMap(anc);
-        LinkedHashMap<String, Object> issMap = buildIssMap(iss);
+        GrantEmbedMaps grantEmbedMaps = resolveGrantEmbedMaps(client, credential);
+        LinkedHashMap<String, Object> sadMap = grantEmbedMaps.sadMap();
+        LinkedHashMap<String, Object> ancMap = grantEmbedMaps.ancMap();
+        LinkedHashMap<String, Object> issMap = grantEmbedMaps.issMap();
+
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
                 .senderName(multisigAID.getName())
@@ -672,6 +668,23 @@ public class MultisigUtils {
         );
     }
 
+    public static GrantEmbedMaps resolveGrantEmbedMaps(SignifyClient client, Credential credential) {
+        GrantEmbedMaps cachedGrantEmbedMaps = TestUtils.getCachedGrantEmbedMaps(credential.getSad().getD());
+        if (cachedGrantEmbedMaps != null) {
+            return cachedGrantEmbedMaps;
+        }
+
+        try {
+            GrantEmbedMaps fetchedGrantEmbedMaps = TestUtils.fetchAndCacheGrantEmbedMaps(client, credential.getSad().getD());
+            if (fetchedGrantEmbedMaps != null) {
+                return fetchedGrantEmbedMaps;
+            }
+        } catch (Exception ignored) {
+        }
+
+        throw new IllegalStateException("Unable to resolve canonical grant embeds for credential: " + credential.getSad().getD());
+    }
+
     public static Object issueCredentialMultisig(
             SignifyClient client,
             HabState aid,
@@ -719,68 +732,11 @@ public class MultisigUtils {
         return op;
     }
 
-    private static LinkedHashMap<String, Object> buildSadMap(CredentialSad sadObj) {
-        LinkedHashMap<String, Object> sad = new LinkedHashMap<>();
-        sad.put("v", sadObj.getV());
-        sad.put("d", sadObj.getD());
-        sad.put("i", sadObj.getI());
-        if (sadObj.getRi() != null) sad.put("ri", sadObj.getRi());
-        sad.put("s", sadObj.getS());
-
-        if (sadObj.getA() != null) {
-            LinkedHashMap<String, Object> a = new LinkedHashMap<>();
-            Map<String, Object> aMap = Utils.toMap(sadObj.getA());
-            if (aMap.containsKey("d")) a.put("d", aMap.get("d"));
-            if (aMap.containsKey("i")) a.put("i", aMap.get("i"));
-            if (aMap.containsKey("dt")) a.put("dt", aMap.get("dt"));
-            aMap.forEach((key, value) -> {
-                if (!key.equals("d") && !key.equals("i") && !key.equals("dt")) {
-                    a.put(key, value);
-                }
-            });
-            sad.put("a", a);
-        }
-
-        if (sadObj.getE() != null) sad.put("e", tryParseJsonObject(sadObj.getE()));
-        if (sadObj.getR() != null) sad.put("r", tryParseJsonObject(sadObj.getR()));
-        return sad;
-    }
-
-    private static LinkedHashMap<String, Object> buildAncMap(CredentialAnc ancObj) {
-        LinkedHashMap<String, Object> anc = new LinkedHashMap<>();
-        anc.put("v", ancObj.getV());
-        anc.put("t", ancObj.getT());
-        anc.put("d", ancObj.getD());
-        anc.put("i", ancObj.getI());
-        anc.put("s", ancObj.getS());
-        anc.put("p", ancObj.getP());
-        if (ancObj.getA() != null) anc.put("a", ancObj.getA());
-        return anc;
-    }
-
-    private static LinkedHashMap<String, Object> buildIssMap(IssEvent issObj) {
-        LinkedHashMap<String, Object> iss = new LinkedHashMap<>();
-        iss.put("v", issObj.getV());
-        iss.put("t", issObj.getT());
-        iss.put("d", issObj.getD());
-        iss.put("i", issObj.getI());
-        iss.put("s", issObj.getS());
-        iss.put("ri", issObj.getRi());
-        iss.put("dt", issObj.getDt());
-        return iss;
-    }
-
-    private static Object tryParseJsonObject(String s) {
-        try {
-            Object parsed = Utils.fromJson(s, Object.class);
-            if (parsed instanceof Map || parsed instanceof List) {
-                return parsed;
-            }
-            return s;
-        } catch (Exception ignored) {
-            return s;
-        }
-    }
+    public record GrantEmbedMaps(
+            LinkedHashMap<String, Object> sadMap,
+            LinkedHashMap<String, Object> ancMap,
+            LinkedHashMap<String, Object> issMap
+    ) {}
 
     public static Object startMultisigIncept(
             SignifyClient client,
