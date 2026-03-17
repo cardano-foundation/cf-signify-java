@@ -569,12 +569,11 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     }
 
     public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) throws Exception {
-        CredentialSad sad = credential.getSad();
-        CredentialAnc anc = credential.getAnc();
-        IssEvent iss = credential.getIss();
-        LinkedHashMap<String, Object> sadMap = MultisigUtils.buildSadMap(sad);
-        LinkedHashMap<String, Object> ancMap = MultisigUtils.buildAncMap(anc);
-        LinkedHashMap<String, Object> issMap = MultisigUtils.buildIssMap(iss);
+        MultisigUtils.GrantEmbedMaps grantEmbedMaps = MultisigUtils.resolveGrantEmbedMaps(senderClient, credential);
+        LinkedHashMap<String, Object> sadMap = grantEmbedMaps.sadMap();
+        LinkedHashMap<String, Object> ancMap = grantEmbedMaps.ancMap();
+        LinkedHashMap<String, Object> issMap = grantEmbedMaps.issMap();
+
         IpexGrantArgs grantArgs = IpexGrantArgs.builder()
                 .senderName(senderAid.name)
                 .acdc(new Serder(sadMap))

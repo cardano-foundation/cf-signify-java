@@ -44,6 +44,7 @@ public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static List<Notification> filteredNotes;
     static Retry retry = new Retry();
+    private static final Map<String, MultisigUtils.GrantEmbedMaps> GRANT_EMBED_CACHE = new ConcurrentHashMap<>();
 
     public static class Aid {
         public String name;
@@ -260,8 +261,11 @@ public class TestUtils {
             op = operationToObject(waitOperation(client, op));
             if (op instanceof String) {
                 try {
-                    HashMap<String, Object> map = objectMapper.readValue((String) op, HashMap.class);
-                    HashMap<String, Object> idMap = (HashMap<String, Object>) map.get("response");
+                    HashMap<String, Object> map = objectMapper.readValue(
+                            (String) op,
+                            new TypeReference<HashMap<String, Object>>() {}
+                    );
+                    Map<String, Object> idMap = castObjectToLinkedHashMap(map.get("response"));
                     id = idMap.get("i");
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -280,7 +284,8 @@ public class TestUtils {
         }
 
         Object oobi = client.oobis().get(name, "agent").get();
-        String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
+        Map<String, Object> oobiMap = castObjectToLinkedHashMap(oobi);
+        String getOobi = oobiMap.get("oobis").toString().replaceAll("[\\[\\]]", "");
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
         };
@@ -348,7 +353,9 @@ public class TestUtils {
                     })
                     .findFirst();
             if (credential.isPresent()) {
-                return (Credential) credential.get();
+                Credential existingCredential = (Credential) credential.get();
+                fetchAndCacheGrantEmbedMaps(issuerClient, existingCredential.getSad().getD());
+                return existingCredential;
             }
         }
 
@@ -366,10 +373,67 @@ public class TestUtils {
         cData.setE(source);
 
         IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
+        cacheGrantEmbedMaps(
+                issResult.getAcdc().getKed().get("d").toString(),
+                new MultisigUtils.GrantEmbedMaps(
+                        toLinkedHashMap(issResult.getAcdc().getKed()),
+                        toLinkedHashMap(issResult.getAnc().getKed()),
+                        toLinkedHashMap(issResult.getIss().getKed())
+                )
+        );
         waitOperation(issuerClient, issResult.getOp());
         Credential credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
 
         return credential;
+    }
+
+    public static void cacheGrantEmbedMaps(String said, MultisigUtils.GrantEmbedMaps grantEmbedMaps) {
+        if (said == null || grantEmbedMaps == null) {
+            return;
+        }
+        GRANT_EMBED_CACHE.put(said, grantEmbedMaps);
+    }
+
+    public static MultisigUtils.GrantEmbedMaps getCachedGrantEmbedMaps(String said) {
+        if (said == null) {
+            return null;
+        }
+        return GRANT_EMBED_CACHE.get(said);
+    }
+
+    public static MultisigUtils.GrantEmbedMaps fetchAndCacheGrantEmbedMaps(SignifyClient client, String said) throws IOException, InterruptedException, LibsodiumException {
+        MultisigUtils.GrantEmbedMaps cached = getCachedGrantEmbedMaps(said);
+        if (cached != null) {
+            return cached;
+        }
+
+        HttpResponse<String> response = client.fetch("/credentials/" + said, "GET", null, Map.of("Accept", "application/json"));
+        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
+            return null;
+        }
+
+        LinkedHashMap<String, Object> credentialBody = Utils.fromJson(
+                response.body(),
+                new TypeReference<LinkedHashMap<String, Object>>() {}
+        );
+
+        MultisigUtils.GrantEmbedMaps grantEmbedMaps = new MultisigUtils.GrantEmbedMaps(
+                toLinkedHashMap(castObjectToLinkedHashMap(credentialBody.get("sad"))),
+                toLinkedHashMap(castObjectToLinkedHashMap(credentialBody.get("anc"))),
+                toLinkedHashMap(castObjectToLinkedHashMap(credentialBody.get("iss")))
+        );
+        cacheGrantEmbedMaps(said, grantEmbedMaps);
+        return grantEmbedMaps;
+    }
+
+    public static LinkedHashMap<String, Object> toLinkedHashMap(Map<String, Object> source) {
+        if (source == null) {
+            return new LinkedHashMap<>();
+        }
+        return Utils.fromJson(
+                Utils.jsonStringify(source),
+                new TypeReference<LinkedHashMap<String, Object>>() {}
+        );
     }
 
     public static List<KeyStateRecord> getStates(SignifyClient client, List<String> prefixes) throws IOException, InterruptedException {
