@@ -23,6 +23,7 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
@@ -789,7 +790,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         msgSaid = waitAndMarkNotification(client1, "/exn/ipex/admit");
         System.out.println("Member1 received exchange message with the admit response");
-        List<Object> creds = (List<Object>) client4.credentials().list(CredentialFilter.builder().build());
+        List<Credential> creds = client4.credentials().list(CredentialFilter.builder().build());
         System.out.println("Holder holds " + creds.size() + " credential");
 
         assertOperations(List.of(client1, client2, client3, client4));
