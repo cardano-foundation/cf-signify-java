@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
@@ -283,9 +284,8 @@ public class TestUtils {
             }
         }
 
-        Object oobi = client.oobis().get(name, "agent").get();
-        Map<String, Object> oobiMap = castObjectToLinkedHashMap(oobi);
-        String getOobi = oobiMap.get("oobis").toString().replaceAll("[\\[\\]]", "");
+        OOBI oobi = client.oobis().get(name, "agent").get();
+        String getOobi = oobi.getOobis().toString().replaceAll("[\\[\\]]", "");
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
         };

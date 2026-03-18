@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 
 public class Oobis {
     private final SignifyClient client;
@@ -28,7 +29,7 @@ public class Oobis {
      * @throws JsonProcessingException if there is an error processing the JSON
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Optional<Object> get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<OOBI> get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
         if (role == null) {
             role = "agent";
         }
@@ -40,7 +41,7 @@ public class Oobis {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), Object.class));
+        return Optional.of(Utils.fromJson(response.body(), OOBI.class));
     }
 
     /**
