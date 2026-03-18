@@ -30,7 +30,10 @@ public class Ipex {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("m", args.getMessage() != null ? args.getMessage() : "");
         data.put("s", args.getSchemaSaid());
-        data.put("a", args.getAttributes() != null ? args.getAttributes() : new LinkedHashMap<>());
+
+        if (args.getAttributes() != null) {
+            args.getAttributes().forEach(data::put);
+        }
 
         return this.client
             .exchanges()
