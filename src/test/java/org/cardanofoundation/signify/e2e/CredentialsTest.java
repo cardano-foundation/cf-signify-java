@@ -400,11 +400,10 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Map<String, Object> filter = new LinkedHashMap<>();
                 filter.put("-s", aBody.get("s").toString());
 
-                LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(aBody.get("a"));
-                for (Map.Entry<String, Object> entry : a.entrySet()) {
+                for (Map.Entry<String, Object> entry : aBody.entrySet()) {
                     String key = entry.getKey();
-                    Object value = entry.getValue();
-                    filter.put("-a-" + key, value);
+                    if (key.equals("m") || key.equals("s")) continue;
+                    filter.put("-a-" + key, entry.getValue());
                 }
 
                 CredentialFilter cFilter = CredentialFilter.builder().build();
