@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.e2e;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,8 +43,8 @@ public class TestSetupSingleClient {
     @Test
     public void test_setup_single_client_step2() throws IOException, InterruptedException, LibsodiumException {
         ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-        Map<String, Object> oobi = (Map<String, Object>) client.oobis().get("name1", "witness").get();
-        ArrayList<String> oobis = (ArrayList<String>) oobi.get("oobis");
+        OOBI oobi = client.oobis().get("name1", "witness").get();
+        List<String> oobis = oobi.getOobis();
         assertEquals(3, oobis.size());
         switch (env.preset()) {
             case LOCAL:
