@@ -25,6 +25,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.CredentialDat
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -401,10 +402,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         System.out.println("Issuer starting credential issuance to holder...");
 
-        Object registires = client3.registries().list("issuer");
-        List<HashMap<String, Object>> listRegistries = (List<HashMap<String, Object>>) registires;
-        Map<String, Object> registryMap = listRegistries.getFirst();
-        String regk = registryMap.get("regk").toString();
+        List<Registry> registires = client3.registries().list("issuer");
+        Registry registry = registires.get(0);
+        String regk = registry.getRegk();
 
         CredentialSubject subject = CredentialSubject.builder()
                 .i(holderAid.getPrefix())
@@ -509,12 +509,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         Object op = result.op();
         waitOperation(client, op);
 
-        Object registries = client.registries().list(name);
-        registryList = (List<HashMap<String, Object>>) registries;
-        HashMap<String, Object> opResponseName = registryList.getFirst();
+        List<Registry> registryList = client.registries().list(name);
+        Registry opResponseName = registryList.get(0);
 
         assertEquals(1, registryList.size());
-        assertEquals(registryName, opResponseName.get("name"));
+        assertEquals(registryName, opResponseName.getName());
         return opResponseName;
     }
 

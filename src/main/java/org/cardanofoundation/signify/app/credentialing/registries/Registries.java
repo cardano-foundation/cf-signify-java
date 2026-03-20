@@ -18,7 +18,8 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
-
+import org.cardanofoundation.signify.generated.keria.model.Registry;
+import com.fasterxml.jackson.core.type.TypeReference;
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 
 public class Registries {
@@ -33,16 +34,16 @@ public class Registries {
      * Lists all registries associated with the specified identifier name.
      *
      * @param name the name or alias of the identifier
-     * @return an Object representing the list of registries
+     * @return a List<Registry> representing the list of registries
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object list(String name) throws IOException, InterruptedException, LibsodiumException {
+    public List<Registry> list(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries";
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), new TypeReference<List<Registry>>() {});
     }
 
     /**
