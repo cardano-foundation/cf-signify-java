@@ -24,6 +24,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
@@ -766,12 +767,12 @@ public class MultisigTest extends BaseIntegrationTest {
 
         msgSaid = waitAndMarkNotification(client4, "/exn/ipex/grant");
         System.out.println("Holder received exchange message with the grant message");
-        res = client4.exchanges().get(msgSaid).get();
+        ExchangeResource exnRes = client4.exchanges().get(msgSaid).get();
 
         Exchanging.ExchangeMessageResult admitResult = client4.ipex().admit(IpexAdmitArgs.builder()
                 .senderName("holder")
                 .message("")
-                .grantSaid(Utils.toMap(Utils.toMap(res).get("exn")).get("d").toString())
+                .grantSaid(exnRes.getExn().getD())
                 .recipient(m.getPrefix())
                 .build()
         );

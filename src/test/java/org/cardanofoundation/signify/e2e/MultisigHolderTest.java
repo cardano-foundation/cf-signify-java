@@ -17,6 +17,8 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -426,23 +428,22 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid = waitAndMarkNotification(client1, "/exn/ipex/grant");
         System.out.println("Member1 received /exn/ipex/grant msg with SAID: " + grantMsgSaid);
 
-        Object exnRes = client1.exchanges().get(grantMsgSaid).get();
+        ExchangeResource exnRes = client1.exchanges().get(grantMsgSaid).get();
         recp = Stream.of(aid2.getState())
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        LinkedHashMap<String, Object> exnResList = castObjectToLinkedHashMap(exnRes);
-        LinkedHashMap<String, Object> getExn = castObjectToLinkedHashMap(exnResList.get("exn"));
+        Exn getExn = exnRes.getExn();
 
         op1 = multisigAdmitCredential(client1,
                 "holder",
                 "member1",
-                getExn.get("d").toString(),
-                getExn.get("i").toString(),
+                getExn.getD(),
+                getExn.getI(),
                 recp
         );
 
-        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.get("e"));
+        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.getE());
         LinkedHashMap<String, Object> exnGetAcdc = castObjectToLinkedHashMap(exnGetE.get("acdc"));
 
         System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
@@ -450,7 +451,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid2 = waitAndMarkNotification(client2, "/exn/ipex/grant");
         System.out.println("Member2 received /exn/ipex/grant msg with SAID: " + grantMsgSaid2);
 
-        Object exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
+        ExchangeResource exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
         assertEquals(grantMsgSaid2, grantMsgSaid);
         System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
 
@@ -461,8 +462,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         op2 = multisigAdmitCredential(client2,
                 "holder",
                 "member2",
-                getExn.get("d").toString(),
-                getExn.get("i").toString(),
+                getExn.getD(),
+                getExn.getI(),
                 recp2
         );
         System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
