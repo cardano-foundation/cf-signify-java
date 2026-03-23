@@ -38,11 +38,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class RandyKeyState {
   public static final String JSON_PROPERTY_PRXS = "prxs";
   @jakarta.annotation.Nonnull
-  private List<String> prxs = new ArrayList<>();
+  private List<String> prxs;
 
   public static final String JSON_PROPERTY_NXTS = "nxts";
   @jakarta.annotation.Nonnull
-  private List<String> nxts = new ArrayList<>();
+  private List<String> nxts;
 
   public RandyKeyState() {
   }

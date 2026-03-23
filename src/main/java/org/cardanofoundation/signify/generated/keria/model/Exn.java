@@ -81,7 +81,7 @@ public class Exn {
 
   public static final String JSON_PROPERTY_Q = "q";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> q = new HashMap<>();
+  private Map<String, Object> q;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
@@ -89,7 +89,7 @@ public class Exn {
 
   public static final String JSON_PROPERTY_E = "e";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> e = new HashMap<>();
+  private Map<String, Object> e;
 
   public static final String JSON_PROPERTY_X = "x";
   @jakarta.annotation.Nonnull

@@ -43,7 +43,7 @@ public class ChallengesNamePostRequest {
 
   public static final String JSON_PROPERTY_WORDS = "words";
   @jakarta.annotation.Nullable
-  private List<String> words = new ArrayList<>();
+  private List<String> words;
 
   public ChallengesNamePostRequest() {
   }

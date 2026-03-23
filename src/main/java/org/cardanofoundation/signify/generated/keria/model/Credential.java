@@ -77,7 +77,7 @@ public class Credential {
 
   public static final String JSON_PROPERTY_CHAINS = "chains";
   @jakarta.annotation.Nonnull
-  private List<Map<String, Object>> chains = new ArrayList<>();
+  private List<Map<String, Object>> chains;
 
   public static final String JSON_PROPERTY_STATUS = "status";
   @jakarta.annotation.Nonnull

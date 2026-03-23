@@ -42,7 +42,7 @@ public class ExchangeResource {
 
   public static final String JSON_PROPERTY_PATHED = "pathed";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> pathed = new HashMap<>();
+  private Map<String, Object> pathed;
 
   public ExchangeResource() {
   }

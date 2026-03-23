@@ -273,8 +273,6 @@ public class CredentialsTest extends BaseIntegrationTest {
                 LinkedHashMap<String, Object> sad = buildSadMap(sadObj);
                 LinkedHashMap<String, Object> anc = buildAncMap(ancObj);
                 LinkedHashMap<String, Object> iss = buildIssMap(issObj);
-                
-                assert issuerCredential != null;
 
                 IpexGrantArgs gArgs = IpexGrantArgs.builder().build();
                 gArgs.setSenderName(issuerAid.name);
@@ -322,7 +320,6 @@ public class CredentialsTest extends BaseIntegrationTest {
                 iargs.setDatetime(createTimestamp());
 
                 Exchanging.ExchangeMessageResult result = holderClient.ipex().admit(iargs);
-                System.out.println("Admit result exn: " + result.exn());
                 Object op = holderClient.ipex().submitAdmit(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
                 );

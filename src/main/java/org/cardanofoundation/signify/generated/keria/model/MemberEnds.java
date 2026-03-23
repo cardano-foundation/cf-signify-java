@@ -44,39 +44,39 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class MemberEnds {
   public static final String JSON_PROPERTY_AGENT = "agent";
   @jakarta.annotation.Nullable
-  private Map<String, String> agent = new HashMap<>();
+  private Map<String, String> agent;
 
   public static final String JSON_PROPERTY_CONTROLLER = "controller";
   @jakarta.annotation.Nullable
-  private Map<String, String> controller = new HashMap<>();
+  private Map<String, String> controller;
 
   public static final String JSON_PROPERTY_WITNESS = "witness";
   @jakarta.annotation.Nullable
-  private Map<String, String> witness = new HashMap<>();
+  private Map<String, String> witness;
 
   public static final String JSON_PROPERTY_REGISTRAR = "registrar";
   @jakarta.annotation.Nullable
-  private Map<String, String> registrar = new HashMap<>();
+  private Map<String, String> registrar;
 
   public static final String JSON_PROPERTY_WATCHER = "watcher";
   @jakarta.annotation.Nullable
-  private Map<String, String> watcher = new HashMap<>();
+  private Map<String, String> watcher;
 
   public static final String JSON_PROPERTY_JUDGE = "judge";
   @jakarta.annotation.Nullable
-  private Map<String, String> judge = new HashMap<>();
+  private Map<String, String> judge;
 
   public static final String JSON_PROPERTY_JUROR = "juror";
   @jakarta.annotation.Nullable
-  private Map<String, String> juror = new HashMap<>();
+  private Map<String, String> juror;
 
   public static final String JSON_PROPERTY_PEER = "peer";
   @jakarta.annotation.Nullable
-  private Map<String, String> peer = new HashMap<>();
+  private Map<String, String> peer;
 
   public static final String JSON_PROPERTY_MAILBOX = "mailbox";
   @jakarta.annotation.Nullable
-  private Map<String, String> mailbox = new HashMap<>();
+  private Map<String, String> mailbox;
 
   public MemberEnds() {
   }

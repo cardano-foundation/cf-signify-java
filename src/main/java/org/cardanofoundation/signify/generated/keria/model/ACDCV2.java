@@ -74,11 +74,11 @@ public class ACDCV2 {
 
   public static final String JSON_PROPERTY_E = "e";
   @jakarta.annotation.Nullable
-  private Map<String, Object> e = new HashMap<>();
+  private Map<String, Object> e;
 
   public static final String JSON_PROPERTY_R = "r";
   @jakarta.annotation.Nullable
-  private Map<String, Object> r = new HashMap<>();
+  private Map<String, Object> r;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
