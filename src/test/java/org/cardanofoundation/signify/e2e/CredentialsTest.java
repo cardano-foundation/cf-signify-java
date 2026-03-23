@@ -772,8 +772,8 @@ public class CredentialsTest extends BaseIntegrationTest {
             sad.put("a", a);
         }
 
-        if (sadObj.getE() != null) sad.put("e", tryParseJsonObject(sadObj.getE()));
-        if (sadObj.getR() != null) sad.put("r", tryParseJsonObject(sadObj.getR()));
+        if (sadObj.getE() != null) sad.put("e", sadObj.getE());
+        if (sadObj.getR() != null) sad.put("r", sadObj.getR());
         return sad;
     }
 
@@ -799,17 +799,5 @@ public class CredentialsTest extends BaseIntegrationTest {
         iss.put("ri", issObj.getRi());
         iss.put("dt", issObj.getDt());
         return iss;
-    }
-
-    private static Object tryParseJsonObject(String s) {
-        try {
-            Object parsed = Utils.fromJson(s, Object.class);
-            if (parsed instanceof Map || parsed instanceof List) {
-                return parsed;
-            }
-            return s;
-        } catch (Exception ignored) {
-            return s;
-        }
     }
 }

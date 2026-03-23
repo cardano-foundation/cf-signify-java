@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
@@ -8,7 +9,6 @@ import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.IssuerRegistry;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
@@ -47,6 +47,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     SignifyClient gleifClient, qviClient, leClient, roleClient;
     Aid gleifAid, qviAid, leAid, roleAid;
     IssuerRegistry gleifRegistry, qviRegistry, leRegistry;
+
+    ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void singlesig_vlei_issuance() throws Exception {
@@ -255,15 +257,13 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         CredentialSad sadLeCredHolder = leCredHolder.getSad();
         CredentialState statusLeCredHolder = leCredHolder.getStatus();
-
-        Map<String, Object> leEdges = Utils.fromJson(sadLeCredHolder.getE(), new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> leQviEdge = castObjectToLinkedHashMap(leEdges.get("qvi"));
+        JsonNode leQviEdge = mapper.convertValue(sadLeCredHolder.getE(), JsonNode.class);
 
         assertEquals(sadLeCred.getD(), sadLeCredHolder.getD());
         assertEquals(LE_SCHEMA_SAID, sadLeCredHolder.getS());
         assertEquals(qviAid.prefix, sadLeCredHolder.getI());
         assertEquals(leAid.prefix, sadLeCredHolder.getA().getI());
-        assertEquals(sadQviCred.getD(), leQviEdge.get("n").toString());
+        assertEquals(sadQviCred.getD(), leQviEdge.at("/qvi/n").asText());
 
         assertEquals("0", statusLeCredHolder.getS());
         assertNotNull(leCredHolder.getAtc());
@@ -310,15 +310,14 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         CredentialSad sadEcrCredHolder = ecrCredHolder.getSad();
         ACDCAttributes aEcrCredHolder = sadEcrCredHolder.getA();
-        Map<String, Object> ecrEdges = Utils.fromJson(sadEcrCredHolder.getE(), new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> ecrLeEdge = castObjectToLinkedHashMap(ecrEdges.get("le"));
+        JsonNode ecrLeEdge = mapper.convertValue(sadEcrCredHolder.getE(), JsonNode.class);
         CredentialState statusEcrCredHolder = ecrCredHolder.getStatus();
 
         assertEquals(sadEcrCred.getD(), sadEcrCredHolder.getD());
         assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder.getS());
         assertEquals(leAid.prefix, sadEcrCredHolder.getI());
         assertEquals(roleAid.prefix, aEcrCredHolder.getI());
-        assertEquals(sadLeCred.getD(), ecrLeEdge.get("n").toString());
+        assertEquals(sadLeCred.getD(), ecrLeEdge.at("/le/n").asText());
         assertEquals("0", statusEcrCredHolder.getS());
         assertNotNull(ecrCredHolder.getAtc());
 
@@ -353,7 +352,6 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
             ecrAuthCredHolder = retry(() -> {
                 try {
-                    System.out.println("Trying to receive " + sadEcrAuthCred.getD());
                     Credential cred = getReceivedCredential(qviClient, sadEcrAuthCred.getD());
                     if (cred == null) throw new RuntimeException("Credential not yet available");
                     return cred;
@@ -365,8 +363,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         CredentialSad sadEcrAuthCredHolder = ecrAuthCredHolder.getSad();
         ACDCAttributes aEcrAuthCredHolder = sadEcrAuthCredHolder.getA();
-        Map<String, Object> ecrAuthEdges = Utils.fromJson(sadEcrAuthCredHolder.getE(), new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> ecrAuthLeEdge = castObjectToLinkedHashMap(ecrAuthEdges.get("le"));
+        JsonNode ecrAuthLeEdge = mapper.convertValue(sadEcrAuthCredHolder.getE(), JsonNode.class);
         CredentialState statusEcrAuthCredHolder = ecrAuthCredHolder.getStatus();
 
         assertEquals(sadEcrAuthCred.getD(), sadEcrAuthCredHolder.getD());
@@ -374,7 +371,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         assertEquals(leAid.prefix, sadEcrAuthCredHolder.getI());
         assertEquals(qviAid.prefix, aEcrAuthCredHolder.getI());
         assertEquals(roleAid.prefix, aEcrAuthCredHolder.getAdditionalProperties().get("AID").toString());
-        assertEquals(sadLeCred.getD(), ecrAuthLeEdge.get("n").toString());
+        assertEquals(sadLeCred.getD(), ecrAuthLeEdge.at("/le/n").asText());
         assertEquals("0", statusEcrAuthCredHolder.getS());
         assertNotNull(ecrAuthCredHolder.getAtc());
 
@@ -419,14 +416,13 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         }
 
         CredentialSad sadEcrCredHolder2 = ecrCredHolder2.getSad();
-        Map<String, Object> ecrEdges2 = Utils.fromJson(sadEcrCredHolder2.getE(), new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> ecrEcrAuthEdges2 = castObjectToLinkedHashMap(ecrEdges2.get("auth"));
+        JsonNode ecrEcrAuthEdges2 = mapper.convertValue(sadEcrCredHolder2.getE(), JsonNode.class);
         CredentialState statusEcrCredHolder2 = ecrCredHolder2.getStatus();
 
         assertEquals(sadEcrCred2.getD(), sadEcrCredHolder2.getD());
         assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder2.getS());
         assertEquals(qviAid.prefix, sadEcrCredHolder2.getI());
-        assertEquals(sadEcrAuthCred.getD(), ecrEcrAuthEdges2.get("n").toString());
+        assertEquals(sadEcrAuthCred.getD(), ecrEcrAuthEdges2.at("/auth/n").asText());
         assertEquals("0", statusEcrCredHolder2.getS());
         assertNotNull(ecrCredHolder2.getAtc());
 
@@ -471,8 +467,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         CredentialSad sadOorAuthCredHolder = oorAuthCredHolder.getSad();
         ACDCAttributes aOorAuthCredHolder = sadOorAuthCredHolder.getA();
-        Map<String, Object> oorAuthEdges = Utils.fromJson(sadOorAuthCredHolder.getE(), new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> oorAuthLeEdge = castObjectToLinkedHashMap(oorAuthEdges.get("le"));
+        JsonNode oorAuthLeEdge = mapper.convertValue(sadOorAuthCredHolder.getE(), JsonNode.class);
         CredentialState statusOorAuthCredHolder = oorAuthCredHolder.getStatus();
 
         assertEquals(sadOorAuthCred.getD(), sadOorAuthCredHolder.getD());
@@ -480,7 +475,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         assertEquals(leAid.prefix, sadOorAuthCredHolder.getI());
         assertEquals(qviAid.prefix, aOorAuthCredHolder.getI());
         assertEquals(roleAid.prefix, aOorAuthCredHolder.getAdditionalProperties().get("AID").toString());
-        assertEquals(sadLeCred.getD(), oorAuthLeEdge.get("n").toString());
+        assertEquals(sadLeCred.getD(), oorAuthLeEdge.at("/le/n").asText());
         assertEquals("0", statusOorAuthCredHolder.getS());
         assertNotNull(oorAuthCredHolder.getAtc());
 
@@ -524,14 +519,13 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         }
 
         CredentialSad sadOorCredHolder = oorCredHolder.getSad();
-        Map<String, Object> oorEdges = Utils.fromJson(sadOorCredHolder.getE(), new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> oorOorAuthEdge = castObjectToLinkedHashMap(oorEdges.get("auth"));
+        JsonNode oorOorAuthEdge = mapper.convertValue(sadOorCredHolder.getE(), JsonNode.class);
         CredentialState statusOorCredHolder = oorCredHolder.getStatus();
 
         assertEquals(sadOorCred.getD(), sadOorCredHolder.getD());
         assertEquals(OOR_SCHEMA_SAID, sadOorCredHolder.getS());
         assertEquals(qviAid.prefix, sadOorCredHolder.getI());
-        assertEquals(sadOorAuthCred.getD(), oorOorAuthEdge.get("n").toString());
+        assertEquals(sadOorAuthCred.getD(), oorOorAuthEdge.at("/auth/n").asText());
         assertEquals("0", statusOorCredHolder.getS());
         assertNotNull(oorCredHolder.getAtc());
 

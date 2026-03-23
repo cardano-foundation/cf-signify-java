@@ -25,6 +25,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.ACDCAttributes;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -72,11 +74,11 @@ public class ACDCV1OneOf {
 
   public static final String JSON_PROPERTY_E = "e";
   @jakarta.annotation.Nullable
-  private String e;
+  private Map<String, Object> e = new HashMap<>();
 
   public static final String JSON_PROPERTY_R = "r";
   @jakarta.annotation.Nullable
-  private String r;
+  private Map<String, Object> r = new HashMap<>();
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
@@ -235,9 +237,17 @@ public class ACDCV1OneOf {
     this.ri = ri;
   }
 
-  public ACDCV1OneOf e(@jakarta.annotation.Nullable String e) {
+  public ACDCV1OneOf e(@jakarta.annotation.Nullable Map<String, Object> e) {
     
     this.e = e;
+    return this;
+  }
+
+  public ACDCV1OneOf putEItem(String key, Object eItem) {
+    if (this.e == null) {
+      this.e = new HashMap<>();
+    }
+    this.e.put(key, eItem);
     return this;
   }
 
@@ -247,22 +257,30 @@ public class ACDCV1OneOf {
    */
   @jakarta.annotation.Nullable
   @JsonProperty(value = JSON_PROPERTY_E, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getE() {
+  public Map<String, Object> getE() {
     return e;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_E, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setE(@jakarta.annotation.Nullable String e) {
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+  public void setE(@jakarta.annotation.Nullable Map<String, Object> e) {
     this.e = e;
   }
 
-  public ACDCV1OneOf r(@jakarta.annotation.Nullable String r) {
+  public ACDCV1OneOf r(@jakarta.annotation.Nullable Map<String, Object> r) {
     
     this.r = r;
+    return this;
+  }
+
+  public ACDCV1OneOf putRItem(String key, Object rItem) {
+    if (this.r == null) {
+      this.r = new HashMap<>();
+    }
+    this.r.put(key, rItem);
     return this;
   }
 
@@ -272,16 +290,16 @@ public class ACDCV1OneOf {
    */
   @jakarta.annotation.Nullable
   @JsonProperty(value = JSON_PROPERTY_R, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getR() {
+  public Map<String, Object> getR() {
     return r;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_R, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setR(@jakarta.annotation.Nullable String r) {
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+  public void setR(@jakarta.annotation.Nullable Map<String, Object> r) {
     this.r = r;
   }
 

@@ -47,8 +47,8 @@ public class Credentials {
 
         final String method = "POST";
         HttpResponse<String> response = this.client.fetch(path, method, data);
-    String normalizedJson = normalizeCredentialEtForGeneratedModel(response.body());
-    return Utils.fromJson(normalizedJson, new TypeReference<List<Credential>>() {});
+        String normalizedJson = normalizeCredentialEtForGeneratedModel(response.body());
+        return Utils.fromJson(normalizedJson, new TypeReference<List<Credential>>() {});
     }
 
     public Optional<Credential> get(String said) throws IOException, InterruptedException, LibsodiumException {
@@ -114,19 +114,6 @@ public class Credentials {
                 } else if ("rev".equals(et)) {
                     statusMap.put("et", "brv");
                 }
-            }
-        }
-
-        Object credSadObj = map.get("sad");
-        if (credSadObj instanceof Map<?, ?> credSadMapRaw) {
-            Map<String, Object> credSadMap = (Map<String, Object>) credSadMapRaw;
-            Object eObj = credSadMap.get("e");
-            if (eObj instanceof Map || eObj instanceof List) {
-                credSadMap.put("e", Utils.jsonStringify(eObj));
-            }
-            Object rObj = credSadMap.get("r");
-            if (rObj instanceof Map || rObj instanceof List) {
-                credSadMap.put("r", Utils.jsonStringify(rObj));
             }
         }
 
