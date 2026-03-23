@@ -19,6 +19,8 @@ import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialAnc;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.IssEvent;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.AfterAll;
@@ -381,12 +383,11 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertNotNull(holderApplyNote.a.d);
 
             try {
-                Object apply = holderClient.exchanges().get(holderApplyNote.a.d).get();
-                LinkedHashMap<String, Object> applyMap = castObjectToLinkedHashMap(apply);
-                LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(applyMap.get("exn"));
-                applySaid = exn.get("d").toString();
+                ExchangeResource apply = holderClient.exchanges().get(holderApplyNote.a.d).get();
+                Exn exn = apply.getExn();
+                applySaid = exn.getD();
 
-                LinkedHashMap<String, Object> aBody = castObjectToLinkedHashMap(exn.get("a"));
+                LinkedHashMap<String, Object> aBody = castObjectToLinkedHashMap(exn.getA());
 
                 Map<String, Object> filter = new LinkedHashMap<>();
                 filter.put("-s", aBody.get("s").toString());
@@ -433,14 +434,13 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification verifierOfferNote = verifierNotifications.getFirst();
                 assertNotNull(verifierOfferNote.a.d);
 
-                Object offer = verifierClient.exchanges().get(verifierOfferNote.a.d).get();
-                LinkedHashMap<String, Object> offerBody = castObjectToLinkedHashMap(offer);
-                LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(offerBody.get("exn"));
+                ExchangeResource offer = verifierClient.exchanges().get(verifierOfferNote.a.d).get();
+                Exn exn = offer.getExn();
 
-                offerSaid = exn.get("d").toString();
-                String p = exn.get("p").toString();
+                offerSaid = exn.getD();
+                String p = exn.getP();
 
-                LinkedHashMap<String, Object> e = castObjectToLinkedHashMap(exn.get("e"));
+                LinkedHashMap<String, Object> e = castObjectToLinkedHashMap(exn.getE());
                 LinkedHashMap<String, Object> acdc = castObjectToLinkedHashMap(e.get("acdc"));
                 LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(acdc.get("a"));
                 String LEI = a.get("LEI").toString();
@@ -473,11 +473,10 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification holderAgreeNote = holderNotifications.getFirst();
                 assertNotNull(holderAgreeNote.a.d);
 
-                Object agree = verifierClient.exchanges().get(holderAgreeNote.a.d).get();
-                LinkedHashMap<String, Object> agreeBody = castObjectToLinkedHashMap(agree);
-                LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(agreeBody.get("exn"));
-                agreeSaid = exn.get("d").toString();
-                String agreeP = exn.get("p").toString();
+                ExchangeResource agree = verifierClient.exchanges().get(holderAgreeNote.a.d).get();
+                Exn exn = agree.getExn();
+                agreeSaid = exn.getD();
+                String agreeP = exn.getP();
 
                 assertEquals(offerSaid, agreeP);
 
@@ -526,10 +525,9 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification verifierGrantNote = verifierNotifications.getFirst();
                 assertNotNull(verifierGrantNote.a.d);
 
-                Object grant = holderClient.exchanges().get(verifierGrantNote.a.d).get();
-                LinkedHashMap<String, Object> grantBody = castObjectToLinkedHashMap(grant);
-                LinkedHashMap<String, Object> exn = castObjectToLinkedHashMap(grantBody.get("exn"));
-                String p = exn.get("p").toString();
+                ExchangeResource grant = holderClient.exchanges().get(verifierGrantNote.a.d).get();
+                Exn exn = grant.getExn();
+                String p = exn.getP();
 
                 assertEquals(agreeSaid, p);
 
