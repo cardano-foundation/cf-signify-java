@@ -36,10 +36,10 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ACDCV1.JSON_PROPERTY_V,
   ACDCV1.JSON_PROPERTY_D,
-  ACDCV1.JSON_PROPERTY_I,
-  ACDCV1.JSON_PROPERTY_S,
   ACDCV1.JSON_PROPERTY_U,
+  ACDCV1.JSON_PROPERTY_I,
   ACDCV1.JSON_PROPERTY_RI,
+  ACDCV1.JSON_PROPERTY_S,
   ACDCV1.JSON_PROPERTY_E,
   ACDCV1.JSON_PROPERTY_R,
   ACDCV1.JSON_PROPERTY_A,
@@ -56,21 +56,21 @@ public class ACDCV1 {
   @jakarta.annotation.Nonnull
   private String d;
 
-  public static final String JSON_PROPERTY_I = "i";
-  @jakarta.annotation.Nonnull
-  private String i;
-
-  public static final String JSON_PROPERTY_S = "s";
-  @jakarta.annotation.Nonnull
-  private String s;
-
   public static final String JSON_PROPERTY_U = "u";
   @jakarta.annotation.Nullable
   private String u;
 
+  public static final String JSON_PROPERTY_I = "i";
+  @jakarta.annotation.Nonnull
+  private String i;
+
   public static final String JSON_PROPERTY_RI = "ri";
   @jakarta.annotation.Nullable
   private String ri;
+
+  public static final String JSON_PROPERTY_S = "s";
+  @jakarta.annotation.Nonnull
+  private String s;
 
   public static final String JSON_PROPERTY_E = "e";
   @jakarta.annotation.Nullable
@@ -141,56 +141,6 @@ public class ACDCV1 {
     this.d = d;
   }
 
-  public ACDCV1 i(@jakarta.annotation.Nonnull String i) {
-    
-    this.i = i;
-    return this;
-  }
-
-  /**
-   * Get i
-   * @return i
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_I, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getI() {
-    return i;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_I, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setI(@jakarta.annotation.Nonnull String i) {
-    this.i = i;
-  }
-
-  public ACDCV1 s(@jakarta.annotation.Nonnull String s) {
-    
-    this.s = s;
-    return this;
-  }
-
-  /**
-   * Get s
-   * @return s
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_S, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getS() {
-    return s;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_S, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setS(@jakarta.annotation.Nonnull String s) {
-    this.s = s;
-  }
-
   public ACDCV1 u(@jakarta.annotation.Nullable String u) {
     
     this.u = u;
@@ -216,6 +166,31 @@ public class ACDCV1 {
     this.u = u;
   }
 
+  public ACDCV1 i(@jakarta.annotation.Nonnull String i) {
+    
+    this.i = i;
+    return this;
+  }
+
+  /**
+   * Get i
+   * @return i
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_I, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getI() {
+    return i;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_I, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setI(@jakarta.annotation.Nonnull String i) {
+    this.i = i;
+  }
+
   public ACDCV1 ri(@jakarta.annotation.Nullable String ri) {
     
     this.ri = ri;
@@ -239,6 +214,31 @@ public class ACDCV1 {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setRi(@jakarta.annotation.Nullable String ri) {
     this.ri = ri;
+  }
+
+  public ACDCV1 s(@jakarta.annotation.Nonnull String s) {
+    
+    this.s = s;
+    return this;
+  }
+
+  /**
+   * Get s
+   * @return s
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_S, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getS() {
+    return s;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_S, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setS(@jakarta.annotation.Nonnull String s) {
+    this.s = s;
   }
 
   public ACDCV1 e(@jakarta.annotation.Nullable Map<String, Object> e) {
@@ -369,10 +369,10 @@ public class ACDCV1 {
     ACDCV1 ACDC_V_1 = (ACDCV1) o;
     return Objects.equals(this.v, ACDC_V_1.v) &&
         Objects.equals(this.d, ACDC_V_1.d) &&
-        Objects.equals(this.i, ACDC_V_1.i) &&
-        Objects.equals(this.s, ACDC_V_1.s) &&
         Objects.equals(this.u, ACDC_V_1.u) &&
+        Objects.equals(this.i, ACDC_V_1.i) &&
         Objects.equals(this.ri, ACDC_V_1.ri) &&
+        Objects.equals(this.s, ACDC_V_1.s) &&
         Objects.equals(this.e, ACDC_V_1.e) &&
         Objects.equals(this.r, ACDC_V_1.r) &&
         Objects.equals(this.a, ACDC_V_1.a) &&
@@ -381,7 +381,7 @@ public class ACDCV1 {
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, d, i, s, u, ri, e, r, a, AUpper);
+    return Objects.hash(v, d, u, i, ri, s, e, r, a, AUpper);
   }
 
   @Override
@@ -390,10 +390,10 @@ public class ACDCV1 {
     sb.append("class ACDCV1 {\n");
     sb.append("    v: ").append(toIndentedString(v)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
-    sb.append("    i: ").append(toIndentedString(i)).append("\n");
-    sb.append("    s: ").append(toIndentedString(s)).append("\n");
     sb.append("    u: ").append(toIndentedString(u)).append("\n");
+    sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    ri: ").append(toIndentedString(ri)).append("\n");
+    sb.append("    s: ").append(toIndentedString(s)).append("\n");
     sb.append("    e: ").append(toIndentedString(e)).append("\n");
     sb.append("    r: ").append(toIndentedString(r)).append("\n");
     sb.append("    a: ").append(toIndentedString(a)).append("\n");
