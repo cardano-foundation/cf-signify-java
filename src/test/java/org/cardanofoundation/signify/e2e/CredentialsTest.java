@@ -16,10 +16,8 @@ import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
-import org.cardanofoundation.signify.generated.keria.model.CredentialAnc;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
-import org.cardanofoundation.signify.generated.keria.model.IssEvent;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -266,19 +264,12 @@ public class CredentialsTest extends BaseIntegrationTest {
             String dt = createTimestamp();
             try {
                 Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
-                CredentialSad sadObj = issuerCredential.getSad();
-                CredentialAnc ancObj = issuerCredential.getAnc();
-                IssEvent issObj = issuerCredential.getIss();
-
-                LinkedHashMap<String, Object> sad = buildSadMap(sadObj);
-                LinkedHashMap<String, Object> anc = buildAncMap(ancObj);
-                LinkedHashMap<String, Object> iss = buildIssMap(issObj);
 
                 IpexGrantArgs gArgs = IpexGrantArgs.builder().build();
                 gArgs.setSenderName(issuerAid.name);
-                gArgs.setAcdc(new Serder(sad));
-                gArgs.setAnc(new Serder(anc));
-                gArgs.setIss(new Serder(iss));
+                gArgs.setAcdc(new Serder(Utils.toMap(issuerCredential.getSad())));
+                gArgs.setAnc(new Serder(Utils.toMap(issuerCredential.getAnc())));
+                gArgs.setIss(new Serder(Utils.toMap(issuerCredential.getIss())));
                 gArgs.setAncAttachment(null);
                 gArgs.setRecipient(holderAid.prefix);
                 gArgs.setDatetime(dt);
@@ -404,20 +395,14 @@ public class CredentialsTest extends BaseIntegrationTest {
                 CredentialFilter cFilter = CredentialFilter.builder().build();
                 cFilter.setFilter(filter);
                 List<Credential> matchingCreds = holderClient.credentials().list(cFilter);
-                // ArrayList<String> matchingCredsMap = (ArrayList<String>) matchingCreds;
                 assertEquals(1, matchingCreds.size());
-
-                // LinkedHashMap<String, Object> matchingCredsBody = castObjectToLinkedHashMap(matchingCreds.get(0));
-                CredentialSad sadObj = matchingCreds.get(0).getSad();
-
-                LinkedHashMap<String, Object> sad = buildSadMap(sadObj);
 
                 markAndRemoveNotification(holderClient, holderNotifications.getFirst());
 
                 IpexOfferArgs offerArgs = IpexOfferArgs.builder().build();
                 offerArgs.setSenderName(holderAid.name);
                 offerArgs.setRecipient(verifierAid.prefix);
-                offerArgs.setAcdc(new Serder(sad));
+                offerArgs.setAcdc(new Serder(Utils.toMap(matchingCreds.get(0).getSad())));
                 offerArgs.setApplySaid(applySaid);
                 offerArgs.setDatetime(createTimestamp());
 
@@ -487,14 +472,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 markAndRemoveNotification(holderClient, holderAgreeNote);
 
                 Credential holderCredential = holderClient.credentials().get(qviCredentialId).get();
-                CredentialSad sadObj = holderCredential.getSad();
-                CredentialAnc ancObj = holderCredential.getAnc();
-                IssEvent issObj = holderCredential.getIss();
 
-                LinkedHashMap<String, Object> sad = buildSadMap(sadObj);
-                LinkedHashMap<String, Object> anc = buildAncMap(ancObj);
-                LinkedHashMap<String, Object> iss = buildIssMap(issObj);
-                
                 String atc = holderCredential.getAtc();
                 String ancatc = holderCredential.getAncatc();
                 String issAtc = holderCredential.getIssatc();
@@ -502,9 +480,9 @@ public class CredentialsTest extends BaseIntegrationTest {
                 IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
                 grantArgs.setSenderName(holderAid.name);
                 grantArgs.setRecipient(verifierAid.prefix);
-                grantArgs.setAcdc(new Serder(sad));
-                grantArgs.setAnc(new Serder(anc));
-                grantArgs.setIss(new Serder(iss));
+                grantArgs.setAcdc(new Serder(Utils.toMap(holderCredential.getSad())));
+                grantArgs.setAnc(new Serder(Utils.toMap(holderCredential.getAnc())));
+                grantArgs.setIss(new Serder(Utils.toMap(holderCredential.getIss())));
                 grantArgs.setAcdcAttachment(atc);
                 grantArgs.setAncAttachment(ancatc);
                 grantArgs.setIssAttachment(issAtc);
@@ -646,15 +624,11 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Credential leCredential = holderClient.credentials().get(leCredentialId)
                     .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
 
-                LinkedHashMap<String, Object> sad = buildSadMap(leCredential.getSad());
-                LinkedHashMap<String, Object> anc = buildAncMap(leCredential.getAnc());
-                LinkedHashMap<String, Object> iss = buildIssMap(leCredential.getIss());
-
                 IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
                 grantArgs.setSenderName(holderAid.name);
-                grantArgs.setAcdc(new Serder(sad));
-                grantArgs.setAnc(new Serder(anc));
-                grantArgs.setIss(new Serder(iss));
+                grantArgs.setAcdc(new Serder(Utils.toMap(leCredential.getSad())));
+                grantArgs.setAnc(new Serder(Utils.toMap(leCredential.getAnc())));
+                grantArgs.setIss(new Serder(Utils.toMap(leCredential.getIss())));
                 grantArgs.setAncAttachment(null);
                 grantArgs.setRecipient(legalEntityAid.prefix);
                 grantArgs.setDatetime(dt);
@@ -745,56 +719,5 @@ public class CredentialsTest extends BaseIntegrationTest {
     public static class StringData {
         public static final String USAGE_DISCLAIMER = "Usage of a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, does not assert that the Legal Entity is trustworthy, honest, reputable in its business dealings, safe to do business with, or compliant with any laws or that an implied or expressly intended purpose will be fulfilled.";
         public static final String ISSUANCE_DISCLAIMER = "All information in a valid, unexpired, and non-revoked vLEI Credential, as defined in the associated Ecosystem Governance Framework, is accurate as of the date the validation process was complete. The vLEI Credential has been issued to the legal entity or person named in the vLEI Credential as the subject; and the qualified vLEI Issuer exercised reasonable care to perform the validation process set forth in the vLEI Ecosystem Governance Framework.";
-    }
-
-    private static LinkedHashMap<String, Object> buildSadMap(CredentialSad sadObj) {
-        LinkedHashMap<String, Object> sad = new LinkedHashMap<>();
-        sad.put("v", sadObj.getV());
-        sad.put("d", sadObj.getD());
-        sad.put("i", sadObj.getI());
-        if (sadObj.getRi() != null) sad.put("ri", sadObj.getRi());
-        sad.put("s", sadObj.getS());
-
-        if (sadObj.getA() != null) {
-            LinkedHashMap<String, Object> a = new LinkedHashMap<>();
-            Map<String, Object> aMap = Utils.toMap(sadObj.getA());
-            if (aMap.containsKey("d")) a.put("d", aMap.get("d"));
-            if (aMap.containsKey("i")) a.put("i", aMap.get("i"));
-            if (aMap.containsKey("dt")) a.put("dt", aMap.get("dt"));
-            aMap.forEach((key, value) -> {
-                if (!key.equals("d") && !key.equals("i") && !key.equals("dt")) {
-                    a.put(key, value);
-                }
-            });
-            sad.put("a", a);
-        }
-
-        if (sadObj.getE() != null) sad.put("e", sadObj.getE());
-        if (sadObj.getR() != null) sad.put("r", sadObj.getR());
-        return sad;
-    }
-
-    private static LinkedHashMap<String, Object> buildAncMap(CredentialAnc ancObj) {
-        LinkedHashMap<String, Object> anc = new LinkedHashMap<>();
-        anc.put("v", ancObj.getV());
-        anc.put("t", ancObj.getT());
-        anc.put("d", ancObj.getD());
-        anc.put("i", ancObj.getI());
-        anc.put("s", ancObj.getS());
-        anc.put("p", ancObj.getP());
-        if (ancObj.getA() != null) anc.put("a", ancObj.getA());
-        return anc;
-    }
-
-    private static LinkedHashMap<String, Object> buildIssMap(IssEvent issObj) {
-        LinkedHashMap<String, Object> iss = new LinkedHashMap<>();
-        iss.put("v", issObj.getV());
-        iss.put("t", issObj.getT());
-        iss.put("d", issObj.getD());
-        iss.put("i", issObj.getI());
-        iss.put("s", issObj.getS());
-        iss.put("ri", issObj.getRi());
-        iss.put("dt", issObj.getDt());
-        return iss;
     }
 }

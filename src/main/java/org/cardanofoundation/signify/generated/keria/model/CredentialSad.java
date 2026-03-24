@@ -40,9 +40,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CredentialSad.JSON_PROPERTY_I,
   CredentialSad.JSON_PROPERTY_RI,
   CredentialSad.JSON_PROPERTY_S,
+  CredentialSad.JSON_PROPERTY_A,
   CredentialSad.JSON_PROPERTY_E,
   CredentialSad.JSON_PROPERTY_R,
-  CredentialSad.JSON_PROPERTY_A,
   CredentialSad.JSON_PROPERTY_A_UPPER,
   CredentialSad.JSON_PROPERTY_RD
 })
@@ -73,6 +73,10 @@ public class CredentialSad {
   @jakarta.annotation.Nonnull
   private String s;
 
+  public static final String JSON_PROPERTY_A = "a";
+  @jakarta.annotation.Nullable
+  private ACDCAttributes a;
+
   public static final String JSON_PROPERTY_E = "e";
   @jakarta.annotation.Nullable
   private Map<String, Object> e;
@@ -80,10 +84,6 @@ public class CredentialSad {
   public static final String JSON_PROPERTY_R = "r";
   @jakarta.annotation.Nullable
   private Map<String, Object> r;
-
-  public static final String JSON_PROPERTY_A = "a";
-  @jakarta.annotation.Nullable
-  private ACDCAttributes a;
 
   public static final String JSON_PROPERTY_A_UPPER = "A";
   @jakarta.annotation.Nullable
@@ -246,6 +246,31 @@ public class CredentialSad {
     this.s = s;
   }
 
+  public CredentialSad a(@jakarta.annotation.Nullable ACDCAttributes a) {
+    
+    this.a = a;
+    return this;
+  }
+
+  /**
+   * Get a
+   * @return a
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public ACDCAttributes getA() {
+    return a;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setA(@jakarta.annotation.Nullable ACDCAttributes a) {
+    this.a = a;
+  }
+
   public CredentialSad e(@jakarta.annotation.Nullable Map<String, Object> e) {
     
     this.e = e;
@@ -310,31 +335,6 @@ public class CredentialSad {
   @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
   public void setR(@jakarta.annotation.Nullable Map<String, Object> r) {
     this.r = r;
-  }
-
-  public CredentialSad a(@jakarta.annotation.Nullable ACDCAttributes a) {
-    
-    this.a = a;
-    return this;
-  }
-
-  /**
-   * Get a
-   * @return a
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public ACDCAttributes getA() {
-    return a;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setA(@jakarta.annotation.Nullable ACDCAttributes a) {
-    this.a = a;
   }
 
   public CredentialSad AUpper(@jakarta.annotation.Nullable ACDCV1OneOf1A AUpper) {
@@ -403,16 +403,16 @@ public class CredentialSad {
         Objects.equals(this.i, credentialSad.i) &&
         Objects.equals(this.ri, credentialSad.ri) &&
         Objects.equals(this.s, credentialSad.s) &&
+        Objects.equals(this.a, credentialSad.a) &&
         Objects.equals(this.e, credentialSad.e) &&
         Objects.equals(this.r, credentialSad.r) &&
-        Objects.equals(this.a, credentialSad.a) &&
         Objects.equals(this.AUpper, credentialSad.AUpper) &&
         Objects.equals(this.rd, credentialSad.rd);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, d, u, i, ri, s, e, r, a, AUpper, rd);
+    return Objects.hash(v, d, u, i, ri, s, a, e, r, AUpper, rd);
   }
 
   @Override
@@ -425,9 +425,9 @@ public class CredentialSad {
     sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    ri: ").append(toIndentedString(ri)).append("\n");
     sb.append("    s: ").append(toIndentedString(s)).append("\n");
+    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    e: ").append(toIndentedString(e)).append("\n");
     sb.append("    r: ").append(toIndentedString(r)).append("\n");
-    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    AUpper: ").append(toIndentedString(AUpper)).append("\n");
     sb.append("    rd: ").append(toIndentedString(rd)).append("\n");
     sb.append("}");

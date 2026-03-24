@@ -41,9 +41,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ACDCV1OneOf.JSON_PROPERTY_I,
   ACDCV1OneOf.JSON_PROPERTY_RI,
   ACDCV1OneOf.JSON_PROPERTY_S,
+  ACDCV1OneOf.JSON_PROPERTY_A,
   ACDCV1OneOf.JSON_PROPERTY_E,
-  ACDCV1OneOf.JSON_PROPERTY_R,
-  ACDCV1OneOf.JSON_PROPERTY_A
+  ACDCV1OneOf.JSON_PROPERTY_R
 })
 @JsonTypeName("ACDC_V_1_oneOf")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
@@ -72,6 +72,10 @@ public class ACDCV1OneOf {
   @jakarta.annotation.Nonnull
   private String s;
 
+  public static final String JSON_PROPERTY_A = "a";
+  @jakarta.annotation.Nullable
+  private ACDCAttributes a;
+
   public static final String JSON_PROPERTY_E = "e";
   @jakarta.annotation.Nullable
   private Map<String, Object> e;
@@ -79,10 +83,6 @@ public class ACDCV1OneOf {
   public static final String JSON_PROPERTY_R = "r";
   @jakarta.annotation.Nullable
   private Map<String, Object> r;
-
-  public static final String JSON_PROPERTY_A = "a";
-  @jakarta.annotation.Nullable
-  private ACDCAttributes a;
 
   public ACDCV1OneOf() {
   }
@@ -237,6 +237,31 @@ public class ACDCV1OneOf {
     this.s = s;
   }
 
+  public ACDCV1OneOf a(@jakarta.annotation.Nullable ACDCAttributes a) {
+    
+    this.a = a;
+    return this;
+  }
+
+  /**
+   * Get a
+   * @return a
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public ACDCAttributes getA() {
+    return a;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setA(@jakarta.annotation.Nullable ACDCAttributes a) {
+    this.a = a;
+  }
+
   public ACDCV1OneOf e(@jakarta.annotation.Nullable Map<String, Object> e) {
     
     this.e = e;
@@ -303,31 +328,6 @@ public class ACDCV1OneOf {
     this.r = r;
   }
 
-  public ACDCV1OneOf a(@jakarta.annotation.Nullable ACDCAttributes a) {
-    
-    this.a = a;
-    return this;
-  }
-
-  /**
-   * Get a
-   * @return a
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public ACDCAttributes getA() {
-    return a;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setA(@jakarta.annotation.Nullable ACDCAttributes a) {
-    this.a = a;
-  }
-
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -387,15 +387,15 @@ public class ACDCV1OneOf {
         Objects.equals(this.i, acDCV1OneOf.i) &&
         Objects.equals(this.ri, acDCV1OneOf.ri) &&
         Objects.equals(this.s, acDCV1OneOf.s) &&
+        Objects.equals(this.a, acDCV1OneOf.a) &&
         Objects.equals(this.e, acDCV1OneOf.e) &&
         Objects.equals(this.r, acDCV1OneOf.r) &&
-        Objects.equals(this.a, acDCV1OneOf.a) &&
         Objects.equals(this.additionalProperties, acDCV1OneOf.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, d, u, i, ri, s, e, r, a, additionalProperties);
+    return Objects.hash(v, d, u, i, ri, s, a, e, r, additionalProperties);
   }
 
   @Override
@@ -408,9 +408,9 @@ public class ACDCV1OneOf {
     sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    ri: ").append(toIndentedString(ri)).append("\n");
     sb.append("    s: ").append(toIndentedString(s)).append("\n");
+    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    e: ").append(toIndentedString(e)).append("\n");
     sb.append("    r: ").append(toIndentedString(r)).append("\n");
-    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
