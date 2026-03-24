@@ -710,12 +710,6 @@ public class MultisigUtils {
         return op;
     }
 
-    public record GrantEmbedMaps(
-            LinkedHashMap<String, Object> sadMap,
-            LinkedHashMap<String, Object> ancMap,
-            LinkedHashMap<String, Object> issMap
-    ) {}
-
     public static Object startMultisigIncept(
             SignifyClient client,
             StartMultisigInceptArgs args
