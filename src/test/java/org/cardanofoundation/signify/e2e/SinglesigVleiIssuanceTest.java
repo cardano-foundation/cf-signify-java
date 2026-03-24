@@ -9,8 +9,8 @@ import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.IssuerRegistry;
-import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -563,16 +563,11 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     }
 
     public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) throws Exception {
-        MultisigUtils.GrantEmbedMaps grantEmbedMaps = MultisigUtils.resolveGrantEmbedMaps(senderClient, credential);
-        LinkedHashMap<String, Object> sadMap = grantEmbedMaps.sadMap();
-        LinkedHashMap<String, Object> ancMap = grantEmbedMaps.ancMap();
-        LinkedHashMap<String, Object> issMap = grantEmbedMaps.issMap();
-
         IpexGrantArgs grantArgs = IpexGrantArgs.builder()
                 .senderName(senderAid.name)
-                .acdc(new Serder(sadMap))
-                .anc(new Serder(ancMap))
-                .iss(new Serder(issMap))
+                .acdc(new Serder(Utils.toMap(credential.getSad())))
+                .anc(new Serder(Utils.toMap(credential.getAnc())))
+                .iss(new Serder(Utils.toMap(credential.getIss())))
                 .recipient(recipientAid.prefix)
                 .datetime(createTimestamp())
                 .build();

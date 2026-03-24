@@ -612,17 +612,12 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
 
-        GrantEmbedMaps grantEmbedMaps = resolveGrantEmbedMaps(client, credential);
-        LinkedHashMap<String, Object> sadMap = grantEmbedMaps.sadMap();
-        LinkedHashMap<String, Object> ancMap = grantEmbedMaps.ancMap();
-        LinkedHashMap<String, Object> issMap = grantEmbedMaps.issMap();
-
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
                 .senderName(multisigAID.getName())
-            .acdc(new Serder(sadMap))
-            .anc(new Serder(ancMap))
-            .iss(new Serder(issMap))
+            .acdc(new Serder(Utils.toMap(credential.getSad())))
+            .anc(new Serder(Utils.toMap(credential.getAnc())))
+            .iss(new Serder(Utils.toMap(credential.getIss())))
                 .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
@@ -666,23 +661,6 @@ public class MultisigUtils {
                 gembeds,
                 recp
         );
-    }
-
-    public static GrantEmbedMaps resolveGrantEmbedMaps(SignifyClient client, Credential credential) {
-        GrantEmbedMaps cachedGrantEmbedMaps = TestUtils.getCachedGrantEmbedMaps(credential.getSad().getD());
-        if (cachedGrantEmbedMaps != null) {
-            return cachedGrantEmbedMaps;
-        }
-
-        try {
-            GrantEmbedMaps fetchedGrantEmbedMaps = TestUtils.fetchAndCacheGrantEmbedMaps(client, credential.getSad().getD());
-            if (fetchedGrantEmbedMaps != null) {
-                return fetchedGrantEmbedMaps;
-            }
-        } catch (Exception ignored) {
-        }
-
-        throw new IllegalStateException("Unable to resolve canonical grant embeds for credential: " + credential.getSad().getD());
     }
 
     public static Object issueCredentialMultisig(

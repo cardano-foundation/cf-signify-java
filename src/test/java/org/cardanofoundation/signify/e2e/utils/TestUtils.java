@@ -21,8 +21,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.generated.keria.model.Credential;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.*;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -32,9 +31,6 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
-
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,8 +39,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static List<Notification> filteredNotes;
-    static Retry retry = new Retry();
-    private static final Map<String, MultisigUtils.GrantEmbedMaps> GRANT_EMBED_CACHE = new ConcurrentHashMap<>();
 
     public static class Aid {
         public String name;
@@ -340,22 +334,17 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
 
         List<Credential> credentialList = issuerClient.credentials().list(credentialFilter);
-        if (credentialList instanceof List && !((List<?>) credentialList).isEmpty()) {
-            Optional<?> credential = ((List<?>) credentialList).stream()
+        if (credentialList != null && !credentialList.isEmpty()) {
+            Optional<Credential> credential = credentialList.stream()
                     .filter(cred -> {
-                        Map<String, Object> credMap = Utils.toMap(cred);
-                        Map<String, Object> sad = Utils.toMap(credMap.get("sad"));
-                        Map<String, Object> a = Utils.toMap(sad.get("a"));
-
-                        return schema.equals(sad.get("s")) &&
-                                issuerAid.prefix.equals(sad.get("i")) &&
-                                recipientAid.prefix.equals(a.get("i"));
+                        CredentialSad sad = cred.getSad();
+                        return schema.equals(sad.getS()) &&
+                                issuerAid.prefix.equals(sad.getI()) &&
+                                recipientAid.prefix.equals(sad.getA().getI());
                     })
                     .findFirst();
             if (credential.isPresent()) {
-                Credential existingCredential = (Credential) credential.get();
-                fetchAndCacheGrantEmbedMaps(issuerClient, existingCredential.getSad().getD());
-                return existingCredential;
+                return credential.get();
             }
         }
 
@@ -373,67 +362,9 @@ public class TestUtils {
         cData.setE(source);
 
         IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
-        cacheGrantEmbedMaps(
-                issResult.getAcdc().getKed().get("d").toString(),
-                new MultisigUtils.GrantEmbedMaps(
-                        toLinkedHashMap(issResult.getAcdc().getKed()),
-                        toLinkedHashMap(issResult.getAnc().getKed()),
-                        toLinkedHashMap(issResult.getIss().getKed())
-                )
-        );
         waitOperation(issuerClient, issResult.getOp());
-        Credential credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
 
-        return credential;
-    }
-
-    public static void cacheGrantEmbedMaps(String said, MultisigUtils.GrantEmbedMaps grantEmbedMaps) {
-        if (said == null || grantEmbedMaps == null) {
-            return;
-        }
-        GRANT_EMBED_CACHE.put(said, grantEmbedMaps);
-    }
-
-    public static MultisigUtils.GrantEmbedMaps getCachedGrantEmbedMaps(String said) {
-        if (said == null) {
-            return null;
-        }
-        return GRANT_EMBED_CACHE.get(said);
-    }
-
-    public static MultisigUtils.GrantEmbedMaps fetchAndCacheGrantEmbedMaps(SignifyClient client, String said) throws IOException, InterruptedException, LibsodiumException {
-        MultisigUtils.GrantEmbedMaps cached = getCachedGrantEmbedMaps(said);
-        if (cached != null) {
-            return cached;
-        }
-
-        HttpResponse<String> response = client.fetch("/credentials/" + said, "GET", null, Map.of("Accept", "application/json"));
-        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
-            return null;
-        }
-
-        LinkedHashMap<String, Object> credentialBody = Utils.fromJson(
-                response.body(),
-                new TypeReference<LinkedHashMap<String, Object>>() {}
-        );
-
-        MultisigUtils.GrantEmbedMaps grantEmbedMaps = new MultisigUtils.GrantEmbedMaps(
-                toLinkedHashMap(castObjectToLinkedHashMap(credentialBody.get("sad"))),
-                toLinkedHashMap(castObjectToLinkedHashMap(credentialBody.get("anc"))),
-                toLinkedHashMap(castObjectToLinkedHashMap(credentialBody.get("iss")))
-        );
-        cacheGrantEmbedMaps(said, grantEmbedMaps);
-        return grantEmbedMaps;
-    }
-
-    public static LinkedHashMap<String, Object> toLinkedHashMap(Map<String, Object> source) {
-        if (source == null) {
-            return new LinkedHashMap<>();
-        }
-        return Utils.fromJson(
-                Utils.jsonStringify(source),
-                new TypeReference<LinkedHashMap<String, Object>>() {}
-        );
+        return issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
     }
 
     public static List<KeyStateRecord> getStates(SignifyClient client, List<String> prefixes) throws IOException, InterruptedException {

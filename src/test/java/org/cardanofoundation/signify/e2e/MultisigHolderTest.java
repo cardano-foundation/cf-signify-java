@@ -563,7 +563,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         }
 
         System.out.println("Grant message sent");
-                return cred;
+        return cred;
     }
 
     public Object multisigAdmitCredential(
