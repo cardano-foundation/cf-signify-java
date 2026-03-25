@@ -15,12 +15,13 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -35,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExnMultisig.JSON_PROPERTY_MEMBER_NAME,
   ExnMultisig.JSON_PROPERTY_SENDER
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class ExnMultisig {
   public static final String JSON_PROPERTY_EXN = "exn";
   @jakarta.annotation.Nonnull
@@ -43,7 +44,7 @@ public class ExnMultisig {
 
   public static final String JSON_PROPERTY_PATHS = "paths";
   @jakarta.annotation.Nonnull
-  private Object paths;
+  private Map<String, Object> paths = new HashMap<>();
 
   public static final String JSON_PROPERTY_GROUP_NAME = "groupName";
   @jakarta.annotation.Nullable
@@ -85,9 +86,14 @@ public class ExnMultisig {
     this.exn = exn;
   }
 
-  public ExnMultisig paths(@jakarta.annotation.Nonnull Object paths) {
+  public ExnMultisig paths(@jakarta.annotation.Nonnull Map<String, Object> paths) {
     
     this.paths = paths;
+    return this;
+  }
+
+  public ExnMultisig putPathsItem(String key, Object pathsItem) {
+    this.paths.put(key, pathsItem);
     return this;
   }
 
@@ -97,16 +103,16 @@ public class ExnMultisig {
    */
   @jakarta.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_PATHS, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
 
-  public Object getPaths() {
+  public Map<String, Object> getPaths() {
     return paths;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_PATHS, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPaths(@jakarta.annotation.Nonnull Object paths) {
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  public void setPaths(@jakarta.annotation.Nonnull Map<String, Object> paths) {
     this.paths = paths;
   }
 

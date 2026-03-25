@@ -15,7 +15,6 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,7 +22,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -42,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Schema.JSON_PROPERTY_ADDITIONAL_PROPERTIES,
   Schema.JSON_PROPERTY_REQUIRED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class Schema {
   public static final String JSON_PROPERTY_$_ID = "$id";
   @jakarta.annotation.Nonnull
@@ -74,7 +75,7 @@ public class Schema {
 
   public static final String JSON_PROPERTY_PROPERTIES = "properties";
   @jakarta.annotation.Nonnull
-  private Object properties;
+  private Map<String, Object> properties = new HashMap<>();
 
   public static final String JSON_PROPERTY_ADDITIONAL_PROPERTIES = "additionalProperties";
   @jakarta.annotation.Nonnull
@@ -262,9 +263,14 @@ public class Schema {
     this.version = version;
   }
 
-  public Schema properties(@jakarta.annotation.Nonnull Object properties) {
+  public Schema properties(@jakarta.annotation.Nonnull Map<String, Object> properties) {
     
     this.properties = properties;
+    return this;
+  }
+
+  public Schema putPropertiesItem(String key, Object propertiesItem) {
+    this.properties.put(key, propertiesItem);
     return this;
   }
 
@@ -274,16 +280,16 @@ public class Schema {
    */
   @jakarta.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_PROPERTIES, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
 
-  public Object getProperties() {
+  public Map<String, Object> getProperties() {
     return properties;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_PROPERTIES, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setProperties(@jakarta.annotation.Nonnull Object properties) {
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  public void setProperties(@jakarta.annotation.Nonnull Map<String, Object> properties) {
     this.properties = properties;
   }
 

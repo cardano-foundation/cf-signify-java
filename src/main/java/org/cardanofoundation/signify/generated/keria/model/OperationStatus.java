@@ -15,12 +15,13 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -32,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   OperationStatus.JSON_PROPERTY_MESSAGE,
   OperationStatus.JSON_PROPERTY_DETAILS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class OperationStatus {
   public static final String JSON_PROPERTY_CODE = "code";
   @jakarta.annotation.Nonnull
@@ -44,7 +45,7 @@ public class OperationStatus {
 
   public static final String JSON_PROPERTY_DETAILS = "details";
   @jakarta.annotation.Nullable
-  private Object details;
+  private Map<String, Object> details = new HashMap<>();
 
   public OperationStatus() {
   }
@@ -99,9 +100,17 @@ public class OperationStatus {
     this.message = message;
   }
 
-  public OperationStatus details(@jakarta.annotation.Nullable Object details) {
+  public OperationStatus details(@jakarta.annotation.Nullable Map<String, Object> details) {
     
     this.details = details;
+    return this;
+  }
+
+  public OperationStatus putDetailsItem(String key, Object detailsItem) {
+    if (this.details == null) {
+      this.details = new HashMap<>();
+    }
+    this.details.put(key, detailsItem);
     return this;
   }
 
@@ -111,16 +120,16 @@ public class OperationStatus {
    */
   @jakarta.annotation.Nullable
   @JsonProperty(value = JSON_PROPERTY_DETAILS, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Object getDetails() {
+  public Map<String, Object> getDetails() {
     return details;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_DETAILS, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDetails(@jakarta.annotation.Nullable Object details) {
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+  public void setDetails(@jakarta.annotation.Nullable Map<String, Object> details) {
     this.details = details;
   }
 
