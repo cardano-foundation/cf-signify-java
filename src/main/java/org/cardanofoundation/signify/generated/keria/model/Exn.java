@@ -21,8 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.HashMap;
-import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.EXNV1;
 import org.cardanofoundation.signify.generated.keria.model.EXNV2;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -45,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Exn.JSON_PROPERTY_E,
   Exn.JSON_PROPERTY_X
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class Exn {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
@@ -81,7 +79,7 @@ public class Exn {
 
   public static final String JSON_PROPERTY_Q = "q";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> q = new HashMap<>();
+  private Object q;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
@@ -89,7 +87,7 @@ public class Exn {
 
   public static final String JSON_PROPERTY_E = "e";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> e = new HashMap<>();
+  private Object e;
 
   public static final String JSON_PROPERTY_X = "x";
   @jakarta.annotation.Nonnull
@@ -298,14 +296,9 @@ public class Exn {
     this.r = r;
   }
 
-  public Exn q(@jakarta.annotation.Nonnull Map<String, Object> q) {
+  public Exn q(@jakarta.annotation.Nonnull Object q) {
     
     this.q = q;
-    return this;
-  }
-
-  public Exn putQItem(String key, Object qItem) {
-    this.q.put(key, qItem);
     return this;
   }
 
@@ -315,16 +308,16 @@ public class Exn {
    */
   @jakarta.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_Q, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Map<String, Object> getQ() {
+  public Object getQ() {
     return q;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_Q, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
-  public void setQ(@jakarta.annotation.Nonnull Map<String, Object> q) {
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setQ(@jakarta.annotation.Nonnull Object q) {
     this.q = q;
   }
 
@@ -353,14 +346,9 @@ public class Exn {
     this.a = a;
   }
 
-  public Exn e(@jakarta.annotation.Nonnull Map<String, Object> e) {
+  public Exn e(@jakarta.annotation.Nonnull Object e) {
     
     this.e = e;
-    return this;
-  }
-
-  public Exn putEItem(String key, Object eItem) {
-    this.e.put(key, eItem);
     return this;
   }
 
@@ -370,16 +358,16 @@ public class Exn {
    */
   @jakarta.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_E, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Map<String, Object> getE() {
+  public Object getE() {
     return e;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_E, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
-  public void setE(@jakarta.annotation.Nonnull Map<String, Object> e) {
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setE(@jakarta.annotation.Nonnull Object e) {
     this.e = e;
   }
 

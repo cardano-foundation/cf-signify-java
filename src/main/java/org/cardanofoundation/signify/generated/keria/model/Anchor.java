@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Anchor.JSON_PROPERTY_SN,
   Anchor.JSON_PROPERTY_D
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class Anchor {
   public static final String JSON_PROPERTY_PRE = "pre";
   @jakarta.annotation.Nonnull

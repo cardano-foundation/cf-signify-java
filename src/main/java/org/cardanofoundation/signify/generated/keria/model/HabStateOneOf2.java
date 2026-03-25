@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   HabStateOneOf2.JSON_PROPERTY_GROUP
 })
 @JsonTypeName("HabState_oneOf_2")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class HabStateOneOf2 {
   public static final String JSON_PROPERTY_GROUP = "group";
   @jakarta.annotation.Nonnull

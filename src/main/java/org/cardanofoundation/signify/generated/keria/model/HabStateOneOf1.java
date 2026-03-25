@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   HabStateOneOf1.JSON_PROPERTY_RANDY
 })
 @JsonTypeName("HabState_oneOf_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class HabStateOneOf1 {
   public static final String JSON_PROPERTY_RANDY = "randy";
   @jakarta.annotation.Nonnull

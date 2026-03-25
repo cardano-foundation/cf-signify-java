@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AgentResourceResult.JSON_PROPERTY_RIDX,
   AgentResourceResult.JSON_PROPERTY_SXLT
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class AgentResourceResult {
   public static final String JSON_PROPERTY_AGENT = "agent";
   @jakarta.annotation.Nonnull

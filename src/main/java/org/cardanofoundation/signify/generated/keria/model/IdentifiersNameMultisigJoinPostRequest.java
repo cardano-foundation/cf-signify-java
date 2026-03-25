@@ -38,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdentifiersNameMultisigJoinPostRequest.JSON_PROPERTY_RMIDS
 })
 @JsonTypeName("_identifiers__name__multisig_join_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class IdentifiersNameMultisigJoinPostRequest {
   public static final String JSON_PROPERTY_ROT = "rot";
   @jakarta.annotation.Nullable

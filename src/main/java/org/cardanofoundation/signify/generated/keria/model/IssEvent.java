@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IssEvent.JSON_PROPERTY_RI,
   IssEvent.JSON_PROPERTY_DT
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class IssEvent {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull

@@ -35,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EndrolesAidPostRequest.JSON_PROPERTY_SIGS
 })
 @JsonTypeName("_endroles__aid__post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class EndrolesAidPostRequest {
   public static final String JSON_PROPERTY_RPY = "rpy";
   @jakarta.annotation.Nullable

@@ -39,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CredentialStateIssOrRev.JSON_PROPERTY_ET,
   CredentialStateIssOrRev.JSON_PROPERTY_RA
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class CredentialStateIssOrRev {
   public static final String JSON_PROPERTY_VN = "vn";
   @jakarta.annotation.Nullable

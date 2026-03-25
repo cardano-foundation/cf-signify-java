@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   MultisigInteractEmbeds.JSON_PROPERTY_IXN
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class MultisigInteractEmbeds {
   public static final String JSON_PROPERTY_IXN = "ixn";
   @jakarta.annotation.Nonnull

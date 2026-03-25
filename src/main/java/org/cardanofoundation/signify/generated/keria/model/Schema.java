@@ -23,9 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -44,7 +42,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Schema.JSON_PROPERTY_ADDITIONAL_PROPERTIES,
   Schema.JSON_PROPERTY_REQUIRED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class Schema {
   public static final String JSON_PROPERTY_$_ID = "$id";
   @jakarta.annotation.Nonnull
@@ -76,7 +74,7 @@ public class Schema {
 
   public static final String JSON_PROPERTY_PROPERTIES = "properties";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> properties = new HashMap<>();
+  private Object properties;
 
   public static final String JSON_PROPERTY_ADDITIONAL_PROPERTIES = "additionalProperties";
   @jakarta.annotation.Nonnull
@@ -264,14 +262,9 @@ public class Schema {
     this.version = version;
   }
 
-  public Schema properties(@jakarta.annotation.Nonnull Map<String, Object> properties) {
+  public Schema properties(@jakarta.annotation.Nonnull Object properties) {
     
     this.properties = properties;
-    return this;
-  }
-
-  public Schema putPropertiesItem(String key, Object propertiesItem) {
-    this.properties.put(key, propertiesItem);
     return this;
   }
 
@@ -281,16 +274,16 @@ public class Schema {
    */
   @jakarta.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_PROPERTIES, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Map<String, Object> getProperties() {
+  public Object getProperties() {
     return properties;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_PROPERTIES, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
-  public void setProperties(@jakarta.annotation.Nonnull Map<String, Object> properties) {
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setProperties(@jakarta.annotation.Nonnull Object properties) {
     this.properties = properties;
   }
 

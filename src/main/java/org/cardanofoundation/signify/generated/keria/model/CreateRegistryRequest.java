@@ -40,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CreateRegistryRequest.JSON_PROPERTY_EST_ONLY
 })
 @JsonTypeName("createRegistry_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class CreateRegistryRequest {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull

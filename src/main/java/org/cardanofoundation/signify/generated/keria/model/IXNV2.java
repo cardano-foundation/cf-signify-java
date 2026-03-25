@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IXNV2.JSON_PROPERTY_A
 })
 @JsonTypeName("IXN_V_2")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class IXNV2 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull

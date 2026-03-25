@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   MultisigRegistryInceptEmbeds.JSON_PROPERTY_VCP
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class MultisigRegistryInceptEmbeds {
   public static final String JSON_PROPERTY_VCP = "vcp";
   @jakarta.annotation.Nonnull

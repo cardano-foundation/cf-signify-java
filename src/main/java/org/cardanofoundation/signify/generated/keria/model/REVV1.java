@@ -38,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   REVV1.JSON_PROPERTY_DT
 })
 @JsonTypeName("REV_V_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class REVV1 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull

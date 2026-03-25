@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.Anchor;
 import org.cardanofoundation.signify.generated.keria.model.CredentialAnc;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
@@ -49,7 +48,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Credential.JSON_PROPERTY_ANC,
   Credential.JSON_PROPERTY_ANCATC
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class Credential {
   public static final String JSON_PROPERTY_SAD = "sad";
   @jakarta.annotation.Nonnull
@@ -77,7 +76,7 @@ public class Credential {
 
   public static final String JSON_PROPERTY_CHAINS = "chains";
   @jakarta.annotation.Nonnull
-  private List<Map<String, Object>> chains = new ArrayList<>();
+  private List<Object> chains = new ArrayList<>();
 
   public static final String JSON_PROPERTY_STATUS = "status";
   @jakarta.annotation.Nonnull
@@ -248,13 +247,13 @@ public class Credential {
     this.schema = schema;
   }
 
-  public Credential chains(@jakarta.annotation.Nonnull List<Map<String, Object>> chains) {
+  public Credential chains(@jakarta.annotation.Nonnull List<Object> chains) {
     
     this.chains = chains;
     return this;
   }
 
-  public Credential addChainsItem(Map<String, Object> chainsItem) {
+  public Credential addChainsItem(Object chainsItem) {
     if (this.chains == null) {
       this.chains = new ArrayList<>();
     }
@@ -270,14 +269,14 @@ public class Credential {
   @JsonProperty(value = JSON_PROPERTY_CHAINS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public List<Map<String, Object>> getChains() {
+  public List<Object> getChains() {
     return chains;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_CHAINS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setChains(@jakarta.annotation.Nonnull List<Map<String, Object>> chains) {
+  public void setChains(@jakarta.annotation.Nonnull List<Object> chains) {
     this.chains = chains;
   }
 

@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Challenge.JSON_PROPERTY_SAID,
   Challenge.JSON_PROPERTY_AUTHENTICATED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class Challenge {
   public static final String JSON_PROPERTY_WORDS = "words";
   @jakarta.annotation.Nonnull

@@ -21,8 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.HashMap;
-import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -34,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ExchangeResource.JSON_PROPERTY_EXN,
   ExchangeResource.JSON_PROPERTY_PATHED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class ExchangeResource {
   public static final String JSON_PROPERTY_EXN = "exn";
   @jakarta.annotation.Nonnull
@@ -42,7 +40,7 @@ public class ExchangeResource {
 
   public static final String JSON_PROPERTY_PATHED = "pathed";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> pathed = new HashMap<>();
+  private Object pathed;
 
   public ExchangeResource() {
   }
@@ -72,14 +70,9 @@ public class ExchangeResource {
     this.exn = exn;
   }
 
-  public ExchangeResource pathed(@jakarta.annotation.Nonnull Map<String, Object> pathed) {
+  public ExchangeResource pathed(@jakarta.annotation.Nonnull Object pathed) {
     
     this.pathed = pathed;
-    return this;
-  }
-
-  public ExchangeResource putPathedItem(String key, Object pathedItem) {
-    this.pathed.put(key, pathedItem);
     return this;
   }
 
@@ -89,16 +82,16 @@ public class ExchangeResource {
    */
   @jakarta.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_PATHED, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Map<String, Object> getPathed() {
+  public Object getPathed() {
     return pathed;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_PATHED, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
-  public void setPathed(@jakarta.annotation.Nonnull Map<String, Object> pathed) {
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setPathed(@jakarta.annotation.Nonnull Object pathed) {
     this.pathed = pathed;
   }
 

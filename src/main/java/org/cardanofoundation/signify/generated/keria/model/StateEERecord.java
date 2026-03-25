@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   StateEERecord.JSON_PROPERTY_BR,
   StateEERecord.JSON_PROPERTY_BA
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class StateEERecord {
   public static final String JSON_PROPERTY_S = "s";
   @jakarta.annotation.Nullable

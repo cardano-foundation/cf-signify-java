@@ -13,10 +13,6 @@
 
 package org.cardanofoundation.signify.generated.keria.model;
 
-import java.util.Map;
-import java.util.HashMap;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.Objects;
 import java.util.Arrays;
 import java.util.Locale;
@@ -36,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   NotificationData.JSON_PROPERTY_D,
   NotificationData.JSON_PROPERTY_M
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class NotificationData {
   public static final String JSON_PROPERTY_R = "r";
   @jakarta.annotation.Nullable
@@ -128,49 +124,6 @@ public class NotificationData {
     this.m = m;
   }
 
-  /**
-   * A container for additional, undeclared properties.
-   * This is a holder for any undeclared properties as specified with
-   * the 'additionalProperties' keyword in the OAS document.
-   */
-  private Map<String, Object> additionalProperties;
-
-  /**
-   * Set the additional (undeclared) property with the specified name and value.
-   * If the property does not already exist, create it otherwise replace it.
-   * @param key the name of the property
-   * @param value the value of the property
-   * @return self reference
-   */
-  @JsonAnySetter
-  public NotificationData putAdditionalProperty(String key, Object value) {
-    if (this.additionalProperties == null) {
-        this.additionalProperties = new HashMap<String, Object>();
-    }
-    this.additionalProperties.put(key, value);
-    return this;
-  }
-
-  /**
-   * Return the additional (undeclared) properties.
-   * @return the additional (undeclared) properties
-   */
-  @JsonAnyGetter
-  public Map<String, Object> getAdditionalProperties() {
-    return additionalProperties;
-  }
-
-  /**
-   * Return the additional (undeclared) property with the specified name.
-   * @param key the name of the property
-   * @return the additional (undeclared) property with the specified name
-   */
-  public Object getAdditionalProperty(String key) {
-    if (this.additionalProperties == null) {
-        return null;
-    }
-    return this.additionalProperties.get(key);
-  }
 
   @Override
   public boolean equals(Object o) {
@@ -183,13 +136,12 @@ public class NotificationData {
     NotificationData notificationData = (NotificationData) o;
     return Objects.equals(this.r, notificationData.r) &&
         Objects.equals(this.d, notificationData.d) &&
-        Objects.equals(this.m, notificationData.m) &&
-        Objects.equals(this.additionalProperties, notificationData.additionalProperties);
+        Objects.equals(this.m, notificationData.m);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(r, d, m, additionalProperties);
+    return Objects.hash(r, d, m);
   }
 
   @Override
@@ -199,7 +151,6 @@ public class NotificationData {
     sb.append("    r: ").append(toIndentedString(r)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("    m: ").append(toIndentedString(m)).append("\n");
-    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   RevokeCredentialRequest.JSON_PROPERTY_SIGS
 })
 @JsonTypeName("revokeCredential_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class RevokeCredentialRequest {
   public static final String JSON_PROPERTY_REV = "rev";
   @jakarta.annotation.Nullable

@@ -40,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   MemberEnds.JSON_PROPERTY_PEER,
   MemberEnds.JSON_PROPERTY_MAILBOX
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class MemberEnds {
   public static final String JSON_PROPERTY_AGENT = "agent";
   @jakarta.annotation.Nullable

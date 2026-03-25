@@ -48,7 +48,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   DIPV1.JSON_PROPERTY_DI
 })
 @JsonTypeName("DIP_V_1")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class DIPV1 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull

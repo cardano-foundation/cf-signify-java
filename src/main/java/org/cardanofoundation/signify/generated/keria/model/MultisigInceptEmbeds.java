@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   MultisigInceptEmbeds.JSON_PROPERTY_ICP
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class MultisigInceptEmbeds {
   public static final String JSON_PROPERTY_ICP = "icp";
   @jakarta.annotation.Nonnull

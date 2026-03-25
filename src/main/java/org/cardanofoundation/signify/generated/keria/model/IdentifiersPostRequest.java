@@ -40,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdentifiersPostRequest.JSON_PROPERTY_EXTERN
 })
 @JsonTypeName("_identifiers_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class IdentifiersPostRequest {
   public static final String JSON_PROPERTY_ICP = "icp";
   @jakarta.annotation.Nullable

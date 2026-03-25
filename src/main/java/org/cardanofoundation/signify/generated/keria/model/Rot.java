@@ -50,7 +50,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Rot.JSON_PROPERTY_A,
   Rot.JSON_PROPERTY_C
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class Rot {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull

@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   HabStateOneOf3.JSON_PROPERTY_EXTERN
 })
 @JsonTypeName("HabState_oneOf_3")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class HabStateOneOf3 {
   public static final String JSON_PROPERTY_EXTERN = "extern";
   @jakarta.annotation.Nonnull

@@ -38,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IssueCredentialRequest.JSON_PROPERTY_PRIVATE
 })
 @JsonTypeName("issueCredential_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class IssueCredentialRequest {
   public static final String JSON_PROPERTY_REGISTRY = "registry";
   @jakarta.annotation.Nullable

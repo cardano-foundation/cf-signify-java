@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   MultisigIssueEmbeds.JSON_PROPERTY_ACDC,
   MultisigIssueEmbeds.JSON_PROPERTY_ISS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class MultisigIssueEmbeds {
   public static final String JSON_PROPERTY_ACDC = "acdc";
   @jakarta.annotation.Nonnull

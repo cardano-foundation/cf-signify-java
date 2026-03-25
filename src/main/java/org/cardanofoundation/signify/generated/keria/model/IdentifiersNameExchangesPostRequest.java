@@ -38,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   IdentifiersNameExchangesPostRequest.JSON_PROPERTY_TPC
 })
 @JsonTypeName("_identifiers__name__exchanges_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class IdentifiersNameExchangesPostRequest {
   public static final String JSON_PROPERTY_EXN = "exn";
   @jakarta.annotation.Nullable

@@ -21,8 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.HashMap;
-import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -42,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   EXNV2.JSON_PROPERTY_A
 })
 @JsonTypeName("EXN_V_2")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class EXNV2 {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
@@ -78,7 +76,7 @@ public class EXNV2 {
 
   public static final String JSON_PROPERTY_Q = "q";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> q = new HashMap<>();
+  private Object q;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
@@ -287,14 +285,9 @@ public class EXNV2 {
     this.r = r;
   }
 
-  public EXNV2 q(@jakarta.annotation.Nonnull Map<String, Object> q) {
+  public EXNV2 q(@jakarta.annotation.Nonnull Object q) {
     
     this.q = q;
-    return this;
-  }
-
-  public EXNV2 putQItem(String key, Object qItem) {
-    this.q.put(key, qItem);
     return this;
   }
 
@@ -304,16 +297,16 @@ public class EXNV2 {
    */
   @jakarta.annotation.Nonnull
   @JsonProperty(value = JSON_PROPERTY_Q, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Map<String, Object> getQ() {
+  public Object getQ() {
     return q;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_Q, required = true)
-  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
-  public void setQ(@jakarta.annotation.Nonnull Map<String, Object> q) {
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setQ(@jakarta.annotation.Nonnull Object q) {
     this.q = q;
   }
 

@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   AgentCaidPutRequest.JSON_PROPERTY_KEYS
 })
 @JsonTypeName("_agent__caid__put_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class AgentCaidPutRequest {
   public static final String JSON_PROPERTY_ROT = "rot";
   @jakarta.annotation.Nonnull

@@ -35,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ChallengesNamePostRequest.JSON_PROPERTY_WORDS
 })
 @JsonTypeName("_challenges__name__post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.17.0")
 public class ChallengesNamePostRequest {
   public static final String JSON_PROPERTY_RECIPIENT = "recipient";
   @jakarta.annotation.Nullable
