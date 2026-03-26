@@ -5,23 +5,20 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.cardanofoundation.signify.generated.keria.model.CredentialStateBisOrBrv;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
-import org.cardanofoundation.signify.generated.keria.model.CredentialStateIssOrRev;
 import org.cardanofoundation.signify.generated.keria.model.RaFields;
 import org.cardanofoundation.signify.generated.keria.model.Seal;
 
 import java.io.IOException;
 
 /**
- * Tolerant deserializer for generated CredentialState.
- *
- * OpenAPI `oneOf` for CredentialState can carry et values from two branches:
- * - iss/rev
- * - bis/brv
- *
- * Generated model currently only accepts bis/brv in CredentialState.EtEnum.
- * This deserializer keeps deserialization resilient for both payload shapes.
+ * Custom deserializer for {@link CredentialState} that works around OpenAPI Generator limitations.
+ * <p>
+ * The generated {@code CredentialState} has {@code @JsonSubTypes} mapping to
+ * {@code CredentialStateIssOrRev} and {@code CredentialStateBisOrBrv}, but those classes
+ * don't extend {@code CredentialState}, so Jackson's polymorphic dispatch fails.
+ * This deserializer bypasses that by deserializing directly into {@code CredentialState},
+ * accepting all four {@code et} values (iss, rev, bis, brv) and both {@code ra} shapes.
  */
 public class CredentialStateDeserializer extends JsonDeserializer<CredentialState> {
 
@@ -50,29 +47,13 @@ public class CredentialStateDeserializer extends JsonDeserializer<CredentialStat
 
         JsonNode etNode = node.get("et");
         if (etNode != null && !etNode.isNull()) {
-            String et = etNode.asText();
-            switch (et) {
-                case "bis", "brv" -> {
-                    CredentialStateBisOrBrv.EtEnum.fromValue(et);
-                    out.setEt(CredentialState.EtEnum.fromValue(et));
-                }
-                case "iss", "rev" -> {
-                    CredentialStateIssOrRev.EtEnum.fromValue(et);
-                    out.setEt(CredentialState.EtEnum.fromValue(et));
-                }
-                default -> {
-                    // leave unset for unknown future values
-                }
-            }
+            out.setEt(CredentialState.EtEnum.fromValue(etNode.asText()));
         }
 
         JsonNode raNode = node.get("ra");
         if (raNode != null && raNode.isObject()) {
-            // for iss/rev branch ra is often {}, so only map when fields are present
-            boolean hasI = raNode.has("i") && !raNode.get("i").isNull();
-            boolean hasS = raNode.has("s") && !raNode.get("s").isNull();
-            boolean hasD = raNode.has("d") && !raNode.get("d").isNull();
-            if (hasI && hasS && hasD) {
+            boolean hasFields = raNode.has("i") && raNode.has("s") && raNode.has("d");
+            if (hasFields) {
                 out.setRa(codec.treeToValue(raNode, RaFields.class));
             }
         }

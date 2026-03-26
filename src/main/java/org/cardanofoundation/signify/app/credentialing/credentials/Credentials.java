@@ -47,8 +47,7 @@ public class Credentials {
 
         final String method = "POST";
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        String normalizedJson = normalizeCredentialEtForGeneratedModel(response.body());
-        return Utils.fromJson(normalizedJson, new TypeReference<List<Credential>>() {});
+        return Utils.fromJson(response.body(), new TypeReference<List<Credential>>() {});
     }
 
     public Optional<Credential> get(String said) throws IOException, InterruptedException, LibsodiumException {
@@ -78,52 +77,11 @@ public class Credentials {
             return Optional.empty();
         }
 
-        String normalizedJson = normalizeCredentialEtForGeneratedModel(response.body());
-        Credential cred = Utils.fromJson(normalizedJson, Credential.class);
+        Credential cred = Utils.fromJson(response.body(), Credential.class);
         return Optional.of(cred);
     }
 
-    private static String normalizeCredentialEtForGeneratedModel(String rawJson) {
-        Object parsed = Utils.fromJson(rawJson, Object.class);
-        normalizeCredentialEtNode(parsed);
-        return Utils.jsonStringify(parsed);
-    }
 
-    @SuppressWarnings("unchecked")
-    private static void normalizeCredentialEtNode(Object node) {
-        if (node instanceof List<?> list) {
-            for (Object item : list) {
-                normalizeCredentialEtNode(item);
-            }
-            return;
-        }
-
-        if (!(node instanceof Map<?, ?>)) {
-            return;
-        }
-
-        Map<String, Object> map = (Map<String, Object>) node;
-
-        Object statusObj = map.get("status");
-        if (statusObj instanceof Map<?, ?> statusMapRaw) {
-            Map<String, Object> statusMap = (Map<String, Object>) statusMapRaw;
-            Object etObj = statusMap.get("et");
-            if (etObj instanceof String et) {
-                if ("iss".equals(et)) {
-                    statusMap.put("et", "bis");
-                } else if ("rev".equals(et)) {
-                    statusMap.put("et", "brv");
-                }
-            }
-        }
-
-        Object chainsObj = map.get("chains");
-        if (chainsObj instanceof List<?> chains) {
-            for (Object chain : chains) {
-                normalizeCredentialEtNode(chain);
-            }
-        }
-    }
 
     /**
      * Delete a credential from the DB
@@ -146,25 +104,7 @@ public class Credentials {
             return Optional.empty();
         }
 
-        String normalizedJson = normalizeCredentialStateEtForGeneratedModel(response.body());
-        return Optional.of(Utils.fromJson(normalizedJson, CredentialState.class));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static String normalizeCredentialStateEtForGeneratedModel(String rawJson) {
-        Object parsed = Utils.fromJson(rawJson, Object.class);
-        if (parsed instanceof Map<?, ?> mapRaw) {
-            Map<String, Object> map = (Map<String, Object>) mapRaw;
-            Object etObj = map.get("et");
-            if (etObj instanceof String et) {
-                if ("iss".equals(et)) {
-                    map.put("et", "bis");
-                } else if ("rev".equals(et)) {
-                    map.put("et", "brv");
-                }
-            }
-        }
-        return Utils.jsonStringify(parsed);
+        return Optional.of(Utils.fromJson(response.body(), CredentialState.class));
     }
 
     /**
