@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -34,7 +35,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     static String nameMember3 = "member3";
     static String nameMultisig = "multisigGroup";
     static String oobi1, oobi2, oobi3, oobiMultisig;
-    private static Map<String, Object> oobiGetMultisig;
+    private static OOBI oobiGetMultisig;
 
     @BeforeAll
     public static void getClients() throws Exception {
@@ -46,7 +47,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         createAID(client1, nameMember1, new ArrayList<>());
         createAID(client2, nameMember2, new ArrayList<>());
 
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
             new GetOobisArgs(client1, nameMember1, "agent"),
             new GetOobisArgs(client2, nameMember2, "agent")
         );
@@ -166,8 +167,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         EventResult endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
         EventResult endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
 
-        oobiGetMultisig = new LinkedHashMap<>();
-        oobiGetMultisig = (Map<String, Object>) client1.oobis().get(nameMultisig, "agent").get();
+        oobiGetMultisig = client1.oobis().get(nameMultisig, "agent").get();
 
         waitOperationAsync(
             new WaitOperationArgs(client1, endRoleOperation1.op()),
@@ -182,7 +182,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         aid3 = createAID(client3, nameMember3, new ArrayList<>());
 
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
             new GetOobisArgs(client1, nameMember1, "agent"),
             new GetOobisArgs(client2, nameMember2, "agent"),
             new GetOobisArgs(client3, nameMember3, "agent")
@@ -442,9 +442,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         return client.identifiers().get(name).get();
     }
 
-    public static String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = Utils.toMap(oobi);
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
+    public static String getOobisIndexAt0(OOBI oobi) {
+        List<String> oobisResponse = oobi.getOobis();
+        return oobisResponse.get(0);
     }
 }
