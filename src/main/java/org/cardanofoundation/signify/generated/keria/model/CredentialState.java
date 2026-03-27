@@ -24,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.CredentialStateBisOrBrv;
 import org.cardanofoundation.signify.generated.keria.model.CredentialStateIssOrRev;
 import org.cardanofoundation.signify.generated.keria.model.RaFields;
@@ -107,8 +110,8 @@ public class CredentialState {
   private Object ra;
 
   public static final String JSON_PROPERTY_VN = "vn";
-  @jakarta.annotation.Nullable
-  private Object vn = null;
+  @jakarta.annotation.Nonnull
+  private List<Integer> vn;
 
   public static final String JSON_PROPERTY_I = "i";
   @jakarta.annotation.Nonnull
@@ -187,9 +190,17 @@ public class CredentialState {
     this.ra = ra;
   }
 
-  public CredentialState vn(@jakarta.annotation.Nullable Object vn) {
+  public CredentialState vn(@jakarta.annotation.Nonnull List<Integer> vn) {
     
     this.vn = vn;
+    return this;
+  }
+
+  public CredentialState addVnItem(Integer vnItem) {
+    if (this.vn == null) {
+      this.vn = new ArrayList<>();
+    }
+    this.vn.add(vnItem);
     return this;
   }
 
@@ -197,18 +208,18 @@ public class CredentialState {
    * Get vn
    * @return vn
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_VN, required = false)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_VN, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Object getVn() {
+  public List<Integer> getVn() {
     return vn;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_VN, required = false)
+  @JsonProperty(value = JSON_PROPERTY_VN, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setVn(@jakarta.annotation.Nullable Object vn) {
+  public void setVn(@jakarta.annotation.Nonnull List<Integer> vn) {
     this.vn = vn;
   }
 

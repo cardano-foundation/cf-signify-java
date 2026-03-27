@@ -21,6 +21,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.cardanofoundation.signify.generated.keria.model.RaFields;
 import org.cardanofoundation.signify.generated.keria.model.Seal;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -43,8 +46,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
 public class CredentialStateBisOrBrv {
   public static final String JSON_PROPERTY_VN = "vn";
-  @jakarta.annotation.Nullable
-  private Object vn = null;
+  @jakarta.annotation.Nonnull
+  private List<Integer> vn;
 
   public static final String JSON_PROPERTY_I = "i";
   @jakarta.annotation.Nonnull
@@ -116,9 +119,17 @@ public class CredentialStateBisOrBrv {
   public CredentialStateBisOrBrv() {
   }
 
-  public CredentialStateBisOrBrv vn(@jakarta.annotation.Nullable Object vn) {
+  public CredentialStateBisOrBrv vn(@jakarta.annotation.Nonnull List<Integer> vn) {
     
     this.vn = vn;
+    return this;
+  }
+
+  public CredentialStateBisOrBrv addVnItem(Integer vnItem) {
+    if (this.vn == null) {
+      this.vn = new ArrayList<>();
+    }
+    this.vn.add(vnItem);
     return this;
   }
 
@@ -126,18 +137,18 @@ public class CredentialStateBisOrBrv {
    * Get vn
    * @return vn
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_VN, required = false)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_VN, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Object getVn() {
+  public List<Integer> getVn() {
     return vn;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_VN, required = false)
+  @JsonProperty(value = JSON_PROPERTY_VN, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setVn(@jakarta.annotation.Nullable Object vn) {
+  public void setVn(@jakarta.annotation.Nonnull List<Integer> vn) {
     this.vn = vn;
   }
 
