@@ -46,7 +46,7 @@ public class OperationStatus {
 
   public static final String JSON_PROPERTY_DETAILS = "details";
   @jakarta.annotation.Nullable
-  private Map<String, Object> details = new HashMap<>();
+  private Map<String, Object> details;
 
   public OperationStatus() {
   }

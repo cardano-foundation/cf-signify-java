@@ -25,6 +25,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.ACDCAttributes;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -35,13 +37,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   ACDCV1OneOf.JSON_PROPERTY_V,
   ACDCV1OneOf.JSON_PROPERTY_D,
-  ACDCV1OneOf.JSON_PROPERTY_I,
-  ACDCV1OneOf.JSON_PROPERTY_S,
   ACDCV1OneOf.JSON_PROPERTY_U,
+  ACDCV1OneOf.JSON_PROPERTY_I,
   ACDCV1OneOf.JSON_PROPERTY_RI,
+  ACDCV1OneOf.JSON_PROPERTY_S,
+  ACDCV1OneOf.JSON_PROPERTY_A,
   ACDCV1OneOf.JSON_PROPERTY_E,
-  ACDCV1OneOf.JSON_PROPERTY_R,
-  ACDCV1OneOf.JSON_PROPERTY_A
+  ACDCV1OneOf.JSON_PROPERTY_R
 })
 @JsonTypeName("ACDC_V_1_oneOf")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
@@ -54,33 +56,33 @@ public class ACDCV1OneOf {
   @jakarta.annotation.Nonnull
   private String d;
 
-  public static final String JSON_PROPERTY_I = "i";
-  @jakarta.annotation.Nonnull
-  private String i;
-
-  public static final String JSON_PROPERTY_S = "s";
-  @jakarta.annotation.Nonnull
-  private String s;
-
   public static final String JSON_PROPERTY_U = "u";
   @jakarta.annotation.Nullable
   private String u;
+
+  public static final String JSON_PROPERTY_I = "i";
+  @jakarta.annotation.Nonnull
+  private String i;
 
   public static final String JSON_PROPERTY_RI = "ri";
   @jakarta.annotation.Nullable
   private String ri;
 
-  public static final String JSON_PROPERTY_E = "e";
-  @jakarta.annotation.Nullable
-  private String e;
-
-  public static final String JSON_PROPERTY_R = "r";
-  @jakarta.annotation.Nullable
-  private String r;
+  public static final String JSON_PROPERTY_S = "s";
+  @jakarta.annotation.Nonnull
+  private String s;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
   private ACDCAttributes a;
+
+  public static final String JSON_PROPERTY_E = "e";
+  @jakarta.annotation.Nullable
+  private Map<String, Object> e;
+
+  public static final String JSON_PROPERTY_R = "r";
+  @jakarta.annotation.Nullable
+  private Map<String, Object> r;
 
   public ACDCV1OneOf() {
   }
@@ -135,56 +137,6 @@ public class ACDCV1OneOf {
     this.d = d;
   }
 
-  public ACDCV1OneOf i(@jakarta.annotation.Nonnull String i) {
-    
-    this.i = i;
-    return this;
-  }
-
-  /**
-   * Get i
-   * @return i
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_I, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getI() {
-    return i;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_I, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setI(@jakarta.annotation.Nonnull String i) {
-    this.i = i;
-  }
-
-  public ACDCV1OneOf s(@jakarta.annotation.Nonnull String s) {
-    
-    this.s = s;
-    return this;
-  }
-
-  /**
-   * Get s
-   * @return s
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_S, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getS() {
-    return s;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_S, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setS(@jakarta.annotation.Nonnull String s) {
-    this.s = s;
-  }
-
   public ACDCV1OneOf u(@jakarta.annotation.Nullable String u) {
     
     this.u = u;
@@ -208,6 +160,31 @@ public class ACDCV1OneOf {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setU(@jakarta.annotation.Nullable String u) {
     this.u = u;
+  }
+
+  public ACDCV1OneOf i(@jakarta.annotation.Nonnull String i) {
+    
+    this.i = i;
+    return this;
+  }
+
+  /**
+   * Get i
+   * @return i
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_I, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getI() {
+    return i;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_I, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setI(@jakarta.annotation.Nonnull String i) {
+    this.i = i;
   }
 
   public ACDCV1OneOf ri(@jakarta.annotation.Nullable String ri) {
@@ -235,54 +212,29 @@ public class ACDCV1OneOf {
     this.ri = ri;
   }
 
-  public ACDCV1OneOf e(@jakarta.annotation.Nullable String e) {
+  public ACDCV1OneOf s(@jakarta.annotation.Nonnull String s) {
     
-    this.e = e;
+    this.s = s;
     return this;
   }
 
   /**
-   * Get e
-   * @return e
+   * Get s
+   * @return s
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_E, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_S, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getE() {
-    return e;
+  public String getS() {
+    return s;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_E, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setE(@jakarta.annotation.Nullable String e) {
-    this.e = e;
-  }
-
-  public ACDCV1OneOf r(@jakarta.annotation.Nullable String r) {
-    
-    this.r = r;
-    return this;
-  }
-
-  /**
-   * Get r
-   * @return r
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_R, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getR() {
-    return r;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_R, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setR(@jakarta.annotation.Nullable String r) {
-    this.r = r;
+  @JsonProperty(value = JSON_PROPERTY_S, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setS(@jakarta.annotation.Nonnull String s) {
+    this.s = s;
   }
 
   public ACDCV1OneOf a(@jakarta.annotation.Nullable ACDCAttributes a) {
@@ -308,6 +260,72 @@ public class ACDCV1OneOf {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setA(@jakarta.annotation.Nullable ACDCAttributes a) {
     this.a = a;
+  }
+
+  public ACDCV1OneOf e(@jakarta.annotation.Nullable Map<String, Object> e) {
+    
+    this.e = e;
+    return this;
+  }
+
+  public ACDCV1OneOf putEItem(String key, Object eItem) {
+    if (this.e == null) {
+      this.e = new HashMap<>();
+    }
+    this.e.put(key, eItem);
+    return this;
+  }
+
+  /**
+   * Get e
+   * @return e
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_E, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Map<String, Object> getE() {
+    return e;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_E, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+  public void setE(@jakarta.annotation.Nullable Map<String, Object> e) {
+    this.e = e;
+  }
+
+  public ACDCV1OneOf r(@jakarta.annotation.Nullable Map<String, Object> r) {
+    
+    this.r = r;
+    return this;
+  }
+
+  public ACDCV1OneOf putRItem(String key, Object rItem) {
+    if (this.r == null) {
+      this.r = new HashMap<>();
+    }
+    this.r.put(key, rItem);
+    return this;
+  }
+
+  /**
+   * Get r
+   * @return r
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_R, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Map<String, Object> getR() {
+    return r;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_R, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+  public void setR(@jakarta.annotation.Nullable Map<String, Object> r) {
+    this.r = r;
   }
 
   /**
@@ -365,19 +383,19 @@ public class ACDCV1OneOf {
     ACDCV1OneOf acDCV1OneOf = (ACDCV1OneOf) o;
     return Objects.equals(this.v, acDCV1OneOf.v) &&
         Objects.equals(this.d, acDCV1OneOf.d) &&
-        Objects.equals(this.i, acDCV1OneOf.i) &&
-        Objects.equals(this.s, acDCV1OneOf.s) &&
         Objects.equals(this.u, acDCV1OneOf.u) &&
+        Objects.equals(this.i, acDCV1OneOf.i) &&
         Objects.equals(this.ri, acDCV1OneOf.ri) &&
+        Objects.equals(this.s, acDCV1OneOf.s) &&
+        Objects.equals(this.a, acDCV1OneOf.a) &&
         Objects.equals(this.e, acDCV1OneOf.e) &&
         Objects.equals(this.r, acDCV1OneOf.r) &&
-        Objects.equals(this.a, acDCV1OneOf.a) &&
         Objects.equals(this.additionalProperties, acDCV1OneOf.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, d, i, s, u, ri, e, r, a, additionalProperties);
+    return Objects.hash(v, d, u, i, ri, s, a, e, r, additionalProperties);
   }
 
   @Override
@@ -386,13 +404,13 @@ public class ACDCV1OneOf {
     sb.append("class ACDCV1OneOf {\n");
     sb.append("    v: ").append(toIndentedString(v)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
-    sb.append("    i: ").append(toIndentedString(i)).append("\n");
-    sb.append("    s: ").append(toIndentedString(s)).append("\n");
     sb.append("    u: ").append(toIndentedString(u)).append("\n");
+    sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    ri: ").append(toIndentedString(ri)).append("\n");
+    sb.append("    s: ").append(toIndentedString(s)).append("\n");
+    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    e: ").append(toIndentedString(e)).append("\n");
     sb.append("    r: ").append(toIndentedString(r)).append("\n");
-    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();

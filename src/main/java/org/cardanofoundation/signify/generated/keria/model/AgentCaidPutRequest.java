@@ -45,7 +45,7 @@ public class AgentCaidPutRequest {
 
   public static final String JSON_PROPERTY_SIGS = "sigs";
   @jakarta.annotation.Nonnull
-  private List<String> sigs = new ArrayList<>();
+  private List<String> sigs;
 
   public static final String JSON_PROPERTY_SXLT = "sxlt";
   @jakarta.annotation.Nonnull

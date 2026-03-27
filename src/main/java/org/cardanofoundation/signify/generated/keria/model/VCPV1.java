@@ -71,7 +71,7 @@ public class VCPV1 {
 
   public static final String JSON_PROPERTY_C = "c";
   @jakarta.annotation.Nonnull
-  private List<String> c = new ArrayList<>();
+  private List<String> c;
 
   public static final String JSON_PROPERTY_BT = "bt";
   @jakarta.annotation.Nonnull
@@ -79,7 +79,7 @@ public class VCPV1 {
 
   public static final String JSON_PROPERTY_B = "b";
   @jakarta.annotation.Nonnull
-  private List<String> b = new ArrayList<>();
+  private List<String> b;
 
   public static final String JSON_PROPERTY_N = "n";
   @jakarta.annotation.Nonnull

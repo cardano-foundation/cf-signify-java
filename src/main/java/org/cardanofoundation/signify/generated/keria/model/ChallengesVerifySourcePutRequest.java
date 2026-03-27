@@ -43,7 +43,7 @@ public class ChallengesVerifySourcePutRequest {
 
   public static final String JSON_PROPERTY_SAID = "said";
   @jakarta.annotation.Nullable
-  private List<String> said = new ArrayList<>();
+  private List<String> said;
 
   public ChallengesVerifySourcePutRequest() {
   }

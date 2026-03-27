@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class AgentConfig {
   public static final String JSON_PROPERTY_IURLS = "iurls";
   @jakarta.annotation.Nullable
-  private List<String> iurls = new ArrayList<>();
+  private List<String> iurls;
 
   public AgentConfig() {
   }

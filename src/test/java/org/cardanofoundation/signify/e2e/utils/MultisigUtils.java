@@ -9,7 +9,6 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -30,9 +29,12 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
+@SuppressWarnings("unchecked")
 public class MultisigUtils {
 
     public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
@@ -602,7 +604,7 @@ public class MultisigUtils {
             List<HabState> otherMembersAIDs,
             HabState multisigAID,
             HabState recipientAID,
-            Object credential,
+            Credential credential,
             String timestamp,
             boolean isInitiator) throws Exception {
 
@@ -610,15 +612,12 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
 
-        Map<String, Object> sad = (Map<String, Object>) ((Map<String, Object>) credential).get("sad");
-        Map<String, Object> anc = (Map<String, Object>) ((Map<String, Object>) credential).get("anc");
-        Map<String, Object> iss = (Map<String, Object>) ((Map<String, Object>) credential).get("iss");
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
                 .senderName(multisigAID.getName())
-                .acdc(new Serder(sad))
-                .anc(new Serder(anc))
-                .iss(new Serder(iss))
+            .acdc(new Serder(Utils.toMap(credential.getSad())))
+            .anc(new Serder(Utils.toMap(credential.getAnc())))
+            .iss(new Serder(Utils.toMap(credential.getIss())))
                 .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
@@ -768,7 +767,6 @@ public class MultisigUtils {
 
         return op1;
     }
-
 
     @Getter
     @Setter

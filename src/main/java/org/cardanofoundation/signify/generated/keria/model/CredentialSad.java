@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.ACDCAttributes;
 import org.cardanofoundation.signify.generated.keria.model.ACDCV1;
 import org.cardanofoundation.signify.generated.keria.model.ACDCV1OneOf1A;
@@ -34,13 +36,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonPropertyOrder({
   CredentialSad.JSON_PROPERTY_V,
   CredentialSad.JSON_PROPERTY_D,
-  CredentialSad.JSON_PROPERTY_I,
-  CredentialSad.JSON_PROPERTY_S,
   CredentialSad.JSON_PROPERTY_U,
+  CredentialSad.JSON_PROPERTY_I,
   CredentialSad.JSON_PROPERTY_RI,
+  CredentialSad.JSON_PROPERTY_S,
+  CredentialSad.JSON_PROPERTY_A,
   CredentialSad.JSON_PROPERTY_E,
   CredentialSad.JSON_PROPERTY_R,
-  CredentialSad.JSON_PROPERTY_A,
   CredentialSad.JSON_PROPERTY_A_UPPER,
   CredentialSad.JSON_PROPERTY_RD
 })
@@ -55,33 +57,33 @@ public class CredentialSad {
   @jakarta.annotation.Nonnull
   private String d;
 
-  public static final String JSON_PROPERTY_I = "i";
-  @jakarta.annotation.Nonnull
-  private String i;
-
-  public static final String JSON_PROPERTY_S = "s";
-  @jakarta.annotation.Nonnull
-  private String s;
-
   public static final String JSON_PROPERTY_U = "u";
   @jakarta.annotation.Nullable
   private String u;
+
+  public static final String JSON_PROPERTY_I = "i";
+  @jakarta.annotation.Nonnull
+  private String i;
 
   public static final String JSON_PROPERTY_RI = "ri";
   @jakarta.annotation.Nullable
   private String ri;
 
-  public static final String JSON_PROPERTY_E = "e";
-  @jakarta.annotation.Nullable
-  private String e;
-
-  public static final String JSON_PROPERTY_R = "r";
-  @jakarta.annotation.Nullable
-  private String r;
+  public static final String JSON_PROPERTY_S = "s";
+  @jakarta.annotation.Nonnull
+  private String s;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
   private ACDCAttributes a;
+
+  public static final String JSON_PROPERTY_E = "e";
+  @jakarta.annotation.Nullable
+  private Map<String, Object> e;
+
+  public static final String JSON_PROPERTY_R = "r";
+  @jakarta.annotation.Nullable
+  private Map<String, Object> r;
 
   public static final String JSON_PROPERTY_A_UPPER = "A";
   @jakarta.annotation.Nullable
@@ -144,56 +146,6 @@ public class CredentialSad {
     this.d = d;
   }
 
-  public CredentialSad i(@jakarta.annotation.Nonnull String i) {
-    
-    this.i = i;
-    return this;
-  }
-
-  /**
-   * Get i
-   * @return i
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_I, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getI() {
-    return i;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_I, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setI(@jakarta.annotation.Nonnull String i) {
-    this.i = i;
-  }
-
-  public CredentialSad s(@jakarta.annotation.Nonnull String s) {
-    
-    this.s = s;
-    return this;
-  }
-
-  /**
-   * Get s
-   * @return s
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_S, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getS() {
-    return s;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_S, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setS(@jakarta.annotation.Nonnull String s) {
-    this.s = s;
-  }
-
   public CredentialSad u(@jakarta.annotation.Nullable String u) {
     
     this.u = u;
@@ -217,6 +169,31 @@ public class CredentialSad {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setU(@jakarta.annotation.Nullable String u) {
     this.u = u;
+  }
+
+  public CredentialSad i(@jakarta.annotation.Nonnull String i) {
+    
+    this.i = i;
+    return this;
+  }
+
+  /**
+   * Get i
+   * @return i
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_I, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getI() {
+    return i;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_I, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setI(@jakarta.annotation.Nonnull String i) {
+    this.i = i;
   }
 
   public CredentialSad ri(@jakarta.annotation.Nullable String ri) {
@@ -244,54 +221,29 @@ public class CredentialSad {
     this.ri = ri;
   }
 
-  public CredentialSad e(@jakarta.annotation.Nullable String e) {
+  public CredentialSad s(@jakarta.annotation.Nonnull String s) {
     
-    this.e = e;
+    this.s = s;
     return this;
   }
 
   /**
-   * Get e
-   * @return e
+   * Get s
+   * @return s
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_E, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_S, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getE() {
-    return e;
+  public String getS() {
+    return s;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_E, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setE(@jakarta.annotation.Nullable String e) {
-    this.e = e;
-  }
-
-  public CredentialSad r(@jakarta.annotation.Nullable String r) {
-    
-    this.r = r;
-    return this;
-  }
-
-  /**
-   * Get r
-   * @return r
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_R, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getR() {
-    return r;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_R, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setR(@jakarta.annotation.Nullable String r) {
-    this.r = r;
+  @JsonProperty(value = JSON_PROPERTY_S, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setS(@jakarta.annotation.Nonnull String s) {
+    this.s = s;
   }
 
   public CredentialSad a(@jakarta.annotation.Nullable ACDCAttributes a) {
@@ -317,6 +269,72 @@ public class CredentialSad {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setA(@jakarta.annotation.Nullable ACDCAttributes a) {
     this.a = a;
+  }
+
+  public CredentialSad e(@jakarta.annotation.Nullable Map<String, Object> e) {
+    
+    this.e = e;
+    return this;
+  }
+
+  public CredentialSad putEItem(String key, Object eItem) {
+    if (this.e == null) {
+      this.e = new HashMap<>();
+    }
+    this.e.put(key, eItem);
+    return this;
+  }
+
+  /**
+   * Get e
+   * @return e
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_E, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Map<String, Object> getE() {
+    return e;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_E, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+  public void setE(@jakarta.annotation.Nullable Map<String, Object> e) {
+    this.e = e;
+  }
+
+  public CredentialSad r(@jakarta.annotation.Nullable Map<String, Object> r) {
+    
+    this.r = r;
+    return this;
+  }
+
+  public CredentialSad putRItem(String key, Object rItem) {
+    if (this.r == null) {
+      this.r = new HashMap<>();
+    }
+    this.r.put(key, rItem);
+    return this;
+  }
+
+  /**
+   * Get r
+   * @return r
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_R, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Map<String, Object> getR() {
+    return r;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_R, required = false)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.USE_DEFAULTS)
+  public void setR(@jakarta.annotation.Nullable Map<String, Object> r) {
+    this.r = r;
   }
 
   public CredentialSad AUpper(@jakarta.annotation.Nullable ACDCV1OneOf1A AUpper) {
@@ -381,20 +399,20 @@ public class CredentialSad {
     CredentialSad credentialSad = (CredentialSad) o;
     return Objects.equals(this.v, credentialSad.v) &&
         Objects.equals(this.d, credentialSad.d) &&
-        Objects.equals(this.i, credentialSad.i) &&
-        Objects.equals(this.s, credentialSad.s) &&
         Objects.equals(this.u, credentialSad.u) &&
+        Objects.equals(this.i, credentialSad.i) &&
         Objects.equals(this.ri, credentialSad.ri) &&
+        Objects.equals(this.s, credentialSad.s) &&
+        Objects.equals(this.a, credentialSad.a) &&
         Objects.equals(this.e, credentialSad.e) &&
         Objects.equals(this.r, credentialSad.r) &&
-        Objects.equals(this.a, credentialSad.a) &&
         Objects.equals(this.AUpper, credentialSad.AUpper) &&
         Objects.equals(this.rd, credentialSad.rd);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, d, i, s, u, ri, e, r, a, AUpper, rd);
+    return Objects.hash(v, d, u, i, ri, s, a, e, r, AUpper, rd);
   }
 
   @Override
@@ -403,13 +421,13 @@ public class CredentialSad {
     sb.append("class CredentialSad {\n");
     sb.append("    v: ").append(toIndentedString(v)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
-    sb.append("    i: ").append(toIndentedString(i)).append("\n");
-    sb.append("    s: ").append(toIndentedString(s)).append("\n");
     sb.append("    u: ").append(toIndentedString(u)).append("\n");
+    sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    ri: ").append(toIndentedString(ri)).append("\n");
+    sb.append("    s: ").append(toIndentedString(s)).append("\n");
+    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    e: ").append(toIndentedString(e)).append("\n");
     sb.append("    r: ").append(toIndentedString(r)).append("\n");
-    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    AUpper: ").append(toIndentedString(AUpper)).append("\n");
     sb.append("    rd: ").append(toIndentedString(rd)).append("\n");
     sb.append("}");

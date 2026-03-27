@@ -77,7 +77,7 @@ public class Credential {
 
   public static final String JSON_PROPERTY_CHAINS = "chains";
   @jakarta.annotation.Nonnull
-  private List<Map<String, Object>> chains = new ArrayList<>();
+  private List<Map<String, Object>> chains;
 
   public static final String JSON_PROPERTY_STATUS = "status";
   @jakarta.annotation.Nonnull
@@ -93,7 +93,7 @@ public class Credential {
 
   public static final String JSON_PROPERTY_ANCATC = "ancatc";
   @jakarta.annotation.Nonnull
-  private String ancatc;
+  private List<String> ancatc;
 
   public Credential() {
   }
@@ -356,9 +356,17 @@ public class Credential {
     this.anc = anc;
   }
 
-  public Credential ancatc(@jakarta.annotation.Nonnull String ancatc) {
+  public Credential ancatc(@jakarta.annotation.Nonnull List<String> ancatc) {
     
     this.ancatc = ancatc;
+    return this;
+  }
+
+  public Credential addAncatcItem(String ancatcItem) {
+    if (this.ancatc == null) {
+      this.ancatc = new ArrayList<>();
+    }
+    this.ancatc.add(ancatcItem);
     return this;
   }
 
@@ -370,14 +378,14 @@ public class Credential {
   @JsonProperty(value = JSON_PROPERTY_ANCATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getAncatc() {
+  public List<String> getAncatc() {
     return ancatc;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_ANCATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAncatc(@jakarta.annotation.Nonnull String ancatc) {
+  public void setAncatc(@jakarta.annotation.Nonnull List<String> ancatc) {
     this.ancatc = ancatc;
   }
 

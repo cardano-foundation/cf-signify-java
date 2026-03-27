@@ -70,11 +70,11 @@ public class SaltyState {
 
   public static final String JSON_PROPERTY_ICODES = "icodes";
   @jakarta.annotation.Nonnull
-  private List<String> icodes = new ArrayList<>();
+  private List<String> icodes;
 
   public static final String JSON_PROPERTY_NCODES = "ncodes";
   @jakarta.annotation.Nonnull
-  private List<String> ncodes = new ArrayList<>();
+  private List<String> ncodes;
 
   public static final String JSON_PROPERTY_TRANSFERABLE = "transferable";
   @jakarta.annotation.Nullable

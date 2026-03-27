@@ -75,7 +75,7 @@ public class HabState {
 
   public static final String JSON_PROPERTY_WINDEXES = "windexes";
   @jakarta.annotation.Nullable
-  private List<String> windexes = new ArrayList<>();
+  private List<String> windexes;
 
   public static final String JSON_PROPERTY_SALTY = "salty";
   @jakarta.annotation.Nonnull
