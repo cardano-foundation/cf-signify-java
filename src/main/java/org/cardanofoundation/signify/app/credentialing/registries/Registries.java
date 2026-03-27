@@ -151,12 +151,12 @@ public class Registries {
      * @param name         the name or alias of the identifier
      * @param registryName the current name of the registry
      * @param newName      the new name for the registry
-     * @return an Object representing the updated registry record
+     * @return the updated Registry record
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
+    public Registry rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries/" + registryName;
         String method = "PUT";
 
@@ -164,6 +164,6 @@ public class Registries {
         data.put("name", newName);
 
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), Registry.class);
     }
 }
