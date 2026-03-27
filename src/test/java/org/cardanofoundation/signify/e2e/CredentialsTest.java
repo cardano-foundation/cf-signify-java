@@ -474,7 +474,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Credential holderCredential = holderClient.credentials().get(qviCredentialId).get();
 
                 String atc = holderCredential.getAtc();
-                String ancatc = holderCredential.getAncatc();
+                List<String> ancatc = holderCredential.getAncatc();
                 String issAtc = holderCredential.getIssatc();
 
                 IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
@@ -484,7 +484,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 grantArgs.setAnc(new Serder(Utils.toMap(holderCredential.getAnc())));
                 grantArgs.setIss(new Serder(Utils.toMap(holderCredential.getIss())));
                 grantArgs.setAcdcAttachment(atc);
-                grantArgs.setAncAttachment(ancatc);
+                grantArgs.setAncAttachment(ancatc.getFirst());
                 grantArgs.setIssAttachment(issAtc);
                 grantArgs.setAgreeSaid(agreeSaid);
                 grantArgs.setDatetime(createTimestamp());
