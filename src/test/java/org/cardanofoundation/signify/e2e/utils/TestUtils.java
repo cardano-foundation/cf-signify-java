@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.signify.app.Contacting;
+import org.cardanofoundation.signify.generated.keria.model.Contact;
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
@@ -290,9 +290,9 @@ public class TestUtils {
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws IOException, InterruptedException, LibsodiumException {
-        List<Contacting.Contact> list = Arrays.asList(client.contacts().list(null, "alias", "^" + name + "$"));
+        List<Contact> list = client.contacts().list(null, "alias", "^" + name + "$");
         if (!list.isEmpty()) {
-            Contacting.Contact contact = list.getFirst();
+            Contact contact = list.getFirst();
             if (contact.getOobi().equals(oobi)) {
                 return contact.getId();
             }

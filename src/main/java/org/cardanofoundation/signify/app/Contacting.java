@@ -1,31 +1,29 @@
 package org.cardanofoundation.signify.app;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Challenge;
+import org.cardanofoundation.signify.generated.keria.model.Contact;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
-import java.util.HashMap;
-import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.net.http.HttpResponse;
 import java.util.Optional;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.util.concurrent.ExecutionException;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Contacting {
-
-    @Getter
-    public static class Challenge {
-        public List<String> words;
-    }
 
     @Getter
     public static class Challenges {
@@ -62,10 +60,10 @@ public class Contacting {
          * @param name Name or alias of the identifier
          * @param recipient Prefix of the recipient of the response
          * @param words List of words to embed in the signed response
-         * @return The result of the response
+         * @return The sent exn message
          * @throws Exception if the fetch operation fails
          */
-        public Object respond(String name, String recipient, List<String> words) throws IOException, InterruptedException, DigestException, ExecutionException, LibsodiumException {
+        public Exn respond(String name, String recipient, List<String> words) throws IOException, InterruptedException, DigestException, ExecutionException, LibsodiumException {
             HabState hab = this.client.identifiers().get(name)
                     .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
             Exchanging.Exchanges exchanges = this.client.exchanges();
@@ -93,14 +91,14 @@ public class Contacting {
          * @return The long-running operation
          * @throws Exception if the fetch operation fails
          */
-        public Object verify(String source, List<String> words) throws LibsodiumException, IOException, InterruptedException {
+        public Operation<?> verify(String source, List<String> words) throws LibsodiumException, IOException, InterruptedException {
             String path = "/challenges_verify/" + source;
             String method = "POST";
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("words", words);
 
             HttpResponse<String> response = this.client.fetch(path, method, data);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(response.body(), new TypeReference<Operation<?>>() {});
         }
 
         /**
@@ -121,28 +119,6 @@ public class Contacting {
     }
 
     @Getter
-    public static class Contact {
-        private String alias;
-        private String oobi;
-        private String id;
-        private Map<String, Object> additionalProperties = new HashMap<>();
-
-        @JsonAnySetter
-        public void setAdditionalProperty(String key, Object value) {
-            additionalProperties.put(key, value);
-        }
-
-        public <T> T get(String key) {
-            return switch (key) {
-                case "alias" -> (T) alias;
-                case "oobi" -> (T) oobi;
-                case "id" -> (T) id;
-                default -> (T) additionalProperties.get(key);
-            };
-        }
-    }
-
-    @Getter
     public static class Contacts {
         private final SignifyClient client;
 
@@ -159,9 +135,9 @@ public class Contacting {
          * @param group Optional group name to filter contacts
          * @param filterField Optional field name to filter contacts
          * @param filterValue Optional field value to filter contacts
-         * @return An array list of contacts
+         * @return A list of contacts
          */
-        public Contact[] list(
+        public List<Contact> list(
             String group,
             String filterField,
             String filterValue
@@ -180,10 +156,10 @@ public class Contacting {
             }
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path.toString(), method, null);
-            return Utils.fromJson(response.body(), Contact[].class);
+            return Utils.fromJson(response.body(), new TypeReference<List<Contact>>() {});
         }
 
-        public Contact[] list() throws IOException, InterruptedException, LibsodiumException {
+        public List<Contact> list() throws IOException, InterruptedException, LibsodiumException {
             return list(null, null, null);
         }
 
@@ -192,29 +168,29 @@ public class Contacting {
          * @param pre Prefix of the contact
          * @return Optional containing the contact if found, or empty if not found
          */
-        public Optional<Object> get(String pre) throws InterruptedException, IOException, LibsodiumException {
+        public Optional<Contact> get(String pre) throws InterruptedException, IOException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path, method, null);
-            
+
             if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 return Optional.empty();
             }
-            
-            return Optional.of(Utils.fromJson(response.body(), Object.class));
+
+            return Optional.of(Utils.fromJson(response.body(), Contact.class));
         }
 
         /**
          * Add a contact
          * @param pre Prefix of the contact
          * @param info Information about the contact
-         * @return Result of the addition
+         * @return The created contact
          */
-        public Object add(String pre, Map<String, Object> info) throws IOException, InterruptedException, LibsodiumException {
+        public Contact add(String pre, Map<String, Object> info) throws IOException, InterruptedException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "POST";
             HttpResponse<String> response = this.client.fetch(path, method, info);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(response.body(), Contact.class);
         }
 
         /**
@@ -231,13 +207,13 @@ public class Contacting {
          * Update a contact
          * @param pre Prefix of the contact
          * @param info Updated information about the contact
-         * @return Result of the update
+         * @return The updated contact
          */
-        public Object update(String pre, Object info) throws IOException, InterruptedException, LibsodiumException {
+        public Contact update(String pre, Map<String, Object> info) throws IOException, InterruptedException, LibsodiumException {
             String path = "/contacts/" + pre;
             String method = "PUT";
             HttpResponse<String> response = this.client.fetch(path, method, info);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(response.body(), Contact.class);
         }
     }
 }
