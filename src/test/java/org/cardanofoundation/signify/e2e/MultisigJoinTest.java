@@ -12,6 +12,8 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
@@ -115,13 +117,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
-        Object response = client2.groups().getRequest(msgSaid).get();
-        Map<String, Object> exn = castObjectToLinkedHashMap(
-            castObjectToListMap(response).getFirst().get("exn")
-        );
-        Map<String, Object> icp = castObjectToLinkedHashMap(
-            castObjectToLinkedHashMap(exn.get("e")).get("icp")
-        );
+        List<ExnMultisig> response = client2.groups().getRequest(msgSaid).get();
+        Exn exn = response.getFirst().getExn();
+        Map<String, Object> icp = Utils.toMap(exn.getE().get("icp"));
 
         CreateIdentifierArgs iargs2 = new CreateIdentifierArgs();
         iargs2.setAlgo(Manager.Algos.group);
@@ -387,12 +385,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
-        Object response = client3.groups().getRequest(rotationNotification3).get();
-
-        Map<String, Object> exn3 = castObjectToLinkedHashMap(
-            castObjectToListMap(response).getFirst().get("exn")
-        );
-        Map<String, Object> op1Response = Utils.toMap(exn3.get("e"));
+        List<ExnMultisig> response = client3.groups().getRequest(rotationNotification3).get();
+        Exn exn3 = response.getFirst().getExn();
+        Map<String, Object> op1Response = exn3.getE();
         Map<String, Object> exnValue = Utils.toMap(op1Response.get("rot"));
         Serder serder3 = new Serder(exnValue);
 
@@ -404,7 +399,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
                 nameMultisig,
                 serder3,
                 sig3,
-                Utils.toMap(exn3.get("a")).get("gid").toString(),
+                Utils.toMap(exn3.getA()).get("gid").toString(),
                 smids,
                 rmids
             );
