@@ -31,6 +31,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
@@ -41,12 +43,11 @@ public class MultisigUtils {
         final HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
-        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid()).get();
-        Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
-        Map<String, Object> exn = (Map<String, Object>) responseMap.get("exn");
-        Map<String, Object> icp = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("icp");
-        List<String> smids = (List<String>) ((Map<String, Object>) exn.get("a")).get("smids");
-        List<String> rmids = (List<String>) ((Map<String, Object>) exn.get("a")).get("rmids");
+        List<ExnMultisig> res = client2.groups().getRequest(args.getMsgSaid()).get();
+        Exn exn = res.getFirst().getExn();
+        Map<String, Object> icp = Utils.toMap(exn.getE().get("icp"));
+        List<String> smids = (List<String>) Utils.toMap(exn.getA()).get("smids");
+        List<String> rmids = (List<String>) Utils.toMap(exn.getA()).get("rmids");
 
         List<KeyStateRecord> states = TestUtils.getStates(client2, smids)
             .stream()
@@ -549,9 +550,9 @@ public class MultisigUtils {
         if (!isInitiator) {
             String msgSaid = TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
-            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid).get();
-            Map<String, Object> exn = (Map<String, Object>) ((Map<String, Object>) res.get(0)).get("exn");
-            Map<String, Object> ixn = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("ixn");
+            List<ExnMultisig> res = client.groups().getRequest(msgSaid).get();
+            Exn exn = res.getFirst().getExn();
+            Map<String, Object> ixn = Utils.toMap(exn.getE().get("ixn"));
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }
 

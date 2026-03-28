@@ -2,9 +2,10 @@ package org.cardanofoundation.signify.app;
 
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
+
+import org.cardanofoundation.signify.generated.keria.model.Exn;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ public class GroupingTest extends BaseMockServerTest {
 
         Grouping.Groups groups = client.groups();
 
-        groups.sendRequest("aid1", new HashMap<>(), List.of(), "");
+        groups.sendRequest("aid1", new Exn(), List.of(), "");
         RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("POST", request.getMethod());
         assertEquals(url + "/identifiers/aid1/multisig/request", request.getRequestUrl().toString());

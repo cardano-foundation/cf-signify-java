@@ -17,6 +17,9 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -222,15 +225,13 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid).get();
-        List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) resp;
-        Map<String, Object> resMap = listRes.getFirst();
-        Map<String, Object> exn = (Map<String, Object>) resMap.get("exn");
+        List<ExnMultisig> listRes = client2.groups().getRequest(msgSaid).get();
+        Exn exn = listRes.getFirst().getExn();
 
         // stamp, eid and role are provided in the exn message
-        String rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        String rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        String rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+        String rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        String rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        String rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
 
         endRoleRes = client2.
                 identifiers().
@@ -328,15 +329,13 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid).get();
-        listRes = (List<HashMap<String, Object>>) resp;
-        resMap = listRes.getFirst();
-        exn = (Map<String, Object>) resMap.get("exn");
+        listRes = client2.groups().getRequest(msgSaid).get();
+        exn = listRes.getFirst().getExn();
 
         // stamp, eid and role are provided in the exn message
-        rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+        rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
 
         endRoleRes = client2.
             identifiers().
@@ -426,23 +425,22 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid = waitAndMarkNotification(client1, "/exn/ipex/grant");
         System.out.println("Member1 received /exn/ipex/grant msg with SAID: " + grantMsgSaid);
 
-        Object exnRes = client1.exchanges().get(grantMsgSaid).get();
+        ExchangeResource exnRes = client1.exchanges().get(grantMsgSaid).get();
         recp = Stream.of(aid2.getState())
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        LinkedHashMap<String, Object> exnResList = castObjectToLinkedHashMap(exnRes);
-        LinkedHashMap<String, Object> getExn = castObjectToLinkedHashMap(exnResList.get("exn"));
+        Exn getExn = exnRes.getExn();
 
         op1 = multisigAdmitCredential(client1,
                 "holder",
                 "member1",
-                getExn.get("d").toString(),
-                getExn.get("i").toString(),
+                getExn.getD(),
+                getExn.getI(),
                 recp
         );
 
-        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.get("e"));
+        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.getE());
         LinkedHashMap<String, Object> exnGetAcdc = castObjectToLinkedHashMap(exnGetE.get("acdc"));
 
         System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
@@ -450,7 +448,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid2 = waitAndMarkNotification(client2, "/exn/ipex/grant");
         System.out.println("Member2 received /exn/ipex/grant msg with SAID: " + grantMsgSaid2);
 
-        Object exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
+        ExchangeResource exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
         assertEquals(grantMsgSaid2, grantMsgSaid);
         System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
 
@@ -461,8 +459,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         op2 = multisigAdmitCredential(client2,
                 "holder",
                 "member2",
-                getExn.get("d").toString(),
-                getExn.get("i").toString(),
+                getExn.getD(),
+                getExn.getI(),
                 recp2
         );
         System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));

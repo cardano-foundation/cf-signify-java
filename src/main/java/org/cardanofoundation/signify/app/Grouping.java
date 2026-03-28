@@ -5,6 +5,10 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
@@ -34,16 +38,16 @@ public class Grouping {
          * @throws IOException if an I/O error occurs
          * @throws InterruptedException if the operation is interrupted
          */
-        public Optional<Object> getRequest(String said) throws LibsodiumException, IOException, InterruptedException {
+        public Optional<List<ExnMultisig>> getRequest(String said) throws LibsodiumException, IOException, InterruptedException {
             String path = "/multisig/request/" + said;
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path, method, null);
-            
+
             if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 return Optional.empty();
             }
-            
-            return Optional.of(Utils.fromJson(response.body(), Object.class));
+
+            return Optional.of(Utils.fromJson(response.body(), new TypeReference<List<ExnMultisig>>() {}));
         }
 
         /**
@@ -55,9 +59,9 @@ public class Grouping {
          * @return The list of replay messages
          * @throws Exception if the fetch operation fails
          */
-        public Object sendRequest(
+        public Exn sendRequest(
             String name,
-            Map<String, Object> exn,
+            Exn exn,
             List<String> sigs,
             String atc
         ) throws LibsodiumException, IOException, InterruptedException {
@@ -69,7 +73,7 @@ public class Grouping {
             data.put("atc", atc);
 
             HttpResponse<String> response = this.client.fetch(path, method, data);
-            return Utils.fromJson(response.body(), Object.class);
+            return Utils.fromJson(response.body(), Exn.class);
         }
 
         /**
