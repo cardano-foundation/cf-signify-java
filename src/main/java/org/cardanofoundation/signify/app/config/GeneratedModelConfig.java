@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.ICPV1Kt;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 
@@ -24,9 +25,7 @@ public final class GeneratedModelConfig {
 
         SimpleModule module = new SimpleModule("GeneratedModelModule");
         module.addDeserializer(KeyStateRecordKt.class, new KeyStateRecordKtDeserializer());
-        // TODO: register deserializer for ICPV1Kt.class (same pattern) when any schema that uses
-        //  it (ICPV1/V2, ROTV1/V2, DIPV1/V2, DRTV1/V2, CredentialAnc, ControllerEe) needs kt/nt
-        //  accessed in non-generated code.
+        module.addDeserializer(ICPV1Kt.class, new ICPV1KtDeserializer());
         mapper.registerModule(module);
     }
 }

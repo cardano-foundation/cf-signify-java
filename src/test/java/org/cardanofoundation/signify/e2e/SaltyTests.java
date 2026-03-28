@@ -10,6 +10,8 @@ import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
+import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.SaltyState;
 import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
@@ -177,20 +179,20 @@ class SaltyTests {
 
         // KeyEvents
         Coring.KeyEvents events = client.keyEvents();
-        List<Map<String, Object>> log = (List<Map<String, Object>>) events.get(aidLast.getPrefix());
+        List<KeyEventRecord> log = events.get(aidLast.getPrefix());
         assertEquals(3, log.size());
 
-        Serder serder = new Serder((Map<String, Object>) log.getFirst().get("ked"));
-        assertEquals(icp.getPre(), serder.getPre());
-        assertEquals(icp.getKed().get("d"), serder.getKed().get("d"));
+        KeyEvent ked0 = log.getFirst().getKed();
+        assertEquals(icp.getPre(), ked0.getI());
+        assertEquals(icp.getKed().get("d"), ked0.getD());
 
-        serder = new Serder((Map<String, Object>) log.get(1).get("ked"));
-        assertEquals(rotRotate.getPre(), serder.getPre());
-        assertEquals(rotRotate.getKed().get("d"), serder.getKed().get("d"));
+        KeyEvent ked1 = log.get(1).getKed();
+        assertEquals(rotRotate.getPre(), ked1.getI());
+        assertEquals(rotRotate.getKed().get("d"), ked1.getD());
 
-        serder = new Serder((Map<String, Object>) log.get(2).get("ked"));
-        assertEquals(ixn.getPre(), serder.getPre());
-        assertEquals(ixn.getKed().get("d"), serder.getKed().get("d"));
+        KeyEvent ked2 = log.get(2).getKed();
+        assertEquals(ixn.getPre(), ked2.getI());
+        assertEquals(ixn.getKed().get("d"), ked2.getD());
 
         assertOperations(Collections.singletonList(client));
 

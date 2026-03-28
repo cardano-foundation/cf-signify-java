@@ -268,21 +268,24 @@ public class BaseMockServerTest {
         ]""";
 
     public static final String MOCK_KEY_EVENT = """
-        {
-            "v": "KERI10JSON00012b_",
-            "t": "icp",
-            "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
-            "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
-            "s": "0",
-            "kt": "1",
-            "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
-            "nt": "1",
-            "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
-            "bt": "0",
-            "b": [],
-            "c": [],
-            "a": []
-        }""";
+        [{
+            "ked": {
+                "v": "KERI10JSON00012b_",
+                "t": "icp",
+                "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "s": "0",
+                "kt": "1",
+                "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+                "nt": "1",
+                "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+                "bt": "0",
+                "b": [],
+                "c": [],
+                "a": []
+            },
+            "atc": ""
+        }]""";
 
     public static final String MOCK_EXN = """
         {
