@@ -1,12 +1,15 @@
 package org.cardanofoundation.signify.app.credentialing;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Schema;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Optional;
 
 public class Schemas {
@@ -30,30 +33,30 @@ public class Schemas {
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a Sodium error occurs
      */
-    public Optional<Object> get(String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Schema> get(String said) throws IOException, InterruptedException, LibsodiumException {
         String path = "/schema/" + said;
         var method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        
+
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             return Optional.empty();
         }
-        
-        return Optional.of(Utils.fromJson(response.body(), Object.class));
+
+        return Optional.of(Utils.fromJson(response.body(), Schema.class));
     }
 
     /**
      * List schemas
      *
-     * @return an Object representing the list of schemas
+     * @return list of schemas
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a Sodium error occurs
      */
-    public Object list() throws IOException, InterruptedException, LibsodiumException {
+    public List<Schema> list() throws IOException, InterruptedException, LibsodiumException {
         String path = "/schema";
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), new TypeReference<List<Schema>>() {});
     }
 }

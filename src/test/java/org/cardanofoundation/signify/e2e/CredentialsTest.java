@@ -145,15 +145,11 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer can get schemas", () -> {
             try {
-                Object issuerQviSchema = issuerClient.schemas().get(QVI_SCHEMA_SAID).get();
-                LinkedHashMap<String, Object> issuerQviSchemaList = castObjectToLinkedHashMap(issuerQviSchema);
-                String issuerQviSchemaID = issuerQviSchemaList.get("$id").toString();
-                assertEquals(issuerQviSchemaID, QVI_SCHEMA_SAID);
+                Schema issuerQviSchema = issuerClient.schemas().get(QVI_SCHEMA_SAID).get();
+                assertEquals(QVI_SCHEMA_SAID, issuerQviSchema.get$Id());
 
-                Object issuerLeSchema = issuerClient.schemas().get(LE_SCHEMA_SAID).get();
-                LinkedHashMap<String, Object> issuerLeSchemaList = castObjectToLinkedHashMap(issuerLeSchema);
-                String issuerLeSchemaID = issuerLeSchemaList.get("$id").toString();
-                assertEquals(issuerLeSchemaID, LE_SCHEMA_SAID);
+                Schema issuerLeSchema = issuerClient.schemas().get(LE_SCHEMA_SAID).get();
+                assertEquals(LE_SCHEMA_SAID, issuerLeSchema.get$Id());
             } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
@@ -161,9 +157,8 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Holder can list schemas", () -> {
             try {
-                Object holderSchemas = holderClient.schemas().list();
-                List<Map<String, Object>> holderSchemasList = castObjectToListMap(holderSchemas);
-                assertEquals(2, holderSchemasList.size());
+                List<Schema> holderSchemas = holderClient.schemas().list();
+                assertEquals(2, holderSchemas.size());
             } catch (IOException | InterruptedException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
@@ -209,30 +204,30 @@ public class CredentialsTest extends BaseIntegrationTest {
             CredentialFilter credentialFilter = CredentialFilter.builder().build();
             credentialFilter.setFilter(filterData);
             try {
-                List<Map<String, Object>> list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
+                List<Credential> list = issuerClient.credentials().list(credentialFilter);
                 assertEquals(1, list.size());
 
                 filterData.remove("-i");
                 filterData.put("-s", QVI_SCHEMA_SAID);
-                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
+                list = issuerClient.credentials().list(credentialFilter);
                 assertEquals(1, list.size());
 
                 filterData.remove("-s");
                 filterData.put("-a-i", holderAid.prefix);
-                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
+                list = issuerClient.credentials().list(credentialFilter);
                 assertEquals(1, list.size());
 
                 filterData.remove("-a-i");
                 filterData.put("-i", issuerAid.prefix);
                 filterData.put("-s", QVI_SCHEMA_SAID);
                 filterData.put("-a-i", holderAid.prefix);
-                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
+                list = issuerClient.credentials().list(credentialFilter);
                 assertEquals(1, list.size());
 
                 filterData.put("-i", UUID.randomUUID().toString());
                 filterData.put("-s", QVI_SCHEMA_SAID);
                 filterData.put("-a-i", holderAid.prefix);
-                list = castObjectToListMap(issuerClient.credentials().list(credentialFilter));
+                list = issuerClient.credentials().list(credentialFilter);
                 assertEquals(0, list.size());
 
             } catch (IOException | InterruptedException | LibsodiumException e) {
