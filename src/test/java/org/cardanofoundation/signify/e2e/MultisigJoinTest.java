@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
@@ -153,14 +154,11 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).getFirst());
         assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).get(1));
 
-        Map<String, Object> membersAgent1 = (Map<String, Object>) client1.identifiers().members(nameMultisig);
-        Map<String, Object> membersAgent2 = (Map<String, Object>) client2.identifiers().members(nameMultisig);
+        GroupMember membersAgent1 = client1.identifiers().members(nameMultisig);
+        GroupMember membersAgent2 = client2.identifiers().members(nameMultisig);
 
-        List<Map<String, Object>> signing1 = castObjectToListMap(Utils.toMap(membersAgent1).get("signing"));
-        String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing1.getFirst().get("ends")).get("agent")).keySet()).getFirst();
-
-        List<Map<String, Object>> signing2 = castObjectToListMap(Utils.toMap(membersAgent2).get("signing"));
-        String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing2.getFirst().get("ends")).get("agent")).keySet()).getFirst();
+        String eid1 = membersAgent1.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
+        String eid2 = membersAgent2.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
 
         EventResult endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
         EventResult endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
@@ -418,9 +416,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertEquals(aid2.getState().getN().getFirst(), multiSigAid.getState().getN().get(1));
         assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
 
-        Object members = client3.identifiers().members(nameMultisig);
-        List<Map<String, Object>> signing3 = castObjectToListMap(Utils.toMap(members).get("signing"));
-        String eid = Utils.toList(Utils.toMap(Utils.toMap(signing3.get(2).get("ends")).get("agent")).keySet()).getFirst();
+        GroupMember members = client3.identifiers().members(nameMultisig);
+        String eid = members.getSigning().get(2).getEnds().getAgent().keySet().iterator().next();
 
         EventResult endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
         Object endRoleResult = waitOperation(client3, endRoleOperation.op());

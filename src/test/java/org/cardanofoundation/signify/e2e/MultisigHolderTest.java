@@ -20,6 +20,7 @@ import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -172,11 +173,10 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         // Multisig end role
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
-        Object members = client1.identifiers().members("holder");
+        GroupMember members = client1.identifiers().members("holder");
         HabState ghab1 = client1.identifiers().get("holder").get();
-        List<Map<String, Object>> signing = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
-        String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing.getFirst().get("ends")).get("agent")).keySet()).getFirst();
-        String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing.get(1).get("ends")).get("agent")).keySet()).getFirst();
+        String eid1 = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
+        String eid2 = members.getSigning().get(1).getEnds().getAgent().keySet().iterator().next();
 
         System.out.println("Starting multisig end role authorization for agent " + eid1);
 

@@ -11,6 +11,7 @@ import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.net.http.HttpResponse;
+import org.cardanofoundation.signify.generated.keria.model.AgentConfig;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 public class Coring {
@@ -57,6 +58,7 @@ public class Coring {
          * @return A map representing the key states
          * @throws Exception if the fetch operation fails
          */
+        // TODO: use List<KeyEventRecord> once spec includes ked and other key event fields
         public Object get(String pre) throws Exception {
             String path = "/events?pre=" + pre;
             String method = "GET";
@@ -77,11 +79,11 @@ public class Coring {
             this.client = client;
         }
 
-        public Object get() throws Exception {
+        public AgentConfig get() throws Exception {
             String path = "/config";
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
-            return Utils.fromJson(res.body(), Object.class);
+            return Utils.fromJson(res.body(), AgentConfig.class);
         }
     }
 }

@@ -23,10 +23,12 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
@@ -142,7 +144,7 @@ public class MultisigTest extends BaseIntegrationTest {
         // First member challenge the other members with a random list of words
         // List of words should be passed to the other members out of band
         // The other members should do the same challenge/response flow, not shown here for brevity
-        List<String> words = client1.challenges().generate(128).words;
+        List<String> words = client1.challenges().generate(128).getWords();
         System.out.println("Member1 generated challenge words: " + words);
 
         client2.challenges().respond("member2", aid1.getPrefix(), words);
@@ -847,7 +849,7 @@ public class MultisigTest extends BaseIntegrationTest {
     ) throws Exception {
         HabState leaderHab = client.identifiers().get(memberName).get();
         HabState groupHab = client.identifiers().get(groupName).get();
-        Object members = client.identifiers().members(groupName);
+        GroupMember members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
         Keeping.SignResult sigs = keeper.sign(result.getAnc().getRaw().getBytes());
@@ -863,10 +865,8 @@ public class MultisigTest extends BaseIntegrationTest {
         embeds.put("iss", Arrays.asList(result.getIss(), ""));
         embeds.put("anc", Arrays.asList(result.getAnc(), atc));
 
-        Map<String, Object> membersMap = Utils.toMap(members);
-        List<Map<String, Object>> signing = (List<Map<String, Object>>) membersMap.get("signing");
-        List<String> recipients = signing.stream()
-                .map(m -> m.get("aid").toString())
+        List<String> recipients = members.getSigning().stream()
+                .map(AidRecord::getAid)
                 .filter(aid -> !aid.equals(leaderHab.getPrefix()))
                 .collect(Collectors.toList());
 
@@ -890,7 +890,7 @@ public class MultisigTest extends BaseIntegrationTest {
     ) throws Exception {
         HabState leaderHab = client.identifiers().get(memberName).get();
         HabState groupHab = client.identifiers().get(groupName).get();
-        Object members = client.identifiers().members(groupName);
+        GroupMember members = client.identifiers().members(groupName);
 
         Keeping.Keeper<?> keeper = client.getManager().get(groupHab);
         Keeping.SignResult sigs = keeper.sign(anc.getRaw().getBytes());
@@ -905,10 +905,8 @@ public class MultisigTest extends BaseIntegrationTest {
         embeds.put("iss", Arrays.asList(rev, ""));
         embeds.put("anc", Arrays.asList(anc, atc));
 
-        Map<String, Object> membersMap = Utils.toMap(members);
-        List<Map<String, Object>> signing = (List<Map<String, Object>>) membersMap.get("signing");
-        List<String> recipients = signing.stream()
-                .map(m -> m.get("aid").toString())
+        List<String> recipients = members.getSigning().stream()
+                .map(AidRecord::getAid)
                 .filter(aid -> !aid.equals(leaderHab.getPrefix()))
                 .collect(Collectors.toList());
 
