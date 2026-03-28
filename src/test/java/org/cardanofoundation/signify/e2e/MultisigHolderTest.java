@@ -19,6 +19,7 @@ import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -224,15 +225,13 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid).get();
-        List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) resp;
-        Map<String, Object> resMap = listRes.getFirst();
-        Map<String, Object> exn = (Map<String, Object>) resMap.get("exn");
+        List<ExnMultisig> listRes = client2.groups().getRequest(msgSaid).get();
+        Exn exn = listRes.getFirst().getExn();
 
         // stamp, eid and role are provided in the exn message
-        String rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        String rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        String rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+        String rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        String rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        String rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
 
         endRoleRes = client2.
                 identifiers().
@@ -330,15 +329,13 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid).get();
-        listRes = (List<HashMap<String, Object>>) resp;
-        resMap = listRes.getFirst();
-        exn = (Map<String, Object>) resMap.get("exn");
+        listRes = client2.groups().getRequest(msgSaid).get();
+        exn = listRes.getFirst().getExn();
 
         // stamp, eid and role are provided in the exn message
-        rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+        rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
 
         endRoleRes = client2.
             identifiers().

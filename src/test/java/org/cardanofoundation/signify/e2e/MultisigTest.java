@@ -24,7 +24,9 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
@@ -547,14 +549,12 @@ public class MultisigTest extends BaseIntegrationTest {
         String msgSaid = waitAndMarkNotification(client2, "/multisig/iss");
         System.out.println("Member2 received exchange message to join the credential create event");
 
-        Object res = client2.groups().getRequest(msgSaid).get();
-        Map<String, Object> exn = castObjectToLinkedHashMap(
-                castObjectToListMap(res).getFirst().get("exn")
-        );
-        String credentialSaid = castObjectToLinkedHashMap(
-                castObjectToLinkedHashMap(exn.get("e")).get("acdc")).get("d").toString();
+        List<ExnMultisig> res = client2.groups().getRequest(msgSaid).get();
+        Exn exn = res.getFirst().getExn();
+        assertEquals(msgSaid, exn.getD());
+        String credentialSaid = Utils.toMap(exn.getE().get("acdc")).get("d").toString();
 
-        Object acdcMap = Utils.toMap(Utils.toMap(exn.get("e"))).get("acdc");
+        Object acdcMap = exn.getE().get("acdc");
         String i = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("i").toString();
         String dt = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("dt").toString();
         String LEI = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("LEI").toString();
@@ -576,10 +576,9 @@ public class MultisigTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client3, "/multisig/iss");
         System.out.println("Member3 received exchange message to join the credential create event");
         res = client3.groups().getRequest(msgSaid).get();
-        exn = castObjectToLinkedHashMap(
-                castObjectToListMap(res).getFirst().get("exn")
-        );
-        acdcMap = Utils.toMap(Utils.toMap(exn.get("e"))).get("acdc");
+        exn = res.getFirst().getExn();
+        assertEquals(msgSaid, exn.getD());
+        acdcMap = exn.getE().get("acdc");
         i = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("i").toString();
         dt = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("dt").toString();
         LEI = Utils.toMap(Utils.toMap(acdcMap).get("a")).get("LEI").toString();
@@ -672,9 +671,8 @@ public class MultisigTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/exn");
         System.out.println("Member2 received exchange message to join the grant message");
         res = client2.groups().getRequest(msgSaid).get();
-        exn = castObjectToLinkedHashMap(
-                castObjectToListMap(res).getFirst().get("exn")
-        );
+        exn = res.getFirst().getExn();
+        assertEquals(msgSaid, exn.getD());
 
         Exchanging.ExchangeMessageResult grantResult2 = client2.ipex().grant(IpexGrantArgs.builder()
                 .senderName("multisig")
@@ -720,9 +718,8 @@ public class MultisigTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client3, "/multisig/exn");
         System.out.println("Member3 received exchange message to join the grant message");
         res = client3.groups().getRequest(msgSaid).get();
-        exn = castObjectToLinkedHashMap(
-                castObjectToListMap(res).getFirst().get("exn")
-        );
+        exn = res.getFirst().getExn();
+        assertEquals(msgSaid, exn.getD());
 
         Exchanging.ExchangeMessageResult grantResult3 = client3.ipex().grant(IpexGrantArgs.builder()
                 .senderName("multisig")
@@ -810,6 +807,7 @@ public class MultisigTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rev");
         System.out.println("Member2 received exchange message to join the credential revocation event");
         res = client2.groups().getRequest(msgSaid).get();
+        assertEquals(msgSaid, res.getFirst().getExn().getD());
 
         RevokeCredentialResult revokeRes2 = client2.credentials().revoke("multisig", credentialSaid, REVTIME);
         op2 = revokeRes2.getOp();
@@ -820,6 +818,7 @@ public class MultisigTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client3, "/multisig/rev");
         System.out.println("Member3 received exchange message to join the credential revocation event");
         res = client3.groups().getRequest(msgSaid).get();
+        assertEquals(msgSaid, res.getFirst().getExn().getD());
 
         RevokeCredentialResult revokeRes3 = client3.credentials().revoke("multisig", credentialSaid, REVTIME);
         op3 = revokeRes3.getOp();
