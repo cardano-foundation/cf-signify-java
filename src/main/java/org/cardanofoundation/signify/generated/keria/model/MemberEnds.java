@@ -44,50 +44,50 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class MemberEnds {
   public static final String JSON_PROPERTY_AGENT = "agent";
   @jakarta.annotation.Nullable
-  private Map<String, String> agent;
+  private Map<String, Map<String, String>> agent;
 
   public static final String JSON_PROPERTY_CONTROLLER = "controller";
   @jakarta.annotation.Nullable
-  private Map<String, String> controller;
+  private Map<String, Map<String, String>> controller;
 
   public static final String JSON_PROPERTY_WITNESS = "witness";
   @jakarta.annotation.Nullable
-  private Map<String, String> witness;
+  private Map<String, Map<String, String>> witness;
 
   public static final String JSON_PROPERTY_REGISTRAR = "registrar";
   @jakarta.annotation.Nullable
-  private Map<String, String> registrar;
+  private Map<String, Map<String, String>> registrar;
 
   public static final String JSON_PROPERTY_WATCHER = "watcher";
   @jakarta.annotation.Nullable
-  private Map<String, String> watcher;
+  private Map<String, Map<String, String>> watcher;
 
   public static final String JSON_PROPERTY_JUDGE = "judge";
   @jakarta.annotation.Nullable
-  private Map<String, String> judge;
+  private Map<String, Map<String, String>> judge;
 
   public static final String JSON_PROPERTY_JUROR = "juror";
   @jakarta.annotation.Nullable
-  private Map<String, String> juror;
+  private Map<String, Map<String, String>> juror;
 
   public static final String JSON_PROPERTY_PEER = "peer";
   @jakarta.annotation.Nullable
-  private Map<String, String> peer;
+  private Map<String, Map<String, String>> peer;
 
   public static final String JSON_PROPERTY_MAILBOX = "mailbox";
   @jakarta.annotation.Nullable
-  private Map<String, String> mailbox;
+  private Map<String, Map<String, String>> mailbox;
 
   public MemberEnds() {
   }
 
-  public MemberEnds agent(@jakarta.annotation.Nullable Map<String, String> agent) {
+  public MemberEnds agent(@jakarta.annotation.Nullable Map<String, Map<String, String>> agent) {
     
     this.agent = agent;
     return this;
   }
 
-  public MemberEnds putAgentItem(String key, String agentItem) {
+  public MemberEnds putAgentItem(String key, Map<String, String> agentItem) {
     if (this.agent == null) {
       this.agent = new HashMap<>();
     }
@@ -103,24 +103,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_AGENT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getAgent() {
+  public Map<String, Map<String, String>> getAgent() {
     return agent;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_AGENT, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAgent(@jakarta.annotation.Nullable Map<String, String> agent) {
+  public void setAgent(@jakarta.annotation.Nullable Map<String, Map<String, String>> agent) {
     this.agent = agent;
   }
 
-  public MemberEnds controller(@jakarta.annotation.Nullable Map<String, String> controller) {
+  public MemberEnds controller(@jakarta.annotation.Nullable Map<String, Map<String, String>> controller) {
     
     this.controller = controller;
     return this;
   }
 
-  public MemberEnds putControllerItem(String key, String controllerItem) {
+  public MemberEnds putControllerItem(String key, Map<String, String> controllerItem) {
     if (this.controller == null) {
       this.controller = new HashMap<>();
     }
@@ -136,24 +136,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_CONTROLLER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getController() {
+  public Map<String, Map<String, String>> getController() {
     return controller;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_CONTROLLER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setController(@jakarta.annotation.Nullable Map<String, String> controller) {
+  public void setController(@jakarta.annotation.Nullable Map<String, Map<String, String>> controller) {
     this.controller = controller;
   }
 
-  public MemberEnds witness(@jakarta.annotation.Nullable Map<String, String> witness) {
+  public MemberEnds witness(@jakarta.annotation.Nullable Map<String, Map<String, String>> witness) {
     
     this.witness = witness;
     return this;
   }
 
-  public MemberEnds putWitnessItem(String key, String witnessItem) {
+  public MemberEnds putWitnessItem(String key, Map<String, String> witnessItem) {
     if (this.witness == null) {
       this.witness = new HashMap<>();
     }
@@ -169,24 +169,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_WITNESS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getWitness() {
+  public Map<String, Map<String, String>> getWitness() {
     return witness;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_WITNESS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWitness(@jakarta.annotation.Nullable Map<String, String> witness) {
+  public void setWitness(@jakarta.annotation.Nullable Map<String, Map<String, String>> witness) {
     this.witness = witness;
   }
 
-  public MemberEnds registrar(@jakarta.annotation.Nullable Map<String, String> registrar) {
+  public MemberEnds registrar(@jakarta.annotation.Nullable Map<String, Map<String, String>> registrar) {
     
     this.registrar = registrar;
     return this;
   }
 
-  public MemberEnds putRegistrarItem(String key, String registrarItem) {
+  public MemberEnds putRegistrarItem(String key, Map<String, String> registrarItem) {
     if (this.registrar == null) {
       this.registrar = new HashMap<>();
     }
@@ -202,24 +202,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_REGISTRAR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getRegistrar() {
+  public Map<String, Map<String, String>> getRegistrar() {
     return registrar;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_REGISTRAR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setRegistrar(@jakarta.annotation.Nullable Map<String, String> registrar) {
+  public void setRegistrar(@jakarta.annotation.Nullable Map<String, Map<String, String>> registrar) {
     this.registrar = registrar;
   }
 
-  public MemberEnds watcher(@jakarta.annotation.Nullable Map<String, String> watcher) {
+  public MemberEnds watcher(@jakarta.annotation.Nullable Map<String, Map<String, String>> watcher) {
     
     this.watcher = watcher;
     return this;
   }
 
-  public MemberEnds putWatcherItem(String key, String watcherItem) {
+  public MemberEnds putWatcherItem(String key, Map<String, String> watcherItem) {
     if (this.watcher == null) {
       this.watcher = new HashMap<>();
     }
@@ -235,24 +235,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_WATCHER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getWatcher() {
+  public Map<String, Map<String, String>> getWatcher() {
     return watcher;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_WATCHER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setWatcher(@jakarta.annotation.Nullable Map<String, String> watcher) {
+  public void setWatcher(@jakarta.annotation.Nullable Map<String, Map<String, String>> watcher) {
     this.watcher = watcher;
   }
 
-  public MemberEnds judge(@jakarta.annotation.Nullable Map<String, String> judge) {
+  public MemberEnds judge(@jakarta.annotation.Nullable Map<String, Map<String, String>> judge) {
     
     this.judge = judge;
     return this;
   }
 
-  public MemberEnds putJudgeItem(String key, String judgeItem) {
+  public MemberEnds putJudgeItem(String key, Map<String, String> judgeItem) {
     if (this.judge == null) {
       this.judge = new HashMap<>();
     }
@@ -268,24 +268,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_JUDGE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getJudge() {
+  public Map<String, Map<String, String>> getJudge() {
     return judge;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_JUDGE, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setJudge(@jakarta.annotation.Nullable Map<String, String> judge) {
+  public void setJudge(@jakarta.annotation.Nullable Map<String, Map<String, String>> judge) {
     this.judge = judge;
   }
 
-  public MemberEnds juror(@jakarta.annotation.Nullable Map<String, String> juror) {
+  public MemberEnds juror(@jakarta.annotation.Nullable Map<String, Map<String, String>> juror) {
     
     this.juror = juror;
     return this;
   }
 
-  public MemberEnds putJurorItem(String key, String jurorItem) {
+  public MemberEnds putJurorItem(String key, Map<String, String> jurorItem) {
     if (this.juror == null) {
       this.juror = new HashMap<>();
     }
@@ -301,24 +301,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_JUROR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getJuror() {
+  public Map<String, Map<String, String>> getJuror() {
     return juror;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_JUROR, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setJuror(@jakarta.annotation.Nullable Map<String, String> juror) {
+  public void setJuror(@jakarta.annotation.Nullable Map<String, Map<String, String>> juror) {
     this.juror = juror;
   }
 
-  public MemberEnds peer(@jakarta.annotation.Nullable Map<String, String> peer) {
+  public MemberEnds peer(@jakarta.annotation.Nullable Map<String, Map<String, String>> peer) {
     
     this.peer = peer;
     return this;
   }
 
-  public MemberEnds putPeerItem(String key, String peerItem) {
+  public MemberEnds putPeerItem(String key, Map<String, String> peerItem) {
     if (this.peer == null) {
       this.peer = new HashMap<>();
     }
@@ -334,24 +334,24 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_PEER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getPeer() {
+  public Map<String, Map<String, String>> getPeer() {
     return peer;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_PEER, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setPeer(@jakarta.annotation.Nullable Map<String, String> peer) {
+  public void setPeer(@jakarta.annotation.Nullable Map<String, Map<String, String>> peer) {
     this.peer = peer;
   }
 
-  public MemberEnds mailbox(@jakarta.annotation.Nullable Map<String, String> mailbox) {
+  public MemberEnds mailbox(@jakarta.annotation.Nullable Map<String, Map<String, String>> mailbox) {
     
     this.mailbox = mailbox;
     return this;
   }
 
-  public MemberEnds putMailboxItem(String key, String mailboxItem) {
+  public MemberEnds putMailboxItem(String key, Map<String, String> mailboxItem) {
     if (this.mailbox == null) {
       this.mailbox = new HashMap<>();
     }
@@ -367,14 +367,14 @@ public class MemberEnds {
   @JsonProperty(value = JSON_PROPERTY_MAILBOX, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Map<String, String> getMailbox() {
+  public Map<String, Map<String, String>> getMailbox() {
     return mailbox;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_MAILBOX, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMailbox(@jakarta.annotation.Nullable Map<String, String> mailbox) {
+  public void setMailbox(@jakarta.annotation.Nullable Map<String, Map<String, String>> mailbox) {
     this.mailbox = mailbox;
   }
 
