@@ -85,8 +85,8 @@ public class IdentifiersPost202Response {
   }
 
   public static final String JSON_PROPERTY_DONE = "done";
-  @jakarta.annotation.Nullable
-  private DoneEnum done = true;
+  @jakarta.annotation.Nonnull
+  private DoneEnum done;
 
   public static final String JSON_PROPERTY_ERROR = "error";
   @jakarta.annotation.Nonnull
@@ -149,7 +149,7 @@ public class IdentifiersPost202Response {
     this.metadata = metadata;
   }
 
-  public IdentifiersPost202Response done(@jakarta.annotation.Nullable DoneEnum done) {
+  public IdentifiersPost202Response done(@jakarta.annotation.Nonnull DoneEnum done) {
     
     this.done = done;
     return this;
@@ -159,18 +159,18 @@ public class IdentifiersPost202Response {
    * Get done
    * @return done
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_DONE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DONE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
   public DoneEnum getDone() {
     return done;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_DONE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDone(@jakarta.annotation.Nullable DoneEnum done) {
+  @JsonProperty(value = JSON_PROPERTY_DONE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDone(@jakarta.annotation.Nonnull DoneEnum done) {
     this.done = done;
   }
 

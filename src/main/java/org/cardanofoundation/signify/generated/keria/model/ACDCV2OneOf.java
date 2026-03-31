@@ -323,49 +323,6 @@ public class ACDCV2OneOf {
     this.r = r;
   }
 
-  /**
-   * A container for additional, undeclared properties.
-   * This is a holder for any undeclared properties as specified with
-   * the 'additionalProperties' keyword in the OAS document.
-   */
-  private Map<String, Object> additionalProperties;
-
-  /**
-   * Set the additional (undeclared) property with the specified name and value.
-   * If the property does not already exist, create it otherwise replace it.
-   * @param key the name of the property
-   * @param value the value of the property
-   * @return self reference
-   */
-  @JsonAnySetter
-  public ACDCV2OneOf putAdditionalProperty(String key, Object value) {
-    if (this.additionalProperties == null) {
-        this.additionalProperties = new HashMap<String, Object>();
-    }
-    this.additionalProperties.put(key, value);
-    return this;
-  }
-
-  /**
-   * Return the additional (undeclared) properties.
-   * @return the additional (undeclared) properties
-   */
-  @JsonAnyGetter
-  public Map<String, Object> getAdditionalProperties() {
-    return additionalProperties;
-  }
-
-  /**
-   * Return the additional (undeclared) property with the specified name.
-   * @param key the name of the property
-   * @return the additional (undeclared) property with the specified name
-   */
-  public Object getAdditionalProperty(String key) {
-    if (this.additionalProperties == null) {
-        return null;
-    }
-    return this.additionalProperties.get(key);
-  }
 
   @Override
   public boolean equals(Object o) {
@@ -384,13 +341,12 @@ public class ACDCV2OneOf {
         Objects.equals(this.s, acDCV2OneOf.s) &&
         Objects.equals(this.a, acDCV2OneOf.a) &&
         Objects.equals(this.e, acDCV2OneOf.e) &&
-        Objects.equals(this.r, acDCV2OneOf.r) &&
-        Objects.equals(this.additionalProperties, acDCV2OneOf.additionalProperties);
+        Objects.equals(this.r, acDCV2OneOf.r);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, d, u, i, rd, s, a, e, r, additionalProperties);
+    return Objects.hash(v, d, u, i, rd, s, a, e, r);
   }
 
   @Override
@@ -406,7 +362,6 @@ public class ACDCV2OneOf {
     sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    e: ").append(toIndentedString(e)).append("\n");
     sb.append("    r: ").append(toIndentedString(r)).append("\n");
-    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

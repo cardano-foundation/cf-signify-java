@@ -30,7 +30,7 @@ import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostReques
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.KtValue;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -395,8 +395,7 @@ public class IdentifierController {
         String dig = state.getD();
         int ridx = Integer.parseInt(state.getS(), 16) + 1;
         List<String> wits = state.getB();
-        Object isith = ((KtValue) state.getNt()).raw();
-
+        Object isith = org.cardanofoundation.signify.app.config.KeyStateRecordKtDeserializer.getRawValue(state.getNt());
         Object nsith = kargs.getNsith() != null ? kargs.getNsith() : isith;
 
         // if isith is None:  # compute default from newly rotated verfers above

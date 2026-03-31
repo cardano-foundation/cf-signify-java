@@ -82,8 +82,8 @@ public class CompletedRegistryOperation {
   }
 
   public static final String JSON_PROPERTY_DONE = "done";
-  @jakarta.annotation.Nullable
-  private DoneEnum done = true;
+  @jakarta.annotation.Nonnull
+  private DoneEnum done;
 
   public CompletedRegistryOperation() {
   }
@@ -163,7 +163,7 @@ public class CompletedRegistryOperation {
     this.response = response;
   }
 
-  public CompletedRegistryOperation done(@jakarta.annotation.Nullable DoneEnum done) {
+  public CompletedRegistryOperation done(@jakarta.annotation.Nonnull DoneEnum done) {
     
     this.done = done;
     return this;
@@ -173,18 +173,18 @@ public class CompletedRegistryOperation {
    * Get done
    * @return done
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_DONE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DONE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
   public DoneEnum getDone() {
     return done;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_DONE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDone(@jakarta.annotation.Nullable DoneEnum done) {
+  @JsonProperty(value = JSON_PROPERTY_DONE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDone(@jakarta.annotation.Nonnull DoneEnum done) {
     this.done = done;
   }
 

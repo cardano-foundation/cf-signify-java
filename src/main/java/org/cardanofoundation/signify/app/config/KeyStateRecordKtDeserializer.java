@@ -3,36 +3,38 @@ package org.cardanofoundation.signify.app.config;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
-import org.cardanofoundation.signify.generated.keria.model.KtValue;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
-/**
- * Deserializes the polymorphic {@code kt}/{@code nt} fields into a {@link KtValue}.
- * KERIA returns these as either a plain string (unweighted) or an array of strings (weighted).
- */
-class KeyStateRecordKtDeserializer extends JsonDeserializer<KeyStateRecordKt> {
+public class KeyStateRecordKtDeserializer extends JsonDeserializer<KeyStateRecordKt> {
+    // WeakHashMap to avoid memory leaks (keys are GC'd when no longer referenced)
+    private static final Map<KeyStateRecordKt, Object> rawValueMap = new WeakHashMap<>();
+
+    public static Object getRawValue(KeyStateRecordKt instance) {
+        return rawValueMap.get(instance);
+    }
 
     @Override
     public KeyStateRecordKt deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        JsonNode node = p.getCodec().readTree(p);
-
-        if (node.isTextual()) {
-            return KtValue.unweighted(node.asText());
+        Object value;
+        switch (p.currentToken()) {
+            case VALUE_STRING:
+                value = p.getValueAsString();
+                break;
+            case START_ARRAY:
+                value = ctxt.readValue(p, Object.class); // parse array
+                break;
+            case START_OBJECT:
+                value = ctxt.readValue(p, Object.class); // parse object
+                break;
+            default:
+                value = null;
+                break;
         }
-
-        if (node.isArray()) {
-            List<String> weights = new ArrayList<>();
-            for (JsonNode item : node) {
-                weights.add(item.asText());
-            }
-            return KtValue.weighted(weights);
-        }
-
-        return KtValue.unweighted(node.asText());
+        KeyStateRecordKt instance = new KeyStateRecordKt();
+        rawValueMap.put(instance, value);
+        return instance;
     }
 }
