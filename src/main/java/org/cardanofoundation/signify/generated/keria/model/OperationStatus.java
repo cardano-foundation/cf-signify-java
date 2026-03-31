@@ -15,7 +15,6 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -34,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   OperationStatus.JSON_PROPERTY_MESSAGE,
   OperationStatus.JSON_PROPERTY_DETAILS
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class OperationStatus {
   public static final String JSON_PROPERTY_CODE = "code";
   @jakarta.annotation.Nonnull

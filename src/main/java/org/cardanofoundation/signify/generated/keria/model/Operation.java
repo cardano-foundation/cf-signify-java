@@ -15,13 +15,27 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.cardanofoundation.signify.generated.keria.model.ChallengeOperation;
+import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
+import org.cardanofoundation.signify.generated.keria.model.DelegationOperation;
+import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
+import org.cardanofoundation.signify.generated.keria.model.DelegatorOperationMetadata;
+import org.cardanofoundation.signify.generated.keria.model.DoneOperation;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
+import org.cardanofoundation.signify.generated.keria.model.LocSchemeOperation;
+import org.cardanofoundation.signify.generated.keria.model.OOBIOperation;
 import org.cardanofoundation.signify.generated.keria.model.OperationStatus;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
+import org.cardanofoundation.signify.generated.keria.model.SubmitOperation;
+import org.cardanofoundation.signify.generated.keria.model.WitnessOperation;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -30,32 +44,65 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  */
 @JsonPropertyOrder({
   Operation.JSON_PROPERTY_NAME,
-  Operation.JSON_PROPERTY_ERROR,
-  Operation.JSON_PROPERTY_DONE,
   Operation.JSON_PROPERTY_METADATA,
-  Operation.JSON_PROPERTY_RESPONSE
+  Operation.JSON_PROPERTY_DONE,
+  Operation.JSON_PROPERTY_RESPONSE,
+  Operation.JSON_PROPERTY_ERROR
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class Operation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;
 
-  public static final String JSON_PROPERTY_ERROR = "error";
-  @jakarta.annotation.Nullable
-  private OperationStatus error;
-
-  public static final String JSON_PROPERTY_DONE = "done";
-  @jakarta.annotation.Nullable
-  private Boolean done;
-
   public static final String JSON_PROPERTY_METADATA = "metadata";
   @jakarta.annotation.Nullable
-  private Object metadata;
+  private DelegatorOperationMetadata metadata;
+
+  /**
+   * Gets or Sets done
+   */
+  public enum DoneEnum {
+    TRUE(Boolean.valueOf("true"));
+
+    private Boolean value;
+
+    DoneEnum(Boolean value) {
+      this.value = value;
+    }
+
+    @JsonValue
+    public Boolean getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static DoneEnum fromValue(Boolean value) {
+      for (DoneEnum b : DoneEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+  }
+
+  public static final String JSON_PROPERTY_DONE = "done";
+  @jakarta.annotation.Nonnull
+  private DoneEnum done;
 
   public static final String JSON_PROPERTY_RESPONSE = "response";
-  @jakarta.annotation.Nullable
-  private Object response;
+  @jakarta.annotation.Nonnull
+  private String response;
+
+  public static final String JSON_PROPERTY_ERROR = "error";
+  @jakarta.annotation.Nonnull
+  private OperationStatus error;
 
   public Operation() {
   }
@@ -85,57 +132,7 @@ public class Operation {
     this.name = name;
   }
 
-  public Operation error(@jakarta.annotation.Nullable OperationStatus error) {
-    
-    this.error = error;
-    return this;
-  }
-
-  /**
-   * Get error
-   * @return error
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_ERROR, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public OperationStatus getError() {
-    return error;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_ERROR, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setError(@jakarta.annotation.Nullable OperationStatus error) {
-    this.error = error;
-  }
-
-  public Operation done(@jakarta.annotation.Nullable Boolean done) {
-    
-    this.done = done;
-    return this;
-  }
-
-  /**
-   * Get done
-   * @return done
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_DONE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public Boolean getDone() {
-    return done;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_DONE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDone(@jakarta.annotation.Nullable Boolean done) {
-    this.done = done;
-  }
-
-  public Operation metadata(@jakarta.annotation.Nullable Object metadata) {
+  public Operation metadata(@jakarta.annotation.Nullable DelegatorOperationMetadata metadata) {
     
     this.metadata = metadata;
     return this;
@@ -149,18 +146,43 @@ public class Operation {
   @JsonProperty(value = JSON_PROPERTY_METADATA, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Object getMetadata() {
+  public DelegatorOperationMetadata getMetadata() {
     return metadata;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_METADATA, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setMetadata(@jakarta.annotation.Nullable Object metadata) {
+  public void setMetadata(@jakarta.annotation.Nullable DelegatorOperationMetadata metadata) {
     this.metadata = metadata;
   }
 
-  public Operation response(@jakarta.annotation.Nullable Object response) {
+  public Operation done(@jakarta.annotation.Nonnull DoneEnum done) {
+    
+    this.done = done;
+    return this;
+  }
+
+  /**
+   * Get done
+   * @return done
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DONE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public DoneEnum getDone() {
+    return done;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_DONE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDone(@jakarta.annotation.Nonnull DoneEnum done) {
+    this.done = done;
+  }
+
+  public Operation response(@jakarta.annotation.Nonnull String response) {
     
     this.response = response;
     return this;
@@ -170,19 +192,44 @@ public class Operation {
    * Get response
    * @return response
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_RESPONSE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_RESPONSE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Object getResponse() {
+  public String getResponse() {
     return response;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_RESPONSE, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setResponse(@jakarta.annotation.Nullable Object response) {
+  @JsonProperty(value = JSON_PROPERTY_RESPONSE, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setResponse(@jakarta.annotation.Nonnull String response) {
     this.response = response;
+  }
+
+  public Operation error(@jakarta.annotation.Nonnull OperationStatus error) {
+    
+    this.error = error;
+    return this;
+  }
+
+  /**
+   * Get error
+   * @return error
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_ERROR, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public OperationStatus getError() {
+    return error;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_ERROR, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setError(@jakarta.annotation.Nonnull OperationStatus error) {
+    this.error = error;
   }
 
 
@@ -196,15 +243,15 @@ public class Operation {
     }
     Operation operation = (Operation) o;
     return Objects.equals(this.name, operation.name) &&
-        Objects.equals(this.error, operation.error) &&
-        Objects.equals(this.done, operation.done) &&
         Objects.equals(this.metadata, operation.metadata) &&
-        Objects.equals(this.response, operation.response);
+        Objects.equals(this.done, operation.done) &&
+        Objects.equals(this.response, operation.response) &&
+        Objects.equals(this.error, operation.error);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, error, done, metadata, response);
+    return Objects.hash(name, metadata, done, response, error);
   }
 
   @Override
@@ -212,10 +259,10 @@ public class Operation {
     StringBuilder sb = new StringBuilder();
     sb.append("class Operation {\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    error: ").append(toIndentedString(error)).append("\n");
-    sb.append("    done: ").append(toIndentedString(done)).append("\n");
     sb.append("    metadata: ").append(toIndentedString(metadata)).append("\n");
+    sb.append("    done: ").append(toIndentedString(done)).append("\n");
     sb.append("    response: ").append(toIndentedString(response)).append("\n");
+    sb.append("    error: ").append(toIndentedString(error)).append("\n");
     sb.append("}");
     return sb.toString();
   }

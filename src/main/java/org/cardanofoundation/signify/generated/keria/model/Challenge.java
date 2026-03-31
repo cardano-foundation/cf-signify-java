@@ -15,7 +15,6 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -36,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Challenge.JSON_PROPERTY_SAID,
   Challenge.JSON_PROPERTY_AUTHENTICATED
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class Challenge {
   public static final String JSON_PROPERTY_WORDS = "words";
   @jakarta.annotation.Nonnull

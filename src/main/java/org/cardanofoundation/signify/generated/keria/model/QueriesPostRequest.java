@@ -15,7 +15,6 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -33,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   QueriesPostRequest.JSON_PROPERTY_SN
 })
 @JsonTypeName("_queries_post_request")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class QueriesPostRequest {
   public static final String JSON_PROPERTY_PRE = "pre";
   @jakarta.annotation.Nonnull

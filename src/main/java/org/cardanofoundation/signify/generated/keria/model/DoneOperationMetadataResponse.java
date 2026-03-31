@@ -15,7 +15,6 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
-import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,46 +22,49 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.DIPV1;
-import org.cardanofoundation.signify.generated.keria.model.DIPV2;
-import org.cardanofoundation.signify.generated.keria.model.DRTV1;
-import org.cardanofoundation.signify.generated.keria.model.DRTV2;
+import java.util.Map;
+import org.cardanofoundation.signify.generated.keria.model.EXNV1;
+import org.cardanofoundation.signify.generated.keria.model.EXNV2;
 import org.cardanofoundation.signify.generated.keria.model.ICPV1;
 import org.cardanofoundation.signify.generated.keria.model.ICPV1Kt;
 import org.cardanofoundation.signify.generated.keria.model.ICPV2;
-import org.cardanofoundation.signify.generated.keria.model.IXNV1;
-import org.cardanofoundation.signify.generated.keria.model.IXNV2;
 import org.cardanofoundation.signify.generated.keria.model.ROTV1;
 import org.cardanofoundation.signify.generated.keria.model.ROTV2;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * CredentialAnc
+ * DoneOperationMetadataResponse
  */
 @JsonPropertyOrder({
-  CredentialAnc.JSON_PROPERTY_V,
-  CredentialAnc.JSON_PROPERTY_T,
-  CredentialAnc.JSON_PROPERTY_D,
-  CredentialAnc.JSON_PROPERTY_I,
-  CredentialAnc.JSON_PROPERTY_S,
-  CredentialAnc.JSON_PROPERTY_P,
-  CredentialAnc.JSON_PROPERTY_A,
-  CredentialAnc.JSON_PROPERTY_KT,
-  CredentialAnc.JSON_PROPERTY_K,
-  CredentialAnc.JSON_PROPERTY_NT,
-  CredentialAnc.JSON_PROPERTY_N,
-  CredentialAnc.JSON_PROPERTY_BT,
-  CredentialAnc.JSON_PROPERTY_B,
-  CredentialAnc.JSON_PROPERTY_C,
-  CredentialAnc.JSON_PROPERTY_BR,
-  CredentialAnc.JSON_PROPERTY_BA,
-  CredentialAnc.JSON_PROPERTY_DI
+  DoneOperationMetadataResponse.JSON_PROPERTY_V,
+  DoneOperationMetadataResponse.JSON_PROPERTY_T,
+  DoneOperationMetadataResponse.JSON_PROPERTY_D,
+  DoneOperationMetadataResponse.JSON_PROPERTY_I,
+  DoneOperationMetadataResponse.JSON_PROPERTY_S,
+  DoneOperationMetadataResponse.JSON_PROPERTY_KT,
+  DoneOperationMetadataResponse.JSON_PROPERTY_K,
+  DoneOperationMetadataResponse.JSON_PROPERTY_NT,
+  DoneOperationMetadataResponse.JSON_PROPERTY_N,
+  DoneOperationMetadataResponse.JSON_PROPERTY_BT,
+  DoneOperationMetadataResponse.JSON_PROPERTY_B,
+  DoneOperationMetadataResponse.JSON_PROPERTY_C,
+  DoneOperationMetadataResponse.JSON_PROPERTY_A,
+  DoneOperationMetadataResponse.JSON_PROPERTY_P,
+  DoneOperationMetadataResponse.JSON_PROPERTY_BR,
+  DoneOperationMetadataResponse.JSON_PROPERTY_BA,
+  DoneOperationMetadataResponse.JSON_PROPERTY_RP,
+  DoneOperationMetadataResponse.JSON_PROPERTY_DT,
+  DoneOperationMetadataResponse.JSON_PROPERTY_R,
+  DoneOperationMetadataResponse.JSON_PROPERTY_Q,
+  DoneOperationMetadataResponse.JSON_PROPERTY_E,
+  DoneOperationMetadataResponse.JSON_PROPERTY_X
 })
-@JsonTypeName("Credential_anc")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
-public class CredentialAnc {
+@JsonTypeName("DoneOperationMetadata_response")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
+public class DoneOperationMetadataResponse {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -82,14 +84,6 @@ public class CredentialAnc {
   public static final String JSON_PROPERTY_S = "s";
   @jakarta.annotation.Nonnull
   private String s;
-
-  public static final String JSON_PROPERTY_P = "p";
-  @jakarta.annotation.Nonnull
-  private String p;
-
-  public static final String JSON_PROPERTY_A = "a";
-  @jakarta.annotation.Nullable
-  private Object a = null;
 
   public static final String JSON_PROPERTY_KT = "kt";
   @jakarta.annotation.Nonnull
@@ -119,6 +113,14 @@ public class CredentialAnc {
   @jakarta.annotation.Nonnull
   private List<String> c;
 
+  public static final String JSON_PROPERTY_A = "a";
+  @jakarta.annotation.Nullable
+  private Object a = null;
+
+  public static final String JSON_PROPERTY_P = "p";
+  @jakarta.annotation.Nonnull
+  private String p;
+
   public static final String JSON_PROPERTY_BR = "br";
   @jakarta.annotation.Nonnull
   private List<String> br;
@@ -127,14 +129,34 @@ public class CredentialAnc {
   @jakarta.annotation.Nonnull
   private List<String> ba;
 
-  public static final String JSON_PROPERTY_DI = "di";
+  public static final String JSON_PROPERTY_RP = "rp";
   @jakarta.annotation.Nonnull
-  private String di;
+  private String rp;
 
-  public CredentialAnc() {
+  public static final String JSON_PROPERTY_DT = "dt";
+  @jakarta.annotation.Nonnull
+  private String dt;
+
+  public static final String JSON_PROPERTY_R = "r";
+  @jakarta.annotation.Nonnull
+  private String r;
+
+  public static final String JSON_PROPERTY_Q = "q";
+  @jakarta.annotation.Nonnull
+  private Map<String, Object> q;
+
+  public static final String JSON_PROPERTY_E = "e";
+  @jakarta.annotation.Nonnull
+  private Map<String, Object> e;
+
+  public static final String JSON_PROPERTY_X = "x";
+  @jakarta.annotation.Nonnull
+  private String x;
+
+  public DoneOperationMetadataResponse() {
   }
 
-  public CredentialAnc v(@jakarta.annotation.Nonnull String v) {
+  public DoneOperationMetadataResponse v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
     return this;
@@ -159,7 +181,7 @@ public class CredentialAnc {
     this.v = v;
   }
 
-  public CredentialAnc t(@jakarta.annotation.Nonnull String t) {
+  public DoneOperationMetadataResponse t(@jakarta.annotation.Nonnull String t) {
     
     this.t = t;
     return this;
@@ -184,7 +206,7 @@ public class CredentialAnc {
     this.t = t;
   }
 
-  public CredentialAnc d(@jakarta.annotation.Nonnull String d) {
+  public DoneOperationMetadataResponse d(@jakarta.annotation.Nonnull String d) {
     
     this.d = d;
     return this;
@@ -209,7 +231,7 @@ public class CredentialAnc {
     this.d = d;
   }
 
-  public CredentialAnc i(@jakarta.annotation.Nonnull String i) {
+  public DoneOperationMetadataResponse i(@jakarta.annotation.Nonnull String i) {
     
     this.i = i;
     return this;
@@ -234,7 +256,7 @@ public class CredentialAnc {
     this.i = i;
   }
 
-  public CredentialAnc s(@jakarta.annotation.Nonnull String s) {
+  public DoneOperationMetadataResponse s(@jakarta.annotation.Nonnull String s) {
     
     this.s = s;
     return this;
@@ -259,57 +281,7 @@ public class CredentialAnc {
     this.s = s;
   }
 
-  public CredentialAnc p(@jakarta.annotation.Nonnull String p) {
-    
-    this.p = p;
-    return this;
-  }
-
-  /**
-   * Get p
-   * @return p
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_P, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public String getP() {
-    return p;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_P, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setP(@jakarta.annotation.Nonnull String p) {
-    this.p = p;
-  }
-
-  public CredentialAnc a(@jakarta.annotation.Nullable Object a) {
-    
-    this.a = a;
-    return this;
-  }
-
-  /**
-   * Get a
-   * @return a
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public Object getA() {
-    return a;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setA(@jakarta.annotation.Nullable Object a) {
-    this.a = a;
-  }
-
-  public CredentialAnc kt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
+  public DoneOperationMetadataResponse kt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
     
     this.kt = kt;
     return this;
@@ -334,13 +306,13 @@ public class CredentialAnc {
     this.kt = kt;
   }
 
-  public CredentialAnc k(@jakarta.annotation.Nonnull List<String> k) {
+  public DoneOperationMetadataResponse k(@jakarta.annotation.Nonnull List<String> k) {
     
     this.k = k;
     return this;
   }
 
-  public CredentialAnc addKItem(String kItem) {
+  public DoneOperationMetadataResponse addKItem(String kItem) {
     if (this.k == null) {
       this.k = new ArrayList<>();
     }
@@ -367,7 +339,7 @@ public class CredentialAnc {
     this.k = k;
   }
 
-  public CredentialAnc nt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
+  public DoneOperationMetadataResponse nt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
     
     this.nt = nt;
     return this;
@@ -392,13 +364,13 @@ public class CredentialAnc {
     this.nt = nt;
   }
 
-  public CredentialAnc n(@jakarta.annotation.Nonnull List<String> n) {
+  public DoneOperationMetadataResponse n(@jakarta.annotation.Nonnull List<String> n) {
     
     this.n = n;
     return this;
   }
 
-  public CredentialAnc addNItem(String nItem) {
+  public DoneOperationMetadataResponse addNItem(String nItem) {
     if (this.n == null) {
       this.n = new ArrayList<>();
     }
@@ -425,7 +397,7 @@ public class CredentialAnc {
     this.n = n;
   }
 
-  public CredentialAnc bt(@jakarta.annotation.Nonnull String bt) {
+  public DoneOperationMetadataResponse bt(@jakarta.annotation.Nonnull String bt) {
     
     this.bt = bt;
     return this;
@@ -450,13 +422,13 @@ public class CredentialAnc {
     this.bt = bt;
   }
 
-  public CredentialAnc b(@jakarta.annotation.Nonnull List<String> b) {
+  public DoneOperationMetadataResponse b(@jakarta.annotation.Nonnull List<String> b) {
     
     this.b = b;
     return this;
   }
 
-  public CredentialAnc addBItem(String bItem) {
+  public DoneOperationMetadataResponse addBItem(String bItem) {
     if (this.b == null) {
       this.b = new ArrayList<>();
     }
@@ -483,13 +455,13 @@ public class CredentialAnc {
     this.b = b;
   }
 
-  public CredentialAnc c(@jakarta.annotation.Nonnull List<String> c) {
+  public DoneOperationMetadataResponse c(@jakarta.annotation.Nonnull List<String> c) {
     
     this.c = c;
     return this;
   }
 
-  public CredentialAnc addCItem(String cItem) {
+  public DoneOperationMetadataResponse addCItem(String cItem) {
     if (this.c == null) {
       this.c = new ArrayList<>();
     }
@@ -516,13 +488,63 @@ public class CredentialAnc {
     this.c = c;
   }
 
-  public CredentialAnc br(@jakarta.annotation.Nonnull List<String> br) {
+  public DoneOperationMetadataResponse a(@jakarta.annotation.Nullable Object a) {
+    
+    this.a = a;
+    return this;
+  }
+
+  /**
+   * Get a
+   * @return a
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public Object getA() {
+    return a;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setA(@jakarta.annotation.Nullable Object a) {
+    this.a = a;
+  }
+
+  public DoneOperationMetadataResponse p(@jakarta.annotation.Nonnull String p) {
+    
+    this.p = p;
+    return this;
+  }
+
+  /**
+   * Get p
+   * @return p
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_P, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getP() {
+    return p;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_P, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setP(@jakarta.annotation.Nonnull String p) {
+    this.p = p;
+  }
+
+  public DoneOperationMetadataResponse br(@jakarta.annotation.Nonnull List<String> br) {
     
     this.br = br;
     return this;
   }
 
-  public CredentialAnc addBrItem(String brItem) {
+  public DoneOperationMetadataResponse addBrItem(String brItem) {
     if (this.br == null) {
       this.br = new ArrayList<>();
     }
@@ -549,13 +571,13 @@ public class CredentialAnc {
     this.br = br;
   }
 
-  public CredentialAnc ba(@jakarta.annotation.Nonnull List<String> ba) {
+  public DoneOperationMetadataResponse ba(@jakarta.annotation.Nonnull List<String> ba) {
     
     this.ba = ba;
     return this;
   }
 
-  public CredentialAnc addBaItem(String baItem) {
+  public DoneOperationMetadataResponse addBaItem(String baItem) {
     if (this.ba == null) {
       this.ba = new ArrayList<>();
     }
@@ -582,29 +604,164 @@ public class CredentialAnc {
     this.ba = ba;
   }
 
-  public CredentialAnc di(@jakarta.annotation.Nonnull String di) {
+  public DoneOperationMetadataResponse rp(@jakarta.annotation.Nonnull String rp) {
     
-    this.di = di;
+    this.rp = rp;
     return this;
   }
 
   /**
-   * Get di
-   * @return di
+   * Get rp
+   * @return rp
    */
   @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_DI, required = true)
+  @JsonProperty(value = JSON_PROPERTY_RP, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getDi() {
-    return di;
+  public String getRp() {
+    return rp;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_DI, required = true)
+  @JsonProperty(value = JSON_PROPERTY_RP, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDi(@jakarta.annotation.Nonnull String di) {
-    this.di = di;
+  public void setRp(@jakarta.annotation.Nonnull String rp) {
+    this.rp = rp;
+  }
+
+  public DoneOperationMetadataResponse dt(@jakarta.annotation.Nonnull String dt) {
+    
+    this.dt = dt;
+    return this;
+  }
+
+  /**
+   * Get dt
+   * @return dt
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getDt() {
+    return dt;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_DT, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDt(@jakarta.annotation.Nonnull String dt) {
+    this.dt = dt;
+  }
+
+  public DoneOperationMetadataResponse r(@jakarta.annotation.Nonnull String r) {
+    
+    this.r = r;
+    return this;
+  }
+
+  /**
+   * Get r
+   * @return r
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_R, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getR() {
+    return r;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_R, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setR(@jakarta.annotation.Nonnull String r) {
+    this.r = r;
+  }
+
+  public DoneOperationMetadataResponse q(@jakarta.annotation.Nonnull Map<String, Object> q) {
+    
+    this.q = q;
+    return this;
+  }
+
+  public DoneOperationMetadataResponse putQItem(String key, Object qItem) {
+    this.q.put(key, qItem);
+    return this;
+  }
+
+  /**
+   * Get q
+   * @return q
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_Q, required = true)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+
+  public Map<String, Object> getQ() {
+    return q;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_Q, required = true)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  public void setQ(@jakarta.annotation.Nonnull Map<String, Object> q) {
+    this.q = q;
+  }
+
+  public DoneOperationMetadataResponse e(@jakarta.annotation.Nonnull Map<String, Object> e) {
+    
+    this.e = e;
+    return this;
+  }
+
+  public DoneOperationMetadataResponse putEItem(String key, Object eItem) {
+    this.e.put(key, eItem);
+    return this;
+  }
+
+  /**
+   * Get e
+   * @return e
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_E, required = true)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+
+  public Map<String, Object> getE() {
+    return e;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_E, required = true)
+  @JsonInclude(content = JsonInclude.Include.ALWAYS, value = JsonInclude.Include.ALWAYS)
+  public void setE(@jakarta.annotation.Nonnull Map<String, Object> e) {
+    this.e = e;
+  }
+
+  public DoneOperationMetadataResponse x(@jakarta.annotation.Nonnull String x) {
+    
+    this.x = x;
+    return this;
+  }
+
+  /**
+   * Get x
+   * @return x
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_X, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getX() {
+    return x;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_X, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setX(@jakarta.annotation.Nonnull String x) {
+    this.x = x;
   }
 
 
@@ -616,42 +773,45 @@ public class CredentialAnc {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CredentialAnc credentialAnc = (CredentialAnc) o;
-    return Objects.equals(this.v, credentialAnc.v) &&
-        Objects.equals(this.t, credentialAnc.t) &&
-        Objects.equals(this.d, credentialAnc.d) &&
-        Objects.equals(this.i, credentialAnc.i) &&
-        Objects.equals(this.s, credentialAnc.s) &&
-        Objects.equals(this.p, credentialAnc.p) &&
-        Objects.equals(this.a, credentialAnc.a) &&
-        Objects.equals(this.kt, credentialAnc.kt) &&
-        Objects.equals(this.k, credentialAnc.k) &&
-        Objects.equals(this.nt, credentialAnc.nt) &&
-        Objects.equals(this.n, credentialAnc.n) &&
-        Objects.equals(this.bt, credentialAnc.bt) &&
-        Objects.equals(this.b, credentialAnc.b) &&
-        Objects.equals(this.c, credentialAnc.c) &&
-        Objects.equals(this.br, credentialAnc.br) &&
-        Objects.equals(this.ba, credentialAnc.ba) &&
-        Objects.equals(this.di, credentialAnc.di);
+    DoneOperationMetadataResponse doneOperationMetadataResponse = (DoneOperationMetadataResponse) o;
+    return Objects.equals(this.v, doneOperationMetadataResponse.v) &&
+        Objects.equals(this.t, doneOperationMetadataResponse.t) &&
+        Objects.equals(this.d, doneOperationMetadataResponse.d) &&
+        Objects.equals(this.i, doneOperationMetadataResponse.i) &&
+        Objects.equals(this.s, doneOperationMetadataResponse.s) &&
+        Objects.equals(this.kt, doneOperationMetadataResponse.kt) &&
+        Objects.equals(this.k, doneOperationMetadataResponse.k) &&
+        Objects.equals(this.nt, doneOperationMetadataResponse.nt) &&
+        Objects.equals(this.n, doneOperationMetadataResponse.n) &&
+        Objects.equals(this.bt, doneOperationMetadataResponse.bt) &&
+        Objects.equals(this.b, doneOperationMetadataResponse.b) &&
+        Objects.equals(this.c, doneOperationMetadataResponse.c) &&
+        Objects.equals(this.a, doneOperationMetadataResponse.a) &&
+        Objects.equals(this.p, doneOperationMetadataResponse.p) &&
+        Objects.equals(this.br, doneOperationMetadataResponse.br) &&
+        Objects.equals(this.ba, doneOperationMetadataResponse.ba) &&
+        Objects.equals(this.rp, doneOperationMetadataResponse.rp) &&
+        Objects.equals(this.dt, doneOperationMetadataResponse.dt) &&
+        Objects.equals(this.r, doneOperationMetadataResponse.r) &&
+        Objects.equals(this.q, doneOperationMetadataResponse.q) &&
+        Objects.equals(this.e, doneOperationMetadataResponse.e) &&
+        Objects.equals(this.x, doneOperationMetadataResponse.x);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, t, d, i, s, p, a, kt, k, nt, n, bt, b, c, br, ba, di);
+    return Objects.hash(v, t, d, i, s, kt, k, nt, n, bt, b, c, a, p, br, ba, rp, dt, r, q, e, x);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CredentialAnc {\n");
+    sb.append("class DoneOperationMetadataResponse {\n");
     sb.append("    v: ").append(toIndentedString(v)).append("\n");
     sb.append("    t: ").append(toIndentedString(t)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    s: ").append(toIndentedString(s)).append("\n");
-    sb.append("    p: ").append(toIndentedString(p)).append("\n");
-    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    kt: ").append(toIndentedString(kt)).append("\n");
     sb.append("    k: ").append(toIndentedString(k)).append("\n");
     sb.append("    nt: ").append(toIndentedString(nt)).append("\n");
@@ -659,9 +819,16 @@ public class CredentialAnc {
     sb.append("    bt: ").append(toIndentedString(bt)).append("\n");
     sb.append("    b: ").append(toIndentedString(b)).append("\n");
     sb.append("    c: ").append(toIndentedString(c)).append("\n");
+    sb.append("    a: ").append(toIndentedString(a)).append("\n");
+    sb.append("    p: ").append(toIndentedString(p)).append("\n");
     sb.append("    br: ").append(toIndentedString(br)).append("\n");
     sb.append("    ba: ").append(toIndentedString(ba)).append("\n");
-    sb.append("    di: ").append(toIndentedString(di)).append("\n");
+    sb.append("    rp: ").append(toIndentedString(rp)).append("\n");
+    sb.append("    dt: ").append(toIndentedString(dt)).append("\n");
+    sb.append("    r: ").append(toIndentedString(r)).append("\n");
+    sb.append("    q: ").append(toIndentedString(q)).append("\n");
+    sb.append("    e: ").append(toIndentedString(e)).append("\n");
+    sb.append("    x: ").append(toIndentedString(x)).append("\n");
     sb.append("}");
     return sb.toString();
   }
