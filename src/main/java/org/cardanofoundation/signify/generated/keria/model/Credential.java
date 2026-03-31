@@ -25,10 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.Anchor;
-import org.cardanofoundation.signify.generated.keria.model.CredentialAnc;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 import org.cardanofoundation.signify.generated.keria.model.IssEvent;
+import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -76,7 +76,7 @@ public class Credential {
 
   public static final String JSON_PROPERTY_CHAINS = "chains";
   @jakarta.annotation.Nonnull
-  private List<Map<String, Object>> chains = new ArrayList<>();
+  private List<Map<String, Object>> chains;
 
   public static final String JSON_PROPERTY_STATUS = "status";
   @jakarta.annotation.Nonnull
@@ -88,11 +88,11 @@ public class Credential {
 
   public static final String JSON_PROPERTY_ANC = "anc";
   @jakarta.annotation.Nonnull
-  private CredentialAnc anc;
+  private KeyEvent anc;
 
   public static final String JSON_PROPERTY_ANCATC = "ancatc";
   @jakarta.annotation.Nonnull
-  private String ancatc;
+  private List<String> ancatc;
 
   public Credential() {
   }
@@ -330,7 +330,7 @@ public class Credential {
     this.anchor = anchor;
   }
 
-  public Credential anc(@jakarta.annotation.Nonnull CredentialAnc anc) {
+  public Credential anc(@jakarta.annotation.Nonnull KeyEvent anc) {
     
     this.anc = anc;
     return this;
@@ -344,20 +344,28 @@ public class Credential {
   @JsonProperty(value = JSON_PROPERTY_ANC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public CredentialAnc getAnc() {
+  public KeyEvent getAnc() {
     return anc;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_ANC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAnc(@jakarta.annotation.Nonnull CredentialAnc anc) {
+  public void setAnc(@jakarta.annotation.Nonnull KeyEvent anc) {
     this.anc = anc;
   }
 
-  public Credential ancatc(@jakarta.annotation.Nonnull String ancatc) {
+  public Credential ancatc(@jakarta.annotation.Nonnull List<String> ancatc) {
     
     this.ancatc = ancatc;
+    return this;
+  }
+
+  public Credential addAncatcItem(String ancatcItem) {
+    if (this.ancatc == null) {
+      this.ancatc = new ArrayList<>();
+    }
+    this.ancatc.add(ancatcItem);
     return this;
   }
 
@@ -369,14 +377,14 @@ public class Credential {
   @JsonProperty(value = JSON_PROPERTY_ANCATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getAncatc() {
+  public List<String> getAncatc() {
     return ancatc;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_ANCATC, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setAncatc(@jakarta.annotation.Nonnull String ancatc) {
+  public void setAncatc(@jakarta.annotation.Nonnull List<String> ancatc) {
     this.ancatc = ancatc;
   }
 

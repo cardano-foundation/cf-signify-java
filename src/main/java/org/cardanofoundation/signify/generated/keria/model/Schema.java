@@ -75,7 +75,7 @@ public class Schema {
 
   public static final String JSON_PROPERTY_PROPERTIES = "properties";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> properties = new HashMap<>();
+  private Map<String, Object> properties;
 
   public static final String JSON_PROPERTY_ADDITIONAL_PROPERTIES = "additionalProperties";
   @jakarta.annotation.Nonnull
@@ -83,7 +83,7 @@ public class Schema {
 
   public static final String JSON_PROPERTY_REQUIRED = "required";
   @jakarta.annotation.Nonnull
-  private List<String> required = new ArrayList<>();
+  private List<String> required;
 
   public Schema() {
   }

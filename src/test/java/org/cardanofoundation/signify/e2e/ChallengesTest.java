@@ -6,10 +6,10 @@ import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.Utils;
-
+import org.cardanofoundation.signify.generated.keria.model.Challenge;
+import org.cardanofoundation.signify.generated.keria.model.Contact;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -54,10 +54,10 @@ public class ChallengesTest {
         client2.state();
 
         // Generate challenge words
-        Contacting.Challenge challenge1_small = client1.challenges().generate(128);
-        assertEquals(12, challenge1_small.words.size());
-        Contacting.Challenge challenge1_big = client1.challenges().generate(256);
-        assertEquals(24, challenge1_big.words.size());
+        Challenge challenge1_small = client1.challenges().generate(128);
+        assertEquals(12, challenge1_small.getWords().size());
+        Challenge challenge1_big = client1.challenges().generate(256);
+        assertEquals(24, challenge1_big.getWords().size());
 
         // Create two identifiers, one for each client
         CreateIdentifierArgs kargs1 = new CreateIdentifierArgs();
@@ -97,31 +97,28 @@ public class ChallengesTest {
         waitOperation(client2, rpyResult2.op());
 
         // Exchange OOBIs
-        Object oobi1 = client1.oobis().get("alice", "agent").get();
-        Map<String, Object> oobiBody1 = (Map<String, Object>) oobi1;
-        ArrayList<String> oobiResponse1 = (ArrayList<String>) oobiBody1.get("oobis");
+        OOBI oobi1 = client1.oobis().get("alice", "agent").get();
+        List<String> oobiResponse1 = oobi1.getOobis();
 
-        Object oobi2 = client2.oobis().get("bob", "agent").get();
-        Map<String, Object> oobiBody2 = (Map<String, Object>) oobi2;
-        ArrayList<String> oobiResponse2 = (ArrayList<String>) oobiBody2.get("oobis");
-
+        OOBI oobi2 = client2.oobis().get("bob", "agent").get();
+        List<String> oobiResponse2 = oobi2.getOobis();
         resolveOobi(client1, oobiResponse2.getFirst(), "bob");
         resolveOobi(client2, oobiResponse1.getFirst(), "alice");
 
         // List Client 1 contacts
         Contacting.Contacts contacts1 = client1.contacts();
-        Contacting.Contact[] client1Contacts = contacts1.list();
-        Contacting.Contact bobContact = findContact(client1Contacts, "bob");
+        List<Contact> client1Contacts = contacts1.list();
+        Contact bobContact = findContact(client1Contacts, "bob");
         assert bobContact != null;
         assertEquals("bob", bobContact.getAlias());
-        assertEquals(((List<Object>) bobContact.get("challenges")).size(), 0);
+        assertEquals(0, bobContact.getChallenges().size());
 
         // Bob responds to Alice's challenge
-        client2.challenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.words);
+        client2.challenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.getWords());
         System.out.println("Bob responded to Alice's challenge with signed words");
 
         // Alice verifies Bob's response
-        Object verifyResult = client1.challenges().verify((String) opResponse2.get("i"), challenge1_small.words);
+        Operation<?> verifyResult = client1.challenges().verify((String) opResponse2.get("i"), challenge1_small.getWords());
         Operation op = Operation.fromObject(waitOperation(client1, verifyResult));
         System.out.println("Alice verified challenge response");
         opResponse = (HashMap<String, Object>) op.getResponse();
@@ -135,16 +132,15 @@ public class ChallengesTest {
         bobContact = findContact(client1Contacts, "bob");
 
         assertNotNull(bobContact);
-        Object challenges = bobContact.get("challenges");
-        assertInstanceOf(List.class, challenges);
-        assertTrue((Boolean) Utils.toMap(((List<?>) challenges).getFirst()).get("authenticated"));
+        List<Challenge> challenges = bobContact.getChallenges();
+        assertTrue(challenges.getFirst().getAuthenticated());
 
         List<SignifyClient> clientList = new ArrayList<>(Arrays.asList(client1, client2));
         assertOperations(clientList);
     }
 
-    private static Contacting.Contact findContact(Contacting.Contact[] contacts, String alias) {
-        for (Contacting.Contact contact : contacts) {
+    private static Contact findContact(List<Contact> contacts, String alias) {
+        for (Contact contact : contacts) {
             if (alias.equals(contact.getAlias())) {
                 return contact;
             }

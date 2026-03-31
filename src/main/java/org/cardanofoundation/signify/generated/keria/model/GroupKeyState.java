@@ -43,11 +43,11 @@ public class GroupKeyState {
 
   public static final String JSON_PROPERTY_KEYS = "keys";
   @jakarta.annotation.Nonnull
-  private List<String> keys = new ArrayList<>();
+  private List<String> keys;
 
   public static final String JSON_PROPERTY_NDIGS = "ndigs";
   @jakarta.annotation.Nonnull
-  private List<String> ndigs = new ArrayList<>();
+  private List<String> ndigs;
 
   public GroupKeyState() {
   }

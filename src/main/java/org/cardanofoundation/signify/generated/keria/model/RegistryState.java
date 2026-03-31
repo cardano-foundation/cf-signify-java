@@ -15,6 +15,7 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
+import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,26 +24,26 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.Seal;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * CredentialStateIssOrRev
+ * RegistryState
  */
 @JsonPropertyOrder({
-  CredentialStateIssOrRev.JSON_PROPERTY_VN,
-  CredentialStateIssOrRev.JSON_PROPERTY_I,
-  CredentialStateIssOrRev.JSON_PROPERTY_S,
-  CredentialStateIssOrRev.JSON_PROPERTY_D,
-  CredentialStateIssOrRev.JSON_PROPERTY_RI,
-  CredentialStateIssOrRev.JSON_PROPERTY_A,
-  CredentialStateIssOrRev.JSON_PROPERTY_DT,
-  CredentialStateIssOrRev.JSON_PROPERTY_ET,
-  CredentialStateIssOrRev.JSON_PROPERTY_RA
+  RegistryState.JSON_PROPERTY_VN,
+  RegistryState.JSON_PROPERTY_I,
+  RegistryState.JSON_PROPERTY_S,
+  RegistryState.JSON_PROPERTY_D,
+  RegistryState.JSON_PROPERTY_II,
+  RegistryState.JSON_PROPERTY_DT,
+  RegistryState.JSON_PROPERTY_ET,
+  RegistryState.JSON_PROPERTY_BT,
+  RegistryState.JSON_PROPERTY_B,
+  RegistryState.JSON_PROPERTY_C
 })
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class CredentialStateIssOrRev {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public class RegistryState {
   public static final String JSON_PROPERTY_VN = "vn";
   @jakarta.annotation.Nonnull
   private List<Integer> vn;
@@ -59,13 +60,9 @@ public class CredentialStateIssOrRev {
   @jakarta.annotation.Nonnull
   private String d;
 
-  public static final String JSON_PROPERTY_RI = "ri";
+  public static final String JSON_PROPERTY_II = "ii";
   @jakarta.annotation.Nonnull
-  private String ri;
-
-  public static final String JSON_PROPERTY_A = "a";
-  @jakarta.annotation.Nonnull
-  private Seal a;
+  private String ii;
 
   public static final String JSON_PROPERTY_DT = "dt";
   @jakarta.annotation.Nonnull
@@ -75,9 +72,9 @@ public class CredentialStateIssOrRev {
    * Gets or Sets et
    */
   public enum EtEnum {
-    ISS(String.valueOf("iss")),
+    VCP(String.valueOf("vcp")),
     
-    REV(String.valueOf("rev"));
+    VRT(String.valueOf("vrt"));
 
     private String value;
 
@@ -110,20 +107,28 @@ public class CredentialStateIssOrRev {
   @jakarta.annotation.Nonnull
   private EtEnum et;
 
-  public static final String JSON_PROPERTY_RA = "ra";
+  public static final String JSON_PROPERTY_BT = "bt";
   @jakarta.annotation.Nonnull
-  private Object ra;
+  private String bt;
 
-  public CredentialStateIssOrRev() {
+  public static final String JSON_PROPERTY_B = "b";
+  @jakarta.annotation.Nonnull
+  private List<String> b;
+
+  public static final String JSON_PROPERTY_C = "c";
+  @jakarta.annotation.Nonnull
+  private List<String> c;
+
+  public RegistryState() {
   }
 
-  public CredentialStateIssOrRev vn(@jakarta.annotation.Nonnull List<Integer> vn) {
+  public RegistryState vn(@jakarta.annotation.Nonnull List<Integer> vn) {
     
     this.vn = vn;
     return this;
   }
 
-  public CredentialStateIssOrRev addVnItem(Integer vnItem) {
+  public RegistryState addVnItem(Integer vnItem) {
     if (this.vn == null) {
       this.vn = new ArrayList<>();
     }
@@ -150,7 +155,7 @@ public class CredentialStateIssOrRev {
     this.vn = vn;
   }
 
-  public CredentialStateIssOrRev i(@jakarta.annotation.Nonnull String i) {
+  public RegistryState i(@jakarta.annotation.Nonnull String i) {
     
     this.i = i;
     return this;
@@ -175,7 +180,7 @@ public class CredentialStateIssOrRev {
     this.i = i;
   }
 
-  public CredentialStateIssOrRev s(@jakarta.annotation.Nonnull String s) {
+  public RegistryState s(@jakarta.annotation.Nonnull String s) {
     
     this.s = s;
     return this;
@@ -200,7 +205,7 @@ public class CredentialStateIssOrRev {
     this.s = s;
   }
 
-  public CredentialStateIssOrRev d(@jakarta.annotation.Nonnull String d) {
+  public RegistryState d(@jakarta.annotation.Nonnull String d) {
     
     this.d = d;
     return this;
@@ -225,57 +230,32 @@ public class CredentialStateIssOrRev {
     this.d = d;
   }
 
-  public CredentialStateIssOrRev ri(@jakarta.annotation.Nonnull String ri) {
+  public RegistryState ii(@jakarta.annotation.Nonnull String ii) {
     
-    this.ri = ri;
+    this.ii = ii;
     return this;
   }
 
   /**
-   * Get ri
-   * @return ri
+   * Get ii
+   * @return ii
    */
   @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_RI, required = true)
+  @JsonProperty(value = JSON_PROPERTY_II, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public String getRi() {
-    return ri;
+  public String getIi() {
+    return ii;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_RI, required = true)
+  @JsonProperty(value = JSON_PROPERTY_II, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRi(@jakarta.annotation.Nonnull String ri) {
-    this.ri = ri;
+  public void setIi(@jakarta.annotation.Nonnull String ii) {
+    this.ii = ii;
   }
 
-  public CredentialStateIssOrRev a(@jakarta.annotation.Nonnull Seal a) {
-    
-    this.a = a;
-    return this;
-  }
-
-  /**
-   * Get a
-   * @return a
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_A, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public Seal getA() {
-    return a;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_A, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setA(@jakarta.annotation.Nonnull Seal a) {
-    this.a = a;
-  }
-
-  public CredentialStateIssOrRev dt(@jakarta.annotation.Nonnull String dt) {
+  public RegistryState dt(@jakarta.annotation.Nonnull String dt) {
     
     this.dt = dt;
     return this;
@@ -300,7 +280,7 @@ public class CredentialStateIssOrRev {
     this.dt = dt;
   }
 
-  public CredentialStateIssOrRev et(@jakarta.annotation.Nonnull EtEnum et) {
+  public RegistryState et(@jakarta.annotation.Nonnull EtEnum et) {
     
     this.et = et;
     return this;
@@ -325,29 +305,95 @@ public class CredentialStateIssOrRev {
     this.et = et;
   }
 
-  public CredentialStateIssOrRev ra(@jakarta.annotation.Nonnull Object ra) {
+  public RegistryState bt(@jakarta.annotation.Nonnull String bt) {
     
-    this.ra = ra;
+    this.bt = bt;
     return this;
   }
 
   /**
-   * Get ra
-   * @return ra
+   * Get bt
+   * @return bt
    */
   @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_RA, required = true)
+  @JsonProperty(value = JSON_PROPERTY_BT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Object getRa() {
-    return ra;
+  public String getBt() {
+    return bt;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_RA, required = true)
+  @JsonProperty(value = JSON_PROPERTY_BT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setRa(@jakarta.annotation.Nonnull Object ra) {
-    this.ra = ra;
+  public void setBt(@jakarta.annotation.Nonnull String bt) {
+    this.bt = bt;
+  }
+
+  public RegistryState b(@jakarta.annotation.Nonnull List<String> b) {
+    
+    this.b = b;
+    return this;
+  }
+
+  public RegistryState addBItem(String bItem) {
+    if (this.b == null) {
+      this.b = new ArrayList<>();
+    }
+    this.b.add(bItem);
+    return this;
+  }
+
+  /**
+   * Get b
+   * @return b
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_B, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public List<String> getB() {
+    return b;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_B, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setB(@jakarta.annotation.Nonnull List<String> b) {
+    this.b = b;
+  }
+
+  public RegistryState c(@jakarta.annotation.Nonnull List<String> c) {
+    
+    this.c = c;
+    return this;
+  }
+
+  public RegistryState addCItem(String cItem) {
+    if (this.c == null) {
+      this.c = new ArrayList<>();
+    }
+    this.c.add(cItem);
+    return this;
+  }
+
+  /**
+   * Get c
+   * @return c
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_C, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public List<String> getC() {
+    return c;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_C, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setC(@jakarta.annotation.Nonnull List<String> c) {
+    this.c = c;
   }
 
 
@@ -359,36 +405,38 @@ public class CredentialStateIssOrRev {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CredentialStateIssOrRev credentialStateIssOrRev = (CredentialStateIssOrRev) o;
-    return Objects.equals(this.vn, credentialStateIssOrRev.vn) &&
-        Objects.equals(this.i, credentialStateIssOrRev.i) &&
-        Objects.equals(this.s, credentialStateIssOrRev.s) &&
-        Objects.equals(this.d, credentialStateIssOrRev.d) &&
-        Objects.equals(this.ri, credentialStateIssOrRev.ri) &&
-        Objects.equals(this.a, credentialStateIssOrRev.a) &&
-        Objects.equals(this.dt, credentialStateIssOrRev.dt) &&
-        Objects.equals(this.et, credentialStateIssOrRev.et) &&
-        Objects.equals(this.ra, credentialStateIssOrRev.ra);
+    RegistryState registryState = (RegistryState) o;
+    return Objects.equals(this.vn, registryState.vn) &&
+        Objects.equals(this.i, registryState.i) &&
+        Objects.equals(this.s, registryState.s) &&
+        Objects.equals(this.d, registryState.d) &&
+        Objects.equals(this.ii, registryState.ii) &&
+        Objects.equals(this.dt, registryState.dt) &&
+        Objects.equals(this.et, registryState.et) &&
+        Objects.equals(this.bt, registryState.bt) &&
+        Objects.equals(this.b, registryState.b) &&
+        Objects.equals(this.c, registryState.c);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(vn, i, s, d, ri, a, dt, et, ra);
+    return Objects.hash(vn, i, s, d, ii, dt, et, bt, b, c);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CredentialStateIssOrRev {\n");
+    sb.append("class RegistryState {\n");
     sb.append("    vn: ").append(toIndentedString(vn)).append("\n");
     sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    s: ").append(toIndentedString(s)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
-    sb.append("    ri: ").append(toIndentedString(ri)).append("\n");
-    sb.append("    a: ").append(toIndentedString(a)).append("\n");
+    sb.append("    ii: ").append(toIndentedString(ii)).append("\n");
     sb.append("    dt: ").append(toIndentedString(dt)).append("\n");
     sb.append("    et: ").append(toIndentedString(et)).append("\n");
-    sb.append("    ra: ").append(toIndentedString(ra)).append("\n");
+    sb.append("    bt: ").append(toIndentedString(bt)).append("\n");
+    sb.append("    b: ").append(toIndentedString(b)).append("\n");
+    sb.append("    c: ").append(toIndentedString(c)).append("\n");
     sb.append("}");
     return sb.toString();
   }

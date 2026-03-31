@@ -15,6 +15,7 @@ package org.cardanofoundation.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
+import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,33 +24,44 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.cardanofoundation.signify.generated.keria.model.DIPV1;
+import org.cardanofoundation.signify.generated.keria.model.DIPV2;
+import org.cardanofoundation.signify.generated.keria.model.DRTV1;
+import org.cardanofoundation.signify.generated.keria.model.DRTV2;
+import org.cardanofoundation.signify.generated.keria.model.ICPV1;
 import org.cardanofoundation.signify.generated.keria.model.ICPV1Kt;
+import org.cardanofoundation.signify.generated.keria.model.ICPV2;
+import org.cardanofoundation.signify.generated.keria.model.IXNV1;
+import org.cardanofoundation.signify.generated.keria.model.IXNV2;
+import org.cardanofoundation.signify.generated.keria.model.ROTV1;
+import org.cardanofoundation.signify.generated.keria.model.ROTV2;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * ROTV2
+ * KeyEvent
  */
 @JsonPropertyOrder({
-  ROTV2.JSON_PROPERTY_V,
-  ROTV2.JSON_PROPERTY_T,
-  ROTV2.JSON_PROPERTY_D,
-  ROTV2.JSON_PROPERTY_I,
-  ROTV2.JSON_PROPERTY_S,
-  ROTV2.JSON_PROPERTY_P,
-  ROTV2.JSON_PROPERTY_KT,
-  ROTV2.JSON_PROPERTY_K,
-  ROTV2.JSON_PROPERTY_NT,
-  ROTV2.JSON_PROPERTY_N,
-  ROTV2.JSON_PROPERTY_BT,
-  ROTV2.JSON_PROPERTY_BR,
-  ROTV2.JSON_PROPERTY_BA,
-  ROTV2.JSON_PROPERTY_C,
-  ROTV2.JSON_PROPERTY_A
+  KeyEvent.JSON_PROPERTY_V,
+  KeyEvent.JSON_PROPERTY_T,
+  KeyEvent.JSON_PROPERTY_D,
+  KeyEvent.JSON_PROPERTY_I,
+  KeyEvent.JSON_PROPERTY_S,
+  KeyEvent.JSON_PROPERTY_P,
+  KeyEvent.JSON_PROPERTY_A,
+  KeyEvent.JSON_PROPERTY_KT,
+  KeyEvent.JSON_PROPERTY_K,
+  KeyEvent.JSON_PROPERTY_NT,
+  KeyEvent.JSON_PROPERTY_N,
+  KeyEvent.JSON_PROPERTY_BT,
+  KeyEvent.JSON_PROPERTY_B,
+  KeyEvent.JSON_PROPERTY_C,
+  KeyEvent.JSON_PROPERTY_BR,
+  KeyEvent.JSON_PROPERTY_BA,
+  KeyEvent.JSON_PROPERTY_DI
 })
-@JsonTypeName("ROT_V_2")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class ROTV2 {
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.16.0")
+public class KeyEvent {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -74,6 +86,10 @@ public class ROTV2 {
   @jakarta.annotation.Nonnull
   private String p;
 
+  public static final String JSON_PROPERTY_A = "a";
+  @jakarta.annotation.Nullable
+  private Object a = null;
+
   public static final String JSON_PROPERTY_KT = "kt";
   @jakarta.annotation.Nonnull
   private ICPV1Kt kt;
@@ -94,6 +110,14 @@ public class ROTV2 {
   @jakarta.annotation.Nonnull
   private String bt;
 
+  public static final String JSON_PROPERTY_B = "b";
+  @jakarta.annotation.Nonnull
+  private List<String> b;
+
+  public static final String JSON_PROPERTY_C = "c";
+  @jakarta.annotation.Nonnull
+  private List<String> c;
+
   public static final String JSON_PROPERTY_BR = "br";
   @jakarta.annotation.Nonnull
   private List<String> br;
@@ -102,18 +126,14 @@ public class ROTV2 {
   @jakarta.annotation.Nonnull
   private List<String> ba;
 
-  public static final String JSON_PROPERTY_C = "c";
+  public static final String JSON_PROPERTY_DI = "di";
   @jakarta.annotation.Nonnull
-  private List<String> c;
+  private String di;
 
-  public static final String JSON_PROPERTY_A = "a";
-  @jakarta.annotation.Nullable
-  private Object a = null;
-
-  public ROTV2() {
+  public KeyEvent() {
   }
 
-  public ROTV2 v(@jakarta.annotation.Nonnull String v) {
+  public KeyEvent v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
     return this;
@@ -138,7 +158,7 @@ public class ROTV2 {
     this.v = v;
   }
 
-  public ROTV2 t(@jakarta.annotation.Nonnull String t) {
+  public KeyEvent t(@jakarta.annotation.Nonnull String t) {
     
     this.t = t;
     return this;
@@ -163,7 +183,7 @@ public class ROTV2 {
     this.t = t;
   }
 
-  public ROTV2 d(@jakarta.annotation.Nonnull String d) {
+  public KeyEvent d(@jakarta.annotation.Nonnull String d) {
     
     this.d = d;
     return this;
@@ -188,7 +208,7 @@ public class ROTV2 {
     this.d = d;
   }
 
-  public ROTV2 i(@jakarta.annotation.Nonnull String i) {
+  public KeyEvent i(@jakarta.annotation.Nonnull String i) {
     
     this.i = i;
     return this;
@@ -213,7 +233,7 @@ public class ROTV2 {
     this.i = i;
   }
 
-  public ROTV2 s(@jakarta.annotation.Nonnull String s) {
+  public KeyEvent s(@jakarta.annotation.Nonnull String s) {
     
     this.s = s;
     return this;
@@ -238,7 +258,7 @@ public class ROTV2 {
     this.s = s;
   }
 
-  public ROTV2 p(@jakarta.annotation.Nonnull String p) {
+  public KeyEvent p(@jakarta.annotation.Nonnull String p) {
     
     this.p = p;
     return this;
@@ -263,7 +283,32 @@ public class ROTV2 {
     this.p = p;
   }
 
-  public ROTV2 kt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
+  public KeyEvent a(@jakarta.annotation.Nullable Object a) {
+    
+    this.a = a;
+    return this;
+  }
+
+  /**
+   * Get a
+   * @return a
+   */
+  @jakarta.annotation.Nullable
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public Object getA() {
+    return a;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setA(@jakarta.annotation.Nullable Object a) {
+    this.a = a;
+  }
+
+  public KeyEvent kt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
     
     this.kt = kt;
     return this;
@@ -288,13 +333,13 @@ public class ROTV2 {
     this.kt = kt;
   }
 
-  public ROTV2 k(@jakarta.annotation.Nonnull List<String> k) {
+  public KeyEvent k(@jakarta.annotation.Nonnull List<String> k) {
     
     this.k = k;
     return this;
   }
 
-  public ROTV2 addKItem(String kItem) {
+  public KeyEvent addKItem(String kItem) {
     if (this.k == null) {
       this.k = new ArrayList<>();
     }
@@ -321,7 +366,7 @@ public class ROTV2 {
     this.k = k;
   }
 
-  public ROTV2 nt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
+  public KeyEvent nt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
     
     this.nt = nt;
     return this;
@@ -346,13 +391,13 @@ public class ROTV2 {
     this.nt = nt;
   }
 
-  public ROTV2 n(@jakarta.annotation.Nonnull List<String> n) {
+  public KeyEvent n(@jakarta.annotation.Nonnull List<String> n) {
     
     this.n = n;
     return this;
   }
 
-  public ROTV2 addNItem(String nItem) {
+  public KeyEvent addNItem(String nItem) {
     if (this.n == null) {
       this.n = new ArrayList<>();
     }
@@ -379,7 +424,7 @@ public class ROTV2 {
     this.n = n;
   }
 
-  public ROTV2 bt(@jakarta.annotation.Nonnull String bt) {
+  public KeyEvent bt(@jakarta.annotation.Nonnull String bt) {
     
     this.bt = bt;
     return this;
@@ -404,79 +449,46 @@ public class ROTV2 {
     this.bt = bt;
   }
 
-  public ROTV2 br(@jakarta.annotation.Nonnull List<String> br) {
+  public KeyEvent b(@jakarta.annotation.Nonnull List<String> b) {
     
-    this.br = br;
+    this.b = b;
     return this;
   }
 
-  public ROTV2 addBrItem(String brItem) {
-    if (this.br == null) {
-      this.br = new ArrayList<>();
+  public KeyEvent addBItem(String bItem) {
+    if (this.b == null) {
+      this.b = new ArrayList<>();
     }
-    this.br.add(brItem);
+    this.b.add(bItem);
     return this;
   }
 
   /**
-   * Get br
-   * @return br
+   * Get b
+   * @return b
    */
   @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_BR, required = true)
+  @JsonProperty(value = JSON_PROPERTY_B, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public List<String> getBr() {
-    return br;
+  public List<String> getB() {
+    return b;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_BR, required = true)
+  @JsonProperty(value = JSON_PROPERTY_B, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setBr(@jakarta.annotation.Nonnull List<String> br) {
-    this.br = br;
+  public void setB(@jakarta.annotation.Nonnull List<String> b) {
+    this.b = b;
   }
 
-  public ROTV2 ba(@jakarta.annotation.Nonnull List<String> ba) {
-    
-    this.ba = ba;
-    return this;
-  }
-
-  public ROTV2 addBaItem(String baItem) {
-    if (this.ba == null) {
-      this.ba = new ArrayList<>();
-    }
-    this.ba.add(baItem);
-    return this;
-  }
-
-  /**
-   * Get ba
-   * @return ba
-   */
-  @jakarta.annotation.Nonnull
-  @JsonProperty(value = JSON_PROPERTY_BA, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-
-  public List<String> getBa() {
-    return ba;
-  }
-
-
-  @JsonProperty(value = JSON_PROPERTY_BA, required = true)
-  @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setBa(@jakarta.annotation.Nonnull List<String> ba) {
-    this.ba = ba;
-  }
-
-  public ROTV2 c(@jakarta.annotation.Nonnull List<String> c) {
+  public KeyEvent c(@jakarta.annotation.Nonnull List<String> c) {
     
     this.c = c;
     return this;
   }
 
-  public ROTV2 addCItem(String cItem) {
+  public KeyEvent addCItem(String cItem) {
     if (this.c == null) {
       this.c = new ArrayList<>();
     }
@@ -503,29 +515,95 @@ public class ROTV2 {
     this.c = c;
   }
 
-  public ROTV2 a(@jakarta.annotation.Nullable Object a) {
+  public KeyEvent br(@jakarta.annotation.Nonnull List<String> br) {
     
-    this.a = a;
+    this.br = br;
+    return this;
+  }
+
+  public KeyEvent addBrItem(String brItem) {
+    if (this.br == null) {
+      this.br = new ArrayList<>();
+    }
+    this.br.add(brItem);
     return this;
   }
 
   /**
-   * Get a
-   * @return a
+   * Get br
+   * @return br
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_BR, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Object getA() {
-    return a;
+  public List<String> getBr() {
+    return br;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_A, required = false)
+  @JsonProperty(value = JSON_PROPERTY_BR, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setA(@jakarta.annotation.Nullable Object a) {
-    this.a = a;
+  public void setBr(@jakarta.annotation.Nonnull List<String> br) {
+    this.br = br;
+  }
+
+  public KeyEvent ba(@jakarta.annotation.Nonnull List<String> ba) {
+    
+    this.ba = ba;
+    return this;
+  }
+
+  public KeyEvent addBaItem(String baItem) {
+    if (this.ba == null) {
+      this.ba = new ArrayList<>();
+    }
+    this.ba.add(baItem);
+    return this;
+  }
+
+  /**
+   * Get ba
+   * @return ba
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_BA, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public List<String> getBa() {
+    return ba;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_BA, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setBa(@jakarta.annotation.Nonnull List<String> ba) {
+    this.ba = ba;
+  }
+
+  public KeyEvent di(@jakarta.annotation.Nonnull String di) {
+    
+    this.di = di;
+    return this;
+  }
+
+  /**
+   * Get di
+   * @return di
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DI, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getDi() {
+    return di;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_DI, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDi(@jakarta.annotation.Nonnull String di) {
+    this.di = di;
   }
 
 
@@ -537,48 +615,52 @@ public class ROTV2 {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ROTV2 ROT_V_2 = (ROTV2) o;
-    return Objects.equals(this.v, ROT_V_2.v) &&
-        Objects.equals(this.t, ROT_V_2.t) &&
-        Objects.equals(this.d, ROT_V_2.d) &&
-        Objects.equals(this.i, ROT_V_2.i) &&
-        Objects.equals(this.s, ROT_V_2.s) &&
-        Objects.equals(this.p, ROT_V_2.p) &&
-        Objects.equals(this.kt, ROT_V_2.kt) &&
-        Objects.equals(this.k, ROT_V_2.k) &&
-        Objects.equals(this.nt, ROT_V_2.nt) &&
-        Objects.equals(this.n, ROT_V_2.n) &&
-        Objects.equals(this.bt, ROT_V_2.bt) &&
-        Objects.equals(this.br, ROT_V_2.br) &&
-        Objects.equals(this.ba, ROT_V_2.ba) &&
-        Objects.equals(this.c, ROT_V_2.c) &&
-        Objects.equals(this.a, ROT_V_2.a);
+    KeyEvent keyEvent = (KeyEvent) o;
+    return Objects.equals(this.v, keyEvent.v) &&
+        Objects.equals(this.t, keyEvent.t) &&
+        Objects.equals(this.d, keyEvent.d) &&
+        Objects.equals(this.i, keyEvent.i) &&
+        Objects.equals(this.s, keyEvent.s) &&
+        Objects.equals(this.p, keyEvent.p) &&
+        Objects.equals(this.a, keyEvent.a) &&
+        Objects.equals(this.kt, keyEvent.kt) &&
+        Objects.equals(this.k, keyEvent.k) &&
+        Objects.equals(this.nt, keyEvent.nt) &&
+        Objects.equals(this.n, keyEvent.n) &&
+        Objects.equals(this.bt, keyEvent.bt) &&
+        Objects.equals(this.b, keyEvent.b) &&
+        Objects.equals(this.c, keyEvent.c) &&
+        Objects.equals(this.br, keyEvent.br) &&
+        Objects.equals(this.ba, keyEvent.ba) &&
+        Objects.equals(this.di, keyEvent.di);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, t, d, i, s, p, kt, k, nt, n, bt, br, ba, c, a);
+    return Objects.hash(v, t, d, i, s, p, a, kt, k, nt, n, bt, b, c, br, ba, di);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ROTV2 {\n");
+    sb.append("class KeyEvent {\n");
     sb.append("    v: ").append(toIndentedString(v)).append("\n");
     sb.append("    t: ").append(toIndentedString(t)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
     sb.append("    i: ").append(toIndentedString(i)).append("\n");
     sb.append("    s: ").append(toIndentedString(s)).append("\n");
     sb.append("    p: ").append(toIndentedString(p)).append("\n");
+    sb.append("    a: ").append(toIndentedString(a)).append("\n");
     sb.append("    kt: ").append(toIndentedString(kt)).append("\n");
     sb.append("    k: ").append(toIndentedString(k)).append("\n");
     sb.append("    nt: ").append(toIndentedString(nt)).append("\n");
     sb.append("    n: ").append(toIndentedString(n)).append("\n");
     sb.append("    bt: ").append(toIndentedString(bt)).append("\n");
+    sb.append("    b: ").append(toIndentedString(b)).append("\n");
+    sb.append("    c: ").append(toIndentedString(c)).append("\n");
     sb.append("    br: ").append(toIndentedString(br)).append("\n");
     sb.append("    ba: ").append(toIndentedString(ba)).append("\n");
-    sb.append("    c: ").append(toIndentedString(c)).append("\n");
-    sb.append("    a: ").append(toIndentedString(a)).append("\n");
+    sb.append("    di: ").append(toIndentedString(di)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -45,7 +45,7 @@ public class IdentifiersNameMultisigJoinPostRequest {
 
   public static final String JSON_PROPERTY_SIGS = "sigs";
   @jakarta.annotation.Nullable
-  private List<String> sigs = new ArrayList<>();
+  private List<String> sigs;
 
   public static final String JSON_PROPERTY_GID = "gid";
   @jakarta.annotation.Nullable
@@ -53,11 +53,11 @@ public class IdentifiersNameMultisigJoinPostRequest {
 
   public static final String JSON_PROPERTY_SMIDS = "smids";
   @jakarta.annotation.Nullable
-  private List<String> smids = new ArrayList<>();
+  private List<String> smids;
 
   public static final String JSON_PROPERTY_RMIDS = "rmids";
   @jakarta.annotation.Nullable
-  private List<String> rmids = new ArrayList<>();
+  private List<String> rmids;
 
   public IdentifiersNameMultisigJoinPostRequest() {
   }

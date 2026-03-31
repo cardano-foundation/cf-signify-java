@@ -14,6 +14,13 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
+import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
@@ -21,6 +28,8 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigIncept
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -75,18 +84,15 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         // Exchange OOBIs
         System.out.println("Resolving OOBIs");
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
                 new GetOobisArgs(client1, "member1", "agent"),
                 new GetOobisArgs(client2, "member2", "agent"),
                 new GetOobisArgs(client3, "issuer", "agent")
         );
-        oobi1 = oobis.get(0);
-        oobi2 = oobis.get(1);
-        oobi3 = oobis.get(2);
 
-        oobis1 = getOobisIndexAt0(oobi1);
-        oobis2 = getOobisIndexAt0(oobi2);
-        oobis3 = getOobisIndexAt0(oobi3);
+        oobis1 = getOobisIndexAt0(oobis.get(0));
+        oobis2 = getOobisIndexAt0(oobis.get(1));
+        oobis3 = getOobisIndexAt0(oobis.get(2));
 
         Object op1 = client1.oobis().resolve(oobis2, "member2");
         op1 = waitOperation(client1, op1);
@@ -167,11 +173,10 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         // Multisig end role
         aid1 = client1.identifiers().get("member1").get();
         aid2 = client2.identifiers().get("member2").get();
-        Object members = client1.identifiers().members("holder");
+        GroupMember members = client1.identifiers().members("holder");
         HabState ghab1 = client1.identifiers().get("holder").get();
-        List<Map<String, Object>> signing = (List<Map<String, Object>>) Utils.toMap(members).get("signing");
-        String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing.getFirst().get("ends")).get("agent")).keySet()).getFirst();
-        String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing.get(1).get("ends")).get("agent")).keySet()).getFirst();
+        String eid1 = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
+        String eid2 = members.getSigning().get(1).getEnds().getAgent().keySet().iterator().next();
 
         System.out.println("Starting multisig end role authorization for agent " + eid1);
 
@@ -220,15 +225,13 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid).get();
-        List<HashMap<String, Object>> listRes = (List<HashMap<String, Object>>) resp;
-        Map<String, Object> resMap = listRes.getFirst();
-        Map<String, Object> exn = (Map<String, Object>) resMap.get("exn");
+        List<ExnMultisig> listRes = client2.groups().getRequest(msgSaid).get();
+        Exn exn = listRes.getFirst().getExn();
 
         // stamp, eid and role are provided in the exn message
-        String rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        String rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        String rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+        String rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        String rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        String rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
 
         endRoleRes = client2.
                 identifiers().
@@ -326,15 +329,13 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
         System.out.println("Member2 received exchange message to join the end role authorization");
 
-        resp = client2.groups().getRequest(msgSaid).get();
-        listRes = (List<HashMap<String, Object>>) resp;
-        resMap = listRes.getFirst();
-        exn = (Map<String, Object>) resMap.get("exn");
+        listRes = client2.groups().getRequest(msgSaid).get();
+        exn = listRes.getFirst().getExn();
 
         // stamp, eid and role are provided in the exn message
-        rpystamp = Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("dt").toString();
-        rpyrole = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("role").toString();
-        rpyeid = Utils.toMap(Utils.toMap(Utils.toMap(exn.get("e")).get("rpy")).get("a")).get("eid").toString();
+        rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
 
         endRoleRes = client2.
             identifiers().
@@ -386,12 +387,10 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("End role authorization for agent " + eid2 + " completed!");
 
         // Holder resolve multisig OOBI
-        Object oobisRes = client1.oobis().get("holder", "agent").get();
-        Map<String, Object> oobiBody = (Map<String, Object>) oobisRes;
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
+        OOBI oobisRes = client1.oobis().get("holder", "agent").get();
+        List<String> oobisResponse = oobisRes.getOobis();
 
-        String oobiMultisig = oobisResponse.getFirst().split("/agent/")[0];
-
+        String oobiMultisig = oobisResponse.get(0).split("/agent/")[0];
         op3 = client3.oobis().resolve(oobiMultisig, "holder");
         waitOperation(client3, op3);
         System.out.println("Issuer resolved multisig holder OOBI");
@@ -402,10 +401,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         System.out.println("Issuer starting credential issuance to holder...");
 
-        Object registires = client3.registries().list("issuer");
-        List<HashMap<String, Object>> listRegistries = (List<HashMap<String, Object>>) registires;
-        Map<String, Object> registryMap = listRegistries.getFirst();
-        String regk = registryMap.get("regk").toString();
+        List<Registry> registires = client3.registries().list("issuer");
+        Registry registry = registires.get(0);
+        String regk = registry.getRegk();
 
         CredentialSubject subject = CredentialSubject.builder()
                 .i(holderAid.getPrefix())
@@ -427,23 +425,22 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid = waitAndMarkNotification(client1, "/exn/ipex/grant");
         System.out.println("Member1 received /exn/ipex/grant msg with SAID: " + grantMsgSaid);
 
-        Object exnRes = client1.exchanges().get(grantMsgSaid).get();
+        ExchangeResource exnRes = client1.exchanges().get(grantMsgSaid).get();
         recp = Stream.of(aid2.getState())
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        LinkedHashMap<String, Object> exnResList = castObjectToLinkedHashMap(exnRes);
-        LinkedHashMap<String, Object> getExn = castObjectToLinkedHashMap(exnResList.get("exn"));
+        Exn getExn = exnRes.getExn();
 
         op1 = multisigAdmitCredential(client1,
                 "holder",
                 "member1",
-                getExn.get("d").toString(),
-                getExn.get("i").toString(),
+                getExn.getD(),
+                getExn.getI(),
                 recp
         );
 
-        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.get("e"));
+        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.getE());
         LinkedHashMap<String, Object> exnGetAcdc = castObjectToLinkedHashMap(exnGetE.get("acdc"));
 
         System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
@@ -451,7 +448,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String grantMsgSaid2 = waitAndMarkNotification(client2, "/exn/ipex/grant");
         System.out.println("Member2 received /exn/ipex/grant msg with SAID: " + grantMsgSaid2);
 
-        Object exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
+        ExchangeResource exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
         assertEquals(grantMsgSaid2, grantMsgSaid);
         System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
 
@@ -462,8 +459,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         op2 = multisigAdmitCredential(client2,
                 "holder",
                 "member2",
-                getExn.get("d").toString(),
-                getExn.get("i").toString(),
+                getExn.getD(),
+                getExn.getI(),
                 recp2
         );
         System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
@@ -472,7 +469,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitOperation(client2, op2);
 
         CredentialFilter args = CredentialFilter.builder().build();
-        List<Map<String, Object>> creds1 = (List<Map<String, Object>>) client1.credentials().list(args);
+        List<Credential> creds1 = client1.credentials().list(args);
         System.out.println("Member1 has " + creds1.size() + " credential");
 
         int retryCount = 0;
@@ -480,7 +477,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             retryCount++;
             System.out.println(" retry-" + retryCount + ": No credentials yet...");
 
-            creds1 = (List<Map<String, Object>>) client1.credentials().list(args);
+            creds1 = client1.credentials().list(args);
             if (!creds1.isEmpty()) break;
 
             TimeUnit.SECONDS.sleep(1);
@@ -510,12 +507,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         Object op = result.op();
         waitOperation(client, op);
 
-        Object registries = client.registries().list(name);
-        registryList = (List<HashMap<String, Object>>) registries;
-        HashMap<String, Object> opResponseName = registryList.getFirst();
+        List<Registry> registryList = client.registries().list(name);
+        Registry opResponseName = registryList.get(0);
 
         assertEquals(1, registryList.size());
-        assertEquals(registryName, opResponseName.get("name"));
+        assertEquals(registryName, opResponseName.getName());
         return opResponseName;
     }
 
@@ -527,15 +523,14 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         IssueCredentialResult result = client.credentials().issue(name, data);
         waitOperation(client, result.getOp());
 
-        Object creds = client.credentials().list(CredentialFilter.builder().build());
-        List<HashMap<String, Object>> listCreds = (List<HashMap<String, Object>>) creds;
-        Map<String, Object> credMap = listCreds.getFirst();
-        Map<String, Object> credSad = (Map<String, Object>) credMap.get("sad");
-        Map<String, Object> credStatus = (Map<String, Object>) credMap.get("status");
+        List<Credential> listCreds = client.credentials().list(CredentialFilter.builder().build());
+        Credential cred = listCreds.getFirst();
+        CredentialSad credSad = cred.getSad();
+        CredentialState credStatus = cred.getStatus();
 
         assertEquals(1, listCreds.size());
-        assertEquals(data.getS(), credSad.get("s"));
-        assertEquals("0", credStatus.get("s"));
+        assertEquals(data.getS(), credSad.getS());
+        assertEquals("0", credStatus.getS());
 
         String dt = createTimestamp();
 
@@ -561,7 +556,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         }
 
         System.out.println("Grant message sent");
-        return listCreds.getFirst();
+        return cred;
     }
 
     public Object multisigAdmitCredential(
@@ -624,10 +619,9 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         return op;
     }
 
-    public String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = (Map<String, Object>) oobi;
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
+    public String getOobisIndexAt0(OOBI oobi) {
+        List<String> oobisResponse = oobi.getOobis();
+        return oobisResponse.get(0);
     }
 
 }

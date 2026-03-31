@@ -9,16 +9,15 @@ import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.core.Manager;
+import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,7 +90,7 @@ public class RandyTest {
 
         Coring.KeyEvents events = client1.keyEvents();
 
-        List<Map<String, Object>> logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
+        List<KeyEventRecord> logList = events.get(opResponsePrefix);
         assertEquals(2, logList.size());
 
         icpResult = client1.identifiers().rotate("aid1");
@@ -112,7 +111,7 @@ public class RandyTest {
                 rot.getVerfers().getFirst().getQb64b());
         assertEquals(dig.getQb64(), icp.getDigers().getFirst().getQb64());
 
-        logList = (List<Map<String, Object>>) events.get(opResponsePrefix);
+        logList = events.get(opResponsePrefix);
         assertEquals(3, logList.size());
         assertOperations(Collections.singletonList(client1));
     }

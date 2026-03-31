@@ -63,7 +63,7 @@ public class CreateRegistryRequest {
 
   public static final String JSON_PROPERTY_BAKS = "baks";
   @jakarta.annotation.Nonnull
-  private List<String> baks = new ArrayList<>();
+  private List<String> baks;
 
   public static final String JSON_PROPERTY_EST_ONLY = "estOnly";
   @jakarta.annotation.Nullable

@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.signify.app.Contacting;
+import org.cardanofoundation.signify.generated.keria.model.Contact;
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
@@ -21,7 +21,7 @@ import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredenti
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.*;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
@@ -42,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static List<Notification> filteredNotes;
-    static Retry retry = new Retry();
 
     public static class Aid {
         public String name;
@@ -138,7 +138,7 @@ public class TestUtils {
         return result;
     }
 
-    public static Object getIssuedCredential(
+    public static Credential getIssuedCredential(
             SignifyClient issuerClient,
             HabState issuerAid,
             HabState recipientAid,
@@ -152,9 +152,9 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder()
                 .filter(filter)
                 .build();
-        List<Object> credentialList = (List<Object>) issuerClient.credentials().list(credentialFilter);
+        List<Credential> credentialList = issuerClient.credentials().list(credentialFilter);
         assert credentialList.size() <= 1;
-        return credentialList.isEmpty() ? null : credentialList.getFirst();
+        return credentialList.isEmpty() ? null : credentialList.get(0);
     }
 
     public static HabState getOrCreateAID(SignifyClient client, String name, CreateIdentifierArgs kargs) throws InterruptedException, IOException, DigestException, LibsodiumException {
@@ -259,8 +259,11 @@ public class TestUtils {
             op = operationToObject(waitOperation(client, op));
             if (op instanceof String) {
                 try {
-                    HashMap<String, Object> map = objectMapper.readValue((String) op, HashMap.class);
-                    HashMap<String, Object> idMap = (HashMap<String, Object>) map.get("response");
+                    HashMap<String, Object> map = objectMapper.readValue(
+                            (String) op,
+                            new TypeReference<HashMap<String, Object>>() {}
+                    );
+                    Map<String, Object> idMap = castObjectToLinkedHashMap(map.get("response"));
                     id = idMap.get("i");
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -278,8 +281,8 @@ public class TestUtils {
             }
         }
 
-        Object oobi = client.oobis().get(name, "agent").get();
-        String getOobi = ((LinkedHashMap) oobi).get("oobis").toString().replaceAll("[\\[\\]]", "");
+        OOBI oobi = client.oobis().get(name, "agent").get();
+        String getOobi = oobi.getOobis().toString().replaceAll("[\\[\\]]", "");
         String[] result = new String[]{
                 id != null ? id.toString() : null, getOobi
         };
@@ -287,9 +290,9 @@ public class TestUtils {
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws IOException, InterruptedException, LibsodiumException {
-        List<Contacting.Contact> list = Arrays.asList(client.contacts().list(null, "alias", "^" + name + "$"));
+        List<Contact> list = client.contacts().list(null, "alias", "^" + name + "$");
         if (!list.isEmpty()) {
-            Contacting.Contact contact = list.getFirst();
+            Contact contact = list.getFirst();
             if (contact.getOobi().equals(oobi)) {
                 return contact.getId();
             }
@@ -307,7 +310,7 @@ public class TestUtils {
         return null;
     }
 
-    public static Object getOrIssueCredential(
+    public static Credential getOrIssueCredential(
             SignifyClient issuerClient,
             Aid issuerAid,
             Aid recipientAid,
@@ -320,7 +323,7 @@ public class TestUtils {
         return getOrIssueCredential(issuerClient, issuerAid, recipientAid, regk, credData, schema, rules, source, false);
     }
 
-    public static Object getOrIssueCredential(
+    public static Credential getOrIssueCredential(
             SignifyClient issuerClient,
             Aid issuerAid,
             Aid recipientAid,
@@ -333,17 +336,14 @@ public class TestUtils {
     ) throws Exception {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
 
-        Object credentialList = issuerClient.credentials().list(credentialFilter);
-        if (credentialList instanceof List && !((List<?>) credentialList).isEmpty()) {
-            Optional<?> credential = ((List<?>) credentialList).stream()
+        List<Credential> credentialList = issuerClient.credentials().list(credentialFilter);
+        if (credentialList != null && !credentialList.isEmpty()) {
+            Optional<Credential> credential = credentialList.stream()
                     .filter(cred -> {
-                        Map<String, Object> credMap = Utils.toMap(cred);
-                        Map<String, Object> sad = Utils.toMap(credMap.get("sad"));
-                        Map<String, Object> a = Utils.toMap(sad.get("a"));
-
-                        return schema.equals(sad.get("s")) &&
-                                issuerAid.prefix.equals(sad.get("i")) &&
-                                recipientAid.prefix.equals(a.get("i"));
+                        CredentialSad sad = cred.getSad();
+                        return schema.equals(sad.getS()) &&
+                                issuerAid.prefix.equals(sad.getI()) &&
+                                recipientAid.prefix.equals(sad.getA().getI());
                     })
                     .findFirst();
             if (credential.isPresent()) {
@@ -366,9 +366,8 @@ public class TestUtils {
 
         IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
         waitOperation(issuerClient, issResult.getOp());
-        Object credential = issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
 
-        return credential;
+        return issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
     }
 
     public static List<KeyStateRecord> getStates(SignifyClient client, List<String> prefixes) throws IOException, InterruptedException {
@@ -416,22 +415,9 @@ public class TestUtils {
         client.operations().delete(name);
     }
 
-    public static Object getReceivedCredential(SignifyClient client, String credID) throws Exception {
-        Map<String, Object> filter = new LinkedHashMap<>();
-        filter.put("-d", credID);
-
-        CredentialFilter credentialFilter = CredentialFilter.builder().build();
-        credentialFilter.setFilter(filter);
-
-        Object credentialList = client.credentials().list(credentialFilter);
-        ArrayList<String> credentialListBody = (ArrayList<String>) credentialList;
-
-        Object credential = null;
-        if (!credentialListBody.isEmpty()) {
-            assertEquals(1, credentialListBody.size());
-            credential = credentialListBody.getFirst();
-        }
-        return credential;
+    public static Credential getReceivedCredential(SignifyClient client, String credID) throws Exception {
+        // @TODO - focnnor: Refactor calling functions to expect Optional, not null - probably remove indirection too.
+        return client.credentials().get(credID).orElse(null);
     }
 
     public static void markAndRemoveNotification(SignifyClient client, Notification note) {
@@ -457,17 +443,17 @@ public class TestUtils {
         waitOperation(client, op);
     }
 
-    public static Object waitForCredential(SignifyClient client, String credSAID) throws Exception {
+    public static Credential waitForCredential(SignifyClient client, String credSAID) throws Exception {
         return waitForCredential(client, credSAID, null);
     }
 
-    public static Object waitForCredential(SignifyClient client, String credSAID, Integer MAX_RETRIES) throws Exception {
+    public static Credential waitForCredential(SignifyClient client, String credSAID, Integer MAX_RETRIES) throws Exception {
         if (MAX_RETRIES == null) {
             MAX_RETRIES = 10;
         }
         int retryCount = 0;
         while (retryCount < MAX_RETRIES) {
-            Object cred = getReceivedCredential(client, credSAID);
+            Credential cred = getReceivedCredential(client, credSAID);
             if (cred != null) {
                 return cred;
             }

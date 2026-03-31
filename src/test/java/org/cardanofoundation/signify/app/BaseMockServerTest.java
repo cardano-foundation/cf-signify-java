@@ -268,21 +268,60 @@ public class BaseMockServerTest {
         ]""";
 
     public static final String MOCK_KEY_EVENT = """
+        [{
+            "ked": {
+                "v": "KERI10JSON00012b_",
+                "t": "icp",
+                "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "s": "0",
+                "kt": "1",
+                "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+                "nt": "1",
+                "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+                "bt": "0",
+                "b": [],
+                "c": [],
+                "a": []
+            },
+            "atc": ""
+        }]""";
+
+    public static final String MOCK_EXN = """
         {
-            "v": "KERI10JSON00012b_",
-            "t": "icp",
-            "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
-            "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
-            "s": "0",
-            "kt": "1",
-            "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
-            "nt": "1",
-            "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
-            "bt": "0",
-            "b": [],
-            "c": [],
-            "a": []
+            "v": "KERI10JSON000070_",
+            "t": "exn",
+            "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+            "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+            "p": "",
+            "dt": "2023-08-23T15:16:07.553000+00:00",
+            "r": "/multisig/iss",
+            "q": {},
+            "a": {},
+            "e": {}
         }""";
+
+    public static final String MOCK_EXN_MULTISIG_LIST = """
+        [{
+            "exn": {
+                "v": "KERI10JSON000070_",
+                "t": "exn",
+                "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+                "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "p": "",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": "/multisig/iss",
+                "q": {},
+                "a": {},
+                "e": {}
+            },
+            "paths": {},
+            "groupName": "multisig",
+            "memberName": "member1",
+            "sender": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose"
+        }]""";
 
     public static final String MOCK_CREDENTIAL = """
         {
@@ -358,6 +397,10 @@ public class BaseMockServerTest {
             String query = req.getRequestUrl().query();
             long preCount = query != null ? query.split("pre=").length - 1 : 0;
             body = preCount > 1 ? MOCK_KEY_STATES_ARRAY : "[" + MOCK_KEY_STATE + "]";
+        } else if (reqUrl.startsWith(url + "/multisig/request")) {
+            body = MOCK_EXN_MULTISIG_LIST;
+        } else if (reqUrl.contains("/multisig/request")) {
+            body = MOCK_EXN;
         } else {
             body = MOCK_GET_AID;
         }

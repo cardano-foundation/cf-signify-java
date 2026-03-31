@@ -90,7 +90,7 @@ public class OOBI {
 
   public static final String JSON_PROPERTY_OOBIS = "oobis";
   @jakarta.annotation.Nonnull
-  private List<String> oobis = new ArrayList<>();
+  private List<String> oobis;
 
   public OOBI() {
   }
