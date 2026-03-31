@@ -77,7 +77,7 @@ public class EXNV2 {
 
   public static final String JSON_PROPERTY_Q = "q";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> q = new HashMap<>();
+  private Map<String, Object> q;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable

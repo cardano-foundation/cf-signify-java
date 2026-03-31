@@ -11,19 +11,21 @@ import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.security.DigestException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.castObjectToLinkedHashMap;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitAndMarkNotification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -138,7 +140,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         HabState aidLAR3 = habStates.get(7);
         HabState aidECR = habStates.get(8);
 
-        List<Object> oobisLst = getOobisAsync(
+        List<OOBI> oobisLst = getOobisAsync(
                 new GetOobisArgs(clientGAR1, "GAR1", "agent"),
                 new GetOobisArgs(clientGAR2, "GAR2", "agent"),
                 new GetOobisArgs(clientQAR1, "QAR1", "agent"),
@@ -149,15 +151,15 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new GetOobisArgs(clientLAR3, "LAR3", "agent"),
                 new GetOobisArgs(clientECR, "ECR", "agent")
         );
-        Object oobiGAR1 = oobisLst.get(0);
-        Object oobiGAR2 = oobisLst.get(1);
-        Object oobiQAR1 = oobisLst.get(2);
-        Object oobiQAR2 = oobisLst.get(3);
-        Object oobiQAR3 = oobisLst.get(4);
-        Object oobiLAR1 = oobisLst.get(5);
-        Object oobiLAR2 = oobisLst.get(6);
-        Object oobiLAR3 = oobisLst.get(7);
-        Object oobiECR = oobisLst.get(8);
+        OOBI oobiGAR1 = oobisLst.get(0);
+        OOBI oobiGAR2 = oobisLst.get(1);
+        OOBI oobiQAR1 = oobisLst.get(2);
+        OOBI oobiQAR2 = oobisLst.get(3);
+        OOBI oobiQAR3 = oobisLst.get(4);
+        OOBI oobiLAR1 = oobisLst.get(5);
+        OOBI oobiLAR2 = oobisLst.get(6);
+        OOBI oobiLAR3 = oobisLst.get(7);
+        OOBI oobiECR = oobisLst.get(8);
 
         getOrCreateContactAsync(
                 new GetOrCreateContactArgs(clientGAR1, "GAR2", getOobisIndexAt0(oobiGAR2)),
@@ -260,10 +262,10 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Add endpoint role authorization for all GARs' agents.
         // Skip if they have already been authorized.
-        Map<String, Object> oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
-        Map<String, Object> oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
+        OOBI oobiGEDAbyGAR1 = clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
+        OOBI oobiGEDAbyGAR2 = clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
 
-        if (((List<String>) oobiGEDAbyGAR1.get("oobis")).size() == 0 || ((List<String>) oobiGEDAbyGAR2.get("oobis")).size() == 0) {
+        if (oobiGEDAbyGAR1.getOobis().size() == 0 || oobiGEDAbyGAR2.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientGAR1,
@@ -293,10 +295,10 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/rpy");
 
-            oobiGEDAbyGAR1 = (Map<String, Object>) clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
-            oobiGEDAbyGAR2 = (Map<String, Object>) clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
+            oobiGEDAbyGAR1 = clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
+            oobiGEDAbyGAR2 = clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
         }
-        assertEquals(oobiGEDAbyGAR1.get("role"), oobiGEDAbyGAR2.get("role"));
+        assertEquals(oobiGEDAbyGAR1.getRole(), oobiGEDAbyGAR2.getRole());
         assertEquals(getOobisIndexAt0(oobiGEDAbyGAR1), getOobisIndexAt0(oobiGEDAbyGAR2));
 
         // QARs, LARs, ECR resolve GEDA's OOBI
@@ -428,18 +430,18 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // Add endpoint role authorization for all QARs' agents.
         // Skip if they have already been authorized.
-        List<Object> oobiLst = getOobisAsync(
+        List<OOBI> oobiLst = getOobisAsync(
                 new GetOobisArgs(clientQAR1, aidQVI.getName(), "agent"),
                 new GetOobisArgs(clientQAR2, aidQVI.getName(), "agent"),
                 new GetOobisArgs(clientQAR3, aidQVI.getName(), "agent")
         );
-        Map<String, Object> oobiQVIbyQAR1 = (Map<String, Object>) oobiLst.get(0);
-        Map<String, Object> oobiQVIbyQAR2 = (Map<String, Object>) oobiLst.get(1);
-        Map<String, Object> oobiQVIbyQAR3 = (Map<String, Object>) oobiLst.get(2);
+        OOBI oobiQVIbyQAR1 = oobiLst.get(0);
+        OOBI oobiQVIbyQAR2 = oobiLst.get(1);
+        OOBI oobiQVIbyQAR3 = oobiLst.get(2);
 
-        if (((List<String>) oobiQVIbyQAR1.get("oobis")).size() == 0
-                || ((List<String>) oobiQVIbyQAR2.get("oobis")).size() == 0
-                || ((List<String>) oobiQVIbyQAR3.get("oobis")).size() == 0) {
+        if (oobiQVIbyQAR1.getOobis().size() == 0
+                || oobiQVIbyQAR2.getOobis().size() == 0
+                || oobiQVIbyQAR3.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientQAR1,
@@ -487,12 +489,12 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new GetOobisArgs(clientQAR2, aidQVI.getName(), "agent"),
                     new GetOobisArgs(clientQAR3, aidQVI.getName(), "agent")
             );
-            oobiQVIbyQAR1 = (Map<String, Object>) oobiLst.get(0);
-            oobiQVIbyQAR2 = (Map<String, Object>) oobiLst.get(1);
-            oobiQVIbyQAR3 = (Map<String, Object>) oobiLst.get(2);
+            oobiQVIbyQAR1 = oobiLst.get(0);
+            oobiQVIbyQAR2 = oobiLst.get(1);
+            oobiQVIbyQAR3 = oobiLst.get(2);
         }
-        assertEquals(oobiQVIbyQAR1.get("role"), oobiQVIbyQAR2.get("role"));
-        assertEquals(oobiQVIbyQAR1.get("role"), oobiQVIbyQAR3.get("role"));
+        assertEquals(oobiQVIbyQAR1.getRole(), oobiQVIbyQAR2.getRole());
+        assertEquals(oobiQVIbyQAR1.getRole(), oobiQVIbyQAR3.getRole());
         assertEquals(getOobisIndexAt0(oobiQVIbyQAR1), getOobisIndexAt0(oobiQVIbyQAR2));
         assertEquals(getOobisIndexAt0(oobiQVIbyQAR1), getOobisIndexAt0(oobiQVIbyQAR3));
 
@@ -509,8 +511,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // GARs creates a registry for GEDA.
         // Skip if the registry has already been created.
-        List<Map<String, Object>> gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
-        List<Map<String, Object>> gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
+        List<Registry> gedaRegistrybyGAR1 = clientGAR1.registries().list(aidGEDA.getName());
+        List<Registry> gedaRegistrybyGAR2 = clientGAR2.registries().list(aidGEDA.getName());
 
         if (gedaRegistrybyGAR1.size() == 0 && gedaRegistrybyGAR2.size() == 0) {
             String nonce = Coring.randomNonce();
@@ -540,23 +542,23 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/vcp");
-            gedaRegistrybyGAR1 = (List<Map<String, Object>>) clientGAR1.registries().list(aidGEDA.getName());
-            gedaRegistrybyGAR2 = (List<Map<String, Object>>) clientGAR2.registries().list(aidGEDA.getName());
+            gedaRegistrybyGAR1 = clientGAR1.registries().list(aidGEDA.getName());
+            gedaRegistrybyGAR2 = clientGAR2.registries().list(aidGEDA.getName());
         }
-        assertEquals(gedaRegistrybyGAR1.get(0).get("name"), gedaRegistrybyGAR2.get(0).get("name"));
-        assertEquals(gedaRegistrybyGAR1.get(0).get("regk"), gedaRegistrybyGAR2.get(0).get("regk"));
+        assertEquals(gedaRegistrybyGAR1.get(0).getName(), gedaRegistrybyGAR2.get(0).getName());
+        assertEquals(gedaRegistrybyGAR1.get(0).getRegk(), gedaRegistrybyGAR2.get(0).getRegk());
 
-        Map<String, Object> gedaRegistry = gedaRegistrybyGAR1.get(0);
+        Registry gedaRegistry = gedaRegistrybyGAR1.get(0);
         // GEDA issues a QVI vLEI credential to the QVI AID.
         // Skip if the credential has already been issued.
-        Map<String, Object> qviCredbyGAR1 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential qviCredbyGAR1 = TestUtils.getIssuedCredential(
                 clientGAR1,
                 aidGEDA,
                 aidQVI,
                 QVI_SCHEMA_SAID
         );
 
-        Map<String, Object> qviCredbyGAR2 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential qviCredbyGAR2 = TestUtils.getIssuedCredential(
                 clientGAR2,
                 aidGEDA,
                 aidQVI,
@@ -572,7 +574,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             CredentialData kargsIss = CredentialData.builder()
                     .i(aidGEDA.getPrefix())
-                    .ri(gedaRegistry.get("regk").toString())
+                    .ri(gedaRegistry.getRegk())
                     .s(QVI_SCHEMA_SAID)
                     .a(kargsSub)
                     .build();
@@ -602,14 +604,14 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/iss");
 
-            qviCredbyGAR1 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            qviCredbyGAR1 = TestUtils.getIssuedCredential(
                     clientGAR1,
                     aidGEDA,
                     aidQVI,
                     QVI_SCHEMA_SAID
             );
 
-            qviCredbyGAR2 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            qviCredbyGAR2 = TestUtils.getIssuedCredential(
                     clientGAR2,
                     aidGEDA,
                     aidQVI,
@@ -642,24 +644,24 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/exn");
         }
 
-        Map<String, Object> qviCredbyGAR1Sad = castObjectToLinkedHashMap(qviCredbyGAR1.get("sad"));
-        Map<String, Object> qviCredbyGAR2Sad = castObjectToLinkedHashMap(qviCredbyGAR2.get("sad"));
-        assertEquals(qviCredbyGAR1Sad.get("d"), qviCredbyGAR2Sad.get("d"));
-        assertEquals(qviCredbyGAR1Sad.get("s"), QVI_SCHEMA_SAID);
-        assertEquals(qviCredbyGAR1Sad.get("i"), aidGEDA.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(qviCredbyGAR1Sad.get("a")).get("i"), aidQVI.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(qviCredbyGAR1.get("status")).get("s"), "0");
-        assertNotNull(qviCredbyGAR1.get("atc"));
+        CredentialSad qviCredbyGAR1Sad = qviCredbyGAR1.getSad();
+        CredentialSad qviCredbyGAR2Sad = qviCredbyGAR2.getSad();
+        assertEquals(qviCredbyGAR1Sad.getD(), qviCredbyGAR2Sad.getD());
+        assertEquals(qviCredbyGAR1Sad.getS(), QVI_SCHEMA_SAID);
+        assertEquals(qviCredbyGAR1Sad.getI(), aidGEDA.getPrefix());
+        assertEquals(qviCredbyGAR1Sad.getA().getI(), aidQVI.getPrefix());
+        assertEquals(qviCredbyGAR1.getStatus().getS(), "0");
+        assertNotNull(qviCredbyGAR1.getAtc());
 
-        Map<String, Object> qviCred = qviCredbyGAR1;
-        Map<String, Object> qviCredSad = castObjectToLinkedHashMap(qviCred.get("sad"));
-        System.out.println("GEDA has issued a QVI vLEI credential with SAID: " + qviCredbyGAR1Sad.get("d"));
+        Credential qviCred = qviCredbyGAR1;
+        CredentialSad qviCredSad = qviCred.getSad();
+        System.out.println("GEDA has issued a QVI vLEI credential with SAID: " + qviCredSad.getD());
 
         // GEDA and QVI exchange grant and admit messages.
         // Skip if QVI has already received the credential.
-        Map<String, Object> qviCredbyQAR1 = (Map<String, Object>) TestUtils.getReceivedCredential(clientGAR1, qviCredSad.get("d").toString());
-        Map<String, Object> qviCredbyQAR2 = (Map<String, Object>) TestUtils.getReceivedCredential(clientGAR2, qviCredSad.get("d").toString());
-        Map<String, Object> qviCredbyQAR3 = (Map<String, Object>) TestUtils.getReceivedCredential(clientQAR3, qviCredSad.get("d").toString());
+        Credential qviCredbyQAR1 = TestUtils.getReceivedCredential(clientGAR1, qviCredSad.getD());
+        Credential qviCredbyQAR2 = TestUtils.getReceivedCredential(clientGAR2, qviCredSad.getD());
+        Credential qviCredbyQAR3 = TestUtils.getReceivedCredential(clientQAR3, qviCredSad.getD());
 
 
         if (qviCredbyQAR1 == null || qviCredbyQAR2 == null || qviCredbyQAR3 == null) {
@@ -700,16 +702,17 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientQAR2, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientQAR3, "/exn/ipex/admit");
 
-            qviCredbyQAR1 = (Map<String, Object>) TestUtils.waitForCredential(clientQAR1, qviCredSad.get("d").toString());
-            qviCredbyQAR2 = (Map<String, Object>) TestUtils.waitForCredential(clientQAR2, qviCredSad.get("d").toString());
-            qviCredbyQAR3 = (Map<String, Object>) TestUtils.waitForCredential(clientQAR3, qviCredSad.get("d").toString());
+            qviCredbyQAR1 = TestUtils.waitForCredential(clientQAR1, qviCredSad.getD());
+            qviCredbyQAR2 = TestUtils.waitForCredential(clientQAR2, qviCredSad.getD());
+            qviCredbyQAR3 = TestUtils.waitForCredential(clientQAR3, qviCredSad.getD());
         }
-        Map<String, Object> qviCredbyQAR1Sad = castObjectToLinkedHashMap(qviCredbyQAR1.get("sad"));
-        Map<String, Object> qviCredbyQAR2Sad = castObjectToLinkedHashMap(qviCredbyQAR2.get("sad"));
-        Map<String, Object> qviCredbyQAR3Sad = castObjectToLinkedHashMap(qviCredbyQAR3.get("sad"));
-        assertEquals(qviCredSad.get("d"), qviCredbyQAR1Sad.get("d"));
-        assertEquals(qviCredSad.get("d"), qviCredbyQAR2Sad.get("d"));
-        assertEquals(qviCredSad.get("d"), qviCredbyQAR3Sad.get("d"));
+        CredentialSad qviCredbyQAR1Sad = qviCredbyQAR1.getSad();
+        CredentialSad qviCredbyQAR2Sad = qviCredbyQAR2.getSad();
+        CredentialSad qviCredbyQAR3Sad = qviCredbyQAR3.getSad();
+
+        assertEquals(qviCredSad.getD(), qviCredbyQAR1Sad.getD());
+        assertEquals(qviCredSad.getD(), qviCredbyQAR2Sad.getD());
+        assertEquals(qviCredSad.getD(), qviCredbyQAR3Sad.getD());
 
         // Create a multisig AID for the LE.
         // Skip if a LE AID has already been incepted.
@@ -788,13 +791,13 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
                 new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
         );
-        Map<String, Object> oobiLEbyLAR1 = (Map<String, Object>) oobiLst.get(0);
-        Map<String, Object> oobiLEbyLAR2 = (Map<String, Object>) oobiLst.get(1);
-        Map<String, Object> oobiLEbyLAR3 = (Map<String, Object>) oobiLst.get(2);
+        OOBI oobiLEbyLAR1 = (OOBI) oobiLst.get(0);
+        OOBI oobiLEbyLAR2 = (OOBI) oobiLst.get(1);
+        OOBI oobiLEbyLAR3 = (OOBI) oobiLst.get(2);
 
-        if (((List<Object>) oobiLEbyLAR1.get("oobis")).size() == 0
-                || ((List<Object>) oobiLEbyLAR2.get("oobis")).size() == 0
-                || ((List<Object>) oobiLEbyLAR3.get("oobis")).size() == 0) {
+        if (oobiLEbyLAR1.getOobis().size() == 0
+                || oobiLEbyLAR2.getOobis().size() == 0
+                || oobiLEbyLAR3.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
             List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientLAR1,
@@ -844,12 +847,12 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
                     new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
             );
-            oobiLEbyLAR1 = (Map<String, Object>) oobiLst.get(0);
-            oobiLEbyLAR2 = (Map<String, Object>) oobiLst.get(1);
-            oobiLEbyLAR3 = (Map<String, Object>) oobiLst.get(2);
+            oobiLEbyLAR1 = (OOBI) oobiLst.get(0);
+            oobiLEbyLAR2 = (OOBI) oobiLst.get(1);
+            oobiLEbyLAR3 = (OOBI) oobiLst.get(2);
         }
-        assertEquals(oobiLEbyLAR1.get("role"), oobiLEbyLAR2.get("role"));
-        assertEquals(oobiLEbyLAR1.get("role"), oobiLEbyLAR3.get("role"));
+        assertEquals(oobiLEbyLAR1.getRole(), oobiLEbyLAR2.getRole());
+        assertEquals(oobiLEbyLAR1.getRole(), oobiLEbyLAR3.getRole());
         assertEquals(getOobisIndexAt0(oobiLEbyLAR1), getOobisIndexAt0(oobiLEbyLAR2));
         assertEquals(getOobisIndexAt0(oobiLEbyLAR1), getOobisIndexAt0(oobiLEbyLAR3));
 
@@ -864,9 +867,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // QARs creates a registry for QVI AID.
         // Skip if the registry has already been created.
-        List<Object> qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
-        List<Object> qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
+        List<Registry> qviRegistrybyQAR1 = clientQAR1.registries().list(aidQVI.getName());
+        List<Registry> qviRegistrybyQAR2 = clientQAR2.registries().list(aidQVI.getName());
+        List<Registry> qviRegistrybyQAR3 = clientQAR3.registries().list(aidQVI.getName());
         if (qviRegistrybyQAR1.size() == 0 || qviRegistrybyQAR2.size() == 0 || qviRegistrybyQAR3.size() == 0) {
             String nonce = Coring.randomNonce();
             Object registryOp1 = MultisigUtils.createRegistryMultisig(
@@ -906,34 +909,34 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/vcp");
-            qviRegistrybyQAR1 = (List<Object>) clientQAR1.registries().list(aidQVI.getName());
-            qviRegistrybyQAR2 = (List<Object>) clientQAR2.registries().list(aidQVI.getName());
-            qviRegistrybyQAR3 = (List<Object>) clientQAR3.registries().list(aidQVI.getName());
+            qviRegistrybyQAR1 = clientQAR1.registries().list(aidQVI.getName());
+            qviRegistrybyQAR2 = clientQAR2.registries().list(aidQVI.getName());
+            qviRegistrybyQAR3 = clientQAR3.registries().list(aidQVI.getName());
         }
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR2.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("name"), castObjectToLinkedHashMap(qviRegistrybyQAR3.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("regk"), castObjectToLinkedHashMap(qviRegistrybyQAR2.get(0)).get("regk"));
-        assertEquals(castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0)).get("regk"), castObjectToLinkedHashMap(qviRegistrybyQAR3.get(0)).get("regk"));
+        assertEquals(qviRegistrybyQAR1.get(0).getName(), qviRegistrybyQAR2.get(0).getName());
+        assertEquals(qviRegistrybyQAR1.get(0).getName(), qviRegistrybyQAR3.get(0).getName());
+        assertEquals(qviRegistrybyQAR1.get(0).getRegk(), qviRegistrybyQAR2.get(0).getRegk());
+        assertEquals(qviRegistrybyQAR1.get(0).getRegk(), qviRegistrybyQAR3.get(0).getRegk());
 
-        Map<String, Object> qviRegistry = castObjectToLinkedHashMap(qviRegistrybyQAR1.get(0));
+        Registry qviRegistry = qviRegistrybyQAR1.get(0);
 
         // QVI issues a LE vLEI credential to the LE.
         // Skip if the credential has already been issued.
-        Map<String, Object> leCredbyQAR1 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential leCredbyQAR1 = TestUtils.getIssuedCredential(
                 clientQAR1,
                 aidQVI,
                 aidLE,
                 LE_SCHEMA_SAID
         );
 
-        Map<String, Object> leCredbyQAR2 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential leCredbyQAR2 = TestUtils.getIssuedCredential(
                 clientQAR2,
                 aidQVI,
                 aidLE,
                 LE_SCHEMA_SAID
         );
 
-        Map<String, Object> leCredbyQAR3 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential leCredbyQAR3 = TestUtils.getIssuedCredential(
                 clientQAR3,
                 aidQVI,
                 aidLE,
@@ -945,8 +948,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new LinkedHashMap<>() {{
                         put("d", "");
                         put("qvi", new LinkedHashMap<>() {{
-                            put("n", qviCredSad.get("d"));
-                            put("s", qviCredSad.get("s"));
+                            put("n", qviCredSad.getD());
+                            put("s", qviCredSad.getS());
                         }});
                     }}
             ).sad();
@@ -959,7 +962,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             CredentialData kargsIss = CredentialData.builder()
                     .i(aidQVI.getPrefix())
-                    .ri(qviRegistry.get("regk").toString())
+                    .ri(qviRegistry.getRegk())
                     .s(LE_SCHEMA_SAID)
                     .a(kargsSub)
                     .e(leCredSource)
@@ -1000,19 +1003,19 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
             waitAndMarkNotification(clientQAR1, "/multisig/iss");
 
-            leCredbyQAR1 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            leCredbyQAR1 = TestUtils.getIssuedCredential(
                     clientQAR1,
                     aidQVI,
                     aidLE,
                     LE_SCHEMA_SAID
             );
-            leCredbyQAR2 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            leCredbyQAR2 = TestUtils.getIssuedCredential(
                     clientQAR2,
                     aidQVI,
                     aidLE,
                     LE_SCHEMA_SAID
             );
-            leCredbyQAR3 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            leCredbyQAR3 = TestUtils.getIssuedCredential(
                     clientQAR3,
                     aidQVI,
                     aidLE,
@@ -1055,26 +1058,26 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/exn");
         }
-        Map<String, Object> leCredbyQAR1Sad = castObjectToLinkedHashMap(leCredbyQAR1.get("sad"));
-        Map<String, Object> leCredbyQAR2Sad = castObjectToLinkedHashMap(leCredbyQAR2.get("sad"));
-        Map<String, Object> leCredbyQAR3Sad = castObjectToLinkedHashMap(leCredbyQAR3.get("sad"));
-        assertEquals(leCredbyQAR1Sad.get("d"), leCredbyQAR2Sad.get("d"));
-        assertEquals(leCredbyQAR1Sad.get("d"), leCredbyQAR3Sad.get("d"));
-        assertEquals(leCredbyQAR1Sad.get("s"), LE_SCHEMA_SAID);
-        assertEquals(leCredbyQAR1Sad.get("i"), aidQVI.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(leCredbyQAR1Sad.get("a")).get("i"), aidLE.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(leCredbyQAR1.get("status")).get("s"), "0");
-        assertNotNull(leCredbyQAR1.get("atc"));
+        CredentialSad leCredbyQAR1Sad = leCredbyQAR1.getSad();
+        CredentialSad leCredbyQAR2Sad = leCredbyQAR2.getSad();
+        CredentialSad leCredbyQAR3Sad = leCredbyQAR3.getSad();
+        assertEquals(leCredbyQAR1Sad.getD(), leCredbyQAR2Sad.getD());
+        assertEquals(leCredbyQAR1Sad.getD(), leCredbyQAR3Sad.getD());
+        assertEquals(leCredbyQAR1Sad.getS(), LE_SCHEMA_SAID);
+        assertEquals(leCredbyQAR1Sad.getI(), aidQVI.getPrefix());
+        assertEquals(leCredbyQAR1Sad.getA().getI(), aidLE.getPrefix());
+        assertEquals(leCredbyQAR1.getStatus().getS(), "0");
+        assertNotNull(leCredbyQAR1.getAtc());
 
-        Map<String, Object> leCred = leCredbyQAR1;
-        Map<String, Object> leCredSad = castObjectToLinkedHashMap(leCred.get("sad"));
-        System.out.println("QVI has issued a LE vLEI credential with SAID: " + leCredSad.get("d"));
+        Credential leCred = leCredbyQAR1;
+        CredentialSad leCredSad = leCred.getSad();
+        System.out.println("QVI has issued a LE vLEI credential with SAID: " + leCredSad.getD());
 
         // QVI and LE exchange grant and admit messages.
         // Skip if LE has already received the credential.
-        Map<String, Object> leCredbyLAR1 = (Map<String, Object>) TestUtils.getReceivedCredential(clientLAR1, leCredSad.get("d").toString());
-        Map<String, Object> leCredbyLAR2 = (Map<String, Object>) TestUtils.getReceivedCredential(clientLAR2, leCredSad.get("d").toString());
-        Map<String, Object> leCredbyLAR3 = (Map<String, Object>) TestUtils.getReceivedCredential(clientQAR3, leCredSad.get("d").toString());
+        Credential leCredbyLAR1 = TestUtils.getReceivedCredential(clientLAR1, leCredSad.getD());
+        Credential leCredbyLAR2 = TestUtils.getReceivedCredential(clientLAR2, leCredSad.getD());
+        Credential leCredbyLAR3 = TestUtils.getReceivedCredential(clientLAR3, leCredSad.getD());
 
         if (leCredbyLAR1 == null || leCredbyLAR2 == null || leCredbyLAR3 == null) {
             String admitTime = TestUtils.createTimestamp();
@@ -1115,22 +1118,22 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientLAR2, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientLAR3, "/exn/ipex/admit");
 
-            leCredbyLAR1 = (Map<String, Object>) TestUtils.waitForCredential(clientLAR1, leCredSad.get("d").toString());
-            leCredbyLAR2 = (Map<String, Object>) TestUtils.waitForCredential(clientLAR2, leCredSad.get("d").toString());
-            leCredbyLAR3 = (Map<String, Object>) TestUtils.waitForCredential(clientLAR3, leCredSad.get("d").toString());
+            leCredbyLAR1 = TestUtils.waitForCredential(clientLAR1, leCredSad.getD());
+            leCredbyLAR2 = TestUtils.waitForCredential(clientLAR2, leCredSad.getD());
+            leCredbyLAR3 = TestUtils.waitForCredential(clientLAR3, leCredSad.getD());
         }
-        Map<String, Object> leCredbyLAR1Sad = castObjectToLinkedHashMap(leCredbyLAR1.get("sad"));
-        Map<String, Object> leCredbyLAR2Sad = castObjectToLinkedHashMap(leCredbyLAR2.get("sad"));
-        Map<String, Object> leCredbyLAR3Sad = castObjectToLinkedHashMap(leCredbyLAR3.get("sad"));
-        assertEquals(leCredSad.get("d"), leCredbyLAR1Sad.get("d"));
-        assertEquals(leCredSad.get("d"), leCredbyLAR2Sad.get("d"));
-        assertEquals(leCredSad.get("d"), leCredbyLAR3Sad.get("d"));
+        CredentialSad leCredbyLAR1Sad = leCredbyLAR1.getSad();
+        CredentialSad leCredbyLAR2Sad = leCredbyLAR2.getSad();
+        CredentialSad leCredbyLAR3Sad = leCredbyLAR3.getSad();
+        assertEquals(leCredSad.getD(), leCredbyLAR1Sad.getD());
+        assertEquals(leCredSad.getD(), leCredbyLAR2Sad.getD());
+        assertEquals(leCredSad.getD(), leCredbyLAR3Sad.getD());
 
         // LARs creates a registry for LE AID.
         // Skip if the registry has already been created.
-        List<Object> leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
-        List<Object> leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
+        List<Registry> leRegistrybyLAR1 = clientLAR1.registries().list(aidLE.getName());
+        List<Registry> leRegistrybyLAR2 = clientLAR2.registries().list(aidLE.getName());
+        List<Registry> leRegistrybyLAR3 = clientLAR3.registries().list(aidLE.getName());
 
         if (leRegistrybyLAR1.isEmpty() && leRegistrybyLAR2.isEmpty() && leRegistrybyLAR3.isEmpty()) {
             String nonce = Coring.randomNonce();
@@ -1171,32 +1174,31 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/vcp");
-            leRegistrybyLAR1 = (List<Object>) clientLAR1.registries().list(aidLE.getName());
-            leRegistrybyLAR2 = (List<Object>) clientLAR2.registries().list(aidLE.getName());
-            leRegistrybyLAR3 = (List<Object>) clientLAR3.registries().list(aidLE.getName());
+            leRegistrybyLAR1 = clientLAR1.registries().list(aidLE.getName());
+            leRegistrybyLAR2 = clientLAR2.registries().list(aidLE.getName());
+            leRegistrybyLAR3 = clientLAR3.registries().list(aidLE.getName());
         }
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR2.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("name"), castObjectToLinkedHashMap(leRegistrybyLAR3.get(0)).get("name"));
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("regk"), castObjectToLinkedHashMap(leRegistrybyLAR2.get(0)).get("regk"));
-        assertEquals(castObjectToLinkedHashMap(leRegistrybyLAR1.get(0)).get("regk"), castObjectToLinkedHashMap(leRegistrybyLAR3.get(0)).get("regk"));
+        assertEquals(leRegistrybyLAR1.get(0).getName(), leRegistrybyLAR2.get(0).getName());
+        assertEquals(leRegistrybyLAR1.get(0).getName(), leRegistrybyLAR3.get(0).getName());
+        assertEquals(leRegistrybyLAR1.get(0).getRegk(), leRegistrybyLAR2.get(0).getRegk());
+        assertEquals(leRegistrybyLAR1.get(0).getRegk(), leRegistrybyLAR3.get(0).getRegk());
 
-        Map<String, Object> leRegistry = castObjectToLinkedHashMap(leRegistrybyLAR1.get(0));
-
+        Registry leRegistry = leRegistrybyLAR1.get(0);
         // LE issues a ECR vLEI credential to the ECR Person.
         // Skip if the credential has already been issued.
-        Map<String, Object> ecrCredbyLAR1 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential ecrCredbyLAR1 = TestUtils.getIssuedCredential(
                 clientLAR1,
                 aidLE,
                 aidECR,
                 ECR_SCHEMA_SAID
         );
-        Map<String, Object> ecrCredbyLAR2 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential ecrCredbyLAR2 = TestUtils.getIssuedCredential(
                 clientLAR2,
                 aidLE,
                 aidECR,
                 ECR_SCHEMA_SAID
         );
-        Map<String, Object> ecrCredbyLAR3 = (Map<String, Object>) TestUtils.getIssuedCredential(
+        Credential ecrCredbyLAR3 = TestUtils.getIssuedCredential(
                 clientLAR3,
                 aidLE,
                 aidECR,
@@ -1208,8 +1210,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new LinkedHashMap<>() {{
                         put("d", "");
                         put("le", new LinkedHashMap<>() {{
-                            put("n", leCredSad.get("d"));
-                            put("s", leCredSad.get("s"));
+                            put("n", leCredSad.getD());
+                            put("s", leCredSad.getS());
                         }});
                     }}
             ).sad();
@@ -1224,7 +1226,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             CredentialData kargsIss = CredentialData.builder()
                     .u(new Salter().getQb64())
                     .i(aidLE.getPrefix())
-                    .ri(leRegistry.get("regk").toString())
+                    .ri(leRegistry.getRegk())
                     .s(ECR_SCHEMA_SAID)
                     .a(kargsSub)
                     .e(ecrCredSource)
@@ -1265,19 +1267,19 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
             waitAndMarkNotification(clientLAR1, "/multisig/iss");
 
-            ecrCredbyLAR1 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            ecrCredbyLAR1 = TestUtils.getIssuedCredential(
                     clientLAR1,
                     aidLE,
                     aidECR,
                     ECR_SCHEMA_SAID
             );
-            ecrCredbyLAR2 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            ecrCredbyLAR2 = TestUtils.getIssuedCredential(
                     clientLAR2,
                     aidLE,
                     aidECR,
                     ECR_SCHEMA_SAID
             );
-            ecrCredbyLAR3 = (Map<String, Object>) TestUtils.getIssuedCredential(
+            ecrCredbyLAR3 = TestUtils.getIssuedCredential(
                     clientLAR3,
                     aidLE,
                     aidECR,
@@ -1317,24 +1319,23 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/exn");
         }
-        Map<String, Object> ecrCredbyLAR1Sad = castObjectToLinkedHashMap(ecrCredbyLAR1.get("sad"));
-        Map<String, Object> ecrCredbyLAR2Sad = castObjectToLinkedHashMap(ecrCredbyLAR2.get("sad"));
-        Map<String, Object> ecrCredbyLAR3Sad = castObjectToLinkedHashMap(ecrCredbyLAR3.get("sad"));
-        assertEquals(ecrCredbyLAR1Sad.get("d"), ecrCredbyLAR2Sad.get("d"));
-        assertEquals(ecrCredbyLAR1Sad.get("d"), ecrCredbyLAR3Sad.get("d"));
-        assertEquals(ecrCredbyLAR1Sad.get("s"), ECR_SCHEMA_SAID);
-        assertEquals(ecrCredbyLAR1Sad.get("i"), aidLE.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(ecrCredbyLAR1Sad.get("a")).get("i"), aidECR.getPrefix());
-        assertEquals(castObjectToLinkedHashMap(ecrCredbyLAR1.get("status")).get("s"), "0");
-        assertNotNull(ecrCredbyLAR1.get("atc"));
-
-        Map<String, Object> ecrCred = ecrCredbyLAR1;
-        Map<String, Object> ecrCredSad = castObjectToLinkedHashMap(ecrCred.get("sad"));
-        System.out.println("LE has issued an ECR vLEI credential with SAID: " + ecrCredSad.get("d"));
+        CredentialSad ecrCredbyLAR1Sad = ecrCredbyLAR1.getSad();
+        CredentialSad ecrCredbyLAR2Sad = ecrCredbyLAR2.getSad();
+        CredentialSad ecrCredbyLAR3Sad = ecrCredbyLAR3.getSad();
+        assertEquals(ecrCredbyLAR1Sad.getD(), ecrCredbyLAR2Sad.getD());
+        assertEquals(ecrCredbyLAR1Sad.getD(), ecrCredbyLAR3Sad.getD());
+        assertEquals(ecrCredbyLAR1Sad.getS(), ECR_SCHEMA_SAID);
+        assertEquals(ecrCredbyLAR1Sad.getI(), aidLE.getPrefix());
+        assertEquals(ecrCredbyLAR1Sad.getA().getI(), aidECR.getPrefix());
+        assertEquals(ecrCredbyLAR1.getStatus().getS(), "0");
+        assertNotNull(ecrCredbyLAR1.getAtc());
+        Credential ecrCred = ecrCredbyLAR1;
+        CredentialSad ecrCredSad = ecrCred.getSad();
+        System.out.println("LE has issued an ECR vLEI credential with SAID: " + ecrCredSad.getD());
 
         // LE and ECR exchange grant and admit messages.
         // Skip if ECR has already received the credential.
-        Map<String, Object> ecrCredbyECR1 = (Map<String, Object>) TestUtils.getReceivedCredential(clientLAR1, ecrCredSad.get("d").toString());
+        Credential ecrCredbyECR1 = TestUtils.getReceivedCredential(clientLAR1, ecrCredSad.getD());
 
         if (ecrCredbyECR1 == null) {
             TestUtils.admitSinglesig(
@@ -1346,15 +1347,14 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientLAR2, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientLAR3, "/exn/ipex/admit");
 
-            ecrCredbyECR1 = (Map<String, Object>) TestUtils.waitForCredential(clientLAR1, ecrCredSad.get("d").toString());
+            ecrCredbyECR1 = TestUtils.waitForCredential(clientLAR1, ecrCredSad.getD());
         }
-        Map<String, Object> ecrCredbyECR1Sad = castObjectToLinkedHashMap(ecrCredbyECR1.get("sad"));
-        assertEquals(ecrCredSad.get("d"), ecrCredbyECR1Sad.get("d"));
+        CredentialSad ecrCredbyECR1Sad = ecrCredbyECR1.getSad();
+        assertEquals(ecrCredSad.getD(), ecrCredbyECR1Sad.getD());
     }
 
-    public String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = (Map<String, Object>) oobi;
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
+    public String getOobisIndexAt0(OOBI oobi) {
+        List<String> oobisResponse = oobi.getOobis();
+        return oobisResponse.get(0);
     }
 }

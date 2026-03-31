@@ -217,6 +217,7 @@ tasks.openApiGenerate {
             sourceFolder             : "src/main/java",
             hideGenerationTimestamp  : "true",
             openApiNullable          : "false",
+            containerDefaultToNull   : "true"
     ]
 
     nameMappings.put("A", "AUpper")

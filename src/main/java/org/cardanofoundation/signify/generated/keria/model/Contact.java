@@ -64,11 +64,11 @@ public class Contact {
 
   public static final String JSON_PROPERTY_CHALLENGES = "challenges";
   @jakarta.annotation.Nullable
-  private List<Challenge> challenges = new ArrayList<>();
+  private List<Challenge> challenges;
 
   public static final String JSON_PROPERTY_WELL_KNOWNS = "wellKnowns";
   @jakarta.annotation.Nullable
-  private List<WellKnown> wellKnowns = new ArrayList<>();
+  private List<WellKnown> wellKnowns;
 
   public Contact() {
   }

@@ -45,7 +45,7 @@ public class IdentifiersNameExchangesPostRequest {
 
   public static final String JSON_PROPERTY_SIGS = "sigs";
   @jakarta.annotation.Nullable
-  private List<String> sigs = new ArrayList<>();
+  private List<String> sigs;
 
   public static final String JSON_PROPERTY_ATC = "atc";
   @jakarta.annotation.Nullable
@@ -53,7 +53,7 @@ public class IdentifiersNameExchangesPostRequest {
 
   public static final String JSON_PROPERTY_REC = "rec";
   @jakarta.annotation.Nullable
-  private List<String> rec = new ArrayList<>();
+  private List<String> rec;
 
   public static final String JSON_PROPERTY_TPC = "tpc";
   @jakarta.annotation.Nullable

@@ -86,7 +86,7 @@ public class ControllerEe {
 
   public static final String JSON_PROPERTY_K = "k";
   @jakarta.annotation.Nonnull
-  private List<String> k = new ArrayList<>();
+  private List<String> k;
 
   public static final String JSON_PROPERTY_NT = "nt";
   @jakarta.annotation.Nonnull
@@ -94,7 +94,7 @@ public class ControllerEe {
 
   public static final String JSON_PROPERTY_N = "n";
   @jakarta.annotation.Nonnull
-  private List<String> n = new ArrayList<>();
+  private List<String> n;
 
   public static final String JSON_PROPERTY_BT = "bt";
   @jakarta.annotation.Nonnull
@@ -102,11 +102,11 @@ public class ControllerEe {
 
   public static final String JSON_PROPERTY_B = "b";
   @jakarta.annotation.Nonnull
-  private List<String> b = new ArrayList<>();
+  private List<String> b;
 
   public static final String JSON_PROPERTY_C = "c";
   @jakarta.annotation.Nonnull
-  private List<String> c = new ArrayList<>();
+  private List<String> c;
 
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
@@ -118,11 +118,11 @@ public class ControllerEe {
 
   public static final String JSON_PROPERTY_BR = "br";
   @jakarta.annotation.Nonnull
-  private List<String> br = new ArrayList<>();
+  private List<String> br;
 
   public static final String JSON_PROPERTY_BA = "ba";
   @jakarta.annotation.Nonnull
-  private List<String> ba = new ArrayList<>();
+  private List<String> ba;
 
   public static final String JSON_PROPERTY_DI = "di";
   @jakarta.annotation.Nonnull

@@ -18,6 +18,9 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+
+import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Exchanging {
@@ -86,7 +89,7 @@ public class Exchanging {
          * @param recipients the recipients
          * @return response from server
          */
-        public Object send(
+        public Exn send(
             String name,
             String topic,
             HabState sender,
@@ -130,7 +133,7 @@ public class Exchanging {
          * @param recipients the recipients
          * @return response from server
          */
-        public Object sendFromEvents(
+        public Exn sendFromEvents(
             String name,
             String topic,
             Serder exn,
@@ -148,7 +151,7 @@ public class Exchanging {
             data.put("rec", recipients);
 
             HttpResponse<String> res = this.client.fetch(path, method, data);
-            return Utils.fromJson(res.body(), Object.class);
+            return Utils.fromJson(res.body(), Exn.class);
         }
 
         /**
@@ -157,7 +160,7 @@ public class Exchanging {
          * @param said The said of the exn message
          * @return Optional containing the exn message if found, or empty if not found
          */
-        public Optional<Object> get(String said) throws Exception {
+        public Optional<ExchangeResource> get(String said) throws Exception {
             String path = String.format("/exchanges/%s", said);
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
@@ -166,7 +169,7 @@ public class Exchanging {
                 return Optional.empty();
             }
             
-            return Optional.of(Utils.fromJson(res.body(), Object.class));
+            return Optional.of(Utils.fromJson(res.body(), ExchangeResource.class));
         }
     }
 

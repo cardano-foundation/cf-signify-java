@@ -38,11 +38,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class GroupMember {
   public static final String JSON_PROPERTY_SIGNING = "signing";
   @jakarta.annotation.Nonnull
-  private List<AidRecord> signing = new ArrayList<>();
+  private List<AidRecord> signing;
 
   public static final String JSON_PROPERTY_ROTATION = "rotation";
   @jakarta.annotation.Nonnull
-  private List<AidRecord> rotation = new ArrayList<>();
+  private List<AidRecord> rotation;
 
   public GroupMember() {
   }

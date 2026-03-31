@@ -9,7 +9,6 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.clienting.State;
 import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -30,21 +29,27 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import org.cardanofoundation.signify.generated.keria.model.AidRecord;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
+@SuppressWarnings("unchecked")
 public class MultisigUtils {
 
     public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
         final HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
-        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid()).get();
-        Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
-        Map<String, Object> exn = (Map<String, Object>) responseMap.get("exn");
-        Map<String, Object> icp = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("icp");
-        List<String> smids = (List<String>) ((Map<String, Object>) exn.get("a")).get("smids");
-        List<String> rmids = (List<String>) ((Map<String, Object>) exn.get("a")).get("rmids");
+        List<ExnMultisig> res = client2.groups().getRequest(args.getMsgSaid()).get();
+        Exn exn = res.getFirst().getExn();
+        Map<String, Object> icp = Utils.toMap(exn.getE().get("icp"));
+        List<String> smids = (List<String>) Utils.toMap(exn.getA()).get("smids");
+        List<String> rmids = (List<String>) Utils.toMap(exn.getA()).get("rmids");
 
         List<KeyStateRecord> states = TestUtils.getStates(client2, smids)
             .stream()
@@ -198,15 +203,10 @@ public class MultisigUtils {
         }
 
         List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
-        List<Object> signings = (List<Object>) members.get("signing");
+        GroupMember members = client.identifiers().members(groupName);
 
-        for (Object signing : signings) {
-            Map<String, Object> signingMap = (Map<String, Object>) signing;
-            Map<String, Object> ends = (Map<String, Object>) signingMap.get("ends");
-            LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.get("agent");
-
-            String eid = agent.firstEntry().getKey();
+        for (AidRecord signing : members.getSigning()) {
+            String eid = signing.getEnds().getAgent().keySet().iterator().next();
             EventResult endRoleResult = client
                     .identifiers()
                     .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
@@ -257,14 +257,9 @@ public class MultisigUtils {
         }
 
         List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
-        List<Object> signings = (List<Object>) members.get("signing");
+        GroupMember members = client.identifiers().members(groupName);
 
-        Map<String, Object> signingMap = TestUtils.castObjectToListMap(signings).get(0);
-        Map<String, Object> ends = (Map<String, Object>) signingMap.get("ends");
-        LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.get("agent");
-
-        String eid = agent.firstEntry().getKey();
+        String eid = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
         EventResult endRoleResult = client
                 .identifiers()
                 .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
@@ -547,9 +542,9 @@ public class MultisigUtils {
         if (!isInitiator) {
             String msgSaid = TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
-            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid).get();
-            Map<String, Object> exn = (Map<String, Object>) ((Map<String, Object>) res.get(0)).get("exn");
-            Map<String, Object> ixn = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("ixn");
+            List<ExnMultisig> res = client.groups().getRequest(msgSaid).get();
+            Exn exn = res.getFirst().getExn();
+            Map<String, Object> ixn = Utils.toMap(exn.getE().get("ixn"));
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }
 
@@ -602,7 +597,7 @@ public class MultisigUtils {
             List<HabState> otherMembersAIDs,
             HabState multisigAID,
             HabState recipientAID,
-            Object credential,
+            Credential credential,
             String timestamp,
             boolean isInitiator) throws Exception {
 
@@ -610,15 +605,12 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/exn");
         }
 
-        Map<String, Object> sad = (Map<String, Object>) ((Map<String, Object>) credential).get("sad");
-        Map<String, Object> anc = (Map<String, Object>) ((Map<String, Object>) credential).get("anc");
-        Map<String, Object> iss = (Map<String, Object>) ((Map<String, Object>) credential).get("iss");
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
                 .senderName(multisigAID.getName())
-                .acdc(new Serder(sad))
-                .anc(new Serder(anc))
-                .iss(new Serder(iss))
+            .acdc(new Serder(Utils.toMap(credential.getSad())))
+            .anc(new Serder(Utils.toMap(credential.getAnc())))
+            .iss(new Serder(Utils.toMap(credential.getIss())))
                 .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
@@ -768,7 +760,6 @@ public class MultisigUtils {
 
         return op1;
     }
-
 
     @Getter
     @Setter

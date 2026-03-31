@@ -27,9 +27,10 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.KtValue;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -394,8 +395,7 @@ public class IdentifierController {
         String dig = state.getD();
         int ridx = Integer.parseInt(state.getS(), 16) + 1;
         List<String> wits = state.getB();
-        Object isith = ((KtValue) state.getNt()).raw();
-
+        Object isith = org.cardanofoundation.signify.app.config.KeyStateRecordKtDeserializer.getRawValue(state.getNt());
         Object nsith = kargs.getNsith() != null ? kargs.getNsith() : isith;
 
         // if isith is None:  # compute default from newly rotated verfers above
@@ -472,12 +472,12 @@ public class IdentifierController {
      * @param name Name of the group identifier
      * @return A list of members of the group
      */
-    public Object members(String name) throws LibsodiumException, InterruptedException, IOException {
+    public GroupMember members(String name) throws LibsodiumException, InterruptedException, IOException {
         HttpResponse<String> response = this.client.fetch(
                 "/identifiers/" + name + "/members",
                 "GET",
                 null
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), GroupMember.class);
     }
 }

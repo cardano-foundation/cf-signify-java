@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.cardanofoundation.signify.generated.keria.model.KeyEvent;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -27,15 +28,45 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * KeyEventRecord
  */
 @JsonPropertyOrder({
+  KeyEventRecord.JSON_PROPERTY_KED,
   KeyEventRecord.JSON_PROPERTY_ATC
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class KeyEventRecord {
+  public static final String JSON_PROPERTY_KED = "ked";
+  @jakarta.annotation.Nonnull
+  private KeyEvent ked;
+
   public static final String JSON_PROPERTY_ATC = "atc";
   @jakarta.annotation.Nonnull
   private String atc;
 
   public KeyEventRecord() {
+  }
+
+  public KeyEventRecord ked(@jakarta.annotation.Nonnull KeyEvent ked) {
+    
+    this.ked = ked;
+    return this;
+  }
+
+  /**
+   * Get ked
+   * @return ked
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_KED, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public KeyEvent getKed() {
+    return ked;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_KED, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setKed(@jakarta.annotation.Nonnull KeyEvent ked) {
+    this.ked = ked;
   }
 
   public KeyEventRecord atc(@jakarta.annotation.Nonnull String atc) {
@@ -73,18 +104,20 @@ public class KeyEventRecord {
       return false;
     }
     KeyEventRecord keyEventRecord = (KeyEventRecord) o;
-    return Objects.equals(this.atc, keyEventRecord.atc);
+    return Objects.equals(this.ked, keyEventRecord.ked) &&
+        Objects.equals(this.atc, keyEventRecord.atc);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(atc);
+    return Objects.hash(ked, atc);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class KeyEventRecord {\n");
+    sb.append("    ked: ").append(toIndentedString(ked)).append("\n");
     sb.append("    atc: ").append(toIndentedString(atc)).append("\n");
     sb.append("}");
     return sb.toString();

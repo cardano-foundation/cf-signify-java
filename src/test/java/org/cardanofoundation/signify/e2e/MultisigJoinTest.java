@@ -12,8 +12,12 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -34,7 +38,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     static String nameMember3 = "member3";
     static String nameMultisig = "multisigGroup";
     static String oobi1, oobi2, oobi3, oobiMultisig;
-    private static Map<String, Object> oobiGetMultisig;
+    private static OOBI oobiGetMultisig;
 
     @BeforeAll
     public static void getClients() throws Exception {
@@ -46,7 +50,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         createAID(client1, nameMember1, new ArrayList<>());
         createAID(client2, nameMember2, new ArrayList<>());
 
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
             new GetOobisArgs(client1, nameMember1, "agent"),
             new GetOobisArgs(client2, nameMember2, "agent")
         );
@@ -114,13 +118,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
-        Object response = client2.groups().getRequest(msgSaid).get();
-        Map<String, Object> exn = castObjectToLinkedHashMap(
-            castObjectToListMap(response).getFirst().get("exn")
-        );
-        Map<String, Object> icp = castObjectToLinkedHashMap(
-            castObjectToLinkedHashMap(exn.get("e")).get("icp")
-        );
+        List<ExnMultisig> response = client2.groups().getRequest(msgSaid).get();
+        Exn exn = response.getFirst().getExn();
+        Map<String, Object> icp = Utils.toMap(exn.getE().get("icp"));
 
         CreateIdentifierArgs iargs2 = new CreateIdentifierArgs();
         iargs2.setAlgo(Manager.Algos.group);
@@ -154,20 +154,16 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).getFirst());
         assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).get(1));
 
-        Map<String, Object> membersAgent1 = (Map<String, Object>) client1.identifiers().members(nameMultisig);
-        Map<String, Object> membersAgent2 = (Map<String, Object>) client2.identifiers().members(nameMultisig);
+        GroupMember membersAgent1 = client1.identifiers().members(nameMultisig);
+        GroupMember membersAgent2 = client2.identifiers().members(nameMultisig);
 
-        List<Map<String, Object>> signing1 = castObjectToListMap(Utils.toMap(membersAgent1).get("signing"));
-        String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing1.getFirst().get("ends")).get("agent")).keySet()).getFirst();
-
-        List<Map<String, Object>> signing2 = castObjectToListMap(Utils.toMap(membersAgent2).get("signing"));
-        String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing2.getFirst().get("ends")).get("agent")).keySet()).getFirst();
+        String eid1 = membersAgent1.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
+        String eid2 = membersAgent2.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
 
         EventResult endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
         EventResult endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
 
-        oobiGetMultisig = new LinkedHashMap<>();
-        oobiGetMultisig = (Map<String, Object>) client1.oobis().get(nameMultisig, "agent").get();
+        oobiGetMultisig = client1.oobis().get(nameMultisig, "agent").get();
 
         waitOperationAsync(
             new WaitOperationArgs(client1, endRoleOperation1.op()),
@@ -182,7 +178,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         aid3 = createAID(client3, nameMember3, new ArrayList<>());
 
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
             new GetOobisArgs(client1, nameMember1, "agent"),
             new GetOobisArgs(client2, nameMember2, "agent"),
             new GetOobisArgs(client3, nameMember3, "agent")
@@ -387,12 +383,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         );
 
         String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
-        Object response = client3.groups().getRequest(rotationNotification3).get();
-
-        Map<String, Object> exn3 = castObjectToLinkedHashMap(
-            castObjectToListMap(response).getFirst().get("exn")
-        );
-        Map<String, Object> op1Response = Utils.toMap(exn3.get("e"));
+        List<ExnMultisig> response = client3.groups().getRequest(rotationNotification3).get();
+        Exn exn3 = response.getFirst().getExn();
+        Map<String, Object> op1Response = exn3.getE();
         Map<String, Object> exnValue = Utils.toMap(op1Response.get("rot"));
         Serder serder3 = new Serder(exnValue);
 
@@ -404,7 +397,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
                 nameMultisig,
                 serder3,
                 sig3,
-                Utils.toMap(exn3.get("a")).get("gid").toString(),
+                Utils.toMap(exn3.getA()).get("gid").toString(),
                 smids,
                 rmids
             );
@@ -423,9 +416,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertEquals(aid2.getState().getN().getFirst(), multiSigAid.getState().getN().get(1));
         assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
 
-        Object members = client3.identifiers().members(nameMultisig);
-        List<Map<String, Object>> signing3 = castObjectToListMap(Utils.toMap(members).get("signing"));
-        String eid = Utils.toList(Utils.toMap(Utils.toMap(signing3.get(2).get("ends")).get("agent")).keySet()).getFirst();
+        GroupMember members = client3.identifiers().members(nameMultisig);
+        String eid = members.getSigning().get(2).getEnds().getAgent().keySet().iterator().next();
 
         EventResult endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
         Object endRoleResult = waitOperation(client3, endRoleOperation.op());
@@ -442,9 +434,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         return client.identifiers().get(name).get();
     }
 
-    public static String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = Utils.toMap(oobi);
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
+    public static String getOobisIndexAt0(OOBI oobi) {
+        List<String> oobisResponse = oobi.getOobis();
+        return oobisResponse.get(0);
     }
 }

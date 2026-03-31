@@ -44,7 +44,7 @@ public class ExnMultisig {
 
   public static final String JSON_PROPERTY_PATHS = "paths";
   @jakarta.annotation.Nonnull
-  private Map<String, Object> paths = new HashMap<>();
+  private Map<String, Object> paths;
 
   public static final String JSON_PROPERTY_GROUP_NAME = "groupName";
   @jakarta.annotation.Nullable

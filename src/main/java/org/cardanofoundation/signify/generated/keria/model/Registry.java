@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.RegistryState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -49,7 +49,7 @@ public class Registry {
 
   public static final String JSON_PROPERTY_STATE = "state";
   @jakarta.annotation.Nonnull
-  private CredentialState state;
+  private RegistryState state;
 
   public Registry() {
   }
@@ -129,7 +129,7 @@ public class Registry {
     this.pre = pre;
   }
 
-  public Registry state(@jakarta.annotation.Nonnull CredentialState state) {
+  public Registry state(@jakarta.annotation.Nonnull RegistryState state) {
     
     this.state = state;
     return this;
@@ -143,14 +143,14 @@ public class Registry {
   @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public CredentialState getState() {
+  public RegistryState getState() {
     return state;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_STATE, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setState(@jakarta.annotation.Nonnull CredentialState state) {
+  public void setState(@jakarta.annotation.Nonnull RegistryState state) {
     this.state = state;
   }
 

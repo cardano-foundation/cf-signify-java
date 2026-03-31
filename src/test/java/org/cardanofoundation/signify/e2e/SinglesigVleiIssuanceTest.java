@@ -1,5 +1,7 @@
 package org.cardanofoundation.signify.e2e;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
@@ -7,14 +9,18 @@ import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.IssuerRegistry;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +47,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     SignifyClient gleifClient, qviClient, leClient, roleClient;
     Aid gleifAid, qviAid, leAid, roleAid;
     IssuerRegistry gleifRegistry, qviRegistry, leRegistry;
+
+    ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void singlesig_vlei_issuance() throws Exception {
@@ -171,7 +179,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         System.out.println("Issuing QVI vLEI Credential");
 
-        Object qviCred = getOrIssueCredential(
+        Credential qviCred = getOrIssueCredential(
                 gleifClient,
                 gleifAid,
                 qviAid,
@@ -182,48 +190,44 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 null
         );
 
-        Map<String, Object> qviCredBody = castObjectToLinkedHashMap(qviCred);
-        Map<String, Object> sadQviCred = castObjectToLinkedHashMap(qviCredBody.get("sad"));
-        Object qviCredHolder = getReceivedCredential(qviClient, sadQviCred.get("d").toString());
+        CredentialSad sadQviCred = qviCred.getSad();
+        Credential qviCredHolder = getReceivedCredential(qviClient, sadQviCred.getD());
 
         if (qviCredHolder == null) {
-            sendGrantMessage(gleifClient, gleifAid, qviAid, qviCredBody);
+            sendGrantMessage(gleifClient, gleifAid, qviAid, qviCred);
             sendAdmitMessage(qviClient, qviAid, gleifAid);
         }
 
         qviCredHolder = retry(() -> {
             try {
-                Object cred = getReceivedCredential(qviClient, sadQviCred.get("d").toString());
-                assert (cred != null);
+                Credential cred = getReceivedCredential(qviClient, sadQviCred.getD());
+                if (cred == null) throw new RuntimeException("Credential not yet available");
                 return cred;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }, CRED_RETRY_DEFAULTS);
 
-        Map<String, Object> qviCredHolderBody = castObjectToLinkedHashMap(qviCredHolder);
-        Map<String, Object> sadQviCredHolder = castObjectToLinkedHashMap(qviCredHolderBody.get("sad"));
-        Map<String, Object> a = castObjectToLinkedHashMap(sadQviCredHolder.get("a"));
-        Map<String, Object> statusBody = castObjectToLinkedHashMap(qviCredHolderBody.get("status"));
+        CredentialSad qviCredHolderSad = qviCredHolder.getSad();
 
-        assertEquals(sadQviCredHolder.get("d").toString(), sadQviCred.get("d").toString());
-        assertEquals(sadQviCredHolder.get("s").toString(), QVI_SCHEMA_SAID);
-        assertEquals(sadQviCredHolder.get("i").toString(), gleifAid.prefix);
-        assertEquals(a.get("i").toString(), qviAid.prefix);
-        assertEquals("0", statusBody.get("s").toString());
-        assertNotNull(qviCredHolderBody.get("atc"));
+        assertEquals(qviCredHolderSad.getD(), sadQviCred.getD());
+        assertEquals(qviCredHolderSad.getS(), QVI_SCHEMA_SAID);
+        assertEquals(qviCredHolderSad.getI(), gleifAid.prefix);
+        assertEquals(qviCredHolderSad.getA().getI(), qviAid.prefix);
+        assertEquals("0", qviCredHolder.getStatus().getS());
+        assertNotNull(qviCredHolder.getAtc());
 
         System.out.println("Issuing LE vLEI Credential");
 
         Map<String, Object> qvi = new LinkedHashMap<>();
-        qvi.put("n", sadQviCred.get("d").toString());
-        qvi.put("s", sadQviCred.get("s").toString());
+        qvi.put("n", sadQviCred.getD());
+        qvi.put("s", sadQviCred.getS());
 
         Map<String, Object> leCredSource = new LinkedHashMap<>();
         leCredSource.put("d", "");
         leCredSource.put("qvi", qvi);
 
-        Object leCred = getOrIssueCredential(
+        Credential leCred = getOrIssueCredential(
                 qviClient,
                 qviAid,
                 leAid,
@@ -233,18 +237,17 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 LE_RULES,
                 leCredSource
         );
-        Map<String, Object> leCredSourceBody = castObjectToLinkedHashMap(leCred);
-        Map<String, Object> sadLeCred = castObjectToLinkedHashMap(leCredSourceBody.get("sad"));
-        Object leCredHolder = getReceivedCredential(leClient, sadLeCred.get("d").toString());
+        CredentialSad sadLeCred = leCred.getSad();
+        Credential leCredHolder = getReceivedCredential(leClient, sadLeCred.getD());
 
         if (leCredHolder == null) {
-            sendGrantMessage(qviClient, qviAid, leAid, leCredSourceBody);
+            sendGrantMessage(qviClient, qviAid, leAid, leCred);
             sendAdmitMessage(leClient, leAid, qviAid);
 
             leCredHolder = retry(() -> {
                 try {
-                    Object cred = getReceivedCredential(leClient, sadLeCred.get("d").toString());
-                    assert (cred != null);
+                    Credential cred = getReceivedCredential(leClient, sadLeCred.getD());
+                    if (cred == null) throw new RuntimeException("Credential not yet available");
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -252,33 +255,30 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             }, CRED_RETRY_DEFAULTS);
         }
 
-        Map<String, Object> leCredHolderBody = castObjectToLinkedHashMap(leCredHolder);
+        CredentialSad sadLeCredHolder = leCredHolder.getSad();
+        CredentialState statusLeCredHolder = leCredHolder.getStatus();
+        JsonNode leQviEdge = mapper.convertValue(sadLeCredHolder.getE(), JsonNode.class);
 
-        Map<String, Object> sadLeCredHolder = castObjectToLinkedHashMap(leCredHolderBody.get("sad"));
-        Map<String, Object> aLeCredHolder = castObjectToLinkedHashMap(sadLeCredHolder.get("a"));
-        Map<String, Object> eLeCredHolder = castObjectToLinkedHashMap(sadLeCredHolder.get("e"));
-        Map<String, Object> qviLeCredHolder = castObjectToLinkedHashMap(eLeCredHolder.get("qvi"));
-        Map<String, Object> statusLeCredHolder = castObjectToLinkedHashMap(leCredHolderBody.get("status"));
+        assertEquals(sadLeCred.getD(), sadLeCredHolder.getD());
+        assertEquals(LE_SCHEMA_SAID, sadLeCredHolder.getS());
+        assertEquals(qviAid.prefix, sadLeCredHolder.getI());
+        assertEquals(leAid.prefix, sadLeCredHolder.getA().getI());
+        assertEquals(sadQviCred.getD(), leQviEdge.at("/qvi/n").asText());
 
-        assertEquals(sadLeCred.get("d").toString(), sadLeCredHolder.get("d").toString());
-        assertEquals(LE_SCHEMA_SAID, sadLeCredHolder.get("s").toString());
-        assertEquals(qviAid.prefix, sadLeCredHolder.get("i").toString());
-        assertEquals(leAid.prefix, aLeCredHolder.get("i").toString());
-        assertEquals(sadQviCred.get("d").toString(), qviLeCredHolder.get("n").toString());
-        assertEquals("0", statusLeCredHolder.get("s").toString());
-        assertNotNull(leCredHolderBody.get("atc"));
+        assertEquals("0", statusLeCredHolder.getS());
+        assertNotNull(leCredHolder.getAtc());
 
         System.out.println("Issuing ECR vLEI Credential from LE");
 
         Map<String, Object> le = new LinkedHashMap<>();
-        le.put("n", sadLeCred.get("d").toString());
-        le.put("s", sadLeCred.get("s").toString());
+        le.put("n", sadLeCred.getD());
+        le.put("s", sadLeCred.getS());
 
         Map<String, Object> ecrCredSource = new LinkedHashMap<>();
         ecrCredSource.put("d", "");
         ecrCredSource.put("le", le);
 
-        Object ecrCred = getOrIssueCredential(
+        Credential ecrCred = getOrIssueCredential(
                 leClient,
                 leAid,
                 roleAid,
@@ -290,19 +290,17 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 true
         );
 
-        Map<String, Object> ecrCredBody = castObjectToLinkedHashMap(ecrCred);
-        Map<String, Object> sadEcrCred = castObjectToLinkedHashMap(ecrCredBody.get("sad"));
-        Object ecrCredHolder = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
+        CredentialSad sadEcrCred = ecrCred.getSad();
+        Credential ecrCredHolder = getReceivedCredential(roleClient, sadEcrCred.getD());
 
         if (ecrCredHolder == null) {
-            sendGrantMessage(leClient, leAid, roleAid, ecrCredBody);
+            sendGrantMessage(leClient, leAid, roleAid, ecrCred);
             sendAdmitMessage(roleClient, roleAid, leAid);
 
             ecrCredHolder = retry(() -> {
                 try {
-                    assertNotNull(sadEcrCred.get("d").toString());
-                    Object cred = getReceivedCredential(roleClient, sadEcrCred.get("d").toString());
-                    assert (cred != null);
+                    Credential cred = getReceivedCredential(roleClient, sadEcrCred.getD());
+                    if (cred == null) throw new RuntimeException("Credential not yet available");
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -310,35 +308,32 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             }, CRED_RETRY_DEFAULTS);
         }
 
-        Map<String, Object> ecrCredHolderBody = castObjectToLinkedHashMap(ecrCredHolder);
+        CredentialSad sadEcrCredHolder = ecrCredHolder.getSad();
+        ACDCAttributes aEcrCredHolder = sadEcrCredHolder.getA();
+        JsonNode ecrLeEdge = mapper.convertValue(sadEcrCredHolder.getE(), JsonNode.class);
+        CredentialState statusEcrCredHolder = ecrCredHolder.getStatus();
 
-        Map<String, Object> sadEcrCredHolder = castObjectToLinkedHashMap(ecrCredHolderBody.get("sad"));
-        Map<String, Object> aEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("a"));
-        Map<String, Object> eEcrCredHolder = castObjectToLinkedHashMap(sadEcrCredHolder.get("e"));
-        Map<String, Object> leEcrCredHolder = castObjectToLinkedHashMap(eEcrCredHolder.get("le"));
-        Map<String, Object> statusEcrCredHolder = castObjectToLinkedHashMap(ecrCredHolderBody.get("status"));
-
-        assertEquals(sadEcrCred.get("d").toString(), sadEcrCredHolder.get("d").toString());
-        assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder.get("s").toString());
-        assertEquals(leAid.prefix, sadEcrCredHolder.get("i").toString());
-        assertEquals(roleAid.prefix, aEcrCredHolder.get("i").toString());
-        assertEquals(sadLeCred.get("d").toString(), leEcrCredHolder.get("n").toString());
-        assertEquals("0", statusEcrCredHolder.get("s").toString());
-        assertNotNull(ecrCredHolderBody.get("atc"));
+        assertEquals(sadEcrCred.getD(), sadEcrCredHolder.getD());
+        assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder.getS());
+        assertEquals(leAid.prefix, sadEcrCredHolder.getI());
+        assertEquals(roleAid.prefix, aEcrCredHolder.getI());
+        assertEquals(sadLeCred.getD(), ecrLeEdge.at("/le/n").asText());
+        assertEquals("0", statusEcrCredHolder.getS());
+        assertNotNull(ecrCredHolder.getAtc());
 
         System.out.println("Issuing ECR AUTH vLEI Credential");
 
         ecrAuthData.put("AID", roleAid.prefix);
 
         Map<String, Object> leErc = new LinkedHashMap<>();
-        leErc.put("n", sadLeCred.get("d").toString());
-        leErc.put("s", sadLeCred.get("s").toString());
+        leErc.put("n", sadLeCred.getD());
+        leErc.put("s", sadLeCred.getS());
 
         Map<String, Object> ecrAuthCredSource = new LinkedHashMap<>();
         ecrAuthCredSource.put("d", "");
         ecrAuthCredSource.put("le", leErc);
 
-        Object ecrAuthCred = getOrIssueCredential(
+        Credential ecrAuthCred = getOrIssueCredential(
                 leClient,
                 leAid,
                 qviAid,
@@ -348,53 +343,50 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 ECR_AUTH_RULES,
                 ecrAuthCredSource
         );
-        Map<String, Object> ecrAuthCredBody = castObjectToLinkedHashMap(ecrAuthCred);
-        Map<String, Object> sadEcrAuthCred = castObjectToLinkedHashMap(ecrAuthCredBody.get("sad"));
-        Object ecrAuthCredHolder = getReceivedCredential(roleClient, sadEcrAuthCred.get("d").toString());
+        CredentialSad sadEcrAuthCred = ecrAuthCred.getSad();
+        Credential ecrAuthCredHolder = getReceivedCredential(roleClient, sadEcrAuthCred.getD());
 
         if (ecrAuthCredHolder == null) {
-            sendGrantMessage(leClient, leAid, qviAid, ecrAuthCredBody);
+            sendGrantMessage(leClient, leAid, qviAid, ecrAuthCred);
             sendAdmitMessage(qviClient, qviAid, leAid);
 
             ecrAuthCredHolder = retry(() -> {
                 try {
-                    Object cred = getReceivedCredential(qviClient, sadEcrAuthCred.get("d").toString());
-                    assert (cred != null);
+                    Credential cred = getReceivedCredential(qviClient, sadEcrAuthCred.getD());
+                    if (cred == null) throw new RuntimeException("Credential not yet available");
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, CRED_RETRY_DEFAULTS);
         }
-        Map<String, Object> ecrAuthCredHolderBody = castObjectToLinkedHashMap(ecrAuthCredHolder);
 
-        Map<String, Object> sadEcrAuthCredHolder = castObjectToLinkedHashMap(ecrAuthCredHolderBody.get("sad"));
-        Map<String, Object> aEcrAuthCredHolder = castObjectToLinkedHashMap(sadEcrAuthCredHolder.get("a"));
-        Map<String, Object> eEcrAuthCredHolder = castObjectToLinkedHashMap(sadEcrAuthCredHolder.get("e"));
-        Map<String, Object> leEcrAuthCredHolder = castObjectToLinkedHashMap(eEcrAuthCredHolder.get("le"));
-        Map<String, Object> statusEcrAuthCredHolder = castObjectToLinkedHashMap(ecrAuthCredHolderBody.get("status"));
+        CredentialSad sadEcrAuthCredHolder = ecrAuthCredHolder.getSad();
+        ACDCAttributes aEcrAuthCredHolder = sadEcrAuthCredHolder.getA();
+        JsonNode ecrAuthLeEdge = mapper.convertValue(sadEcrAuthCredHolder.getE(), JsonNode.class);
+        CredentialState statusEcrAuthCredHolder = ecrAuthCredHolder.getStatus();
 
-        assertEquals(sadEcrAuthCred.get("d").toString(), sadEcrAuthCredHolder.get("d").toString());
-        assertEquals(ECR_AUTH_SCHEMA_SAID, sadEcrAuthCredHolder.get("s").toString());
-        assertEquals(leAid.prefix, sadEcrAuthCredHolder.get("i").toString());
-        assertEquals(qviAid.prefix, aEcrAuthCredHolder.get("i").toString());
-        assertEquals(roleAid.prefix, aEcrAuthCredHolder.get("AID").toString());
-        assertEquals(sadLeCred.get("d").toString(), leEcrAuthCredHolder.get("n").toString());
-        assertEquals("0", statusEcrAuthCredHolder.get("s").toString());
-        assertNotNull(ecrAuthCredHolderBody.get("atc"));
+        assertEquals(sadEcrAuthCred.getD(), sadEcrAuthCredHolder.getD());
+        assertEquals(ECR_AUTH_SCHEMA_SAID, sadEcrAuthCredHolder.getS());
+        assertEquals(leAid.prefix, sadEcrAuthCredHolder.getI());
+        assertEquals(qviAid.prefix, aEcrAuthCredHolder.getI());
+        assertEquals(roleAid.prefix, aEcrAuthCredHolder.getAdditionalProperties().get("AID").toString());
+        assertEquals(sadLeCred.getD(), ecrAuthLeEdge.at("/le/n").asText());
+        assertEquals("0", statusEcrAuthCredHolder.getS());
+        assertNotNull(ecrAuthCredHolder.getAtc());
 
         System.out.println("Issuing ECR vLEI Credential from ECR AUTH");
 
         Map<String, Object> auth = new LinkedHashMap<>();
-        auth.put("n", sadEcrAuthCred.get("d").toString());
-        auth.put("s", sadEcrAuthCred.get("s").toString());
+        auth.put("n", sadEcrAuthCred.getD());
+        auth.put("s", sadEcrAuthCred.getS());
         auth.put("o", "I2I");
 
         Map<String, Object> ecrCredSource2 = new LinkedHashMap<>();
         ecrCredSource2.put("d", "");
         ecrCredSource2.put("auth", auth);
 
-        Object ecrCred2 = getOrIssueCredential(
+        Credential ecrCred2 = getOrIssueCredential(
                 qviClient,
                 qviAid,
                 roleAid,
@@ -405,50 +397,47 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 ecrCredSource2,
                 true
         );
-        Map<String, Object> ecrCred2Body = castObjectToLinkedHashMap(ecrCred2);
-        Map<String, Object> sadEcrCred2 = castObjectToLinkedHashMap(ecrCred2Body.get("sad"));
-        Object ecrCredHolder2 = getReceivedCredential(roleClient, sadEcrCred2.get("d").toString());
+        CredentialSad sadEcrCred2 = ecrCred2.getSad();
+        Credential ecrCredHolder2 = getReceivedCredential(roleClient, sadEcrCred2.getD());
 
         if (ecrCredHolder2 == null) {
-            sendGrantMessage(qviClient, qviAid, roleAid, ecrCred2Body);
+            sendGrantMessage(qviClient, qviAid, roleAid, ecrCred2);
             sendAdmitMessage(roleClient, roleAid, qviAid);
 
             ecrCredHolder2 = retry(() -> {
                 try {
-                    Object cred = getReceivedCredential(roleClient, sadEcrCred2.get("d").toString());
-                    assert (cred != null);
+                    Credential cred = getReceivedCredential(roleClient, sadEcrCred2.getD());
+                    if (cred == null) throw new RuntimeException("Credential not yet available");
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, CRED_RETRY_DEFAULTS);
         }
-        Map<String, Object> ecrCredHolder2Body = castObjectToLinkedHashMap(ecrCredHolder2);
 
-        Map<String, Object> sadEcrCredHolder2 = castObjectToLinkedHashMap(ecrCredHolder2Body.get("sad"));
-        Map<String, Object> eEcrCredHolder2 = castObjectToLinkedHashMap(sadEcrCredHolder2.get("e"));
-        Map<String, Object> authEcrCredHolder2 = castObjectToLinkedHashMap(eEcrCredHolder2.get("auth"));
-        Map<String, Object> statusEcrCredHolder2 = castObjectToLinkedHashMap(ecrCredHolder2Body.get("status"));
+        CredentialSad sadEcrCredHolder2 = ecrCredHolder2.getSad();
+        JsonNode ecrEcrAuthEdges2 = mapper.convertValue(sadEcrCredHolder2.getE(), JsonNode.class);
+        CredentialState statusEcrCredHolder2 = ecrCredHolder2.getStatus();
 
-        assertEquals(sadEcrCred2.get("d").toString(), sadEcrCredHolder2.get("d").toString());
-        assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder2.get("s").toString());
-        assertEquals(qviAid.prefix, sadEcrCredHolder2.get("i").toString());
-        assertEquals(sadEcrAuthCred.get("d").toString(), authEcrCredHolder2.get("n").toString());
-        assertEquals("0", statusEcrCredHolder2.get("s").toString());
-        assertNotNull(ecrCredHolder2Body.get("atc"));
+        assertEquals(sadEcrCred2.getD(), sadEcrCredHolder2.getD());
+        assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder2.getS());
+        assertEquals(qviAid.prefix, sadEcrCredHolder2.getI());
+        assertEquals(sadEcrAuthCred.getD(), ecrEcrAuthEdges2.at("/auth/n").asText());
+        assertEquals("0", statusEcrCredHolder2.getS());
+        assertNotNull(ecrCredHolder2.getAtc());
 
         System.out.println("Issuing OOR AUTH vLEI Credential");
         oorAuthData.put("AID", roleAid.prefix);
 
         le = new LinkedHashMap<>();
-        le.put("n", sadLeCred.get("d").toString());
-        le.put("s", sadLeCred.get("s").toString());
+        le.put("n", sadLeCred.getD());
+        le.put("s", sadLeCred.getS());
 
         Map<String, Object> oorAuthCredSource = new LinkedHashMap<>();
         oorAuthCredSource.put("d", "");
         oorAuthCredSource.put("le", le);
 
-        Object oorAuthCred = getOrIssueCredential(
+        Credential oorAuthCred = getOrIssueCredential(
                 leClient,
                 leAid,
                 qviAid,
@@ -458,53 +447,50 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 OOR_AUTH_RULES,
                 oorAuthCredSource
         );
-        Map<String, Object> oorAuthCredBody = castObjectToLinkedHashMap(oorAuthCred);
-        Map<String, Object> sadOorAuthCred = castObjectToLinkedHashMap(oorAuthCredBody.get("sad"));
-        Object oorAuthCredHolder = getReceivedCredential(qviClient, sadOorAuthCred.get("d").toString());
+        CredentialSad sadOorAuthCred = oorAuthCred.getSad();
+        Credential oorAuthCredHolder = getReceivedCredential(qviClient, sadOorAuthCred.getD());
 
         if (oorAuthCredHolder == null) {
-            sendGrantMessage(leClient, leAid, qviAid, oorAuthCredBody);
+            sendGrantMessage(leClient, leAid, qviAid, oorAuthCred);
             sendAdmitMessage(qviClient, qviAid, leAid);
 
             oorAuthCredHolder = retry(() -> {
                 try {
-                    Object cred = getReceivedCredential(qviClient, sadOorAuthCred.get("d").toString());
-                    assert (cred != null);
+                    Credential cred = getReceivedCredential(qviClient, sadOorAuthCred.getD());
+                    if (cred == null) throw new RuntimeException("Credential not yet available");
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, CRED_RETRY_DEFAULTS);
         }
-        Map<String, Object> oorAuthCredHolderBody = castObjectToLinkedHashMap(oorAuthCredHolder);
 
-        Map<String, Object> sadOorAuthCredHolder = castObjectToLinkedHashMap(oorAuthCredHolderBody.get("sad"));
-        Map<String, Object> aOorAuthCredHolder = castObjectToLinkedHashMap(sadOorAuthCredHolder.get("a"));
-        Map<String, Object> eOorAuthCredHolder = castObjectToLinkedHashMap(sadOorAuthCredHolder.get("e"));
-        Map<String, Object> leOorAuthCredHolder = castObjectToLinkedHashMap(eOorAuthCredHolder.get("le"));
-        Map<String, Object> statusOorAuthCredHolder = castObjectToLinkedHashMap(oorAuthCredHolderBody.get("status"));
+        CredentialSad sadOorAuthCredHolder = oorAuthCredHolder.getSad();
+        ACDCAttributes aOorAuthCredHolder = sadOorAuthCredHolder.getA();
+        JsonNode oorAuthLeEdge = mapper.convertValue(sadOorAuthCredHolder.getE(), JsonNode.class);
+        CredentialState statusOorAuthCredHolder = oorAuthCredHolder.getStatus();
 
-        assertEquals(sadOorAuthCred.get("d").toString(), sadOorAuthCredHolder.get("d").toString());
-        assertEquals(OOR_AUTH_SCHEMA_SAID, sadOorAuthCredHolder.get("s").toString());
-        assertEquals(leAid.prefix, sadOorAuthCredHolder.get("i").toString());
-        assertEquals(qviAid.prefix, aOorAuthCredHolder.get("i").toString());
-        assertEquals(roleAid.prefix, aOorAuthCredHolder.get("AID").toString());
-        assertEquals(sadLeCred.get("d").toString(), leOorAuthCredHolder.get("n").toString());
-        assertEquals("0", statusOorAuthCredHolder.get("s").toString());
-        assertNotNull(oorAuthCredHolderBody.get("atc"));
+        assertEquals(sadOorAuthCred.getD(), sadOorAuthCredHolder.getD());
+        assertEquals(OOR_AUTH_SCHEMA_SAID, sadOorAuthCredHolder.getS());
+        assertEquals(leAid.prefix, sadOorAuthCredHolder.getI());
+        assertEquals(qviAid.prefix, aOorAuthCredHolder.getI());
+        assertEquals(roleAid.prefix, aOorAuthCredHolder.getAdditionalProperties().get("AID").toString());
+        assertEquals(sadLeCred.getD(), oorAuthLeEdge.at("/le/n").asText());
+        assertEquals("0", statusOorAuthCredHolder.getS());
+        assertNotNull(oorAuthCredHolder.getAtc());
 
         System.out.println("Issuing OOR vLEI Credential from OOR AUTH");
 
         auth = new LinkedHashMap<>();
-        auth.put("n", sadOorAuthCred.get("d").toString());
-        auth.put("s", sadOorAuthCred.get("s").toString());
+        auth.put("n", sadOorAuthCred.getD());
+        auth.put("s", sadOorAuthCred.getS());
         auth.put("o", "I2I");
 
         Map<String, Object> oorCredSource = new LinkedHashMap<>();
         oorCredSource.put("d", "");
         oorCredSource.put("auth", auth);
 
-        Object oorCred = getOrIssueCredential(
+        Credential oorCred = getOrIssueCredential(
                 qviClient,
                 qviAid,
                 roleAid,
@@ -514,37 +500,34 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 OOR_RULES,
                 oorCredSource
         );
-        Map<String, Object> oorCredBody = castObjectToLinkedHashMap(oorCred);
-        Map<String, Object> sadOorCred = castObjectToLinkedHashMap(oorCredBody.get("sad"));
-        Object oorCredHolder = getReceivedCredential(qviClient, sadOorCred.get("d").toString());
+        CredentialSad sadOorCred = oorCred.getSad();
+        Credential oorCredHolder = getReceivedCredential(qviClient, sadOorCred.getD());
 
         if (oorCredHolder == null) {
-            sendGrantMessage(qviClient, qviAid, roleAid, oorCredBody);
+            sendGrantMessage(qviClient, qviAid, roleAid, oorCred);
             sendAdmitMessage(roleClient, roleAid, qviAid);
 
             oorCredHolder = retry(() -> {
                 try {
-                    Object cred = getReceivedCredential(roleClient, sadOorCred.get("d").toString());
-                    assert (cred != null);
+                    Credential cred = getReceivedCredential(roleClient, sadOorCred.getD());
+                    if (cred == null) throw new RuntimeException("Credential not yet available");
                     return cred;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, CRED_RETRY_DEFAULTS);
         }
-        Map<String, Object> oorCredHolderBody = castObjectToLinkedHashMap(oorCredHolder);
 
-        Map<String, Object> sadOorCredHolder = castObjectToLinkedHashMap(oorCredHolderBody.get("sad"));
-        Map<String, Object> eOorCredHolder = castObjectToLinkedHashMap(sadOorCredHolder.get("e"));
-        Map<String, Object> authOorCredHolder = castObjectToLinkedHashMap(eOorCredHolder.get("auth"));
-        Map<String, Object> statusOorCredHolder = castObjectToLinkedHashMap(oorCredHolderBody.get("status"));
+        CredentialSad sadOorCredHolder = oorCredHolder.getSad();
+        JsonNode oorOorAuthEdge = mapper.convertValue(sadOorCredHolder.getE(), JsonNode.class);
+        CredentialState statusOorCredHolder = oorCredHolder.getStatus();
 
-        assertEquals(sadOorCred.get("d").toString(), sadOorCredHolder.get("d").toString());
-        assertEquals(OOR_SCHEMA_SAID, sadOorCredHolder.get("s").toString());
-        assertEquals(qviAid.prefix, sadOorCredHolder.get("i").toString());
-        assertEquals(sadOorAuthCred.get("d").toString(), authOorCredHolder.get("n").toString());
-        assertEquals("0", statusOorCredHolder.get("s").toString());
-        assertNotNull(oorCredHolderBody.get("atc"));
+        assertEquals(sadOorCred.getD(), sadOorCredHolder.getD());
+        assertEquals(OOR_SCHEMA_SAID, sadOorCredHolder.getS());
+        assertEquals(qviAid.prefix, sadOorCredHolder.getI());
+        assertEquals(sadOorAuthCred.getD(), oorOorAuthEdge.at("/auth/n").asText());
+        assertEquals("0", statusOorCredHolder.getS());
+        assertNotNull(oorCredHolder.getAtc());
 
         List<SignifyClient> clientList = Arrays.asList(
                 gleifClient,
@@ -558,10 +541,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
         IssuerRegistry registry = IssuerRegistry.builder().build();
-        Object registries = client.registries().list(aid.name);
-        ArrayList<String> registriesBody = (ArrayList<String>) registries;
-        if (!registriesBody.isEmpty()) {
-            assertEquals(1, registriesBody.size());
+        List<Registry> registriesList = client.registries().list(aid.name);
+        if (!registriesList.isEmpty()) {
+            assertEquals(1, registriesList.size());
         } else {
             CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
             registryArgs.setName(aid.name);
@@ -569,27 +551,21 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
             RegistryResult regResult = client.registries().create(registryArgs);
             waitOperation(client, regResult.op());
-            registries = client.registries().list(aid.name);
+            registriesList = client.registries().list(aid.name);
 
-            registriesBody = (ArrayList<String>) registries;
-            LinkedHashMap<String, Object> registryBody = castObjectToLinkedHashMap(registriesBody.getFirst());
-            registry.setName(registryBody.get("name").toString());
-            registry.setRegk(registryBody.get("regk").toString());
+            Registry registryBody = registriesList.get(0);
+            registry.setName(registryBody.getName());
+            registry.setRegk(registryBody.getRegk());
         }
         return registry;
     }
 
-    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Map<String, Object> credential) throws Exception {
-        Map<String, Object> sad = castObjectToLinkedHashMap(credential.get("sad"));
-        Map<String, Object> anc = castObjectToLinkedHashMap(credential.get("anc"));
-        Map<String, Object> iss = castObjectToLinkedHashMap(credential.get("iss"));
-
+    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) throws Exception {
         IpexGrantArgs grantArgs = IpexGrantArgs.builder()
                 .senderName(senderAid.name)
-                .acdc(new Serder(sad))
-                .anc(new Serder(anc))
-                .iss(new Serder(iss))
-                .ancAttachment(null)
+                .acdc(new Serder(Utils.toMap(credential.getSad())))
+                .anc(new Serder(Utils.toMap(credential.getAnc())))
+                .iss(new Serder(Utils.toMap(credential.getIss())))
                 .recipient(recipientAid.prefix)
                 .datetime(createTimestamp())
                 .build();

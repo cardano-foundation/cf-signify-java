@@ -42,7 +42,7 @@ public class EndrolesAidPostRequest {
 
   public static final String JSON_PROPERTY_SIGS = "sigs";
   @jakarta.annotation.Nullable
-  private List<String> sigs = new ArrayList<>();
+  private List<String> sigs;
 
   public EndrolesAidPostRequest() {
   }

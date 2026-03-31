@@ -47,11 +47,11 @@ public class StateEERecord {
 
   public static final String JSON_PROPERTY_BR = "br";
   @jakarta.annotation.Nullable
-  private List<Object> br = new ArrayList<>();
+  private List<Object> br;
 
   public static final String JSON_PROPERTY_BA = "ba";
   @jakarta.annotation.Nullable
-  private List<Object> ba = new ArrayList<>();
+  private List<Object> ba;
 
   public StateEERecord() {
   }

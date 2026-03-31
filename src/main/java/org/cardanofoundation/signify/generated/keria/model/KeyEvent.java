@@ -38,30 +38,29 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * CredentialAnc
+ * KeyEvent
  */
 @JsonPropertyOrder({
-  CredentialAnc.JSON_PROPERTY_V,
-  CredentialAnc.JSON_PROPERTY_T,
-  CredentialAnc.JSON_PROPERTY_D,
-  CredentialAnc.JSON_PROPERTY_I,
-  CredentialAnc.JSON_PROPERTY_S,
-  CredentialAnc.JSON_PROPERTY_P,
-  CredentialAnc.JSON_PROPERTY_A,
-  CredentialAnc.JSON_PROPERTY_KT,
-  CredentialAnc.JSON_PROPERTY_K,
-  CredentialAnc.JSON_PROPERTY_NT,
-  CredentialAnc.JSON_PROPERTY_N,
-  CredentialAnc.JSON_PROPERTY_BT,
-  CredentialAnc.JSON_PROPERTY_B,
-  CredentialAnc.JSON_PROPERTY_C,
-  CredentialAnc.JSON_PROPERTY_BR,
-  CredentialAnc.JSON_PROPERTY_BA,
-  CredentialAnc.JSON_PROPERTY_DI
+  KeyEvent.JSON_PROPERTY_V,
+  KeyEvent.JSON_PROPERTY_T,
+  KeyEvent.JSON_PROPERTY_D,
+  KeyEvent.JSON_PROPERTY_I,
+  KeyEvent.JSON_PROPERTY_S,
+  KeyEvent.JSON_PROPERTY_P,
+  KeyEvent.JSON_PROPERTY_A,
+  KeyEvent.JSON_PROPERTY_KT,
+  KeyEvent.JSON_PROPERTY_K,
+  KeyEvent.JSON_PROPERTY_NT,
+  KeyEvent.JSON_PROPERTY_N,
+  KeyEvent.JSON_PROPERTY_BT,
+  KeyEvent.JSON_PROPERTY_B,
+  KeyEvent.JSON_PROPERTY_C,
+  KeyEvent.JSON_PROPERTY_BR,
+  KeyEvent.JSON_PROPERTY_BA,
+  KeyEvent.JSON_PROPERTY_DI
 })
-@JsonTypeName("Credential_anc")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class CredentialAnc {
+public class KeyEvent {
   public static final String JSON_PROPERTY_V = "v";
   @jakarta.annotation.Nonnull
   private String v;
@@ -96,7 +95,7 @@ public class CredentialAnc {
 
   public static final String JSON_PROPERTY_K = "k";
   @jakarta.annotation.Nonnull
-  private List<String> k = new ArrayList<>();
+  private List<String> k;
 
   public static final String JSON_PROPERTY_NT = "nt";
   @jakarta.annotation.Nonnull
@@ -104,7 +103,7 @@ public class CredentialAnc {
 
   public static final String JSON_PROPERTY_N = "n";
   @jakarta.annotation.Nonnull
-  private List<String> n = new ArrayList<>();
+  private List<String> n;
 
   public static final String JSON_PROPERTY_BT = "bt";
   @jakarta.annotation.Nonnull
@@ -112,28 +111,28 @@ public class CredentialAnc {
 
   public static final String JSON_PROPERTY_B = "b";
   @jakarta.annotation.Nonnull
-  private List<String> b = new ArrayList<>();
+  private List<String> b;
 
   public static final String JSON_PROPERTY_C = "c";
   @jakarta.annotation.Nonnull
-  private List<String> c = new ArrayList<>();
+  private List<String> c;
 
   public static final String JSON_PROPERTY_BR = "br";
   @jakarta.annotation.Nonnull
-  private List<String> br = new ArrayList<>();
+  private List<String> br;
 
   public static final String JSON_PROPERTY_BA = "ba";
   @jakarta.annotation.Nonnull
-  private List<String> ba = new ArrayList<>();
+  private List<String> ba;
 
   public static final String JSON_PROPERTY_DI = "di";
   @jakarta.annotation.Nonnull
   private String di;
 
-  public CredentialAnc() {
+  public KeyEvent() {
   }
 
-  public CredentialAnc v(@jakarta.annotation.Nonnull String v) {
+  public KeyEvent v(@jakarta.annotation.Nonnull String v) {
     
     this.v = v;
     return this;
@@ -158,7 +157,7 @@ public class CredentialAnc {
     this.v = v;
   }
 
-  public CredentialAnc t(@jakarta.annotation.Nonnull String t) {
+  public KeyEvent t(@jakarta.annotation.Nonnull String t) {
     
     this.t = t;
     return this;
@@ -183,7 +182,7 @@ public class CredentialAnc {
     this.t = t;
   }
 
-  public CredentialAnc d(@jakarta.annotation.Nonnull String d) {
+  public KeyEvent d(@jakarta.annotation.Nonnull String d) {
     
     this.d = d;
     return this;
@@ -208,7 +207,7 @@ public class CredentialAnc {
     this.d = d;
   }
 
-  public CredentialAnc i(@jakarta.annotation.Nonnull String i) {
+  public KeyEvent i(@jakarta.annotation.Nonnull String i) {
     
     this.i = i;
     return this;
@@ -233,7 +232,7 @@ public class CredentialAnc {
     this.i = i;
   }
 
-  public CredentialAnc s(@jakarta.annotation.Nonnull String s) {
+  public KeyEvent s(@jakarta.annotation.Nonnull String s) {
     
     this.s = s;
     return this;
@@ -258,7 +257,7 @@ public class CredentialAnc {
     this.s = s;
   }
 
-  public CredentialAnc p(@jakarta.annotation.Nonnull String p) {
+  public KeyEvent p(@jakarta.annotation.Nonnull String p) {
     
     this.p = p;
     return this;
@@ -283,7 +282,7 @@ public class CredentialAnc {
     this.p = p;
   }
 
-  public CredentialAnc a(@jakarta.annotation.Nullable Object a) {
+  public KeyEvent a(@jakarta.annotation.Nullable Object a) {
     
     this.a = a;
     return this;
@@ -308,7 +307,7 @@ public class CredentialAnc {
     this.a = a;
   }
 
-  public CredentialAnc kt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
+  public KeyEvent kt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
     
     this.kt = kt;
     return this;
@@ -333,13 +332,13 @@ public class CredentialAnc {
     this.kt = kt;
   }
 
-  public CredentialAnc k(@jakarta.annotation.Nonnull List<String> k) {
+  public KeyEvent k(@jakarta.annotation.Nonnull List<String> k) {
     
     this.k = k;
     return this;
   }
 
-  public CredentialAnc addKItem(String kItem) {
+  public KeyEvent addKItem(String kItem) {
     if (this.k == null) {
       this.k = new ArrayList<>();
     }
@@ -366,7 +365,7 @@ public class CredentialAnc {
     this.k = k;
   }
 
-  public CredentialAnc nt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
+  public KeyEvent nt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
     
     this.nt = nt;
     return this;
@@ -391,13 +390,13 @@ public class CredentialAnc {
     this.nt = nt;
   }
 
-  public CredentialAnc n(@jakarta.annotation.Nonnull List<String> n) {
+  public KeyEvent n(@jakarta.annotation.Nonnull List<String> n) {
     
     this.n = n;
     return this;
   }
 
-  public CredentialAnc addNItem(String nItem) {
+  public KeyEvent addNItem(String nItem) {
     if (this.n == null) {
       this.n = new ArrayList<>();
     }
@@ -424,7 +423,7 @@ public class CredentialAnc {
     this.n = n;
   }
 
-  public CredentialAnc bt(@jakarta.annotation.Nonnull String bt) {
+  public KeyEvent bt(@jakarta.annotation.Nonnull String bt) {
     
     this.bt = bt;
     return this;
@@ -449,13 +448,13 @@ public class CredentialAnc {
     this.bt = bt;
   }
 
-  public CredentialAnc b(@jakarta.annotation.Nonnull List<String> b) {
+  public KeyEvent b(@jakarta.annotation.Nonnull List<String> b) {
     
     this.b = b;
     return this;
   }
 
-  public CredentialAnc addBItem(String bItem) {
+  public KeyEvent addBItem(String bItem) {
     if (this.b == null) {
       this.b = new ArrayList<>();
     }
@@ -482,13 +481,13 @@ public class CredentialAnc {
     this.b = b;
   }
 
-  public CredentialAnc c(@jakarta.annotation.Nonnull List<String> c) {
+  public KeyEvent c(@jakarta.annotation.Nonnull List<String> c) {
     
     this.c = c;
     return this;
   }
 
-  public CredentialAnc addCItem(String cItem) {
+  public KeyEvent addCItem(String cItem) {
     if (this.c == null) {
       this.c = new ArrayList<>();
     }
@@ -515,13 +514,13 @@ public class CredentialAnc {
     this.c = c;
   }
 
-  public CredentialAnc br(@jakarta.annotation.Nonnull List<String> br) {
+  public KeyEvent br(@jakarta.annotation.Nonnull List<String> br) {
     
     this.br = br;
     return this;
   }
 
-  public CredentialAnc addBrItem(String brItem) {
+  public KeyEvent addBrItem(String brItem) {
     if (this.br == null) {
       this.br = new ArrayList<>();
     }
@@ -548,13 +547,13 @@ public class CredentialAnc {
     this.br = br;
   }
 
-  public CredentialAnc ba(@jakarta.annotation.Nonnull List<String> ba) {
+  public KeyEvent ba(@jakarta.annotation.Nonnull List<String> ba) {
     
     this.ba = ba;
     return this;
   }
 
-  public CredentialAnc addBaItem(String baItem) {
+  public KeyEvent addBaItem(String baItem) {
     if (this.ba == null) {
       this.ba = new ArrayList<>();
     }
@@ -581,7 +580,7 @@ public class CredentialAnc {
     this.ba = ba;
   }
 
-  public CredentialAnc di(@jakarta.annotation.Nonnull String di) {
+  public KeyEvent di(@jakarta.annotation.Nonnull String di) {
     
     this.di = di;
     return this;
@@ -615,24 +614,24 @@ public class CredentialAnc {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CredentialAnc credentialAnc = (CredentialAnc) o;
-    return Objects.equals(this.v, credentialAnc.v) &&
-        Objects.equals(this.t, credentialAnc.t) &&
-        Objects.equals(this.d, credentialAnc.d) &&
-        Objects.equals(this.i, credentialAnc.i) &&
-        Objects.equals(this.s, credentialAnc.s) &&
-        Objects.equals(this.p, credentialAnc.p) &&
-        Objects.equals(this.a, credentialAnc.a) &&
-        Objects.equals(this.kt, credentialAnc.kt) &&
-        Objects.equals(this.k, credentialAnc.k) &&
-        Objects.equals(this.nt, credentialAnc.nt) &&
-        Objects.equals(this.n, credentialAnc.n) &&
-        Objects.equals(this.bt, credentialAnc.bt) &&
-        Objects.equals(this.b, credentialAnc.b) &&
-        Objects.equals(this.c, credentialAnc.c) &&
-        Objects.equals(this.br, credentialAnc.br) &&
-        Objects.equals(this.ba, credentialAnc.ba) &&
-        Objects.equals(this.di, credentialAnc.di);
+    KeyEvent keyEvent = (KeyEvent) o;
+    return Objects.equals(this.v, keyEvent.v) &&
+        Objects.equals(this.t, keyEvent.t) &&
+        Objects.equals(this.d, keyEvent.d) &&
+        Objects.equals(this.i, keyEvent.i) &&
+        Objects.equals(this.s, keyEvent.s) &&
+        Objects.equals(this.p, keyEvent.p) &&
+        Objects.equals(this.a, keyEvent.a) &&
+        Objects.equals(this.kt, keyEvent.kt) &&
+        Objects.equals(this.k, keyEvent.k) &&
+        Objects.equals(this.nt, keyEvent.nt) &&
+        Objects.equals(this.n, keyEvent.n) &&
+        Objects.equals(this.bt, keyEvent.bt) &&
+        Objects.equals(this.b, keyEvent.b) &&
+        Objects.equals(this.c, keyEvent.c) &&
+        Objects.equals(this.br, keyEvent.br) &&
+        Objects.equals(this.ba, keyEvent.ba) &&
+        Objects.equals(this.di, keyEvent.di);
   }
 
   @Override
@@ -643,7 +642,7 @@ public class CredentialAnc {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CredentialAnc {\n");
+    sb.append("class KeyEvent {\n");
     sb.append("    v: ").append(toIndentedString(v)).append("\n");
     sb.append("    t: ").append(toIndentedString(t)).append("\n");
     sb.append("    d: ").append(toIndentedString(d)).append("\n");
