@@ -3,9 +3,9 @@ package org.cardanofoundation.signify.app;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.ChallengeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Challenge;
 import org.cardanofoundation.signify.generated.keria.model.Contact;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
@@ -91,14 +91,14 @@ public class Contacting {
          * @return The long-running operation
          * @throws Exception if the fetch operation fails
          */
-        public Operation<?> verify(String source, List<String> words) throws LibsodiumException, IOException, InterruptedException {
+        public ChallengeOperation verify(String source, List<String> words) throws LibsodiumException, IOException, InterruptedException {
             String path = "/challenges_verify/" + source;
             String method = "POST";
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("words", words);
 
             HttpResponse<String> response = this.client.fetch(path, method, data);
-            return Utils.fromJson(response.body(), new TypeReference<Operation<?>>() {});
+            return Utils.fromJson(response.body(), ChallengeOperation.class);
         }
 
         /**

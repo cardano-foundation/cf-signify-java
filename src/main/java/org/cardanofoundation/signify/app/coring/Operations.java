@@ -5,11 +5,13 @@ import lombok.*;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,71 +23,114 @@ public class Operations {
     }
 
     /**
-     * Get operation by name
+     * Get operation by name, deserialized into a specific type.
      *
      * @param name Name or ID of the operation to retrieve
-     * @return Optional containing the operation if found, or empty if not found
-     * @throws IOException if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException if a Sodium error occurs
+     * @param type The target class to deserialize into (e.g., CredentialOperation.class)
+     * @return Optional containing the typed operation if found, or empty if not found
      */
-    public <T> Optional<Operation<T>> get(String name) throws IOException, InterruptedException, LibsodiumException {
+    public <T> Optional<T> get(String name, Class<T> type) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations/" + name;
-        String method = "GET";
-        HttpResponse<String> response = this.client.fetch(path, method, null);
-        
+        HttpResponse<String> response = this.client.fetch(path, "GET", null);
+
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             return Optional.empty();
         }
-        
-        return Optional.of(Utils.fromJson(response.body(), new TypeReference<>() {}));
+
+        return Optional.of(Utils.fromJson(response.body(), type));
     }
 
-    public List<Operation<?>> list(String type) throws IOException, InterruptedException, LibsodiumException {
+    /**
+     * Get operation by name, deserialized into the general Operation union type.
+     *
+     * @param name Name or ID of the operation to retrieve
+     * @return Optional containing the Operation if found, or empty if not found
+     */
+    public Optional<Operation> get(String name) throws IOException, InterruptedException, LibsodiumException {
+        return get(name, Operation.class);
+    }
+
+    /**
+     * List operations, deserialized into the general Operation union type.
+     */
+    public List<Operation> list(String type) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
-        String method = "GET";
-        HttpResponse<String> response = this.client.fetch(path, method, null);
+        HttpResponse<String> response = this.client.fetch(path, "GET", null);
         return Utils.fromJson(response.body(), new TypeReference<>() {});
+    }
+
+    /**
+     * List all operations.
+     */
+    public List<Operation> list() throws IOException, InterruptedException, LibsodiumException {
+        return list(null);
     }
 
     public void delete(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations/" + name;
-        String method = "DELETE";
-        this.client.fetch(path, method, null);
+        this.client.fetch(path, "DELETE", null);
     }
 
-    public <T> Operation<T> wait(Operation<T> op) throws IOException, InterruptedException, LibsodiumException {
-        return wait(op, WaitOptions.builder().build(), System.currentTimeMillis());
+    /**
+     * Wait for an operation to complete, returning the result as the general Operation union type.
+     *
+     * @param operationName The name of the operation to wait for
+     */
+    public Operation wait(String operationName) throws IOException, InterruptedException, LibsodiumException {
+        return wait(operationName, Operation.class, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
-        return wait(op, options, System.currentTimeMillis());
+    /**
+     * Wait for an operation to complete, returning the result deserialized into the given type.
+     * Handles dependent operations automatically.
+     *
+     * @param operationName The name of the operation to wait for
+     * @param resultType    The target class to deserialize the final result into (e.g., CredentialOperation.class)
+     */
+    public <T> T wait(String operationName, Class<T> resultType) throws IOException, InterruptedException, LibsodiumException {
+        return wait(operationName, resultType, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+    public <T> T wait(String operationName, Class<T> resultType, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
+        return wait(operationName, resultType, options, System.currentTimeMillis());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T wait(String operationName, Class<T> resultType, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
         int minSleep = options.getMinSleep();
         int maxSleep = options.getMaxSleep();
         int increaseFactor = options.getIncreaseFactor();
 
-        if (op.getMetadata() != null && op.getMetadata().getDepends() != null && !op.getMetadata().getDepends().isDone()) {
-            wait(op.getMetadata().getDepends(), options, startingTime);
-        }
+        // First fetch to check depends and initial state
+        Map<String, Object> json = get(operationName, Map.class)
+                .orElseThrow(() -> new IOException("Operation not found: " + operationName));
 
-        if (op.isDone()) {
-            return op;
+        // Wait on dependencies first
+        waitOnDepends(json, options, startingTime);
+
+        if (Boolean.TRUE.equals(json.get("done"))) {
+            if (resultType == Map.class) {
+                return (T) json;
+            }
+            return get(operationName, resultType)
+                    .orElseThrow(() -> new IOException("Operation not found: " + operationName));
         }
 
         int retries = 0;
 
         while (true) {
-            String opName = op.getName();
-            op = this.<T>get(opName).orElseThrow(() -> new IllegalArgumentException("Operation not found: " + opName));
+            json = get(operationName, Map.class)
+                    .orElseThrow(() -> new IOException("Operation not found: " + operationName));
 
             int delay = Math.max(minSleep, Math.min(maxSleep, (int) Math.pow(2, retries) * increaseFactor));
             retries++;
 
-            if (op.isDone()) {
-                return op;
+            if (Boolean.TRUE.equals(json.get("done"))) {
+                if (resultType == Map.class) {
+                    return (T) json;
+                }
+                return get(operationName, resultType)
+                        .orElseThrow(() -> new IOException("Operation not found: " + operationName));
             }
             Thread.sleep(delay);
 
@@ -97,6 +142,21 @@ public class Operations {
             }
 
             options.getAbortSignal().throwIfAborted();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void waitOnDepends(Map<String, Object> operationJson, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+        Object metadata = operationJson.get("metadata");
+        if (metadata instanceof Map<?, ?> metaMap) {
+            Object depends = metaMap.get("depends");
+            if (depends instanceof Map<?, ?> depMap) {
+                String depName = (String) depMap.get("name");
+                Boolean depDone = depMap.get("done") instanceof Boolean b ? b : null;
+                if (depName != null && !Boolean.TRUE.equals(depDone)) {
+                    wait(depName, Map.class, options, startingTime);
+                }
+            }
         }
     }
 

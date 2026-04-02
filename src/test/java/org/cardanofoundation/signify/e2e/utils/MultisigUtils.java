@@ -9,7 +9,6 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
@@ -32,16 +31,18 @@ import java.util.stream.Collectors;
 
 import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 
 @SuppressWarnings("unchecked")
 public class MultisigUtils {
 
-    public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
+    public static Operation acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
         final HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
@@ -73,7 +74,7 @@ public class MultisigUtils {
         createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
 
         EventResult icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
-        Object op2 = icpResult2.op();
+        Operation op2 = icpResult2.op();
         Serder serder = icpResult2.serder();
         List<String> sigs = icpResult2.sigs();
         List<Siger> sigers = sigs.stream().map(Siger::new).toList();
@@ -97,7 +98,7 @@ public class MultisigUtils {
         return op2;
     }
 
-    public static Object interactMultisig(SignifyClient client, String groupName, HabState aid,
+    public static Operation interactMultisig(SignifyClient client, String groupName, HabState aid,
                                           List<HabState> otherMemberAIDs,
                                           Object data,
                                           List<KeyStateRecord> states,
@@ -142,7 +143,7 @@ public class MultisigUtils {
         return interactResult.op();
     }
 
-    public static Object rotateMultisig(SignifyClient client, String groupName, HabState aid,
+    public static Operation rotateMultisig(SignifyClient client, String groupName, HabState aid,
                                           List<HabState> otherMemberAIDs,
                                           RotateIdentifierArgs kargs,
                                           String route,
@@ -194,7 +195,7 @@ public class MultisigUtils {
         return interactResult.op();
     }
 
-    public static List<Object> addEndRoleMultisig(SignifyClient client, String groupName, HabState aid,
+    public static List<Operation> addEndRoleMultisig(SignifyClient client, String groupName, HabState aid,
                                             List<HabState> otherMemberAIDs, HabState multisigAID,
                                             String timestamp,
                                             boolean isInitiator) throws Exception {
@@ -202,7 +203,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
         }
 
-        List<Object> opList = new ArrayList<>();
+        List<Operation> opList = new ArrayList<>();
         GroupMember members = client.identifiers().members(groupName);
 
         for (AidRecord signing : members.getSigning()) {
@@ -248,7 +249,7 @@ public class MultisigUtils {
         return opList;
     }
 
-    public static List<Object> addEndRoleMultisigs(SignifyClient client, String groupName, HabState aid,
+    public static List<Operation> addEndRoleMultisigs(SignifyClient client, String groupName, HabState aid,
                                                   List<HabState> otherMemberAIDs, HabState multisigAID,
                                                   String timestamp,
                                                   boolean isInitiator) throws Exception {
@@ -256,7 +257,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
         }
 
-        List<Object> opList = new ArrayList<>();
+        List<Operation> opList = new ArrayList<>();
         GroupMember members = client.identifiers().members(groupName);
 
         String eid = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
@@ -361,7 +362,7 @@ public class MultisigUtils {
                 );
     }
 
-    public static Object createAIDMultisig(
+    public static Operation createAIDMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -374,7 +375,7 @@ public class MultisigUtils {
         }
 
         EventResult icpResult = client.identifiers().create(groupName, kargs);
-        Object op = icpResult.op();
+        Operation op = icpResult.op();
 
         Serder serder = icpResult.serder();
         List<String> sigs = icpResult.sigs();
@@ -413,7 +414,7 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Object createRegistryMultisig(
+    public static Operation createRegistryMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -434,7 +435,7 @@ public class MultisigUtils {
                 .nonce(nonce)
                 .build();
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        Object op = vcpResult.op();
+        Operation op = vcpResult.op();
 
         Serder serder = vcpResult.getRegser();
         Serder anc = vcpResult.getSerder();
@@ -466,7 +467,7 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Object createRegistryMultisig(
+    public static Operation createRegistryMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -478,7 +479,7 @@ public class MultisigUtils {
         return createRegistryMultisig(client, aid, otherMembersAIDs, multisigAID, registryName, nonce, "registry", isInitiator);
     }
 
-    public static Object createMultisig(
+    public static Operation createMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -498,7 +499,7 @@ public class MultisigUtils {
                 .nonce(nonce)
                 .build();
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        Object op = vcpResult.op();
+        Operation op = vcpResult.op();
 
         Serder serder = vcpResult.getRegser();
         Serder anc = vcpResult.getSerder();
@@ -531,7 +532,7 @@ public class MultisigUtils {
 
 
 
-    public static Object delegateMultisig(
+    public static Operation delegateMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -549,7 +550,7 @@ public class MultisigUtils {
         }
 
         EventResult delResult = client.delegations().approve(multisigAID.getName(), anchor);
-        Object appOp = delResult.op();
+        Operation appOp = delResult.op();
         System.out.println("Delegator " + aid.getName() + "(" + aid.getPrefix() + ") approved delegation for " +
                 multisigAID.getName() + " with anchor " + anchor);
 
@@ -656,7 +657,7 @@ public class MultisigUtils {
         );
     }
 
-    public static Object issueCredentialMultisig(
+    public static CredentialOperation issueCredentialMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -669,7 +670,7 @@ public class MultisigUtils {
         }
 
         IssueCredentialResult credResult = client.credentials().issue(multisigAIDName, kargsIss);
-        Operation op = credResult.getOp();
+        CredentialOperation op = credResult.getOp();
 
         HabState multisigAID = client.identifiers().get(multisigAIDName)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + multisigAIDName));
@@ -703,7 +704,7 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Object startMultisigIncept(
+    public static Operation startMultisigIncept(
             SignifyClient client,
             StartMultisigInceptArgs args
     ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
@@ -728,7 +729,7 @@ public class MultisigUtils {
         createIdentifierArgs.setRstates(participantStates);
 
         EventResult icpResult1 = client.identifiers().create(args.getGroupName(), createIdentifierArgs);
-        Object op1 = icpResult1.op();
+        Operation op1 = icpResult1.op();
         Serder serder = icpResult1.serder();
 
         List<String> sigs = icpResult1.sigs();

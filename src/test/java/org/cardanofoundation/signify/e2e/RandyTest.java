@@ -6,7 +6,6 @@ import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
@@ -16,7 +15,6 @@ import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
@@ -28,8 +26,7 @@ public class RandyTest {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private SignifyClient client1;
-    private String opResponseDone, opResponseName, opResponsePrefix;
-    private HashMap<String, Object> opResponse;
+    private String opResponseName, opResponsePrefix;
 
     @Test
     void randyTest() throws Exception {
@@ -48,15 +45,9 @@ public class RandyTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
         EventResult icpResult = client1.identifiers().create("aid1", kargs);
-        Operation<?> op = Operation.fromObject(waitOperation(client1, icpResult.op()));
+        waitOperation(client1, icpResult.op());
 
-        opResponse = (HashMap<String, Object>) op.getResponse();
-        opResponseDone = op.isDone() ? "true" : "false";
-
-        assertEquals("true", opResponseDone);
-
-        HashMap<String, Object> aid = opResponse;
-        Serder icp = new Serder(aid);
+        Serder icp = icpResult.serder();
         assertEquals(1, icp.getVerfers().size());
         assertEquals(1, icp.getDigers().size());
         assertEquals("1", icp.getKed().get("kt"));
@@ -74,10 +65,8 @@ public class RandyTest {
         assertEquals(icp.getPre(), opResponsePrefix);
 
         icpResult = client1.identifiers().interact("aid1", icp.getPre());
-        op = Operation.fromObject(waitOperation(client1, icpResult.op()));
-        opResponse = (HashMap<String, Object>) op.getResponse();
-        HashMap<String, Object> ked = opResponse;
-        Serder ixn = new Serder(ked);
+        waitOperation(client1, icpResult.op());
+        Serder ixn = icpResult.serder();
         assertEquals("1", ixn.getKed().get("s"));
         assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
@@ -94,11 +83,9 @@ public class RandyTest {
         assertEquals(2, logList.size());
 
         icpResult = client1.identifiers().rotate("aid1");
-        op = Operation.fromObject((waitOperation(client1, icpResult.op())));
-        opResponse = (HashMap<String, Object>) op.getResponse();
+        waitOperation(client1, icpResult.op());
 
-        ked = opResponse;
-        Serder rot = new Serder(ked);
+        Serder rot = icpResult.serder();
         assertEquals("2", rot.getKed().get("s"));
         assertEquals(1, rot.getVerfers().size());
         assertEquals(1, rot.getDigers().size());

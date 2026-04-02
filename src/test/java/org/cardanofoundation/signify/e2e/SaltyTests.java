@@ -6,7 +6,6 @@ import org.cardanofoundation.signify.app.aiding.IdentifierInfo;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
@@ -26,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class SaltyTests {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
-    private String opResponseDone, opResponsePrefix;
-    private HashMap<String, Object> opResponse;
 
     @Test
     void saltyTest() throws Exception {
@@ -46,15 +43,9 @@ class SaltyTests {
         CreateIdentifierArgs bran = new CreateIdentifierArgs();
         bran.setBran("0123456789abcdefghijk");
         EventResult icpResult = client.identifiers().create("aid1", bran);
-        Operation op = Operation.fromObject(waitOperation(client, icpResult.op()));
+        waitOperation(client, icpResult.op());
 
-        opResponse = (HashMap<String, Object>) op.getResponse();
-        opResponseDone = op.isDone() ? "true" : "false";
-
-        assertEquals("true", opResponseDone);
-
-        HashMap<String, Object> aid = opResponse;
-        Serder icp = new Serder(aid);
+        Serder icp = icpResult.serder();
 
         assertEquals("ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK", icp.getPre());
         assertEquals(1, icp.getVerfers().size());
@@ -86,11 +77,8 @@ class SaltyTests {
         params.setBran("0123456789lmnopqrstuv");
 
         EventResult icpResult1 = client.identifiers().create("aid2", params);
-        Operation op_1 = Operation.fromObject(waitOperation(client, icpResult1.op()));
-        opResponse = (HashMap<String, Object>) op_1.getResponse();
-        opResponseDone = op_1.isDone() ? "true" : "false";
-        HashMap<String, Object> aid2 = opResponse;
-        Serder icp2 = new Serder(aid2);
+        waitOperation(client, icpResult1.op());
+        Serder icp2 = icpResult1.serder();
 
         assertEquals("EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX", icp2.getPre());
         assertEquals(3, icp2.getVerfers().size());
@@ -145,9 +133,8 @@ class SaltyTests {
 
         // Rotate
         EventResult icpResultRotate = client.identifiers().rotate("aid1");
-        Operation<Object> opRotate = waitOperation(client, icpResultRotate.op());
-        Object ked = opRotate.getResponse();
-        Serder rotRotate = new Serder((Map<String, Object>) ked);
+        waitOperation(client, icpResultRotate.op());
+        Serder rotRotate = icpResultRotate.serder();
 
         Assertions.assertEquals("EBQABdRgaxJONrSLcgrdtbASflkvLxJkiDO0H-XmuhGg", rotRotate.getKed().get("d"));
         Assertions.assertEquals("1", rotRotate.getKed().get("s"));
@@ -158,9 +145,8 @@ class SaltyTests {
 
         // Interact
         EventResult icpResultInteract = client.identifiers().interact("aid1", List.of(icp.getPre()));
-        Operation<Object> opInteract = waitOperation(client, icpResultInteract.op());
-        Map<String, Object> kedInteract = (Map<String, Object>) opInteract.getResponse();
-        Serder ixn = new Serder(kedInteract);
+        waitOperation(client, icpResultInteract.op());
+        Serder ixn = icpResultInteract.serder();
 
         Assertions.assertEquals("ENsmRAg_oM7Hl1S-GTRMA7s4y760lQMjzl0aqOQ2iTce", ixn.getKed().get("d"));
         Assertions.assertEquals("2", ixn.getKed().get("s"));

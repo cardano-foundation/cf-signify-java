@@ -249,4 +249,70 @@ tasks.register("prepareOpenApiSpec") {
 
 tasks.named("openApiGenerate") {
     dependsOn("prepareOpenApiSpec")
+
+    doLast {
+        def ops = [
+            "Challenge", "Credential", "Delegation", "Delegator",
+            "Done", "EndRole", "Exchange", "Group",
+            "LocScheme", "OOBI", "Query", "Registry",
+            "Submit", "Witness"
+        ]
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+
+        ops.each { op ->
+            // Detect metadata type from the Pending variant
+            def pendingFile = new File(modelDir, "Pending${op}Operation.java")
+            if (!pendingFile.exists()) {
+                logger.warn("Pending${op}Operation.java not found, skipping ${op}")
+                return
+            }
+            def metadataMatcher = (pendingFile.text =~ /private\s+(\w+)\s+metadata;/)
+            def metadataType = metadataMatcher ? metadataMatcher[0][1] : null
+
+            // Add 'implements XxxOperation' to Pending/Completed/Failed classes
+            // Also add @JsonDeserialize to break inheritance from Operation's custom deserializer
+            ["Pending", "Completed", "Failed"].each { state ->
+                def f = new File(modelDir, "${state}${op}Operation.java")
+                if (f.exists()) {
+                    def className = "${state}${op}Operation"
+                    f.text = f.text.replace(
+                        "public class ${className} {",
+                        "@com.fasterxml.jackson.databind.annotation.JsonDeserialize\npublic final class ${className} implements ${op}Operation {"
+                    )
+                }
+            }
+
+            // Replace the generated merged oneOf class with a sealed interface
+            def target = new File(modelDir, "${op}Operation.java")
+            def metadataMethod = metadataType ? "\n    ${metadataType} getMetadata();" : ""
+            target.text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+public sealed interface ${op}Operation extends Operation permits
+        Pending${op}Operation,
+        Completed${op}Operation,
+        Failed${op}Operation {
+${metadataMethod}
+}
+"""
+        }
+
+        // Generate the general Operation sealed interface (union of all operation types)
+        def permitsEntries = ops.collect { op -> "        ${op}Operation" }.join(",\n")
+
+        def operationFile = new File(modelDir, "Operation.java")
+        operationFile.text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.cardanofoundation.signify.app.coring.OperationDeserializer;
+
+@JsonDeserialize(using = OperationDeserializer.class)
+public sealed interface Operation permits
+${permitsEntries} {
+
+    String getName();
+}
+"""
+    }
 }

@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -8,13 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.signify.generated.keria.model.Contact;
+
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -31,17 +29,12 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
-
 import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class TestUtils {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static List<Notification> filteredNotes;
 
     public static class Aid {
@@ -91,7 +84,7 @@ public class TestUtils {
 
     public static void assertOperations(List<SignifyClient> clients) throws IOException, InterruptedException, LibsodiumException {
         for (SignifyClient client : clients) {
-            List<Operation<?>> operations = client.operations().list(null);
+            List<Operation> operations = client.operations().list();
             assertEquals(0, operations.size());
         }
     }
@@ -241,7 +234,6 @@ public class TestUtils {
     public static String[] getOrCreateIdentifier(SignifyClient client, String name, CreateIdentifierArgs kargs) throws Exception {
         Object id = null;
         String eid;
-        Object op, ops;
 
         Optional<HabState> optionalIdentifier = client.identifiers().get(name);
         if (optionalIdentifier.isPresent()) {
@@ -255,19 +247,13 @@ public class TestUtils {
                 kargs.setWits(env.witnessIds());
             }
             EventResult result = client.identifiers().create(name, kargs);
-            op = result.op();
-            op = operationToObject(waitOperation(client, op));
-            if (op instanceof String) {
-                try {
-                    HashMap<String, Object> map = objectMapper.readValue(
-                            (String) op,
-                            new TypeReference<HashMap<String, Object>>() {}
-                    );
-                    Map<String, Object> idMap = castObjectToLinkedHashMap(map.get("response"));
-                    id = idMap.get("i");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+            Operation opResult = waitOperation(client, result.op(), Operation.class);
+            if (opResult instanceof CompletedWitnessOperation completed) {
+                id = completed.getResponse().getI();
+            } else if (opResult instanceof CompletedDelegationOperation completed) {
+                id = completed.getResponse().getI();
+            } else if (opResult instanceof CompletedDoneOperation completed) {
+                id = completed.getResponse().getI();
             }
             if (client.getAgent() != null && client.getAgent().getPre() != null) {
                 eid = client.getAgent().getPre();
@@ -276,8 +262,7 @@ public class TestUtils {
             }
             if (!hasEndRole(client, name, "agent", eid)) {
                 EventResult results = client.identifiers().addEndRole(name, "agent", eid, null);
-                ops = results.op();
-                ops = operationToObject(waitOperation(client, ops));
+                waitOperation(client, results.op());
             }
         }
 
@@ -297,17 +282,16 @@ public class TestUtils {
                 return contact.getId();
             }
         }
-        Object op = client.oobis().resolve(oobi, name);
+        OOBIOperation op = client.oobis().resolve(oobi, name);
 
-        Operation<?> opBody = waitOperation(client, op);
-        LinkedHashMap<String, Object> response = castObjectToLinkedHashMap(opBody.getResponse());
-
-        if (response.get("i") != null) {
-            return response.get("i").toString();
-        } else if (response.get("i") == null) {
-            return getOrCreateContact(client, name, oobi);
+        OOBIOperation opBody = waitOperation(client, op, OOBIOperation.class);
+        if (opBody instanceof CompletedOOBIOperation completed) {
+            String i = completed.getResponse().getI();
+            if (i != null) {
+                return i;
+            }
         }
-        return null;
+        return getOrCreateContact(client, name, oobi);
     }
 
     public static Credential getOrIssueCredential(
@@ -404,11 +388,22 @@ public class TestUtils {
         assertTrue(count > 0);
     }
 
-    public static void deleteOperations(SignifyClient client, Operation op) throws IOException, InterruptedException, LibsodiumException {
-        if (op.getMetadata() != null && op.getMetadata().getDepends() != null) {
-            deleteOperations(client, op.getMetadata().getDepends());
+    @SuppressWarnings("unchecked")
+    public static void deleteOperations(SignifyClient client, String operationName) throws IOException, InterruptedException, LibsodiumException {
+        Map<String, Object> opMap = client.operations().get(operationName, Map.class).orElse(null);
+        if (opMap != null) {
+            Object metadata = opMap.get("metadata");
+            if (metadata instanceof Map<?, ?> metaMap) {
+                Object depends = metaMap.get("depends");
+                if (depends instanceof Map<?, ?> depMap) {
+                    String depName = (String) depMap.get("name");
+                    if (depName != null) {
+                        deleteOperations(client, depName);
+                    }
+                }
+            }
         }
-        client.operations().delete(op.getName());
+        client.operations().delete(operationName);
     }
 
     public static void deleteOperation(SignifyClient client, String name) throws IOException, InterruptedException, LibsodiumException {
@@ -439,7 +434,7 @@ public class TestUtils {
     }
 
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
-        Object op = client.oobis().resolve(oobi, alias);
+        OOBIOperation op = client.oobis().resolve(oobi, alias);
         waitOperation(client, op);
     }
 
@@ -511,25 +506,25 @@ public class TestUtils {
         }, retryOptions);
     }
 
-    public static <T> Operation<T> waitOperation(
+    public static Operation waitOperation(
             SignifyClient client,
-            Object op
+            Operation op
     ) throws IOException, InterruptedException, LibsodiumException {
-        Operation operation = Operation.fromObject(op);
-        operation = client.operations().wait(operation);
-        deleteOperations(client, operation);
-        return operation;
+        String name = op.getName();
+        Operation result = client.operations().wait(name);
+        deleteOperations(client, name);
+        return result;
     }
 
-    public static Object operationToObject(Operation<?> operation) throws JsonProcessingException {
-        Map<String, Object> opMap = new LinkedHashMap<>();
-        opMap.put("name", operation.getName());
-        opMap.put("metadata", operation.getMetadata() != null ? operation.getMetadata().getProperties() : null);
-        opMap.put("done", operation.isDone());
-        opMap.put("error", operation.getError());
-        opMap.put("response", operation.getResponse());
-
-        return objectMapper.writeValueAsString(opMap);
+    public static <T> T waitOperation(
+            SignifyClient client,
+            Operation op,
+            Class<T> type
+    ) throws IOException, InterruptedException, LibsodiumException {
+        String name = op.getName();
+        T result = client.operations().wait(name, type);
+        deleteOperations(client, name);
+        return result;
     }
 
     public static Integer parseInteger(String s) {
