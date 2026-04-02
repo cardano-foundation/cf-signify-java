@@ -5,12 +5,7 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.generated.keria.model.Challenge;
-import org.cardanofoundation.signify.generated.keria.model.Contact;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import org.cardanofoundation.signify.generated.keria.model.*;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +21,7 @@ public class ChallengesTest {
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
-    private HashMap<String, Object> opResponse, opResponse1, opResponse2;
+    private String aid1Prefix, aid2Prefix;
 
     @Test
     void ChallengeTest() throws Exception {
@@ -68,15 +63,17 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         EventResult icpResult1 = client1.identifiers().create("alice", kargs1);
-        Operation op1 = Operation.fromObject(waitOperation(client1, icpResult1.op()));
-        opResponse1 = (HashMap<String, Object>) op1.getResponse();
+        Operation op1 = waitOperation(client1, icpResult1.op());
+        if (op1 instanceof CompletedWitnessOperation completed) {
+            aid1Prefix = completed.getResponse().getI();
+        }
         EventResult rpyResult1 = client1.identifiers().addEndRole(
                 "alice",
                 "agent",
                 client1.getAgent().getPre(),
                 null);
         waitOperation(client1, rpyResult1.op());
-        System.out.println("Alice's AID: " + opResponse1.get("i"));
+        System.out.println("Alice's AID: " + aid1Prefix);
 
         CreateIdentifierArgs kargs2 = new CreateIdentifierArgs();
         kargs2.setToad(3);
@@ -86,8 +83,10 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         EventResult icpResult2 = client2.identifiers().create("bob", kargs2);
-        Operation op2 = Operation.fromObject(waitOperation(client2, icpResult2.op()));
-        opResponse2 = (HashMap<String, Object>) op2.getResponse();
+        Operation op2 = waitOperation(client2, icpResult2.op());
+        if (op2 instanceof CompletedWitnessOperation completed) {
+            aid2Prefix = completed.getResponse().getI();
+        }
 
         EventResult rpyResult2 = client2.identifiers().addEndRole(
                 "bob",
@@ -114,17 +113,18 @@ public class ChallengesTest {
         assertEquals(0, bobContact.getChallenges().size());
 
         // Bob responds to Alice's challenge
-        client2.challenges().respond("bob", (String) opResponse1.get("i"), challenge1_small.getWords());
+        client2.challenges().respond("bob", aid1Prefix, challenge1_small.getWords());
         System.out.println("Bob responded to Alice's challenge with signed words");
 
         // Alice verifies Bob's response
-        Operation<?> verifyResult = client1.challenges().verify((String) opResponse2.get("i"), challenge1_small.getWords());
-        Operation op = Operation.fromObject(waitOperation(client1, verifyResult));
+        ChallengeOperation verifyResult = client1.challenges().verify(aid2Prefix, challenge1_small.getWords());
+        ChallengeOperation verifyOp = waitOperation(client1, verifyResult, ChallengeOperation.class);
         System.out.println("Alice verified challenge response");
-        opResponse = (HashMap<String, Object>) op.getResponse();
 
-        Serder exn = new Serder((Map<String, Object>) opResponse.get("exn"));
-        client1.challenges().responded((String) opResponse2.get("i"), (String) exn.getKed().get("d"));
+        if (verifyOp instanceof CompletedChallengeOperation completed) {
+            ChallengeOperationResponseExn exn = completed.getResponse().getExn();
+            client1.challenges().responded(aid2Prefix, exn.getD());
+        }
         System.out.println("Alice marked challenge response as accepted");
 
         // Check Bob's challenge in contacts

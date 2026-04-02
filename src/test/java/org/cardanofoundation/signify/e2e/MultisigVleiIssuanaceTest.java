@@ -3,7 +3,6 @@ package org.cardanofoundation.signify.e2e;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Salter;
@@ -15,7 +14,10 @@ import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -226,7 +228,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .build();
 
             kargsMultisigAID.setMhab(aidGAR1);
-            Object multisigAIDOp1 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp1 = MultisigUtils.createAIDMultisig(
                     clientGAR1,
                     aidGAR1,
                     List.of(aidGAR2),
@@ -236,7 +238,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             kargsMultisigAID.setMhab(aidGAR2);
-            Object multisigAIDOp2 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp2 = MultisigUtils.createAIDMultisig(
                     clientGAR2,
                     aidGAR2,
                     List.of(aidGAR1),
@@ -267,7 +269,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         if (oobiGEDAbyGAR1.getOobis().size() == 0 || oobiGEDAbyGAR2.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
-            List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientGAR1,
                     aidGEDA.getName(),
                     aidGAR1,
@@ -277,7 +279,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            List<Object> opList2 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientGAR2,
                     aidGEDA.getName(),
                     aidGAR2,
@@ -337,7 +339,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .build();
 
             kargsMultisigAID.setMhab(aidQAR1);
-            Object multisigAIDOp1 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp1 = MultisigUtils.createAIDMultisig(
                     clientQAR1,
                     aidQAR1,
                     List.of(aidQAR2, aidQAR3),
@@ -347,7 +349,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             kargsMultisigAID.setMhab(aidQAR2);
-            Object multisigAIDOp2 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp2 = MultisigUtils.createAIDMultisig(
                     clientQAR2,
                     aidQAR2,
                     List.of(aidQAR1, aidQAR3),
@@ -357,7 +359,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             kargsMultisigAID.setMhab(aidQAR3);
-            Object multisigAIDOp3 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp3 = MultisigUtils.createAIDMultisig(
                     clientQAR3,
                     aidQAR3,
                     List.of(aidQAR1, aidQAR2),
@@ -366,9 +368,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            String aidQVIPrefix = Operation.fromObject(multisigAIDOp1).getName().split("\\.")[1];
-            assertEquals(aidQVIPrefix, Operation.fromObject(multisigAIDOp2).getName().split("\\.")[1]);
-            assertEquals(aidQVIPrefix, Operation.fromObject(multisigAIDOp3).getName().split("\\.")[1]);
+            String aidQVIPrefix = multisigAIDOp1.getName().split("\\.")[1];
+            assertEquals(aidQVIPrefix, multisigAIDOp2.getName().split("\\.")[1]);
+            assertEquals(aidQVIPrefix, multisigAIDOp3.getName().split("\\.")[1]);
 
             // GEDA anchors delegation with an interaction event.
             Map<String, String> anchor = new LinkedHashMap<>() {{
@@ -376,7 +378,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 put("s", "0");
                 put("d", aidQVIPrefix);
             }};
-            Object ixnOp1 = MultisigUtils.delegateMultisig(
+            Operation ixnOp1 = MultisigUtils.delegateMultisig(
                     clientGAR1,
                     aidGAR1,
                     List.of(aidGAR2),
@@ -385,7 +387,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            Object ixnOp2 = MultisigUtils.delegateMultisig(
+            Operation ixnOp2 = MultisigUtils.delegateMultisig(
                     clientGAR2,
                     aidGAR2,
                     List.of(aidGAR1),
@@ -402,9 +404,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/ixn");
 
             // QARs query the GEDA's key state
-            Object queryOp1 = clientQAR1.keyStates().query(aidGEDA.getPrefix(), "1");
-            Object queryOp2 = clientQAR2.keyStates().query(aidGEDA.getPrefix(), "1");
-            Object queryOp3 = clientQAR3.keyStates().query(aidGEDA.getPrefix(), "1");
+            QueryOperation queryOp1 = clientQAR1.keyStates().query(aidGEDA.getPrefix(), "1");
+            QueryOperation queryOp2 = clientQAR2.keyStates().query(aidGEDA.getPrefix(), "1");
+            QueryOperation queryOp3 = clientQAR3.keyStates().query(aidGEDA.getPrefix(), "1");
 
             waitOperationAsync(
                     new WaitOperationArgs(clientQAR1, multisigAIDOp1),
@@ -443,7 +445,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 || oobiQVIbyQAR2.getOobis().size() == 0
                 || oobiQVIbyQAR3.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
-            List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientQAR1,
                     aidQVI.getName(),
                     aidQAR1,
@@ -452,7 +454,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     timestamp,
                     true
             );
-            List<Object> opList2 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientQAR2,
                     aidQVI.getName(),
                     aidQAR2,
@@ -462,7 +464,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            List<Object> opList3 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList3 = MultisigUtils.addEndRoleMultisig(
                     clientQAR3,
                     aidQVI.getName(),
                     aidQAR3,
@@ -516,7 +518,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         if (gedaRegistrybyGAR1.size() == 0 && gedaRegistrybyGAR2.size() == 0) {
             String nonce = Coring.randomNonce();
-            Object registryOp1 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp1 = MultisigUtils.createRegistryMultisig(
                     clientGAR1,
                     aidGAR1,
                     List.of(aidGAR2),
@@ -526,7 +528,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            Object registryOp2 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp2 = MultisigUtils.createRegistryMultisig(
                     clientGAR2,
                     aidGAR2,
                     List.of(aidGAR1),
@@ -579,7 +581,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .a(kargsSub)
                     .build();
 
-            Object IssOp1 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp1 = MultisigUtils.issueCredentialMultisig(
                     clientGAR1,
                     aidGAR1,
                     List.of(aidGAR2),
@@ -588,7 +590,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            Object IssOp2 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp2 = MultisigUtils.issueCredentialMultisig(
                     clientGAR2,
                     aidGAR2,
                     List.of(aidGAR1),
@@ -737,7 +739,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .build();
 
             kargsMultisigAID.setMhab(aidLAR1);
-            Object multisigAIDOp1 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp1 = MultisigUtils.createAIDMultisig(
                     clientLAR1,
                     aidLAR1,
                     List.of(aidLAR2, aidLAR3),
@@ -747,7 +749,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             kargsMultisigAID.setMhab(aidLAR2);
-            Object multisigAIDOp2 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp2 = MultisigUtils.createAIDMultisig(
                     clientLAR2,
                     aidLAR2,
                     List.of(aidLAR1, aidLAR3),
@@ -757,7 +759,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
 
             kargsMultisigAID.setMhab(aidLAR3);
-            Object multisigAIDOp3 = MultisigUtils.createAIDMultisig(
+            Operation multisigAIDOp3 = MultisigUtils.createAIDMultisig(
                     clientLAR3,
                     aidLAR3,
                     List.of(aidLAR1, aidLAR2),
@@ -791,15 +793,15 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
                 new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
         );
-        OOBI oobiLEbyLAR1 = (OOBI) oobiLst.get(0);
-        OOBI oobiLEbyLAR2 = (OOBI) oobiLst.get(1);
-        OOBI oobiLEbyLAR3 = (OOBI) oobiLst.get(2);
+        OOBI oobiLEbyLAR1 = oobiLst.get(0);
+        OOBI oobiLEbyLAR2 = oobiLst.get(1);
+        OOBI oobiLEbyLAR3 = oobiLst.get(2);
 
         if (oobiLEbyLAR1.getOobis().size() == 0
                 || oobiLEbyLAR2.getOobis().size() == 0
                 || oobiLEbyLAR3.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
-            List<Object> opList1 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientLAR1,
                     aidLE.getName(),
                     aidLAR1,
@@ -809,7 +811,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            List<Object> opList2 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientLAR2,
                     aidLE.getName(),
                     aidLAR2,
@@ -819,7 +821,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            List<Object> opList3 = MultisigUtils.addEndRoleMultisig(
+            List<Operation> opList3 = MultisigUtils.addEndRoleMultisig(
                     clientLAR3,
                     aidLE.getName(),
                     aidLAR3,
@@ -847,9 +849,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new GetOobisArgs(clientLAR2, aidLE.getName(), "agent"),
                     new GetOobisArgs(clientLAR3, aidLE.getName(), "agent")
             );
-            oobiLEbyLAR1 = (OOBI) oobiLst.get(0);
-            oobiLEbyLAR2 = (OOBI) oobiLst.get(1);
-            oobiLEbyLAR3 = (OOBI) oobiLst.get(2);
+            oobiLEbyLAR1 = oobiLst.get(0);
+            oobiLEbyLAR2 = oobiLst.get(1);
+            oobiLEbyLAR3 = oobiLst.get(2);
         }
         assertEquals(oobiLEbyLAR1.getRole(), oobiLEbyLAR2.getRole());
         assertEquals(oobiLEbyLAR1.getRole(), oobiLEbyLAR3.getRole());
@@ -872,7 +874,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         List<Registry> qviRegistrybyQAR3 = clientQAR3.registries().list(aidQVI.getName());
         if (qviRegistrybyQAR1.size() == 0 || qviRegistrybyQAR2.size() == 0 || qviRegistrybyQAR3.size() == 0) {
             String nonce = Coring.randomNonce();
-            Object registryOp1 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp1 = MultisigUtils.createRegistryMultisig(
                     clientQAR1,
                     aidQAR1,
                     List.of(aidQAR2, aidQAR3),
@@ -882,7 +884,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            Object registryOp2 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp2 = MultisigUtils.createRegistryMultisig(
                     clientQAR2,
                     aidQAR2,
                     List.of(aidQAR1, aidQAR3),
@@ -892,7 +894,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            Object registryOp3 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp3 = MultisigUtils.createRegistryMultisig(
                     clientQAR3,
                     aidQAR3,
                     List.of(aidQAR1, aidQAR2),
@@ -969,7 +971,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .r(LE_RULES)
                     .build();
 
-            Object IssOp1 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp1 = MultisigUtils.issueCredentialMultisig(
                     clientQAR1,
                     aidQAR1,
                     List.of(aidQAR2, aidQAR3),
@@ -978,7 +980,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            Object IssOp2 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp2 = MultisigUtils.issueCredentialMultisig(
                     clientQAR2,
                     aidQAR2,
                     List.of(aidQAR1, aidQAR3),
@@ -987,7 +989,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            Object IssOp3 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp3 = MultisigUtils.issueCredentialMultisig(
                     clientQAR3,
                     aidQAR3,
                     List.of(aidQAR1, aidQAR2),
@@ -1137,7 +1139,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         if (leRegistrybyLAR1.isEmpty() && leRegistrybyLAR2.isEmpty() && leRegistrybyLAR3.isEmpty()) {
             String nonce = Coring.randomNonce();
-            Object registryOp1 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp1 = MultisigUtils.createRegistryMultisig(
                     clientLAR1,
                     aidLAR1,
                     List.of(aidLAR2, aidLAR3),
@@ -1147,7 +1149,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            Object registryOp2 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp2 = MultisigUtils.createRegistryMultisig(
                     clientLAR2,
                     aidLAR2,
                     List.of(aidLAR1, aidLAR3),
@@ -1157,7 +1159,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            Object registryOp3 = MultisigUtils.createRegistryMultisig(
+            Operation registryOp3 = MultisigUtils.createRegistryMultisig(
                     clientLAR3,
                     aidLAR3,
                     List.of(aidLAR1, aidLAR2),
@@ -1233,7 +1235,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     .r(ECR_RULES)
                     .build();
 
-            Object IssOp1 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp1 = MultisigUtils.issueCredentialMultisig(
                     clientLAR1,
                     aidLAR1,
                     List.of(aidLAR2, aidLAR3),
@@ -1242,7 +1244,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            Object IssOp2 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp2 = MultisigUtils.issueCredentialMultisig(
                     clientLAR2,
                     aidLAR2,
                     List.of(aidLAR1, aidLAR3),
@@ -1251,7 +1253,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            Object IssOp3 = MultisigUtils.issueCredentialMultisig(
+            CredentialOperation IssOp3 = MultisigUtils.issueCredentialMultisig(
                     clientLAR3,
                     aidLAR3,
                     List.of(aidLAR1, aidLAR2),

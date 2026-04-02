@@ -15,6 +15,7 @@ import java.security.DigestException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Ipex {
@@ -45,7 +46,7 @@ public class Ipex {
         );
     }
 
-    public Object submitApply(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitApply(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
@@ -56,7 +57,7 @@ public class Ipex {
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -84,7 +85,7 @@ public class Ipex {
         );
     }
 
-    public Object submitOffer(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitOffer(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
@@ -96,7 +97,7 @@ public class Ipex {
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -121,7 +122,7 @@ public class Ipex {
         );
     }
 
-    public Object submitAgree(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitAgree(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
@@ -132,7 +133,7 @@ public class Ipex {
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -175,7 +176,7 @@ public class Ipex {
         );
     }
 
-    public Object submitGrant(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitGrant(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = Map.of(
                 "exn", exn.getKed(),
                 "sigs", sigs,
@@ -188,7 +189,7 @@ public class Ipex {
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -213,7 +214,7 @@ public class Ipex {
         );
     }
 
-    public Object submitAdmit(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitAdmit(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
@@ -225,6 +226,6 @@ public class Ipex {
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 }

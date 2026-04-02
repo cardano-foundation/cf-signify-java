@@ -5,11 +5,11 @@ import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
@@ -84,7 +84,7 @@ public class DelegationTest {
         CreateIdentifierArgs delpre = new CreateIdentifierArgs();
         delpre.setDelpre(ator.getPrefix());
         EventResult icpResult2 = client2.identifiers().create("delegate", delpre);
-        Operation op2 = Operation.fromObject(icpResult2.op());
+        Operation op2 = icpResult2.op();
         opResponseName = op2.getName();
         String delegatePrefix = opResponseName.split("\\.")[1];
         System.out.println("Delegate's prefix: " + delegatePrefix);
@@ -106,7 +106,7 @@ public class DelegationTest {
             assertEquals(approDelResList.getFirst(), anchor);
         });
 
-        Object op3 = client2.keyStates().query(ator.getPrefix(), "1", null);
+        QueryOperation op3 = client2.keyStates().query(ator.getPrefix(), "1", null);
         waitOperation(client2, op3);
 
         // Client 2 check approval

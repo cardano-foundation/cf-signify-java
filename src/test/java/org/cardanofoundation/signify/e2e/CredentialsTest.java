@@ -265,7 +265,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 Exchanging.ExchangeMessageResult result = issuerClient.ipex().grant(gArgs);
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
-                Object op = issuerClient.ipex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
+                ExchangeOperation op = issuerClient.ipex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
                 waitOperation(issuerClient, op);
             } catch (IOException | InterruptedException | DigestException | LibsodiumException e) {
                 throw new RuntimeException(e);
@@ -300,7 +300,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 iargs.setDatetime(createTimestamp());
 
                 Exchanging.ExchangeMessageResult result = holderClient.ipex().admit(iargs);
-                Object op = holderClient.ipex().submitAdmit(
+                ExchangeOperation op = holderClient.ipex().submitAdmit(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
                 );
                 waitOperation(holderClient, op);
@@ -343,7 +343,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
             try {
                 Exchanging.ExchangeMessageResult result = verifierClient.ipex().apply(args);
-                Object op = verifierClient.ipex().submitApply(
+                ExchangeOperation op = verifierClient.ipex().submitApply(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(verifierClient, op);
@@ -395,7 +395,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 offerArgs.setDatetime(createTimestamp());
 
                 Exchanging.ExchangeMessageResult result = holderClient.ipex().offer(offerArgs);
-                Object op = holderClient.ipex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
+                ExchangeOperation op = holderClient.ipex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
                 waitOperation(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -432,7 +432,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 agreeArgs.setDatetime(createTimestamp());
 
                 Exchanging.ExchangeMessageResult result = verifierClient.ipex().agree(agreeArgs);
-                Object op = verifierClient.ipex().submitAgree(
+                ExchangeOperation op = verifierClient.ipex().submitAgree(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(verifierClient, op);
@@ -477,7 +477,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
 
-                Object op = holderClient.ipex().submitGrant(
+                ExchangeOperation op = holderClient.ipex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
                 );
                 waitOperation(holderClient, op);
@@ -507,7 +507,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 admitArgs.setDatetime(createTimestamp());
 
                 Exchanging.ExchangeMessageResult result = verifierClient.ipex().admit(admitArgs);
-                Object op = verifierClient.ipex().submitAdmit(
+                ExchangeOperation op = verifierClient.ipex().submitAdmit(
                         verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(verifierClient, op);
@@ -618,7 +618,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 grantArgs.setDatetime(dt);
 
                 Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
-                Object op = holderClient.ipex().submitGrant(
+                ExchangeOperation op = holderClient.ipex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
                 );
                 waitOperation(holderClient, op);
@@ -640,7 +640,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 admitArgs.setDatetime(createTimestamp());
 
                 Exchanging.ExchangeMessageResult result = legalEntityClient.ipex().admit(admitArgs);
-                Object op = legalEntityClient.ipex().submitAdmit(
+                ExchangeOperation op = legalEntityClient.ipex().submitAdmit(
                         legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
                 waitOperation(legalEntityClient, op);

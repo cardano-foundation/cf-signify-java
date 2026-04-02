@@ -4,6 +4,7 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -67,7 +68,7 @@ public class KeyStates {
      * @return A map representing the long-running operation
      * @throws Exception if the fetch operation fails
      */
-    public Object query(String pre, String sn, Object anchor) throws LibsodiumException, IOException, InterruptedException {
+    public QueryOperation query(String pre, String sn, Object anchor) throws LibsodiumException, IOException, InterruptedException {
         String path = "/queries";
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("pre", pre);
@@ -79,10 +80,10 @@ public class KeyStates {
         }
         String method = "POST";
         HttpResponse<String> res = this.client.fetch(path, method, data);
-        return Utils.fromJson(res.body(), Object.class);
+        return Utils.fromJson(res.body(), QueryOperation.class);
     }
 
-    public Object query(String pre, String sn) throws Exception {
+    public QueryOperation query(String pre, String sn) throws LibsodiumException, IOException, InterruptedException {
         return query(pre, sn, null);
     }
 }

@@ -35,7 +35,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FailedOOBIOperation.JSON_PROPERTY_DONE
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class FailedOOBIOperation {
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize
+public final class FailedOOBIOperation implements OOBIOperation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;

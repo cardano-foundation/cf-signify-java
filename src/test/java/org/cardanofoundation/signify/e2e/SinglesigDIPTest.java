@@ -3,16 +3,17 @@ package org.cardanofoundation.signify.e2e;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
         EventResult result = client2.identifiers().create("delegate1", kargs);
-        Operation<?> op = Operation.fromObject(result.op());
+        Operation op = result.op();
         HabState delegate1 = client2.identifiers().get("delegate1").get();
         opResponseName = op.getName();
         Assertions.assertEquals(opResponseName, "delegation." + delegate1.getPrefix());
@@ -62,10 +63,10 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         seal.put("d", delegate1.getPrefix());
 
         result = client1.identifiers().interact("name1", seal);
-        Object op1 = result.op();
+        Operation op1 = result.op();
 
         // Refresh keystate to sn=1
-        Object op2 = client2.keyStates().query(name1_id, "1", null);
+        QueryOperation op2 = client2.keyStates().query(name1_id, "1", null);
 
         List<Operation> opList = waitOperationAsync(
                 new WaitOperationArgs(client2, op),
@@ -74,8 +75,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         );
         op = opList.getFirst();
 
-        HashMap<String, Object> responseMap = (HashMap<String, Object>) op.getResponse();
-        opResponseI = responseMap.get("i").toString();
+        opResponseI = ((CompletedDelegationOperation) op).getResponse().getI();
 
         delegate1 = client2.identifiers().get("delegate1").get();
         Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
@@ -86,7 +86,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         kargs.setToad(env.witnessIds().size());
         kargs.setWits(env.witnessIds());
         result = client2.identifiers().create("delegate2", kargs);
-        op = Operation.fromObject(result.op());
+        op = result.op();
         opResponseName = op.getName();
 
         HabState delegate2 = client2.identifiers().get("delegate2").get();
@@ -111,15 +111,14 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         );
         op = opList.getFirst();
 
-        responseMap = (HashMap<String, Object>) op.getResponse();
-        opResponseI = responseMap.get("i").toString();
+        opResponseI = ((CompletedDelegationOperation) op).getResponse().getI();
 
         // Delegate waits for completion
         delegate2 = client2.identifiers().get("delegate2").get();
         Assertions.assertEquals(delegate2.getPrefix(), opResponseI);
 
         // Make sure query with seal is idempotent
-        op = Operation.fromObject(client2.keyStates().query(name1_id, null, seal));
-        waitOperation(client2, op);
+        QueryOperation queryOp = client2.keyStates().query(name1_id, null, seal);
+        waitOperation(client2, queryOp);
     }
 }

@@ -33,7 +33,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   PendingChallengeOperation.JSON_PROPERTY_DONE
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class PendingChallengeOperation {
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize
+public final class PendingChallengeOperation implements ChallengeOperation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;

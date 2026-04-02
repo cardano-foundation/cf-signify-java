@@ -8,6 +8,8 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -23,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class MultisigInceptionTest extends BaseIntegrationTest {
     SignifyClient client1, client2;
     String aid1, aid2;
-    Object oobi1, oobi2;
+    OOBI oobi1, oobi2;
     TestSteps testSteps = new TestSteps();
 
     @Test
@@ -39,14 +41,14 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
             oobi1 = client1.oobis().get("member1", "agent").get();
             oobi2 = client2.oobis().get("member2", "agent").get();
 
-            TestUtils.resolveOobi(client1, Utils.toList(Utils.toMap(oobi2).get("oobis")).getFirst(), "member2");
-            TestUtils.resolveOobi(client2, Utils.toList(Utils.toMap(oobi1).get("oobis")).getFirst(), "member1");
+            TestUtils.resolveOobi(client1, oobi2.getOobis().getFirst(), "member2");
+            TestUtils.resolveOobi(client2, oobi1.getOobis().getFirst(), "member1");
             return null;
         });
 
         testSteps.step("Create multisig group", () -> {
             String groupName = "multisig";
-            Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+            Operation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                 .groupName(groupName)
                 .localMemberName("member1")
                 .participants(Arrays.asList(aid1, aid2))
@@ -69,7 +71,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
             String msgSaid = notifications.getLast().getA().getD();
             assertNotNull(msgSaid, "msgSaid not defined");
-            Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+            Operation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                 .localMemberName("member2")
                 .groupName(groupName)
                 .msgSaid(msgSaid)
@@ -99,7 +101,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
         testSteps.step("Test creating another group", () -> {
             String groupName = "multisig2";
-            Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+            Operation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                 .groupName(groupName)
                 .localMemberName("member1")
                 .participants(List.of(aid1, aid2))
@@ -119,7 +121,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
             String msgSaid = notifications.getLast().getA().getD();
             assertNotNull(msgSaid, "msgSaid not defined");
-            Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+            Operation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                 .localMemberName("member2")
                 .groupName(groupName)
                 .msgSaid(msgSaid)

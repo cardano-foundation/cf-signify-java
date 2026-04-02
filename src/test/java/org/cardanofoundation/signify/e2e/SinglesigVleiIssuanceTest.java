@@ -571,7 +571,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 .build();
 
         Exchanging.ExchangeMessageResult result = senderClient.ipex().grant(grantArgs);
-        Object op = senderClient.ipex().submitGrant(
+        ExchangeOperation op = senderClient.ipex().submitGrant(
                 senderAid.name,
                 result.exn(),
                 result.sigs(),
@@ -596,7 +596,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 .build();
         Exchanging.ExchangeMessageResult result = senderClient.ipex().admit(admitArgs);
 
-        Object op = senderClient.ipex().submitAdmit(
+        ExchangeOperation op = senderClient.ipex().submitAdmit(
                 senderAid.name,
                 result.exn(),
                 result.sigs(),

@@ -3,6 +3,8 @@ package org.cardanofoundation.signify.app.credentialing.registries;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -22,7 +24,7 @@ public class RegistryResult {
         this.response = response;
     }
 
-    public String op() {
-        return response.body();
+    public RegistryOperation op() {
+        return Utils.fromJson(response.body(), RegistryOperation.class);
     }
 }

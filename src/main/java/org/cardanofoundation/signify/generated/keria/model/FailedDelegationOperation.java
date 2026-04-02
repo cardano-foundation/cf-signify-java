@@ -35,7 +35,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   FailedDelegationOperation.JSON_PROPERTY_DONE
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class FailedDelegationOperation {
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize
+public final class FailedDelegationOperation implements DelegationOperation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;

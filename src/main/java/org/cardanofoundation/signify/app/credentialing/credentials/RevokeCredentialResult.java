@@ -3,8 +3,8 @@ package org.cardanofoundation.signify.app.credentialing.credentials;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
 
 @Getter
 @Setter
@@ -12,5 +12,5 @@ import org.cardanofoundation.signify.cesr.Serder;
 public class RevokeCredentialResult {
     private Serder anc;
     private Serder rev;
-    private Operation op;
+    private CredentialOperation op;
 }

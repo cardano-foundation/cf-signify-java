@@ -33,7 +33,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   PendingQueryOperation.JSON_PROPERTY_DONE
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class PendingQueryOperation {
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize
+public final class PendingQueryOperation implements QueryOperation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;

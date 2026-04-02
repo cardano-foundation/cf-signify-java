@@ -15,6 +15,7 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.EndRole;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.OOBIOperation;
 
 public class Oobis {
     private final SignifyClient client;
@@ -56,7 +57,7 @@ public class Oobis {
      * @throws JsonProcessingException if there is an error processing the JSON
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Object resolve(String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
+    public OOBIOperation resolve(String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
         String path = "/oobis";
         String method = "POST";
 
@@ -66,7 +67,7 @@ public class Oobis {
             data.put("oobialias", alias);
         }
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), OOBIOperation.class);
     }
 
     /**
