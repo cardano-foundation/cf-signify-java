@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -50,7 +49,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
-        EventResult result = client2.identifiers().create("delegate1", kargs);
+        var result = client2.identifiers().create("delegate1", kargs);
         Operation op = result.op();
         HabState delegate1 = client2.identifiers().get("delegate1").get();
         opResponseName = op.getName();
@@ -62,8 +61,8 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         seal.put("s", "0");
         seal.put("d", delegate1.getPrefix());
 
-        result = client1.identifiers().interact("name1", seal);
-        Operation op1 = result.op();
+        var interactResult1 = client1.identifiers().interact("name1", seal);
+        Operation op1 = interactResult1.op();
 
         // Refresh keystate to sn=1
         QueryOperation op2 = client2.keyStates().query(name1_id, "1", null);
@@ -85,8 +84,8 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         kargs.setDelpre(name1_id);
         kargs.setToad(env.witnessIds().size());
         kargs.setWits(env.witnessIds());
-        result = client2.identifiers().create("delegate2", kargs);
-        op = result.op();
+        var result2 = client2.identifiers().create("delegate2", kargs);
+        op = result2.op();
         opResponseName = op.getName();
 
         HabState delegate2 = client2.identifiers().get("delegate2").get();
@@ -98,8 +97,8 @@ class SinglesigDIPTest extends BaseIntegrationTest {
         seal.put("s", "0");
         seal.put("d", delegate2.getPrefix());
 
-        result = client1.identifiers().interact("name1", seal);
-        op1 = result.op();
+        var interactResult2 = client1.identifiers().interact("name1", seal);
+        op1 = interactResult2.op();
 
         // refresh keystate to seal event
         op2 = client2.keyStates().query(name1_id, null, seal);

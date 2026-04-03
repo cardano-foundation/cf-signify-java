@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
@@ -73,7 +72,7 @@ public class MultisigUtils {
         createIdentifierArgs.setRstates(rstates);
         createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
 
-        EventResult icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
+        var icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
         Operation op2 = icpResult2.op();
         Serder serder = icpResult2.serder();
         List<String> sigs = icpResult2.sigs();
@@ -107,7 +106,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
         }
 
-        EventResult interactResult = client
+        var interactResult = client
                 .identifiers()
                 .interact(groupName, data);
 
@@ -152,7 +151,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/rot");
         }
 
-        EventResult interactResult = client
+        var interactResult = client
                 .identifiers()
                 .rotate(groupName, kargs);
 
@@ -208,7 +207,7 @@ public class MultisigUtils {
 
         for (AidRecord signing : members.getSigning()) {
             String eid = signing.getEnds().getAgent().keySet().iterator().next();
-            EventResult endRoleResult = client
+            var endRoleResult = client
                     .identifiers()
                     .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
@@ -261,7 +260,7 @@ public class MultisigUtils {
         GroupMember members = client.identifiers().members(groupName);
 
         String eid = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
-        EventResult endRoleResult = client
+        var endRoleResult = client
                 .identifiers()
                 .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
@@ -374,7 +373,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/icp");
         }
 
-        EventResult icpResult = client.identifiers().create(groupName, kargs);
+        var icpResult = client.identifiers().create(groupName, kargs);
         Operation op = icpResult.op();
 
         Serder serder = icpResult.serder();
@@ -549,7 +548,7 @@ public class MultisigUtils {
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }
 
-        EventResult delResult = client.delegations().approve(multisigAID.getName(), anchor);
+        var delResult = client.delegations().approve(multisigAID.getName(), anchor);
         Operation appOp = delResult.op();
         System.out.println("Delegator " + aid.getName() + "(" + aid.getPrefix() + ") approved delegation for " +
                 multisigAID.getName() + " with anchor " + anchor);
@@ -728,7 +727,7 @@ public class MultisigUtils {
         createIdentifierArgs.setStates(participantStates);
         createIdentifierArgs.setRstates(participantStates);
 
-        EventResult icpResult1 = client.identifiers().create(args.getGroupName(), createIdentifierArgs);
+        var icpResult1 = client.identifiers().create(args.getGroupName(), createIdentifierArgs);
         Operation op1 = icpResult1.op();
         Serder serder = icpResult1.serder();
 

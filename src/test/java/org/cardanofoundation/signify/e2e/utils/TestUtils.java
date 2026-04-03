@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
@@ -155,7 +154,7 @@ public class TestUtils {
         if (existingAID.isPresent()) {
             return existingAID.get();
         } else {
-            EventResult result = client.identifiers().create(name, kargs);
+            var result = client.identifiers().create(name, kargs);
             waitOperation(client, result.op());
 
             HabState aid = client.identifiers().get(name)
@@ -166,7 +165,7 @@ public class TestUtils {
             }
 
             String pre = client.getAgent().getPre();
-            EventResult op = client.identifiers().addEndRole(name, "agent", pre, null);
+            var op = client.identifiers().addEndRole(name, "agent", pre, null);
             waitOperation(client, op.op());
 
             System.out.println(name + "AID:" + aid.getPrefix());
@@ -246,7 +245,7 @@ public class TestUtils {
                 kargs.setToad(env.witnessIds().size());
                 kargs.setWits(env.witnessIds());
             }
-            EventResult result = client.identifiers().create(name, kargs);
+            var result = client.identifiers().create(name, kargs);
             Operation opResult = waitOperation(client, result.op(), Operation.class);
             if (opResult instanceof CompletedWitnessOperation completed) {
                 id = completed.getResponse().getI();
@@ -261,7 +260,7 @@ public class TestUtils {
                 throw new IllegalStateException("Agent or pre is null");
             }
             if (!hasEndRole(client, name, "agent", eid)) {
-                EventResult results = client.identifiers().addEndRole(name, "agent", eid, null);
+                var results = client.identifiers().addEndRole(name, "agent", eid, null);
                 waitOperation(client, results.op());
             }
         }

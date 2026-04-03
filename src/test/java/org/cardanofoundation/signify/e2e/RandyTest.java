@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
@@ -44,7 +43,7 @@ public class RandyTest {
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
-        EventResult icpResult = client1.identifiers().create("aid1", kargs);
+        var icpResult = client1.identifiers().create("aid1", kargs);
         waitOperation(client1, icpResult.op());
 
         Serder icp = icpResult.serder();
@@ -64,9 +63,9 @@ public class RandyTest {
         assertEquals("aid1", opResponseName);
         assertEquals(icp.getPre(), opResponsePrefix);
 
-        icpResult = client1.identifiers().interact("aid1", icp.getPre());
-        waitOperation(client1, icpResult.op());
-        Serder ixn = icpResult.serder();
+        var ixnResult = client1.identifiers().interact("aid1", icp.getPre());
+        waitOperation(client1, ixnResult.op());
+        Serder ixn = ixnResult.serder();
         assertEquals("1", ixn.getKed().get("s"));
         assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
 
@@ -82,10 +81,10 @@ public class RandyTest {
         List<KeyEventRecord> logList = events.get(opResponsePrefix);
         assertEquals(2, logList.size());
 
-        icpResult = client1.identifiers().rotate("aid1");
-        waitOperation(client1, icpResult.op());
+        var rotResult = client1.identifiers().rotate("aid1");
+        waitOperation(client1, rotResult.op());
 
-        Serder rot = icpResult.serder();
+        Serder rot = rotResult.serder();
         assertEquals("2", rot.getKed().get("s"));
         assertEquals(1, rot.getVerfers().size());
         assertEquals(1, rot.getDigers().size());

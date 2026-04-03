@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
@@ -66,7 +65,7 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
         assertNotNull(keyStateRecord0);
 
         // ixn
-        EventResult result = client1.identifiers().interact("name1", null);
+        var result = client1.identifiers().interact("name1", null);
         waitOperation(client1, result.op());
 
         // local keystate after rot

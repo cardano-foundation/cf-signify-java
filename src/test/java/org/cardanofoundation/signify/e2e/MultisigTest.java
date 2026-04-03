@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -369,19 +368,19 @@ public class MultisigTest extends BaseIntegrationTest {
 
         // Members agree out of band to rotate keys
         System.out.println("Members agree out of band to rotate keys");
-        EventResult icpResult1 = client1.identifiers().rotate("member1");
+        var icpResult1 = client1.identifiers().rotate("member1");
         op1 = icpResult1.op();
         op1 = waitOperation(client1, op1);
         aid1 = client1.identifiers().get("member1").get();
         System.out.println("Member1 rotated keys");
 
-        EventResult icpResult2 = client2.identifiers().rotate("member2");
+        var icpResult2 = client2.identifiers().rotate("member2");
         op2 = icpResult2.op();
         op2 = waitOperation(client2, op2);
         aid2 = client2.identifiers().get("member2").get();
         System.out.println("Member2 rotated keys");
 
-        EventResult icpResult3 = client3.identifiers().rotate("member3");
+        var icpResult3 = client3.identifiers().rotate("member3");
         op3 = icpResult3.op();
         op3 = waitOperation(client3, op3);
         aid3 = client3.identifiers().get("member3").get();

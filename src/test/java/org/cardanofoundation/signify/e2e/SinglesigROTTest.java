@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
@@ -76,7 +75,7 @@ public class SinglesigROTTest extends BaseIntegrationTest {
 
         // rot
         RotateIdentifierArgs args = RotateIdentifierArgs.builder().build();
-        EventResult result = client1.identifiers().rotate("name1", args);
+        var result = client1.identifiers().rotate("name1", args);
         waitOperation(client1, result.op());
 
         // local keystate after rot
