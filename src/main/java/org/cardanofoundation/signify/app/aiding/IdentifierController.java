@@ -27,10 +27,13 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
+import org.cardanofoundation.signify.generated.keria.model.DoneOperation;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -129,7 +132,7 @@ public class IdentifierController {
      * @param kargs Optional parameters to create the identifier
      * @return An EventResult to the inception result
      */
-    public EventResult create(String name, CreateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<Operation> create(String name, CreateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
         // Assuming kargs is an instance of a class with appropriate getters
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
@@ -275,7 +278,7 @@ public class IdentifierController {
         this.client.setPidx(this.client.getPidx() + 1);
 
         HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata);
-        return new EventResult(serder, sigs, response);
+        return new EventResult<>(serder, sigs, response, Operation.class);
     }
 
 
@@ -290,7 +293,7 @@ public class IdentifierController {
      * @return An EventResult to the result of the authorization
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public EventResult addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<EndRoleOperation> addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
@@ -310,7 +313,7 @@ public class IdentifierController {
                 "POST",
                 endrolesAidPostRequest
         );
-        return new EventResult(rpy, sigs, res);
+        return new EventResult<>(rpy, sigs, res, EndRoleOperation.class);
     }
 
     /**
@@ -335,14 +338,14 @@ public class IdentifierController {
         return Eventing.reply(route, data, stamp, null, Serials.JSON);
     }
 
-    public EventResult interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<DoneOperation> interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
         InteractionResponse interactionResponse = this.createInteract(name, data);
         HttpResponse<String> response = this.client.fetch(
             "/identifiers/" + name + "/events",
             "POST",
             interactionResponse.jsondata()
         );
-        return new EventResult(interactionResponse.serder(), interactionResponse.sigs(), response);
+        return new EventResult<>(interactionResponse.serder(), interactionResponse.sigs(), response, DoneOperation.class);
     }
 
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
@@ -376,11 +379,11 @@ public class IdentifierController {
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
 
-    public EventResult rotate(String name) throws ExecutionException, InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<DoneOperation> rotate(String name) throws ExecutionException, InterruptedException, DigestException, IOException, LibsodiumException {
         return this.rotate(name, RotateIdentifierArgs.builder().build());
     }
 
-    public EventResult rotate(String name, RotateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<DoneOperation> rotate(String name, RotateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
@@ -464,7 +467,7 @@ public class IdentifierController {
             jsondata
         );
 
-        return new EventResult(serder, sigs, res);
+        return new EventResult<>(serder, sigs, res, DoneOperation.class);
     }
 
     /**

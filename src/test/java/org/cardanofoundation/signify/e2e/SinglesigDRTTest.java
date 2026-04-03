@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -54,7 +53,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);
 
-        EventResult result = delegate.identifiers().create("delegate1", kargs);
+        var result = delegate.identifiers().create("delegate1", kargs);
         Operation op = result.op();
         HabState delegate1 = delegate.identifiers().get("delegate1").get();
         opResponseName = op.getName();
@@ -67,8 +66,8 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         seal.put("s", "0");
         seal.put("d", delegate1.getPrefix());
 
-        result = delegator.identifiers().interact("name1", seal);
-        Operation op1 = result.op();
+        var interactResult1 = delegator.identifiers().interact("name1", seal);
+        Operation op1 = interactResult1.op();
         QueryOperation op2 = delegate.keyStates().query(name1_id, "1", null);
 
         waitOperationAsync(
@@ -78,11 +77,11 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         );
 
         RotateIdentifierArgs karg = RotateIdentifierArgs.builder().build();
-        result = delegate.identifiers().rotate("delegate1", karg);
-        op = result.op();
+        var rotResult = delegate.identifiers().rotate("delegate1", karg);
+        op = rotResult.op();
         opResponseName = op.getName();
 
-        Assertions.assertEquals(opResponseName, "delegation." + result.serder().getKed().get("d"));
+        Assertions.assertEquals(opResponseName, "delegation." + rotResult.serder().getKed().get("d"));
 
         // delegator approves delegate
         delegate1 = delegate.identifiers().get("delegate1").get();
@@ -91,8 +90,8 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         seal.put("s", "1");
         seal.put("d", delegate1.getState().getD());
 
-        result = delegator.identifiers().interact("name1", seal);
-        op1 = result.op();
+        var interactResult2 = delegator.identifiers().interact("name1", seal);
+        op1 = interactResult2.op();
         op2 = delegate.keyStates().query(name1_id, "2", null);
 
         List<Operation> operationList = waitOperationAsync(

@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
@@ -185,7 +184,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         String timestamp = createTimestamp();
 
-        EventResult endRoleRes = client1.identifiers().addEndRole("holder", "agent", eid1, timestamp);
+        var endRoleRes = client1.identifiers().addEndRole("holder", "agent", eid1, timestamp);
         op1 = endRoleRes.op();
         Serder rpy = endRoleRes.serder();
         List<String> sigs = endRoleRes.sigs();

@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.Contacting;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.generated.keria.model.*;
@@ -62,12 +61,12 @@ public class ChallengesTest {
                 "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
-        EventResult icpResult1 = client1.identifiers().create("alice", kargs1);
+        var icpResult1 = client1.identifiers().create("alice", kargs1);
         Operation op1 = waitOperation(client1, icpResult1.op());
         if (op1 instanceof CompletedWitnessOperation completed) {
             aid1Prefix = completed.getResponse().getI();
         }
-        EventResult rpyResult1 = client1.identifiers().addEndRole(
+        var rpyResult1 = client1.identifiers().addEndRole(
                 "alice",
                 "agent",
                 client1.getAgent().getPre(),
@@ -82,13 +81,13 @@ public class ChallengesTest {
                 "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
-        EventResult icpResult2 = client2.identifiers().create("bob", kargs2);
+        var icpResult2 = client2.identifiers().create("bob", kargs2);
         Operation op2 = waitOperation(client2, icpResult2.op());
         if (op2 instanceof CompletedWitnessOperation completed) {
             aid2Prefix = completed.getResponse().getI();
         }
 
-        EventResult rpyResult2 = client2.identifiers().addEndRole(
+        var rpyResult2 = client2.identifiers().addEndRole(
                 "bob",
                 "agent",
                 client2.getAgent().getPre(),

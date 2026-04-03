@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Keeping;
@@ -86,7 +85,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         kargs.setStates(states);
         kargs.setRstates(states);
 
-        EventResult icpResult = client1.identifiers().create(nameMultisig, kargs);
+        var icpResult = client1.identifiers().create(nameMultisig, kargs);
 
         Operation createMultisig1 = icpResult.op();
         Serder serder = icpResult.serder();
@@ -134,7 +133,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         iargs2.setStates(states);
         iargs2.setRstates(states);
 
-        EventResult icpResult2 = client2.identifiers().create(nameMultisig, iargs2);
+        var icpResult2 = client2.identifiers().create(nameMultisig, iargs2);
 
         Operation createMultisig2 = icpResult2.op();
 
@@ -157,8 +156,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         String eid1 = membersAgent1.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
         String eid2 = membersAgent2.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
 
-        EventResult endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
-        EventResult endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
+        var endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
+        var endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
 
         oobiGetMultisig = client1.oobis().get(nameMultisig, "agent").get();
 
@@ -192,8 +191,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new ResolveOobisArgs(client3, oobiMultisig, nameMultisig)
         );
 
-        EventResult rotateResult1 = client1.identifiers().rotate(nameMember1);
-        EventResult rotateResult2 = client2.identifiers().rotate(nameMember2);
+        var rotateResult1 = client1.identifiers().rotate(nameMember1);
+        var rotateResult2 = client2.identifiers().rotate(nameMember2);
 
         waitOperationAsync(
             new WaitOperationArgs(client1, rotateResult1.op()),
@@ -230,7 +229,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         List<KeyStateRecord> rstates = new ArrayList<>(states);
         rstates.add(aid3State);
 
-        EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
+        var rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
             .states(states)
             .rstates(rstates)
             .build());
@@ -291,9 +290,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     @Test
     @Order(3)
     public void signingKeysAndJoinTest() throws Exception {
-        EventResult rotateResult1 = client1.identifiers().rotate(nameMember1);
-        EventResult rotateResult2 = client2.identifiers().rotate(nameMember2);
-        EventResult rotateResult3 = client3.identifiers().rotate(nameMember3);
+        var rotateResult1 = client1.identifiers().rotate(nameMember1);
+        var rotateResult2 = client2.identifiers().rotate(nameMember2);
+        var rotateResult3 = client3.identifiers().rotate(nameMember3);
 
         waitOperationAsync(
             new WaitOperationArgs(client1, rotateResult1.op()),
@@ -330,7 +329,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State, aid3State);
 
-        EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
+        var rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
             .states(states)
             .rstates(states)
             .build());
@@ -410,7 +409,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         GroupMember members = client3.identifiers().members(nameMultisig);
         String eid = members.getSigning().get(2).getEnds().getAgent().keySet().iterator().next();
 
-        EventResult endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
+        var endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
         Operation endRoleResult = waitOperation(client3, endRoleOperation.op());
 
         assertNotNull(endRoleResult);

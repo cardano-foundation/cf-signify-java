@@ -8,9 +8,9 @@ import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
 
-public record EventResult(Serder serder, List<String> sigs, HttpResponse<String> response) {
+public record EventResult<T extends Operation>(Serder serder, List<String> sigs, HttpResponse<String> response, Class<T> opType) {
 
-    public Operation op() throws IOException {
-        return Utils.fromJson(response.body(), Operation.class);
+    public T op() throws IOException {
+        return Utils.fromJson(response.body(), opType);
     }
 }

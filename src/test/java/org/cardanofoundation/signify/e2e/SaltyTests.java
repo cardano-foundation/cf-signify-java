@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierInfo;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -42,7 +41,7 @@ class SaltyTests {
 
         CreateIdentifierArgs bran = new CreateIdentifierArgs();
         bran.setBran("0123456789abcdefghijk");
-        EventResult icpResult = client.identifiers().create("aid1", bran);
+        var icpResult = client.identifiers().create("aid1", bran);
         waitOperation(client, icpResult.op());
 
         Serder icp = icpResult.serder();
@@ -76,7 +75,7 @@ class SaltyTests {
         params.setNsith("2");
         params.setBran("0123456789lmnopqrstuv");
 
-        EventResult icpResult1 = client.identifiers().create("aid2", params);
+        var icpResult1 = client.identifiers().create("aid2", params);
         waitOperation(client, icpResult1.op());
         Serder icp2 = icpResult1.serder();
 
@@ -107,7 +106,7 @@ class SaltyTests {
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.salty);
-        EventResult icpResult2 = client.identifiers().create("aid3", kargs);
+        var icpResult2 = client.identifiers().create("aid3", kargs);
         waitOperation(client, icpResult2.op());
 
         IdentifierListResponse aidsJson2 = client.identifiers().list(0, 24);
@@ -132,7 +131,7 @@ class SaltyTests {
         Assertions.assertEquals("aid3", aid6.getName());
 
         // Rotate
-        EventResult icpResultRotate = client.identifiers().rotate("aid1");
+        var icpResultRotate = client.identifiers().rotate("aid1");
         waitOperation(client, icpResultRotate.op());
         Serder rotRotate = icpResultRotate.serder();
 
@@ -144,7 +143,7 @@ class SaltyTests {
         Assertions.assertEquals("EJMovBlrBuD6BVeUsGSxLjczbLEbZU9YnTSud9K4nVzk", rotRotate.getDigers().getFirst().getQb64());
 
         // Interact
-        EventResult icpResultInteract = client.identifiers().interact("aid1", List.of(icp.getPre()));
+        var icpResultInteract = client.identifiers().interact("aid1", List.of(icp.getPre()));
         waitOperation(client, icpResultInteract.op());
         Serder ixn = icpResultInteract.serder();
 
