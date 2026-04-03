@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app.config;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -15,9 +14,9 @@ import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
 import java.io.IOException;
 
 /**
- * Deserializes {@link CompletedDelegationOperationResponse} handling both object and string forms.
- * KERIA returns a full key-event object for delegation inception but a plain SAID string
- * for delegation approval (IXN) operations.
+ * Deserializes {@link CompletedDelegationOperationResponse} from a JSON object.
+ * String responses (delegation approval / IXN) are handled upstream by OperationDeserializer,
+ * which redirects them to {@code CompletedDelegatorOperation}.
  */
 class CompletedDelegationOperationResponseDeserializer extends JsonDeserializer<CompletedDelegationOperationResponse> {
 
@@ -38,11 +37,7 @@ class CompletedDelegationOperationResponseDeserializer extends JsonDeserializer<
 
     @Override
     public CompletedDelegationOperationResponse deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        if (p.currentToken() == JsonToken.VALUE_STRING) {
-            CompletedDelegationOperationResponse response = new CompletedDelegationOperationResponse();
-            response.setD(p.getText());
-            return response;
-        }
+        // String responses are now handled by OperationDeserializer redirecting to CompletedDelegatorOperation
         // Use a mapper with nested custom deserializers but without ours to avoid infinite recursion
         JsonNode tree = p.getCodec().readTree(p);
         return FALLBACK_MAPPER.treeToValue(tree, CompletedDelegationOperationResponse.class);
