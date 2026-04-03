@@ -110,7 +110,11 @@ public class OperationDeserializer extends JsonDeserializer<Operation> implement
         // Determine state: response → completed, error → failed, otherwise → pending
         Class<? extends Operation> concreteType;
         if (node.has("response") && !node.get("response").isNull()) {
-            concreteType = opType.completed;
+            if (opType == OperationType.DELEGATION && node.get("response").isTextual()) {
+                concreteType = OperationType.DELEGATOR.completed;
+            } else {
+                concreteType = opType.completed;
+            }
         } else if (node.has("error") && !node.get("error").isNull()) {
             concreteType = opType.failed;
         } else {
