@@ -302,6 +302,65 @@ public class BaseMockServerTest {
             "e": {}
         }""";
 
+    public static final String MOCK_EXCHANGE_RESOURCE = """
+        {
+            "exn": {
+                "v": "KERI10JSON000120_",
+                "t": "exn",
+                "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+                "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "p": "",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": "/ipex/apply",
+                "q": {},
+                "a": {
+                    "m": "Applying"
+                },
+                "e": {
+                    "d": "EMockEmbed"
+                }
+            },
+            "pathed": {}
+        }""";
+
+    public static final String MOCK_EXCHANGE_RESOURCE_NEUTRAL = """
+        {
+            "exn": {
+                "v": "KERI10JSON000120_",
+                "t": "exn",
+                "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+                "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "p": "",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": "/multisig/icp",
+                "q": {},
+                "a": {},
+                "e": {}
+            },
+            "pathed": {}
+        }""";
+
+    protected String exchangeResourceBody() {
+        return MOCK_EXCHANGE_RESOURCE;
+    }
+
+    public static final String MOCK_NOTIFICATIONS_LIST = """
+        [
+            {
+                "i": "ENote001",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": false,
+                "a": {
+                    "r": "/exn/ipex/apply",
+                    "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                    "m": "new exn"
+                }
+            }
+        ]
+        """;
+
     public static final String MOCK_EXN_MULTISIG_LIST = """
         [{
             "exn": {
@@ -314,7 +373,7 @@ public class BaseMockServerTest {
                 "dt": "2023-08-23T15:16:07.553000+00:00",
                 "r": "/multisig/iss",
                 "q": {},
-                "a": {},
+                "a": {"gid": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose"},
                 "e": {}
             },
             "paths": {},
@@ -397,6 +456,10 @@ public class BaseMockServerTest {
             String query = req.getRequestUrl().query();
             long preCount = query != null ? query.split("pre=").length - 1 : 0;
             body = preCount > 1 ? MOCK_KEY_STATES_ARRAY : "[" + MOCK_KEY_STATE + "]";
+        } else if (reqUrl.startsWith(url + "/notifications")) {
+            body = MOCK_NOTIFICATIONS_LIST;
+        } else if (reqUrl.startsWith(url + "/exchanges/")) {
+            body = exchangeResourceBody();
         } else if (reqUrl.startsWith(url + "/multisig/request")) {
             body = MOCK_EXN_MULTISIG_LIST;
         } else if (reqUrl.contains("/multisig/request")) {

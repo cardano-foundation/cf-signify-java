@@ -1,6 +1,16 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.Exchanging;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexAgreeExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexApplyExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexOfferExchange;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.attributes;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.*;
 import org.cardanofoundation.signify.app.credentialing.ipex.*;
@@ -289,7 +299,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("holder IPEX admit", () -> {
             try {
-                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn/ipex/grant");
+                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_GRANT_ROUTE);
                 Notification grantNotification = holderNotifications.getFirst();
 
                 IpexAdmitArgs iargs = IpexAdmitArgs.builder().build();
@@ -313,7 +323,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Issuer IPEX grant response", () -> {
             List<Notification> issuerNotifications;
             try {
-                issuerNotifications = waitForNotifications(issuerClient, "/exn/ipex/admit");
+                issuerNotifications = waitForNotifications(issuerClient, "/exn" + IPEX_ADMIT_ROUTE);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -356,7 +366,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             List<Notification> holderNotifications;
             try {
                 Thread.sleep(2000);
-                holderNotifications = waitForNotifications(holderClient, "/exn/ipex/apply");
+                holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_APPLY_ROUTE);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -364,11 +374,10 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertNotNull(holderApplyNote.a.d);
 
             try {
-                ExchangeResource apply = holderClient.exchanges().get(holderApplyNote.a.d).get();
-                Exn exn = apply.getExn();
-                applySaid = exn.getD();
+                IpexApplyExchange apply = holderClient.exchanges().getIpexApply(holderApplyNote.a.d).orElseThrow();
+                applySaid = apply.message().getExn().getD();
 
-                LinkedHashMap<String, Object> aBody = castObjectToLinkedHashMap(exn.getA());
+                Map<String, Object> aBody = attributes(apply.message());
 
                 Map<String, Object> filter = new LinkedHashMap<>();
                 filter.put("-s", aBody.get("s").toString());
@@ -405,18 +414,16 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Verifier receive offer and agree", () -> {
             List<Notification> verifierNotifications;
             try {
-                verifierNotifications = waitForNotifications(verifierClient, "/exn/ipex/offer");
+                verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_OFFER_ROUTE);
                 Notification verifierOfferNote = verifierNotifications.getFirst();
                 assertNotNull(verifierOfferNote.a.d);
 
-                ExchangeResource offer = verifierClient.exchanges().get(verifierOfferNote.a.d).get();
-                Exn exn = offer.getExn();
+                IpexOfferExchange offer = verifierClient.exchanges().getIpexOffer(verifierOfferNote.a.d).orElseThrow();
 
-                offerSaid = exn.getD();
-                String p = exn.getP();
+                offerSaid = offer.message().getExn().getD();
+                String p = offer.message().getExn().getP();
 
-                LinkedHashMap<String, Object> e = castObjectToLinkedHashMap(exn.getE());
-                LinkedHashMap<String, Object> acdc = castObjectToLinkedHashMap(e.get("acdc"));
+                LinkedHashMap<String, Object> acdc = castObjectToLinkedHashMap(offer.e().acdc());
                 LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(acdc.get("a"));
                 String LEI = a.get("LEI").toString();
 
@@ -444,14 +451,13 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Holder IPEX receive agree and grant/present", () -> {
             List<Notification> holderNotifications;
             try {
-                holderNotifications = waitForNotifications(holderClient, "/exn/ipex/agree");
+                holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_AGREE_ROUTE);
                 Notification holderAgreeNote = holderNotifications.getFirst();
                 assertNotNull(holderAgreeNote.a.d);
 
-                ExchangeResource agree = verifierClient.exchanges().get(holderAgreeNote.a.d).get();
-                Exn exn = agree.getExn();
-                agreeSaid = exn.getD();
-                String agreeP = exn.getP();
+                IpexAgreeExchange agree = verifierClient.exchanges().getIpexAgree(holderAgreeNote.a.d).orElseThrow();
+                agreeSaid = agree.message().getExn().getD();
+                String agreeP = agree.message().getExn().getP();
 
                 assertEquals(offerSaid, agreeP);
 
@@ -489,13 +495,12 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Verifier receives IPEX grant", () -> {
             List<Notification> verifierNotifications;
             try {
-                verifierNotifications = waitForNotifications(verifierClient, "/exn/ipex/grant");
+                verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_GRANT_ROUTE);
                 Notification verifierGrantNote = verifierNotifications.getFirst();
                 assertNotNull(verifierGrantNote.a.d);
 
-                ExchangeResource grant = holderClient.exchanges().get(verifierGrantNote.a.d).get();
-                Exn exn = grant.getExn();
-                String p = exn.getP();
+                IpexGrantExchange grant = holderClient.exchanges().getIpexGrant(verifierGrantNote.a.d).orElseThrow();
+                String p = grant.message().getExn().getP();
 
                 assertEquals(agreeSaid, p);
 
@@ -531,7 +536,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Holder IPEX present response", () -> {
             try {
-                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn/ipex/admit");
+                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
                 markAndRemoveNotification(holderClient, holderNotifications.getFirst());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -629,7 +634,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Legal Entity IPEX admit", () -> {
             try {
-                List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn/ipex/grant");
+                List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn" + IPEX_GRANT_ROUTE);
                 Notification grantNotification = notifications.getFirst();
 
                 IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
@@ -652,7 +657,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("LE credential IPEX grant response", () -> {
             try {
-                List<Notification> notifications = waitForNotifications(holderClient, "/exn/ipex/admit");
+                List<Notification> notifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
                 markAndRemoveNotification(holderClient, notifications.getFirst());
             } catch (Exception e) {
                 throw new RuntimeException(e);
