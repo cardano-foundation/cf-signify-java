@@ -12,6 +12,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.cardanofoundation.signify.app.Exchanging.exchange;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.routeOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.DigestException;
@@ -259,9 +261,29 @@ public class ExchangingTest extends BaseMockServerTest {
         Exchanging.Exchanges exchanges = client.exchanges();
         String exchangeId = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
-        exchanges.get(exchangeId);
+        assertTrue(exchanges.get(exchangeId).isPresent());
 
         RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+
+        // Mock returns /ipex/apply route — getIpexApply should resolve to typed model
+        var apply = exchanges.getIpexApply(exchangeId);
+        request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+        assertTrue(apply.isPresent());
+        assertEquals(IPEX_APPLY_ROUTE, routeOf(apply.orElseThrow().message()));
+
+        // Route mismatch — getIpexGrant should return empty
+        assertTrue(exchanges.getIpexGrant(exchangeId).isEmpty());
+        request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+
+        // Route mismatch — getMultisigIcp should return empty
+        assertTrue(exchanges.getMultisigIcp(exchangeId).isEmpty());
+        request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());
     }
