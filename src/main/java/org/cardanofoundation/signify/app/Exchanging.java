@@ -171,6 +171,58 @@ public class Exchanging {
             
             return Optional.of(Utils.fromJson(res.body(), ExchangeResource.class));
         }
+
+        public Optional<ExnMessageTypes.MultisigIcpExchange> getMultisigIcp(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigIcp);
+        }
+
+        public Optional<ExnMessageTypes.MultisigRotExchange> getMultisigRot(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigRot);
+        }
+
+        public Optional<ExnMessageTypes.MultisigIxnExchange> getMultisigIxn(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigIxn);
+        }
+
+        public Optional<ExnMessageTypes.MultisigRpyExchange> getMultisigRpy(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigRpy);
+        }
+
+        public Optional<ExnMessageTypes.MultisigVcpExchange> getMultisigVcp(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigVcp);
+        }
+
+        public Optional<ExnMessageTypes.MultisigIssExchange> getMultisigIss(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigIss);
+        }
+
+        public Optional<ExnMessageTypes.MultisigExnExchange> getMultisigExn(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigExn);
+        }
+
+        public Optional<ExnMessageTypes.MultisigRevExchange> getMultisigRev(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asMultisigRev);
+        }
+
+        public Optional<ExnMessageTypes.IpexGrantExchange> getIpexGrant(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asIpexGrant);
+        }
+
+        public Optional<ExnMessageTypes.IpexOfferExchange> getIpexOffer(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asIpexOffer);
+        }
+
+        public Optional<ExnMessageTypes.IpexApplyExchange> getIpexApply(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asIpexApply);
+        }
+
+        public Optional<ExnMessageTypes.IpexAgreeExchange> getIpexAgree(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asIpexAgree);
+        }
+
+        public Optional<ExnMessageTypes.IpexAdmitExchange> getIpexAdmit(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asIpexAdmit);
+        }
     }
 
     public static ExchangeResult exchange(

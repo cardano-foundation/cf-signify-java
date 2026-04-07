@@ -1,6 +1,16 @@
 package org.cardanofoundation.signify.app.credentialing.ipex;
 
 import org.cardanofoundation.signify.app.Exchanging;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexAdmitExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexAgreeExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexApplyExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexOfferExchange;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
@@ -16,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
+import java.util.Optional;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Ipex {
@@ -37,7 +48,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/apply",
+                IPEX_APPLY_ROUTE,
                 data,
                 new LinkedHashMap<>(),
                 args.getRecipient(),
@@ -53,7 +64,7 @@ public class Ipex {
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/apply",
+            "/identifiers/" + name + IPEX_APPLY_ROUTE,
             "POST",
             body
         );
@@ -76,7 +87,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/offer",
+                IPEX_OFFER_ROUTE,
                 data,
                 embeds,
                 args.getRecipient(),
@@ -93,7 +104,7 @@ public class Ipex {
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/offer",
+            "/identifiers/" + name + IPEX_OFFER_ROUTE,
             "POST",
             body
         );
@@ -113,7 +124,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/agree",
+                IPEX_AGREE_ROUTE,
                 data,
                 Map.of(),
                 args.getRecipient(),
@@ -129,7 +140,7 @@ public class Ipex {
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/agree",
+            "/identifiers/" + name + IPEX_AGREE_ROUTE,
             "POST",
             body
         );
@@ -167,7 +178,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/grant",
+                IPEX_GRANT_ROUTE,
                 data,
                 embeds,
                 args.getRecipient(),
@@ -185,7 +196,7 @@ public class Ipex {
         );
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/grant",
+            "/identifiers/" + name + IPEX_GRANT_ROUTE,
             "POST",
             body
         );
@@ -205,7 +216,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/admit",
+                IPEX_ADMIT_ROUTE,
                 data,
                 Map.of(),
                 args.getRecipient(),
@@ -222,10 +233,30 @@ public class Ipex {
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/admit",
+            "/identifiers/" + name + IPEX_ADMIT_ROUTE,
             "POST",
             body
         );
         return Utils.fromJson(response.body(), ExchangeOperation.class);
+    }
+
+    public Optional<IpexGrantExchange> getGrantExchange(String said) throws Exception {
+        return this.client.exchanges().getIpexGrant(said);
+    }
+
+    public Optional<IpexOfferExchange> getOfferExchange(String said) throws Exception {
+        return this.client.exchanges().getIpexOffer(said);
+    }
+
+    public Optional<IpexApplyExchange> getApplyExchange(String said) throws Exception {
+        return this.client.exchanges().getIpexApply(said);
+    }
+
+    public Optional<IpexAgreeExchange> getAgreeExchange(String said) throws Exception {
+        return this.client.exchanges().getIpexAgree(said);
+    }
+
+    public Optional<IpexAdmitExchange> getAdmitExchange(String said) throws Exception {
+        return this.client.exchanges().getIpexAdmit(said);
     }
 }
