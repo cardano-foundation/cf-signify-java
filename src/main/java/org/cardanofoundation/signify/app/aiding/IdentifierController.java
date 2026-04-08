@@ -26,14 +26,16 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
+import org.cardanofoundation.signify.generated.keria.model.DelegationOperation;
 import org.cardanofoundation.signify.generated.keria.model.DoneOperation;
+import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
 import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.WitnessOperation;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
@@ -132,7 +134,8 @@ public class IdentifierController {
      * @param kargs Optional parameters to create the identifier
      * @return An EventResult to the inception result
      */
-    public EventResult<Operation> create(String name, CreateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    @SuppressWarnings("unchecked")
+    public EventResult<KelOperation> create(String name, CreateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
         // Assuming kargs is an instance of a class with appropriate getters
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
@@ -278,7 +281,8 @@ public class IdentifierController {
         this.client.setPidx(this.client.getPidx() + 1);
 
         HttpResponse<String> response = this.client.fetch("/identifiers", "POST", jsondata);
-        return new EventResult<>(serder, sigs, response, Operation.class);
+        Class<? extends KelOperation> opType = resolveKelOpTypeFromArgs(kargs, wits);
+        return new EventResult<>(serder, sigs, response, (Class<KelOperation>) opType);
     }
 
 
@@ -338,19 +342,74 @@ public class IdentifierController {
         return Eventing.reply(route, data, stamp, null, Serials.JSON);
     }
 
-    public EventResult<DoneOperation> interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        InteractionResponse interactionResponse = this.createInteract(name, data);
+    @SuppressWarnings("unchecked")
+    public EventResult<KelOperation> interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
+        HabState hab = this.get(name)
+            .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
+        Class<? extends KelOperation> opType = resolveKelOpTypeForIxn(hab);
+        InteractionResponse interactionResponse = this.createInteract(hab, data);
         HttpResponse<String> response = this.client.fetch(
             "/identifiers/" + name + "/events",
             "POST",
             interactionResponse.jsondata()
         );
-        return new EventResult<>(interactionResponse.serder(), interactionResponse.sigs(), response, DoneOperation.class);
+        return new EventResult<>(interactionResponse.serder(), interactionResponse.sigs(), response, (Class<KelOperation>) opType);
+    }
+
+    /**
+     * Resolve the expected KERIA operation type for an interaction (IXN) event.
+     */
+    static Class<? extends KelOperation> resolveKelOpTypeForIxn(HabState hab) {
+        if (hab.getGroup() != null) {
+            return GroupOperation.class;
+        }
+        KeyStateRecord state = hab.getState();
+        if (state != null && state.getB() != null && !state.getB().isEmpty()) {
+            return WitnessOperation.class;
+        }
+        return DoneOperation.class;
+    }
+
+    /**
+     * Resolve the expected KERIA operation type for a rotation (ROT/DRT) event.
+     */
+    static Class<? extends KelOperation> resolveKelOpTypeForRot(HabState hab) {
+        if (hab.getGroup() != null) {
+            return GroupOperation.class;
+        }
+        KeyStateRecord state = hab.getState();
+        if (state != null && state.getDi() != null && !state.getDi().isEmpty()) {
+            return DelegationOperation.class;
+        }
+        if (state != null && state.getB() != null && !state.getB().isEmpty()) {
+            return WitnessOperation.class;
+        }
+        return DoneOperation.class;
+    }
+
+    /**
+     * Resolve the expected KERIA operation type for an inception (ICP/DIP) event.
+     */
+    private static Class<? extends KelOperation> resolveKelOpTypeFromArgs(CreateIdentifierArgs kargs, List<String> wits) {
+        if (kargs.getMhab() != null || kargs.getStates() != null) {
+            return GroupOperation.class;
+        }
+        if (kargs.getDelpre() != null) {
+            return DelegationOperation.class;
+        }
+        if (!wits.isEmpty()) {
+            return WitnessOperation.class;
+        }
+        return DoneOperation.class;
     }
 
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
+        return this.createInteract(hab, data);
+    }
+
+    private InteractionResponse createInteract(HabState hab, Object data) throws DigestException, IOException, LibsodiumException {
         String pre = hab.getPrefix();
 
         KeyStateRecord state = hab.getState();
@@ -379,11 +438,12 @@ public class IdentifierController {
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
 
-    public EventResult<DoneOperation> rotate(String name) throws ExecutionException, InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<KelOperation> rotate(String name) throws ExecutionException, InterruptedException, DigestException, IOException, LibsodiumException {
         return this.rotate(name, RotateIdentifierArgs.builder().build());
     }
 
-    public EventResult<DoneOperation> rotate(String name, RotateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    @SuppressWarnings("unchecked")
+    public EventResult<KelOperation> rotate(String name, RotateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
@@ -467,7 +527,7 @@ public class IdentifierController {
             jsondata
         );
 
-        return new EventResult<>(serder, sigs, res, DoneOperation.class);
+        return new EventResult<>(serder, sigs, res, (Class<KelOperation>) resolveKelOpTypeForRot(hab));
     }
 
     /**

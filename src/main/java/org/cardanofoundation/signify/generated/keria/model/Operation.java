@@ -13,6 +13,7 @@ public sealed interface Operation permits
         EndRoleOperation,
         ExchangeOperation,
         GroupOperation,
+        KelOperation,
         LocSchemeOperation,
         OOBIOperation,
         QueryOperation,
