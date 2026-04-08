@@ -257,6 +257,7 @@ tasks.named("openApiGenerate") {
             "LocScheme", "OOBI", "Query", "Registry",
             "Submit", "Witness"
         ]
+        def kelOps = ["Done", "Witness", "Submit", "Group", "Delegation"] as Set
         def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
 
         ops.each { op ->
@@ -285,10 +286,11 @@ tasks.named("openApiGenerate") {
             // Replace the generated merged oneOf class with a sealed interface
             def target = new File(modelDir, "${op}Operation.java")
             def metadataMethod = metadataType ? "\n    ${metadataType} getMetadata();" : ""
+            def extendsClause = kelOps.contains(op) ? "extends Operation, KelOperation" : "extends Operation"
             target.text = """\
 package org.cardanofoundation.signify.generated.keria.model;
 
-public sealed interface ${op}Operation extends Operation permits
+public sealed interface ${op}Operation ${extendsClause} permits
         Pending${op}Operation,
         Completed${op}Operation,
         Failed${op}Operation {
@@ -298,7 +300,11 @@ ${metadataMethod}
         }
 
         // Generate the general Operation sealed interface (union of all operation types)
-        def permitsEntries = ops.collect { op -> "        ${op}Operation" }.join(",\n")
+        // KelOperation is also listed here as a permitted subtype
+        def permitsEntries = (ops.collect { op -> "${op}Operation" } + ["KelOperation"])
+            .sort()
+            .collect { name -> "        ${name}" }
+            .join(",\n")
 
         def operationFile = new File(modelDir, "Operation.java")
         operationFile.text = """\
@@ -312,6 +318,20 @@ public sealed interface Operation permits
 ${permitsEntries} {
 
     String getName();
+}
+"""
+
+        // Generate KelOperation — a sealed group interface for all KEL event operation types.
+        def kelPermits = kelOps.sort().collect { op -> "        ${op}Operation" }.join(",\n")
+        def kelOperationFile = new File(modelDir, "KelOperation.java")
+        kelOperationFile.text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+/**
+ * Marker interface for operations that result from appending a KEL event.
+ */
+public sealed interface KelOperation extends Operation permits
+${kelPermits} {
 }
 """
     }
