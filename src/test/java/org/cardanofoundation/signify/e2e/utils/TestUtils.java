@@ -247,13 +247,12 @@ public class TestUtils {
             }
             var result = client.identifiers().create(name, kargs);
             Operation opResult = waitOperation(client, result.op(), Operation.class);
-            if (opResult instanceof CompletedWitnessOperation completed) {
-                id = completed.getResponse().getI();
-            } else if (opResult instanceof CompletedDelegationOperation completed) {
-                id = completed.getResponse().getI();
-            } else if (opResult instanceof CompletedDoneOperation completed) {
-                id = completed.getResponse().getI();
-            }
+            id = switch (opResult) {
+                case CompletedWitnessOperation completed -> completed.getResponse().getI();
+                case CompletedDelegationOperation completed -> completed.getResponse().getI();
+                case CompletedDoneOperation completed -> completed.getResponse().getI();
+                default -> id;
+            };
             if (client.getAgent() != null && client.getAgent().getPre() != null) {
                 eid = client.getAgent().getPre();
             } else {
@@ -387,22 +386,37 @@ public class TestUtils {
         assertTrue(count > 0);
     }
 
-    @SuppressWarnings("unchecked")
     public static void deleteOperations(SignifyClient client, String operationName) throws IOException, InterruptedException, LibsodiumException {
-        Map<String, Object> opMap = client.operations().get(operationName, Map.class).orElse(null);
-        if (opMap != null) {
-            Object metadata = opMap.get("metadata");
-            if (metadata instanceof Map<?, ?> metaMap) {
-                Object depends = metaMap.get("depends");
-                if (depends instanceof Map<?, ?> depMap) {
-                    String depName = (String) depMap.get("name");
-                    if (depName != null) {
-                        deleteOperations(client, depName);
-                    }
-                }
-            }
+        deleteOperations(client, operationName, null);
+    }
+
+    private static void deleteOperations(SignifyClient client, String operationName, String knownDepName) throws IOException, InterruptedException, LibsodiumException {
+        // Use knownDepName if provided (from pending state); otherwise try to discover via re-fetch.
+        // Completed operations may omit metadata, so the re-fetch approach is a best-effort fallback.
+        String depName = knownDepName;
+        if (depName == null) {
+            Operation op = client.operations().get(operationName, Operation.class).orElse(null);
+            depName = extractDepName(op);
+        }
+        if (depName != null) {
+            deleteOperations(client, depName, null);
         }
         client.operations().delete(operationName);
+    }
+
+    private static String extractDepName(Operation op) {
+        if (op == null) return null;
+        if (op instanceof DelegatorOperation delegatorOp && delegatorOp.getMetadata() != null) {
+            DelegatorOperationMetadataDepends dep = delegatorOp.getMetadata().getDepends();
+            if (dep != null) return dep.getName();
+        } else if (op instanceof RegistryOperation registryOp && registryOp.getMetadata() != null) {
+            RegistryOperationDepends dep = registryOp.getMetadata().getDepends();
+            if (dep != null) return dep.getName();
+        } else if (op instanceof CredentialOperation credentialOp && credentialOp.getMetadata() != null) {
+            CredentialOperationDepends dep = credentialOp.getMetadata().getDepends();
+            if (dep != null) return dep.getName();
+        }
+        return null;
     }
 
     public static void deleteOperation(SignifyClient client, String name) throws IOException, InterruptedException, LibsodiumException {
@@ -510,19 +524,21 @@ public class TestUtils {
             Operation op
     ) throws IOException, InterruptedException, LibsodiumException {
         String name = op.getName();
+        String depName = extractDepName(op);
         Operation result = client.operations().wait(name);
-        deleteOperations(client, name);
+        deleteOperations(client, name, depName);
         return result;
     }
 
-    public static <T> T waitOperation(
+    public static <T extends Operation> T waitOperation(
             SignifyClient client,
             Operation op,
             Class<T> type
     ) throws IOException, InterruptedException, LibsodiumException {
         String name = op.getName();
+        String depName = extractDepName(op);
         T result = client.operations().wait(name, type);
-        deleteOperations(client, name);
+        deleteOperations(client, name, depName);
         return result;
     }
 

@@ -389,16 +389,25 @@ public class MultisigTest extends BaseIntegrationTest {
         // Update new key states
         op1 = client1.keyStates().query(aid2.getPrefix(), "1");
         op1 = waitOperation(client1, op1);
-        KeyStateRecord aid2State = ((CompletedQueryOperation) op1).getResponse();
+        KeyStateRecord aid2State = switch (op1) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
         op1 = client1.keyStates().query(aid3.getPrefix(), "1");
         op1 = waitOperation(client1, op1);
-        KeyStateRecord aid3State = ((CompletedQueryOperation) op1).getResponse();
+        KeyStateRecord aid3State = switch (op1) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         op2 = client2.keyStates().query(aid3.getPrefix(), "1");
         op2 = waitOperation(client2, op2);
         op2 = client2.keyStates().query(aid1.getPrefix(), "1");
         op2 = waitOperation(client2, op2);
-        KeyStateRecord aid1State = ((CompletedQueryOperation) op2).getResponse();
+        KeyStateRecord aid1State = switch (op2) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         op3 = client3.keyStates().query(aid1.getPrefix(), "1");
         op3 = waitOperation(client3, op3);

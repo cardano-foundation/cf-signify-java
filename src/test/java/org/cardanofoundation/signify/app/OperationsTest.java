@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.app;
 import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import org.mockito.*;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -105,16 +105,15 @@ public class OperationsTest {
     @Test
     @DisplayName("Does not poll when operation is already done")
     void doesNotWaitForOperationThatIsAlreadyDone() throws IOException, InterruptedException, LibsodiumException {
-        Map<String, Object> operation = buildOperationMap(true, true);
-        String operationName = (String) operation.get("name");
+        String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(mockResponse.body()).thenReturn(Utils.jsonStringify(operation));
+        Mockito.when(mockResponse.body()).thenReturn(doneLocSchemeOpJson(opName));
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
         when(client.fetch(anyString(), anyString(), isNull()))
             .thenReturn(mockResponse);
 
-        operations.wait(operationName, Map.class);
+        operations.wait(opName, Operation.class);
         // 1 fetch: initial check finds done=true, returns immediately
         verify(client, times(1)).fetch(anyString(), anyString(), isNull());
     }
@@ -122,24 +121,21 @@ public class OperationsTest {
     @Test
     @DisplayName("Returns when operation is done after first poll")
     void returnsWhenOperationIsDoneAfterFirstPoll() throws IOException, InterruptedException, LibsodiumException {
-        Map<String, Object> pendingOp = buildOperationMap(false, true);
-        Map<String, Object> doneOp = buildOperationMap(true, true);
-        doneOp.put("name", pendingOp.get("name"));
-        String operationName = (String) pendingOp.get("name");
+        String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> pendingResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(pendingResponse.body()).thenReturn(Utils.jsonStringify(pendingOp));
+        Mockito.when(pendingResponse.body()).thenReturn(pendingLocSchemeOpJson(opName));
         Mockito.when(pendingResponse.statusCode()).thenReturn(200);
 
         HttpResponse<String> doneResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(doneResponse.body()).thenReturn(Utils.jsonStringify(doneOp));
+        Mockito.when(doneResponse.body()).thenReturn(doneLocSchemeOpJson(opName));
         Mockito.when(doneResponse.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull()))
             .thenReturn(pendingResponse)
             .thenReturn(doneResponse);
 
-        operations.wait(operationName, Map.class);
+        operations.wait(opName, Operation.class);
         // 1 initial fetch + 1 poll
         verify(client, times(2)).fetch(anyString(), anyString(), isNull());
     }
@@ -147,17 +143,14 @@ public class OperationsTest {
     @Test
     @DisplayName("Returns when operation is done after second poll")
     void returnsWhenOperationIsDoneAfterSecondPoll() throws IOException, InterruptedException, LibsodiumException {
-        Map<String, Object> pendingOp = buildOperationMap(false, true);
-        Map<String, Object> doneOp = buildOperationMap(true, true);
-        doneOp.put("name", pendingOp.get("name"));
-        String operationName = (String) pendingOp.get("name");
+        String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> pendingResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(pendingResponse.body()).thenReturn(Utils.jsonStringify(pendingOp));
+        Mockito.when(pendingResponse.body()).thenReturn(pendingLocSchemeOpJson(opName));
         Mockito.when(pendingResponse.statusCode()).thenReturn(200);
 
         HttpResponse<String> doneResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(doneResponse.body()).thenReturn(Utils.jsonStringify(doneOp));
+        Mockito.when(doneResponse.body()).thenReturn(doneLocSchemeOpJson(opName));
         Mockito.when(doneResponse.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull()))
@@ -168,7 +161,7 @@ public class OperationsTest {
         Operations.WaitOptions options = Operations.WaitOptions.builder()
                 .maxSleep(10)
                 .build();
-        operations.wait(operationName, Map.class, options);
+        operations.wait(opName, Operation.class, options);
         // 1 initial + 2 polls
         verify(client, times(3)).fetch(anyString(), anyString(), isNull());
     }
@@ -176,39 +169,49 @@ public class OperationsTest {
     @Test
     @DisplayName("Returns when child operation is also done")
     void returnsWhenChildOperationIsAlsoDone() throws IOException, InterruptedException, LibsodiumException {
+        String depName = "registry." + UUID.randomUUID();
+        String mainName = "registry." + UUID.randomUUID();
+
         HttpResponse<String> response1 = Mockito.mock(HttpResponse.class);
-        Mockito.when(response1.body()).thenReturn(Utils.jsonStringify(buildOperationMap(false, false)));
+        // main: pending, depends (depName) is not done
+        Mockito.when(response1.body()).thenReturn(pendingRegistryWithDependsJson(mainName, depName, false));
         Mockito.when(response1.statusCode()).thenReturn(200);
 
         HttpResponse<String> response2 = Mockito.mock(HttpResponse.class);
-        Mockito.when(response2.body()).thenReturn(Utils.jsonStringify(buildOperationMap(false, true)));
+        // dep: pending, no nested depends
+        Mockito.when(response2.body()).thenReturn(pendingRegistryOpJson(depName));
         Mockito.when(response2.statusCode()).thenReturn(200);
 
         HttpResponse<String> response3 = Mockito.mock(HttpResponse.class);
-        Mockito.when(response3.body()).thenReturn(Utils.jsonStringify(buildOperationMap(true, true)));
+        // dep: done
+        Mockito.when(response3.body()).thenReturn(doneRegistryOpJson(depName));
         Mockito.when(response3.statusCode()).thenReturn(200);
 
+        HttpResponse<String> response4 = Mockito.mock(HttpResponse.class);
+        // main: done
+        Mockito.when(response4.body()).thenReturn(doneRegistryOpJson(mainName));
+        Mockito.when(response4.statusCode()).thenReturn(200);
+
         when(client.fetch(anyString(), anyString(), isNull()))
-            .thenReturn(response1)   // main: initial fetch - not done, depends not done
-            .thenReturn(response2)   // depends: initial fetch - not done, its depends done
-            .thenReturn(response3)   // depends: poll - done
-            .thenReturn(response3);  // main: poll - done
+            .thenReturn(response1)   // main: initial fetch - pending, depends not done
+            .thenReturn(response2)   // dep: initial fetch - pending, no nested depends
+            .thenReturn(response3)   // dep: poll - done
+            .thenReturn(response4);  // main: poll - done
 
         Operations.WaitOptions options = Operations.WaitOptions.builder()
                 .maxSleep(10)
                 .build();
-        operations.wait("witness.main", Map.class, options);
+        operations.wait(mainName, Operation.class, options);
         verify(client, times(4)).fetch(anyString(), anyString(), isNull());
     }
 
     @Test
     @DisplayName("Throw if aborting operation")
     void throwIfAbortingOperation() throws IOException, InterruptedException, LibsodiumException {
-        Map<String, Object> operation = buildOperationMap(false, true);
-        String operationName = (String) operation.get("name");
+        String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(mockResponse.body()).thenReturn(Utils.jsonStringify(operation));
+        Mockito.when(mockResponse.body()).thenReturn(pendingLocSchemeOpJson(opName));
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull()))
@@ -220,26 +223,29 @@ public class OperationsTest {
                 .build();
 
         Exception exception = assertThrows(InterruptedException.class,
-                () -> operations.wait(operationName, Map.class, options));
+                () -> operations.wait(opName, Operation.class, options));
         assertEquals("Operation aborted: Timeout", exception.getMessage());
     }
 
-    Map<String, Object> buildOperationMap(boolean done, boolean dependsDone) {
-        Map<String, Object> depends = new LinkedHashMap<>();
-        depends.put("name", UUID.randomUUID().toString());
-        depends.put("response", "depend");
-        depends.put("done", dependsDone);
+    // --- JSON helpers ---
 
-        Map<String, Object> metadata = new LinkedHashMap<>();
-        metadata.put("depends", depends);
-        metadata.put("key", "value");
+    private String pendingLocSchemeOpJson(String name) {
+        return "{\"name\": \"" + name + "\"}";
+    }
 
-        Map<String, Object> operation = new LinkedHashMap<>();
-        operation.put("name", UUID.randomUUID().toString());
-        operation.put("response", "response");
-        operation.put("done", done);
-        operation.put("metadata", metadata);
+    private String doneLocSchemeOpJson(String name) {
+        return "{\"name\": \"" + name + "\", \"response\": {\"eid\": \"ETest\", \"scheme\": \"http\", \"url\": \"http://test\"}}";
+    }
 
-        return operation;
+    private String pendingRegistryOpJson(String name) {
+        return "{\"name\": \"" + name + "\", \"metadata\": {\"pre\": \"ETest\", \"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}}}";
+    }
+
+    private String pendingRegistryWithDependsJson(String name, String depName, boolean depDone) {
+        return "{\"name\": \"" + name + "\", \"metadata\": {\"pre\": \"ETest\", \"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}, \"depends\": {\"name\": \"" + depName + "\", \"done\": " + depDone + "}}}";
+    }
+
+    private String doneRegistryOpJson(String name) {
+        return "{\"name\": \"" + name + "\", \"response\": {\"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}}}";
     }
 }

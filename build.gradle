@@ -334,5 +334,194 @@ public sealed interface KelOperation extends Operation permits
 ${kelPermits} {
 }
 """
+
+        // Generate RegistryOperationDepends sealed interface + Pending/Completed impls
+        new File(modelDir, "RegistryOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+/**
+ * Represents the {@code depends} field of a {@link RegistryOperationMetadata}.
+ * The dependency is either still pending or already completed.
+ */
+public sealed interface RegistryOperationDepends
+        permits PendingRegistryOperationDepends, CompletedRegistryOperationDepends {
+
+    String getName();
+
+    boolean isDone();
+}
+"""
+
+        new File(modelDir, "PendingRegistryOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class PendingRegistryOperationDepends implements RegistryOperationDepends {
+
+    @JsonProperty("name")
+    private String name;
+
+    @Override
+    public boolean isDone() {
+        return false;
+    }
+}
+"""
+
+        new File(modelDir, "CompletedRegistryOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class CompletedRegistryOperationDepends implements RegistryOperationDepends {
+
+    @JsonProperty("name")
+    private String name;
+
+    @Override
+    public boolean isDone() {
+        return true;
+    }
+}
+"""
+
+        // Patch RegistryOperationMetadata to use typed RegistryOperationDepends with custom deserializer
+        def registryMetaFile = new File(modelDir, "RegistryOperationMetadata.java")
+        if (registryMetaFile.exists()) {
+            def text = registryMetaFile.text
+            // Add JsonDeserialize import and RegistryOperationDependsDeserializer import
+            text = text.replace(
+                "import com.fasterxml.jackson.annotation.JsonCreator;",
+                "import com.fasterxml.jackson.annotation.JsonCreator;\nimport com.fasterxml.jackson.databind.annotation.JsonDeserialize;\nimport org.cardanofoundation.signify.app.coring.RegistryOperationDependsDeserializer;"
+            )
+            // Change field type from Object to RegistryOperationDepends
+            text = text.replace("private Object depends = null;", "private RegistryOperationDepends depends = null;")
+            // Change builder method signature
+            text = text.replace(
+                "public RegistryOperationMetadata depends(@jakarta.annotation.Nullable Object depends) {",
+                "public RegistryOperationMetadata depends(@jakarta.annotation.Nullable RegistryOperationDepends depends) {"
+            )
+            // Change getter return type
+            text = text.replace("public Object getDepends() {", "public RegistryOperationDepends getDepends() {")
+            // Change setter parameter type and add @JsonDeserialize
+            text = text.replace(
+                "public void setDepends(@jakarta.annotation.Nullable Object depends) {",
+                "@JsonDeserialize(using = RegistryOperationDependsDeserializer.class)\n  public void setDepends(@jakarta.annotation.Nullable RegistryOperationDepends depends) {"
+            )
+            registryMetaFile.text = text
+        }
+
+        // Generate CredentialOperationDepends sealed interface + Pending/Completed impls
+        new File(modelDir, "CredentialOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+/**
+ * Represents the {@code depends} field of a {@link CredentialOperationMetadata}.
+ * The dependency is either still pending or already completed.
+ */
+public sealed interface CredentialOperationDepends
+        permits PendingCredentialOperationDepends, CompletedCredentialOperationDepends {
+
+    String getName();
+
+    boolean isDone();
+}
+"""
+
+        new File(modelDir, "PendingCredentialOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class PendingCredentialOperationDepends implements CredentialOperationDepends {
+
+    @JsonProperty("name")
+    private String name;
+
+    @Override
+    public boolean isDone() {
+        return false;
+    }
+}
+"""
+
+        new File(modelDir, "CompletedCredentialOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class CompletedCredentialOperationDepends implements CredentialOperationDepends {
+
+    @JsonProperty("name")
+    private String name;
+
+    @Override
+    public boolean isDone() {
+        return true;
+    }
+}
+"""
+
+        // Patch CredentialOperationMetadata to use typed CredentialOperationDepends with custom deserializer
+        def credentialMetaFile = new File(modelDir, "CredentialOperationMetadata.java")
+        if (credentialMetaFile.exists()) {
+            def text = credentialMetaFile.text
+            // Add JsonDeserialize import and CredentialOperationDependsDeserializer import
+            text = text.replace(
+                "import com.fasterxml.jackson.annotation.JsonCreator;",
+                "import com.fasterxml.jackson.annotation.JsonCreator;\nimport com.fasterxml.jackson.databind.annotation.JsonDeserialize;\nimport org.cardanofoundation.signify.app.coring.CredentialOperationDependsDeserializer;"
+            )
+            // Remove the old CredentialOperationMetadataDepends import (replaced by our sealed interface)
+            text = text.replace(
+                "import org.cardanofoundation.signify.generated.keria.model.CredentialOperationMetadataDepends;\n",
+                ""
+            )
+            // Change field type
+            text = text.replace(
+                "private CredentialOperationMetadataDepends depends;",
+                "private CredentialOperationDepends depends;"
+            )
+            // Change builder method signature
+            text = text.replace(
+                "public CredentialOperationMetadata depends(@jakarta.annotation.Nullable CredentialOperationMetadataDepends depends) {",
+                "public CredentialOperationMetadata depends(@jakarta.annotation.Nullable CredentialOperationDepends depends) {"
+            )
+            // Change getter return type
+            text = text.replace(
+                "public CredentialOperationMetadataDepends getDepends() {",
+                "public CredentialOperationDepends getDepends() {"
+            )
+            // Change setter parameter type and add @JsonDeserialize
+            text = text.replace(
+                "public void setDepends(@jakarta.annotation.Nullable CredentialOperationMetadataDepends depends) {",
+                "@JsonDeserialize(using = CredentialOperationDependsDeserializer.class)\n  public void setDepends(@jakarta.annotation.Nullable CredentialOperationDepends depends) {"
+            )
+            credentialMetaFile.text = text
+        }
     }
 }
