@@ -18,6 +18,8 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.cardanofoundation.signify.app.coring.RegistryOperationDependsDeserializer;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Anchor;
@@ -40,7 +42,7 @@ public class RegistryOperationMetadata {
 
   public static final String JSON_PROPERTY_DEPENDS = "depends";
   @jakarta.annotation.Nullable
-  private Object depends = null;
+  private RegistryOperationDepends depends = null;
 
   public static final String JSON_PROPERTY_ANCHOR = "anchor";
   @jakarta.annotation.Nonnull
@@ -74,7 +76,7 @@ public class RegistryOperationMetadata {
     this.pre = pre;
   }
 
-  public RegistryOperationMetadata depends(@jakarta.annotation.Nullable Object depends) {
+  public RegistryOperationMetadata depends(@jakarta.annotation.Nullable RegistryOperationDepends depends) {
     
     this.depends = depends;
     return this;
@@ -88,14 +90,15 @@ public class RegistryOperationMetadata {
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public Object getDepends() {
+  public RegistryOperationDepends getDepends() {
     return depends;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setDepends(@jakarta.annotation.Nullable Object depends) {
+  @JsonDeserialize(using = RegistryOperationDependsDeserializer.class)
+  public void setDepends(@jakarta.annotation.Nullable RegistryOperationDepends depends) {
     this.depends = depends;
   }
 

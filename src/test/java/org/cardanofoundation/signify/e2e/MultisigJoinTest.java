@@ -221,9 +221,18 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client3, updates.get(5))
         );
 
-        KeyStateRecord aid2State = ((CompletedQueryOperation) statesUpdate.get(0)).getResponse();
-        KeyStateRecord aid3State = ((CompletedQueryOperation) statesUpdate.get(1)).getResponse();
-        KeyStateRecord aid1State = ((CompletedQueryOperation) statesUpdate.get(2)).getResponse();
+        KeyStateRecord aid2State = switch (statesUpdate.get(0)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid3State = switch (statesUpdate.get(1)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid1State = switch (statesUpdate.get(2)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State);
         List<KeyStateRecord> rstates = new ArrayList<>(states);
@@ -323,9 +332,18 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client3, updates.get(5))
         );
 
-        KeyStateRecord aid2State = ((CompletedQueryOperation) statesUpdate.get(0)).getResponse();
-        KeyStateRecord aid3State = ((CompletedQueryOperation) statesUpdate.get(1)).getResponse();
-        KeyStateRecord aid1State = ((CompletedQueryOperation) statesUpdate.get(2)).getResponse();
+        KeyStateRecord aid2State = switch (statesUpdate.get(0)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid3State = switch (statesUpdate.get(1)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid1State = switch (statesUpdate.get(2)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State, aid3State);
 
