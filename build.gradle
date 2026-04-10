@@ -523,5 +523,105 @@ public final class CompletedCredentialOperationDepends implements CredentialOper
             )
             credentialMetaFile.text = text
         }
+
+        // Generate DelegatorOperationDepends sealed interface + Pending/Completed impls
+        new File(modelDir, "DelegatorOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+/**
+ * Represents the {@code depends} field of a {@link DelegatorOperationMetadata}.
+ * The dependency is either still pending or already completed.
+ */
+public sealed interface DelegatorOperationDepends
+        permits PendingDelegatorOperationDepends, CompletedDelegatorOperationDepends {
+
+    String getName();
+
+    boolean isDone();
+}
+"""
+
+        new File(modelDir, "PendingDelegatorOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class PendingDelegatorOperationDepends implements DelegatorOperationDepends {
+
+    @JsonProperty("name")
+    private String name;
+
+    @Override
+    public boolean isDone() {
+        return false;
+    }
+}
+"""
+
+        new File(modelDir, "CompletedDelegatorOperationDepends.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public final class CompletedDelegatorOperationDepends implements DelegatorOperationDepends {
+
+    @JsonProperty("name")
+    private String name;
+
+    @Override
+    public boolean isDone() {
+        return true;
+    }
+}
+"""
+
+        // Patch DelegatorOperationMetadata to use typed DelegatorOperationDepends with custom deserializer
+        def delegatorMetaFile = new File(modelDir, "DelegatorOperationMetadata.java")
+        if (delegatorMetaFile.exists()) {
+            def text = delegatorMetaFile.text
+            // Add JsonDeserialize import and DelegatorOperationDependsDeserializer import
+            text = text.replace(
+                "import com.fasterxml.jackson.annotation.JsonCreator;",
+                "import com.fasterxml.jackson.annotation.JsonCreator;\nimport com.fasterxml.jackson.databind.annotation.JsonDeserialize;\nimport org.cardanofoundation.signify.app.coring.DelegatorOperationDependsDeserializer;"
+            )
+            // Remove the old DelegatorOperationMetadataDepends import (replaced by our sealed interface)
+            text = text.replace(
+                "import org.cardanofoundation.signify.generated.keria.model.DelegatorOperationMetadataDepends;\n",
+                ""
+            )
+            // Change field type
+            text = text.replace(
+                "private DelegatorOperationMetadataDepends depends;",
+                "private DelegatorOperationDepends depends;"
+            )
+            // Change builder method signature
+            text = text.replace(
+                "public DelegatorOperationMetadata depends(@jakarta.annotation.Nullable DelegatorOperationMetadataDepends depends) {",
+                "public DelegatorOperationMetadata depends(@jakarta.annotation.Nullable DelegatorOperationDepends depends) {"
+            )
+            // Change getter return type
+            text = text.replace(
+                "public DelegatorOperationMetadataDepends getDepends() {",
+                "public DelegatorOperationDepends getDepends() {"
+            )
+            // Change setter parameter type and add @JsonDeserialize
+            text = text.replace(
+                "public void setDepends(@jakarta.annotation.Nullable DelegatorOperationMetadataDepends depends) {",
+                "@JsonDeserialize(using = DelegatorOperationDependsDeserializer.class)\n  public void setDepends(@jakarta.annotation.Nullable DelegatorOperationDepends depends) {"
+            )
+            delegatorMetaFile.text = text
+        }
     }
 }
