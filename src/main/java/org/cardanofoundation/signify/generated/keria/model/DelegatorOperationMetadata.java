@@ -18,10 +18,11 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.cardanofoundation.signify.app.coring.DelegatorOperationDependsDeserializer;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Anchor;
-import org.cardanofoundation.signify.generated.keria.model.DelegatorOperationMetadataDepends;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -50,7 +51,7 @@ public class DelegatorOperationMetadata {
 
   public static final String JSON_PROPERTY_DEPENDS = "depends";
   @jakarta.annotation.Nullable
-  private DelegatorOperationMetadataDepends depends;
+  private DelegatorOperationDepends depends;
 
   public DelegatorOperationMetadata() {
   }
@@ -130,7 +131,7 @@ public class DelegatorOperationMetadata {
     this.anchor = anchor;
   }
 
-  public DelegatorOperationMetadata depends(@jakarta.annotation.Nullable DelegatorOperationMetadataDepends depends) {
+  public DelegatorOperationMetadata depends(@jakarta.annotation.Nullable DelegatorOperationDepends depends) {
     
     this.depends = depends;
     return this;
@@ -144,14 +145,15 @@ public class DelegatorOperationMetadata {
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public DelegatorOperationMetadataDepends getDepends() {
+  public DelegatorOperationDepends getDepends() {
     return depends;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDepends(@jakarta.annotation.Nullable DelegatorOperationMetadataDepends depends) {
+  @JsonDeserialize(using = DelegatorOperationDependsDeserializer.class)
+  public void setDepends(@jakarta.annotation.Nullable DelegatorOperationDepends depends) {
     this.depends = depends;
   }
 

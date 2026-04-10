@@ -163,31 +163,21 @@ public class Operations {
     }
 
     private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
-        String dependsName = null;
-        boolean dependsDone = true;
+        String depName = switch (operation) {
+            case DelegatorOperation op when op.getMetadata() != null
+                    && op.getMetadata().getDepends() != null
+                    && !op.getMetadata().getDepends().isDone() -> op.getMetadata().getDepends().getName();
+            case RegistryOperation op when op.getMetadata() != null
+                    && op.getMetadata().getDepends() != null
+                    && !op.getMetadata().getDepends().isDone() -> op.getMetadata().getDepends().getName();
+            case CredentialOperation op when op.getMetadata() != null
+                    && op.getMetadata().getDepends() != null
+                    && !op.getMetadata().getDepends().isDone() -> op.getMetadata().getDepends().getName();
+            default -> null;
+        };
 
-        if (operation instanceof DelegatorOperation op && op.getMetadata() != null) {
-            DelegatorOperationMetadataDepends dep = op.getMetadata().getDepends();
-            if (dep != null) {
-                dependsName = dep.getName();
-                dependsDone = dep.getDone() == DelegatorOperationMetadataDepends.DoneEnum.TRUE;
-            }
-        } else if (operation instanceof RegistryOperation op && op.getMetadata() != null) {
-            RegistryOperationDepends dep = op.getMetadata().getDepends();
-            if (dep != null) {
-                dependsName = dep.getName();
-                dependsDone = dep.isDone();
-            }
-        } else if (operation instanceof CredentialOperation op && op.getMetadata() != null) {
-            CredentialOperationDepends dep = op.getMetadata().getDepends();
-            if (dep != null) {
-                dependsName = dep.getName();
-                dependsDone = dep.isDone();
-            }
-        }
-
-        if (dependsName != null && !dependsDone) {
-            wait(dependsName, Operation.class, options, startingTime);
+        if (depName != null) {
+            wait(depName, Operation.class, options, startingTime);
         }
     }
 
