@@ -286,7 +286,7 @@ tasks.named("openApiGenerate") {
             // Replace the generated merged oneOf class with a sealed interface
             def target = new File(modelDir, "${op}Operation.java")
             def metadataMethod = metadataType ? "\n    ${metadataType} getMetadata();" : ""
-            def extendsClause = kelOps.contains(op) ? "extends Operation, KelOperation" : "extends Operation"
+            def extendsClause = kelOps.contains(op) ? "extends KelOperation" : "extends Operation"
             target.text = """\
 package org.cardanofoundation.signify.generated.keria.model;
 
@@ -300,8 +300,8 @@ ${metadataMethod}
         }
 
         // Generate the general Operation sealed interface (union of all operation types)
-        // KelOperation is also listed here as a permitted subtype
-        def permitsEntries = (ops.collect { op -> "${op}Operation" } + ["KelOperation"])
+        // KelOperation is listed as a permitted subtype; individual KelOp types are only reachable via KelOperation
+        def permitsEntries = (ops.findAll { !kelOps.contains(it) }.collect { op -> "${op}Operation" } + ["KelOperation"])
             .sort()
             .collect { name -> "        ${name}" }
             .join(",\n")
