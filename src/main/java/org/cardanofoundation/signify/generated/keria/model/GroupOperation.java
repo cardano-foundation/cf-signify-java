@@ -1,6 +1,6 @@
 package org.cardanofoundation.signify.generated.keria.model;
 
-public sealed interface GroupOperation extends Operation, KelOperation permits
+public sealed interface GroupOperation extends KelOperation permits
         PendingGroupOperation,
         CompletedGroupOperation,
         FailedGroupOperation {

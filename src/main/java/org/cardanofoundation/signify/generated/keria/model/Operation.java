@@ -7,19 +7,14 @@ import org.cardanofoundation.signify.app.coring.OperationDeserializer;
 public sealed interface Operation permits
         ChallengeOperation,
         CredentialOperation,
-        DelegationOperation,
         DelegatorOperation,
-        DoneOperation,
         EndRoleOperation,
         ExchangeOperation,
-        GroupOperation,
         KelOperation,
         LocSchemeOperation,
         OOBIOperation,
         QueryOperation,
-        RegistryOperation,
-        SubmitOperation,
-        WitnessOperation {
+        RegistryOperation {
 
     String getName();
 }
