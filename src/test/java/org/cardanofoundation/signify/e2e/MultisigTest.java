@@ -984,14 +984,7 @@ public class MultisigTest extends BaseIntegrationTest {
             Operation op) throws IOException, InterruptedException, LibsodiumException {
         String name = op.getName();
         Operation operation = client.operations().wait(name);
-        TestUtils.deleteOperations(client, name);
-        TestUtils.deleteOperation(client, name);
+        TestUtils.deleteOperations(client, operation);
         return operation;
-    }
-
-    public void deleteOperations(List<SignifyClient> clients, List<String> name) throws Exception {
-        for (int i = 1; i <= clients.size(); i++) {
-            deleteOperation(clients.get(i - 1), name.get(i - 1));
-        }
     }
 }

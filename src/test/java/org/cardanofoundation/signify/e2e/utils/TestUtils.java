@@ -386,37 +386,27 @@ public class TestUtils {
         assertTrue(count > 0);
     }
 
-    public static void deleteOperations(SignifyClient client, String operationName) throws IOException, InterruptedException, LibsodiumException {
-        deleteOperations(client, operationName, null);
+    public static void deleteOperations(SignifyClient client, Operation op) throws IOException, InterruptedException, LibsodiumException {
+        String dep = findDependsName(op);
+
+        if (dep != null) {
+            client.operations().delete(dep);
+        }
+
+        client.operations().delete(op.getName());
     }
 
-    private static void deleteOperations(SignifyClient client, String operationName, String knownDepName) throws IOException, InterruptedException, LibsodiumException {
-        // Use knownDepName if provided (from pending state); otherwise try to discover via re-fetch.
-        // Completed operations may omit metadata, so the re-fetch approach is a best-effort fallback.
-        String depName = knownDepName;
-        if (depName == null) {
-            Operation op = client.operations().get(operationName, Operation.class).orElse(null);
-            depName = extractDepName(op);
-        }
-        if (depName != null) {
-            deleteOperations(client, depName, null);
-        }
-        client.operations().delete(operationName);
-    }
-
-    private static String extractDepName(Operation op) {
-        if (op == null) return null;
-        if (op instanceof DelegatorOperation delegatorOp && delegatorOp.getMetadata() != null) {
-            DelegatorOperationMetadataDepends dep = delegatorOp.getMetadata().getDepends();
-            if (dep != null) return dep.getName();
-        } else if (op instanceof RegistryOperation registryOp && registryOp.getMetadata() != null) {
-            RegistryOperationDepends dep = registryOp.getMetadata().getDepends();
-            if (dep != null) return dep.getName();
-        } else if (op instanceof CredentialOperation credentialOp && credentialOp.getMetadata() != null) {
-            CredentialOperationDepends dep = credentialOp.getMetadata().getDepends();
-            if (dep != null) return dep.getName();
-        }
-        return null;
+    private static String findDependsName(Operation op) {
+        return switch (op) {
+            case null -> null;
+            case DelegatorOperation d when d.getMetadata() != null && d.getMetadata().getDepends() != null ->
+                    d.getMetadata().getDepends().getName();
+            case RegistryOperation r when r.getMetadata() != null && r.getMetadata().getDepends() != null ->
+                    r.getMetadata().getDepends().getName();
+            case CredentialOperation c when c.getMetadata() != null && c.getMetadata().getDepends() != null ->
+                    c.getMetadata().getDepends().getName();
+            default -> null;
+        };
     }
 
     public static void deleteOperation(SignifyClient client, String name) throws IOException, InterruptedException, LibsodiumException {
@@ -524,9 +514,8 @@ public class TestUtils {
             Operation op
     ) throws IOException, InterruptedException, LibsodiumException {
         String name = op.getName();
-        String depName = extractDepName(op);
         Operation result = client.operations().wait(name);
-        deleteOperations(client, name, depName);
+        deleteOperations(client, op);
         return result;
     }
 
@@ -536,9 +525,8 @@ public class TestUtils {
             Class<T> type
     ) throws IOException, InterruptedException, LibsodiumException {
         String name = op.getName();
-        String depName = extractDepName(op);
         T result = client.operations().wait(name, type);
-        deleteOperations(client, name, depName);
+        deleteOperations(client, op);
         return result;
     }
 
