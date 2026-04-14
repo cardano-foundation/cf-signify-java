@@ -5,7 +5,8 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.InteractionResponse;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.generated.keria.model.DelegationOperation;
+import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -31,7 +32,7 @@ public class Delegating {
          * @return The delegated approval result
          * @throws Exception if the fetch operation fails
          */
-        public EventResult<DelegationOperation> approve(String name, Object data) throws LibsodiumException, DigestException, IOException, InterruptedException {
+        public EventResult<DelegatorOperation> approve(String name, Object data) throws LibsodiumException, DigestException, IOException, InterruptedException {
             InteractionResponse interactionResponse = this.client
                 .identifiers()
                 .createInteract(name, data);
@@ -41,10 +42,11 @@ public class Delegating {
                 "POST",
                 interactionResponse.jsondata()
             );
-            return new EventResult<>(interactionResponse.serder(), interactionResponse.sigs(), res, DelegationOperation.class);
+            DelegatorOperation op = Utils.fromJson(res.body(), DelegatorOperation.class);
+            return new EventResult<>(interactionResponse.serder(), interactionResponse.sigs(), op);
         }
 
-        public EventResult<DelegationOperation> approve(String name) throws LibsodiumException, DigestException, IOException, InterruptedException {
+        public EventResult<DelegatorOperation> approve(String name) throws LibsodiumException, DigestException, IOException, InterruptedException {
             return this.approve(name, null);
         }
     }
