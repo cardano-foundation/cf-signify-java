@@ -18,11 +18,10 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.cardanofoundation.signify.app.coring.CredentialOperationDependsDeserializer;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperationMetadataDepends;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -41,7 +40,7 @@ public class CredentialOperationMetadata {
 
   public static final String JSON_PROPERTY_DEPENDS = "depends";
   @jakarta.annotation.Nullable
-  private CredentialOperationDepends depends;
+  private RegistryOperationMetadataDepends depends;
 
   public CredentialOperationMetadata() {
   }
@@ -71,7 +70,7 @@ public class CredentialOperationMetadata {
     this.ced = ced;
   }
 
-  public CredentialOperationMetadata depends(@jakarta.annotation.Nullable CredentialOperationDepends depends) {
+  public CredentialOperationMetadata depends(@jakarta.annotation.Nullable RegistryOperationMetadataDepends depends) {
     
     this.depends = depends;
     return this;
@@ -85,15 +84,14 @@ public class CredentialOperationMetadata {
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public CredentialOperationDepends getDepends() {
+  public RegistryOperationMetadataDepends getDepends() {
     return depends;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  @JsonDeserialize(using = CredentialOperationDependsDeserializer.class)
-  public void setDepends(@jakarta.annotation.Nullable CredentialOperationDepends depends) {
+  public void setDepends(@jakarta.annotation.Nullable RegistryOperationMetadataDepends depends) {
     this.depends = depends;
   }
 
