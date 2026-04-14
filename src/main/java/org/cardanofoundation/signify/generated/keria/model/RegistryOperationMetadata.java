@@ -18,11 +18,10 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.cardanofoundation.signify.app.coring.RegistryOperationDependsDeserializer;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Anchor;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperationMetadataDepends;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -41,8 +40,8 @@ public class RegistryOperationMetadata {
   private String pre;
 
   public static final String JSON_PROPERTY_DEPENDS = "depends";
-  @jakarta.annotation.Nullable
-  private RegistryOperationDepends depends = null;
+  @jakarta.annotation.Nonnull
+  private RegistryOperationMetadataDepends depends;
 
   public static final String JSON_PROPERTY_ANCHOR = "anchor";
   @jakarta.annotation.Nonnull
@@ -76,7 +75,7 @@ public class RegistryOperationMetadata {
     this.pre = pre;
   }
 
-  public RegistryOperationMetadata depends(@jakarta.annotation.Nullable RegistryOperationDepends depends) {
+  public RegistryOperationMetadata depends(@jakarta.annotation.Nonnull RegistryOperationMetadataDepends depends) {
     
     this.depends = depends;
     return this;
@@ -86,19 +85,18 @@ public class RegistryOperationMetadata {
    * Get depends
    * @return depends
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public RegistryOperationDepends getDepends() {
+  public RegistryOperationMetadataDepends getDepends() {
     return depends;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
+  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  @JsonDeserialize(using = RegistryOperationDependsDeserializer.class)
-  public void setDepends(@jakarta.annotation.Nullable RegistryOperationDepends depends) {
+  public void setDepends(@jakarta.annotation.Nonnull RegistryOperationMetadataDepends depends) {
     this.depends = depends;
   }
 
