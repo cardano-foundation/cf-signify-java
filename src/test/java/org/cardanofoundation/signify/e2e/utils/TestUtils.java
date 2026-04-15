@@ -246,7 +246,7 @@ public class TestUtils {
                 kargs.setWits(env.witnessIds());
             }
             var result = client.identifiers().create(name, kargs);
-            Operation opResult = waitOperation(client, result.op(), Operation.class);
+            KelOperation opResult = waitOperation(client, result.op(), KelOperation.class);
             id = switch (opResult) {
                 case CompletedWitnessOperation completed -> completed.getResponse().getI();
                 case CompletedDelegationOperation completed -> completed.getResponse().getI();
@@ -398,7 +398,6 @@ public class TestUtils {
 
     private static String findDependsName(Operation op) {
         return switch (op) {
-            case null -> null;
             case DelegatorOperation d when d.getMetadata() != null && d.getMetadata().getDepends() != null ->
                     d.getMetadata().getDepends().getName();
             case RegistryOperation r when r.getMetadata() != null && r.getMetadata().getDepends() != null ->

@@ -345,9 +345,7 @@ public class IdentifierController {
     }
 
     public EventResult<KelOperation> interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
-        HabState hab = this.get(name)
-            .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        InteractionResponse interactionResponse = this.createInteract(hab, data);
+        InteractionResponse interactionResponse = this.createInteract(name, data);
         HttpResponse<String> response = this.client.fetch(
             "/identifiers/" + name + "/events",
             "POST",
@@ -357,48 +355,9 @@ public class IdentifierController {
         return new EventResult<KelOperation>(interactionResponse.serder(), interactionResponse.sigs(), kelOp);
     }
 
-    /**
-     * Resolve the expected KERIA operation type for an interaction (IXN) event.
-     */
-    static KelOperation resolveKelOpTypeForIxn(HabState hab) {
-        if (hab.getGroup() != null) {
-            return new PendingGroupOperation();
-        }
-        KeyStateRecord state = hab.getState();
-        if (state != null && state.getB() != null && !state.getB().isEmpty()) {
-            return new PendingWitnessOperation();
-        }
-        return new PendingDoneOperation();
-    }
-
-    /**
-     * Resolve the expected KERIA operation type for a rotation (ROT/DRT) event.
-     */
-    static KelOperation resolveKelOpTypeForRot(HabState hab) {
-        if (hab.getGroup() != null) {
-            return new PendingGroupOperation();
-        }
-        KeyStateRecord state = hab.getState();
-        if (state != null && state.getDi() != null && !state.getDi().isEmpty()) {
-            return new PendingDelegationOperation();
-        }
-        if (state != null && state.getB() != null && !state.getB().isEmpty()) {
-            return new PendingWitnessOperation();
-        }
-        return new PendingDoneOperation();
-    }
-
-    /**
-     * Resolve the expected KERIA operation type for an inception (ICP/DIP) event.
-     */
-
     public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
-        return this.createInteract(hab, data);
-    }
-
-    private InteractionResponse createInteract(HabState hab, Object data) throws DigestException, IOException, LibsodiumException {
         String pre = hab.getPrefix();
 
         KeyStateRecord state = hab.getState();
