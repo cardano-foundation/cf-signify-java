@@ -201,15 +201,15 @@ public class OperationsTest {
         Mockito.when(response3.statusCode()).thenReturn(200);
 
         HttpResponse<String> response4 = Mockito.mock(HttpResponse.class);
-        // main: registry op, now done
-        Mockito.when(response4.body()).thenReturn(pendingRegistryWithDependsJson(mainName, depName, true));
+        // main: registry op, now done (completed)
+        Mockito.when(response4.body()).thenReturn(completedRegistryOpJson(mainName, depName));
         Mockito.when(response4.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull()))
             .thenReturn(response1)   // main: initial fetch - pending, depends not done
             .thenReturn(response2)   // dep: initial fetch - pending, no nested depends
             .thenReturn(response3)   // dep: poll - done
-            .thenReturn(response4);  // main: poll - depends now done
+            .thenReturn(response4);  // main: poll - now done (completed)
 
         Operations.WaitOptions options = Operations.WaitOptions.builder()
             .maxSleep(10)
@@ -240,7 +240,24 @@ public class OperationsTest {
         assertEquals("Operation aborted: Timeout", exception.getMessage());
     }
 
-    // --- JSON helpers ---
+    private String completedRegistryOpJson(String name, String depName) {
+        return "{" +
+            "\"_type\": \"CompletedRegistryOperation\"," +
+            "\"name\": \"" + name + "\"," +
+            "\"done\": \"true\"," +
+            "\"metadata\": {" +
+            "\"pre\": \"ETest\"," +
+            "\"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}," +
+            "\"depends\": {" +
+            "\"_type\": \"CompletedDoneOperation\"," +
+            "\"name\": \"" + depName + "\"," +
+            "\"done\": true," +
+            "\"metadata\": {\"pre\": \"ETest\", \"response\": {}}" +
+            "}" +
+            "}," +
+            "\"response\": {\"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}}" +
+            "}";
+    }
 
     private String pendingLocSchemeOpJson(String name) {
         return "{\"name\": \"" + name + "\"}";
