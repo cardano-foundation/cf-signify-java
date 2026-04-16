@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 
 public class ChallengesTest {

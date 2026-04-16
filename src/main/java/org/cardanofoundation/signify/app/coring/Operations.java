@@ -165,14 +165,11 @@ public class Operations {
     private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
         String depName = switch (operation) {
             case DelegatorOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null
-                && (op.getMetadata().getDepends().getDone() == null || !Boolean.TRUE.equals(op.getMetadata().getDepends().getDone().getValue())) -> op.getMetadata().getDepends().getName();
+                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends().getName();
             case RegistryOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null
-                && (op.getMetadata().getDepends().getDone() == null || !Boolean.TRUE.equals(op.getMetadata().getDepends().getDone().getValue())) -> op.getMetadata().getDepends().getName();
+                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends().getName();
             case CredentialOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null
-                && (op.getMetadata().getDepends().getDone() == null || !Boolean.TRUE.equals(op.getMetadata().getDepends().getDone().getValue())) -> op.getMetadata().getDepends().getName();
+                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends().getName();
             default -> null;
         };
 
