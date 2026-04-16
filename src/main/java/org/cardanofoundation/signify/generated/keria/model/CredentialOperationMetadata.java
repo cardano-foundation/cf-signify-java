@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
-import org.cardanofoundation.signify.generated.keria.model.RegistryOperationMetadataDepends;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -39,8 +39,8 @@ public class CredentialOperationMetadata {
   private CredentialSad ced;
 
   public static final String JSON_PROPERTY_DEPENDS = "depends";
-  @jakarta.annotation.Nullable
-  private RegistryOperationMetadataDepends depends;
+  @jakarta.annotation.Nonnull
+  private KelOperation depends;
 
   public CredentialOperationMetadata() {
   }
@@ -70,7 +70,7 @@ public class CredentialOperationMetadata {
     this.ced = ced;
   }
 
-  public CredentialOperationMetadata depends(@jakarta.annotation.Nullable RegistryOperationMetadataDepends depends) {
+  public CredentialOperationMetadata depends(@jakarta.annotation.Nonnull KelOperation depends) {
     
     this.depends = depends;
     return this;
@@ -80,18 +80,18 @@ public class CredentialOperationMetadata {
    * Get depends
    * @return depends
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public RegistryOperationMetadataDepends getDepends() {
+  public KelOperation getDepends() {
     return depends;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDepends(@jakarta.annotation.Nullable RegistryOperationMetadataDepends depends) {
+  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDepends(@jakarta.annotation.Nonnull KelOperation depends) {
     this.depends = depends;
   }
 

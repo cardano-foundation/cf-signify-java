@@ -3,6 +3,8 @@ package org.cardanofoundation.signify.app.coring;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.cardanofoundation.signify.generated.keria.model.*;
 
 import java.io.IOException;
@@ -123,6 +125,7 @@ public class OperationDeserializer extends JsonDeserializer<Operation> implement
             concreteType = opType.pending;
         }
 
+        removeDoneFields(node);
         JsonParser nodeParser = node.traverse(p.getCodec());
         nodeParser.nextToken();
         return ctxt.readValue(nodeParser, concreteType);
@@ -134,5 +137,21 @@ public class OperationDeserializer extends JsonDeserializer<Operation> implement
         }
         String prefix = name.substring(0, name.indexOf('.')).toLowerCase();
         return PREFIX_MAP.get(prefix);
+    }
+
+    /**
+     * Remove 'done' field only from depends.
+     */
+    private static void removeDoneFields(JsonNode node) {
+        if (node != null && node.isObject()) {
+            node.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                JsonNode value = entry.getValue();
+                if ("depends".equals(key) && value.isObject()) {
+                    ((ObjectNode) value).remove("done");
+                }
+                removeDoneFields(value);
+            });
+        }
     }
 }

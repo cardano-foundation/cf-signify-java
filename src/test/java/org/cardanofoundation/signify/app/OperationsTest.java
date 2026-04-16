@@ -14,6 +14,8 @@ import java.net.http.HttpResponse;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 public class OperationsTest {
@@ -31,6 +33,19 @@ public class OperationsTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         operations = new Operations(client);
+    }
+
+    private String pendingDoneOpJson(String name) {
+        return "{\"_type\":\"PendingDoneOperation\",\"name\":\"" + name + "\",\"done\":false,\"metadata\":{\"pre\":\"ETest\",\"response\":{}}}";
+    }
+
+    private String completedDoneOpJson(String name) {
+        return "{" +
+            "\"_type\": \"CompletedDoneOperation\"," +
+            "\"name\": \"" + name + "\"," +
+            "\"done\": true," +
+            "\"response\": {\"pre\": \"ETest\", \"response\": {}}" +
+            "}";
     }
 
     @Test
@@ -169,39 +184,37 @@ public class OperationsTest {
     @Test
     @DisplayName("Returns when child operation is also done")
     void returnsWhenChildOperationIsAlsoDone() throws IOException, InterruptedException, LibsodiumException {
-        String depName = "registry." + UUID.randomUUID();
+        String depName = "done." + UUID.randomUUID();
         String mainName = "registry." + UUID.randomUUID();
 
         HttpResponse<String> response1 = Mockito.mock(HttpResponse.class);
-        // main: pending, depends (depName) is not done
+        // main: registry op, pending, depends (depName) is not done
         Mockito.when(response1.body()).thenReturn(pendingRegistryWithDependsJson(mainName, depName, false));
         Mockito.when(response1.statusCode()).thenReturn(200);
 
         HttpResponse<String> response2 = Mockito.mock(HttpResponse.class);
-        // dep: pending, no nested depends
-        Mockito.when(response2.body()).thenReturn(pendingRegistryOpJson(depName));
+        Mockito.when(response2.body()).thenReturn(pendingDoneOpJson(depName));
         Mockito.when(response2.statusCode()).thenReturn(200);
 
         HttpResponse<String> response3 = Mockito.mock(HttpResponse.class);
-        // dep: done
-        Mockito.when(response3.body()).thenReturn(doneRegistryOpJson(depName));
+        Mockito.when(response3.body()).thenReturn(completedDoneOpJson(depName));
         Mockito.when(response3.statusCode()).thenReturn(200);
 
         HttpResponse<String> response4 = Mockito.mock(HttpResponse.class);
-        // main: done
-        Mockito.when(response4.body()).thenReturn(doneRegistryOpJson(mainName));
+        // main: registry op, now done
+        Mockito.when(response4.body()).thenReturn(pendingRegistryWithDependsJson(mainName, depName, true));
         Mockito.when(response4.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull()))
             .thenReturn(response1)   // main: initial fetch - pending, depends not done
             .thenReturn(response2)   // dep: initial fetch - pending, no nested depends
             .thenReturn(response3)   // dep: poll - done
-            .thenReturn(response4);  // main: poll - done
+            .thenReturn(response4);  // main: poll - depends now done
 
         Operations.WaitOptions options = Operations.WaitOptions.builder()
-                .maxSleep(10)
-                .build();
-        operations.wait(mainName, Operation.class, options);
+            .maxSleep(10)
+            .build();
+        operations.wait(mainName, org.cardanofoundation.signify.generated.keria.model.Operation.class, options);
         verify(client, times(4)).fetch(anyString(), anyString(), isNull());
     }
 
@@ -237,15 +250,21 @@ public class OperationsTest {
         return "{\"name\": \"" + name + "\", \"response\": {\"eid\": \"ETest\", \"scheme\": \"http\", \"url\": \"http://test\"}}";
     }
 
-    private String pendingRegistryOpJson(String name) {
-        return "{\"name\": \"" + name + "\", \"metadata\": {\"pre\": \"ETest\", \"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}}}";
-    }
-
     private String pendingRegistryWithDependsJson(String name, String depName, boolean depDone) {
-        return "{\"name\": \"" + name + "\", \"metadata\": {\"pre\": \"ETest\", \"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}, \"depends\": {\"name\": \"" + depName + "\", \"done\": " + depDone + "}}}";
-    }
-
-    private String doneRegistryOpJson(String name) {
-        return "{\"name\": \"" + name + "\", \"response\": {\"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}}}";
+        return "{" +
+            "\"_type\": \"RegistryDoneOperation\"," +
+            "\"name\": \"" + name + "\"," +
+            "\"done\": false," +
+            "\"metadata\": {" +
+            "\"pre\": \"ETest\"," +
+            "\"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}," +
+            "\"depends\": {" +
+            "\"_type\": \"PendingDoneOperation\"," +
+            "\"name\": \"" + depName + "\"," +
+            "\"done\": " + depDone + "," +
+            "\"metadata\": {\"pre\": \"ETest\", \"response\": {}}" +
+            "}" +
+            "}" +
+            "}";
     }
 }
