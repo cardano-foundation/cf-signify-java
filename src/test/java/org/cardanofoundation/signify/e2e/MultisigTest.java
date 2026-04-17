@@ -982,8 +982,7 @@ public class MultisigTest extends BaseIntegrationTest {
     public static Operation waitOperations(
             SignifyClient client,
             Operation op) throws IOException, InterruptedException, LibsodiumException {
-        String name = op.getName();
-        Operation operation = client.operations().wait(name);
+        Operation operation = client.operations().wait(op);
         TestUtils.deleteOperations(client, operation);
         return operation;
     }

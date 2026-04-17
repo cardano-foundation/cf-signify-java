@@ -73,35 +73,34 @@ public class Operations {
     /**
      * Wait for an operation to complete, returning the result as the general Operation union type.
      *
-     * @param operationName The name of the operation to wait for
+     * @param op The operation instance to wait for
      */
-    public Operation wait(String operationName) throws IOException, InterruptedException, LibsodiumException {
-        return wait(operationName, Operation.class, WaitOptions.builder().build(), System.currentTimeMillis());
+    public Operation wait(Operation op) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, Operation.class, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
     /**
      * Wait for an operation to complete, returning the result deserialized into the given type.
      * Handles dependent operations automatically.
      *
-     * @param operationName The name of the operation to wait for
+     * @param op The operation instance to wait for
      * @param resultType    The target class to deserialize the final result into (e.g., CredentialOperation.class)
      */
-    public <T extends Operation> T wait(String operationName, Class<T> resultType) throws IOException, InterruptedException, LibsodiumException {
-        return wait(operationName, resultType, WaitOptions.builder().build(), System.currentTimeMillis());
+    public <T extends Operation> T wait(Operation op, Class<T> resultType) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, resultType, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
-    public <T extends Operation> T wait(String operationName, Class<T> resultType, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
-        return wait(operationName, resultType, options, System.currentTimeMillis());
+    public <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, resultType, options, System.currentTimeMillis());
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Operation> T wait(String operationName, Class<T> resultType, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+    private <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
         int minSleep = options.getMinSleep();
         int maxSleep = options.getMaxSleep();
         int increaseFactor = options.getIncreaseFactor();
 
-        Operation op = get(operationName, Operation.class)
-                .orElseThrow(() -> new IOException("Operation not found: " + operationName));
+        String operationName = op.getName();
 
         waitOnDepends(op, options, startingTime);
 
@@ -116,15 +115,15 @@ public class Operations {
         int retries = 0;
 
         while (true) {
-            op = get(operationName, Operation.class)
+            Operation newOp = get(operationName, Operation.class)
                     .orElseThrow(() -> new IOException("Operation not found: " + operationName));
 
             int delay = Math.max(minSleep, Math.min(maxSleep, (int) Math.pow(2, retries) * increaseFactor));
             retries++;
 
-            if (isDone(op)) {
+            if (isDone(newOp)) {
                 if (resultType == Operation.class) {
-                    return (T) op;
+                    return (T) newOp;
                 }
                 return get(operationName, resultType)
                         .orElseThrow(() -> new IOException("Operation not found: " + operationName));
@@ -163,18 +162,18 @@ public class Operations {
     }
 
     private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
-        String depName = switch (operation) {
+        Operation depOp = switch (operation) {
             case DelegatorOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends().getName();
+                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends();
             case RegistryOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends().getName();
+                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends();
             case CredentialOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends().getName();
+                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends();
             default -> null;
         };
 
-        if (depName != null) {
-            wait(depName, Operation.class, options, startingTime);
+        if (depOp != null) {
+            wait(depOp, Operation.class, options, startingTime);
         }
     }
 

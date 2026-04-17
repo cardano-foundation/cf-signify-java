@@ -259,6 +259,7 @@ tasks.named("openApiGenerate") {
         ]
         def kelOps = ["Done", "Witness", "Submit", "Group", "Delegation"] as Set
         def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def dualExtendsOps = ["Group", "Witness", "Done"]
 
         ops.each { op ->
             // Detect metadata type from the Pending variant
@@ -286,8 +287,10 @@ tasks.named("openApiGenerate") {
             // Replace the generated merged oneOf class with a sealed interface
             def target = new File(modelDir, "${op}Operation.java")
             def metadataMethod = metadataType ? "\n    ${metadataType} getMetadata();" : ""
-            def extendsClause = kelOps.contains(op) ? "extends KelOperation" : "extends Operation"
-            target.text = """\
+            def extendsClause = kelOps.contains(op)
+                    ? (dualExtendsOps.contains(op) ? "extends KelOperation, DelegatorDependsOperation" : "extends KelOperation")
+                    : "extends Operation"
+            target.text = """
 package org.cardanofoundation.signify.generated.keria.model;
 
 public sealed interface ${op}Operation ${extendsClause} permits
@@ -300,26 +303,30 @@ ${metadataMethod}
         }
 
         // Generate the general Operation sealed interface (union of all operation types)
-        // KelOperation is listed as a permitted subtype; individual KelOp types are only reachable via KelOperation
-        def permitsEntries = (ops.findAll { !kelOps.contains(it) }.collect { op -> "${op}Operation" } + ["KelOperation"])
-            .sort()
-            .collect { name -> "        ${name}" }
-            .join(",\n")
-
         def operationFile = new File(modelDir, "Operation.java")
-        operationFile.text = """\
-package org.cardanofoundation.signify.generated.keria.model;
+        operationFile.text = """
+    package org.cardanofoundation.signify.generated.keria.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.cardanofoundation.signify.app.coring.OperationDeserializer;
+    import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+    import org.cardanofoundation.signify.app.coring.OperationDeserializer;
 
-@JsonDeserialize(using = OperationDeserializer.class)
-public sealed interface Operation permits
-${permitsEntries} {
+    @JsonDeserialize(using = OperationDeserializer.class)
+    public sealed interface Operation permits
+        ChallengeOperation,
+        CredentialOperation,
+        DelegatorOperation,
+        EndRoleOperation,
+        ExchangeOperation,
+        KelOperation,
+        DelegatorDependsOperation,
+        LocSchemeOperation,
+        OOBIOperation,
+        QueryOperation,
+        RegistryOperation {
 
-    String getName();
-}
-"""
+        String getName();
+    }
+    """
 
         // Generate KelOperation — a sealed group interface for all KEL event operation types.
         def kelPermits = kelOps.sort().collect { op -> "        ${op}Operation" }.join(",\n")
@@ -332,6 +339,21 @@ package org.cardanofoundation.signify.generated.keria.model;
  */
 public sealed interface KelOperation extends Operation permits
 ${kelPermits} {
+}
+"""
+
+        // Generate DelegatorDependsOperation as a sealed interface
+        def delegatorDependsFile = new File(modelDir, "DelegatorDependsOperation.java")
+        delegatorDependsFile.text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+/**
+ * Marker interface for DelegatorDependsOperation, for protocol operation dependency.
+ */
+public sealed interface DelegatorDependsOperation extends Operation permits
+        GroupOperation,
+        WitnessOperation,
+        DoneOperation {
 }
 """
     }
