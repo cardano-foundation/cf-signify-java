@@ -32,7 +32,6 @@ public class OperationsTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        operations = new Operations(client);
     }
 
     private String pendingDoneOpJson(String name) {
@@ -121,36 +120,34 @@ public class OperationsTest {
     @DisplayName("Does not poll when operation is already done")
     void doesNotWaitForOperationThatIsAlreadyDone() throws IOException, InterruptedException, LibsodiumException {
         String opName = "locscheme." + UUID.randomUUID();
+        String doneJson = doneLocSchemeOpJson(opName);
 
-        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(mockResponse.body()).thenReturn(doneLocSchemeOpJson(opName));
-        Mockito.when(mockResponse.statusCode()).thenReturn(200);
-        when(client.fetch(anyString(), anyString(), isNull()))
-            .thenReturn(mockResponse);
-
-        operations.wait(opName, Operation.class);
-        // 1 fetch: initial check finds done=true, returns immediately
-        verify(client, times(1)).fetch(anyString(), anyString(), isNull());
+        Operation op = org.cardanofoundation.signify.cesr.util.Utils.fromJson(doneJson, Operation.class);
+        operations.wait(op, Operation.class);
+        verifyNoInteractions(client);
     }
 
     @Test
     @DisplayName("Returns when operation is done after first poll")
     void returnsWhenOperationIsDoneAfterFirstPoll() throws IOException, InterruptedException, LibsodiumException {
         String opName = "locscheme." + UUID.randomUUID();
+        String pendingJson = pendingLocSchemeOpJson(opName);
+        String doneJson = doneLocSchemeOpJson(opName);
 
         HttpResponse<String> pendingResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(pendingResponse.body()).thenReturn(pendingLocSchemeOpJson(opName));
+        Mockito.when(pendingResponse.body()).thenReturn(pendingJson);
         Mockito.when(pendingResponse.statusCode()).thenReturn(200);
 
         HttpResponse<String> doneResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(doneResponse.body()).thenReturn(doneLocSchemeOpJson(opName));
+        Mockito.when(doneResponse.body()).thenReturn(doneJson);
         Mockito.when(doneResponse.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull()))
             .thenReturn(pendingResponse)
             .thenReturn(doneResponse);
 
-        operations.wait(opName, Operation.class);
+        Operation op = org.cardanofoundation.signify.cesr.util.Utils.fromJson(pendingJson, Operation.class);
+        operations.wait(op, Operation.class);
         // 1 initial fetch + 1 poll
         verify(client, times(2)).fetch(anyString(), anyString(), isNull());
     }
@@ -159,13 +156,15 @@ public class OperationsTest {
     @DisplayName("Returns when operation is done after second poll")
     void returnsWhenOperationIsDoneAfterSecondPoll() throws IOException, InterruptedException, LibsodiumException {
         String opName = "locscheme." + UUID.randomUUID();
+        String pendingJson = pendingLocSchemeOpJson(opName);
+        String doneJson = doneLocSchemeOpJson(opName);
 
         HttpResponse<String> pendingResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(pendingResponse.body()).thenReturn(pendingLocSchemeOpJson(opName));
+        Mockito.when(pendingResponse.body()).thenReturn(pendingJson);
         Mockito.when(pendingResponse.statusCode()).thenReturn(200);
 
         HttpResponse<String> doneResponse = Mockito.mock(HttpResponse.class);
-        Mockito.when(doneResponse.body()).thenReturn(doneLocSchemeOpJson(opName));
+        Mockito.when(doneResponse.body()).thenReturn(doneJson);
         Mockito.when(doneResponse.statusCode()).thenReturn(200);
 
         when(client.fetch(anyString(), anyString(), isNull()))
@@ -174,9 +173,10 @@ public class OperationsTest {
             .thenReturn(doneResponse);
 
         Operations.WaitOptions options = Operations.WaitOptions.builder()
-                .maxSleep(10)
-                .build();
-        operations.wait(opName, Operation.class, options);
+            .maxSleep(10)
+            .build();
+        Operation op = org.cardanofoundation.signify.cesr.util.Utils.fromJson(pendingJson, Operation.class);
+        operations.wait(op, Operation.class, options);
         // 1 initial + 2 polls
         verify(client, times(3)).fetch(anyString(), anyString(), isNull());
     }
@@ -214,7 +214,9 @@ public class OperationsTest {
         Operations.WaitOptions options = Operations.WaitOptions.builder()
             .maxSleep(10)
             .build();
-        operations.wait(mainName, org.cardanofoundation.signify.generated.keria.model.Operation.class, options);
+        Operation mainOp = org.cardanofoundation.signify.cesr.util.Utils.fromJson(
+            pendingRegistryWithDependsJson(mainName, depName, false), Operation.class);
+        operations.wait(mainOp, org.cardanofoundation.signify.generated.keria.model.Operation.class, options);
         verify(client, times(4)).fetch(anyString(), anyString(), isNull());
     }
 
@@ -235,8 +237,10 @@ public class OperationsTest {
                 .abortSignal(Operations.AbortSignal.builder().timeout(5000L).build())
                 .build();
 
+        Operation abortOp = org.cardanofoundation.signify.cesr.util.Utils.fromJson(
+            pendingLocSchemeOpJson(opName), Operation.class);
         Exception exception = assertThrows(InterruptedException.class,
-                () -> operations.wait(opName, Operation.class, options));
+            () -> operations.wait(abortOp, Operation.class, options));
         assertEquals("Operation aborted: Timeout", exception.getMessage());
     }
 

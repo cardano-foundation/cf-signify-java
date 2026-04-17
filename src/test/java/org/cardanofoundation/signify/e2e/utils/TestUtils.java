@@ -512,8 +512,7 @@ public class TestUtils {
             SignifyClient client,
             Operation op
     ) throws IOException, InterruptedException, LibsodiumException {
-        String name = op.getName();
-        Operation result = client.operations().wait(name);
+        Operation result = client.operations().wait(op);
         deleteOperations(client, op);
         return result;
     }
@@ -523,8 +522,7 @@ public class TestUtils {
             Operation op,
             Class<T> type
     ) throws IOException, InterruptedException, LibsodiumException {
-        String name = op.getName();
-        T result = client.operations().wait(name, type);
+        T result = client.operations().wait(op, type);
         deleteOperations(client, op);
         return result;
     }
