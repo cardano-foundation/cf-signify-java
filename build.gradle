@@ -288,7 +288,7 @@ tasks.named("openApiGenerate") {
             def target = new File(modelDir, "${op}Operation.java")
             def metadataMethod = metadataType ? "\n    ${metadataType} getMetadata();" : ""
             def extendsClause = kelOps.contains(op)
-                    ? (dualExtendsOps.contains(op) ? "extends KelOperation, DelegatorDependsOperation" : "extends KelOperation")
+                    ? (dualExtendsOps.contains(op) ? "extends KelOperation" : "extends KelOperation")
                     : "extends Operation"
             target.text = """
 package org.cardanofoundation.signify.generated.keria.model;
@@ -318,7 +318,6 @@ ${metadataMethod}
         EndRoleOperation,
         ExchangeOperation,
         KelOperation,
-        DelegatorDependsOperation,
         LocSchemeOperation,
         OOBIOperation,
         QueryOperation,
@@ -339,21 +338,6 @@ package org.cardanofoundation.signify.generated.keria.model;
  */
 public sealed interface KelOperation extends Operation permits
 ${kelPermits} {
-}
-"""
-
-        // Generate DelegatorDependsOperation as a sealed interface
-        def delegatorDependsFile = new File(modelDir, "DelegatorDependsOperation.java")
-        delegatorDependsFile.text = """\
-package org.cardanofoundation.signify.generated.keria.model;
-
-/**
- * Marker interface for DelegatorDependsOperation, for protocol operation dependency.
- */
-public sealed interface DelegatorDependsOperation extends Operation permits
-        GroupOperation,
-        WitnessOperation,
-        DoneOperation {
 }
 """
     }

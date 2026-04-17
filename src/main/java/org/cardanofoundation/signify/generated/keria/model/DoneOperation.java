@@ -1,7 +1,7 @@
 
 package org.cardanofoundation.signify.generated.keria.model;
 
-public sealed interface DoneOperation extends KelOperation, DelegatorDependsOperation permits
+public sealed interface DoneOperation extends KelOperation permits
         PendingDoneOperation,
         CompletedDoneOperation,
         FailedDoneOperation {

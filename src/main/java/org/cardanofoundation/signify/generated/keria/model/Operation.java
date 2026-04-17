@@ -12,7 +12,6 @@
         EndRoleOperation,
         ExchangeOperation,
         KelOperation,
-        DelegatorDependsOperation,
         LocSchemeOperation,
         OOBIOperation,
         QueryOperation,
