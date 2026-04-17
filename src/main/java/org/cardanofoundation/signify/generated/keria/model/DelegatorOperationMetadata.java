@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.cardanofoundation.signify.generated.keria.model.Anchor;
-import org.cardanofoundation.signify.generated.keria.model.DelegatorDependsOperation;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -50,7 +50,7 @@ public class DelegatorOperationMetadata {
 
   public static final String JSON_PROPERTY_DEPENDS = "depends";
   @jakarta.annotation.Nullable
-  private DelegatorDependsOperation depends;
+  private KelOperation depends;
 
   public DelegatorOperationMetadata() {
   }
@@ -130,7 +130,7 @@ public class DelegatorOperationMetadata {
     this.anchor = anchor;
   }
 
-  public DelegatorOperationMetadata depends(@jakarta.annotation.Nullable DelegatorDependsOperation depends) {
+  public DelegatorOperationMetadata depends(@jakarta.annotation.Nullable KelOperation depends) {
     
     this.depends = depends;
     return this;
@@ -144,14 +144,14 @@ public class DelegatorOperationMetadata {
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public DelegatorDependsOperation getDepends() {
+  public KelOperation getDepends() {
     return depends;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDepends(@jakarta.annotation.Nullable DelegatorDependsOperation depends) {
+  public void setDepends(@jakarta.annotation.Nullable KelOperation depends) {
     this.depends = depends;
   }
 
