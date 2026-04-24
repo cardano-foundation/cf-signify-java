@@ -162,7 +162,7 @@ public class Operations {
     }
 
     private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
-        Operation depOp = switch (operation) {
+        KelOperation depOp = switch (operation) {
             case DelegatorOperation op when op.getMetadata() != null
                 && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends();
             case RegistryOperation op when op.getMetadata() != null
@@ -172,8 +172,8 @@ public class Operations {
             default -> null;
         };
 
-        if (depOp != null) {
-            wait(depOp, Operation.class, options, startingTime);
+        if (depOp != null && !isDone(depOp)) {
+            wait(depOp, KelOperation.class, options, startingTime);
         }
     }
 

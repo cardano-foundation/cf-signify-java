@@ -217,7 +217,7 @@ public class OperationsTest {
         Operation mainOp = org.cardanofoundation.signify.cesr.util.Utils.fromJson(
             pendingRegistryWithDependsJson(mainName, depName, false), Operation.class);
         operations.wait(mainOp, org.cardanofoundation.signify.generated.keria.model.Operation.class, options);
-        verify(client, times(4)).fetch(anyString(), anyString(), isNull());
+        verify(client, times(5)).fetch(anyString(), anyString(), isNull());
     }
 
     @Test
