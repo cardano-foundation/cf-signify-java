@@ -2,12 +2,10 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -30,6 +28,10 @@ import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.CompletedChallengeOperation;
+import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
@@ -100,7 +102,7 @@ public class MultisigTest extends BaseIntegrationTest {
         String oobis3 = getOobisIndexAt0(oobi3);
         String oobis4 = getOobisIndexAt0(oobi4);
 
-        Object op1 = client1.oobis().resolve(oobis2, "member2");
+        Operation op1 = client1.oobis().resolve(oobis2, "member2");
         op1 = waitOperation(client1, op1);
         op1 = client1.oobis().resolve(oobis3, "member3");
         op1 = waitOperation(client1, op1);
@@ -110,7 +112,7 @@ public class MultisigTest extends BaseIntegrationTest {
         op1 = waitOperation(client1, op1);
         System.out.println("Member1 resolved 4 OOBIs");
 
-        Object op2 = client2.oobis().resolve(oobis1, "member1");
+        Operation op2 = client2.oobis().resolve(oobis1, "member1");
         op2 = waitOperation(client2, op2);
         op2 = client2.oobis().resolve(oobis3, "member3");
         op2 = waitOperation(client2, op2);
@@ -120,7 +122,7 @@ public class MultisigTest extends BaseIntegrationTest {
         op2 = waitOperation(client2, op2);
         System.out.println("Member2 resolved 4 OOBIs");
 
-        Object op3 = client3.oobis().resolve(oobis1, "member1");
+        Operation op3 = client3.oobis().resolve(oobis1, "member1");
         op3 = waitOperation(client3, op3);
         op3 = client3.oobis().resolve(oobis2, "member2");
         op3 = waitOperation(client3, op3);
@@ -130,7 +132,7 @@ public class MultisigTest extends BaseIntegrationTest {
         op3 = waitOperation(client3, op3);
         System.out.println("Member3 resolved 4 OOBIs");
 
-        Object op4 = client4.oobis().resolve(oobis1, "member1");
+        Operation op4 = client4.oobis().resolve(oobis1, "member1");
         op4 = waitOperation(client4, op4);
         op4 = client4.oobis().resolve(oobis2, "member2");
         op4 = waitOperation(client4, op4);
@@ -156,17 +158,15 @@ public class MultisigTest extends BaseIntegrationTest {
         op1 = client1.challenges().verify(aid2.getPrefix(), words);
         op1 = waitOperation(client1, op1);
         System.out.println("Member1 verified challenge response from member2");
-        Map<String, Object> exnValue = (Map<String, Object>) Utils.toMap(Operation.fromObject(op1).getResponse()).get("exn");
-        Serder exnwords = new Serder(exnValue);
-        op1 = client1.challenges().responded(aid2.getPrefix(), exnwords.getKed().get("d").toString());
+        String exnD = ((CompletedChallengeOperation) op1).getResponse().getExn().getD();
+        client1.challenges().responded(aid2.getPrefix(), exnD);
         System.out.println("Member1 marked challenge response as accepted");
 
         op1 = client1.challenges().verify(aid3.getPrefix(), words);
-        op1 = operationToObject(waitOperation(client1, op1));
+        op1 = waitOperation(client1, op1);
         System.out.println("Member1 verified challenge response from member3");
-        exnValue = (Map<String, Object>) Utils.toMap(Operation.fromObject(op1).getResponse()).get("exn");
-        exnwords = new Serder(exnValue);
-        op1 = client1.challenges().responded(aid3.getPrefix(), exnwords.getKed().get("d").toString());
+        exnD = ((CompletedChallengeOperation) op1).getResponse().getExn().getD();
+        client1.challenges().responded(aid3.getPrefix(), exnD);
         System.out.println("Member1 marked challenge response as accepted");
 
         // First member start the creation of a multisig identifier
@@ -267,12 +267,12 @@ public class MultisigTest extends BaseIntegrationTest {
                 aids3.get(1).getPrefix()
         );
 
-        String multisig = Utils.toMap(aids3.get(1)).get("prefix").toString();
+        String multisig = aids3.get(1).getPrefix();
 
         HabState multisigAID = client1.identifiers().get("multisig").get();
 
         String timestamp = TestUtils.createTimestamp();
-        List<Object> opList1 = MultisigUtils.addEndRoleMultisigs(
+        List<Operation> opList1 = MultisigUtils.addEndRoleMultisigs(
                 client1,
                 "multisig",
                 aid1,
@@ -282,7 +282,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 true
         );
 
-        List<Object> opList2 = MultisigUtils.addEndRoleMultisigs(
+        List<Operation> opList2 = MultisigUtils.addEndRoleMultisigs(
                 client2,
                 "multisig",
                 aid2,
@@ -291,7 +291,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 timestamp,
                 false
         );
-        List<Object> opList3 = MultisigUtils.addEndRoleMultisigs(
+        List<Operation> opList3 = MultisigUtils.addEndRoleMultisigs(
                 client3,
                 "multisig",
                 aid3,
@@ -368,19 +368,19 @@ public class MultisigTest extends BaseIntegrationTest {
 
         // Members agree out of band to rotate keys
         System.out.println("Members agree out of band to rotate keys");
-        EventResult icpResult1 = client1.identifiers().rotate("member1");
+        var icpResult1 = client1.identifiers().rotate("member1");
         op1 = icpResult1.op();
         op1 = waitOperation(client1, op1);
         aid1 = client1.identifiers().get("member1").get();
         System.out.println("Member1 rotated keys");
 
-        EventResult icpResult2 = client2.identifiers().rotate("member2");
+        var icpResult2 = client2.identifiers().rotate("member2");
         op2 = icpResult2.op();
         op2 = waitOperation(client2, op2);
         aid2 = client2.identifiers().get("member2").get();
         System.out.println("Member2 rotated keys");
 
-        EventResult icpResult3 = client3.identifiers().rotate("member3");
+        var icpResult3 = client3.identifiers().rotate("member3");
         op3 = icpResult3.op();
         op3 = waitOperation(client3, op3);
         aid3 = client3.identifiers().get("member3").get();
@@ -389,16 +389,25 @@ public class MultisigTest extends BaseIntegrationTest {
         // Update new key states
         op1 = client1.keyStates().query(aid2.getPrefix(), "1");
         op1 = waitOperation(client1, op1);
-        Object aid2State = Operation.fromObject(op1).getResponse();
+        KeyStateRecord aid2State = switch (op1) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
         op1 = client1.keyStates().query(aid3.getPrefix(), "1");
         op1 = waitOperation(client1, op1);
-        Object aid3State = Operation.fromObject(op1).getResponse();
+        KeyStateRecord aid3State = switch (op1) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         op2 = client2.keyStates().query(aid3.getPrefix(), "1");
         op2 = waitOperation(client2, op2);
         op2 = client2.keyStates().query(aid1.getPrefix(), "1");
         op2 = waitOperation(client2, op2);
-        Object aid1State = Operation.fromObject(op2).getResponse();
+        KeyStateRecord aid1State = switch (op2) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         op3 = client3.keyStates().query(aid1.getPrefix(), "1");
         op3 = waitOperation(client3, op3);
@@ -412,11 +421,7 @@ public class MultisigTest extends BaseIntegrationTest {
         op4 = client4.keyStates().query(aid3.getPrefix(), "1");
         op4 = waitOperation(client4, op4);
 
-        List<KeyStateRecord> rstateLst = List.of(
-                Utils.fromJson(Utils.jsonStringify(aid1State), KeyStateRecord.class),
-                Utils.fromJson(Utils.jsonStringify(aid2State), KeyStateRecord.class),
-                Utils.fromJson(Utils.jsonStringify(aid3State), KeyStateRecord.class)
-        );
+        List<KeyStateRecord> rstateLst = List.of(aid1State, aid2State, aid3State);
         List<KeyStateRecord> stateLst = rstateLst;
 
         // Multisig Rotation
@@ -486,7 +491,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 nonce,
                 true
         );
-        op1 = registryMultisigList.get(0);
+        op1 = (Operation) registryMultisigList.get(0);
         String regk = registryMultisigList.get(1).toString();
         System.out.println("Member1 initiated registry, waiting for others to join...");
 
@@ -941,7 +946,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 .nonce(nonce)
                 .build();
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        Object op = vcpResult.op();
+        RegistryOperation op = vcpResult.op();
 
         Serder serder = vcpResult.getRegser();
         String regk = serder.getPre();
@@ -974,20 +979,11 @@ public class MultisigTest extends BaseIntegrationTest {
         return list;
     }
 
-    public static <T> Operation<T> waitOperations(
+    public static Operation waitOperations(
             SignifyClient client,
-            Object op) throws IOException, InterruptedException, LibsodiumException {
-        Operation operation = Operation.fromObject(op);
-        String name = operation.getName();
-        operation = client.operations().wait(operation);
+            Operation op) throws IOException, InterruptedException, LibsodiumException {
+        Operation operation = client.operations().wait(op);
         TestUtils.deleteOperations(client, operation);
-        TestUtils.deleteOperation(client, name);
         return operation;
-    }
-
-    public void deleteOperations(List<SignifyClient> clients, List<String> name) throws Exception {
-        for (int i = 1; i <= clients.size(); i++) {
-            deleteOperation(clients.get(i - 1), name.get(i - 1));
-        }
     }
 }

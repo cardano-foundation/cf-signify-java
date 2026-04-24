@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
@@ -18,6 +17,7 @@ import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
@@ -29,7 +29,9 @@ import org.cardanofoundation.signify.app.credentialing.credentials.CredentialDat
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -94,7 +96,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         oobis2 = getOobisIndexAt0(oobis.get(1));
         oobis3 = getOobisIndexAt0(oobis.get(2));
 
-        Object op1 = client1.oobis().resolve(oobis2, "member2");
+        Operation op1 = client1.oobis().resolve(oobis2, "member2");
         op1 = waitOperation(client1, op1);
         op1 = client1.oobis().resolve(oobis3, "member3");
         op1 = waitOperation(client1, op1);
@@ -102,7 +104,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         op1 = waitOperation(client1, op1);
         System.out.println("Member1 resolved 3 OOBIs");
 
-        Object op2 = client2.oobis().resolve(oobis1, "member1");
+        Operation op2 = client2.oobis().resolve(oobis1, "member1");
         op2 = waitOperation(client2, op2);
         op2 = client2.oobis().resolve(oobis3, "member3");
         op2 = waitOperation(client2, op2);
@@ -110,7 +112,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         op2 = waitOperation(client2, op2);
         System.out.println("Member2 resolved 3 OOBIs");
 
-        Object op3 = client3.oobis().resolve(oobis1, "member1");
+        Operation op3 = client3.oobis().resolve(oobis1, "member1");
         op3 = waitOperation(client3, op3);
         op3 = client3.oobis().resolve(oobis2, "member2");
         op3 = waitOperation(client3, op3);
@@ -182,7 +184,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         String timestamp = createTimestamp();
 
-        EventResult endRoleRes = client1.identifiers().addEndRole("holder", "agent", eid1, timestamp);
+        var endRoleRes = client1.identifiers().addEndRole("holder", "agent", eid1, timestamp);
         op1 = endRoleRes.op();
         Serder rpy = endRoleRes.serder();
         List<String> sigs = endRoleRes.sigs();
@@ -210,7 +212,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        Object resp = client1.exchanges().send(
+        Exn resp = client1.exchanges().send(
                 "member1",
                 "multisig",
                 aid1,
@@ -504,7 +506,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .build();
 
         RegistryResult result = client.registries().create(args);
-        Object op = result.op();
+        RegistryOperation op = result.op();
         waitOperation(client, op);
 
         List<Registry> registryList = client.registries().list(name);
@@ -549,7 +551,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             List<String> gsigs = grantResult.sigs();
             String end = grantResult.atc();
 
-            Object op = client
+            ExchangeOperation op = client
                     .ipex()
                     .submitGrant(name, grant, gsigs, end, List.of(data.getA().getI()));
             waitOperation(client, op);
@@ -559,7 +561,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         return cred;
     }
 
-    public Object multisigAdmitCredential(
+    public ExchangeOperation multisigAdmitCredential(
             SignifyClient client,
             String groupName,
             String memberAlias,
@@ -583,7 +585,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         List<String> sigs = exchangeMessageResult.sigs();
         String end = exchangeMessageResult.atc();
 
-        Object op = client.ipex().submitAdmit(
+        ExchangeOperation op = client.ipex().submitAdmit(
                 groupName,
                 admit,
                 sigs,

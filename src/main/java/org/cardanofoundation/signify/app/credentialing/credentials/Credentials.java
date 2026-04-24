@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.app.credentialing.credentials;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Serder;
@@ -180,7 +180,7 @@ public class Credentials {
         body.put(keeper.getAlgo().getValue(), keeper.getParams().toMap());
 
         HttpResponse<String> response = this.client.fetch(path, method, body);
-        Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
+        CredentialOperation op = Utils.fromJson(response.body(), CredentialOperation.class);
 
         return new IssueCredentialResult(new Serder(acdc), new Serder(iss), anc, op);
     }
@@ -257,7 +257,7 @@ public class Credentials {
         String path = "/identifiers/" + name + "/credentials/" + said;
         String method = "DELETE";
         HttpResponse<String> response = this.client.fetch(path, method, body);
-        Operation<?> op = Operation.fromObject(Utils.fromJson(response.body(), Map.class));
+        CredentialOperation op = Utils.fromJson(response.body(), CredentialOperation.class);
 
         return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
     }
