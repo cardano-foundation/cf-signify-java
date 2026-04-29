@@ -1,10 +1,8 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
@@ -15,9 +13,14 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -26,7 +29,6 @@ import java.util.stream.Stream;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MultisigJoinTest extends BaseIntegrationTest {
@@ -84,9 +86,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         kargs.setStates(states);
         kargs.setRstates(states);
 
-        EventResult icpResult = client1.identifiers().create(nameMultisig, kargs);
+        var icpResult = client1.identifiers().create(nameMultisig, kargs);
 
-        Object createMultisig1 = icpResult.op();
+        KelOperation createMultisig1 = icpResult.op();
         Serder serder = icpResult.serder();
         List<String> sigs = icpResult.sigs();
         List<Siger> sigers = sigs.stream()
@@ -132,27 +134,22 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         iargs2.setStates(states);
         iargs2.setRstates(states);
 
-        EventResult icpResult2 = client2.identifiers().create(nameMultisig, iargs2);
+        var icpResult2 = client2.identifiers().create(nameMultisig, iargs2);
 
-        Object createMultisig2 = icpResult2.op();
+        KelOperation createMultisig2 = icpResult2.op();
 
-        List<Operation> op = waitOperationAsync(
+        waitOperationAsync(
             new WaitOperationArgs(client1, createMultisig1),
             new WaitOperationArgs(client2, createMultisig2)
         );
 
-        createMultisig1 = op.get(0);
-        createMultisig2 = op.get(1);
+        HabState multisig1 = client1.identifiers().get(nameMultisig).get();
+        HabState multisig2 = client2.identifiers().get(nameMultisig).get();
 
-        Map<String, Object> multisigRes1 = castObjectToLinkedHashMap(
-            Utils.toMap(createMultisig1).get("response"));
-        Map<String, Object> multisigRes2 = castObjectToLinkedHashMap(
-            Utils.toMap(createMultisig2).get("response"));
-
-        assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes1.get("k")).getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes1.get("k")).get(1));
-        assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).get(1));
+        assertEquals(aid1.getState().getK().getFirst(), multisig1.getState().getK().getFirst());
+        assertEquals(aid2.getState().getK().getFirst(), multisig1.getState().getK().get(1));
+        assertEquals(aid1.getState().getK().getFirst(), multisig2.getState().getK().getFirst());
+        assertEquals(aid2.getState().getK().getFirst(), multisig2.getState().getK().get(1));
 
         GroupMember membersAgent1 = client1.identifiers().members(nameMultisig);
         GroupMember membersAgent2 = client2.identifiers().members(nameMultisig);
@@ -160,8 +157,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         String eid1 = membersAgent1.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
         String eid2 = membersAgent2.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
 
-        EventResult endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
-        EventResult endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
+        var endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
+        var endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
 
         oobiGetMultisig = client1.oobis().get(nameMultisig, "agent").get();
 
@@ -195,8 +192,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new ResolveOobisArgs(client3, oobiMultisig, nameMultisig)
         );
 
-        EventResult rotateResult1 = client1.identifiers().rotate(nameMember1);
-        EventResult rotateResult2 = client2.identifiers().rotate(nameMember2);
+        var rotateResult1 = client1.identifiers().rotate(nameMember1);
+        var rotateResult2 = client2.identifiers().rotate(nameMember2);
 
         waitOperationAsync(
             new WaitOperationArgs(client1, rotateResult1.op()),
@@ -206,7 +203,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid1 = client1.identifiers().get(nameMember1).get();
         aid2 = client2.identifiers().get(nameMember2).get();
 
-        List<Object> updates = getKeyStateQuerAsync(
+        List<QueryOperation> updates = getKeyStateQuerAsync(
             new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "1"),
             new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "0"),
             new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "1"),
@@ -224,19 +221,25 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client3, updates.get(4)),
             new WaitOperationArgs(client3, updates.get(5))
         );
-        Object aid2States = statesUpdate.get(0);
-        Object aid1States = statesUpdate.get(2);
-        Object aid3States = statesUpdate.get(1);
 
-        KeyStateRecord aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), KeyStateRecord.class);
-        KeyStateRecord aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), KeyStateRecord.class);
-        KeyStateRecord aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), KeyStateRecord.class);
+        KeyStateRecord aid2State = switch (statesUpdate.get(0)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid3State = switch (statesUpdate.get(1)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid1State = switch (statesUpdate.get(2)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State);
         List<KeyStateRecord> rstates = new ArrayList<>(states);
         rstates.add(aid3State);
 
-        EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
+        var rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
             .states(states)
             .rstates(rstates)
             .build());
@@ -297,9 +300,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     @Test
     @Order(3)
     public void signingKeysAndJoinTest() throws Exception {
-        EventResult rotateResult1 = client1.identifiers().rotate(nameMember1);
-        EventResult rotateResult2 = client2.identifiers().rotate(nameMember2);
-        EventResult rotateResult3 = client3.identifiers().rotate(nameMember3);
+        var rotateResult1 = client1.identifiers().rotate(nameMember1);
+        var rotateResult2 = client2.identifiers().rotate(nameMember2);
+        var rotateResult3 = client3.identifiers().rotate(nameMember3);
 
         waitOperationAsync(
             new WaitOperationArgs(client1, rotateResult1.op()),
@@ -311,7 +314,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid2 = client2.identifiers().get(nameMember2).get();
         aid3 = client3.identifiers().get(nameMember3).get();
 
-        List<Object> updates = getKeyStateQuerAsync(
+        List<QueryOperation> updates = getKeyStateQuerAsync(
             new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "2"),
             new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "1"),
             new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "2"),
@@ -329,17 +332,23 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client3, updates.get(4)),
             new WaitOperationArgs(client3, updates.get(5))
         );
-        Object aid2States = statesUpdate.get(0);
-        Object aid1States = statesUpdate.get(2);
-        Object aid3States = statesUpdate.get(1);
 
-        KeyStateRecord aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), KeyStateRecord.class);
-        KeyStateRecord aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), KeyStateRecord.class);
-        KeyStateRecord aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), KeyStateRecord.class);
+        KeyStateRecord aid2State = switch (statesUpdate.get(0)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid3State = switch (statesUpdate.get(1)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid1State = switch (statesUpdate.get(2)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
         List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State, aid3State);
 
-        EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
+        var rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
             .states(states)
             .rstates(states)
             .build());
@@ -392,7 +401,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         Keeping.Keeper<?> keeper3 = client3.getManager().get(aid3);
         List<String> sig3 = keeper3.sign(serder3.getRaw().getBytes()).signatures();
 
-        Object joinOperation = client3.groups()
+        GroupOperation joinOperation = Utils.fromJson(Utils.jsonStringify(client3.groups()
             .join(
                 nameMultisig,
                 serder3,
@@ -400,9 +409,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
                 Utils.toMap(exn3.getA()).get("gid").toString(),
                 smids,
                 rmids
-            );
-
-        waitOperation(client3, joinOperation);
+            )), GroupOperation.class);
+        waitForCompleted(client3, joinOperation);
 
         HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
 
@@ -419,11 +427,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         GroupMember members = client3.identifiers().members(nameMultisig);
         String eid = members.getSigning().get(2).getEnds().getAgent().keySet().iterator().next();
 
-        EventResult endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
-        Object endRoleResult = waitOperation(client3, endRoleOperation.op());
-
-        assertEquals("true", Utils.toMap(endRoleResult).get("done").toString());
-        assertNull(Utils.toMap(endRoleResult).get("error"));
+        var endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
+        waitForCompleted(client3, endRoleOperation.op());
     }
 
     public static HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {

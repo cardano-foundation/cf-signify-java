@@ -33,7 +33,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   PendingEndRoleOperation.JSON_PROPERTY_DONE
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
-public class PendingEndRoleOperation {
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize
+public final class PendingEndRoleOperation implements EndRoleOperation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;

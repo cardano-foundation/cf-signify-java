@@ -1,19 +1,17 @@
 package org.cardanofoundation.signify.e2e;
 
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +21,6 @@ public class SinglesigROTTest extends BaseIntegrationTest {
     static SignifyClient client1, client2;
     static String contact1_id;
     static String name1_id, name1_oobi;
-    private HashMap<String, Object> response;
 
     @BeforeAll
     public static void getClients() throws Exception {
@@ -77,8 +74,8 @@ public class SinglesigROTTest extends BaseIntegrationTest {
 
         // rot
         RotateIdentifierArgs args = RotateIdentifierArgs.builder().build();
-        EventResult result = client1.identifiers().rotate("name1", args);
-        waitOperation(client1, result.op());
+        var result = client1.identifiers().rotate("name1", args);
+        waitForCompleted(client1, result.op());
 
         // local keystate after rot
         KeyStateRecord keyStateRecord1 = client1.keyStates().get(name1_id).get();
@@ -102,14 +99,13 @@ public class SinglesigROTTest extends BaseIntegrationTest {
 
         // refresh remote keystate
         String sn = keyStateRecord1.getS();
-        Operation op = Operation.fromObject(client2.keyStates().query(contact1_id, sn, null));
-        op = waitOperation(client2, op);
-        response = (HashMap<String, Object>) op.getResponse();
+        QueryOperation queryOp = client2.keyStates().query(contact1_id, sn, null);
+        CompletedQueryOperation completedOp = waitForCompleted(client2, queryOp, CompletedQueryOperation.class);
+        KeyStateRecord keyState3 = completedOp.getResponse();
 
-        HashMap<String, Object> keyState3 = response;
         // local and remote keystate match
-        assertEquals(keyState3.get("s"), keyStateRecord1.getS());
-        assertEquals(keyState3.get("k"), keyStateRecord1.getK());
-        assertEquals(keyState3.get("n"), keyStateRecord1.getN());
+        assertEquals(keyState3.getS(), keyStateRecord1.getS());
+        assertEquals(keyState3.getK(), keyStateRecord1.getK());
+        assertEquals(keyState3.getN(), keyStateRecord1.getN());
     }
 }

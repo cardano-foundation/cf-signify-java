@@ -550,7 +550,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             registryArgs.setRegistryName(registryName);
 
             RegistryResult regResult = client.registries().create(registryArgs);
-            waitOperation(client, regResult.op());
+            waitForCompleted(client, regResult.op());
             registriesList = client.registries().list(aid.name);
 
             Registry registryBody = registriesList.get(0);
@@ -571,14 +571,14 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 .build();
 
         Exchanging.ExchangeMessageResult result = senderClient.ipex().grant(grantArgs);
-        Object op = senderClient.ipex().submitGrant(
+        ExchangeOperation op = senderClient.ipex().submitGrant(
                 senderAid.name,
                 result.exn(),
                 result.sigs(),
                 result.atc(),
                 Collections.singletonList(recipientAid.prefix)
         );
-        waitOperation(senderClient, op);
+        waitForCompleted(senderClient, op);
     }
 
     public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) throws Exception {
@@ -596,14 +596,14 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 .build();
         Exchanging.ExchangeMessageResult result = senderClient.ipex().admit(admitArgs);
 
-        Object op = senderClient.ipex().submitAdmit(
+        ExchangeOperation op = senderClient.ipex().submitAdmit(
                 senderAid.name,
                 result.exn(),
                 result.sigs(),
                 result.atc(),
                 Collections.singletonList(recipientAid.prefix)
         );
-        waitOperation(senderClient, op);
+        waitForCompleted(senderClient, op);
         markAndRemoveNotification(senderClient, grantNotification);
     }
 
