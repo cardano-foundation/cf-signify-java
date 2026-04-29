@@ -116,7 +116,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             registryArgs.setRegistryName(registryName);
             try {
                 RegistryResult regResult = issuerClient.registries().create(registryArgs);
-                waitOperation(issuerClient, regResult.op());
+                waitForCompleted(issuerClient, regResult.op());
             } catch (IOException | InterruptedException | DigestException e) {
                 throw new RuntimeException(e);
             }
@@ -178,7 +178,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             cData.setA(a);
 
             IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
-            waitOperation(issuerClient, issResult.getOp());
+            waitForCompleted(issuerClient, issResult.getOp());
             return issResult.getAcdc().getKed().get("d").toString();
         });
 
@@ -266,7 +266,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Exchanging.ExchangeMessageResult result = issuerClient.ipex().grant(gArgs);
                 List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
                 ExchangeOperation op = issuerClient.ipex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
-                waitOperation(issuerClient, op);
+                waitForCompleted(issuerClient, op);
             } catch (IOException | InterruptedException | DigestException | LibsodiumException e) {
                 throw new RuntimeException(e);
             }
@@ -303,7 +303,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 ExchangeOperation op = holderClient.ipex().submitAdmit(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
                 );
-                waitOperation(holderClient, op);
+                waitForCompleted(holderClient, op);
                 markAndRemoveNotification(holderClient, grantNotification);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -346,7 +346,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 ExchangeOperation op = verifierClient.ipex().submitApply(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(verifierClient, op);
+                waitForCompleted(verifierClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -396,7 +396,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 Exchanging.ExchangeMessageResult result = holderClient.ipex().offer(offerArgs);
                 ExchangeOperation op = holderClient.ipex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
-                waitOperation(holderClient, op);
+                waitForCompleted(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -435,7 +435,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 ExchangeOperation op = verifierClient.ipex().submitAgree(
                         verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(verifierClient, op);
+                waitForCompleted(verifierClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -480,7 +480,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 ExchangeOperation op = holderClient.ipex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
                 );
-                waitOperation(holderClient, op);
+                waitForCompleted(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -510,7 +510,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 ExchangeOperation op = verifierClient.ipex().submitAdmit(
                         verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(verifierClient, op);
+                waitForCompleted(verifierClient, op);
                 markAndRemoveNotification(verifierClient, verifierGrantNote);
                 Credential verifierCredential = verifierClient.credentials().get(qviCredentialId).get();
 
@@ -547,7 +547,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             try {
                 RegistryResult regResult = holderClient.registries().create(registryArgs);
 
-                waitOperation(holderClient, regResult.op());
+                waitForCompleted(holderClient, regResult.op());
                 List<Registry> registriesList = holderClient.registries().list(holderAid.name);
 
                 assertTrue(!registriesList.isEmpty());
@@ -595,7 +595,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 cData.setE(e);
 
                 IssueCredentialResult result = holderClient.credentials().issue(holderAid.name, cData);
-                waitOperation(holderClient, result.getOp());
+                waitForCompleted(holderClient, result.getOp());
                 return result.getAcdc().getKed().get("d").toString();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -621,7 +621,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 ExchangeOperation op = holderClient.ipex().submitGrant(
                         holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
                 );
-                waitOperation(holderClient, op);
+                waitForCompleted(holderClient, op);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -643,7 +643,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 ExchangeOperation op = legalEntityClient.ipex().submitAdmit(
                         legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
                 );
-                waitOperation(legalEntityClient, op);
+                waitForCompleted(legalEntityClient, op);
                 markAndRemoveNotification(legalEntityClient, grantNotification);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -688,7 +688,7 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Issuer revoke QVI credential", () -> {
             try {
                 RevokeCredentialResult revokeOperation = issuerClient.credentials().revoke(issuerAid.name, qviCredentialId, null);
-                waitOperation(issuerClient, revokeOperation.getOp());
+                waitForCompleted(issuerClient, revokeOperation.getOp());
                 Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
 
                 CredentialState status = issuerCredential.getStatus();

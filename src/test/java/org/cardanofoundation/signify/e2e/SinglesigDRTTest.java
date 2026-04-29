@@ -7,7 +7,9 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperation;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperationResponse;
+import org.cardanofoundation.signify.generated.keria.model.DelegationOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +27,6 @@ import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdent
 public class SinglesigDRTTest extends BaseIntegrationTest {
     private static SignifyClient delegator, delegate;
     private static String name1_id, name1_oobi;
-    private static String contact1_id;
     private String opResponseName, opResponseT, opResponseS;
 
     @BeforeAll
@@ -44,7 +45,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
 
     @BeforeEach
     public void getContact() throws IOException, InterruptedException, LibsodiumException {
-        contact1_id = TestUtils.getOrCreateContact(delegate, "contact1", name1_oobi);
+        TestUtils.getOrCreateContact(delegate, "contact1", name1_oobi);
     }
 
     @Test
@@ -54,7 +55,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         kargs.setDelpre(name1_id);
 
         var result = delegate.identifiers().create("delegate1", kargs);
-        Operation op = result.op();
+        KelOperation op = result.op();
         HabState delegate1 = delegate.identifiers().get("delegate1").get();
         opResponseName = op.getName();
 
@@ -67,7 +68,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
         seal.put("d", delegate1.getPrefix());
 
         var interactResult1 = delegator.identifiers().interact("name1", seal);
-        Operation op1 = interactResult1.op();
+        KelOperation op1 = interactResult1.op();
         QueryOperation op2 = delegate.keyStates().query(name1_id, "1", null);
 
         waitOperationAsync(
@@ -100,8 +101,8 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
                 new WaitOperationArgs(delegate, op2)
         );
 
-        op = operationList.getFirst();
-        CompletedDelegationOperationResponse opResponse = ((CompletedDelegationOperation) op).getResponse();
+        DelegationOperation dop = (DelegationOperation) operationList.getFirst();
+        CompletedDelegationOperationResponse opResponse = ((CompletedDelegationOperation) dop).getResponse();
         opResponseT = opResponse.getT();
         opResponseS = opResponse.getS();
 

@@ -16,12 +16,15 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
@@ -29,7 +32,9 @@ import org.cardanofoundation.signify.app.credentialing.credentials.CredentialDat
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.OOBIOperation;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.PendingGroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 import org.junit.jupiter.api.DisplayName;
@@ -96,32 +101,32 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         oobis2 = getOobisIndexAt0(oobis.get(1));
         oobis3 = getOobisIndexAt0(oobis.get(2));
 
-        Operation op1 = client1.oobis().resolve(oobis2, "member2");
-        op1 = waitOperation(client1, op1);
+        OOBIOperation op1 = client1.oobis().resolve(oobis2, "member2");
+        waitForCompleted(client1, op1);
         op1 = client1.oobis().resolve(oobis3, "member3");
-        op1 = waitOperation(client1, op1);
+        waitForCompleted(client1, op1);
         op1 = client1.oobis().resolve(SCHEMA_OOBI, "schema");
-        op1 = waitOperation(client1, op1);
+        waitForCompleted(client1, op1);
         System.out.println("Member1 resolved 3 OOBIs");
 
-        Operation op2 = client2.oobis().resolve(oobis1, "member1");
-        op2 = waitOperation(client2, op2);
+        OOBIOperation op2 = client2.oobis().resolve(oobis1, "member1");
+        waitForCompleted(client2, op2);
         op2 = client2.oobis().resolve(oobis3, "member3");
-        op2 = waitOperation(client2, op2);
+        waitForCompleted(client2, op2);
         op2 = client2.oobis().resolve(SCHEMA_OOBI, "schema");
-        op2 = waitOperation(client2, op2);
+        waitForCompleted(client2, op2);
         System.out.println("Member2 resolved 3 OOBIs");
 
-        Operation op3 = client3.oobis().resolve(oobis1, "member1");
-        op3 = waitOperation(client3, op3);
+        OOBIOperation op3 = client3.oobis().resolve(oobis1, "member1");
+        waitForCompleted(client3, op3);
         op3 = client3.oobis().resolve(oobis2, "member2");
-        op3 = waitOperation(client3, op3);
+        waitForCompleted(client3, op3);
         op3 = client3.oobis().resolve(SCHEMA_OOBI, "schema");
-        op3 = waitOperation(client3, op3);
+        waitForCompleted(client3, op3);
         System.out.println("Member3 resolved 3 OOBIs");
 
         // First member start the creation of a multisig identifier
-        op1 = startMultisigIncept(client1, new StartMultisigInceptArgs(
+        KelOperation gop1 = startMultisigIncept(client1, new StartMultisigInceptArgs(
                 "holder",
                 aid1.getName(),
                 Arrays.asList(aid1.getPrefix(), aid2.getPrefix()),
@@ -136,7 +141,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         // Second member check notifications and join the multisig
         String msgSaid = waitAndMarkNotification(client2, "/multisig/icp");
         System.out.println("Member2 received exchange message to join multisig");
-        op2 = acceptMultisigIncept(client2, new AcceptMultisigInceptArgs(
+        KelOperation gop2 = acceptMultisigIncept(client2, new AcceptMultisigInceptArgs(
                 "holder",
                 aid2.getName(),
                 msgSaid
@@ -144,8 +149,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Member2 joined multisig, waiting for others...");
 
         // Check for completion
-        op1 = waitOperation(client1, op1);
-        op2 = waitOperation(client2, op2);
+        waitForCompleted(client1, gop1);
+        waitForCompleted(client2, gop2);
         System.out.println("Multisig created!");
 
         IdentifierListResponse identifiers1 = client1.identifiers().list();
@@ -185,7 +190,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         String timestamp = createTimestamp();
 
         var endRoleRes = client1.identifiers().addEndRole("holder", "agent", eid1, timestamp);
-        op1 = endRoleRes.op();
+        EndRoleOperation eop1 = endRoleRes.op();
         Serder rpy = endRoleRes.serder();
         List<String> sigs = endRoleRes.sigs();
 
@@ -238,7 +243,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         endRoleRes = client2.
                 identifiers().
                 addEndRole("holder", rpyrole, rpyeid, rpystamp);
-        op2 = endRoleRes.op();
+        EndRoleOperation eop2 = endRoleRes.op();
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
@@ -279,15 +284,15 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Member2 authorized agent role to %s, waiting for others to authorize..." + eid1);
 
         // Check for completion
-        op1 = waitOperation(client1, op1);
-        op2 = waitOperation(client2, op2);
+        waitForCompleted(client1, eop1);
+        waitForCompleted(client2, eop2);
         System.out.println("End role authorization for agent " + eid1 + " completed!");
 
         System.out.println("Starting multisig end role authorization for agent " + eid2);
 
         endRoleRes = client1.identifiers()
                 .addEndRole("holder", "agent", eid2, timestamp);
-        op1 = endRoleRes.op();
+        eop1 = endRoleRes.op();
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
 
@@ -342,7 +347,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         endRoleRes = client2.
             identifiers().
             addEndRole("holder", rpyrole, rpyeid, rpystamp);
-        op2 = endRoleRes.op();
+        eop2 = endRoleRes.op();
 
         rpy = endRoleRes.serder();
         sigs = endRoleRes.sigs();
@@ -384,8 +389,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Member2 authorized agent role to %s, waiting for others to authorize..." + eid1);
 
         // Check for completion
-        op1 = waitOperation(client1, op1);
-        op2 = waitOperation(client2, op2);
+        waitForCompleted(client1, eop1);
+        waitForCompleted(client2, eop2);
         System.out.println("End role authorization for agent " + eid2 + " completed!");
 
         // Holder resolve multisig OOBI
@@ -393,8 +398,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         List<String> oobisResponse = oobisRes.getOobis();
 
         String oobiMultisig = oobisResponse.get(0).split("/agent/")[0];
-        op3 = client3.oobis().resolve(oobiMultisig, "holder");
-        waitOperation(client3, op3);
+        OOBIOperation oop3 = client3.oobis().resolve(oobiMultisig, "holder");
+        waitForCompleted(client3, oop3);
         System.out.println("Issuer resolved multisig holder OOBI");
 
         HabState holderAid = client1.identifiers().get("holder").get();
@@ -434,7 +439,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         Exn getExn = exnRes.getExn();
 
-        op1 = multisigAdmitCredential(client1,
+        ExchangeOperation exop1 = multisigAdmitCredential(client1,
                 "holder",
                 "member1",
                 getExn.getD(),
@@ -458,7 +463,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .map(KeyStateRecord::getI)
                 .toList();
 
-        op2 = multisigAdmitCredential(client2,
+        ExchangeOperation exop2 = multisigAdmitCredential(client2,
                 "holder",
                 "member2",
                 getExn.getD(),
@@ -467,8 +472,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         );
         System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
 
-        waitOperation(client1, op1);
-        waitOperation(client2, op2);
+        waitForCompleted(client1, exop1);
+        waitForCompleted(client2, exop2);
 
         CredentialFilter args = CredentialFilter.builder().build();
         List<Credential> creds1 = client1.credentials().list(args);
@@ -507,7 +512,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         RegistryResult result = client.registries().create(args);
         RegistryOperation op = result.op();
-        waitOperation(client, op);
+        waitForCompleted(client, op);
 
         List<Registry> registryList = client.registries().list(name);
         Registry opResponseName = registryList.get(0);
@@ -523,7 +528,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             CredentialData data
     ) throws Exception {
         IssueCredentialResult result = client.credentials().issue(name, data);
-        waitOperation(client, result.getOp());
+        waitForCompleted(client, result.getOp());
 
         List<Credential> listCreds = client.credentials().list(CredentialFilter.builder().build());
         Credential cred = listCreds.getFirst();
@@ -554,7 +559,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             ExchangeOperation op = client
                     .ipex()
                     .submitGrant(name, grant, gsigs, end, List.of(data.getA().getI()));
-            waitOperation(client, op);
+            waitForCompleted(client, op);
         }
 
         System.out.println("Grant message sent");

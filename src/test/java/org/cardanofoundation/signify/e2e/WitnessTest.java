@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.resolveOobi;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitOperation;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitForCompleted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WitnessTest {
@@ -52,14 +52,14 @@ public class WitnessTest {
         kargs.setWits(Collections.singletonList(WITNESS_AID));
 
         var icpResult1 = client1.identifiers().create("aid1", kargs);
-        waitOperation(client1, icpResult1.op());
+        waitForCompleted(client1, icpResult1.op());
         HabState aid1 = client1.identifiers().get("aid1").get();
         System.out.println("AID1: " + aid1.getPrefix());
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
 
         var rotResult1 = client1.identifiers().rotate("aid1");
-        waitOperation(client1, rotResult1.op());
+        waitForCompleted(client1, rotResult1.op());
         aid1 = client1.identifiers().get("aid1").get();
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());
@@ -69,7 +69,7 @@ public class WitnessTest {
         args.setCuts(Collections.singletonList(WITNESS_AID));
 
         var rotResult2 = client1.identifiers().rotate("aid1", args);
-        waitOperation(client1, rotResult2.op());
+        waitForCompleted(client1, rotResult2.op());
         aid1 = client1.identifiers().get("aid1").get();
         assertEquals(0, aid1.getState().getB().size());
 
@@ -77,7 +77,7 @@ public class WitnessTest {
         args.setCuts(null);
         args.setAdds(Collections.singletonList(WITNESS_AID));
         var rotResult3 = client1.identifiers().rotate("aid1", args);
-        waitOperation(client1, rotResult3.op());
+        waitForCompleted(client1, rotResult3.op());
         aid1 = client1.identifiers().get("aid1").get();
         assertEquals(1, aid1.getState().getB().size());
         assertEquals(WITNESS_AID, aid1.getState().getB().getFirst());

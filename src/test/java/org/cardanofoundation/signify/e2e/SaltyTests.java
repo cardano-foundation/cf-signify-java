@@ -42,7 +42,7 @@ class SaltyTests {
         CreateIdentifierArgs bran = new CreateIdentifierArgs();
         bran.setBran("0123456789abcdefghijk");
         var icpResult = client.identifiers().create("aid1", bran);
-        waitOperation(client, icpResult.op());
+        waitForCompleted(client, icpResult.op());
 
         Serder icp = icpResult.serder();
 
@@ -76,7 +76,7 @@ class SaltyTests {
         params.setBran("0123456789lmnopqrstuv");
 
         var icpResult1 = client.identifiers().create("aid2", params);
-        waitOperation(client, icpResult1.op());
+        waitForCompleted(client, icpResult1.op());
         Serder icp2 = icpResult1.serder();
 
         assertEquals("EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX", icp2.getPre());
@@ -107,7 +107,7 @@ class SaltyTests {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.salty);
         var icpResult2 = client.identifiers().create("aid3", kargs);
-        waitOperation(client, icpResult2.op());
+        waitForCompleted(client, icpResult2.op());
 
         IdentifierListResponse aidsJson2 = client.identifiers().list(0, 24);
         List<HabState> aids2 = aidsJson2.aids();
@@ -132,7 +132,7 @@ class SaltyTests {
 
         // Rotate
         var icpResultRotate = client.identifiers().rotate("aid1");
-        waitOperation(client, icpResultRotate.op());
+        waitForCompleted(client, icpResultRotate.op());
         Serder rotRotate = icpResultRotate.serder();
 
         Assertions.assertEquals("EBQABdRgaxJONrSLcgrdtbASflkvLxJkiDO0H-XmuhGg", rotRotate.getKed().get("d"));
@@ -144,7 +144,7 @@ class SaltyTests {
 
         // Interact
         var icpResultInteract = client.identifiers().interact("aid1", List.of(icp.getPre()));
-        waitOperation(client, icpResultInteract.op());
+        waitForCompleted(client, icpResultInteract.op());
         Serder ixn = icpResultInteract.serder();
 
         Assertions.assertEquals("ENsmRAg_oM7Hl1S-GTRMA7s4y760lQMjzl0aqOQ2iTce", ixn.getKed().get("d"));

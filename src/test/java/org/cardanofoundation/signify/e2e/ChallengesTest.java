@@ -61,16 +61,13 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         var icpResult1 = client1.identifiers().create("alice", kargs1);
-        Operation op1 = waitOperation(client1, icpResult1.op());
-        if (op1 instanceof CompletedWitnessOperation completed) {
-            aid1Prefix = completed.getResponse().getI();
-        }
+        aid1Prefix = waitForCompleted(client1, icpResult1.op(), CompletedWitnessOperation.class).getResponse().getI();
         var rpyResult1 = client1.identifiers().addEndRole(
                 "alice",
                 "agent",
                 client1.getAgent().getPre(),
                 null);
-        waitOperation(client1, rpyResult1.op());
+        waitForCompleted(client1, rpyResult1.op());
         System.out.println("Alice's AID: " + aid1Prefix);
 
         CreateIdentifierArgs kargs2 = new CreateIdentifierArgs();
@@ -81,17 +78,14 @@ public class ChallengesTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
         ));
         var icpResult2 = client2.identifiers().create("bob", kargs2);
-        Operation op2 = waitOperation(client2, icpResult2.op());
-        if (op2 instanceof CompletedWitnessOperation completed) {
-            aid2Prefix = completed.getResponse().getI();
-        }
+        aid2Prefix = waitForCompleted(client2, icpResult2.op(), CompletedWitnessOperation.class).getResponse().getI();
 
         var rpyResult2 = client2.identifiers().addEndRole(
                 "bob",
                 "agent",
                 client2.getAgent().getPre(),
                 null);
-        waitOperation(client2, rpyResult2.op());
+        waitForCompleted(client2, rpyResult2.op());
 
         // Exchange OOBIs
         OOBI oobi1 = client1.oobis().get("alice", "agent").get();
@@ -116,13 +110,11 @@ public class ChallengesTest {
 
         // Alice verifies Bob's response
         ChallengeOperation verifyResult = client1.challenges().verify(aid2Prefix, challenge1_small.getWords());
-        ChallengeOperation verifyOp = waitOperation(client1, verifyResult, ChallengeOperation.class);
+        CompletedChallengeOperation verifyOp = waitForCompleted(client1, verifyResult, CompletedChallengeOperation.class);
         System.out.println("Alice verified challenge response");
 
-        if (verifyOp instanceof CompletedChallengeOperation completed) {
-            ChallengeOperationResponseExn exn = completed.getResponse().getExn();
-            client1.challenges().responded(aid2Prefix, exn.getD());
-        }
+        ChallengeOperationResponseExn exn = verifyOp.getResponse().getExn();
+        client1.challenges().responded(aid2Prefix, exn.getD());
         System.out.println("Alice marked challenge response as accepted");
 
         // Check Bob's challenge in contacts

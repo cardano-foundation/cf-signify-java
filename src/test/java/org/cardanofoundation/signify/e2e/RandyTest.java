@@ -44,7 +44,7 @@ public class RandyTest {
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.randy);
         var icpResult = client1.identifiers().create("aid1", kargs);
-        waitOperation(client1, icpResult.op());
+        waitForCompleted(client1, icpResult.op());
 
         Serder icp = icpResult.serder();
         assertEquals(1, icp.getVerfers().size());
@@ -64,7 +64,7 @@ public class RandyTest {
         assertEquals(icp.getPre(), opResponsePrefix);
 
         var ixnResult = client1.identifiers().interact("aid1", icp.getPre());
-        waitOperation(client1, ixnResult.op());
+        waitForCompleted(client1, ixnResult.op());
         Serder ixn = ixnResult.serder();
         assertEquals("1", ixn.getKed().get("s"));
         assertEquals(List.of(icp.getPre()), ixn.getKed().get("a"));
@@ -82,7 +82,7 @@ public class RandyTest {
         assertEquals(2, logList.size());
 
         var rotResult = client1.identifiers().rotate("aid1");
-        waitOperation(client1, rotResult.op());
+        waitForCompleted(client1, rotResult.op());
 
         Serder rot = rotResult.serder();
         assertEquals("2", rot.getKed().get("s"));
