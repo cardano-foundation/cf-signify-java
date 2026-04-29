@@ -1,13 +1,13 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitOperation;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitForCompleted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -48,7 +48,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
         testSteps.step("Create multisig group", () -> {
             String groupName = "multisig";
-            Operation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+            KelOperation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                 .groupName(groupName)
                 .localMemberName("member1")
                 .participants(Arrays.asList(aid1, aid2))
@@ -71,7 +71,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
             String msgSaid = notifications.getLast().getA().getD();
             assertNotNull(msgSaid, "msgSaid not defined");
-            Operation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+            KelOperation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                 .localMemberName("member2")
                 .groupName(groupName)
                 .msgSaid(msgSaid)
@@ -101,7 +101,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
         testSteps.step("Test creating another group", () -> {
             String groupName = "multisig2";
-            Operation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+            KelOperation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                 .groupName(groupName)
                 .localMemberName("member1")
                 .participants(List.of(aid1, aid2))
@@ -121,15 +121,15 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
             String msgSaid = notifications.getLast().getA().getD();
             assertNotNull(msgSaid, "msgSaid not defined");
-            Operation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+            KelOperation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                 .localMemberName("member2")
                 .groupName(groupName)
                 .msgSaid(msgSaid)
                 .build()
             );
 
-            op1 = waitOperation(client1, op1);
-            op2 = waitOperation(client2, op2);
+            waitForCompleted(client1, op1);
+            waitForCompleted(client2, op2);
 
             // TODO: https://github.com/WebOfTrust/keria/issues/189
             // const members = await client1.identifiers().members(groupName);

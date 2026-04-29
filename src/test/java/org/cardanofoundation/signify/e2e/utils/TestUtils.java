@@ -155,18 +155,18 @@ public class TestUtils {
             return existingAID.get();
         } else {
             var result = client.identifiers().create(name, kargs);
-            waitOperation(client, result.op());
+            waitForCompleted(client, result.op());
 
             HabState aid = client.identifiers().get(name)
                     .orElseThrow(() -> new IllegalArgumentException("Failed to create identifier: " + name));
-            
+
             if (client.getAgent() == null || client.getAgent().getPre() == null) {
                 throw new IllegalArgumentException("Client, agent, or pre cannot be null");
             }
 
             String pre = client.getAgent().getPre();
             var op = client.identifiers().addEndRole(name, "agent", pre, null);
-            waitOperation(client, op.op());
+            waitForCompleted(client, op.op());
 
             System.out.println(name + "AID:" + aid.getPrefix());
             return aid;
@@ -246,7 +246,7 @@ public class TestUtils {
                 kargs.setWits(env.witnessIds());
             }
             var result = client.identifiers().create(name, kargs);
-            KelOperation opResult = waitOperation(client, result.op(), KelOperation.class);
+            Operation opResult = waitForCompleted(client, result.op());
             id = switch (opResult) {
                 case CompletedWitnessOperation completed -> completed.getResponse().getI();
                 case CompletedDelegationOperation completed -> completed.getResponse().getI();
@@ -260,7 +260,7 @@ public class TestUtils {
             }
             if (!hasEndRole(client, name, "agent", eid)) {
                 var results = client.identifiers().addEndRole(name, "agent", eid, null);
-                waitOperation(client, results.op());
+                waitForCompleted(client, results.op());
             }
         }
 
@@ -282,12 +282,10 @@ public class TestUtils {
         }
         OOBIOperation op = client.oobis().resolve(oobi, name);
 
-        OOBIOperation opBody = waitOperation(client, op, OOBIOperation.class);
-        if (opBody instanceof CompletedOOBIOperation completed) {
-            String i = completed.getResponse().getI();
-            if (i != null) {
-                return i;
-            }
+        CompletedOOBIOperation opBody = waitForCompleted(client, op, CompletedOOBIOperation.class);
+        String i = opBody.getResponse().getI();
+        if (i != null) {
+            return i;
         }
         return getOrCreateContact(client, name, oobi);
     }
@@ -347,7 +345,7 @@ public class TestUtils {
         cData.setE(source);
 
         IssueCredentialResult issResult = issuerClient.credentials().issue(issuerAid.name, cData);
-        waitOperation(issuerClient, issResult.getOp());
+        waitForCompleted(issuerClient, issResult.getOp());
 
         return issuerClient.credentials().get(issResult.getAcdc().getKed().get("d").toString()).get();
     }
@@ -437,7 +435,7 @@ public class TestUtils {
 
     public static void resolveOobi(SignifyClient client, String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
         OOBIOperation op = client.oobis().resolve(oobi, alias);
-        waitOperation(client, op);
+        waitForCompleted(client, op);
     }
 
     public static Credential waitForCredential(SignifyClient client, String credSAID) throws Exception {
@@ -525,6 +523,42 @@ public class TestUtils {
         T result = client.operations().wait(op, type);
         deleteOperations(client, op);
         return result;
+    }
+
+    public static Operation waitForCompleted(SignifyClient client, Operation op)
+            throws IOException, InterruptedException, LibsodiumException {
+        Operation result = waitOperation(client, op, Operation.class);
+        String failureMessage = switch (result) {
+            case FailedChallengeOperation f -> f.getError().getMessage();
+            case FailedCredentialOperation f -> f.getError().getMessage();
+            case FailedDelegationOperation f -> f.getError().getMessage();
+            case FailedDelegatorOperation f -> f.getError().getMessage();
+            case FailedDoneOperation f -> f.getError().getMessage();
+            case FailedEndRoleOperation f -> f.getError().getMessage();
+            case FailedExchangeOperation f -> f.getError().getMessage();
+            case FailedGroupOperation f -> f.getError().getMessage();
+            case FailedLocSchemeOperation f -> f.getError().getMessage();
+            case FailedOOBIOperation f -> f.getError().getMessage();
+            case FailedQueryOperation f -> f.getError().getMessage();
+            case FailedRegistryOperation f -> f.getError().getMessage();
+            case FailedSubmitOperation f -> f.getError().getMessage();
+            case FailedWitnessOperation f -> f.getError().getMessage();
+            default -> null;
+        };
+        if (failureMessage != null) {
+            throw new AssertionError("Operation failed: " + failureMessage);
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Operation> T waitForCompleted(SignifyClient client, Operation op, Class<T> expectedType)
+            throws IOException, InterruptedException, LibsodiumException {
+        Operation result = waitForCompleted(client, op);
+        if (!expectedType.isInstance(result)) {
+            throw new AssertionError("Expected " + expectedType.getSimpleName() + " but got " + result.getClass().getSimpleName());
+        }
+        return (T) result;
     }
 
     public static Integer parseInteger(String s) {

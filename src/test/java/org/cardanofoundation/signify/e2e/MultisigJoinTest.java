@@ -13,7 +13,9 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
@@ -27,7 +29,6 @@ import java.util.stream.Stream;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MultisigJoinTest extends BaseIntegrationTest {
@@ -87,7 +88,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         var icpResult = client1.identifiers().create(nameMultisig, kargs);
 
-        Operation createMultisig1 = icpResult.op();
+        KelOperation createMultisig1 = icpResult.op();
         Serder serder = icpResult.serder();
         List<String> sigs = icpResult.sigs();
         List<Siger> sigers = sigs.stream()
@@ -135,9 +136,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         var icpResult2 = client2.identifiers().create(nameMultisig, iargs2);
 
-        Operation createMultisig2 = icpResult2.op();
+        KelOperation createMultisig2 = icpResult2.op();
 
-        List<Operation> op = waitOperationAsync(
+        waitOperationAsync(
             new WaitOperationArgs(client1, createMultisig1),
             new WaitOperationArgs(client2, createMultisig2)
         );
@@ -400,7 +401,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         Keeping.Keeper<?> keeper3 = client3.getManager().get(aid3);
         List<String> sig3 = keeper3.sign(serder3.getRaw().getBytes()).signatures();
 
-        Operation joinOperation = Utils.fromJson(Utils.jsonStringify(client3.groups()
+        GroupOperation joinOperation = Utils.fromJson(Utils.jsonStringify(client3.groups()
             .join(
                 nameMultisig,
                 serder3,
@@ -408,9 +409,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
                 Utils.toMap(exn3.getA()).get("gid").toString(),
                 smids,
                 rmids
-            )), Operation.class);
-
-        waitOperation(client3, joinOperation);
+            )), GroupOperation.class);
+        waitForCompleted(client3, joinOperation);
 
         HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
 
@@ -428,9 +428,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         String eid = members.getSigning().get(2).getEnds().getAgent().keySet().iterator().next();
 
         var endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
-        Operation endRoleResult = waitOperation(client3, endRoleOperation.op());
-
-        assertNotNull(endRoleResult);
+        waitForCompleted(client3, endRoleOperation.op());
     }
 
     public static HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {

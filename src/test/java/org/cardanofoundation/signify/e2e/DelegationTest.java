@@ -62,7 +62,7 @@ public class DelegationTest {
                 "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"));
         kargs.setWits(wits);
         var icpResult1 = client1.identifiers().create("delegator", kargs);
-        waitOperation(client1, icpResult1.op());
+        waitForCompleted(client1, icpResult1.op());
 
         HabState ator = client1.identifiers().get("delegator").get();
         var rpyResult1 = client1.identifiers().addEndRole(
@@ -71,7 +71,7 @@ public class DelegationTest {
                 client1.getAgent().getPre(),
                 null
         );
-        waitOperation(client1, rpyResult1.op());
+        waitForCompleted(client1, rpyResult1.op());
 
         // Client 2 resolves delegator OOBI
         OOBI oobi1 = client1.oobis().get("delegator", "agent").get();
@@ -98,7 +98,7 @@ public class DelegationTest {
         testSteps.step("delegator approves delegation", () -> {
             var result = retry(unchecked(() -> {
                 var apprDelRes = client1.delegations().approve("delegator", anchor);
-                waitOperation(client1, apprDelRes.op());
+                waitForCompleted(client1, apprDelRes.op());
                 return apprDelRes;
             }));
             List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");
@@ -106,10 +106,10 @@ public class DelegationTest {
         });
 
         QueryOperation op3 = client2.keyStates().query(ator.getPrefix(), "1", null);
-        waitOperation(client2, op3);
+        waitForCompleted(client2, op3);
 
         // Client 2 check approval
-        waitOperation(client2, op2);
+        waitForCompleted(client2, op2);
         HabState aid2 = client2.identifiers().get("delegate").get();
         assertEquals(delegatePrefix, aid2.getPrefix());
         System.out.println("Delegation approved for aid: " + aid2.getPrefix());
@@ -123,7 +123,7 @@ public class DelegationTest {
                 client2.getAgent().getPre(),
                 null
         );
-        waitOperation(client2, rpyResult2.op());
+        waitForCompleted(client2, rpyResult2.op());
         Object oobis = client2.oobis().get("delegate", null).get();
         OOBI oobiBody = (OOBI) oobis;
         List<String> oobisResponse = oobiBody.getOobis();

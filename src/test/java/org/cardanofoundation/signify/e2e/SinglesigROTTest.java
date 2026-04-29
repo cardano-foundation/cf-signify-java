@@ -5,7 +5,6 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +75,7 @@ public class SinglesigROTTest extends BaseIntegrationTest {
         // rot
         RotateIdentifierArgs args = RotateIdentifierArgs.builder().build();
         var result = client1.identifiers().rotate("name1", args);
-        waitOperation(client1, result.op());
+        waitForCompleted(client1, result.op());
 
         // local keystate after rot
         KeyStateRecord keyStateRecord1 = client1.keyStates().get(name1_id).get();
@@ -101,8 +100,8 @@ public class SinglesigROTTest extends BaseIntegrationTest {
         // refresh remote keystate
         String sn = keyStateRecord1.getS();
         QueryOperation queryOp = client2.keyStates().query(contact1_id, sn, null);
-        Operation completedOp = waitOperation(client2, queryOp);
-        KeyStateRecord keyState3 = ((CompletedQueryOperation) completedOp).getResponse();
+        CompletedQueryOperation completedOp = waitForCompleted(client2, queryOp, CompletedQueryOperation.class);
+        KeyStateRecord keyState3 = completedOp.getResponse();
 
         // local and remote keystate match
         assertEquals(keyState3.getS(), keyStateRecord1.getS());

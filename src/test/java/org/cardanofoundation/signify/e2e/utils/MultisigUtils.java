@@ -31,17 +31,21 @@ import java.util.stream.Collectors;
 import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
+import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 
 @SuppressWarnings("unchecked")
 public class MultisigUtils {
 
-    public static Operation acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
+    public static KelOperation acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
         final HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
@@ -73,7 +77,7 @@ public class MultisigUtils {
         createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
 
         var icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
-        Operation op2 = icpResult2.op();
+        KelOperation op2 = icpResult2.op();
         Serder serder = icpResult2.serder();
         List<String> sigs = icpResult2.sigs();
         List<Siger> sigers = sigs.stream().map(Siger::new).toList();
@@ -97,7 +101,7 @@ public class MultisigUtils {
         return op2;
     }
 
-    public static Operation interactMultisig(SignifyClient client, String groupName, HabState aid,
+    public static KelOperation interactMultisig(SignifyClient client, String groupName, HabState aid,
                                           List<HabState> otherMemberAIDs,
                                           Object data,
                                           List<KeyStateRecord> states,
@@ -142,7 +146,7 @@ public class MultisigUtils {
         return interactResult.op();
     }
 
-    public static Operation rotateMultisig(SignifyClient client, String groupName, HabState aid,
+    public static KelOperation rotateMultisig(SignifyClient client, String groupName, HabState aid,
                                           List<HabState> otherMemberAIDs,
                                           RotateIdentifierArgs kargs,
                                           String route,
@@ -361,7 +365,7 @@ public class MultisigUtils {
                 );
     }
 
-    public static Operation createAIDMultisig(
+    public static GroupOperation createAIDMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -374,7 +378,7 @@ public class MultisigUtils {
         }
 
         var icpResult = client.identifiers().create(groupName, kargs);
-        Operation op = icpResult.op();
+        GroupOperation op = (GroupOperation) icpResult.op();
 
         Serder serder = icpResult.serder();
         List<String> sigs = icpResult.sigs();
@@ -413,7 +417,7 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Operation createRegistryMultisig(
+    public static RegistryOperation createRegistryMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -434,7 +438,7 @@ public class MultisigUtils {
                 .nonce(nonce)
                 .build();
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        Operation op = vcpResult.op();
+        RegistryOperation op = (RegistryOperation) vcpResult.op();
 
         Serder serder = vcpResult.getRegser();
         Serder anc = vcpResult.getSerder();
@@ -466,7 +470,7 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Operation createRegistryMultisig(
+    public static RegistryOperation createRegistryMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -531,7 +535,7 @@ public class MultisigUtils {
 
 
 
-    public static Operation delegateMultisig(
+    public static DelegatorOperation delegateMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -549,7 +553,7 @@ public class MultisigUtils {
         }
 
         var delResult = client.delegations().approve(multisigAID.getName(), anchor);
-        Operation appOp = delResult.op();
+        DelegatorOperation appOp = delResult.op();
         System.out.println("Delegator " + aid.getName() + "(" + aid.getPrefix() + ") approved delegation for " +
                 multisigAID.getName() + " with anchor " + anchor);
 
@@ -703,7 +707,7 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Operation startMultisigIncept(
+    public static KelOperation startMultisigIncept(
             SignifyClient client,
             StartMultisigInceptArgs args
     ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
@@ -728,7 +732,7 @@ public class MultisigUtils {
         createIdentifierArgs.setRstates(participantStates);
 
         var icpResult1 = client.identifiers().create(args.getGroupName(), createIdentifierArgs);
-        Operation op1 = icpResult1.op();
+        KelOperation op1 = icpResult1.op();
         Serder serder = icpResult1.serder();
 
         List<String> sigs = icpResult1.sigs();

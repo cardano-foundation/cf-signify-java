@@ -6,7 +6,11 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.generated.keria.model.CompletedDelegatorOperation;
+import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
@@ -87,7 +91,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         // First member start the creation of a multisig identifier
         // Create a multisig AID for the GEDA.
         // Skip if a GEDA AID has already been incepted.
-        Operation otor1 = testSteps.step(String.format("%s(%s) initiated delegator multisig, waiting for %s(%s) to join...",
+        KelOperation otor1 = testSteps.step(String.format("%s(%s) initiated delegator multisig, waiting for %s(%s) to join...",
                 delegator1Name, delegator1Aid.getPrefix(), delegator2Name, delegator2Aid.getPrefix()), () -> {
 
             MultisigUtils.StartMultisigInceptArgs startMultisigInceptArgs = MultisigUtils.StartMultisigInceptArgs
@@ -129,7 +133,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         .msgSaid(ntor.getA().getD())
                         .build();
 
-        Operation otor2 = MultisigUtils.acceptMultisigIncept(delegator2Client, acceptMultisigInceptArgs);
+        KelOperation otor2 = MultisigUtils.acceptMultisigIncept(delegator2Client, acceptMultisigInceptArgs);
 
         String torpre = otor1.getName().split("\\.")[1];
 
@@ -197,7 +201,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 new GetOrCreateContactArgs(delegatee2Client, delegateeGroupName, oobiGtor)
         );
 
-        Operation opDelegatee1 = testSteps.step(delegatee1Name + "(" + delegatee1Aid.getPrefix() + ") initiated delegatee multisig, waiting for "
+        KelOperation opDelegatee1 = testSteps.step(delegatee1Name + "(" + delegatee1Aid.getPrefix() + ") initiated delegatee multisig, waiting for "
                 + delegatee2Name + "(" + delegatee2Aid.getPrefix() + ") to join...", () -> {
             MultisigUtils.StartMultisigInceptArgs startMultisigInceptArgs = MultisigUtils.StartMultisigInceptArgs
                     .builder()
@@ -231,7 +235,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         .groupName(delegateeGroupName)
                         .msgSaid(ntee.getA().getD())
                         .build();
-        Operation opDelegatee2 = MultisigUtils.acceptMultisigIncept(delegatee2Client, acceptMultisigInceptArgs);
+        KelOperation opDelegatee2 = MultisigUtils.acceptMultisigIncept(delegatee2Client, acceptMultisigInceptArgs);
         System.out.println(delegatee2Name + " joined multisig, waiting for delegator...");
 
         HabState agtee1 = delegatee1Client.identifiers().get(delegateeGroupName).get();
@@ -252,7 +256,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
             }};
 
             try {
-                Operation delApprOp1 = MultisigUtils.delegateMultisig(
+                DelegatorOperation delApprOp1 = MultisigUtils.delegateMultisig(
                         delegator1Client,
                         delegator1Aid,
                         Collections.singletonList(delegator2Aid),
@@ -260,7 +264,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         anchor,
                         true);
 
-                Operation delApprOp2 = MultisigUtils.delegateMultisig(
+                DelegatorOperation delApprOp2 = MultisigUtils.delegateMultisig(
                         delegator2Client,
                         delegator2Aid,
                         Collections.singletonList(delegator1Aid),
@@ -268,11 +272,11 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         anchor,
                         false);
 
-                Operation dresult1 = waitOperation(delegator1Client, delApprOp1);
-                Object responseDresult1 = dresult1.getName();
+                CompletedDelegatorOperation dresult1 = waitForCompleted(delegator1Client, delApprOp1, CompletedDelegatorOperation.class);
+                String responseDresult1 = dresult1.getName();
 
-                Operation dresult2 = waitOperation(delegator2Client, delApprOp2);
-                Object responseDresult2 = dresult2.getName();
+                CompletedDelegatorOperation dresult2 = waitForCompleted(delegator2Client, delApprOp2, CompletedDelegatorOperation.class);
+                String responseDresult2 = dresult2.getName();
 
                 assertEquals(responseDresult1, responseDresult2);
                 waitAndMarkNotification(delegator1Client, "/multisig/ixn");
