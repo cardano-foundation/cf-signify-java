@@ -40,7 +40,6 @@ import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 
 @SuppressWarnings("unchecked")
@@ -439,7 +438,7 @@ public class MultisigUtils {
                 .nonce(nonce)
                 .build();
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        RegistryOperation op = (RegistryOperation) vcpResult.op();
+        RegistryOperation op = vcpResult.op();
 
         Serder serder = vcpResult.regser();
         Serder anc = vcpResult.serder();
@@ -483,7 +482,7 @@ public class MultisigUtils {
         return createRegistryMultisig(client, aid, otherMembersAIDs, multisigAID, registryName, nonce, "registry", isInitiator);
     }
 
-    public static Operation createMultisig(
+    public static RegistryOperation createMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -503,7 +502,7 @@ public class MultisigUtils {
                 .nonce(nonce)
                 .build();
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        Operation op = vcpResult.op();
+        RegistryOperation op = vcpResult.op();
 
         Serder serder = vcpResult.regser();
         Serder anc = vcpResult.serder();
