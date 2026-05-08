@@ -12,6 +12,7 @@ import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
@@ -269,7 +270,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         if (oobiGEDAbyGAR1.getOobis().size() == 0 || oobiGEDAbyGAR2.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
-            List<Operation> opList1 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientGAR1,
                     aidGEDA.getName(),
                     aidGAR1,
@@ -279,7 +280,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            List<Operation> opList2 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientGAR2,
                     aidGEDA.getName(),
                     aidGAR2,
@@ -445,7 +446,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 || oobiQVIbyQAR2.getOobis().size() == 0
                 || oobiQVIbyQAR3.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
-            List<Operation> opList1 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientQAR1,
                     aidQVI.getName(),
                     aidQAR1,
@@ -454,7 +455,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     timestamp,
                     true
             );
-            List<Operation> opList2 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientQAR2,
                     aidQVI.getName(),
                     aidQAR2,
@@ -464,7 +465,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            List<Operation> opList3 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList3 = MultisigUtils.addEndRoleMultisig(
                     clientQAR3,
                     aidQVI.getName(),
                     aidQAR3,
@@ -801,7 +802,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                 || oobiLEbyLAR2.getOobis().size() == 0
                 || oobiLEbyLAR3.getOobis().size() == 0) {
             String timestamp = TestUtils.createTimestamp();
-            List<Operation> opList1 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisig(
                     clientLAR1,
                     aidLE.getName(),
                     aidLAR1,
@@ -811,7 +812,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     true
             );
 
-            List<Operation> opList2 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisig(
                     clientLAR2,
                     aidLE.getName(),
                     aidLAR2,
@@ -821,7 +822,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            List<Operation> opList3 = MultisigUtils.addEndRoleMultisig(
+            List<EndRoleOperation> opList3 = MultisigUtils.addEndRoleMultisig(
                     clientLAR3,
                     aidLE.getName(),
                     aidLAR3,

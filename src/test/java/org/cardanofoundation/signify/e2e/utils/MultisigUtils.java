@@ -32,6 +32,7 @@ import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
 import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
@@ -198,7 +199,7 @@ public class MultisigUtils {
         return interactResult.op();
     }
 
-    public static List<Operation> addEndRoleMultisig(SignifyClient client, String groupName, HabState aid,
+    public static List<EndRoleOperation> addEndRoleMultisig(SignifyClient client, String groupName, HabState aid,
                                             List<HabState> otherMemberAIDs, HabState multisigAID,
                                             String timestamp,
                                             boolean isInitiator) throws Exception {
@@ -206,7 +207,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
         }
 
-        List<Operation> opList = new ArrayList<>();
+        List<EndRoleOperation> opList = new ArrayList<>();
         GroupMember members = client.identifiers().members(groupName);
 
         for (AidRecord signing : members.getSigning()) {
@@ -252,7 +253,7 @@ public class MultisigUtils {
         return opList;
     }
 
-    public static List<Operation> addEndRoleMultisigs(SignifyClient client, String groupName, HabState aid,
+    public static List<EndRoleOperation> addEndRoleMultisigs(SignifyClient client, String groupName, HabState aid,
                                                   List<HabState> otherMemberAIDs, HabState multisigAID,
                                                   String timestamp,
                                                   boolean isInitiator) throws Exception {
@@ -260,7 +261,7 @@ public class MultisigUtils {
             TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
         }
 
-        List<Operation> opList = new ArrayList<>();
+        List<EndRoleOperation> opList = new ArrayList<>();
         GroupMember members = client.identifiers().members(groupName);
 
         String eid = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();

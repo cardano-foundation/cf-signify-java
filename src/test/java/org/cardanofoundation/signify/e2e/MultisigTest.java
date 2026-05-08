@@ -25,6 +25,7 @@ import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.ChallengeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
@@ -275,7 +276,7 @@ public class MultisigTest extends BaseIntegrationTest {
         HabState multisigAID = client1.identifiers().get("multisig").get();
 
         String timestamp = TestUtils.createTimestamp();
-        List<Operation> opList1 = MultisigUtils.addEndRoleMultisigs(
+        List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisigs(
                 client1,
                 "multisig",
                 aid1,
@@ -285,7 +286,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 true
         );
 
-        List<Operation> opList2 = MultisigUtils.addEndRoleMultisigs(
+        List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisigs(
                 client2,
                 "multisig",
                 aid2,
@@ -294,7 +295,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 timestamp,
                 false
         );
-        List<Operation> opList3 = MultisigUtils.addEndRoleMultisigs(
+        List<EndRoleOperation> opList3 = MultisigUtils.addEndRoleMultisigs(
                 client3,
                 "multisig",
                 aid3,

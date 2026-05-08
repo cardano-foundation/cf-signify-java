@@ -9,10 +9,10 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegatorOperation;
 import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -154,7 +154,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         String delegatorGroupNameOobi = testSteps.step(String.format("Add and resolve delegator OOBI %s(%s)", delegatorGroupName, adelegatorGroupName.getPrefix()), () -> {
             String timestamp = createTimestamp();
             try {
-                List<Operation> opList1 = MultisigUtils.addEndRoleMultisig(delegator1Client,
+                List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisig(delegator1Client,
                         delegatorGroupName,
                         delegator1Aid,
                         List.of(delegator2Aid),
@@ -162,7 +162,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                         timestamp,
                         true);
 
-                List<Operation> opList2 = MultisigUtils.addEndRoleMultisig(delegator2Client,
+                List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisig(delegator2Client,
                         delegatorGroupName,
                         delegator2Aid,
                         List.of(delegator1Aid),
