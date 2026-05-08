@@ -440,9 +440,9 @@ public class MultisigUtils {
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
         RegistryOperation op = (RegistryOperation) vcpResult.op();
 
-        Serder serder = vcpResult.getRegser();
-        Serder anc = vcpResult.getSerder();
-        List<String> sigs = vcpResult.getSigs();
+        Serder serder = vcpResult.regser();
+        Serder anc = vcpResult.serder();
+        List<String> sigs = vcpResult.sigs();
         List<Siger> sigers = sigs.stream().map(Siger::new).toList();
 
         String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
@@ -504,9 +504,9 @@ public class MultisigUtils {
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
         Operation op = vcpResult.op();
 
-        Serder serder = vcpResult.getRegser();
-        Serder anc = vcpResult.getSerder();
-        List<String> sigs = vcpResult.getSigs();
+        Serder serder = vcpResult.regser();
+        Serder anc = vcpResult.serder();
+        List<String> sigs = vcpResult.sigs();
         List<Siger> sigers = sigs.stream().map(Siger::new).toList();
 
         String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));

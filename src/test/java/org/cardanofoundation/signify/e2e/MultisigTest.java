@@ -936,10 +936,10 @@ public class MultisigTest extends BaseIntegrationTest {
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
         RegistryOperation op = vcpResult.op();
 
-        Serder serder = vcpResult.getRegser();
+        Serder serder = vcpResult.regser();
         String regk = serder.getPre();
-        Serder anc = vcpResult.getSerder();
-        List<String> sigs = vcpResult.getSigs();
+        Serder anc = vcpResult.serder();
+        List<String> sigs = vcpResult.sigs();
         List<Siger> sigers = sigs.stream().map(Siger::new).toList();
 
         String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));

@@ -19,6 +19,7 @@ import java.security.DigestException;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 import com.fasterxml.jackson.core.type.TypeReference;
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 
@@ -104,7 +105,8 @@ public class Registries {
             List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
 
             HttpResponse<String> res = this.createFromEvents(hab, args.getName(), args.getRegistryName(), regser.getKed(), serder.getKed(), sigs);
-            return new RegistryResult(regser, serder, sigs, res);
+            RegistryOperation op = Utils.fromJson(res.body(), RegistryOperation.class);
+            return new RegistryResult(regser, serder, sigs, op);
         }
     }
 

@@ -63,8 +63,9 @@ public class RegistryTest {
         when(mockedKeeper.getParams()).thenReturn(SaltyParams.builder().build());
 
         HttpResponse<String> mockedResponse = mock(HttpResponse.class);
-        when(mockedClient.fetch(eq("/identifiers/a name/registries"), eq("POST"), any(), any()))
+        when(mockedClient.fetch(eq("/identifiers/a name/registries"), eq("POST"), any()))
                 .thenReturn(mockedResponse);
+        when(mockedResponse.body()).thenReturn("{\"name\":\"registry.test\",\"done\":false}");
 
         CreateRegistryArgs args = CreateRegistryArgs.builder()
                 .name("a name")
@@ -73,8 +74,8 @@ public class RegistryTest {
                 .build();
         var actual = registries.create(args);
 
-        assertEquals("{\"v\":\"KERI10JSON0000c5_\",\"t\":\"vcp\",\"d\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\",\"i\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\",\"ii\":\"hab prefix\",\"s\":\"0\",\"c\":[\"NB\"],\"bt\":\"0\",\"b\":[],\"n\":\"\"}", actual.getRegser().getRaw());
-        assertEquals("{\"v\":\"KERI10JSON0000f4_\",\"t\":\"ixn\",\"d\":\"EE5R61289Xnpxc2M-euPtsAkp849tUdNJ7DuyBeSiRtm\",\"i\":\"hab prefix\",\"s\":\"1\",\"p\":\"a digest\",\"a\":[{\"i\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\",\"s\":\"0\",\"d\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\"}]}", actual.getSerder().getRaw());
+        assertEquals("{\"v\":\"KERI10JSON0000c5_\",\"t\":\"vcp\",\"d\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\",\"i\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\",\"ii\":\"hab prefix\",\"s\":\"0\",\"c\":[\"NB\"],\"bt\":\"0\",\"b\":[],\"n\":\"\"}", actual.regser().getRaw());
+        assertEquals("{\"v\":\"KERI10JSON0000f4_\",\"t\":\"ixn\",\"d\":\"EE5R61289Xnpxc2M-euPtsAkp849tUdNJ7DuyBeSiRtm\",\"i\":\"hab prefix\",\"s\":\"1\",\"p\":\"a digest\",\"a\":[{\"i\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\",\"s\":\"0\",\"d\":\"EMppKX_JxXBuL_xE3A_a6lOcseYwaB7jAvZ0YFdgecXX\"}]}", actual.serder().getRaw());
     }
 
     @Test
