@@ -323,6 +323,20 @@ public class BaseMockServerTest {
             "sender": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose"
         }]""";
 
+    public static final String MOCK_ENDROLES = """
+        [
+            {
+                "cid": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "role": "agent",
+                "eid": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei"
+            },
+            {
+                "cid": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "role": "witness",
+                "eid": "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
+            }
+        ]""";
+
     public static final String MOCK_CREDENTIAL = """
         {
             "sad": {
@@ -388,7 +402,9 @@ public class BaseMockServerTest {
         );
 
         String body;
-        if (reqUrl.startsWith(url + "/identifiers/aid1/credentials")) {
+        if (reqUrl.startsWith(url + "/endroles/")) {
+            body = MOCK_ENDROLES;
+        } else if (reqUrl.startsWith(url + "/identifiers/aid1/credentials")) {
             body = MOCK_CREDENTIAL;
         } else if (reqUrl.startsWith(url + "/events")) {
             body = MOCK_KEY_EVENT;

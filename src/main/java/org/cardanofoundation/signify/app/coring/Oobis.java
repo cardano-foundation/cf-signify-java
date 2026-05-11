@@ -81,9 +81,6 @@ public class Oobis {
                 ? "/endroles/" + aid + "/" + role
                 : "/endroles/" + aid;
         HttpResponse<String> response = this.client.fetch(path, "GET", null);
-        if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-            return List.of();
-        }
         return Utils.fromJson(response.body(), new TypeReference<List<EndRole>>() {});
     }
 }
