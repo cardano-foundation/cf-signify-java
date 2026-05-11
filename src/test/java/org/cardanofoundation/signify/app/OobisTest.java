@@ -5,10 +5,12 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.coring.Oobis;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Salter;
+import org.cardanofoundation.signify.generated.keria.model.EndRole;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,4 +56,46 @@ public class OobisTest extends BaseMockServerTest {
         assertTrue(data.containsKey("oobialias"));
         assertEquals("witness", data.get("oobialias"));
     }
+
+    @Test
+    @DisplayName("Test endroles without role filter")
+    void testEndroles_withoutRole() throws Exception {
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
+        client.boot();
+        client.connect();
+        cleanUpRequest();
+
+        Oobis oobis = client.oobis();
+        String aid = "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK";
+
+        List<EndRole> result = oobis.endroles(aid, null);
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals(url + "/endroles/" + aid, request.getRequestUrl().toString());
+        assertEquals(2, result.size());
+        assertEquals(aid, result.get(0).getCid());
+        assertEquals("agent", result.get(0).getRole());
+        assertEquals("EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei", result.get(0).getEid());
+    }
+
+    @Test
+    @DisplayName("Test endroles with role filter")
+    void testEndroles_withRole() throws Exception {
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
+        client.boot();
+        client.connect();
+        cleanUpRequest();
+
+        Oobis oobis = client.oobis();
+        String aid = "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK";
+
+        List<EndRole> result = oobis.endroles(aid, "agent");
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals(url + "/endroles/" + aid + "/agent", request.getRequestUrl().toString());
+        assertEquals(2, result.size());
+    }
+
 }
