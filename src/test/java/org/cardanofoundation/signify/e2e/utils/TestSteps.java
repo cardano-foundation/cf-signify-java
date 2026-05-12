@@ -3,6 +3,12 @@ package org.cardanofoundation.signify.e2e.utils;
 import java.util.concurrent.Callable;
 
 public class TestSteps {
+
+    @FunctionalInterface
+    public interface ThrowingRunnable {
+        void run() throws Exception;
+    }
+
     public <T> T step(String description, Callable<T> fn) throws Exception {
         long start = System.currentTimeMillis();
 
@@ -29,7 +35,7 @@ public class TestSteps {
         }
     }
 
-    public void step(String description, Runnable action) {
+    public void step(String description, ThrowingRunnable action) throws Exception {
         long start = System.currentTimeMillis();
 
         try {
@@ -38,7 +44,7 @@ public class TestSteps {
             System.out.println("Step - " + description + " - finished (" + (System.currentTimeMillis() - start) + "ms)");
         } catch (Exception e) {
             System.err.println("Step - " + description + " - failed");
-            throw new RuntimeException("Step - " + description + " - failed", e);
+            throw new Exception("Step - " + description + " - failed", e);
         }
     }
 }

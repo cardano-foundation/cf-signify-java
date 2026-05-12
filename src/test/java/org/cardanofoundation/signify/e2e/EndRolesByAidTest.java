@@ -69,140 +69,108 @@ public class EndRolesByAidTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Create 2-member multisig group (2-of-2)", () -> {
-            try {
-                System.out.println("Member1 starting multisig inception...");
-                Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
-                        .groupName(groupName)
-                        .localMemberName(memberNames[0])
-                        .participants(List.of(aid1.getPrefix(), aid2.getPrefix()))
-                        .isith(2)
-                        .nsith(2)
-                        .toad(wits.size())
-                        .wits(wits)
-                        .build());
+            System.out.println("Member1 starting multisig inception...");
+            Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+                    .groupName(groupName)
+                    .localMemberName(memberNames[0])
+                    .participants(List.of(aid1.getPrefix(), aid2.getPrefix()))
+                    .isith(2)
+                    .nsith(2)
+                    .toad(wits.size())
+                    .wits(wits)
+                    .build());
 
-                List<Notification> notes = TestUtils.waitForNotifications(client2, "/multisig/icp");
-                for (Notification note : notes) client2.notifications().mark(note.getI());
-                System.out.println("Member2 accepted");
-                Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
-                        .groupName(groupName)
-                        .localMemberName(memberNames[1])
-                        .msgSaid(notes.getLast().getA().getD())
-                        .build());
+            List<Notification> notes = TestUtils.waitForNotifications(client2, "/multisig/icp");
+            for (Notification note : notes) client2.notifications().mark(note.getI());
+            System.out.println("Member2 accepted");
+            Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+                    .groupName(groupName)
+                    .localMemberName(memberNames[1])
+                    .msgSaid(notes.getLast().getA().getD())
+                    .build());
 
-                waitOperationAsync(
-                        new WaitOperationArgs(client1, op1),
-                        new WaitOperationArgs(client2, op2)
-                );
+            waitOperationAsync(
+                    new WaitOperationArgs(client1, op1),
+                    new WaitOperationArgs(client2, op2)
+            );
 
-                HabState g1 = client1.identifiers().get(groupName).get();
-                HabState g2 = client2.identifiers().get(groupName).get();
-                assertEquals(g1.getPrefix(), g2.getPrefix());
-                System.out.println("Multisig created: " + g1.getPrefix());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            HabState g1 = client1.identifiers().get(groupName).get();
+            HabState g2 = client2.identifiers().get(groupName).get();
+            assertEquals(g1.getPrefix(), g2.getPrefix());
+            System.out.println("Multisig created: " + g1.getPrefix());
         });
 
         testSteps.step("Add agent end roles for group", () -> {
-            try {
-                HabState aid1Hab = client1.identifiers().get(memberNames[0]).get();
-                HabState aid2Hab = client2.identifiers().get(memberNames[1]).get();
-                HabState multisigAID = client1.identifiers().get(groupName).get();
-                String stamp = TestUtils.createTimestamp();
+            HabState aid1Hab = client1.identifiers().get(memberNames[0]).get();
+            HabState aid2Hab = client2.identifiers().get(memberNames[1]).get();
+            HabState multisigAID = client1.identifiers().get(groupName).get();
+            String stamp = TestUtils.createTimestamp();
 
-                System.out.println("Adding agent end roles in parallel...");
-                CompletableFuture<List<Object>> future1 = CompletableFuture.supplyAsync(unchecked(() ->
-                        MultisigUtils.addEndRoleMultisig(client1, groupName, aid1Hab,
-                                List.of(aid2Hab), multisigAID, stamp, true)
-                ));
-                CompletableFuture<List<Object>> future2 = CompletableFuture.supplyAsync(unchecked(() ->
-                        MultisigUtils.addEndRoleMultisig(client2, groupName, aid2Hab,
-                                List.of(aid1Hab), multisigAID, stamp, false)
-                ));
+            System.out.println("Adding agent end roles in parallel...");
+            CompletableFuture<List<Object>> future1 = CompletableFuture.supplyAsync(unchecked(() ->
+                    MultisigUtils.addEndRoleMultisig(client1, groupName, aid1Hab,
+                            List.of(aid2Hab), multisigAID, stamp, true)
+            ));
+            CompletableFuture<List<Object>> future2 = CompletableFuture.supplyAsync(unchecked(() ->
+                    MultisigUtils.addEndRoleMultisig(client2, groupName, aid2Hab,
+                            List.of(aid1Hab), multisigAID, stamp, false)
+            ));
 
-                List<Object> ops1 = future1.join();
-                List<Object> ops2 = future2.join();
+            List<Object> ops1 = future1.join();
+            List<Object> ops2 = future2.join();
 
-                List<WaitOperationArgs> waitArgs = new ArrayList<>();
-                ops1.forEach(op -> waitArgs.add(new WaitOperationArgs(client1, op)));
-                ops2.forEach(op -> waitArgs.add(new WaitOperationArgs(client2, op)));
-                waitOperationAsync(waitArgs.toArray(new WaitOperationArgs[0]));
+            List<WaitOperationArgs> waitArgs = new ArrayList<>();
+            ops1.forEach(op -> waitArgs.add(new WaitOperationArgs(client1, op)));
+            ops2.forEach(op -> waitArgs.add(new WaitOperationArgs(client2, op)));
+            waitOperationAsync(waitArgs.toArray(new WaitOperationArgs[0]));
 
-                GroupMember members = client1.identifiers().members(groupName);
-                for (AidRecord signing : members.getSigning()) {
-                    agentEids.add(signing.getEnds().getAgent().keySet().iterator().next());
-                }
-                System.out.println("Agent EIDs: " + agentEids);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            GroupMember members = client1.identifiers().members(groupName);
+            for (AidRecord signing : members.getSigning()) {
+                agentEids.add(signing.getEnds().getAgent().keySet().iterator().next());
             }
+            System.out.println("Agent EIDs: " + agentEids);
         });
 
         testSteps.step("Alice resolves group OOBI", () -> {
-            try {
-                OOBI groupOobi = client1.oobis().get(groupName, "agent").get();
-                String oobiUrl = getOobisIndexAt0(groupOobi).split("/agent/")[0];
-                TestUtils.resolveOobi(alice, oobiUrl, groupName);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            OOBI groupOobi = client1.oobis().get(groupName, "agent").get();
+            String oobiUrl = getOobisIndexAt0(groupOobi).split("/agent/")[0];
+            TestUtils.resolveOobi(alice, oobiUrl, groupName);
         });
 
         String groupAid = client1.identifiers().get(groupName).get().getPrefix();
 
         testSteps.step("Alice queries /endroles/{aid}", () -> {
-            try {
-                List<EndRole> result = alice.oobis().endroles(groupAid, null);
-                assertFalse(result.isEmpty());
-                assertTrue(result.stream().allMatch(r -> groupAid.equals(r.getCid())));
-                assertTrue(result.stream().allMatch(r -> "agent".equals(r.getRole())));
-                assertEquals(agentEids.stream().sorted().toList(),
-                        result.stream().map(EndRole::getEid).sorted().toList());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            List<EndRole> result = alice.oobis().endroles(groupAid, null);
+            assertFalse(result.isEmpty());
+            assertTrue(result.stream().allMatch(r -> groupAid.equals(r.getCid())));
+            assertTrue(result.stream().allMatch(r -> "agent".equals(r.getRole())));
+            assertEquals(agentEids.stream().sorted().toList(),
+                    result.stream().map(EndRole::getEid).sorted().toList());
         });
 
         testSteps.step("Alice queries /endroles/{aid}/agent", () -> {
-            try {
-                List<EndRole> result = alice.oobis().endroles(groupAid, "agent");
-                assertFalse(result.isEmpty());
-                assertTrue(result.stream().allMatch(r -> "agent".equals(r.getRole())));
-                assertTrue(result.stream().allMatch(r -> groupAid.equals(r.getCid())));
-                assertEquals(agentEids.stream().sorted().toList(),
-                        result.stream().map(EndRole::getEid).sorted().toList());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            List<EndRole> result = alice.oobis().endroles(groupAid, "agent");
+            assertFalse(result.isEmpty());
+            assertTrue(result.stream().allMatch(r -> "agent".equals(r.getRole())));
+            assertTrue(result.stream().allMatch(r -> groupAid.equals(r.getCid())));
+            assertEquals(agentEids.stream().sorted().toList(),
+                    result.stream().map(EndRole::getEid).sorted().toList());
         });
 
         testSteps.step("Alice queries non-existent role returns empty", () -> {
-            try {
-                assertTrue(alice.oobis().endroles(groupAid, "mailbox").isEmpty());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            assertTrue(alice.oobis().endroles(groupAid, "mailbox").isEmpty());
         });
 
         testSteps.step("Alice queries unknown AID returns empty", () -> {
-            try {
-                assertTrue(alice.oobis().endroles("EXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", null).isEmpty());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            assertTrue(alice.oobis().endroles("EXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", null).isEmpty());
         });
 
         testSteps.step("Alice queries her own AID returns her agent EID", () -> {
-            try {
-                HabState aliceAid = alice.identifiers().get(aliceName).get();
-                List<EndRole> result = alice.oobis().endroles(aliceAid.getPrefix(), null);
-                assertEquals(1, result.size());
-                assertEquals("agent", result.getFirst().getRole());
-                assertEquals(aliceAid.getPrefix(), result.getFirst().getCid());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            HabState aliceAid = alice.identifiers().get(aliceName).get();
+            List<EndRole> result = alice.oobis().endroles(aliceAid.getPrefix(), null);
+            assertEquals(1, result.size());
+            assertEquals("agent", result.getFirst().getRole());
+            assertEquals(aliceAid.getPrefix(), result.getFirst().getCid());
         });
     }
 }
