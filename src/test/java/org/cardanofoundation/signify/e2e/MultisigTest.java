@@ -31,6 +31,7 @@ import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
+import org.cardanofoundation.signify.e2e.utils.OperationWaiter;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
@@ -979,7 +980,7 @@ public class MultisigTest extends BaseIntegrationTest {
             Object op) throws IOException, InterruptedException, LibsodiumException {
         Operation operation = Operation.fromObject(op);
         String name = operation.getName();
-        operation = client.operations().wait(operation);
+        operation = OperationWaiter.wait(client.operations(), operation);
         TestUtils.deleteOperations(client, operation);
         TestUtils.deleteOperation(client, name);
         return operation;
