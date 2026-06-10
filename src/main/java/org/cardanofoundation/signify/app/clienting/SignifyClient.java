@@ -250,7 +250,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
         headers.put("signify-resource", this.controller.getPre());
-        headers.put("signify-timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put("signify-timestamp", Utils.currentDateTimeString());
         headers.put("content-type", "application/json");
 
         Object _body = method.equals("GET") ? null : Utils.jsonStringify(data);

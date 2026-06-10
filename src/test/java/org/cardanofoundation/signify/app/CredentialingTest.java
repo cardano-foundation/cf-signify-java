@@ -27,7 +27,7 @@ public class CredentialingTest extends BaseMockServerTest {
     public MockResponse mockAllRequests(RecordedRequest req) throws LibsodiumException {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
-        headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put(Httping.HEADER_SIG_TIME, Utils.currentDateTimeString());
         headers.put("content-type", "application/json");
 
         String reqUrl = req.getRequestUrl().toString();

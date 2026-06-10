@@ -526,7 +526,7 @@ public class MultisigTest extends BaseIntegrationTest {
         Map<String, Object> vcdata = new HashMap<>();
         vcdata.put("LEI", "5493001KJTIIGC8Y1R17");
         String holder = aid4.getPrefix();
-        String TIME = new Date().toInstant().toString().replace("Z", "000+00:00");
+        String TIME = Utils.currentDateTimeString();
 
         CredentialData.CredentialSubject subject = CredentialData.CredentialSubject.builder()
                 .i(holder)
@@ -619,7 +619,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         // IPEX grant message
         System.out.println("Starting grant message");
-        String stamp = new Date().toInstant().toString().replace("Z", "000+00:00");
+        String stamp = Utils.currentDateTimeString();
 
         Exchanging.ExchangeMessageResult grantResult = client1.ipex().grant(IpexGrantArgs.builder()
                 .senderName("multisig")
@@ -798,7 +798,7 @@ public class MultisigTest extends BaseIntegrationTest {
         warnNotifications(List.of(client1, client2, client3, client4));
 
         System.out.println("Revoking credential...");
-        String REVTIME = new Date().toInstant().toString().replace("Z", "000+00:00");
+        String REVTIME = Utils.currentDateTimeString();
         RevokeCredentialResult revokeRes = client1.credentials().revoke("multisig", credentialSaid, REVTIME);
         op1 = revokeRes.getOp();
 

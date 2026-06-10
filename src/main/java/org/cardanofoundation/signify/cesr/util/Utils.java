@@ -1,8 +1,6 @@
 package org.cardanofoundation.signify.cesr.util;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.config.GeneratedModelConfig;
 import org.cardanofoundation.signify.cesr.*;
@@ -12,6 +10,9 @@ import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueExcept
 import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Utils {
@@ -113,8 +114,17 @@ public class Utils {
         return System.currentTimeMillis() / 1000;
     }
 
+    // KERI datetimes are fixed-width with exactly 6 fraction digits;
+    // Instant.toString() drops the fraction entirely on whole seconds.
+    private static final DateTimeFormatter KERI_DATETIME_FORMATTER =
+            DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSSSS'+00:00'").withZone(ZoneOffset.UTC);
+
     public static String currentDateTimeString() {
-        return new Date().toInstant().toString().replace("Z", "000+00:00");
+        return toDateTimeString(Instant.now());
+    }
+
+    public static String toDateTimeString(Instant instant) {
+        return KERI_DATETIME_FORMATTER.format(instant);
     }
 
 

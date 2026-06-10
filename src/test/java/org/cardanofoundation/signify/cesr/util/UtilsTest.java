@@ -82,4 +82,18 @@ public class UtilsTest {
 
         assertArrayEquals(expected, result, "The concatenated array is not as expected.");
     }
+
+    @Test
+    public void testDateTimeStringIsFixedWidth() {
+        // Whole-second instants must still produce the 6-digit fraction KERI requires
+        assertEquals(
+                "2026-06-10T06:53:58.000000+00:00",
+                Utils.toDateTimeString(java.time.Instant.parse("2026-06-10T06:53:58Z")));
+        assertEquals(
+                "2026-06-10T06:53:58.166000+00:00",
+                Utils.toDateTimeString(java.time.Instant.parse("2026-06-10T06:53:58.166Z")));
+
+        String now = Utils.currentDateTimeString();
+        assertEquals(32, now.length(), "KERI datetime must be fixed-width: " + now);
+    }
 }

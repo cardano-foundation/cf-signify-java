@@ -185,8 +185,7 @@ public class Exchanging {
     ) throws DigestException {
         String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         String ilk = CoreUtil.Ilks.EXN.getValue();
-        String dt = date != null ? date :
-                new Date().toInstant().toString().replace("Z", "000+00:00");
+        String dt = date != null ? date : Utils.currentDateTimeString();
         String p = dig != null ? dig : "";
         Map<String, Object> q = modifiers != null ? modifiers : new LinkedHashMap<>();
         Map<String, List<Object>> ems = embeds != null ? embeds : new LinkedHashMap<>();
