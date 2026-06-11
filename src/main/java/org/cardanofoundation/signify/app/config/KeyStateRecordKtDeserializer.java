@@ -4,37 +4,28 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
+
 import java.io.IOException;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.List;
 
-public class KeyStateRecordKtDeserializer extends JsonDeserializer<KeyStateRecordKt> {
-    // WeakHashMap to avoid memory leaks (keys are GC'd when no longer referenced)
-    private static final Map<KeyStateRecordKt, Object> rawValueMap = new WeakHashMap<>();
-
-    public static Object getRawValue(KeyStateRecordKt instance) {
-        return rawValueMap.get(instance);
-    }
+/**
+ * Deserializes the polymorphic {@code kt}/{@code nt} fields into a {@link KtValue}.
+ * KERIA returns these as either a plain string (unweighted) or an array of weights (weighted).
+ */
+class KeyStateRecordKtDeserializer extends JsonDeserializer<KeyStateRecordKt> {
 
     @Override
     public KeyStateRecordKt deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        Object value;
         switch (p.currentToken()) {
             case VALUE_STRING:
-                value = p.getValueAsString();
-                break;
+            case VALUE_NUMBER_INT: // tolerated; signify-ts types thresholds as string | number
+                return KtValue.unweighted(p.getValueAsString());
             case START_ARRAY:
-                value = ctxt.readValue(p, Object.class); // parse array
-                break;
-            case START_OBJECT:
-                value = ctxt.readValue(p, Object.class); // parse object
-                break;
+                return KtValue.weighted(ctxt.readValue(p, List.class));
             default:
-                value = null;
-                break;
+                return ctxt.reportInputMismatch(KeyStateRecordKt.class,
+                    "Cannot deserialize kt/nt threshold from token %s; expected a string or an array of weights",
+                    p.currentToken());
         }
-        KeyStateRecordKt instance = new KeyStateRecordKt();
-        rawValueMap.put(instance, value);
-        return instance;
     }
 }

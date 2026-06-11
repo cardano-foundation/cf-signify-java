@@ -1,6 +1,7 @@
 package org.cardanofoundation.signify.app.aiding;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.cardanofoundation.signify.app.config.KtValue;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
@@ -395,7 +396,7 @@ public class IdentifierController {
         String dig = state.getD();
         int ridx = Integer.parseInt(state.getS(), 16) + 1;
         List<String> wits = state.getB();
-        Object isith = org.cardanofoundation.signify.app.config.KeyStateRecordKtDeserializer.getRawValue(state.getNt());
+        Object isith = KtValue.rawOf(state.getNt());
         Object nsith = kargs.getNsith() != null ? kargs.getNsith() : isith;
 
         // if isith is None:  # compute default from newly rotated verfers above
