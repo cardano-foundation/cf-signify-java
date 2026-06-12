@@ -99,21 +99,27 @@ public class OperationDeserializer extends JsonDeserializer<Operation> implement
     public Operation deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode node = p.readValueAsTree();
 
-        OperationType opType = fixedType;
-        if (opType == null) {
-            String name = node.has("name") ? node.get("name").asText() : null;
-            opType = resolveFromPrefix(name);
-            if (opType == null) {
-                throw new IOException("Cannot determine operation type from name: " + name
-                        + ". Expected format: <type>.<identifier> where type is one of: " + PREFIX_MAP.keySet());
-            }
-        }
-
-        if (opType == OperationType.DELEGATION
+        String name = node.has("name") ? node.get("name").asText() : null;
+        OperationType sniffedType = resolveFromPrefix(name);
+        if (sniffedType == OperationType.DELEGATION
                 && node.has("metadata")
                 && !node.get("metadata").isNull()
                 && node.get("metadata").has("teepre")) {
-            opType = OperationType.DELEGATOR;
+            sniffedType = OperationType.DELEGATOR;
+        }
+
+        OperationType opType = fixedType;
+        if (opType == null) {
+            opType = sniffedType;
+            if (opType == null) {
+                return ctxt.reportInputMismatch(Operation.class,
+                        "Cannot determine operation type from name: %s. Expected format: <type>.<identifier> where type is one of: %s",
+                        name, PREFIX_MAP.keySet());
+            }
+        } else if (sniffedType != null && sniffedType != opType) {
+            return ctxt.reportInputMismatch(Operation.class,
+                    "Operation name '%s' indicates type %s but %s was requested",
+                    name, sniffedType, opType);
         }
 
         Class<? extends Operation> concreteType;
@@ -125,7 +131,7 @@ public class OperationDeserializer extends JsonDeserializer<Operation> implement
             concreteType = opType.pending;
         }
 
-        removeDoneFields(node);
+        removeDependsDone(node);
         JsonParser nodeParser = node.traverse(p.getCodec());
         nodeParser.nextToken();
         return ctxt.readValue(nodeParser, concreteType);
@@ -140,18 +146,17 @@ public class OperationDeserializer extends JsonDeserializer<Operation> implement
     }
 
     /**
-     * Remove 'done' field only from depends.
+     * Remove 'done' from the dependent operation at metadata.depends.
+     * TODO remove once the KERIA spec types metadata.depends as the creation-time snapshot
+     *  it actually is, instead of the full operation oneOf (whose variants pin 'done').
      */
-    private static void removeDoneFields(JsonNode node) {
-        if (node != null && node.isObject()) {
-            node.fields().forEachRemaining(entry -> {
-                String key = entry.getKey();
-                JsonNode value = entry.getValue();
-                if ("depends".equals(key) && value.isObject()) {
-                    ((ObjectNode) value).remove("done");
-                }
-                removeDoneFields(value);
-            });
+    private static void removeDependsDone(JsonNode node) {
+        JsonNode metadata = node.get("metadata");
+        if (metadata != null && metadata.isObject()) {
+            JsonNode depends = metadata.get("depends");
+            if (depends != null && depends.isObject()) {
+                ((ObjectNode) depends).remove("done");
+            }
         }
     }
 }
