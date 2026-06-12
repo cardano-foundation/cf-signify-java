@@ -2,8 +2,18 @@ package org.cardanofoundation.signify.app;
 
 import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.coring.exception.OperationFailedException;
+import org.cardanofoundation.signify.app.coring.exception.OperationNotFoundException;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.CompletedLocSchemeOperation;
+import org.cardanofoundation.signify.generated.keria.model.DoneOperation;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
+import org.cardanofoundation.signify.generated.keria.model.LocSchemeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.PendingDoneOperation;
+import org.cardanofoundation.signify.generated.keria.model.PendingRegistryOperation;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,19 +42,6 @@ public class OperationsTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-    }
-
-    private String pendingDoneOpJson(String name) {
-        return "{\"_type\":\"PendingDoneOperation\",\"name\":\"" + name + "\",\"done\":false,\"metadata\":{\"pre\":\"ETest\",\"response\":{}}}";
-    }
-
-    private String completedDoneOpJson(String name) {
-        return "{" +
-            "\"_type\": \"CompletedDoneOperation\"," +
-            "\"name\": \"" + name + "\"," +
-            "\"done\": true," +
-            "\"response\": {\"pre\": \"ETest\", \"response\": {}}" +
-            "}";
     }
 
     @Test
@@ -79,6 +76,7 @@ public class OperationsTest {
         verify(client).fetch(pathCaptor.capture(), methodCaptor.capture(), isNull());
         assertEquals("/operations", pathCaptor.getValue());
         assertEquals("GET", methodCaptor.getValue());
+        assertEquals(1, response.size());
     }
 
     @Test
@@ -122,7 +120,7 @@ public class OperationsTest {
         String opName = "locscheme." + UUID.randomUUID();
         String doneJson = doneLocSchemeOpJson(opName);
 
-        Operation op = org.cardanofoundation.signify.cesr.util.Utils.fromJson(doneJson, Operation.class);
+        Operation op = Utils.fromJson(doneJson, Operation.class);
         operations.wait(op, Operation.class);
         verifyNoInteractions(client);
     }
@@ -146,7 +144,7 @@ public class OperationsTest {
             .thenReturn(pendingResponse)
             .thenReturn(doneResponse);
 
-        Operation op = org.cardanofoundation.signify.cesr.util.Utils.fromJson(pendingJson, Operation.class);
+        Operation op = Utils.fromJson(pendingJson, Operation.class);
         operations.wait(op, Operation.class);
         // 1 initial fetch + 1 poll
         verify(client, times(2)).fetch(anyString(), anyString(), isNull());
@@ -175,10 +173,59 @@ public class OperationsTest {
         Operations.WaitOptions options = Operations.WaitOptions.builder()
             .maxSleep(10)
             .build();
-        Operation op = org.cardanofoundation.signify.cesr.util.Utils.fromJson(pendingJson, Operation.class);
-        operations.wait(op, Operation.class, options);
+        Operation op = Utils.fromJson(pendingJson, Operation.class);
+        operations.wait(op, options);
         // 1 initial + 2 polls
         verify(client, times(3)).fetch(anyString(), anyString(), isNull());
+    }
+
+    @Test
+    @DisplayName("Returns the completed operation as the requested type")
+    void returnsTypedResult() throws IOException, InterruptedException, LibsodiumException {
+        String opName = "locscheme." + UUID.randomUUID();
+
+        HttpResponse<String> doneResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(doneResponse.body()).thenReturn(doneLocSchemeOpJson(opName));
+        Mockito.when(doneResponse.statusCode()).thenReturn(200);
+
+        when(client.fetch(anyString(), anyString(), isNull()))
+            .thenReturn(doneResponse);
+
+        Operation op = Utils.fromJson(pendingLocSchemeOpJson(opName), Operation.class);
+        LocSchemeOperation result = operations.wait(op, LocSchemeOperation.class);
+
+        assertInstanceOf(CompletedLocSchemeOperation.class, result);
+        assertEquals(opName, result.getName());
+        // the polled operation is returned directly; no extra typed re-fetch
+        verify(client, times(1)).fetch(anyString(), anyString(), isNull());
+    }
+
+    @Test
+    @DisplayName("Throws when the completed operation is not of the requested type")
+    void throwsWhenResultTypeDoesNotMatch() {
+        String opName = "locscheme." + UUID.randomUUID();
+
+        Operation op = Utils.fromJson(doneLocSchemeOpJson(opName), Operation.class);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> operations.wait(op, DoneOperation.class));
+
+        assertTrue(exception.getMessage().contains("not the requested DoneOperation"));
+        verifyNoInteractions(client);
+    }
+
+    @Test
+    @DisplayName("Throws when the operation disappears while waiting")
+    void throwsWhenOperationNotFoundWhileWaiting() throws IOException, InterruptedException, LibsodiumException {
+        String opName = "locscheme." + UUID.randomUUID();
+
+        HttpResponse<String> notFoundResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(notFoundResponse.statusCode()).thenReturn(404);
+
+        when(client.fetch(anyString(), anyString(), isNull()))
+            .thenReturn(notFoundResponse);
+
+        Operation op = Utils.fromJson(pendingLocSchemeOpJson(opName), Operation.class);
+        assertThrows(OperationNotFoundException.class, () -> operations.wait(op, Operation.class));
     }
 
     @Test
@@ -196,7 +243,6 @@ public class OperationsTest {
         Mockito.when(response2.statusCode()).thenReturn(200);
 
         HttpResponse<String> response3 = Mockito.mock(HttpResponse.class);
-        // main: registry op, now done (completed)
         Mockito.when(response3.body()).thenReturn(completedRegistryOpJson(mainName, depName));
         Mockito.when(response3.statusCode()).thenReturn(200);
 
@@ -208,10 +254,49 @@ public class OperationsTest {
         Operations.WaitOptions options = Operations.WaitOptions.builder()
             .maxSleep(10)
             .build();
-        Operation mainOp = org.cardanofoundation.signify.cesr.util.Utils.fromJson(
+        Operation mainOp = Utils.fromJson(
             pendingRegistryWithDependsJson(mainName, depName, false), Operation.class);
-        operations.wait(mainOp, org.cardanofoundation.signify.generated.keria.model.Operation.class, options);
+        operations.wait(mainOp, Operation.class, options);
         verify(client, times(3)).fetch(anyString(), anyString(), isNull());
+    }
+
+    @Test
+    @DisplayName("Throws when a dependent operation fails")
+    void throwsWhenChildOperationFails() throws IOException, InterruptedException, LibsodiumException {
+        String depName = "done." + UUID.randomUUID();
+        String mainName = "registry." + UUID.randomUUID();
+
+        HttpResponse<String> failedDepResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(failedDepResponse.body()).thenReturn(failedDoneOpJson(depName));
+        Mockito.when(failedDepResponse.statusCode()).thenReturn(200);
+
+        when(client.fetch(anyString(), anyString(), isNull()))
+            .thenReturn(failedDepResponse);
+
+        Operation mainOp = Utils.fromJson(
+            pendingRegistryWithDependsJson(mainName, depName, false), Operation.class);
+        OperationFailedException exception = assertThrows(OperationFailedException.class,
+            () -> operations.wait(mainOp, Operation.class));
+
+        assertEquals(depName, exception.getOperation().getName());
+        // the parent operation is never polled
+        verify(client, times(1)).fetch(anyString(), anyString(), isNull());
+    }
+
+    @Test
+    @DisplayName("Strips the stale done flag from metadata.depends when deserializing")
+    void stripsDoneFromDependsSnapshot() {
+        String depName = "done." + UUID.randomUUID();
+        String mainName = "registry." + UUID.randomUUID();
+
+        // KERIA serializes depends as a creation-time snapshot: done may be true with no response
+        Operation op = Utils.fromJson(
+            pendingRegistryWithDependsJson(mainName, depName, true), Operation.class);
+
+        assertInstanceOf(PendingRegistryOperation.class, op);
+        KelOperation depends = ((RegistryOperation) op).getMetadata().getDepends();
+        assertInstanceOf(PendingDoneOperation.class, depends);
+        assertEquals(depName, depends.getName());
     }
 
     @Test
@@ -228,26 +313,54 @@ public class OperationsTest {
 
         Operations.WaitOptions options = Operations.WaitOptions.builder()
                 .maxSleep(10)
-                .abortSignal(Operations.AbortSignal.builder().timeout(5000L).build())
+                .abortSignal(Operations.AbortSignal.builder().timeout(50L).build())
                 .build();
 
-        Operation abortOp = org.cardanofoundation.signify.cesr.util.Utils.fromJson(
+        Operation abortOp = Utils.fromJson(
             pendingLocSchemeOpJson(opName), Operation.class);
         Exception exception = assertThrows(InterruptedException.class,
             () -> operations.wait(abortOp, Operation.class, options));
         assertEquals("Operation aborted: Timeout", exception.getMessage());
     }
 
+    private String pendingLocSchemeOpJson(String name) {
+        return "{\"name\": \"" + name + "\", \"done\": false}";
+    }
+
+    private String doneLocSchemeOpJson(String name) {
+        return "{\"name\": \"" + name + "\", \"done\": true, \"response\": {\"eid\": \"ETest\", \"scheme\": \"http\", \"url\": \"http://test\"}}";
+    }
+
+    private String pendingDoneOpJson(String name) {
+        return "{\"name\":\"" + name + "\",\"done\":false,\"metadata\":{\"pre\":\"ETest\",\"response\":{}}}";
+    }
+
+    private String completedDoneOpJson(String name) {
+        return "{" +
+            "\"name\": \"" + name + "\"," +
+            "\"done\": true," +
+            "\"metadata\": {\"pre\": \"ETest\", \"response\": {}}," +
+            "\"response\": {\"pre\": \"ETest\", \"response\": {}}" +
+            "}";
+    }
+
+    private String failedDoneOpJson(String name) {
+        return "{" +
+            "\"name\": \"" + name + "\"," +
+            "\"done\": true," +
+            "\"metadata\": {\"pre\": \"ETest\", \"response\": {}}," +
+            "\"error\": {\"code\": 500, \"message\": \"anchoring event failed\"}" +
+            "}";
+    }
+
     private String completedRegistryOpJson(String name, String depName) {
         return "{" +
-            "\"_type\": \"CompletedRegistryOperation\"," +
             "\"name\": \"" + name + "\"," +
-            "\"done\": \"true\"," +
+            "\"done\": true," +
             "\"metadata\": {" +
             "\"pre\": \"ETest\"," +
             "\"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}," +
             "\"depends\": {" +
-            "\"_type\": \"CompletedDoneOperation\"," +
             "\"name\": \"" + depName + "\"," +
             "\"done\": true," +
             "\"metadata\": {\"pre\": \"ETest\", \"response\": {}}" +
@@ -257,24 +370,14 @@ public class OperationsTest {
             "}";
     }
 
-    private String pendingLocSchemeOpJson(String name) {
-        return "{\"name\": \"" + name + "\"}";
-    }
-
-    private String doneLocSchemeOpJson(String name) {
-        return "{\"name\": \"" + name + "\", \"response\": {\"eid\": \"ETest\", \"scheme\": \"http\", \"url\": \"http://test\"}}";
-    }
-
     private String pendingRegistryWithDependsJson(String name, String depName, boolean depDone) {
         return "{" +
-            "\"_type\": \"RegistryDoneOperation\"," +
             "\"name\": \"" + name + "\"," +
             "\"done\": false," +
             "\"metadata\": {" +
             "\"pre\": \"ETest\"," +
             "\"anchor\": {\"pre\": \"ETest\", \"sn\": 0, \"d\": \"ETest\"}," +
             "\"depends\": {" +
-            "\"_type\": \"PendingDoneOperation\"," +
             "\"name\": \"" + depName + "\"," +
             "\"done\": " + depDone + "," +
             "\"metadata\": {\"pre\": \"ETest\", \"response\": {}}" +
