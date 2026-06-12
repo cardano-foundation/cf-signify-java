@@ -12,6 +12,7 @@ import org.cardanofoundation.signify.app.Notifying;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
@@ -231,13 +232,11 @@ public class TestUtils {
     }
 
     public static String[] getOrCreateIdentifier(SignifyClient client, String name, CreateIdentifierArgs kargs) throws Exception {
-        Object id = null;
-        String eid;
+        String id;
 
         Optional<HabState> optionalIdentifier = client.identifiers().get(name);
         if (optionalIdentifier.isPresent()) {
             id = optionalIdentifier.get().getPrefix();
-            
         } else {
             ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
             if (kargs == null) {
@@ -246,13 +245,10 @@ public class TestUtils {
                 kargs.setWits(env.witnessIds());
             }
             var result = client.identifiers().create(name, kargs);
-            Operation opResult = waitForCompleted(client, result.op());
-            id = switch (opResult) {
-                case CompletedWitnessOperation completed -> completed.getResponse().getI();
-                case CompletedDelegationOperation completed -> completed.getResponse().getI();
-                case CompletedDoneOperation completed -> completed.getResponse().getI();
-                default -> id;
-            };
+            waitForCompleted(client, result.op());
+            id = result.serder().getPre();
+
+            String eid;
             if (client.getAgent() != null && client.getAgent().getPre() != null) {
                 eid = client.getAgent().getPre();
             } else {
@@ -266,10 +262,7 @@ public class TestUtils {
 
         OOBI oobi = client.oobis().get(name, "agent").get();
         String getOobi = oobi.getOobis().toString().replaceAll("[\\[\\]]", "");
-        String[] result = new String[]{
-                id != null ? id.toString() : null, getOobi
-        };
-        return result;
+        return new String[]{id, getOobi};
     }
 
     public static String getOrCreateContact(SignifyClient client, String name, String oobi) throws IOException, InterruptedException, LibsodiumException {
@@ -385,29 +378,13 @@ public class TestUtils {
     }
 
     public static void deleteOperations(SignifyClient client, Operation op) throws IOException, InterruptedException, LibsodiumException {
-        String dep = findDependsName(op);
+        KelOperation dep = Operations.dependsOf(op);
 
         if (dep != null) {
-            client.operations().delete(dep);
+            client.operations().delete(dep.getName());
         }
 
         client.operations().delete(op.getName());
-    }
-
-    private static String findDependsName(Operation op) {
-        return switch (op) {
-            case DelegatorOperation d when d.getMetadata() != null && d.getMetadata().getDepends() != null ->
-                    d.getMetadata().getDepends().getName();
-            case RegistryOperation r when r.getMetadata() != null && r.getMetadata().getDepends() != null ->
-                    r.getMetadata().getDepends().getName();
-            case CredentialOperation c when c.getMetadata() != null && c.getMetadata().getDepends() != null ->
-                    c.getMetadata().getDepends().getName();
-            default -> null;
-        };
-    }
-
-    public static void deleteOperation(SignifyClient client, String name) throws IOException, InterruptedException, LibsodiumException {
-        client.operations().delete(name);
     }
 
     public static Credential getReceivedCredential(SignifyClient client, String credID) throws Exception {
@@ -472,7 +449,7 @@ public class TestUtils {
                 }
             }));
         }
-        CompletableFuture.allOf(markOperationFutures.toArray(new CompletableFuture[0]));
+        CompletableFuture.allOf(markOperationFutures.toArray(new CompletableFuture[0])).join();
 
         return notes.isEmpty() ? "" :
                 Optional.ofNullable(notes.getLast())
@@ -515,50 +492,22 @@ public class TestUtils {
         return result;
     }
 
-    public static <T extends Operation> T waitOperation(
-            SignifyClient client,
-            Operation op,
-            Class<T> type
-    ) throws IOException, InterruptedException, LibsodiumException {
-        T result = client.operations().wait(op, type);
-        deleteOperations(client, op);
-        return result;
-    }
-
     public static Operation waitForCompleted(SignifyClient client, Operation op)
             throws IOException, InterruptedException, LibsodiumException {
-        Operation result = waitOperation(client, op, Operation.class);
-        String failureMessage = switch (result) {
-            case FailedChallengeOperation f -> f.getError().getMessage();
-            case FailedCredentialOperation f -> f.getError().getMessage();
-            case FailedDelegationOperation f -> f.getError().getMessage();
-            case FailedDelegatorOperation f -> f.getError().getMessage();
-            case FailedDoneOperation f -> f.getError().getMessage();
-            case FailedEndRoleOperation f -> f.getError().getMessage();
-            case FailedExchangeOperation f -> f.getError().getMessage();
-            case FailedGroupOperation f -> f.getError().getMessage();
-            case FailedLocSchemeOperation f -> f.getError().getMessage();
-            case FailedOOBIOperation f -> f.getError().getMessage();
-            case FailedQueryOperation f -> f.getError().getMessage();
-            case FailedRegistryOperation f -> f.getError().getMessage();
-            case FailedSubmitOperation f -> f.getError().getMessage();
-            case FailedWitnessOperation f -> f.getError().getMessage();
-            default -> null;
-        };
-        if (failureMessage != null) {
-            throw new AssertionError("Operation failed: " + failureMessage);
+        Operation result = waitOperation(client, op);
+        if (result instanceof FailedOperation failed) {
+            throw new AssertionError("Operation failed: " + failed.getError().getMessage());
         }
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Operation> T waitForCompleted(SignifyClient client, Operation op, Class<T> expectedType)
             throws IOException, InterruptedException, LibsodiumException {
         Operation result = waitForCompleted(client, op);
         if (!expectedType.isInstance(result)) {
             throw new AssertionError("Expected " + expectedType.getSimpleName() + " but got " + result.getClass().getSimpleName());
         }
-        return (T) result;
+        return expectedType.cast(result);
     }
 
     public static Integer parseInteger(String s) {

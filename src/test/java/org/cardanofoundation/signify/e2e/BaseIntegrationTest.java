@@ -131,8 +131,8 @@ public class BaseIntegrationTest {
     }
 
     static CompletableFuture<Operation> waitOperationFuture(SignifyClient client, Operation op) {
-        return CompletableFuture.supplyAsync(unchecked(() -> 
-            TestUtils.waitOperation(client, op)
+        return CompletableFuture.supplyAsync(unchecked(() ->
+            TestUtils.waitForCompleted(client, op)
         ));
     }
 

@@ -378,7 +378,10 @@ public class MultisigUtils {
         }
 
         var icpResult = client.identifiers().create(groupName, kargs);
-        GroupOperation op = (GroupOperation) icpResult.op();
+        if (!(icpResult.op() instanceof GroupOperation op)) {
+            throw new AssertionError("Expected group inception to return a GroupOperation but got "
+                    + icpResult.op().getClass().getSimpleName());
+        }
 
         Serder serder = icpResult.serder();
         List<String> sigs = icpResult.sigs();
@@ -388,14 +391,7 @@ public class MultisigUtils {
         String atc = ims.substring(serder.getSize());
 
         Map<String, List<Object>> embeds = Map.of("icp", List.of(serder, atc));
-        List<String> smids = kargs.getStates().stream().map(state -> {
-                    if (state instanceof Map<?, ?> stateMap) {
-                        return stateMap.get("i").toString();
-                    } else if (state instanceof KeyStateRecord stateHab) {
-                        return stateHab.getI();
-                    }
-                    return null;
-                }).toList();
+        List<String> smids = kargs.getStates().stream().map(KeyStateRecord::getI).toList();
         List<String> recp = otherMembersAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{

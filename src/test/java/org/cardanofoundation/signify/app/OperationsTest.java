@@ -279,6 +279,7 @@ public class OperationsTest {
             () -> operations.wait(mainOp, Operation.class));
 
         assertEquals(depName, exception.getOperation().getName());
+        assertTrue(exception.getMessage().contains("anchoring event failed"));
         // the parent operation is never polled
         verify(client, times(1)).fetch(anyString(), anyString(), isNull());
     }

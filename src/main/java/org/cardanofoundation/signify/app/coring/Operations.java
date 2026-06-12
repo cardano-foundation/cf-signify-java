@@ -162,13 +162,21 @@ public class Operations {
         return !(op instanceof PendingOperation);
     }
 
-    private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
-        KelOperation depOp = switch (operation) {
+    /**
+     * Returns the dependent operation embedded in the given operation's metadata,
+     * or null if the operation has none.
+     */
+    public static KelOperation dependsOf(Operation operation) {
+        return switch (operation) {
             case DelegatorOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
             case RegistryOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
             case CredentialOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
             default -> null;
         };
+    }
+
+    private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+        KelOperation depOp = dependsOf(operation);
 
         if (depOp != null) {
             KelOperation depResult = isDone(depOp) ? depOp : wait(depOp, KelOperation.class, options, startingTime);

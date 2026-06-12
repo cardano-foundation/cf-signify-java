@@ -10,7 +10,8 @@ public class OperationFailedException extends RuntimeException {
     private final transient FailedOperation operation;
 
     public OperationFailedException(FailedOperation operation) {
-        super("Operation failed: " + operation.getName());
+        super("Operation failed: " + operation.getName()
+                + (operation.getError() != null ? " - " + operation.getError().getMessage() : ""));
         this.operation = operation;
     }
 
