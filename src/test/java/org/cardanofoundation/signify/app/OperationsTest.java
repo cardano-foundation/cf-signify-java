@@ -188,28 +188,22 @@ public class OperationsTest {
         String mainName = "registry." + UUID.randomUUID();
 
         HttpResponse<String> response1 = Mockito.mock(HttpResponse.class);
-        // main: registry op, pending, depends (depName) is not done
-        Mockito.when(response1.body()).thenReturn(pendingRegistryWithDependsJson(mainName, depName, false));
+        Mockito.when(response1.body()).thenReturn(pendingDoneOpJson(depName));
         Mockito.when(response1.statusCode()).thenReturn(200);
 
         HttpResponse<String> response2 = Mockito.mock(HttpResponse.class);
-        Mockito.when(response2.body()).thenReturn(pendingDoneOpJson(depName));
+        Mockito.when(response2.body()).thenReturn(completedDoneOpJson(depName));
         Mockito.when(response2.statusCode()).thenReturn(200);
 
         HttpResponse<String> response3 = Mockito.mock(HttpResponse.class);
-        Mockito.when(response3.body()).thenReturn(completedDoneOpJson(depName));
+        // main: registry op, now done (completed)
+        Mockito.when(response3.body()).thenReturn(completedRegistryOpJson(mainName, depName));
         Mockito.when(response3.statusCode()).thenReturn(200);
 
-        HttpResponse<String> response4 = Mockito.mock(HttpResponse.class);
-        // main: registry op, now done (completed)
-        Mockito.when(response4.body()).thenReturn(completedRegistryOpJson(mainName, depName));
-        Mockito.when(response4.statusCode()).thenReturn(200);
-
         when(client.fetch(anyString(), anyString(), isNull()))
-            .thenReturn(response1)   // main: initial fetch - pending, depends not done
-            .thenReturn(response2)   // dep: initial fetch - pending, no nested depends
-            .thenReturn(response3)   // dep: poll - done
-            .thenReturn(response4);  // main: poll - now done (completed)
+            .thenReturn(response1)   // dep: poll - still pending
+            .thenReturn(response2)   // dep: poll - done
+            .thenReturn(response3);  // main: poll - now done (completed)
 
         Operations.WaitOptions options = Operations.WaitOptions.builder()
             .maxSleep(10)
@@ -217,7 +211,7 @@ public class OperationsTest {
         Operation mainOp = org.cardanofoundation.signify.cesr.util.Utils.fromJson(
             pendingRegistryWithDependsJson(mainName, depName, false), Operation.class);
         operations.wait(mainOp, org.cardanofoundation.signify.generated.keria.model.Operation.class, options);
-        verify(client, times(5)).fetch(anyString(), anyString(), isNull());
+        verify(client, times(3)).fetch(anyString(), anyString(), isNull());
     }
 
     @Test
