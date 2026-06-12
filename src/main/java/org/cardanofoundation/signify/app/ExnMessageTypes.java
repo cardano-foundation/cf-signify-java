@@ -12,6 +12,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Route-typed views over exchange (exn) messages.
+ *
+ * <p>When the expected type is known (the usual case — the caller just branched on a
+ * notification route):</p>
+ * <pre>{@code
+ * MultisigIcpGroup group = asGroup(requests.getFirst(), MultisigIcpGroup.class).orElseThrow();
+ * IpexGrantExchange grant = client.exchanges().get(said, IpexGrantExchange.class).orElseThrow();
+ * }</pre>
+ *
+ * <p>For generic dispatch, {@link #asTyped} parses by the message's own route and the
+ * sealed unions support exhaustive switching:</p>
+ * <pre>{@code
+ * switch (asTyped(msg).orElseThrow()) {
+ *     case MultisigIcpExchange icp -> ...
+ *     case IpexGrantExchange grant -> ...
+ *     ...
+ * }
+ * }</pre>
+ *
+ * <p>Parsers return {@link Optional#empty()} for unknown or non-matching routes, and
+ * throw {@link IllegalArgumentException} for matching-route messages whose payload is
+ * malformed.</p>
+ */
 public final class ExnMessageTypes {
 
     private ExnMessageTypes() {
@@ -31,6 +55,7 @@ public final class ExnMessageTypes {
 
     /**
      * Union of all route-typed group request messages, enabling exhaustive switching.
+     * Obtain instances via {@link #asTypedGroup} or {@link #asGroup}.
      */
     public sealed interface TypedGroup permits
             MultisigIcpGroup, MultisigRotGroup, MultisigIxnGroup, MultisigRpyGroup,
@@ -39,6 +64,7 @@ public final class ExnMessageTypes {
 
     /**
      * Union of all route-typed exchange messages, enabling exhaustive switching.
+     * Obtain instances via {@link #asTyped} or {@code exchanges().get(said, type)}.
      */
     public sealed interface TypedExchange permits
             MultisigIcpExchange, MultisigRotExchange, MultisigIxnExchange, MultisigRpyExchange,
@@ -77,6 +103,9 @@ public final class ExnMessageTypes {
     }
 
     public record GenericEmbeds(Map<String, Object> values) {
+        public GenericEmbeds {
+            values = Collections.unmodifiableMap(values);
+        }
     }
 
     public record MultisigIcpExchange(ExchangeResource message, ParticipantsAttributes a, MultisigIcpEmbeds e) implements TypedExchange {
@@ -170,8 +199,16 @@ public final class ExnMessageTypes {
      * Parses any known-route exchange message into its typed form; empty for unknown routes.
      */
     public static Optional<TypedExchange> asTyped(ExchangeResource msg) {
-        ExchangeParser<? extends TypedExchange> parser = EXCHANGE_PARSERS.get(routeOf(msg));
-        return parser == null ? Optional.empty() : Optional.of(parser.parse(msg));
+        String route = routeOf(msg);
+        ExchangeParser<? extends TypedExchange> parser = route == null ? null : EXCHANGE_PARSERS.get(route);
+        if (parser == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(parser.parse(msg));
+        } catch (RuntimeException e) {
+            throw malformed(route, msg.getExn(), e);
+        }
     }
 
     private static final Map<String, GroupParser<? extends TypedGroup>> GROUP_PARSERS = Map.ofEntries(
@@ -189,8 +226,16 @@ public final class ExnMessageTypes {
      * Parses any known-route group request message into its typed form; empty for unknown routes.
      */
     public static Optional<TypedGroup> asTypedGroup(ExnMultisig msg) {
-        GroupParser<? extends TypedGroup> parser = GROUP_PARSERS.get(routeOf(msg));
-        return parser == null ? Optional.empty() : Optional.of(parser.parse(msg));
+        String route = routeOf(msg);
+        GroupParser<? extends TypedGroup> parser = route == null ? null : GROUP_PARSERS.get(route);
+        if (parser == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(parser.parse(msg));
+        } catch (RuntimeException e) {
+            throw malformed(route, msg.getExn(), e);
+        }
     }
 
     /**
@@ -348,7 +393,7 @@ public final class ExnMessageTypes {
 
     private static GroupMetadata metadata(ExnMultisig msg) {
         return new GroupMetadata(
-            msg.getPaths() == null ? Collections.emptyMap() : msg.getPaths(),
+            msg.getPaths() == null ? Collections.emptyMap() : Collections.unmodifiableMap(msg.getPaths()),
             msg.getGroupName(),
             msg.getMemberName(),
             msg.getSender()
@@ -388,7 +433,7 @@ public final class ExnMessageTypes {
         if (value == null) {
             return List.of();
         }
-        return Utils.toList(value);
+        return List.copyOf(Utils.toList(value));
     }
 
     @SuppressWarnings("unchecked")
@@ -398,9 +443,16 @@ public final class ExnMessageTypes {
             return null;
         }
         if (value instanceof Map<?, ?> map) {
-            return (Map<String, Object>) map;
+            return Collections.unmodifiableMap((Map<String, Object>) map);
         }
         throw new IllegalArgumentException("Expected embedded object for field: " + key);
+    }
+
+    private static IllegalArgumentException malformed(String route, Exn exn, RuntimeException cause) {
+        String said = exn == null ? null : exn.getD();
+        return new IllegalArgumentException(
+            "Malformed " + route + " message" + (said == null ? "" : " (d=" + said + ")") + ": " + cause.getMessage(),
+            cause);
     }
 
     private static Exn toExn(Object value) {
