@@ -286,7 +286,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
                 return response;
             }
 
-            if (200 < response.statusCode() && response.statusCode() > 300) {
+            if (response.statusCode() < 200 || response.statusCode() > 299) {
                 throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
                         method, path, response.statusCode(), response.body()));
             }
