@@ -3,6 +3,8 @@ package org.cardanofoundation.signify.app.coring;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.*;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.coring.exception.OperationFailedException;
+import org.cardanofoundation.signify.app.coring.exception.OperationNotFoundException;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.*;
@@ -80,21 +82,31 @@ public class Operations {
     }
 
     /**
-     * Wait for an operation to complete, returning the result deserialized into the given type.
-     * Handles dependent operations automatically.
+     * Wait for an operation to complete, returning the result as the given type.
+     * Handles dependent operations automatically; fails if a dependent operation fails.
      *
      * @param op The operation instance to wait for
-     * @param resultType    The target class to deserialize the final result into (e.g., CredentialOperation.class)
+     * @param resultType The expected type of the completed operation (e.g., CredentialOperation.class)
+     * @throws IllegalArgumentException if the completed operation is not of the expected type
      */
     public <T extends Operation> T wait(Operation op, Class<T> resultType) throws IOException, InterruptedException, LibsodiumException {
         return wait(op, resultType, WaitOptions.builder().build(), System.currentTimeMillis());
+    }
+
+    /**
+     * Wait for an operation to complete, returning the result as the general Operation union type.
+     *
+     * @param op The operation instance to wait for
+     * @param options Polling and timeout options
+     */
+    public Operation wait(Operation op, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, Operation.class, options, System.currentTimeMillis());
     }
 
     public <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
         return wait(op, resultType, options, System.currentTimeMillis());
     }
 
-    @SuppressWarnings("unchecked")
     private <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
         int minSleep = options.getMinSleep();
         int maxSleep = options.getMaxSleep();
@@ -105,40 +117,45 @@ public class Operations {
         waitOnDepends(op, options, startingTime);
 
         if (isDone(op)) {
-            if (resultType == Operation.class) {
-                return (T) op;
-            }
-            return get(operationName, resultType)
-                    .orElseThrow(() -> new IOException("Operation not found: " + operationName));
+            return castResult(op, resultType);
         }
 
         int retries = 0;
 
         while (true) {
             Operation newOp = get(operationName, Operation.class)
-                    .orElseThrow(() -> new IOException("Operation not found: " + operationName));
-
-            int delay = Math.max(minSleep, Math.min(maxSleep, (int) Math.pow(2, retries) * increaseFactor));
-            retries++;
+                    .orElseThrow(() -> new OperationNotFoundException(operationName));
 
             if (isDone(newOp)) {
-                if (resultType == Operation.class) {
-                    return (T) newOp;
-                }
-                return get(operationName, resultType)
-                        .orElseThrow(() -> new IOException("Operation not found: " + operationName));
+                return castResult(newOp, resultType);
             }
-            Thread.sleep(delay);
 
-            if (options.getAbortSignal().getTimeout() != null) {
-                long currentTime = System.currentTimeMillis();
-                if (currentTime - startingTime > options.getAbortSignal().getTimeout()) {
+            long delay = Math.max(minSleep, Math.min(maxSleep, (long) Math.pow(2, retries) * increaseFactor));
+            retries++;
+
+            Long timeout = options.getAbortSignal().getTimeout();
+            if (timeout != null) {
+                long remaining = timeout - (System.currentTimeMillis() - startingTime);
+                if (remaining <= 0) {
                     options.getAbortSignal().abort("Timeout");
+                } else {
+                    // clamp so the timeout is honored to within one poll, then give
+                    // the operation a final fetch before aborting on the next pass
+                    delay = Math.min(delay, remaining);
                 }
             }
-
             options.getAbortSignal().throwIfAborted();
+
+            Thread.sleep(delay);
         }
+    }
+
+    private static <T extends Operation> T castResult(Operation op, Class<T> resultType) {
+        if (!resultType.isInstance(op)) {
+            throw new IllegalArgumentException("Operation " + op.getName() + " is a "
+                    + op.getClass().getSimpleName() + ", not the requested " + resultType.getSimpleName());
+        }
+        return resultType.cast(op);
     }
 
     private static boolean isDone(Operation op) {
@@ -147,17 +164,17 @@ public class Operations {
 
     private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
         KelOperation depOp = switch (operation) {
-            case DelegatorOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends();
-            case RegistryOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends();
-            case CredentialOperation op when op.getMetadata() != null
-                && op.getMetadata().getDepends() != null -> op.getMetadata().getDepends();
+            case DelegatorOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
+            case RegistryOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
+            case CredentialOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
             default -> null;
         };
 
-        if (depOp != null && !isDone(depOp)) {
-            wait(depOp, KelOperation.class, options, startingTime);
+        if (depOp != null) {
+            KelOperation depResult = isDone(depOp) ? depOp : wait(depOp, KelOperation.class, options, startingTime);
+            if (depResult instanceof FailedOperation failedDep) {
+                throw new OperationFailedException(failedDep);
+            }
         }
     }
 
