@@ -9,8 +9,10 @@ import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
 import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.EndRole;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.Test;
 
@@ -70,7 +72,7 @@ public class EndRolesByAidTest extends BaseIntegrationTest {
 
         testSteps.step("Create 2-member multisig group (2-of-2)", () -> {
             System.out.println("Member1 starting multisig inception...");
-            Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+            KelOperation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                     .groupName(groupName)
                     .localMemberName(memberNames[0])
                     .participants(List.of(aid1.getPrefix(), aid2.getPrefix()))
@@ -83,7 +85,7 @@ public class EndRolesByAidTest extends BaseIntegrationTest {
             List<Notification> notes = TestUtils.waitForNotifications(client2, "/multisig/icp");
             for (Notification note : notes) client2.notifications().mark(note.getI());
             System.out.println("Member2 accepted");
-            Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+            KelOperation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                     .groupName(groupName)
                     .localMemberName(memberNames[1])
                     .msgSaid(notes.getLast().getA().getD())
@@ -107,17 +109,17 @@ public class EndRolesByAidTest extends BaseIntegrationTest {
             String stamp = TestUtils.createTimestamp();
 
             System.out.println("Adding agent end roles in parallel...");
-            CompletableFuture<List<Object>> future1 = CompletableFuture.supplyAsync(unchecked(() ->
+            CompletableFuture<List<EndRoleOperation>> future1 = CompletableFuture.supplyAsync(unchecked(() ->
                     MultisigUtils.addEndRoleMultisig(client1, groupName, aid1Hab,
                             List.of(aid2Hab), multisigAID, stamp, true)
             ));
-            CompletableFuture<List<Object>> future2 = CompletableFuture.supplyAsync(unchecked(() ->
+            CompletableFuture<List<EndRoleOperation>> future2 = CompletableFuture.supplyAsync(unchecked(() ->
                     MultisigUtils.addEndRoleMultisig(client2, groupName, aid2Hab,
                             List.of(aid1Hab), multisigAID, stamp, false)
             ));
 
-            List<Object> ops1 = future1.join();
-            List<Object> ops2 = future2.join();
+            List<EndRoleOperation> ops1 = future1.join();
+            List<EndRoleOperation> ops2 = future2.join();
 
             List<WaitOperationArgs> waitArgs = new ArrayList<>();
             ops1.forEach(op -> waitArgs.add(new WaitOperationArgs(client1, op)));
