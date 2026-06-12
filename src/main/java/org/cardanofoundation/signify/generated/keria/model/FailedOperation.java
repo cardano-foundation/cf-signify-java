@@ -18,4 +18,6 @@ public sealed interface FailedOperation extends Operation permits
         FailedRegistryOperation,
         FailedSubmitOperation,
         FailedWitnessOperation {
+
+    OperationStatus getError();
 }

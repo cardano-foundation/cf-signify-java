@@ -266,6 +266,11 @@ tasks.named("openApiGenerate") {
             Completed: "that completed successfully",
             Failed   : "that failed",
         ]
+        def stateMethods = [
+            Pending  : "",
+            Completed: "",
+            Failed   : "\n    OperationStatus getError();\n",
+        ]
 
         def ops = modelDir.list()
                 .findAll { it ==~ /Pending\w+Operation\.java/ }
@@ -355,7 +360,7 @@ package org.cardanofoundation.signify.generated.keria.model;
  */
 public sealed interface ${state}Operation extends Operation permits
 ${ops.collect { "        ${state}${it}Operation" }.join(",\n")} {
-}
+${stateMethods[state]}}
 """
         }
     }
