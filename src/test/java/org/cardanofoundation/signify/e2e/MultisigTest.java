@@ -471,7 +471,7 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("Starting multisig registry creation");
 
         String nonce = Coring.randomNonce();
-        List<Object> registryMultisigList = createRegistryMultisig(
+        MultisigUtils.RegistryCreation registryCreation = MultisigUtils.createRegistryMultisig(
                 client1,
                 aid1,
                 List.of(aid2, aid3),
@@ -480,8 +480,8 @@ public class MultisigTest extends BaseIntegrationTest {
                 nonce,
                 true
         );
-        RegistryOperation rop1 = (RegistryOperation) registryMultisigList.get(0);
-        String regk = registryMultisigList.get(1).toString();
+        RegistryOperation rop1 = registryCreation.op();
+        String regk = registryCreation.regk();
         System.out.println("Member1 initiated registry, waiting for others to join...");
 
         // Member2 check for notifications and join the create registry event
@@ -493,7 +493,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 "vLEI Registry",
                 nonce,
                 false
-        );
+        ).op();
         System.out.println("Member2 joins registry event, waiting for others...");
 
         // Member3 check for notifications and join the create registry event
@@ -506,7 +506,7 @@ public class MultisigTest extends BaseIntegrationTest {
                 nonce,
                 "multisig",
                 false
-        );
+        ).op();
 
         waitOperationAsync(
                 new WaitOperationArgs(client1, rop1),
@@ -915,64 +915,4 @@ public class MultisigTest extends BaseIntegrationTest {
         );
     }
 
-    public static List<Object> createRegistryMultisig(
-            SignifyClient client,
-            HabState aid,
-            List<HabState> otherMembersAIDs,
-            HabState multisigAID,
-            String registryName,
-            String nonce,
-            boolean isInitiator) throws Exception {
-
-        if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
-        }
-
-        CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
-                .builder()
-                .name(multisigAID.getName())
-                .registryName(registryName)
-                .nonce(nonce)
-                .build();
-        RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        RegistryOperation op = vcpResult.op();
-
-        Serder serder = vcpResult.regser();
-        String regk = serder.getPre();
-        Serder anc = vcpResult.serder();
-        List<String> sigs = vcpResult.sigs();
-        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
-
-        String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
-        String atc = ims.substring(anc.getSize());
-
-        Map<String, List<Object>> regbeds = new LinkedHashMap<>() {{
-            put("vcp", List.of(serder, ""));
-            put("anc", List.of(anc, atc));
-        }};
-
-        List<String> recp = otherMembersAIDs.stream()
-                .map(HabState::getPrefix)
-                .toList();
-
-        client.exchanges().send(
-                aid.getName(),
-                "registry",
-                aid,
-                "/multisig/vcp",
-                Map.of("gid", multisigAID.getPrefix()),
-                regbeds,
-                recp
-        );
-        List<Object> list = List.of(op, regk);
-        return list;
-    }
-
-    public static Operation waitOperations(
-            SignifyClient client,
-            Operation op) throws IOException, InterruptedException, LibsodiumException {
-        Operation operation = client.operations().wait(op);
-        TestUtils.deleteOperations(client, operation);
-        return operation;
-    }
 }

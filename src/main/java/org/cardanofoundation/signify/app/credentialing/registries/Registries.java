@@ -119,7 +119,7 @@ public class Registries {
      * @param vcp          the VCP data
      * @param ixn          the IXN data
      * @param sigs         the signatures
-     * @return an Object representing the result of the operation
+     * @return the raw HTTP response from the registry creation endpoint
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs

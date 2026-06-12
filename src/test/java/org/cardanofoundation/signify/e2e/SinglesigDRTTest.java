@@ -7,7 +7,6 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperation;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperationResponse;
-import org.cardanofoundation.signify.generated.keria.model.DelegationOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
@@ -101,8 +100,8 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
                 new WaitOperationArgs(delegate, op2)
         );
 
-        DelegationOperation dop = (DelegationOperation) operationList.getFirst();
-        CompletedDelegationOperationResponse opResponse = ((CompletedDelegationOperation) dop).getResponse();
+        CompletedDelegationOperationResponse opResponse = Assertions.assertInstanceOf(
+                CompletedDelegationOperation.class, operationList.getFirst()).getResponse();
         opResponseT = opResponse.getT();
         opResponseS = opResponse.getS();
 

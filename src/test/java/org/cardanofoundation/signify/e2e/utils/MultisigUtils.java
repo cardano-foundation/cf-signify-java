@@ -413,7 +413,13 @@ public class MultisigUtils {
         return op;
     }
 
-    public static RegistryOperation createRegistryMultisig(
+    /**
+     * The created registry: the operation to wait on and the registry identifier (regk).
+     */
+    public record RegistryCreation(RegistryOperation op, String regk) {
+    }
+
+    public static RegistryCreation createRegistryMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -463,10 +469,10 @@ public class MultisigUtils {
                 recp
         );
 
-        return op;
+        return new RegistryCreation(op, serder.getPre());
     }
 
-    public static RegistryOperation createRegistryMultisig(
+    public static RegistryCreation createRegistryMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
@@ -477,59 +483,6 @@ public class MultisigUtils {
 
         return createRegistryMultisig(client, aid, otherMembersAIDs, multisigAID, registryName, nonce, "registry", isInitiator);
     }
-
-    public static RegistryOperation createMultisig(
-            SignifyClient client,
-            HabState aid,
-            List<HabState> otherMembersAIDs,
-            HabState multisigAID,
-            String registryName,
-            String nonce,
-            boolean isInitiator) throws Exception {
-
-        if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
-        }
-
-        CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
-                .builder()
-                .name(multisigAID.getName())
-                .registryName(registryName)
-                .nonce(nonce)
-                .build();
-        RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        RegistryOperation op = vcpResult.op();
-
-        Serder serder = vcpResult.regser();
-        Serder anc = vcpResult.serder();
-        List<String> sigs = vcpResult.sigs();
-        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
-
-        String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
-        String atc = ims.substring(anc.getSize());
-
-        Map<String, List<Object>> regbeds = new LinkedHashMap<>() {{
-            put("vcp", List.of(serder, ""));
-            put("anc", List.of(anc, atc));
-        }};
-
-        List<String> recp = otherMembersAIDs.stream()
-                .map(HabState::getPrefix)
-                .toList();
-
-        client.exchanges().send(
-                aid.getName(),
-                "multisig",
-                aid,
-                "/multisig/vcp",
-                Map.of("gid", multisigAID.getPrefix()),
-                regbeds,
-                recp
-        );
-        return op;
-    }
-
-
 
     public static DelegatorOperation delegateMultisig(
             SignifyClient client,

@@ -6,7 +6,6 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperation;
-import org.cardanofoundation.signify.generated.keria.model.DelegationOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
@@ -72,9 +71,8 @@ class SinglesigDIPTest extends BaseIntegrationTest {
                 new WaitOperationArgs(client1, op1),
                 new WaitOperationArgs(client2, op2)
         );
-        op = (DelegationOperation) opList.getFirst();
-
-        opResponseI = ((CompletedDelegationOperation) op).getResponse().getI();
+        opResponseI = Assertions.assertInstanceOf(CompletedDelegationOperation.class, opList.getFirst())
+                .getResponse().getI();
 
         delegate1 = client2.identifiers().get("delegate1").get();
         Assertions.assertEquals(delegate1.getPrefix(), opResponseI);
@@ -108,9 +106,8 @@ class SinglesigDIPTest extends BaseIntegrationTest {
                 new WaitOperationArgs(client1, op1),
                 new WaitOperationArgs(client2, op2)
         );
-        op = (DelegationOperation) opList.getFirst();
-
-        opResponseI = ((CompletedDelegationOperation) op).getResponse().getI();
+        opResponseI = Assertions.assertInstanceOf(CompletedDelegationOperation.class, opList.getFirst())
+                .getResponse().getI();
 
         // Delegate waits for completion
         delegate2 = client2.identifiers().get("delegate2").get();

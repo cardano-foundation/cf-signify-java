@@ -529,7 +529,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "gedaRegistry",
                     nonce,
                     true
-            );
+            ).op();
 
             RegistryOperation registryOp2 = MultisigUtils.createRegistryMultisig(
                     clientGAR2,
@@ -539,7 +539,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "gedaRegistry",
                     nonce,
                     false
-            );
+            ).op();
 
             waitOperationAsync(
                     new WaitOperationArgs(clientGAR1, registryOp1),
@@ -885,7 +885,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "qviRegistry",
                     nonce,
                     true
-            );
+            ).op();
 
             RegistryOperation registryOp2 = MultisigUtils.createRegistryMultisig(
                     clientQAR2,
@@ -895,7 +895,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "qviRegistry",
                     nonce,
                     false
-            );
+            ).op();
 
             RegistryOperation registryOp3 = MultisigUtils.createRegistryMultisig(
                     clientQAR3,
@@ -905,7 +905,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "qviRegistry",
                     nonce,
                     false
-            );
+            ).op();
 
             waitOperationAsync(
                     new WaitOperationArgs(clientQAR1, registryOp1),
@@ -1150,7 +1150,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "leRegistry",
                     nonce,
                     true
-            );
+            ).op();
 
             RegistryOperation registryOp2 = MultisigUtils.createRegistryMultisig(
                     clientLAR2,
@@ -1160,7 +1160,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "leRegistry",
                     nonce,
                     false
-            );
+            ).op();
 
             RegistryOperation registryOp3 = MultisigUtils.createRegistryMultisig(
                     clientLAR3,
@@ -1170,7 +1170,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     "leRegistry",
                     nonce,
                     false
-            );
+            ).op();
 
             waitOperationAsync(
                     new WaitOperationArgs(clientLAR1, registryOp1),
