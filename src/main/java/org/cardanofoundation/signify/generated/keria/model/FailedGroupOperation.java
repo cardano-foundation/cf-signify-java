@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 @com.fasterxml.jackson.databind.annotation.JsonDeserialize
-public final class FailedGroupOperation implements GroupOperation {
+public final class FailedGroupOperation implements GroupOperation, FailedOperation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;

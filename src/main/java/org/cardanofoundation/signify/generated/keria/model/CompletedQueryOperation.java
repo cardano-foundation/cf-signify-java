@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 @com.fasterxml.jackson.databind.annotation.JsonDeserialize
-public final class CompletedQueryOperation implements QueryOperation {
+public final class CompletedQueryOperation implements QueryOperation, CompletedOperation {
   public static final String JSON_PROPERTY_NAME = "name";
   @jakarta.annotation.Nonnull
   private String name;

@@ -142,23 +142,7 @@ public class Operations {
     }
 
     private static boolean isDone(Operation op) {
-        return switch (op) {
-            case PendingChallengeOperation ignored -> false;
-            case PendingCredentialOperation ignored -> false;
-            case PendingDelegationOperation ignored -> false;
-            case PendingDelegatorOperation ignored -> false;
-            case PendingDoneOperation ignored -> false;
-            case PendingEndRoleOperation ignored -> false;
-            case PendingExchangeOperation ignored -> false;
-            case PendingGroupOperation ignored -> false;
-            case PendingLocSchemeOperation ignored -> false;
-            case PendingOOBIOperation ignored -> false;
-            case PendingQueryOperation ignored -> false;
-            case PendingRegistryOperation ignored -> false;
-            case PendingSubmitOperation ignored -> false;
-            case PendingWitnessOperation ignored -> false;
-            default -> true;
-        };
+        return !(op instanceof PendingOperation);
     }
 
     private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {

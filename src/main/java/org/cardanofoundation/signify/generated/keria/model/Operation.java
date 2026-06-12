@@ -1,11 +1,10 @@
+package org.cardanofoundation.signify.generated.keria.model;
 
-    package org.cardanofoundation.signify.generated.keria.model;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.cardanofoundation.signify.app.coring.OperationDeserializer;
 
-    import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-    import org.cardanofoundation.signify.app.coring.OperationDeserializer;
-
-    @JsonDeserialize(using = OperationDeserializer.class)
-    public sealed interface Operation permits
+@JsonDeserialize(using = OperationDeserializer.class)
+public sealed interface Operation permits
         ChallengeOperation,
         CredentialOperation,
         DelegatorOperation,
@@ -15,8 +14,10 @@
         LocSchemeOperation,
         OOBIOperation,
         QueryOperation,
-        RegistryOperation {
+        RegistryOperation,
+        PendingOperation,
+        CompletedOperation,
+        FailedOperation {
 
-        String getName();
-    }
-    
+    String getName();
+}
