@@ -7,7 +7,6 @@ import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigIcpGro
 import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigRotGroup;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ROT_ROUTE;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Keeping;

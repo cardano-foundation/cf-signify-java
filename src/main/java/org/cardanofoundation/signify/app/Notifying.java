@@ -6,18 +6,12 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Notification;
-import org.cardanofoundation.signify.app.ExnMessageTypes.TypedExchange;
-import static org.cardanofoundation.signify.app.ExnMessages.isRoute;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asTyped;
-import org.cardanofoundation.signify.generated.keria.model.NotificationData;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class Notifying {
     @Getter
@@ -66,55 +60,6 @@ public class Notifying {
             return list(start, 24);
         }
 
-        public Optional<ResolvedTypedExchange> resolveExchange(Notification notification) throws Exception {
-            NotificationData data = notification == null ? null : notification.getA();
-            if (data == null) {
-                return Optional.empty();
-            }
-
-            String route = data.getR();
-            String said = data.getD();
-
-            if (route == null) {
-                Object additionalRoute = data.getAdditionalProperty("r");
-                if (additionalRoute instanceof String additionalRouteString) {
-                    route = additionalRouteString;
-                }
-            }
-            if (said == null) {
-                Object additionalSaid = data.getAdditionalProperty("d");
-                if (additionalSaid instanceof String additionalSaidString) {
-                    said = additionalSaidString;
-                }
-            }
-
-            return resolveExchange(route, said);
-        }
-
-        public Optional<ResolvedTypedExchange> resolveExchange(String route, String said) throws Exception {
-            if (route == null || said == null || said.isBlank()) {
-                return Optional.empty();
-            }
-
-            String normalizedRoute = normalizeRoute(route);
-            return this.client.exchanges()
-                .get(said)
-                .flatMap(exchangeResource -> resolveExchange(normalizedRoute, exchangeResource));
-        }
-
-        public Optional<ResolvedTypedExchange> resolveExchange(String route, ExchangeResource exchangeResource) {
-            if (route == null || exchangeResource == null) {
-                return Optional.empty();
-            }
-
-            String normalizedRoute = normalizeRoute(route);
-            if (!isRoute(exchangeResource, normalizedRoute)) {
-                return Optional.empty();
-            }
-            return asTyped(exchangeResource)
-                .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-        }
-
         public String mark(String said) throws IOException, InterruptedException, LibsodiumException {
             String path = "/notifications/" + said;
             String method = "PUT";
@@ -132,17 +77,6 @@ public class Notifying {
             this.client.fetch(path, method, null);
         }
 
-        private static String normalizeRoute(String route) {
-            if (route == null) {
-                return null;
-            }
-            String trimmed = route.trim();
-            if (trimmed.startsWith("/exn/")) {
-                return trimmed.substring(4);
-            }
-            return trimmed;
-        }
-
         private static List<Notification> parseNotifications(String notesJson) {
             if (notesJson == null || notesJson.isBlank()) {
                 return List.of();
@@ -151,9 +85,6 @@ public class Notifying {
         }
 
         public record NotificationListResponse(int start, int end, int total, List<Notification> notes) {
-        }
-
-        public record ResolvedTypedExchange(String route, ExchangeResource exchange, TypedExchange typed) {
         }
 
     }

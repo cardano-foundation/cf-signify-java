@@ -172,6 +172,15 @@ public class Exchanging {
             return Optional.of(Utils.fromJson(res.body(), ExchangeResource.class));
         }
 
+        /**
+         * Fetches an exchange message and types it by its own route; empty when not
+         * found or the route is unknown. Use the route-specific getters when the
+         * expected type is already known.
+         */
+        public Optional<ExnMessageTypes.TypedExchange> getTyped(String said) throws Exception {
+            return get(said).flatMap(ExnMessageTypes::asTyped);
+        }
+
         public Optional<ExnMessageTypes.MultisigIcpExchange> getMultisigIcp(String said) throws Exception {
             return get(said).flatMap(ExnMessageTypes::asMultisigIcp);
         }

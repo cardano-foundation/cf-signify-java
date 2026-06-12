@@ -286,5 +286,13 @@ public class ExchangingTest extends BaseMockServerTest {
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());
+
+        // getTyped dispatches on the exn's own route
+        var typed = exchanges.getTyped(exchangeId);
+        request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+        assertTrue(typed.isPresent());
+        assertTrue(typed.orElseThrow() instanceof ExnMessageTypes.IpexApplyExchange);
     }
 }

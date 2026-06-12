@@ -38,7 +38,6 @@ import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
 import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
 import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
-import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
