@@ -365,12 +365,9 @@ public class IdentifierController {
         int sn = Integer.parseInt(state.getS(), 16);
         String dig = state.getD();
 
-        if (!(data instanceof List)) {
-            data = Collections.singletonList(data);
-        }
-
-        @SuppressWarnings("unchecked")
-        List<Object> dataList = (List<Object>) data;
+        List<Object> dataList = data instanceof List<?> list
+            ? new ArrayList<>(list)
+            : Collections.singletonList(data);
 
         InteractArgs interactArgs = InteractArgs.builder()
             .pre(pre)
