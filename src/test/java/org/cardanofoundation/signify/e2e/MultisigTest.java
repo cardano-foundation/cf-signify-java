@@ -794,7 +794,7 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("Revoking credential...");
         String REVTIME = Utils.currentDateTimeString();
         RevokeCredentialResult revokeRes = client1.credentials().revoke("multisig", credentialSaid, REVTIME);
-        cop1 = revokeRes.getOp();
+        KelOperation revOp1 = revokeRes.getOp();
 
         multisigRevoke(client1, "member1", "multisig", revokeRes.getRev(), revokeRes.getAnc());
         System.out.println("Member1 initiated credential revocation, waiting for others to join...");
@@ -806,7 +806,7 @@ public class MultisigTest extends BaseIntegrationTest {
         assertEquals(msgSaid, res.getFirst().getExn().getD());
 
         RevokeCredentialResult revokeRes2 = client2.credentials().revoke("multisig", credentialSaid, REVTIME);
-        cop2 = revokeRes2.getOp();
+        KelOperation revOp2 = revokeRes2.getOp();
         multisigRevoke(client2, "member2", "multisig", revokeRes2.getRev(), revokeRes2.getAnc());
         System.out.println("Member2 joins credential revoke event, waiting for others...");
 
@@ -817,15 +817,15 @@ public class MultisigTest extends BaseIntegrationTest {
         assertEquals(msgSaid, res.getFirst().getExn().getD());
 
         RevokeCredentialResult revokeRes3 = client3.credentials().revoke("multisig", credentialSaid, REVTIME);
-        cop3 = revokeRes3.getOp();
+        KelOperation revOp3 = revokeRes3.getOp();
         multisigRevoke(client3, "member3", "multisig", revokeRes3.getRev(), revokeRes3.getAnc());
         System.out.println("Member3 joins credential revoke event, waiting for others...");
 
         // Check completion
         waitOperationAsync(
-                new WaitOperationArgs(client1, cop1),
-                new WaitOperationArgs(client2, cop2),
-                new WaitOperationArgs(client3, cop3)
+                new WaitOperationArgs(client1, revOp1),
+                new WaitOperationArgs(client2, revOp2),
+                new WaitOperationArgs(client3, revOp3)
         );
         System.out.println("Multisig credential revocation completed!");
     }

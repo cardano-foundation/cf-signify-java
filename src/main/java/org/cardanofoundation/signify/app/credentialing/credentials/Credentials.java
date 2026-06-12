@@ -21,6 +21,7 @@ import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 
 public class Credentials {
 
@@ -257,7 +258,7 @@ public class Credentials {
         String path = "/identifiers/" + name + "/credentials/" + said;
         String method = "DELETE";
         HttpResponse<String> response = this.client.fetch(path, method, body);
-        CredentialOperation op = Utils.fromJson(response.body(), CredentialOperation.class);
+        KelOperation op = Utils.fromJson(response.body(), KelOperation.class);
 
         return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
     }

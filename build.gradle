@@ -103,6 +103,13 @@ tasks.register('testE2E', Test) {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
     }
 
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+        showCauses = true
+        showStackTraces = true
+    }
+
     beforeTest { descriptor ->
         startTime[descriptor] = System.currentTimeSeconds()
         def now = java.time.LocalDateTime.now()

@@ -483,11 +483,17 @@ public class TestUtils {
         }, retryOptions);
     }
 
+    /** Default per-operation timeout so an unreachable dependency fails the test instead of hanging it. */
+    private static final long OPERATION_TIMEOUT_MS = 30_000;
+
     public static Operation waitOperation(
             SignifyClient client,
             Operation op
     ) throws IOException, InterruptedException, LibsodiumException {
-        Operation result = client.operations().wait(op);
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .abortSignal(Operations.AbortSignal.builder().timeout(OPERATION_TIMEOUT_MS).build())
+                .build();
+        Operation result = client.operations().wait(op, Operation.class, options);
         deleteOperations(client, op);
         return result;
     }

@@ -53,6 +53,10 @@ public class CredentialingTest extends BaseMockServerTest {
                         body = "[" + MOCK_CREDENTIAL + "]";
                 } else if (reqUrl.startsWith(url + "/credentials/")) {
                         body = MOCK_CREDENTIAL;
+                } else if (reqUrl.contains("/identifiers/aid1/credentials")) {
+                        body = "DELETE".equals(req.getMethod())
+                                ? "{\"name\": \"witness.EJ5EZpC_NjBKAPz8jzVUgRMQtyxpqsCKVefAFPSAVdSp\", \"done\": false, \"metadata\": {\"sn\": 2}}"
+                                : "{\"name\": \"credential.EI6gHFuoUyqyB1MOJxBhab2EVUEt_3IYg2DqFI4Q/Ya5\", \"done\": false, \"metadata\": {\"ced\": {}}}";
                 } else {
                         body = MOCK_GET_AID;
                 }
