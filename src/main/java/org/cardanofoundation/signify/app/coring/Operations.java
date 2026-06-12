@@ -5,6 +5,7 @@ import lombok.*;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.app.coring.exception.OperationFailedException;
 import org.cardanofoundation.signify.app.coring.exception.OperationNotFoundException;
+import org.cardanofoundation.signify.app.coring.exception.OperationTimeoutException;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.*;
@@ -137,12 +138,11 @@ public class Operations {
             if (timeout != null) {
                 long remaining = timeout - (System.currentTimeMillis() - startingTime);
                 if (remaining <= 0) {
-                    options.getAbortSignal().abort("Timeout");
-                } else {
-                    // clamp so the timeout is honored to within one poll, then give
-                    // the operation a final fetch before aborting on the next pass
-                    delay = Math.min(delay, remaining);
+                    throw new OperationTimeoutException(operationName, timeout);
                 }
+                // clamp so the timeout is honored to within one poll, then give
+                // the operation a final fetch before timing out on the next pass
+                delay = Math.min(delay, remaining);
             }
             options.getAbortSignal().throwIfAborted();
 

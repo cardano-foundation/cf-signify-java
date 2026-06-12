@@ -4,6 +4,7 @@ import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.app.coring.exception.OperationFailedException;
 import org.cardanofoundation.signify.app.coring.exception.OperationNotFoundException;
+import org.cardanofoundation.signify.app.coring.exception.OperationTimeoutException;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.CompletedLocSchemeOperation;
@@ -301,8 +302,8 @@ public class OperationsTest {
     }
 
     @Test
-    @DisplayName("Throw if aborting operation")
-    void throwIfAbortingOperation() throws IOException, InterruptedException, LibsodiumException {
+    @DisplayName("Throws when waiting times out")
+    void throwsWhenWaitTimesOut() throws IOException, InterruptedException, LibsodiumException {
         String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
@@ -317,11 +318,35 @@ public class OperationsTest {
                 .abortSignal(Operations.AbortSignal.builder().timeout(50L).build())
                 .build();
 
+        Operation pendingOp = Utils.fromJson(
+            pendingLocSchemeOpJson(opName), Operation.class);
+        Exception exception = assertThrows(OperationTimeoutException.class,
+            () -> operations.wait(pendingOp, Operation.class, options));
+        assertEquals("Operation " + opName + " timed out after 50 ms", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Throw if aborting operation")
+    void throwIfAbortingOperation() throws IOException, InterruptedException, LibsodiumException {
+        String opName = "locscheme." + UUID.randomUUID();
+
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        Mockito.when(mockResponse.body()).thenReturn(pendingLocSchemeOpJson(opName));
+        Mockito.when(mockResponse.statusCode()).thenReturn(200);
+
+        when(client.fetch(anyString(), anyString(), isNull()))
+                .thenReturn(mockResponse);
+
+        Operations.WaitOptions options = Operations.WaitOptions.builder()
+                .maxSleep(10)
+                .build();
+        options.getAbortSignal().abort("user cancelled");
+
         Operation abortOp = Utils.fromJson(
             pendingLocSchemeOpJson(opName), Operation.class);
         Exception exception = assertThrows(InterruptedException.class,
             () -> operations.wait(abortOp, Operation.class, options));
-        assertEquals("Operation aborted: Timeout", exception.getMessage());
+        assertEquals("Operation aborted: user cancelled", exception.getMessage());
     }
 
     private String pendingLocSchemeOpJson(String name) {
