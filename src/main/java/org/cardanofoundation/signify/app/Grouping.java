@@ -157,19 +157,12 @@ public class Grouping {
                 return Optional.empty();
             }
 
+            // the parser returns empty for route mismatches; malformed matching-route messages throw
             List<T> parsed = list.get().stream()
-                .map(item -> safeParse(item, parser))
+                .map(parser)
                 .flatMap(Optional::stream)
                 .toList();
             return Optional.of(parsed);
-        }
-
-        private static <T> Optional<T> safeParse(ExnMultisig message, Function<ExnMultisig, Optional<T>> parser) {
-            try {
-                return parser.apply(message);
-            } catch (RuntimeException ignored) {
-                return Optional.empty();
-            }
         }
     }
 }

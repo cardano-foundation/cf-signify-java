@@ -53,22 +53,20 @@ public class NotifyingTest extends BaseMockServerTest {
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/notificationSAID", request.getPath());
 
-        Notifying.Notifications.TypedNotificationListResponse typedPage = notifications.listTyped();
+        Notifying.Notifications.NotificationListResponse page = notifications.list();
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/notifications", request.getPath());
-        assertEquals(1, typedPage.notes().size());
-        assertEquals("/exn/ipex/apply", typedPage.notes().getFirst().getA().getR());
+        assertEquals(1, page.notes().size());
+        assertEquals("/exn/ipex/apply", page.notes().getFirst().getA().getR());
 
-        Notifying.Notifications.ResolvedNotificationListResponse resolvedPage = notifications.listResolved();
-        request = mockWebServer.takeRequest();
-        assertEquals("GET", request.getMethod());
-        assertEquals("/notifications", request.getPath());
+        // resolve the typed exchange on demand from the listed notification
+        var resolvedExchange = notifications.resolveExchange(page.notes().getFirst());
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei", request.getPath());
-        assertTrue(resolvedPage.notes().getFirst().exchange().isPresent());
-        assertTrue(resolvedPage.notes().getFirst().exchange().orElseThrow().typed() instanceof IpexApplyExchange);
+        assertTrue(resolvedExchange.isPresent());
+        assertTrue(resolvedExchange.orElseThrow().typed() instanceof IpexApplyExchange);
     }
 
     @Test

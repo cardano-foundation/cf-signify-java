@@ -56,7 +56,7 @@ public class MultisigUtils {
 
         List<ExnMultisig> res = client2.groups().getRequest(args.getMsgSaid()).get();
         MultisigIcpGroup group = asMultisigIcpGroup(res.getFirst()).orElseThrow();
-        Map<String, Object> icp = Utils.toMap(group.e().icp());
+        Map<String, Object> icp = group.e().icp();
         List<String> smids = group.a().smids();
         List<String> rmids = group.a().rmids();
 
@@ -502,7 +502,7 @@ public class MultisigUtils {
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
             List<ExnMultisig> res = client.groups().getRequest(msgSaid).get();
             MultisigIxnGroup group = asMultisigIxnGroup(res.getFirst()).orElseThrow();
-            Map<String, Object> ixn = Utils.toMap(group.e().ixn());
+            Map<String, Object> ixn = group.e().ixn();
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }
 

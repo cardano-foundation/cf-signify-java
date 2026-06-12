@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.generated.keria.model.Notification;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
@@ -590,7 +590,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         IpexAdmitArgs admitArgs = IpexAdmitArgs.builder()
                 .senderName(senderAid.name)
                 .message("")
-                .grantSaid(grantNotification.a.d)
+                .grantSaid(grantNotification.getA().getD())
                 .recipient(recipientAid.prefix)
                 .datetime(createTimestamp())
                 .build();

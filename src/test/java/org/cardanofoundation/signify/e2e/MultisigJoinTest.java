@@ -128,7 +128,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         String msgSaid = TestUtils.waitAndMarkNotification(client2, MULTISIG_ICP_ROUTE);
         List<ExnMultisig> response = client2.groups().getRequest(msgSaid).get();
         MultisigIcpGroup group = asMultisigIcpGroup(response.getFirst()).orElseThrow();
-        Map<String, Object> icp = Utils.toMap(group.e().icp());
+        Map<String, Object> icp = group.e().icp();
 
         CreateIdentifierArgs iargs2 = new CreateIdentifierArgs();
         iargs2.setAlgo(Manager.Algos.group);
@@ -400,7 +400,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, MULTISIG_ROT_ROUTE);
         List<ExnMultisig> response = client3.groups().getRequest(rotationNotification3).get();
         MultisigRotGroup group = asMultisigRotGroup(response.getFirst()).orElseThrow();
-        Map<String, Object> ked = Utils.toMap(group.e().rot());
+        Map<String, Object> ked = group.e().rot();
         Serder serder3 = new Serder(ked);
 
         Keeping.Keeper<?> keeper3 = client3.getManager().get(aid3);

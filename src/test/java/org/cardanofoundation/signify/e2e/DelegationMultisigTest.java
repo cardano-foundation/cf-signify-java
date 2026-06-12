@@ -6,7 +6,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.generated.keria.model.Notification;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegatorOperation;
 import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
 import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
@@ -114,7 +114,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
             }
         });
 
-        TestUtils.Notification ntor;
+        Notification ntor;
         Retry.RetryOptions options = Retry.RetryOptions.builder()
                 .maxSleep(10000)
                 .minSleep(1000)

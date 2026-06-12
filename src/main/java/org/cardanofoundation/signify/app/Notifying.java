@@ -8,20 +8,9 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Notification;
-import static org.cardanofoundation.signify.app.ExnMessages.*;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asIpexAdmit;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asIpexAgree;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asIpexApply;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asIpexGrant;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asIpexOffer;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigExn;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigIcp;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigIss;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigIxn;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigRev;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigRot;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigRpy;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigVcp;
+import org.cardanofoundation.signify.app.ExnMessageTypes.TypedExchange;
+import static org.cardanofoundation.signify.app.ExnMessages.isRoute;
+import static org.cardanofoundation.signify.app.ExnMessageTypes.asTyped;
 import org.cardanofoundation.signify.generated.keria.model.NotificationData;
 
 import java.io.IOException;
@@ -65,7 +54,7 @@ public class Notifying {
                     range.start(),
                     range.end(),
                     range.total(),
-                    res.body()
+                    parseNotifications(res.body())
             );
         }
 
@@ -75,41 +64,6 @@ public class Notifying {
 
         public NotificationListResponse list(int start) throws IOException, InterruptedException, LibsodiumException {
             return list(start, 24);
-        }
-
-        public TypedNotificationListResponse listTyped(int start, int end) throws IOException, InterruptedException, LibsodiumException {
-            NotificationListResponse page = list(start, end);
-            return new TypedNotificationListResponse(
-                page.start(),
-                page.end(),
-                page.total(),
-                parseNotifications(page.notes())
-            );
-        }
-
-        public TypedNotificationListResponse listTyped() throws IOException, InterruptedException, LibsodiumException {
-            return listTyped(0, 24);
-        }
-
-        public TypedNotificationListResponse listTyped(int start) throws IOException, InterruptedException, LibsodiumException {
-            return listTyped(start, 24);
-        }
-
-        public ResolvedNotificationListResponse listResolved(int start, int end) throws IOException, InterruptedException, LibsodiumException {
-            TypedNotificationListResponse page = listTyped(start, end);
-            List<ResolvedNotification> resolved = page.notes().stream()
-                .map(note -> new ResolvedNotification(note, safeResolveExchange(note)))
-                .toList();
-
-            return new ResolvedNotificationListResponse(page.start(), page.end(), page.total(), resolved);
-        }
-
-        public ResolvedNotificationListResponse listResolved() throws IOException, InterruptedException, LibsodiumException {
-            return listResolved(0, 24);
-        }
-
-        public ResolvedNotificationListResponse listResolved(int start) throws IOException, InterruptedException, LibsodiumException {
-            return listResolved(start, 24);
         }
 
         public Optional<ResolvedTypedExchange> resolveExchange(Notification notification) throws Exception {
@@ -154,42 +108,13 @@ public class Notifying {
             }
 
             String normalizedRoute = normalizeRoute(route);
-            return switch (normalizedRoute) {
-                case MULTISIG_ICP_ROUTE -> asMultisigIcp(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case MULTISIG_ROT_ROUTE -> asMultisigRot(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case MULTISIG_IXN_ROUTE -> asMultisigIxn(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case MULTISIG_RPY_ROUTE -> asMultisigRpy(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case MULTISIG_VCP_ROUTE -> asMultisigVcp(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case MULTISIG_ISS_ROUTE -> asMultisigIss(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case MULTISIG_EXN_ROUTE -> asMultisigExn(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case MULTISIG_REV_ROUTE -> asMultisigRev(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case IPEX_GRANT_ROUTE -> asIpexGrant(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case IPEX_OFFER_ROUTE -> asIpexOffer(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case IPEX_APPLY_ROUTE -> asIpexApply(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case IPEX_AGREE_ROUTE -> asIpexAgree(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                case IPEX_ADMIT_ROUTE -> asIpexAdmit(exchangeResource)
-                    .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
-                default -> Optional.empty();
-            };
+            if (!isRoute(exchangeResource, normalizedRoute)) {
+                return Optional.empty();
+            }
+            return asTyped(exchangeResource)
+                .map(value -> new ResolvedTypedExchange(normalizedRoute, exchangeResource, value));
         }
 
-        /**
-         * Mark a notification as read
-         * @param said SAID of the notification
-         * @return Result of the marking
-         */
         public String mark(String said) throws IOException, InterruptedException, LibsodiumException {
             String path = "/notifications/" + said;
             String method = "PUT";
@@ -222,35 +147,14 @@ public class Notifying {
             if (notesJson == null || notesJson.isBlank()) {
                 return List.of();
             }
-
-            try {
-                return Utils.fromJson(notesJson, new TypeReference<List<Notification>>() {});
-            } catch (RuntimeException ex) {
-                return List.of();
-            }
+            return Utils.fromJson(notesJson, new TypeReference<List<Notification>>() {});
         }
 
-        private Optional<ResolvedTypedExchange> safeResolveExchange(Notification notification) {
-            try {
-                return resolveExchange(notification);
-            } catch (Exception ex) {
-                return Optional.empty();
-            }
+        public record NotificationListResponse(int start, int end, int total, List<Notification> notes) {
         }
 
-        public record NotificationListResponse(int start, int end, int total, String notes) {
+        public record ResolvedTypedExchange(String route, ExchangeResource exchange, TypedExchange typed) {
         }
 
-        public record TypedNotificationListResponse(int start, int end, int total, List<Notification> notes) {
-        }
-
-        public record ResolvedTypedExchange(String route, ExchangeResource exchange, Object typed) {
-        }
-
-        public record ResolvedNotification(Notification notification, Optional<ResolvedTypedExchange> exchange) {
-        }
-
-        public record ResolvedNotificationListResponse(int start, int end, int total, List<ResolvedNotification> notes) {
-        }
     }
 }

@@ -6,7 +6,7 @@ import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.generated.keria.model.Notification;
 import org.cardanofoundation.signify.generated.keria.model.AidRecord;
 import org.cardanofoundation.signify.generated.keria.model.EndRole;
 import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;

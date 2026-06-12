@@ -24,7 +24,7 @@ import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.generated.keria.model.Notification;
 import org.cardanofoundation.signify.generated.keria.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -305,7 +305,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 IpexAdmitArgs iargs = IpexAdmitArgs.builder().build();
                 iargs.setSenderName(holderAid.name);
                 iargs.setMessage("");
-                iargs.setGrantSaid(grantNotification.a.d);
+                iargs.setGrantSaid(grantNotification.getA().getD());
                 iargs.setRecipient(issuerAid.prefix);
                 iargs.setDatetime(createTimestamp());
 
@@ -371,10 +371,10 @@ public class CredentialsTest extends BaseIntegrationTest {
                 throw new RuntimeException(e);
             }
             Notification holderApplyNote = holderNotifications.getFirst();
-            assertNotNull(holderApplyNote.a.d);
+            assertNotNull(holderApplyNote.getA().getD());
 
             try {
-                IpexApplyExchange apply = holderClient.exchanges().getIpexApply(holderApplyNote.a.d).orElseThrow();
+                IpexApplyExchange apply = holderClient.exchanges().getIpexApply(holderApplyNote.getA().getD()).orElseThrow();
                 applySaid = apply.message().getExn().getD();
 
                 Map<String, Object> aBody = attributes(apply.message());
@@ -416,14 +416,14 @@ public class CredentialsTest extends BaseIntegrationTest {
             try {
                 verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_OFFER_ROUTE);
                 Notification verifierOfferNote = verifierNotifications.getFirst();
-                assertNotNull(verifierOfferNote.a.d);
+                assertNotNull(verifierOfferNote.getA().getD());
 
-                IpexOfferExchange offer = verifierClient.exchanges().getIpexOffer(verifierOfferNote.a.d).orElseThrow();
+                IpexOfferExchange offer = verifierClient.exchanges().getIpexOffer(verifierOfferNote.getA().getD()).orElseThrow();
 
                 offerSaid = offer.message().getExn().getD();
                 String p = offer.message().getExn().getP();
 
-                LinkedHashMap<String, Object> acdc = castObjectToLinkedHashMap(offer.e().acdc());
+                Map<String, Object> acdc = offer.e().acdc();
                 LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(acdc.get("a"));
                 String LEI = a.get("LEI").toString();
 
@@ -453,9 +453,9 @@ public class CredentialsTest extends BaseIntegrationTest {
             try {
                 holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_AGREE_ROUTE);
                 Notification holderAgreeNote = holderNotifications.getFirst();
-                assertNotNull(holderAgreeNote.a.d);
+                assertNotNull(holderAgreeNote.getA().getD());
 
-                IpexAgreeExchange agree = verifierClient.exchanges().getIpexAgree(holderAgreeNote.a.d).orElseThrow();
+                IpexAgreeExchange agree = verifierClient.exchanges().getIpexAgree(holderAgreeNote.getA().getD()).orElseThrow();
                 agreeSaid = agree.message().getExn().getD();
                 String agreeP = agree.message().getExn().getP();
 
@@ -497,9 +497,9 @@ public class CredentialsTest extends BaseIntegrationTest {
             try {
                 verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_GRANT_ROUTE);
                 Notification verifierGrantNote = verifierNotifications.getFirst();
-                assertNotNull(verifierGrantNote.a.d);
+                assertNotNull(verifierGrantNote.getA().getD());
 
-                IpexGrantExchange grant = holderClient.exchanges().getIpexGrant(verifierGrantNote.a.d).orElseThrow();
+                IpexGrantExchange grant = holderClient.exchanges().getIpexGrant(verifierGrantNote.getA().getD()).orElseThrow();
                 String p = grant.message().getExn().getP();
 
                 assertEquals(agreeSaid, p);
@@ -507,7 +507,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
                 admitArgs.setSenderName(verifierAid.name);
                 admitArgs.setMessage("");
-                admitArgs.setGrantSaid(verifierGrantNote.a.d);
+                admitArgs.setGrantSaid(verifierGrantNote.getA().getD());
                 admitArgs.setRecipient(holderAid.prefix);
                 admitArgs.setDatetime(createTimestamp());
 
@@ -640,7 +640,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
                 admitArgs.setSenderName(legalEntityAid.name);
                 admitArgs.setMessage("");
-                admitArgs.setGrantSaid(grantNotification.a.d);
+                admitArgs.setGrantSaid(grantNotification.getA().getD());
                 admitArgs.setRecipient(holderAid.prefix);
                 admitArgs.setDatetime(createTimestamp());
 
