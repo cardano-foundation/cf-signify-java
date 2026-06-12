@@ -123,11 +123,11 @@ public class Operations {
         int retries = 0;
 
         while (true) {
-            Operation newOp = get(operationName, Operation.class)
+            Operation current = get(operationName, Operation.class)
                     .orElseThrow(() -> new OperationNotFoundException(operationName));
 
-            if (isDone(newOp)) {
-                return castResult(newOp, resultType);
+            if (isDone(current)) {
+                return castResult(current, resultType);
             }
 
             long delay = Math.max(minSleep, Math.min(maxSleep, (long) Math.pow(2, retries) * increaseFactor));
