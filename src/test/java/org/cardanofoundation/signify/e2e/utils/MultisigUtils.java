@@ -5,10 +5,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIxnGroup;
+import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIxnExchange;
 import static org.cardanofoundation.signify.app.ExnMessages.*;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asGroup;
+import static org.cardanofoundation.signify.app.ExnMessageTypes.as;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -53,7 +53,7 @@ public class MultisigUtils {
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
         List<ExnMultisig> res = client2.groups().getRequest(args.getMsgSaid()).get();
-        MultisigIcpGroup group = asGroup(res.getFirst(), MultisigIcpGroup.class).orElseThrow();
+        MultisigIcpExchange group = as(res.getFirst(), MultisigIcpExchange.class).orElseThrow();
         Map<String, Object> icp = group.e().icp();
         List<String> smids = group.a().smids();
         List<String> rmids = group.a().rmids();
@@ -499,7 +499,7 @@ public class MultisigUtils {
             String msgSaid = TestUtils.waitAndMarkNotification(client, MULTISIG_IXN_ROUTE);
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
             List<ExnMultisig> res = client.groups().getRequest(msgSaid).get();
-            MultisigIxnGroup group = asGroup(res.getFirst(), MultisigIxnGroup.class).orElseThrow();
+            MultisigIxnExchange group = as(res.getFirst(), MultisigIxnExchange.class).orElseThrow();
             Map<String, Object> ixn = group.e().ixn();
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }

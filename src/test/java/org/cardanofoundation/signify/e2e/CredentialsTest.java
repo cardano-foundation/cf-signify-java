@@ -10,7 +10,6 @@ import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.attributes;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.credentialing.credentials.*;
 import org.cardanofoundation.signify.app.credentialing.ipex.*;
@@ -377,7 +376,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 IpexApplyExchange apply = holderClient.exchanges().get(holderApplyNote.getA().getD(), IpexApplyExchange.class).orElseThrow();
                 applySaid = apply.message().getExn().getD();
 
-                Map<String, Object> aBody = attributes(apply.message());
+                Map<String, Object> aBody = apply.a();
 
                 Map<String, Object> filter = new LinkedHashMap<>();
                 filter.put("-s", aBody.get("s").toString());

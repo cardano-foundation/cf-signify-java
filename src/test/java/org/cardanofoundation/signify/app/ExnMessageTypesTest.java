@@ -1,8 +1,6 @@
 package org.cardanofoundation.signify.app;
 
 import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIssGroup;
 import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
 import org.cardanofoundation.signify.app.ExnMessageTypes.TypedExchange;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
@@ -65,7 +63,7 @@ public class ExnMessageTypesTest {
         assertTrue(ExnMessageTypes.asTyped(exchange("/unknown/route", Map.of(), Map.of())).isEmpty());
         assertTrue(ExnMessageTypes.asTyped(exchange(null, Map.of(), Map.of())).isEmpty());
         assertTrue(ExnMessageTypes.asTyped(new ExchangeResource()).isEmpty());
-        assertTrue(ExnMessageTypes.asTyped(null).isEmpty());
+        assertTrue(ExnMessageTypes.asTyped((ExchangeResource) null).isEmpty());
     }
 
     @Test
@@ -78,19 +76,18 @@ public class ExnMessageTypesTest {
     }
 
     @Test
-    @DisplayName("asGroup parses group requests with metadata")
-    void asGroupParses() {
-        MultisigIcpGroup parsed = ExnMessageTypes
-            .asGroup(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), MultisigIcpGroup.class)
+    @DisplayName("group request messages parse via the same typed exchanges")
+    void groupRequestsParse() {
+        MultisigIcpExchange parsed = ExnMessageTypes
+            .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), MultisigIcpExchange.class)
             .orElseThrow();
 
-        assertEquals("multisig", parsed.metadata().groupName());
-        assertEquals("member1", parsed.metadata().memberName());
         assertEquals("EGroupId", parsed.a().gid());
 
         assertTrue(ExnMessageTypes
-            .asGroup(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), MultisigIssGroup.class)
+            .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), IpexGrantExchange.class)
             .isEmpty());
+        assertTrue(ExnMessageTypes.asTyped((ExnMultisig) null).isEmpty());
     }
 
     @Test

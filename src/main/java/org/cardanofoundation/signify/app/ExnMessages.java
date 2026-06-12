@@ -4,10 +4,6 @@ import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-
 /**
  * Route constants and low-level accessors for exchange (exn) messages.
  *
@@ -45,41 +41,4 @@ public final class ExnMessages {
         return exn == null ? null : exn.getR();
     }
 
-    public static boolean isRoute(ExchangeResource msg, String route) {
-        return Objects.equals(routeOf(msg), route);
-    }
-
-    public static boolean isRoute(ExnMultisig msg, String route) {
-        return Objects.equals(routeOf(msg), route);
-    }
-
-    public static Map<String, Object> attributes(ExchangeResource msg) {
-        return msg == null ? Collections.emptyMap() : attributes(msg.getExn());
-    }
-
-    public static Map<String, Object> attributes(Exn exn) {
-        if (exn == null) {
-            return Collections.emptyMap();
-        }
-        return asMap(exn.getA());
-    }
-
-    public static Map<String, Object> embeds(ExchangeResource msg) {
-        return msg == null ? Collections.emptyMap() : embeds(msg.getExn());
-    }
-
-    public static Map<String, Object> embeds(Exn exn) {
-        if (exn == null || exn.getE() == null) {
-            return Collections.emptyMap();
-        }
-        return exn.getE();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> asMap(Object value) {
-        if (value instanceof Map<?, ?> map) {
-            return (Map<String, Object>) map;
-        }
-        return Collections.emptyMap();
-    }
 }
