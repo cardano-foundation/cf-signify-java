@@ -37,28 +37,21 @@ public class GroupingTest extends BaseMockServerTest {
             request.getRequestUrl().toString()
         );
 
-        // Mock returns /multisig/iss route — getMultisigIcpRequests should filter it out (route mismatch)
-        var icpRequests = groups.getMultisigIcpRequests("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00");
+        // Mock returns a /multisig/iss request — type it with the route parsers
+        var requests = groups.getRequest("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00").orElseThrow();
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals(
             url + "/multisig/request/ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
             request.getRequestUrl().toString()
         );
-        assertTrue(icpRequests.isPresent());
-        assertTrue(icpRequests.orElseThrow().isEmpty());
+        assertEquals(1, requests.size());
 
-        // Route matches /multisig/iss — getMultisigIssRequests should return the parsed group
-        var issRequests = groups.getMultisigIssRequests("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00");
-        request = mockWebServer.takeRequest();
-        assertEquals("GET", request.getMethod());
-        assertEquals(
-            url + "/multisig/request/ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
-            request.getRequestUrl().toString()
-        );
-        assertTrue(issRequests.isPresent());
-        assertEquals(1, issRequests.orElseThrow().size());
-        var issGroup = issRequests.orElseThrow().getFirst();
+        // route mismatch — asMultisigIcpGroup is empty
+        assertTrue(ExnMessageTypes.asGroup(requests.getFirst(), ExnMessageTypes.MultisigIcpGroup.class).isEmpty());
+
+        // route match — asMultisigIssGroup parses the typed group
+        var issGroup = ExnMessageTypes.asGroup(requests.getFirst(), ExnMessageTypes.MultisigIssGroup.class).orElseThrow();
         assertEquals("multisig", issGroup.metadata().groupName());
         assertEquals("member1", issGroup.metadata().memberName());
 

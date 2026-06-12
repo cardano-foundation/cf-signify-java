@@ -1,14 +1,6 @@
 package org.cardanofoundation.signify.app;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigExnGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIxnGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigRevGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigRotGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigRpyGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigVcpGroup;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIssGroup;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
@@ -24,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 public class Grouping {
     @Getter
@@ -57,38 +48,6 @@ public class Grouping {
             }
 
             return Optional.of(Utils.fromJson(response.body(), new TypeReference<List<ExnMultisig>>() {}));
-        }
-
-        public Optional<List<MultisigIcpGroup>> getMultisigIcpRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigIcpGroup);
-        }
-
-        public Optional<List<MultisigRotGroup>> getMultisigRotRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigRotGroup);
-        }
-
-        public Optional<List<MultisigIxnGroup>> getMultisigIxnRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigIxnGroup);
-        }
-
-        public Optional<List<MultisigRpyGroup>> getMultisigRpyRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigRpyGroup);
-        }
-
-        public Optional<List<MultisigVcpGroup>> getMultisigVcpRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigVcpGroup);
-        }
-
-        public Optional<List<MultisigIssGroup>> getMultisigIssRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigIssGroup);
-        }
-
-        public Optional<List<MultisigExnGroup>> getMultisigExnRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigExnGroup);
-        }
-
-        public Optional<List<MultisigRevGroup>> getMultisigRevRequests(String said) throws LibsodiumException, IOException, InterruptedException {
-            return parseGroups(said, ExnMessageTypes::asMultisigRevGroup);
         }
 
         /**
@@ -149,20 +108,6 @@ public class Grouping {
 
             HttpResponse<String> response = this.client.fetch(path, method, data);
             return Utils.fromJson(response.body(), Object.class);
-        }
-
-        private <T> Optional<List<T>> parseGroups(String said, Function<ExnMultisig, Optional<T>> parser) throws LibsodiumException, IOException, InterruptedException {
-            Optional<List<ExnMultisig>> list = getRequest(said);
-            if (list.isEmpty()) {
-                return Optional.empty();
-            }
-
-            // the parser returns empty for route mismatches; malformed matching-route messages throw
-            List<T> parsed = list.get().stream()
-                .map(parser)
-                .flatMap(Optional::stream)
-                .toList();
-            return Optional.of(parsed);
         }
     }
 }

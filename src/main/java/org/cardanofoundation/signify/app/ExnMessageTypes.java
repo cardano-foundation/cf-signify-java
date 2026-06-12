@@ -30,6 +30,14 @@ public final class ExnMessageTypes {
     }
 
     /**
+     * Union of all route-typed group request messages, enabling exhaustive switching.
+     */
+    public sealed interface TypedGroup permits
+            MultisigIcpGroup, MultisigRotGroup, MultisigIxnGroup, MultisigRpyGroup,
+            MultisigVcpGroup, MultisigIssGroup, MultisigExnGroup, MultisigRevGroup {
+    }
+
+    /**
      * Union of all route-typed exchange messages, enabling exhaustive switching.
      */
     public sealed interface TypedExchange permits
@@ -95,28 +103,28 @@ public final class ExnMessageTypes {
     public record MultisigRevExchange(ExchangeResource message, GroupAttributes a, MultisigRevEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigIcpGroup(ExnMultisig message, GroupMetadata metadata, ParticipantsAttributes a, MultisigIcpEmbeds e) {
+    public record MultisigIcpGroup(ExnMultisig message, GroupMetadata metadata, ParticipantsAttributes a, MultisigIcpEmbeds e) implements TypedGroup {
     }
 
-    public record MultisigRotGroup(ExnMultisig message, GroupMetadata metadata, ParticipantsAttributes a, MultisigRotEmbeds e) {
+    public record MultisigRotGroup(ExnMultisig message, GroupMetadata metadata, ParticipantsAttributes a, MultisigRotEmbeds e) implements TypedGroup {
     }
 
-    public record MultisigIxnGroup(ExnMultisig message, GroupMetadata metadata, ParticipantsAttributes a, MultisigIxnEmbeds e) {
+    public record MultisigIxnGroup(ExnMultisig message, GroupMetadata metadata, ParticipantsAttributes a, MultisigIxnEmbeds e) implements TypedGroup {
     }
 
-    public record MultisigRpyGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigRpyEmbeds e) {
+    public record MultisigRpyGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigRpyEmbeds e) implements TypedGroup {
     }
 
-    public record MultisigVcpGroup(ExnMultisig message, GroupMetadata metadata, UsageAttributes a, MultisigVcpEmbeds e) {
+    public record MultisigVcpGroup(ExnMultisig message, GroupMetadata metadata, UsageAttributes a, MultisigVcpEmbeds e) implements TypedGroup {
     }
 
-    public record MultisigIssGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigIssEmbeds e) {
+    public record MultisigIssGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigIssEmbeds e) implements TypedGroup {
     }
 
-    public record MultisigExnGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigExnEmbeds e) {
+    public record MultisigExnGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigExnEmbeds e) implements TypedGroup {
     }
 
-    public record MultisigRevGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigRevEmbeds e) {
+    public record MultisigRevGroup(ExnMultisig message, GroupMetadata metadata, GroupAttributes a, MultisigRevEmbeds e) implements TypedGroup {
     }
 
     public record IpexGrantExchange(ExchangeResource message, IpexGrantEmbeds e) implements TypedExchange {
@@ -151,6 +159,14 @@ public final class ExnMessageTypes {
     );
 
     /**
+     * Parses an exchange message as the given typed form; empty when the message's
+     * route does not produce that type.
+     */
+    public static <T extends TypedExchange> Optional<T> as(ExchangeResource msg, Class<T> type) {
+        return asTyped(msg).filter(type::isInstance).map(type::cast);
+    }
+
+    /**
      * Parses any known-route exchange message into its typed form; empty for unknown routes.
      */
     public static Optional<TypedExchange> asTyped(ExchangeResource msg) {
@@ -158,102 +174,31 @@ public final class ExnMessageTypes {
         return parser == null ? Optional.empty() : Optional.of(parser.parse(msg));
     }
 
-    public static Optional<MultisigIcpExchange> asMultisigIcp(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_ICP_ROUTE, ExnMessageTypes::toMultisigIcpExchange);
+    private static final Map<String, GroupParser<? extends TypedGroup>> GROUP_PARSERS = Map.ofEntries(
+        Map.entry(MULTISIG_ICP_ROUTE, ExnMessageTypes::toMultisigIcpGroup),
+        Map.entry(MULTISIG_ROT_ROUTE, ExnMessageTypes::toMultisigRotGroup),
+        Map.entry(MULTISIG_IXN_ROUTE, ExnMessageTypes::toMultisigIxnGroup),
+        Map.entry(MULTISIG_RPY_ROUTE, ExnMessageTypes::toMultisigRpyGroup),
+        Map.entry(MULTISIG_VCP_ROUTE, ExnMessageTypes::toMultisigVcpGroup),
+        Map.entry(MULTISIG_ISS_ROUTE, ExnMessageTypes::toMultisigIssGroup),
+        Map.entry(MULTISIG_EXN_ROUTE, ExnMessageTypes::toMultisigExnGroup),
+        Map.entry(MULTISIG_REV_ROUTE, ExnMessageTypes::toMultisigRevGroup)
+    );
+
+    /**
+     * Parses any known-route group request message into its typed form; empty for unknown routes.
+     */
+    public static Optional<TypedGroup> asTypedGroup(ExnMultisig msg) {
+        GroupParser<? extends TypedGroup> parser = GROUP_PARSERS.get(routeOf(msg));
+        return parser == null ? Optional.empty() : Optional.of(parser.parse(msg));
     }
 
-    public static Optional<MultisigRotExchange> asMultisigRot(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_ROT_ROUTE, ExnMessageTypes::toMultisigRotExchange);
-    }
-
-    public static Optional<MultisigIxnExchange> asMultisigIxn(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_IXN_ROUTE, ExnMessageTypes::toMultisigIxnExchange);
-    }
-
-    public static Optional<MultisigRpyExchange> asMultisigRpy(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_RPY_ROUTE, ExnMessageTypes::toMultisigRpyExchange);
-    }
-
-    public static Optional<MultisigVcpExchange> asMultisigVcp(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_VCP_ROUTE, ExnMessageTypes::toMultisigVcpExchange);
-    }
-
-    public static Optional<MultisigIssExchange> asMultisigIss(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_ISS_ROUTE, ExnMessageTypes::toMultisigIssExchange);
-    }
-
-    public static Optional<MultisigExnExchange> asMultisigExn(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_EXN_ROUTE, ExnMessageTypes::toMultisigExnExchange);
-    }
-
-    public static Optional<MultisigRevExchange> asMultisigRev(ExchangeResource msg) {
-        return parseExchange(msg, MULTISIG_REV_ROUTE, ExnMessageTypes::toMultisigRevExchange);
-    }
-
-    public static Optional<MultisigIcpGroup> asMultisigIcpGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_ICP_ROUTE, ExnMessageTypes::toMultisigIcpGroup);
-    }
-
-    public static Optional<MultisigRotGroup> asMultisigRotGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_ROT_ROUTE, ExnMessageTypes::toMultisigRotGroup);
-    }
-
-    public static Optional<MultisigIxnGroup> asMultisigIxnGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_IXN_ROUTE, ExnMessageTypes::toMultisigIxnGroup);
-    }
-
-    public static Optional<MultisigRpyGroup> asMultisigRpyGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_RPY_ROUTE, ExnMessageTypes::toMultisigRpyGroup);
-    }
-
-    public static Optional<MultisigVcpGroup> asMultisigVcpGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_VCP_ROUTE, ExnMessageTypes::toMultisigVcpGroup);
-    }
-
-    public static Optional<MultisigIssGroup> asMultisigIssGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_ISS_ROUTE, ExnMessageTypes::toMultisigIssGroup);
-    }
-
-    public static Optional<MultisigExnGroup> asMultisigExnGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_EXN_ROUTE, ExnMessageTypes::toMultisigExnGroup);
-    }
-
-    public static Optional<MultisigRevGroup> asMultisigRevGroup(ExnMultisig msg) {
-        return parseGroup(msg, MULTISIG_REV_ROUTE, ExnMessageTypes::toMultisigRevGroup);
-    }
-
-    public static Optional<IpexGrantExchange> asIpexGrant(ExchangeResource msg) {
-        return parseExchange(msg, IPEX_GRANT_ROUTE, ExnMessageTypes::toIpexGrantExchange);
-    }
-
-    public static Optional<IpexOfferExchange> asIpexOffer(ExchangeResource msg) {
-        return parseExchange(msg, IPEX_OFFER_ROUTE, ExnMessageTypes::toIpexOfferExchange);
-    }
-
-    public static Optional<IpexApplyExchange> asIpexApply(ExchangeResource msg) {
-        return parseExchange(msg, IPEX_APPLY_ROUTE, ExnMessageTypes::toIpexApplyExchange);
-    }
-
-    public static Optional<IpexAgreeExchange> asIpexAgree(ExchangeResource msg) {
-        return parseExchange(msg, IPEX_AGREE_ROUTE, ExnMessageTypes::toIpexAgreeExchange);
-    }
-
-    public static Optional<IpexAdmitExchange> asIpexAdmit(ExchangeResource msg) {
-        return parseExchange(msg, IPEX_ADMIT_ROUTE, ExnMessageTypes::toIpexAdmitExchange);
-    }
-
-    private static <T> Optional<T> parseExchange(ExchangeResource msg, String route, ExchangeParser<T> parser) {
-        if (!isRoute(msg, route)) {
-            return Optional.empty();
-        }
-        return Optional.of(parser.parse(msg));
-    }
-
-    private static <T> Optional<T> parseGroup(ExnMultisig msg, String route, GroupParser<T> parser) {
-        if (!isRoute(msg, route)) {
-            return Optional.empty();
-        }
-        return Optional.of(parser.parse(msg));
+    /**
+     * Parses a group request message as the given typed form; empty when the message's
+     * route does not produce that type.
+     */
+    public static <T extends TypedGroup> Optional<T> asGroup(ExnMultisig msg, Class<T> type) {
+        return asTypedGroup(msg).filter(type::isInstance).map(type::cast);
     }
 
     private static MultisigIcpExchange toMultisigIcpExchange(ExchangeResource msg) {

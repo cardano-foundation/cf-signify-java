@@ -374,7 +374,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertNotNull(holderApplyNote.getA().getD());
 
             try {
-                IpexApplyExchange apply = holderClient.exchanges().getIpexApply(holderApplyNote.getA().getD()).orElseThrow();
+                IpexApplyExchange apply = holderClient.exchanges().get(holderApplyNote.getA().getD(), IpexApplyExchange.class).orElseThrow();
                 applySaid = apply.message().getExn().getD();
 
                 Map<String, Object> aBody = attributes(apply.message());
@@ -418,7 +418,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification verifierOfferNote = verifierNotifications.getFirst();
                 assertNotNull(verifierOfferNote.getA().getD());
 
-                IpexOfferExchange offer = verifierClient.exchanges().getIpexOffer(verifierOfferNote.getA().getD()).orElseThrow();
+                IpexOfferExchange offer = verifierClient.exchanges().get(verifierOfferNote.getA().getD(), IpexOfferExchange.class).orElseThrow();
 
                 offerSaid = offer.message().getExn().getD();
                 String p = offer.message().getExn().getP();
@@ -455,7 +455,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification holderAgreeNote = holderNotifications.getFirst();
                 assertNotNull(holderAgreeNote.getA().getD());
 
-                IpexAgreeExchange agree = verifierClient.exchanges().getIpexAgree(holderAgreeNote.getA().getD()).orElseThrow();
+                IpexAgreeExchange agree = verifierClient.exchanges().get(holderAgreeNote.getA().getD(), IpexAgreeExchange.class).orElseThrow();
                 agreeSaid = agree.message().getExn().getD();
                 String agreeP = agree.message().getExn().getP();
 
@@ -499,7 +499,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 Notification verifierGrantNote = verifierNotifications.getFirst();
                 assertNotNull(verifierGrantNote.getA().getD());
 
-                IpexGrantExchange grant = holderClient.exchanges().getIpexGrant(verifierGrantNote.getA().getD()).orElseThrow();
+                IpexGrantExchange grant = holderClient.exchanges().get(verifierGrantNote.getA().getD(), IpexGrantExchange.class).orElseThrow();
                 String p = grant.message().getExn().getP();
 
                 assertEquals(agreeSaid, p);

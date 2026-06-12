@@ -1,11 +1,6 @@
 package org.cardanofoundation.signify.app.credentialing.ipex;
 
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexAdmitExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexAgreeExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexApplyExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexOfferExchange;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
@@ -26,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
-import java.util.Optional;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Ipex {
@@ -240,23 +234,4 @@ public class Ipex {
         return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
-    public Optional<IpexGrantExchange> getGrantExchange(String said) throws Exception {
-        return this.client.exchanges().getIpexGrant(said);
-    }
-
-    public Optional<IpexOfferExchange> getOfferExchange(String said) throws Exception {
-        return this.client.exchanges().getIpexOffer(said);
-    }
-
-    public Optional<IpexApplyExchange> getApplyExchange(String said) throws Exception {
-        return this.client.exchanges().getIpexApply(said);
-    }
-
-    public Optional<IpexAgreeExchange> getAgreeExchange(String said) throws Exception {
-        return this.client.exchanges().getIpexAgree(said);
-    }
-
-    public Optional<IpexAdmitExchange> getAdmitExchange(String said) throws Exception {
-        return this.client.exchanges().getIpexAdmit(said);
-    }
 }

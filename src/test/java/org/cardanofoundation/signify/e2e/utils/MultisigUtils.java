@@ -8,8 +8,7 @@ import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpGroup;
 import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIxnGroup;
 import static org.cardanofoundation.signify.app.ExnMessages.*;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigIcpGroup;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigIxnGroup;
+import static org.cardanofoundation.signify.app.ExnMessageTypes.asGroup;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -54,7 +53,7 @@ public class MultisigUtils {
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
         List<ExnMultisig> res = client2.groups().getRequest(args.getMsgSaid()).get();
-        MultisigIcpGroup group = asMultisigIcpGroup(res.getFirst()).orElseThrow();
+        MultisigIcpGroup group = asGroup(res.getFirst(), MultisigIcpGroup.class).orElseThrow();
         Map<String, Object> icp = group.e().icp();
         List<String> smids = group.a().smids();
         List<String> rmids = group.a().rmids();
@@ -500,7 +499,7 @@ public class MultisigUtils {
             String msgSaid = TestUtils.waitAndMarkNotification(client, MULTISIG_IXN_ROUTE);
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
             List<ExnMultisig> res = client.groups().getRequest(msgSaid).get();
-            MultisigIxnGroup group = asMultisigIxnGroup(res.getFirst()).orElseThrow();
+            MultisigIxnGroup group = asGroup(res.getFirst(), MultisigIxnGroup.class).orElseThrow();
             Map<String, Object> ixn = group.e().ixn();
             anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
         }

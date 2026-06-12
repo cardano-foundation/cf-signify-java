@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class IpexTest extends BaseMockServerTest {
@@ -359,32 +358,4 @@ public class IpexTest extends BaseMockServerTest {
         assertEquals("/identifiers/multisig/ipex/offer", lastCall.getPath());
     }
 
-        @Test
-        @DisplayName("IPEX typed exchange getters should use exchanges endpoint")
-        void testTypedExchangeGetters() throws Exception {
-                String bran = "0123456789abcdefghijk";
-                SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
-                client.boot();
-                client.connect();
-                cleanUpRequest();
-
-                Ipex ipex = client.ipex();
-                String said = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
-
-                // All getters hit GET /exchanges/{said} — neutral mock (/multisig/icp) causes all to return empty (route mismatch)
-                assertTrue(ipex.getGrantExchange(said).isEmpty());
-                RecordedRequest request = mockWebServer.takeRequest();
-                assertEquals("GET", request.getMethod());
-                assertEquals("/exchanges/" + said, request.getPath());
-
-                assertTrue(ipex.getOfferExchange(said).isEmpty());
-                request = mockWebServer.takeRequest();
-                assertEquals("GET", request.getMethod());
-                assertEquals("/exchanges/" + said, request.getPath());
-
-                assertTrue(ipex.getApplyExchange(said).isEmpty());
-                request = mockWebServer.takeRequest();
-                assertEquals("GET", request.getMethod());
-                assertEquals("/exchanges/" + said, request.getPath());
-        }
 }

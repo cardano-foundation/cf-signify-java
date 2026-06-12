@@ -12,6 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.cardanofoundation.signify.app.Exchanging.exchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexApplyExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
+import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpExchange;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.routeOf;
 import static org.junit.jupiter.api.Assertions.*;
@@ -268,7 +271,7 @@ public class ExchangingTest extends BaseMockServerTest {
         assertEquals("/exchanges/" + exchangeId, request.getPath());
 
         // Mock returns /ipex/apply route — getIpexApply should resolve to typed model
-        var apply = exchanges.getIpexApply(exchangeId);
+        var apply = exchanges.get(exchangeId, IpexApplyExchange.class);
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());
@@ -276,13 +279,13 @@ public class ExchangingTest extends BaseMockServerTest {
         assertEquals(IPEX_APPLY_ROUTE, routeOf(apply.orElseThrow().message()));
 
         // Route mismatch — getIpexGrant should return empty
-        assertTrue(exchanges.getIpexGrant(exchangeId).isEmpty());
+        assertTrue(exchanges.get(exchangeId, IpexGrantExchange.class).isEmpty());
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());
 
         // Route mismatch — getMultisigIcp should return empty
-        assertTrue(exchanges.getMultisigIcp(exchangeId).isEmpty());
+        assertTrue(exchanges.get(exchangeId, MultisigIcpExchange.class).isEmpty());
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());

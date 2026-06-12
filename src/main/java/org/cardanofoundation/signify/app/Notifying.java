@@ -48,7 +48,7 @@ public class Notifying {
                     range.start(),
                     range.end(),
                     range.total(),
-                    parseNotifications(res.body())
+                    Utils.fromJson(res.body(), new TypeReference<>() {})
             );
         }
 
@@ -75,13 +75,6 @@ public class Notifying {
             String path = "/notifications/" + said;
             String method = "DELETE";
             this.client.fetch(path, method, null);
-        }
-
-        private static List<Notification> parseNotifications(String notesJson) {
-            if (notesJson == null || notesJson.isBlank()) {
-                return List.of();
-            }
-            return Utils.fromJson(notesJson, new TypeReference<List<Notification>>() {});
         }
 
         public record NotificationListResponse(int start, int end, int total, List<Notification> notes) {

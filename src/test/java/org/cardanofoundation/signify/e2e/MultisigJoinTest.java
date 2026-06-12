@@ -3,8 +3,7 @@ package org.cardanofoundation.signify.e2e;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpGroup;
 import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigRotGroup;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigIcpGroup;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.asMultisigRotGroup;
+import static org.cardanofoundation.signify.app.ExnMessageTypes.asGroup;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ROT_ROUTE;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
@@ -126,7 +125,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         String msgSaid = TestUtils.waitAndMarkNotification(client2, MULTISIG_ICP_ROUTE);
         List<ExnMultisig> response = client2.groups().getRequest(msgSaid).get();
-        MultisigIcpGroup group = asMultisigIcpGroup(response.getFirst()).orElseThrow();
+        MultisigIcpGroup group = asGroup(response.getFirst(), MultisigIcpGroup.class).orElseThrow();
         Map<String, Object> icp = group.e().icp();
 
         CreateIdentifierArgs iargs2 = new CreateIdentifierArgs();
@@ -398,7 +397,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, MULTISIG_ROT_ROUTE);
         List<ExnMultisig> response = client3.groups().getRequest(rotationNotification3).get();
-        MultisigRotGroup group = asMultisigRotGroup(response.getFirst()).orElseThrow();
+        MultisigRotGroup group = asGroup(response.getFirst(), MultisigRotGroup.class).orElseThrow();
         Map<String, Object> ked = group.e().rot();
         Serder serder3 = new Serder(ked);
 
