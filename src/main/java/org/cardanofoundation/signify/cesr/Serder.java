@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -115,6 +116,8 @@ public class Serder {
         if (!ked.containsKey("v")) {
             throw new NoSuchElementException("Missing or empty version string");
         }
+
+        ked = new LinkedHashMap<>(ked);
 
         DeversifyResult deversifyResult = CoreUtil.deversify((String) ked.get("v"));
         Ident ident = deversifyResult.ident();
