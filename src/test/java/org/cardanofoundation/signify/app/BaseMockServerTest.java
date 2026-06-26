@@ -402,6 +402,15 @@ public class BaseMockServerTest {
             }
         ]""";
 
+    public static final String MOCK_LOCSCHEMES = """
+        [
+            {
+                "eid": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "scheme": "http",
+                "url": "http://indexer.example.com"
+            }
+        ]""";
+
     public static final String MOCK_CREDENTIAL = """
         {
             "sad": {
@@ -467,7 +476,9 @@ public class BaseMockServerTest {
         );
 
         String body;
-        if (reqUrl.startsWith(url + "/endroles/")) {
+        if (reqUrl.startsWith(url + "/locschemes/")) {
+            body = MOCK_LOCSCHEMES;
+        } else if (reqUrl.startsWith(url + "/endroles/")) {
             body = MOCK_ENDROLES;
         } else if (reqUrl.startsWith(url + "/identifiers/aid1/credentials")) {
             body = MOCK_CREDENTIAL;

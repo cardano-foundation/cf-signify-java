@@ -14,6 +14,7 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.EndRole;
+import org.cardanofoundation.signify.generated.keria.model.LocSchemeMetadata;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.OOBIOperation;
 
@@ -83,5 +84,17 @@ public class Oobis {
                 : "/endroles/" + aid;
         HttpResponse<String> response = this.client.fetch(path, "GET", null);
         return Utils.fromJson(response.body(), new TypeReference<List<EndRole>>() {});
+    }
+
+    /**
+     * Get approved location schemes for a given EID
+     *
+     * @param eid Endpoint identifier
+     * @return List of location schemes
+     */
+    public List<LocSchemeMetadata> locschemes(String eid) throws IOException, InterruptedException, LibsodiumException {
+        String path = "/locschemes/" + eid;
+        HttpResponse<String> response = this.client.fetch(path, "GET", null);
+        return Utils.fromJson(response.body(), new TypeReference<List<LocSchemeMetadata>>() {});
     }
 }

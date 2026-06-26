@@ -37,6 +37,7 @@ import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
+import org.cardanofoundation.signify.generated.keria.model.LocSchemeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
@@ -343,6 +344,46 @@ public class IdentifierController {
 
         String route = "/end/role/add";
         return Eventing.reply(route, data, stamp, null, Serials.JSON);
+    }
+
+    /**
+     * Authorize a new location scheme (endpoint) for a particular endpoint identifier
+     *
+     * @param name Name or alias of the identifier to sign reply message
+     * @param args Arguments to create authorizing reply message from
+     * @return An EventResult to the result of the authorization
+     */
+    public EventResult<LocSchemeOperation> addLocScheme(String name, LocSchemeArgs args) throws InterruptedException, DigestException, IOException, LibsodiumException {
+        HabState hab = this.get(name)
+            .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
+        String pre = hab.getPrefix();
+
+        String eid = args.getEid() != null ? args.getEid() : pre;
+        String url = args.getUrl();
+        String scheme = args.getScheme() != null ? args.getScheme() : "http";
+
+        Map<String, Object> rpyData = new LinkedHashMap<>();
+        rpyData.put("eid", eid);
+        rpyData.put("url", url);
+        rpyData.put("scheme", scheme);
+
+        Serder rpy = Eventing.reply("/loc/scheme", rpyData, args.getStamp(), null, Serials.JSON);
+
+        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
+        Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
+        List<String> sigs = signResult.signatures();
+
+        Map<String, Object> jsondata = new LinkedHashMap<>();
+        jsondata.put("rpy", rpy.getKed());
+        jsondata.put("sigs", sigs);
+
+        HttpResponse<String> res = this.client.fetch(
+                "/identifiers/" + name + "/locschemes",
+                "POST",
+                jsondata
+        );
+        LocSchemeOperation op = Utils.fromJson(res.body(), LocSchemeOperation.class);
+        return new EventResult<>(rpy, sigs, op);
     }
 
     public EventResult<KelOperation> interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
