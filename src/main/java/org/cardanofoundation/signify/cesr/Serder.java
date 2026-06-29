@@ -117,6 +117,8 @@ public class Serder {
             throw new NoSuchElementException("Missing or empty version string");
         }
 
+        // sizeify must not mutate the caller's map: callers (e.g. multisig exn embeds)
+        // hold the original event map and re-serialize it byte-for-byte.
         ked = new LinkedHashMap<>(ked);
 
         DeversifyResult deversifyResult = CoreUtil.deversify((String) ked.get("v"));
