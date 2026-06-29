@@ -7,6 +7,5 @@ public sealed interface KelOperation extends Operation permits
         DelegationOperation,
         DoneOperation,
         GroupOperation,
-        SubmitOperation,
         WitnessOperation {
 }

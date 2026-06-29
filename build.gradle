@@ -266,7 +266,7 @@ tasks.named("openApiGenerate") {
     // here instead of producing a silently broken hierarchy.
     doLast {
         def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
-        def kelOps = ["Delegation", "Done", "Group", "Submit", "Witness"] as Set
+        def kelOps = ["Delegation", "Done", "Group", "Witness"] as Set
         def states = ["Pending", "Completed", "Failed"]
         def stateDocs = [
             Pending  : "that have not yet completed",

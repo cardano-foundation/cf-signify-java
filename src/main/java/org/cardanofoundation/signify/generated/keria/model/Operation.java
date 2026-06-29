@@ -15,6 +15,7 @@ public sealed interface Operation permits
         OOBIOperation,
         QueryOperation,
         RegistryOperation,
+        SubmitOperation,
         PendingOperation,
         CompletedOperation,
         FailedOperation {
