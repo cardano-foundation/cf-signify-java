@@ -60,6 +60,11 @@ public class Notifying {
             return list(start, 24);
         }
 
+        /**
+         * Mark a notification as read
+         * @param said SAID of the notification
+         * @return Result of the marking
+         */
         public String mark(String said) throws IOException, InterruptedException, LibsodiumException {
             String path = "/notifications/" + said;
             String method = "PUT";
