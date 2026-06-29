@@ -69,7 +69,7 @@ public class ExnMessagesTest {
     @Test
     @DisplayName("as() narrows to the requested type, empty on mismatch")
     void asNarrows() {
-        ExchangeResource msg = exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of());
+        ExchangeResource msg = exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", Map.of("t", "icp")));
 
         assertTrue(ExnMessages.as(msg, MultisigIcpExchange.class).isPresent());
         assertTrue(ExnMessages.as(msg, IpexGrantExchange.class).isEmpty());
@@ -79,13 +79,13 @@ public class ExnMessagesTest {
     @DisplayName("group request messages parse via the same typed exchanges")
     void groupRequestsParse() {
         MultisigIcpExchange parsed = ExnMessages
-            .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), MultisigIcpExchange.class)
+            .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", Map.of("t", "icp"))), MultisigIcpExchange.class)
             .orElseThrow();
 
         assertEquals("EGroupId", parsed.a().gid());
 
         assertTrue(ExnMessages
-            .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), IpexGrantExchange.class)
+            .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", Map.of("t", "icp"))), IpexGrantExchange.class)
             .isEmpty());
         assertTrue(ExnMessages.asTyped((ExnMultisig) null).isEmpty());
     }
@@ -100,6 +100,17 @@ public class ExnMessagesTest {
         assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
         assertTrue(exception.getMessage().contains("EMessageSaid"));
         assertTrue(exception.getMessage().contains("gid"));
+    }
+
+    @Test
+    @DisplayName("a missing required embed fails loudly rather than parsing to a null payload")
+    void missingRequiredEmbedFails() {
+        ExchangeResource missingIcp = exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> ExnMessages.asTyped(missingIcp));
+        assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
+        assertTrue(exception.getMessage().contains("icp"));
     }
 
     @Test

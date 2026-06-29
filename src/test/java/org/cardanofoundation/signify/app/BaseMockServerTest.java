@@ -375,7 +375,12 @@ public class BaseMockServerTest {
                 "r": "/multisig/iss",
                 "q": {},
                 "a": {"gid": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose"},
-                "e": {}
+                "e": {
+                    "acdc": {"d": "EAcdcSaid"},
+                    "iss": {"d": "EIssSaid"},
+                    "anc": {"d": "EAncSaid"},
+                    "d": "EEmbedsSaid"
+                }
             },
             "paths": {},
             "groupName": "multisig",

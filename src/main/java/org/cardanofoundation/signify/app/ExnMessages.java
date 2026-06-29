@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app;
 
+import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
@@ -10,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Route constants and route-typed views over exchange (exn) messages.
@@ -156,7 +158,7 @@ public final class ExnMessages {
     public record IpexAdmitExchange(ExchangeResource message, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
     }
 
-    private static final Map<String, ExchangeParser<? extends TypedExchange>> EXCHANGE_PARSERS = Map.ofEntries(
+    private static final Map<String, Function<ExchangeResource, ? extends TypedExchange>> EXCHANGE_PARSERS = Map.ofEntries(
         Map.entry(MULTISIG_ICP_ROUTE, ExnMessages::toMultisigIcpExchange),
         Map.entry(MULTISIG_ROT_ROUTE, ExnMessages::toMultisigRotExchange),
         Map.entry(MULTISIG_IXN_ROUTE, ExnMessages::toMultisigIxnExchange),
@@ -198,13 +200,13 @@ public final class ExnMessages {
      */
     public static Optional<TypedExchange> asTyped(ExchangeResource msg) {
         String route = routeOf(msg);
-        ExchangeParser<? extends TypedExchange> parser = route == null ? null : EXCHANGE_PARSERS.get(route);
+        Function<ExchangeResource, ? extends TypedExchange> parser = route == null ? null : EXCHANGE_PARSERS.get(route);
         if (parser == null) {
             return Optional.empty();
         }
         try {
-            return Optional.of(parser.parse(msg));
-        } catch (RuntimeException e) {
+            return Optional.of(parser.apply(msg));
+        } catch (IllegalArgumentException | SerializeException e) {
             throw malformed(route, msg.getExn(), e);
         }
     }
@@ -212,37 +214,37 @@ public final class ExnMessages {
     private static MultisigIcpExchange toMultisigIcpExchange(ExchangeResource msg) {
         Map<String, Object> a = attributes(msg);
         Map<String, Object> e = embeds(msg);
-        return new MultisigIcpExchange(msg, participantsAttributes(a), new MultisigIcpEmbeds(castMap(e, "icp"), optionalString(e, "d")));
+        return new MultisigIcpExchange(msg, participantsAttributes(a), new MultisigIcpEmbeds(requiredMap(e, "icp"), optionalString(e, "d")));
     }
 
     private static MultisigRotExchange toMultisigRotExchange(ExchangeResource msg) {
         Map<String, Object> a = attributes(msg);
         Map<String, Object> e = embeds(msg);
-        return new MultisigRotExchange(msg, participantsAttributes(a), new MultisigRotEmbeds(castMap(e, "rot"), optionalString(e, "d")));
+        return new MultisigRotExchange(msg, participantsAttributes(a), new MultisigRotEmbeds(requiredMap(e, "rot"), optionalString(e, "d")));
     }
 
     private static MultisigIxnExchange toMultisigIxnExchange(ExchangeResource msg) {
         Map<String, Object> a = attributes(msg);
         Map<String, Object> e = embeds(msg);
-        return new MultisigIxnExchange(msg, participantsAttributes(a), new MultisigIxnEmbeds(castMap(e, "ixn"), optionalString(e, "d")));
+        return new MultisigIxnExchange(msg, participantsAttributes(a), new MultisigIxnEmbeds(requiredMap(e, "ixn"), optionalString(e, "d")));
     }
 
     private static MultisigRpyExchange toMultisigRpyExchange(ExchangeResource msg) {
         Map<String, Object> a = attributes(msg);
         Map<String, Object> e = embeds(msg);
-        return new MultisigRpyExchange(msg, groupAttributes(a), new MultisigRpyEmbeds(castMap(e, "rpy"), optionalString(e, "d")));
+        return new MultisigRpyExchange(msg, groupAttributes(a), new MultisigRpyEmbeds(requiredMap(e, "rpy"), optionalString(e, "d")));
     }
 
     private static MultisigVcpExchange toMultisigVcpExchange(ExchangeResource msg) {
         Map<String, Object> a = attributes(msg);
         Map<String, Object> e = embeds(msg);
-        return new MultisigVcpExchange(msg, usageAttributes(a), new MultisigVcpEmbeds(castMap(e, "vcp"), castMap(e, "anc"), optionalString(e, "d")));
+        return new MultisigVcpExchange(msg, usageAttributes(a), new MultisigVcpEmbeds(requiredMap(e, "vcp"), requiredMap(e, "anc"), optionalString(e, "d")));
     }
 
     private static MultisigIssExchange toMultisigIssExchange(ExchangeResource msg) {
         Map<String, Object> a = attributes(msg);
         Map<String, Object> e = embeds(msg);
-        return new MultisigIssExchange(msg, groupAttributes(a), new MultisigIssEmbeds(castMap(e, "acdc"), castMap(e, "iss"), castMap(e, "anc"), optionalString(e, "d")));
+        return new MultisigIssExchange(msg, groupAttributes(a), new MultisigIssEmbeds(requiredMap(e, "acdc"), requiredMap(e, "iss"), requiredMap(e, "anc"), optionalString(e, "d")));
     }
 
     private static MultisigExnExchange toMultisigExnExchange(ExchangeResource msg) {
@@ -254,29 +256,29 @@ public final class ExnMessages {
     private static MultisigRevExchange toMultisigRevExchange(ExchangeResource msg) {
         Map<String, Object> a = attributes(msg);
         Map<String, Object> e = embeds(msg);
-        return new MultisigRevExchange(msg, groupAttributes(a), new MultisigRevEmbeds(castMap(e, "rev"), optionalString(e, "d")));
+        return new MultisigRevExchange(msg, groupAttributes(a), new MultisigRevEmbeds(requiredMap(e, "rev"), optionalString(e, "d")));
     }
 
     private static IpexGrantExchange toIpexGrantExchange(ExchangeResource msg) {
         Map<String, Object> e = embeds(msg);
-        return new IpexGrantExchange(msg, rawAttributes(msg), new IpexGrantEmbeds(castMap(e, "acdc"), castMap(e, "iss"), castMap(e, "anc"), optionalString(e, "d")));
+        return new IpexGrantExchange(msg, attributes(msg), new IpexGrantEmbeds(requiredMap(e, "acdc"), requiredMap(e, "iss"), requiredMap(e, "anc"), optionalString(e, "d")));
     }
 
     private static IpexOfferExchange toIpexOfferExchange(ExchangeResource msg) {
         Map<String, Object> e = embeds(msg);
-        return new IpexOfferExchange(msg, rawAttributes(msg), new IpexOfferEmbeds(castMap(e, "acdc"), optionalString(e, "d")));
+        return new IpexOfferExchange(msg, attributes(msg), new IpexOfferEmbeds(requiredMap(e, "acdc"), optionalString(e, "d")));
     }
 
     private static IpexApplyExchange toIpexApplyExchange(ExchangeResource msg) {
-        return new IpexApplyExchange(msg, rawAttributes(msg), rawEmbeds(msg));
+        return new IpexApplyExchange(msg, attributes(msg), embeds(msg));
     }
 
     private static IpexAgreeExchange toIpexAgreeExchange(ExchangeResource msg) {
-        return new IpexAgreeExchange(msg, rawAttributes(msg), rawEmbeds(msg));
+        return new IpexAgreeExchange(msg, attributes(msg), embeds(msg));
     }
 
     private static IpexAdmitExchange toIpexAdmitExchange(ExchangeResource msg) {
-        return new IpexAdmitExchange(msg, rawAttributes(msg), rawEmbeds(msg));
+        return new IpexAdmitExchange(msg, attributes(msg), embeds(msg));
     }
 
     private static ParticipantsAttributes participantsAttributes(Map<String, Object> values) {
@@ -343,23 +345,12 @@ public final class ExnMessages {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> castMap(Map<String, Object> values, String key) {
+    private static Map<String, Object> requiredMap(Map<String, Object> values, String key) {
         Object value = values.get(key);
-        if (value == null) {
-            return null;
-        }
         if (value instanceof Map<?, ?> map) {
             return Collections.unmodifiableMap((Map<String, Object>) map);
         }
-        throw new IllegalArgumentException("Expected embedded object for field: " + key);
-    }
-
-    private static Map<String, Object> rawAttributes(ExchangeResource msg) {
-        return Collections.unmodifiableMap(attributes(msg));
-    }
-
-    private static Map<String, Object> rawEmbeds(ExchangeResource msg) {
-        return Collections.unmodifiableMap(embeds(msg));
+        throw new IllegalArgumentException("Missing required object field: " + key);
     }
 
     @SuppressWarnings("unchecked")
@@ -369,14 +360,14 @@ public final class ExnMessages {
             return Map.of();
         }
         if (a instanceof Map<?, ?> map) {
-            return (Map<String, Object>) map;
+            return Collections.unmodifiableMap((Map<String, Object>) map);
         }
         throw new IllegalArgumentException("exn attributes ('a') is not an object");
     }
 
     private static Map<String, Object> embeds(ExchangeResource msg) {
         Map<String, Object> e = msg.getExn().getE();
-        return e == null ? Map.of() : e;
+        return e == null ? Map.of() : Collections.unmodifiableMap(e);
     }
 
     private static IllegalArgumentException malformed(String route, Exn exn, RuntimeException cause) {
@@ -387,17 +378,9 @@ public final class ExnMessages {
     }
 
     private static Exn toExn(Object value) {
-        if (value instanceof Exn exn) {
-            return exn;
-        }
         if (value instanceof Map<?, ?> map) {
             return Utils.fromJson(Utils.jsonStringify(map), Exn.class);
         }
         throw new IllegalArgumentException("Expected embedded exn object");
-    }
-
-    @FunctionalInterface
-    private interface ExchangeParser<T> {
-        T parse(ExchangeResource message);
     }
 }
