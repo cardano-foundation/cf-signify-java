@@ -48,10 +48,10 @@ public class GroupingTest extends BaseMockServerTest {
         assertEquals(1, requests.size());
 
         // route mismatch — typing as icp is empty
-        assertTrue(ExnMessageTypes.as(requests.getFirst(), ExnMessageTypes.MultisigIcpExchange.class).isEmpty());
+        assertTrue(ExnMessages.as(requests.getFirst(), ExnMessages.MultisigIcpExchange.class).isEmpty());
 
         // route match — parses to the typed iss exchange
-        var iss = ExnMessageTypes.as(requests.getFirst(), ExnMessageTypes.MultisigIssExchange.class).orElseThrow();
+        var iss = ExnMessages.as(requests.getFirst(), ExnMessages.MultisigIssExchange.class).orElseThrow();
         assertEquals("ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose", iss.a().gid());
         // the envelope fields are typed on the generated ExnMultisig itself
         assertEquals("multisig", requests.getFirst().getGroupName());

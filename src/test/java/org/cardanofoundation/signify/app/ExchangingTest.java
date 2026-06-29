@@ -12,9 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.cardanofoundation.signify.app.Exchanging.exchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexApplyExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexApplyExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.routeOf;
 import static org.junit.jupiter.api.Assertions.*;
@@ -296,6 +296,6 @@ public class ExchangingTest extends BaseMockServerTest {
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());
         assertTrue(typed.isPresent());
-        assertTrue(typed.orElseThrow() instanceof ExnMessageTypes.IpexApplyExchange);
+        assertTrue(typed.orElseThrow() instanceof ExnMessages.IpexApplyExchange);
     }
 }

@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.app;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexApplyExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexApplyExchange;
 import org.junit.jupiter.api.Test;
 
 

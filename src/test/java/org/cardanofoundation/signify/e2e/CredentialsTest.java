@@ -1,10 +1,10 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexAgreeExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexApplyExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexOfferExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexAgreeExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexApplyExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexOfferExchange;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;

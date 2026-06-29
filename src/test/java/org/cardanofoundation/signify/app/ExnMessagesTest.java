@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.app;
 
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.IpexGrantExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.TypedExchange;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
+import org.cardanofoundation.signify.app.ExnMessages.TypedExchange;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
@@ -16,7 +16,7 @@ import java.util.Map;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ExnMessageTypesTest {
+public class ExnMessagesTest {
 
     private static ExchangeResource exchange(String route, Map<String, Object> a, Map<String, Object> e) {
         Exn exn = new Exn();
@@ -45,7 +45,7 @@ public class ExnMessageTypesTest {
     @Test
     @DisplayName("asTyped dispatches on the message's own route")
     void asTypedDispatches() {
-        TypedExchange typed = ExnMessageTypes
+        TypedExchange typed = ExnMessages
             .asTyped(exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", Map.of("t", "icp"))))
             .orElseThrow();
 
@@ -60,10 +60,10 @@ public class ExnMessageTypesTest {
     @Test
     @DisplayName("asTyped is empty for unknown or absent routes")
     void asTypedUnknownRoutes() {
-        assertTrue(ExnMessageTypes.asTyped(exchange("/unknown/route", Map.of(), Map.of())).isEmpty());
-        assertTrue(ExnMessageTypes.asTyped(exchange(null, Map.of(), Map.of())).isEmpty());
-        assertTrue(ExnMessageTypes.asTyped(new ExchangeResource()).isEmpty());
-        assertTrue(ExnMessageTypes.asTyped((ExchangeResource) null).isEmpty());
+        assertTrue(ExnMessages.asTyped(exchange("/unknown/route", Map.of(), Map.of())).isEmpty());
+        assertTrue(ExnMessages.asTyped(exchange(null, Map.of(), Map.of())).isEmpty());
+        assertTrue(ExnMessages.asTyped(new ExchangeResource()).isEmpty());
+        assertTrue(ExnMessages.asTyped((ExchangeResource) null).isEmpty());
     }
 
     @Test
@@ -71,23 +71,23 @@ public class ExnMessageTypesTest {
     void asNarrows() {
         ExchangeResource msg = exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of());
 
-        assertTrue(ExnMessageTypes.as(msg, MultisigIcpExchange.class).isPresent());
-        assertTrue(ExnMessageTypes.as(msg, IpexGrantExchange.class).isEmpty());
+        assertTrue(ExnMessages.as(msg, MultisigIcpExchange.class).isPresent());
+        assertTrue(ExnMessages.as(msg, IpexGrantExchange.class).isEmpty());
     }
 
     @Test
     @DisplayName("group request messages parse via the same typed exchanges")
     void groupRequestsParse() {
-        MultisigIcpExchange parsed = ExnMessageTypes
+        MultisigIcpExchange parsed = ExnMessages
             .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), MultisigIcpExchange.class)
             .orElseThrow();
 
         assertEquals("EGroupId", parsed.a().gid());
 
-        assertTrue(ExnMessageTypes
+        assertTrue(ExnMessages
             .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of()), IpexGrantExchange.class)
             .isEmpty());
-        assertTrue(ExnMessageTypes.asTyped((ExnMultisig) null).isEmpty());
+        assertTrue(ExnMessages.asTyped((ExnMultisig) null).isEmpty());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class ExnMessageTypesTest {
         ExchangeResource missingGid = exchange(MULTISIG_ICP_ROUTE, Map.of("smids", List.of("EMember1")), Map.of());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> ExnMessageTypes.asTyped(missingGid));
+            () -> ExnMessages.asTyped(missingGid));
         assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
         assertTrue(exception.getMessage().contains("EMessageSaid"));
         assertTrue(exception.getMessage().contains("gid"));
@@ -105,7 +105,7 @@ public class ExnMessageTypesTest {
     @Test
     @DisplayName("parsed views are read-only")
     void parsedViewsAreReadOnly() {
-        MultisigIcpExchange icp = ExnMessageTypes
+        MultisigIcpExchange icp = ExnMessages
             .as(exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", new LinkedHashMap<>(Map.of("t", "icp")))),
                 MultisigIcpExchange.class)
             .orElseThrow();

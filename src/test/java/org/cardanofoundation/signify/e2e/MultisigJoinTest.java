@@ -1,9 +1,9 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigIcpExchange;
-import org.cardanofoundation.signify.app.ExnMessageTypes.MultisigRotExchange;
-import static org.cardanofoundation.signify.app.ExnMessageTypes.as;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigRotExchange;
+import static org.cardanofoundation.signify.app.ExnMessages.as;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ROT_ROUTE;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
