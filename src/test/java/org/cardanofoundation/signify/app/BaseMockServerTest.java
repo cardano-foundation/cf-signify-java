@@ -408,6 +408,11 @@ public class BaseMockServerTest {
                 "eid": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
                 "scheme": "http",
                 "url": "http://indexer.example.com"
+            },
+            {
+                "eid": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "scheme": "https",
+                "url": "https://indexer.example.com"
             }
         ]""";
 

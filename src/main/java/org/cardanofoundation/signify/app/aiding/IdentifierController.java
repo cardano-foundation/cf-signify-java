@@ -307,7 +307,7 @@ public class IdentifierController {
 
         // Assuming makeEndRole is a method that returns an object with getRaw() and getKed() methods
         Serder rpy = this.makeEndRole(pre, role, eid, stamp);
-        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
+        Keeper<?> keeper = this.client.getManager().get(hab);
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
@@ -358,18 +358,18 @@ public class IdentifierController {
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
 
-        String eid = args.getEid() != null ? args.getEid() : pre;
-        String url = args.getUrl();
-        String scheme = args.getScheme() != null ? args.getScheme() : "http";
+        String eid = args.eid() != null ? args.eid() : pre;
+        String url = args.url();
+        String scheme = args.scheme() != null ? args.scheme() : "http";
 
         Map<String, Object> rpyData = new LinkedHashMap<>();
         rpyData.put("eid", eid);
         rpyData.put("url", url);
         rpyData.put("scheme", scheme);
 
-        Serder rpy = Eventing.reply("/loc/scheme", rpyData, args.getStamp(), null, Serials.JSON);
+        Serder rpy = Eventing.reply("/loc/scheme", rpyData, args.stamp(), null, Serials.JSON);
 
-        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
+        Keeper<?> keeper = this.client.getManager().get(hab);
         Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
         List<String> sigs = signResult.signatures();
 
@@ -418,7 +418,7 @@ public class IdentifierController {
             .build();
         Serder serder = Eventing.interact(interactArgs);
 
-        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
+        Keeper<?> keeper = this.client.getManager().get(hab);
         Keeping.SignResult sigs = keeper.sign(serder.getRaw().getBytes());
 
         Map<String, Object> jsondata = new LinkedHashMap<>();

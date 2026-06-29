@@ -13,9 +13,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import org.cardanofoundation.signify.app.aiding.IdentifierController;
+import org.cardanofoundation.signify.app.aiding.LocSchemeArgs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class OobisTest extends BaseMockServerTest {
 
@@ -100,7 +103,7 @@ public class OobisTest extends BaseMockServerTest {
     }
 
     @Test
-    @DisplayName("Test locschemes for a given EID")
+    @DisplayName("Can retrieve location schemes for a given EID")
     void testLocschemes() throws Exception {
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
@@ -115,9 +118,59 @@ public class OobisTest extends BaseMockServerTest {
         RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals(url + "/locschemes/" + eid, request.getRequestUrl().toString());
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
         assertEquals("http", result.get(0).getScheme());
         assertEquals("http://indexer.example.com", result.get(0).getUrl());
+        assertEquals("https", result.get(1).getScheme());
+        assertEquals("https://indexer.example.com", result.get(1).getUrl());
+    }
+
+    @Test
+    @DisplayName("Adding a new location scheme")
+    void testAddLocScheme() throws Exception {
+        String bran = "0123456789abcdefghijk";
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
+        client.boot();
+        client.connect();
+        cleanUpRequest();
+
+        IdentifierController identifierController = client.identifiers();
+
+        String eid = "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei";
+        String urlEndpoint = "http://example.com/endpoint";
+        String scheme = "http";
+
+        LocSchemeArgs args = LocSchemeArgs.builder()
+                .url(urlEndpoint)
+                .scheme(scheme)
+                .eid(eid)
+                .build();
+
+        var result = identifierController.addLocScheme("aid1", args);
+
+        assertNotNull(result);
+        assertNotNull(result.op());
+
+        RecordedRequest getRequest = mockWebServer.takeRequest();
+        assertEquals("GET", getRequest.getMethod());
+
+        RecordedRequest postRequest = mockWebServer.takeRequest();
+        assertEquals("POST", postRequest.getMethod());
+        assertEquals("/identifiers/aid1/locschemes", postRequest.getPath());
+
+        Map<String, Object> body = objectMapper.readValue(postRequest.getBody().readUtf8(), new TypeReference<>() {});
+        assertNotNull(body.get("rpy"));
+        assertNotNull(body.get("sigs"));
+        assertTrue(body.get("sigs") instanceof java.util.List);
+
+        Map<String, Object> rpy = (Map<String, Object>) body.get("rpy");
+        assertEquals("rpy", rpy.get("t"));
+        assertEquals("/loc/scheme", rpy.get("r"));
+
+        Map<String, Object> a = (Map<String, Object>) rpy.get("a");
+        assertEquals(urlEndpoint, a.get("url"));
+        assertEquals(scheme, a.get("scheme"));
+        assertEquals(eid, a.get("eid"));
     }
 
 }
