@@ -40,7 +40,7 @@ public class RegistryOperationMetadata {
   private String pre;
 
   public static final String JSON_PROPERTY_DEPENDS = "depends";
-  @jakarta.annotation.Nullable
+  @jakarta.annotation.Nonnull
   private KelOperation depends;
 
   public static final String JSON_PROPERTY_ANCHOR = "anchor";
@@ -75,7 +75,7 @@ public class RegistryOperationMetadata {
     this.pre = pre;
   }
 
-  public RegistryOperationMetadata depends(@jakarta.annotation.Nullable KelOperation depends) {
+  public RegistryOperationMetadata depends(@jakarta.annotation.Nonnull KelOperation depends) {
     
     this.depends = depends;
     return this;
@@ -85,18 +85,18 @@ public class RegistryOperationMetadata {
    * Get depends
    * @return depends
    */
-  @jakarta.annotation.Nullable
-  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
   public KelOperation getDepends() {
     return depends;
   }
 
 
-  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = false)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setDepends(@jakarta.annotation.Nullable KelOperation depends) {
+  @JsonProperty(value = JSON_PROPERTY_DEPENDS, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDepends(@jakarta.annotation.Nonnull KelOperation depends) {
     this.depends = depends;
   }
 
