@@ -74,7 +74,7 @@ public class MultisigUtils {
         createIdentifierArgs.setIsith(icp.get("kt"));
         createIdentifierArgs.setNsith(icp.get("nt"));
         createIdentifierArgs.setToad(Integer.valueOf(icp.get("bt").toString()));
-        createIdentifierArgs.setWits((List<String>) icp.get("b"));
+        createIdentifierArgs.setWits(Utils.toList(icp.get("b")));
         createIdentifierArgs.setStates(states);
         createIdentifierArgs.setRstates(rstates);
         createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
