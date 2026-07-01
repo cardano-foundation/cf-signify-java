@@ -374,7 +374,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
             try {
                 IpexApplyExchange apply = holderClient.exchanges().get(holderApplyNote.getA().getD(), IpexApplyExchange.class).orElseThrow();
-                applySaid = apply.message().getExn().getD();
+                applySaid = apply.exn().getD();
 
                 Map<String, Object> aBody = apply.a();
 
@@ -419,8 +419,8 @@ public class CredentialsTest extends BaseIntegrationTest {
 
                 IpexOfferExchange offer = verifierClient.exchanges().get(verifierOfferNote.getA().getD(), IpexOfferExchange.class).orElseThrow();
 
-                offerSaid = offer.message().getExn().getD();
-                String p = offer.message().getExn().getP();
+                offerSaid = offer.exn().getD();
+                String p = offer.exn().getP();
 
                 Map<String, Object> acdc = offer.e().acdc();
                 LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(acdc.get("a"));
@@ -455,8 +455,8 @@ public class CredentialsTest extends BaseIntegrationTest {
                 assertNotNull(holderAgreeNote.getA().getD());
 
                 IpexAgreeExchange agree = verifierClient.exchanges().get(holderAgreeNote.getA().getD(), IpexAgreeExchange.class).orElseThrow();
-                agreeSaid = agree.message().getExn().getD();
-                String agreeP = agree.message().getExn().getP();
+                agreeSaid = agree.exn().getD();
+                String agreeP = agree.exn().getP();
 
                 assertEquals(offerSaid, agreeP);
 
@@ -499,7 +499,7 @@ public class CredentialsTest extends BaseIntegrationTest {
                 assertNotNull(verifierGrantNote.getA().getD());
 
                 IpexGrantExchange grant = holderClient.exchanges().get(verifierGrantNote.getA().getD(), IpexGrantExchange.class).orElseThrow();
-                String p = grant.message().getExn().getP();
+                String p = grant.exn().getP();
 
                 assertEquals(agreeSaid, p);
 

@@ -276,7 +276,7 @@ public class ExchangingTest extends BaseMockServerTest {
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());
         assertTrue(apply.isPresent());
-        assertEquals(IPEX_APPLY_ROUTE, routeOf(apply.orElseThrow().message()));
+        assertEquals(IPEX_APPLY_ROUTE, routeOf(apply.orElseThrow().exn()));
 
         // Route mismatch — getIpexGrant should return empty
         assertTrue(exchanges.get(exchangeId, IpexGrantExchange.class).isEmpty());

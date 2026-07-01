@@ -11,7 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Route constants and route-typed views over exchange (exn) messages.
@@ -35,7 +35,8 @@ import java.util.function.Function;
  *
  * <p>Parsers return {@link Optional#empty()} for unknown or non-matching routes, and
  * throw {@link IllegalArgumentException} for matching-route messages whose payload is
- * malformed.</p>
+ * malformed. Note that {@link #as} narrows by parsing the message's own route first, so a
+ * malformed message of some <em>other</em> known route throws rather than returning empty.</p>
  */
 public final class ExnMessages {
 
@@ -86,7 +87,15 @@ public final class ExnMessages {
             MultisigVcpExchange, MultisigIssExchange, MultisigExnExchange, MultisigRevExchange,
             IpexGrantExchange, IpexOfferExchange, IpexApplyExchange, IpexAgreeExchange, IpexAdmitExchange {
 
-        ExchangeResource message();
+        /** The exn body. */
+        Exn exn();
+
+        /**
+         * The multisig group request this view was parsed from (via {@code groups().getRequest()}),
+         * or {@code null} for a standalone exchange. Carries the group/member envelope
+         * (groupName, memberName, sender) that the exn body itself does not.
+         */
+        ExnMultisig request();
     }
 
     public record MultisigIcpEmbeds(Map<String, Object> icp, String d) {
@@ -119,46 +128,48 @@ public final class ExnMessages {
     public record IpexOfferEmbeds(Map<String, Object> acdc, String d) {
     }
 
-    public record MultisigIcpExchange(ExchangeResource message, ParticipantsAttributes a, MultisigIcpEmbeds e) implements TypedExchange {
+    public record MultisigIcpExchange(Exn exn, ExnMultisig request, ParticipantsAttributes a, MultisigIcpEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigRotExchange(ExchangeResource message, ParticipantsAttributes a, MultisigRotEmbeds e) implements TypedExchange {
+    public record MultisigRotExchange(Exn exn, ExnMultisig request, ParticipantsAttributes a, MultisigRotEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigIxnExchange(ExchangeResource message, ParticipantsAttributes a, MultisigIxnEmbeds e) implements TypedExchange {
+    public record MultisigIxnExchange(Exn exn, ExnMultisig request, ParticipantsAttributes a, MultisigIxnEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigRpyExchange(ExchangeResource message, GroupAttributes a, MultisigRpyEmbeds e) implements TypedExchange {
+    public record MultisigRpyExchange(Exn exn, ExnMultisig request, GroupAttributes a, MultisigRpyEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigVcpExchange(ExchangeResource message, UsageAttributes a, MultisigVcpEmbeds e) implements TypedExchange {
+    public record MultisigVcpExchange(Exn exn, ExnMultisig request, UsageAttributes a, MultisigVcpEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigIssExchange(ExchangeResource message, GroupAttributes a, MultisigIssEmbeds e) implements TypedExchange {
+    public record MultisigIssExchange(Exn exn, ExnMultisig request, GroupAttributes a, MultisigIssEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigExnExchange(ExchangeResource message, GroupAttributes a, MultisigExnEmbeds e) implements TypedExchange {
+    public record MultisigExnExchange(Exn exn, ExnMultisig request, GroupAttributes a, MultisigExnEmbeds e) implements TypedExchange {
     }
 
-    public record MultisigRevExchange(ExchangeResource message, GroupAttributes a, MultisigRevEmbeds e) implements TypedExchange {
+    public record MultisigRevExchange(Exn exn, ExnMultisig request, GroupAttributes a, MultisigRevEmbeds e) implements TypedExchange {
     }
 
-    public record IpexGrantExchange(ExchangeResource message, Map<String, Object> a, IpexGrantEmbeds e) implements TypedExchange {
+    // IPEX attribute payloads vary in shape by route and are not lifted into typed records
+    // (unlike the multisig participant/group attributes); callers read the raw map.
+    public record IpexGrantExchange(Exn exn, ExnMultisig request, Map<String, Object> a, IpexGrantEmbeds e) implements TypedExchange {
     }
 
-    public record IpexOfferExchange(ExchangeResource message, Map<String, Object> a, IpexOfferEmbeds e) implements TypedExchange {
+    public record IpexOfferExchange(Exn exn, ExnMultisig request, Map<String, Object> a, IpexOfferEmbeds e) implements TypedExchange {
     }
 
-    public record IpexApplyExchange(ExchangeResource message, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
+    public record IpexApplyExchange(Exn exn, ExnMultisig request, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
     }
 
-    public record IpexAgreeExchange(ExchangeResource message, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
+    public record IpexAgreeExchange(Exn exn, ExnMultisig request, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
     }
 
-    public record IpexAdmitExchange(ExchangeResource message, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
+    public record IpexAdmitExchange(Exn exn, ExnMultisig request, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
     }
 
-    private static final Map<String, Function<ExchangeResource, ? extends TypedExchange>> EXCHANGE_PARSERS = Map.ofEntries(
+    private static final Map<String, BiFunction<Exn, ExnMultisig, ? extends TypedExchange>> EXCHANGE_PARSERS = Map.ofEntries(
         Map.entry(MULTISIG_ICP_ROUTE, ExnMessages::toMultisigIcpExchange),
         Map.entry(MULTISIG_ROT_ROUTE, ExnMessages::toMultisigRotExchange),
         Map.entry(MULTISIG_IXN_ROUTE, ExnMessages::toMultisigIxnExchange),
@@ -184,101 +195,97 @@ public final class ExnMessages {
 
     /**
      * Parses a group request message as the given typed form; group requests carry the
-     * same exn body as exchanges, with the envelope (groupName, memberName, sender,
-     * paths) available directly on the {@link ExnMultisig} itself.
+     * same exn body as exchanges. The group envelope (groupName, memberName, sender)
+     * remains recoverable from the parsed view via {@link TypedExchange#request()}.
      */
     public static <T extends TypedExchange> Optional<T> as(ExnMultisig msg, Class<T> type) {
         return asTyped(msg).filter(type::isInstance).map(type::cast);
-    }
-
-    public static Optional<TypedExchange> asTyped(ExnMultisig msg) {
-        return msg == null ? Optional.empty() : asTyped(wrap(msg));
     }
 
     /**
      * Parses any known-route exchange message into its typed form; empty for unknown routes.
      */
     public static Optional<TypedExchange> asTyped(ExchangeResource msg) {
-        String route = routeOf(msg);
-        Function<ExchangeResource, ? extends TypedExchange> parser = route == null ? null : EXCHANGE_PARSERS.get(route);
+        return msg == null ? Optional.empty() : asTyped(msg.getExn(), null);
+    }
+
+    public static Optional<TypedExchange> asTyped(ExnMultisig msg) {
+        return msg == null ? Optional.empty() : asTyped(msg.getExn(), msg);
+    }
+
+    private static Optional<TypedExchange> asTyped(Exn exn, ExnMultisig request) {
+        String route = routeOf(exn);
+        BiFunction<Exn, ExnMultisig, ? extends TypedExchange> parser = route == null ? null : EXCHANGE_PARSERS.get(route);
         if (parser == null) {
             return Optional.empty();
         }
         try {
-            return Optional.of(parser.apply(msg));
+            return Optional.of(parser.apply(exn, request));
         } catch (IllegalArgumentException | SerializeException e) {
-            throw malformed(route, msg.getExn(), e);
+            throw malformed(route, exn, e);
         }
     }
 
-    private static MultisigIcpExchange toMultisigIcpExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigIcpExchange(msg, participantsAttributes(a), new MultisigIcpEmbeds(requiredMap(e, "icp"), optionalString(e, "d")));
+    private static MultisigIcpExchange toMultisigIcpExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigIcpExchange(exn, request, participantsAttributes(attributes(exn)), new MultisigIcpEmbeds(requiredMap(e, "icp"), optionalString(e, "d")));
     }
 
-    private static MultisigRotExchange toMultisigRotExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigRotExchange(msg, participantsAttributes(a), new MultisigRotEmbeds(requiredMap(e, "rot"), optionalString(e, "d")));
+    private static MultisigRotExchange toMultisigRotExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigRotExchange(exn, request, participantsAttributes(attributes(exn)), new MultisigRotEmbeds(requiredMap(e, "rot"), optionalString(e, "d")));
     }
 
-    private static MultisigIxnExchange toMultisigIxnExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigIxnExchange(msg, participantsAttributes(a), new MultisigIxnEmbeds(requiredMap(e, "ixn"), optionalString(e, "d")));
+    private static MultisigIxnExchange toMultisigIxnExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigIxnExchange(exn, request, participantsAttributes(attributes(exn)), new MultisigIxnEmbeds(requiredMap(e, "ixn"), optionalString(e, "d")));
     }
 
-    private static MultisigRpyExchange toMultisigRpyExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigRpyExchange(msg, groupAttributes(a), new MultisigRpyEmbeds(requiredMap(e, "rpy"), optionalString(e, "d")));
+    private static MultisigRpyExchange toMultisigRpyExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigRpyExchange(exn, request, groupAttributes(attributes(exn)), new MultisigRpyEmbeds(requiredMap(e, "rpy"), optionalString(e, "d")));
     }
 
-    private static MultisigVcpExchange toMultisigVcpExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigVcpExchange(msg, usageAttributes(a), new MultisigVcpEmbeds(requiredMap(e, "vcp"), requiredMap(e, "anc"), optionalString(e, "d")));
+    private static MultisigVcpExchange toMultisigVcpExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigVcpExchange(exn, request, usageAttributes(attributes(exn)), new MultisigVcpEmbeds(requiredMap(e, "vcp"), requiredMap(e, "anc"), optionalString(e, "d")));
     }
 
-    private static MultisigIssExchange toMultisigIssExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigIssExchange(msg, groupAttributes(a), new MultisigIssEmbeds(requiredMap(e, "acdc"), requiredMap(e, "iss"), requiredMap(e, "anc"), optionalString(e, "d")));
+    private static MultisigIssExchange toMultisigIssExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigIssExchange(exn, request, groupAttributes(attributes(exn)), new MultisigIssEmbeds(requiredMap(e, "acdc"), requiredMap(e, "iss"), requiredMap(e, "anc"), optionalString(e, "d")));
     }
 
-    private static MultisigExnExchange toMultisigExnExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigExnExchange(msg, groupAttributes(a), new MultisigExnEmbeds(toExn(e.get("exn")), optionalString(e, "d")));
+    private static MultisigExnExchange toMultisigExnExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigExnExchange(exn, request, groupAttributes(attributes(exn)), new MultisigExnEmbeds(toExn(e.get("exn")), optionalString(e, "d")));
     }
 
-    private static MultisigRevExchange toMultisigRevExchange(ExchangeResource msg) {
-        Map<String, Object> a = attributes(msg);
-        Map<String, Object> e = embeds(msg);
-        return new MultisigRevExchange(msg, groupAttributes(a), new MultisigRevEmbeds(requiredMap(e, "rev"), optionalString(e, "d")));
+    private static MultisigRevExchange toMultisigRevExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new MultisigRevExchange(exn, request, groupAttributes(attributes(exn)), new MultisigRevEmbeds(requiredMap(e, "rev"), optionalString(e, "d")));
     }
 
-    private static IpexGrantExchange toIpexGrantExchange(ExchangeResource msg) {
-        Map<String, Object> e = embeds(msg);
-        return new IpexGrantExchange(msg, attributes(msg), new IpexGrantEmbeds(requiredMap(e, "acdc"), requiredMap(e, "iss"), requiredMap(e, "anc"), optionalString(e, "d")));
+    private static IpexGrantExchange toIpexGrantExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new IpexGrantExchange(exn, request, attributes(exn), new IpexGrantEmbeds(requiredMap(e, "acdc"), requiredMap(e, "iss"), requiredMap(e, "anc"), optionalString(e, "d")));
     }
 
-    private static IpexOfferExchange toIpexOfferExchange(ExchangeResource msg) {
-        Map<String, Object> e = embeds(msg);
-        return new IpexOfferExchange(msg, attributes(msg), new IpexOfferEmbeds(requiredMap(e, "acdc"), optionalString(e, "d")));
+    private static IpexOfferExchange toIpexOfferExchange(Exn exn, ExnMultisig request) {
+        Map<String, Object> e = embeds(exn);
+        return new IpexOfferExchange(exn, request, attributes(exn), new IpexOfferEmbeds(requiredMap(e, "acdc"), optionalString(e, "d")));
     }
 
-    private static IpexApplyExchange toIpexApplyExchange(ExchangeResource msg) {
-        return new IpexApplyExchange(msg, attributes(msg), embeds(msg));
+    private static IpexApplyExchange toIpexApplyExchange(Exn exn, ExnMultisig request) {
+        return new IpexApplyExchange(exn, request, attributes(exn), embeds(exn));
     }
 
-    private static IpexAgreeExchange toIpexAgreeExchange(ExchangeResource msg) {
-        return new IpexAgreeExchange(msg, attributes(msg), embeds(msg));
+    private static IpexAgreeExchange toIpexAgreeExchange(Exn exn, ExnMultisig request) {
+        return new IpexAgreeExchange(exn, request, attributes(exn), embeds(exn));
     }
 
-    private static IpexAdmitExchange toIpexAdmitExchange(ExchangeResource msg) {
-        return new IpexAdmitExchange(msg, attributes(msg), embeds(msg));
+    private static IpexAdmitExchange toIpexAdmitExchange(Exn exn, ExnMultisig request) {
+        return new IpexAdmitExchange(exn, request, attributes(exn), embeds(exn));
     }
 
     private static ParticipantsAttributes participantsAttributes(Map<String, Object> values) {
@@ -306,13 +313,6 @@ public final class ExnMessages {
         additional.remove("gid");
         additional.remove("usage");
         return new UsageAttributes(gid, usage, Collections.unmodifiableMap(additional));
-    }
-
-    private static ExchangeResource wrap(ExnMultisig msg) {
-        ExchangeResource wrapped = new ExchangeResource();
-        wrapped.setExn(msg.getExn());
-        wrapped.setPathed(new LinkedHashMap<>());
-        return wrapped;
     }
 
     private static String requiredString(Map<String, Object> values, String key) {
@@ -348,25 +348,27 @@ public final class ExnMessages {
     private static Map<String, Object> requiredMap(Map<String, Object> values, String key) {
         Object value = values.get(key);
         if (value instanceof Map<?, ?> map) {
+            // Embeds are exposed as the exact deserialized objects, not a converting copy:
+            // callers re-wrap them in a Serder and re-sign, so re-typing scalars (which a
+            // convertValue round-trip can do) would change the computed SAID.
             return Collections.unmodifiableMap((Map<String, Object>) map);
         }
         throw new IllegalArgumentException("Missing required object field: " + key);
     }
 
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> attributes(ExchangeResource msg) {
-        Object a = msg.getExn().getA();
+    private static Map<String, Object> attributes(Exn exn) {
+        Object a = exn.getA();
         if (a == null) {
             return Map.of();
         }
-        if (a instanceof Map<?, ?> map) {
-            return Collections.unmodifiableMap((Map<String, Object>) map);
+        if (!(a instanceof Map<?, ?>)) {
+            throw new IllegalArgumentException("exn attributes ('a') is not an object");
         }
-        throw new IllegalArgumentException("exn attributes ('a') is not an object");
+        return Collections.unmodifiableMap(Utils.toMap(a));
     }
 
-    private static Map<String, Object> embeds(ExchangeResource msg) {
-        Map<String, Object> e = msg.getExn().getE();
+    private static Map<String, Object> embeds(Exn exn) {
+        Map<String, Object> e = exn.getE();
         return e == null ? Map.of() : Collections.unmodifiableMap(e);
     }
 

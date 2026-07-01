@@ -91,6 +91,30 @@ public class ExnMessagesTest {
     }
 
     @Test
+    @DisplayName("the group envelope is recoverable from a parsed group request")
+    void groupEnvelopeRecoverable() {
+        MultisigIcpExchange parsed = ExnMessages
+            .as(group(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", Map.of("t", "icp"))), MultisigIcpExchange.class)
+            .orElseThrow();
+
+        ExnMultisig request = parsed.request();
+        assertNotNull(request);
+        assertEquals("multisig", request.getGroupName());
+        assertEquals("member1", request.getMemberName());
+        assertEquals("EMessageSaid", parsed.exn().getD());
+    }
+
+    @Test
+    @DisplayName("a standalone exchange carries no group request")
+    void standaloneExchangeHasNoEnvelope() {
+        MultisigIcpExchange parsed = ExnMessages
+            .as(exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", Map.of("t", "icp"))), MultisigIcpExchange.class)
+            .orElseThrow();
+
+        assertNull(parsed.request());
+    }
+
+    @Test
     @DisplayName("malformed matching-route messages fail loudly with route context")
     void malformedFailsWithContext() {
         ExchangeResource missingGid = exchange(MULTISIG_ICP_ROUTE, Map.of("smids", List.of("EMember1")), Map.of());
