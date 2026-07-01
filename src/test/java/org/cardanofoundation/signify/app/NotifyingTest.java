@@ -4,6 +4,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.cardanofoundation.signify.app.ExnMessages.IpexApplyExchange;
+import org.cardanofoundation.signify.app.Notifying.Notifications.NotificationListResponse;
 import org.junit.jupiter.api.Test;
 
 
@@ -38,7 +39,7 @@ public class NotifyingTest extends BaseMockServerTest {
         assertEquals("DELETE", request.getMethod());
         assertEquals("/notifications/notificationSAID", request.getPath());
 
-        Notifying.Notifications.NotificationListResponse page = notifications.list();
+        NotificationListResponse page = notifications.list();
         request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/notifications", request.getPath());

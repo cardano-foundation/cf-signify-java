@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
-import org.cardanofoundation.signify.app.Notifying;
+import org.cardanofoundation.signify.app.Notifying.Notifications.NotificationListResponse;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
@@ -66,7 +66,7 @@ public class TestUtils {
 
     public static void assertNotifications(List<SignifyClient> clients) throws LibsodiumException, IOException, InterruptedException {
         for (SignifyClient client : clients) {
-            Notifying.Notifications.NotificationListResponse res = client.notifications().list();
+            NotificationListResponse res = client.notifications().list();
             filteredNotes = res.notes().stream()
                     .filter(note -> !Boolean.TRUE.equals(note.getR()))
                     .collect(Collectors.toList());
@@ -338,7 +338,7 @@ public class TestUtils {
     public static void warnNotifications(List<SignifyClient> clients) throws Exception {
         int count = 0;
         for (SignifyClient client : clients) {
-            Notifying.Notifications.NotificationListResponse res = client.notifications().list();
+            NotificationListResponse res = client.notifications().list();
             List<Notification> notes = res.notes();
             if (!notes.isEmpty()) {
                 count += notes.size();
@@ -435,7 +435,7 @@ public class TestUtils {
     public static List<Notification> waitForNotifications(SignifyClient client, String route, Retry.RetryOptions retryOptions) throws Exception {
         return retry(() -> {
             try {
-                Notifying.Notifications.NotificationListResponse response = client.notifications().list();
+                NotificationListResponse response = client.notifications().list();
 
                 filteredNotes = response.notes().stream()
                         .filter(note -> note.getA() != null && Objects.equals(route, note.getA().getR())
