@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
+import org.cardanofoundation.signify.app.config.Threshold;
 import org.cardanofoundation.signify.generated.keria.model.StateEERecord;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -86,7 +86,7 @@ public class KeyStateRecord {
 
   public static final String JSON_PROPERTY_KT = "kt";
   @jakarta.annotation.Nonnull
-  private KeyStateRecordKt kt;
+  private Threshold kt;
 
   public static final String JSON_PROPERTY_K = "k";
   @jakarta.annotation.Nonnull
@@ -94,7 +94,7 @@ public class KeyStateRecord {
 
   public static final String JSON_PROPERTY_NT = "nt";
   @jakarta.annotation.Nonnull
-  private KeyStateRecordKt nt;
+  private Threshold nt;
 
   public static final String JSON_PROPERTY_N = "n";
   @jakarta.annotation.Nonnull
@@ -331,7 +331,7 @@ public class KeyStateRecord {
     this.et = et;
   }
 
-  public KeyStateRecord kt(@jakarta.annotation.Nonnull KeyStateRecordKt kt) {
+  public KeyStateRecord kt(@jakarta.annotation.Nonnull Threshold kt) {
     
     this.kt = kt;
     return this;
@@ -345,14 +345,14 @@ public class KeyStateRecord {
   @JsonProperty(value = JSON_PROPERTY_KT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public KeyStateRecordKt getKt() {
+  public Threshold getKt() {
     return kt;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_KT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setKt(@jakarta.annotation.Nonnull KeyStateRecordKt kt) {
+  public void setKt(@jakarta.annotation.Nonnull Threshold kt) {
     this.kt = kt;
   }
 
@@ -389,7 +389,7 @@ public class KeyStateRecord {
     this.k = k;
   }
 
-  public KeyStateRecord nt(@jakarta.annotation.Nonnull KeyStateRecordKt nt) {
+  public KeyStateRecord nt(@jakarta.annotation.Nonnull Threshold nt) {
     
     this.nt = nt;
     return this;
@@ -403,14 +403,14 @@ public class KeyStateRecord {
   @JsonProperty(value = JSON_PROPERTY_NT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public KeyStateRecordKt getNt() {
+  public Threshold getNt() {
     return nt;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_NT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNt(@jakarta.annotation.Nonnull KeyStateRecordKt nt) {
+  public void setNt(@jakarta.annotation.Nonnull Threshold nt) {
     this.nt = nt;
   }
 

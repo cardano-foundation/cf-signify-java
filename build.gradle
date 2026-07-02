@@ -228,6 +228,19 @@ tasks.openApiGenerate {
     ]
 
     nameMappings.put("A", "AUpper")
+
+    // @TODO - foconnor: interim unification of the polymorphic kt/nt threshold.
+    //    The OpenAPI spec should define a named schema instead of the anonymous
+    //    inline `oneOf` schemas.
+    schemaMappings.putAll([
+        "ICP_V_1_kt"        : "Threshold",
+        "ICP_V_1_nt"        : "Threshold",
+        "KeyStateRecord_kt" : "Threshold",
+        "KeyStateRecord_nt" : "Threshold",
+    ])
+    importMappings.putAll([
+        "Threshold" : "org.cardanofoundation.signify.app.config.Threshold",
+    ])
 }
 
 tasks.register("prepareOpenApiSpec") {

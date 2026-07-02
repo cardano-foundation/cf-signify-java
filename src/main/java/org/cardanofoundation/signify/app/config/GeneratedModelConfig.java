@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.cardanofoundation.signify.generated.keria.model.CredentialState;
-import org.cardanofoundation.signify.generated.keria.model.ICPV1Kt;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 
 /**
@@ -24,8 +22,7 @@ public final class GeneratedModelConfig {
         mapper.registerModule(new InsertionOrderAdditionalPropertiesModule());
 
         SimpleModule module = new SimpleModule("GeneratedModelModule");
-        module.addDeserializer(ICPV1Kt.class, new ICPV1KtDeserializer());
-        module.addDeserializer(KeyStateRecordKt.class, new KeyStateRecordKtDeserializer());
+        module.addDeserializer(Threshold.class, new ThresholdDeserializer());
         mapper.registerModule(module);
     }
 }

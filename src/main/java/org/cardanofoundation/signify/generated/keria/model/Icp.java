@@ -23,8 +23,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.cardanofoundation.signify.app.config.Threshold;
 import org.cardanofoundation.signify.generated.keria.model.ICPV1;
-import org.cardanofoundation.signify.generated.keria.model.ICPV1Kt;
 import org.cardanofoundation.signify.generated.keria.model.ICPV2;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -71,7 +71,7 @@ public class Icp {
 
   public static final String JSON_PROPERTY_KT = "kt";
   @jakarta.annotation.Nonnull
-  private ICPV1Kt kt;
+  private Threshold kt;
 
   public static final String JSON_PROPERTY_K = "k";
   @jakarta.annotation.Nonnull
@@ -79,7 +79,7 @@ public class Icp {
 
   public static final String JSON_PROPERTY_NT = "nt";
   @jakarta.annotation.Nonnull
-  private ICPV1Kt nt;
+  private Threshold nt;
 
   public static final String JSON_PROPERTY_N = "n";
   @jakarta.annotation.Nonnull
@@ -229,7 +229,7 @@ public class Icp {
     this.s = s;
   }
 
-  public Icp kt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
+  public Icp kt(@jakarta.annotation.Nonnull Threshold kt) {
     
     this.kt = kt;
     return this;
@@ -243,14 +243,14 @@ public class Icp {
   @JsonProperty(value = JSON_PROPERTY_KT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public ICPV1Kt getKt() {
+  public Threshold getKt() {
     return kt;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_KT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setKt(@jakarta.annotation.Nonnull ICPV1Kt kt) {
+  public void setKt(@jakarta.annotation.Nonnull Threshold kt) {
     this.kt = kt;
   }
 
@@ -287,7 +287,7 @@ public class Icp {
     this.k = k;
   }
 
-  public Icp nt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
+  public Icp nt(@jakarta.annotation.Nonnull Threshold nt) {
     
     this.nt = nt;
     return this;
@@ -301,14 +301,14 @@ public class Icp {
   @JsonProperty(value = JSON_PROPERTY_NT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
-  public ICPV1Kt getNt() {
+  public Threshold getNt() {
     return nt;
   }
 
 
   @JsonProperty(value = JSON_PROPERTY_NT, required = true)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setNt(@jakarta.annotation.Nonnull ICPV1Kt nt) {
+  public void setNt(@jakarta.annotation.Nonnull Threshold nt) {
     this.nt = nt;
   }
 

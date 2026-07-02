@@ -3,7 +3,9 @@ package org.cardanofoundation.signify.app.config;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import org.cardanofoundation.signify.generated.keria.model.Icp;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.Rot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class KtValueTest {
+public class ThresholdTest {
 
     private static ObjectMapper mapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -23,13 +25,44 @@ public class KtValueTest {
     }
 
     @Test
-    @DisplayName("kt/nt deserialize to KtValue carrying the raw threshold")
+    @DisplayName("kt/nt deserialize to Threshold carrying the raw threshold")
     void deserializeThresholds() throws Exception {
         KeyStateRecord state = mapper().readValue(
             "{\"kt\":\"1\",\"nt\":[\"1/2\",\"1/2\"]}", KeyStateRecord.class);
 
-        assertEquals("1", KtValue.rawOf(state.getKt()));
-        assertEquals(List.of("1/2", "1/2"), KtValue.rawOf(state.getNt()));
+        assertEquals("1", Threshold.rawOf(state.getKt()));
+        assertEquals(List.of("1/2", "1/2"), Threshold.rawOf(state.getNt()));
+    }
+
+    @Test
+    @DisplayName("integer thresholds (keripy intive events) keep integer form; hex strings stay hex")
+    void deserializeIntegerThreshold() throws Exception {
+        ObjectMapper mapper = mapper();
+        // unweighted string thresholds are hex, so JSON 10 (ten) and "10" (sixteen) differ
+        Icp icp = mapper.readValue("{\"kt\":10,\"nt\":\"10\"}", Icp.class);
+
+        assertEquals(10, Threshold.rawOf(icp.getKt()));
+        assertEquals("a", ((Threshold.Unweighted) icp.getKt()).threshold());
+        assertEquals("10", Threshold.rawOf(icp.getNt()));
+        assertEquals("10", ((Threshold.Unweighted) icp.getNt()).threshold());
+
+        JsonNode out = mapper.valueToTree(icp);
+        assertTrue(out.get("kt").isInt());
+        assertEquals(10, out.get("kt").asInt());
+        assertTrue(out.get("nt").isTextual());
+        assertEquals("10", out.get("nt").asText());
+    }
+
+    @Test
+    @DisplayName("KEL event models share the same threshold representation")
+    void deserializeEventThresholds() throws Exception {
+        Icp icp = mapper().readValue("{\"kt\":\"1\",\"nt\":[\"1/2\",\"1/2\"]}", Icp.class);
+        Rot rot = mapper().readValue("{\"kt\":[[\"1/2\",\"1/2\"],[\"1\"]],\"nt\":\"2\"}", Rot.class);
+
+        assertEquals("1", Threshold.rawOf(icp.getKt()));
+        assertEquals(List.of("1/2", "1/2"), Threshold.rawOf(icp.getNt()));
+        assertEquals(List.of(List.of("1/2", "1/2"), List.of("1")), Threshold.rawOf(rot.getKt()));
+        assertEquals("2", Threshold.rawOf(rot.getNt()));
     }
 
     @Test
@@ -38,8 +71,8 @@ public class KtValueTest {
         KeyStateRecord state = mapper().readValue(
             "{\"kt\":[[\"1/2\",\"1/2\"],[\"1\"]],\"nt\":\"2\"}", KeyStateRecord.class);
 
-        assertEquals(List.of(List.of("1/2", "1/2"), List.of("1")), KtValue.rawOf(state.getKt()));
-        assertEquals("2", KtValue.rawOf(state.getNt()));
+        assertEquals(List.of(List.of("1/2", "1/2"), List.of("1")), Threshold.rawOf(state.getKt()));
+        assertEquals("2", Threshold.rawOf(state.getNt()));
     }
 
     @Test
@@ -49,10 +82,10 @@ public class KtValueTest {
         KeyStateRecord first = mapper.readValue("{\"kt\":\"1\",\"nt\":\"2\"}", KeyStateRecord.class);
         KeyStateRecord second = mapper.readValue("{\"kt\":\"3\",\"nt\":\"4\"}", KeyStateRecord.class);
 
-        assertEquals("1", KtValue.rawOf(first.getKt()));
-        assertEquals("2", KtValue.rawOf(first.getNt()));
-        assertEquals("3", KtValue.rawOf(second.getKt()));
-        assertEquals("4", KtValue.rawOf(second.getNt()));
+        assertEquals("1", Threshold.rawOf(first.getKt()));
+        assertEquals("2", Threshold.rawOf(first.getNt()));
+        assertEquals("3", Threshold.rawOf(second.getKt()));
+        assertEquals("4", Threshold.rawOf(second.getNt()));
     }
 
     @Test
@@ -75,13 +108,13 @@ public class KtValueTest {
         KeyStateRecord state = mapper().readValue(
             "{\"kt\":\"2\",\"nt\":[\"1/2\",\"1/2\"]}", KeyStateRecord.class);
 
-        Object kt = switch (KtValue.of(state.getKt())) {
-            case KtValue.Unweighted u -> u.threshold();
-            case KtValue.Weighted w -> w.weights();
+        Object kt = switch (state.getKt()) {
+            case Threshold.Unweighted u -> u.threshold();
+            case Threshold.Weighted w -> w.weights();
         };
-        Object nt = switch (KtValue.of(state.getNt())) {
-            case KtValue.Unweighted u -> u.threshold();
-            case KtValue.Weighted w -> w.weights();
+        Object nt = switch (state.getNt()) {
+            case Threshold.Unweighted u -> u.threshold();
+            case Threshold.Weighted w -> w.weights();
         };
 
         assertEquals("2", kt);
@@ -89,10 +122,9 @@ public class KtValueTest {
     }
 
     @Test
-    @DisplayName("rawOf is null-safe for absent or non-KtValue fields")
+    @DisplayName("rawOf is null-safe for absent fields")
     void rawOfNullSafety() {
-        assertNull(KtValue.rawOf(null));
-        assertNull(KtValue.rawOf(new org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt()));
+        assertNull(Threshold.rawOf(null));
     }
 
     @Test

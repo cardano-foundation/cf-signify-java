@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app.config;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,21 +9,27 @@ import java.util.Objects;
  * Concrete representation of a KERI signing threshold ({@code kt}/{@code nt} fields).
  * KERIA returns these as either a plain string (unweighted, e.g. {@code "2"}) or a list
  * of fraction weights (weighted, e.g. {@code ["1/2", "1/2"]}, possibly nested for
- * multi-clause thresholds). Discriminate with an exhaustive switch:
+ * multi-clause thresholds). Generated models ({@code KeyStateRecord}, {@code Icp},
+ * {@code Rot}, ...) use this type directly via the {@code schemaMappings} entries in
+ * {@code build.gradle}. Discriminate with an exhaustive switch:
  *
  * <pre>{@code
- * switch (KtValue.of(state.getKt())) {
- *     case KtValue.Unweighted u -> u.threshold();
- *     case KtValue.Weighted w -> w.weights();
+ * switch (state.getKt()) {
+ *     case Threshold.Unweighted u -> u.threshold();
+ *     case Threshold.Weighted w -> w.weights();
  * }
  * }</pre>
  */
-public abstract sealed class KtValue extends KeyStateRecordKt {
+public abstract sealed class Threshold {
 
-    private KtValue() {
+    private Threshold() {
     }
 
     public static Unweighted unweighted(String threshold) {
+        return new Unweighted(threshold);
+    }
+
+    public static Unweighted unweighted(int threshold) {
         return new Unweighted(threshold);
     }
 
@@ -33,67 +38,67 @@ public abstract sealed class KtValue extends KeyStateRecordKt {
     }
 
     /**
-     * Narrows a generated {@code kt}/{@code nt} field to a {@link KtValue}. Every value
-     * deserialized off the wire is one; throws on programmatically constructed
-     * {@link KeyStateRecordKt} instances that carry no threshold.
-     */
-    public static KtValue of(KeyStateRecordKt value) {
-        if (value instanceof KtValue ktValue) {
-            return ktValue;
-        }
-        throw new IllegalArgumentException("kt/nt value carries no threshold: " + value);
-    }
-
-    /**
      * Null-safe extraction of the raw threshold from a generated model field.
-     * Returns {@code null} when the field is absent or carries no threshold.
+     * Returns {@code null} when the field is absent.
      */
-    public static Object rawOf(KeyStateRecordKt value) {
-        return value instanceof KtValue ktValue ? ktValue.raw() : null;
+    public static Object rawOf(Threshold value) {
+        return value == null ? null : value.raw();
     }
 
     /**
      * Returns the raw value as KERIA sent it and as CESR utilities such as
      * {@code Tholder} expect it: a {@code String} for unweighted, or a {@code List}
      * for weighted. Also used by Jackson so serialization round-trips the
-     * original JSON instead of emitting an empty object.
+     * original JSON.
      */
     @JsonValue
     public abstract Object raw();
 
-    public static final class Unweighted extends KtValue {
-        private final String threshold;
+    /**
+     * Unweighted thresholds are usually a hex string (keripy: {@code int(sith, 16)});
+     * KERI v1 events created with keripy's {@code intive=True} instead carry a JSON
+     * integer, whose decimal value must not be conflated with the hex string form
+     * ({@code 10} is ten, {@code "10"} is sixteen). {@link #raw()} keeps whichever
+     * form arrived so serialization stays byte-faithful.
+     */
+    public static final class Unweighted extends Threshold {
+        private final Object raw;
 
         private Unweighted(String threshold) {
-            this.threshold = Objects.requireNonNull(threshold, "threshold");
+            this.raw = Objects.requireNonNull(threshold, "threshold");
         }
 
+        private Unweighted(int threshold) {
+            this.raw = threshold;
+        }
+
+        /** The threshold as a canonical hex sith string, regardless of wire form. */
         public String threshold() {
-            return threshold;
+            return raw instanceof Integer i ? Integer.toHexString(i) : (String) raw;
         }
 
         @Override
         public Object raw() {
-            return threshold;
+            return raw;
         }
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof Unweighted other && threshold.equals(other.threshold);
+            return o instanceof Unweighted other && raw.equals(other.raw);
         }
 
         @Override
         public int hashCode() {
-            return threshold.hashCode();
+            return raw.hashCode();
         }
 
         @Override
         public String toString() {
-            return "KtValue.Unweighted(" + threshold + ")";
+            return "Threshold.Unweighted(" + raw + ")";
         }
     }
 
-    public static final class Weighted extends KtValue {
+    public static final class Weighted extends Threshold {
         private final List<?> weights;
 
         private Weighted(List<?> weights) {
@@ -121,7 +126,7 @@ public abstract sealed class KtValue extends KeyStateRecordKt {
 
         @Override
         public String toString() {
-            return "KtValue.Weighted(" + weights + ")";
+            return "Threshold.Weighted(" + weights + ")";
         }
     }
 }
