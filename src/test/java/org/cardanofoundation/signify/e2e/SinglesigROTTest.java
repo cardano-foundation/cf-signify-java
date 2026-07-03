@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
@@ -24,24 +23,16 @@ public class SinglesigROTTest extends BaseIntegrationTest {
 
     @BeforeAll
     public static void getClients() throws Exception {
-        try {
-            List<SignifyClient> clients = getOrCreateClientsAsync(2);
-            client1 = clients.get(0);
-            client2 = clients.get(1);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        List<SignifyClient> clients = getOrCreateClientsAsync(2);
+        client1 = clients.get(0);
+        client2 = clients.get(1);
     }
 
     @BeforeEach
     public void getIdentifier() throws Exception {
         String[] clients = getOrCreateIdentifier(client1, "name1", null);
-        try {
-            name1_id = clients[0];
-            name1_oobi = clients[1];
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        name1_id = clients[0];
+        name1_oobi = clients[1];
     }
 
     @BeforeEach

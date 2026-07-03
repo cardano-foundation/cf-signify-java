@@ -96,11 +96,11 @@ public class DelegationTest {
         anchor.put("d", delegatePrefix);
 
         testSteps.step("delegator approves delegation", () -> {
-            var result = retry(unchecked(() -> {
+            var result = retry(() -> {
                 var apprDelRes = client1.delegations().approve("delegator", anchor);
                 waitForCompleted(client1, apprDelRes.op());
                 return apprDelRes;
-            }));
+            });
             List<LinkedHashMap<String, Object>> approDelResList = (List<LinkedHashMap<String, Object>>) result.serder().getKed().get("a");
             assertEquals(approDelResList.getFirst(), anchor);
         });

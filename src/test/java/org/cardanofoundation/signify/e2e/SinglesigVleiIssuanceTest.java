@@ -199,13 +199,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         }
 
         qviCredHolder = retry(() -> {
-            try {
-                Credential cred = getReceivedCredential(qviClient, sadQviCred.getD());
-                if (cred == null) throw new RuntimeException("Credential not yet available");
-                return cred;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Credential cred = getReceivedCredential(qviClient, sadQviCred.getD());
+            if (cred == null) throw new RuntimeException("Credential not yet available");
+            return cred;
         }, CRED_RETRY_DEFAULTS);
 
         CredentialSad qviCredHolderSad = qviCredHolder.getSad();
@@ -245,13 +241,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendAdmitMessage(leClient, leAid, qviAid);
 
             leCredHolder = retry(() -> {
-                try {
-                    Credential cred = getReceivedCredential(leClient, sadLeCred.getD());
-                    if (cred == null) throw new RuntimeException("Credential not yet available");
-                    return cred;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Credential cred = getReceivedCredential(leClient, sadLeCred.getD());
+                if (cred == null) throw new RuntimeException("Credential not yet available");
+                return cred;
             }, CRED_RETRY_DEFAULTS);
         }
 
@@ -298,13 +290,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendAdmitMessage(roleClient, roleAid, leAid);
 
             ecrCredHolder = retry(() -> {
-                try {
-                    Credential cred = getReceivedCredential(roleClient, sadEcrCred.getD());
-                    if (cred == null) throw new RuntimeException("Credential not yet available");
-                    return cred;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Credential cred = getReceivedCredential(roleClient, sadEcrCred.getD());
+                if (cred == null) throw new RuntimeException("Credential not yet available");
+                return cred;
             }, CRED_RETRY_DEFAULTS);
         }
 
@@ -351,13 +339,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendAdmitMessage(qviClient, qviAid, leAid);
 
             ecrAuthCredHolder = retry(() -> {
-                try {
-                    Credential cred = getReceivedCredential(qviClient, sadEcrAuthCred.getD());
-                    if (cred == null) throw new RuntimeException("Credential not yet available");
-                    return cred;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Credential cred = getReceivedCredential(qviClient, sadEcrAuthCred.getD());
+                if (cred == null) throw new RuntimeException("Credential not yet available");
+                return cred;
             }, CRED_RETRY_DEFAULTS);
         }
 
@@ -405,13 +389,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendAdmitMessage(roleClient, roleAid, qviAid);
 
             ecrCredHolder2 = retry(() -> {
-                try {
-                    Credential cred = getReceivedCredential(roleClient, sadEcrCred2.getD());
-                    if (cred == null) throw new RuntimeException("Credential not yet available");
-                    return cred;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Credential cred = getReceivedCredential(roleClient, sadEcrCred2.getD());
+                if (cred == null) throw new RuntimeException("Credential not yet available");
+                return cred;
             }, CRED_RETRY_DEFAULTS);
         }
 
@@ -455,13 +435,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendAdmitMessage(qviClient, qviAid, leAid);
 
             oorAuthCredHolder = retry(() -> {
-                try {
-                    Credential cred = getReceivedCredential(qviClient, sadOorAuthCred.getD());
-                    if (cred == null) throw new RuntimeException("Credential not yet available");
-                    return cred;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Credential cred = getReceivedCredential(qviClient, sadOorAuthCred.getD());
+                if (cred == null) throw new RuntimeException("Credential not yet available");
+                return cred;
             }, CRED_RETRY_DEFAULTS);
         }
 
@@ -508,13 +484,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendAdmitMessage(roleClient, roleAid, qviAid);
 
             oorCredHolder = retry(() -> {
-                try {
-                    Credential cred = getReceivedCredential(roleClient, sadOorCred.getD());
-                    if (cred == null) throw new RuntimeException("Credential not yet available");
-                    return cred;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Credential cred = getReceivedCredential(roleClient, sadOorCred.getD());
+                if (cred == null) throw new RuntimeException("Credential not yet available");
+                return cred;
             }, CRED_RETRY_DEFAULTS);
         }
 

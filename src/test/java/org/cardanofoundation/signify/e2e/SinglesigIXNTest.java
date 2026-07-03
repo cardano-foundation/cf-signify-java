@@ -22,25 +22,17 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
     static String contact1_id;
 
     @BeforeAll
-    public static void getClients() {
-        try {
-            List<SignifyClient> clients = getOrCreateClientsAsync(2);
-            client1 = clients.get(0);
-            client2 = clients.get(1);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static void getClients() throws Exception {
+        List<SignifyClient> clients = getOrCreateClientsAsync(2);
+        client1 = clients.get(0);
+        client2 = clients.get(1);
     }
 
     @BeforeEach
     public void getIdentifier() throws Exception {
         String[] clients = getOrCreateIdentifier(client1, "name1", null);
-        try {
-            name1_id = clients[0];
-            name1_oobi = clients[1];
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        name1_id = clients[0];
+        name1_oobi = clients[1];
     }
 
     @BeforeEach

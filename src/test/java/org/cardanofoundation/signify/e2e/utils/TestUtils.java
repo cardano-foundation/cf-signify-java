@@ -434,21 +434,17 @@ public class TestUtils {
 
     public static List<Notification> waitForNotifications(SignifyClient client, String route, Retry.RetryOptions retryOptions) throws Exception {
         return retry(() -> {
-            try {
-                NotificationListResponse response = client.notifications().list();
+            NotificationListResponse response = client.notifications().list();
 
-                filteredNotes = response.notes().stream()
-                        .filter(note -> note.getA() != null && Objects.equals(route, note.getA().getR())
-                                && !Boolean.TRUE.equals(note.getR()))
-                        .toList();
+            filteredNotes = response.notes().stream()
+                    .filter(note -> note.getA() != null && Objects.equals(route, note.getA().getR())
+                            && !Boolean.TRUE.equals(note.getR()))
+                    .toList();
 
-                if (filteredNotes.isEmpty()) {
-                    throw new IllegalStateException("No notifications with route " + route);
-                }
-                return filteredNotes;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            if (filteredNotes.isEmpty()) {
+                throw new IllegalStateException("No notifications with route " + route);
             }
+            return filteredNotes;
         }, retryOptions);
     }
 

@@ -16,7 +16,6 @@ import org.cardanofoundation.signify.app.credentialing.ipex.*;
 import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
 import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
 import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
@@ -30,8 +29,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.security.DigestException;
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
@@ -123,54 +120,35 @@ public class CredentialsTest extends BaseIntegrationTest {
             CreateRegistryArgs registryArgs = CreateRegistryArgs.builder().build();
             registryArgs.setName(issuerAid.name);
             registryArgs.setRegistryName(registryName);
-            try {
-                RegistryResult regResult = issuerClient.registries().create(registryArgs);
-                waitForCompleted(issuerClient, regResult.op());
-            } catch (IOException | InterruptedException | DigestException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                List<Registry> registriesList = issuerClient.registries().list(issuerAid.name);
-                Registry registry = registriesList.get(0);
-                assertEquals(1, registriesList.size());
-                assertEquals(registryName, registry.getName());
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            RegistryResult regResult = issuerClient.registries().create(registryArgs);
+            waitForCompleted(issuerClient, regResult.op());
 
+            List<Registry> registriesList = issuerClient.registries().list(issuerAid.name);
+            Registry registry = registriesList.get(0);
+            assertEquals(1, registriesList.size());
+            assertEquals(registryName, registry.getName());
+
+            issuerClient.registries().rename(issuerAid.name, registryName, updatedRegistryName);
+            registriesList = issuerClient.registries().list(issuerAid.name);
             Registry updatedRegistry = new Registry();
-            try {
-                issuerClient.registries().rename(issuerAid.name, registryName, updatedRegistryName);
-                List<Registry> registriesList = issuerClient.registries().list(issuerAid.name);
-                updatedRegistry.setName(registriesList.get(0).getName());
-                updatedRegistry.setRegk(registriesList.get(0).getRegk());
-                assertEquals(1, registriesList.size());
-                assertEquals(updatedRegistryName, updatedRegistry.getName());
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            updatedRegistry.setName(registriesList.get(0).getName());
+            updatedRegistry.setRegk(registriesList.get(0).getRegk());
+            assertEquals(1, registriesList.size());
+            assertEquals(updatedRegistryName, updatedRegistry.getName());
             return updatedRegistry;
         });
 
         testSteps.step("Issuer can get schemas", () -> {
-            try {
-                Schema issuerQviSchema = issuerClient.schemas().get(QVI_SCHEMA_SAID).get();
-                assertEquals(QVI_SCHEMA_SAID, issuerQviSchema.get$Id());
+            Schema issuerQviSchema = issuerClient.schemas().get(QVI_SCHEMA_SAID).get();
+            assertEquals(QVI_SCHEMA_SAID, issuerQviSchema.get$Id());
 
-                Schema issuerLeSchema = issuerClient.schemas().get(LE_SCHEMA_SAID).get();
-                assertEquals(LE_SCHEMA_SAID, issuerLeSchema.get$Id());
-            } catch (IOException | InterruptedException | LibsodiumException e) {
-                throw new RuntimeException(e);
-            }
+            Schema issuerLeSchema = issuerClient.schemas().get(LE_SCHEMA_SAID).get();
+            assertEquals(LE_SCHEMA_SAID, issuerLeSchema.get$Id());
         });
 
         testSteps.step("Holder can list schemas", () -> {
-            try {
-                List<Schema> holderSchemas = holderClient.schemas().list();
-                assertEquals(2, holderSchemas.size());
-            } catch (IOException | InterruptedException | LibsodiumException e) {
-                throw new RuntimeException(e);
-            }
+            List<Schema> holderSchemas = holderClient.schemas().list();
+            assertEquals(2, holderSchemas.size());
         });
 
         String qviCredentialId = testSteps.step("create QVI credential", () -> {
@@ -193,18 +171,14 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer list credentials", () -> {
             CredentialFilter credentialFilter = CredentialFilter.builder().build();
-            try {
-                List<Credential> issuerCredentials = issuerClient.credentials().list(credentialFilter);
-                CredentialSad sad = issuerCredentials.getFirst().getSad();
-                CredentialState status = issuerCredentials.getFirst().getStatus();
+            List<Credential> issuerCredentials = issuerClient.credentials().list(credentialFilter);
+            CredentialSad sad = issuerCredentials.getFirst().getSad();
+            CredentialState status = issuerCredentials.getFirst().getStatus();
 
-                assertTrue(!issuerCredentials.isEmpty());
-                assertEquals(QVI_SCHEMA_SAID, sad.getS().toString());
-                assertEquals(issuerAid.prefix, sad.getI().toString());
-                assertEquals("0", status.getS().toString());
-            } catch (IOException | InterruptedException | LibsodiumException e) {
-                throw new RuntimeException(e);
-            }
+            assertTrue(!issuerCredentials.isEmpty());
+            assertEquals(QVI_SCHEMA_SAID, sad.getS().toString());
+            assertEquals(issuerAid.prefix, sad.getI().toString());
+            assertEquals("0", status.getS().toString());
         });
 
         testSteps.step("Issuer list credentials with filter", () -> {
@@ -212,83 +186,65 @@ public class CredentialsTest extends BaseIntegrationTest {
             filterData.put("-i", issuerAid.prefix);
             CredentialFilter credentialFilter = CredentialFilter.builder().build();
             credentialFilter.setFilter(filterData);
-            try {
-                List<Credential> list = issuerClient.credentials().list(credentialFilter);
-                assertEquals(1, list.size());
+            List<Credential> list = issuerClient.credentials().list(credentialFilter);
+            assertEquals(1, list.size());
 
-                filterData.remove("-i");
-                filterData.put("-s", QVI_SCHEMA_SAID);
-                list = issuerClient.credentials().list(credentialFilter);
-                assertEquals(1, list.size());
+            filterData.remove("-i");
+            filterData.put("-s", QVI_SCHEMA_SAID);
+            list = issuerClient.credentials().list(credentialFilter);
+            assertEquals(1, list.size());
 
-                filterData.remove("-s");
-                filterData.put("-a-i", holderAid.prefix);
-                list = issuerClient.credentials().list(credentialFilter);
-                assertEquals(1, list.size());
+            filterData.remove("-s");
+            filterData.put("-a-i", holderAid.prefix);
+            list = issuerClient.credentials().list(credentialFilter);
+            assertEquals(1, list.size());
 
-                filterData.remove("-a-i");
-                filterData.put("-i", issuerAid.prefix);
-                filterData.put("-s", QVI_SCHEMA_SAID);
-                filterData.put("-a-i", holderAid.prefix);
-                list = issuerClient.credentials().list(credentialFilter);
-                assertEquals(1, list.size());
+            filterData.remove("-a-i");
+            filterData.put("-i", issuerAid.prefix);
+            filterData.put("-s", QVI_SCHEMA_SAID);
+            filterData.put("-a-i", holderAid.prefix);
+            list = issuerClient.credentials().list(credentialFilter);
+            assertEquals(1, list.size());
 
-                filterData.put("-i", UUID.randomUUID().toString());
-                filterData.put("-s", QVI_SCHEMA_SAID);
-                filterData.put("-a-i", holderAid.prefix);
-                list = issuerClient.credentials().list(credentialFilter);
-                assertEquals(0, list.size());
-
-            } catch (IOException | InterruptedException | LibsodiumException e) {
-                throw new RuntimeException(e);
-            }
+            filterData.put("-i", UUID.randomUUID().toString());
+            filterData.put("-s", QVI_SCHEMA_SAID);
+            filterData.put("-a-i", holderAid.prefix);
+            list = issuerClient.credentials().list(credentialFilter);
+            assertEquals(0, list.size());
         });
 
         testSteps.step("Issuer get credential by id", () -> {
-            try {
-                Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
-                CredentialSad sad = issuerCredential.getSad();
-                CredentialState status = issuerCredential.getStatus();
+            Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+            CredentialSad sad = issuerCredential.getSad();
+            CredentialState status = issuerCredential.getStatus();
 
-                assertEquals(QVI_SCHEMA_SAID, sad.getS().toString());
-                assertEquals(issuerAid.prefix, sad.getI().toString());
-                assertEquals("0", status.getS().toString());
-            } catch (IOException | InterruptedException | LibsodiumException e) {
-                throw new RuntimeException(e);
-            }
+            assertEquals(QVI_SCHEMA_SAID, sad.getS().toString());
+            assertEquals(issuerAid.prefix, sad.getI().toString());
+            assertEquals("0", status.getS().toString());
         });
 
         testSteps.step("Issuer IPEX grant", () -> {
             String dt = createTimestamp();
-            try {
-                Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+            Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
 
-                IpexGrantArgs gArgs = IpexGrantArgs.builder().build();
-                gArgs.setSenderName(issuerAid.name);
-                gArgs.setAcdc(new Serder(Utils.toMap(issuerCredential.getSad())));
-                gArgs.setAnc(new Serder(Utils.toMap(issuerCredential.getAnc())));
-                gArgs.setIss(new Serder(Utils.toMap(issuerCredential.getIss())));
-                gArgs.setAncAttachment(null);
-                gArgs.setRecipient(holderAid.prefix);
-                gArgs.setDatetime(dt);
+            IpexGrantArgs gArgs = IpexGrantArgs.builder().build();
+            gArgs.setSenderName(issuerAid.name);
+            gArgs.setAcdc(new Serder(Utils.toMap(issuerCredential.getSad())));
+            gArgs.setAnc(new Serder(Utils.toMap(issuerCredential.getAnc())));
+            gArgs.setIss(new Serder(Utils.toMap(issuerCredential.getIss())));
+            gArgs.setAncAttachment(null);
+            gArgs.setRecipient(holderAid.prefix);
+            gArgs.setDatetime(dt);
 
-                Exchanging.ExchangeMessageResult result = issuerClient.ipex().grant(gArgs);
-                List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
-                ExchangeOperation op = issuerClient.ipex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
-                waitForCompleted(issuerClient, op);
-            } catch (IOException | InterruptedException | DigestException | LibsodiumException e) {
-                throw new RuntimeException(e);
-            }
+            Exchanging.ExchangeMessageResult result = issuerClient.ipex().grant(gArgs);
+            List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
+            ExchangeOperation op = issuerClient.ipex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
+            waitForCompleted(issuerClient, op);
         });
 
         testSteps.step("Holder can get the credential status before or without holding", () -> {
-            Map<String, Object> state = Utils.toMap(Retry.retry(() -> {
-                try {
-                    return holderClient.credentials().state(registrys.getRegk(), qviCredentialId).get();
-                } catch (IOException | InterruptedException | LibsodiumException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
+            Map<String, Object> state = Utils.toMap(Retry.retry(() ->
+                    holderClient.credentials().state(registrys.getRegk(), qviCredentialId).get()));
 
             assertEquals(qviCredentialId, state.get("i"));
             assertEquals(registrys.getRegk(), state.get("ri"));
@@ -297,45 +253,31 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("holder IPEX admit", () -> {
-            try {
-                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_GRANT_ROUTE);
-                Notification grantNotification = holderNotifications.getFirst();
+            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_GRANT_ROUTE);
+            Notification grantNotification = holderNotifications.getFirst();
 
-                IpexAdmitArgs iargs = IpexAdmitArgs.builder().build();
-                iargs.setSenderName(holderAid.name);
-                iargs.setMessage("");
-                iargs.setGrantSaid(grantNotification.getA().getD());
-                iargs.setRecipient(issuerAid.prefix);
-                iargs.setDatetime(createTimestamp());
+            IpexAdmitArgs iargs = IpexAdmitArgs.builder().build();
+            iargs.setSenderName(holderAid.name);
+            iargs.setMessage("");
+            iargs.setGrantSaid(grantNotification.getA().getD());
+            iargs.setRecipient(issuerAid.prefix);
+            iargs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = holderClient.ipex().admit(iargs);
-                ExchangeOperation op = holderClient.ipex().submitAdmit(
-                        holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
-                );
-                waitForCompleted(holderClient, op);
-                markAndRemoveNotification(holderClient, grantNotification);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Exchanging.ExchangeMessageResult result = holderClient.ipex().admit(iargs);
+            ExchangeOperation op = holderClient.ipex().submitAdmit(
+                    holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
+            );
+            waitForCompleted(holderClient, op);
+            markAndRemoveNotification(holderClient, grantNotification);
         });
 
         testSteps.step("Issuer IPEX grant response", () -> {
-            List<Notification> issuerNotifications;
-            try {
-                issuerNotifications = waitForNotifications(issuerClient, "/exn" + IPEX_ADMIT_ROUTE);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            List<Notification> issuerNotifications = waitForNotifications(issuerClient, "/exn" + IPEX_ADMIT_ROUTE);
             markAndRemoveNotification(issuerClient, issuerNotifications.getFirst());
         });
 
         testSteps.step("Holder has credential", () -> {
-            Credential holderCredential;
-            try {
-                holderCredential = holderClient.credentials().get(qviCredentialId).get();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Credential holderCredential = holderClient.credentials().get(qviCredentialId).get();
             assertEquals(QVI_SCHEMA_SAID, holderCredential.getSad().getS());
             assertEquals(issuerAid.prefix, holderCredential.getSad().getI());
             assertEquals("0", holderCredential.getStatus().getS());
@@ -350,195 +292,162 @@ public class CredentialsTest extends BaseIntegrationTest {
             args.setRecipient(holderAid.prefix);
             args.setDatetime(createTimestamp());
 
-            try {
-                Exchanging.ExchangeMessageResult result = verifierClient.ipex().apply(args);
-                ExchangeOperation op = verifierClient.ipex().submitApply(
-                        verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
-                );
-                waitForCompleted(verifierClient, op);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Exchanging.ExchangeMessageResult result = verifierClient.ipex().apply(args);
+            ExchangeOperation op = verifierClient.ipex().submitApply(
+                    verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
+            );
+            waitForCompleted(verifierClient, op);
         });
 
         testSteps.step("Holder IPEX apply receive and offer", () -> {
-            List<Notification> holderNotifications;
-            try {
-                Thread.sleep(2000);
-                holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_APPLY_ROUTE);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Thread.sleep(2000);
+            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_APPLY_ROUTE);
             Notification holderApplyNote = holderNotifications.getFirst();
             assertNotNull(holderApplyNote.getA().getD());
 
-            try {
-                IpexApplyExchange apply = holderClient.exchanges().get(holderApplyNote.getA().getD(), IpexApplyExchange.class).orElseThrow();
-                applySaid = apply.exn().getD();
+            IpexApplyExchange apply = holderClient.exchanges().get(holderApplyNote.getA().getD(), IpexApplyExchange.class).orElseThrow();
+            applySaid = apply.exn().getD();
 
-                Map<String, Object> aBody = apply.a();
+            Map<String, Object> aBody = apply.a();
 
-                Map<String, Object> filter = new LinkedHashMap<>();
-                filter.put("-s", aBody.get("s").toString());
+            Map<String, Object> filter = new LinkedHashMap<>();
+            filter.put("-s", aBody.get("s").toString());
 
-                LinkedHashMap<String, Object> aAttributes = castObjectToLinkedHashMap(aBody.get("a"));
-                for (Map.Entry<String, Object> entry : aAttributes.entrySet()) {
-                    String key = entry.getKey();
-                    Object value = entry.getValue();
-                    filter.put("-a-" + key, value);
-                }
-
-                CredentialFilter cFilter = CredentialFilter.builder().build();
-                cFilter.setFilter(filter);
-                List<Credential> matchingCreds = holderClient.credentials().list(cFilter);
-                assertEquals(1, matchingCreds.size());
-
-                markAndRemoveNotification(holderClient, holderNotifications.getFirst());
-
-                IpexOfferArgs offerArgs = IpexOfferArgs.builder().build();
-                offerArgs.setSenderName(holderAid.name);
-                offerArgs.setRecipient(verifierAid.prefix);
-                offerArgs.setAcdc(new Serder(Utils.toMap(matchingCreds.get(0).getSad())));
-                offerArgs.setApplySaid(applySaid);
-                offerArgs.setDatetime(createTimestamp());
-
-                Exchanging.ExchangeMessageResult result = holderClient.ipex().offer(offerArgs);
-                ExchangeOperation op = holderClient.ipex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
-                waitForCompleted(holderClient, op);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            LinkedHashMap<String, Object> aAttributes = castObjectToLinkedHashMap(aBody.get("a"));
+            for (Map.Entry<String, Object> entry : aAttributes.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                filter.put("-a-" + key, value);
             }
+
+            CredentialFilter cFilter = CredentialFilter.builder().build();
+            cFilter.setFilter(filter);
+            List<Credential> matchingCreds = holderClient.credentials().list(cFilter);
+            assertEquals(1, matchingCreds.size());
+
+            markAndRemoveNotification(holderClient, holderNotifications.getFirst());
+
+            IpexOfferArgs offerArgs = IpexOfferArgs.builder().build();
+            offerArgs.setSenderName(holderAid.name);
+            offerArgs.setRecipient(verifierAid.prefix);
+            offerArgs.setAcdc(new Serder(Utils.toMap(matchingCreds.get(0).getSad())));
+            offerArgs.setApplySaid(applySaid);
+            offerArgs.setDatetime(createTimestamp());
+
+            Exchanging.ExchangeMessageResult result = holderClient.ipex().offer(offerArgs);
+            ExchangeOperation op = holderClient.ipex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
+            waitForCompleted(holderClient, op);
         });
 
         testSteps.step("Verifier receive offer and agree", () -> {
-            List<Notification> verifierNotifications;
-            try {
-                verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_OFFER_ROUTE);
-                Notification verifierOfferNote = verifierNotifications.getFirst();
-                assertNotNull(verifierOfferNote.getA().getD());
+            List<Notification> verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_OFFER_ROUTE);
+            Notification verifierOfferNote = verifierNotifications.getFirst();
+            assertNotNull(verifierOfferNote.getA().getD());
 
-                IpexOfferExchange offer = verifierClient.exchanges().get(verifierOfferNote.getA().getD(), IpexOfferExchange.class).orElseThrow();
+            IpexOfferExchange offer = verifierClient.exchanges().get(verifierOfferNote.getA().getD(), IpexOfferExchange.class).orElseThrow();
 
-                offerSaid = offer.exn().getD();
-                String p = offer.exn().getP();
+            offerSaid = offer.exn().getD();
+            String p = offer.exn().getP();
 
-                ACDCAttributes a = offer.e().acdc().value().getA();
-                String LEI = a.getAdditionalProperties().get("LEI").toString();
+            ACDCAttributes a = offer.e().acdc().value().getA();
+            String LEI = a.getAdditionalProperties().get("LEI").toString();
 
-                assertEquals(applySaid, p);
-                assertEquals("5493001KJTIIGC8Y1R17", LEI);
+            assertEquals(applySaid, p);
+            assertEquals("5493001KJTIIGC8Y1R17", LEI);
 
-                markAndRemoveNotification(verifierClient, verifierOfferNote);
+            markAndRemoveNotification(verifierClient, verifierOfferNote);
 
-                IpexAgreeArgs agreeArgs = IpexAgreeArgs.builder().build();
-                agreeArgs.setSenderName(verifierAid.name);
-                agreeArgs.setRecipient(holderAid.prefix);
-                agreeArgs.setOfferSaid(offerSaid);
-                agreeArgs.setDatetime(createTimestamp());
+            IpexAgreeArgs agreeArgs = IpexAgreeArgs.builder().build();
+            agreeArgs.setSenderName(verifierAid.name);
+            agreeArgs.setRecipient(holderAid.prefix);
+            agreeArgs.setOfferSaid(offerSaid);
+            agreeArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = verifierClient.ipex().agree(agreeArgs);
-                ExchangeOperation op = verifierClient.ipex().submitAgree(
-                        verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
-                );
-                waitForCompleted(verifierClient, op);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Exchanging.ExchangeMessageResult result = verifierClient.ipex().agree(agreeArgs);
+            ExchangeOperation op = verifierClient.ipex().submitAgree(
+                    verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
+            );
+            waitForCompleted(verifierClient, op);
         });
 
         testSteps.step("Holder IPEX receive agree and grant/present", () -> {
-            List<Notification> holderNotifications;
-            try {
-                holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_AGREE_ROUTE);
-                Notification holderAgreeNote = holderNotifications.getFirst();
-                assertNotNull(holderAgreeNote.getA().getD());
+            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_AGREE_ROUTE);
+            Notification holderAgreeNote = holderNotifications.getFirst();
+            assertNotNull(holderAgreeNote.getA().getD());
 
-                IpexAgreeExchange agree = verifierClient.exchanges().get(holderAgreeNote.getA().getD(), IpexAgreeExchange.class).orElseThrow();
-                agreeSaid = agree.exn().getD();
-                String agreeP = agree.exn().getP();
+            IpexAgreeExchange agree = verifierClient.exchanges().get(holderAgreeNote.getA().getD(), IpexAgreeExchange.class).orElseThrow();
+            agreeSaid = agree.exn().getD();
+            String agreeP = agree.exn().getP();
 
-                assertEquals(offerSaid, agreeP);
+            assertEquals(offerSaid, agreeP);
 
-                markAndRemoveNotification(holderClient, holderAgreeNote);
+            markAndRemoveNotification(holderClient, holderAgreeNote);
 
-                Credential holderCredential = holderClient.credentials().get(qviCredentialId).get();
+            Credential holderCredential = holderClient.credentials().get(qviCredentialId).get();
 
-                String atc = holderCredential.getAtc();
-                List<String> ancatc = holderCredential.getAncatc();
-                String issAtc = holderCredential.getIssatc();
+            String atc = holderCredential.getAtc();
+            List<String> ancatc = holderCredential.getAncatc();
+            String issAtc = holderCredential.getIssatc();
 
-                IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
-                grantArgs.setSenderName(holderAid.name);
-                grantArgs.setRecipient(verifierAid.prefix);
-                grantArgs.setAcdc(new Serder(Utils.toMap(holderCredential.getSad())));
-                grantArgs.setAnc(new Serder(Utils.toMap(holderCredential.getAnc())));
-                grantArgs.setIss(new Serder(Utils.toMap(holderCredential.getIss())));
-                grantArgs.setAcdcAttachment(atc);
-                grantArgs.setAncAttachment(ancatc.getFirst());
-                grantArgs.setIssAttachment(issAtc);
-                grantArgs.setAgreeSaid(agreeSaid);
-                grantArgs.setDatetime(createTimestamp());
+            IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
+            grantArgs.setSenderName(holderAid.name);
+            grantArgs.setRecipient(verifierAid.prefix);
+            grantArgs.setAcdc(new Serder(Utils.toMap(holderCredential.getSad())));
+            grantArgs.setAnc(new Serder(Utils.toMap(holderCredential.getAnc())));
+            grantArgs.setIss(new Serder(Utils.toMap(holderCredential.getIss())));
+            grantArgs.setAcdcAttachment(atc);
+            grantArgs.setAncAttachment(ancatc.getFirst());
+            grantArgs.setIssAttachment(issAtc);
+            grantArgs.setAgreeSaid(agreeSaid);
+            grantArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
+            Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
 
-                ExchangeOperation op = holderClient.ipex().submitGrant(
-                        holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
-                );
-                waitForCompleted(holderClient, op);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            ExchangeOperation op = holderClient.ipex().submitGrant(
+                    holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
+            );
+            waitForCompleted(holderClient, op);
         });
 
         testSteps.step("Verifier receives IPEX grant", () -> {
-            List<Notification> verifierNotifications;
-            try {
-                verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_GRANT_ROUTE);
-                Notification verifierGrantNote = verifierNotifications.getFirst();
-                assertNotNull(verifierGrantNote.getA().getD());
+            List<Notification> verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_GRANT_ROUTE);
+            Notification verifierGrantNote = verifierNotifications.getFirst();
+            assertNotNull(verifierGrantNote.getA().getD());
 
-                IpexGrantExchange grant = holderClient.exchanges().get(verifierGrantNote.getA().getD(), IpexGrantExchange.class).orElseThrow();
-                String p = grant.exn().getP();
+            IpexGrantExchange grant = holderClient.exchanges().get(verifierGrantNote.getA().getD(), IpexGrantExchange.class).orElseThrow();
+            String p = grant.exn().getP();
 
-                assertEquals(agreeSaid, p);
+            assertEquals(agreeSaid, p);
 
-                IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
-                admitArgs.setSenderName(verifierAid.name);
-                admitArgs.setMessage("");
-                admitArgs.setGrantSaid(verifierGrantNote.getA().getD());
-                admitArgs.setRecipient(holderAid.prefix);
-                admitArgs.setDatetime(createTimestamp());
+            IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
+            admitArgs.setSenderName(verifierAid.name);
+            admitArgs.setMessage("");
+            admitArgs.setGrantSaid(verifierGrantNote.getA().getD());
+            admitArgs.setRecipient(holderAid.prefix);
+            admitArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = verifierClient.ipex().admit(admitArgs);
-                ExchangeOperation op = verifierClient.ipex().submitAdmit(
-                        verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
-                );
-                waitForCompleted(verifierClient, op);
-                markAndRemoveNotification(verifierClient, verifierGrantNote);
-                Credential verifierCredential = verifierClient.credentials().get(qviCredentialId).get();
+            Exchanging.ExchangeMessageResult result = verifierClient.ipex().admit(admitArgs);
+            ExchangeOperation op = verifierClient.ipex().submitAdmit(
+                    verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
+            );
+            waitForCompleted(verifierClient, op);
+            markAndRemoveNotification(verifierClient, verifierGrantNote);
+            Credential verifierCredential = verifierClient.credentials().get(qviCredentialId).get();
 
-                CredentialSad sadObj = verifierCredential.getSad();
-                CredentialState status = verifierCredential.getStatus();
-                String s = sadObj.getS();
-                String i = sadObj.getI();
-                String sStatus = status.getS();
+            CredentialSad sadObj = verifierCredential.getSad();
+            CredentialState status = verifierCredential.getStatus();
+            String s = sadObj.getS();
+            String i = sadObj.getI();
+            String sStatus = status.getS();
 
-                assertEquals(QVI_SCHEMA_SAID, s);
-                assertEquals(issuerAid.prefix, i);
-                assertEquals("0", sStatus);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            assertEquals(QVI_SCHEMA_SAID, s);
+            assertEquals(issuerAid.prefix, i);
+            assertEquals("0", sStatus);
         });
 
         testSteps.step("Holder IPEX present response", () -> {
-            try {
-                List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
-                markAndRemoveNotification(holderClient, holderNotifications.getFirst());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
+            markAndRemoveNotification(holderClient, holderNotifications.getFirst());
         });
 
         Registry holderRegistry = testSteps.step("Holder create registry for LE credential", () -> {
@@ -547,130 +456,106 @@ public class CredentialsTest extends BaseIntegrationTest {
             registryArgs.setName(holderAid.name);
             registryArgs.setRegistryName(registryName);
 
-            try {
-                RegistryResult regResult = holderClient.registries().create(registryArgs);
+            RegistryResult regResult = holderClient.registries().create(registryArgs);
 
-                waitForCompleted(holderClient, regResult.op());
-                List<Registry> registriesList = holderClient.registries().list(holderAid.name);
+            waitForCompleted(holderClient, regResult.op());
+            List<Registry> registriesList = holderClient.registries().list(holderAid.name);
 
-                assertTrue(!registriesList.isEmpty());
-                return registriesList.getFirst();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            assertTrue(!registriesList.isEmpty());
+            return registriesList.getFirst();
         });
 
         String leCredentialId = testSteps.step("Holder create LE (chained) credential", () -> {
-            try {
-                Credential qviCredential = holderClient.credentials().get(qviCredentialId).get();
-                CredentialSad sadBody = qviCredential.getSad();
+            Credential qviCredential = holderClient.credentials().get(qviCredentialId).get();
+            CredentialSad sadBody = qviCredential.getSad();
 
-                Map<String, Object> additionalProperties = new LinkedHashMap<>();
-                additionalProperties.put("LEI", "5493001KJTIIGC8Y1R17");
+            Map<String, Object> additionalProperties = new LinkedHashMap<>();
+            additionalProperties.put("LEI", "5493001KJTIIGC8Y1R17");
 
-                CredentialData.CredentialSubject cSubject = CredentialData.CredentialSubject.builder().build();
-                cSubject.setI(legalEntityAid.prefix);
-                cSubject.setAdditionalProperties(additionalProperties);
+            CredentialData.CredentialSubject cSubject = CredentialData.CredentialSubject.builder().build();
+            cSubject.setI(legalEntityAid.prefix);
+            cSubject.setAdditionalProperties(additionalProperties);
 
-                Map<String, Object> usageDisclaimer = new LinkedHashMap<>();
-                usageDisclaimer.put("l", StringData.USAGE_DISCLAIMER);
-                Map<String, Object> issuanceDisclaimer = new LinkedHashMap<>();
-                issuanceDisclaimer.put("l", StringData.ISSUANCE_DISCLAIMER);
+            Map<String, Object> usageDisclaimer = new LinkedHashMap<>();
+            usageDisclaimer.put("l", StringData.USAGE_DISCLAIMER);
+            Map<String, Object> issuanceDisclaimer = new LinkedHashMap<>();
+            issuanceDisclaimer.put("l", StringData.ISSUANCE_DISCLAIMER);
 
-                Map<String, Object> sad = new LinkedHashMap<>();
-                sad.put("d", "");
-                sad.put("usageDisclaimer", usageDisclaimer);
-                sad.put("issuanceDisclaimer", issuanceDisclaimer);
+            Map<String, Object> sad = new LinkedHashMap<>();
+            sad.put("d", "");
+            sad.put("usageDisclaimer", usageDisclaimer);
+            sad.put("issuanceDisclaimer", issuanceDisclaimer);
 
-                Map<String, Object> qvi = new LinkedHashMap<>();
-                qvi.put("n", sadBody.getD());
-                qvi.put("s", sadBody.getS());
+            Map<String, Object> qvi = new LinkedHashMap<>();
+            qvi.put("n", sadBody.getD());
+            qvi.put("s", sadBody.getS());
 
-                Map<String, Object> e = new LinkedHashMap<>();
-                e.put("d", "");
-                e.put("qvi", qvi);
+            Map<String, Object> e = new LinkedHashMap<>();
+            e.put("d", "");
+            e.put("qvi", qvi);
 
-                CredentialData cData = CredentialData.builder().build();
-                cData.setA(cSubject);
-                cData.setRi(holderRegistry.getRegk());
-                cData.setS(LE_SCHEMA_SAID);
-                cData.setR(sad);
-                cData.setE(e);
+            CredentialData cData = CredentialData.builder().build();
+            cData.setA(cSubject);
+            cData.setRi(holderRegistry.getRegk());
+            cData.setS(LE_SCHEMA_SAID);
+            cData.setR(sad);
+            cData.setE(e);
 
-                IssueCredentialResult result = holderClient.credentials().issue(holderAid.name, cData);
-                waitForCompleted(holderClient, result.getOp());
-                return result.getAcdc().getKed().get("d").toString();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            IssueCredentialResult result = holderClient.credentials().issue(holderAid.name, cData);
+            waitForCompleted(holderClient, result.getOp());
+            return result.getAcdc().getKed().get("d").toString();
         });
 
         testSteps.step("LE credential IPEX grant", () -> {
             String dt = createTimestamp();
-            try {
-                Credential leCredential = holderClient.credentials().get(leCredentialId)
-                    .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
+            Credential leCredential = holderClient.credentials().get(leCredentialId)
+                .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
 
-                IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
-                grantArgs.setSenderName(holderAid.name);
-                grantArgs.setAcdc(new Serder(Utils.toMap(leCredential.getSad())));
-                grantArgs.setAnc(new Serder(Utils.toMap(leCredential.getAnc())));
-                grantArgs.setIss(new Serder(Utils.toMap(leCredential.getIss())));
-                grantArgs.setAncAttachment(null);
-                grantArgs.setRecipient(legalEntityAid.prefix);
-                grantArgs.setDatetime(dt);
+            IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
+            grantArgs.setSenderName(holderAid.name);
+            grantArgs.setAcdc(new Serder(Utils.toMap(leCredential.getSad())));
+            grantArgs.setAnc(new Serder(Utils.toMap(leCredential.getAnc())));
+            grantArgs.setIss(new Serder(Utils.toMap(leCredential.getIss())));
+            grantArgs.setAncAttachment(null);
+            grantArgs.setRecipient(legalEntityAid.prefix);
+            grantArgs.setDatetime(dt);
 
-                Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
-                ExchangeOperation op = holderClient.ipex().submitGrant(
-                        holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
-                );
-                waitForCompleted(holderClient, op);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
+            ExchangeOperation op = holderClient.ipex().submitGrant(
+                    holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
+            );
+            waitForCompleted(holderClient, op);
         });
 
         testSteps.step("Legal Entity IPEX admit", () -> {
-            try {
-                List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn" + IPEX_GRANT_ROUTE);
-                Notification grantNotification = notifications.getFirst();
+            List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn" + IPEX_GRANT_ROUTE);
+            Notification grantNotification = notifications.getFirst();
 
-                IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
-                admitArgs.setSenderName(legalEntityAid.name);
-                admitArgs.setMessage("");
-                admitArgs.setGrantSaid(grantNotification.getA().getD());
-                admitArgs.setRecipient(holderAid.prefix);
-                admitArgs.setDatetime(createTimestamp());
+            IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
+            admitArgs.setSenderName(legalEntityAid.name);
+            admitArgs.setMessage("");
+            admitArgs.setGrantSaid(grantNotification.getA().getD());
+            admitArgs.setRecipient(holderAid.prefix);
+            admitArgs.setDatetime(createTimestamp());
 
-                Exchanging.ExchangeMessageResult result = legalEntityClient.ipex().admit(admitArgs);
-                ExchangeOperation op = legalEntityClient.ipex().submitAdmit(
-                        legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
-                );
-                waitForCompleted(legalEntityClient, op);
-                markAndRemoveNotification(legalEntityClient, grantNotification);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Exchanging.ExchangeMessageResult result = legalEntityClient.ipex().admit(admitArgs);
+            ExchangeOperation op = legalEntityClient.ipex().submitAdmit(
+                    legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
+            );
+            waitForCompleted(legalEntityClient, op);
+            markAndRemoveNotification(legalEntityClient, grantNotification);
         });
 
         testSteps.step("LE credential IPEX grant response", () -> {
-            try {
-                List<Notification> notifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
-                markAndRemoveNotification(holderClient, notifications.getFirst());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            List<Notification> notifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
+            markAndRemoveNotification(holderClient, notifications.getFirst());
         });
 
         testSteps.step("Legal Entity has chained credential", () -> {
             Credential legalEntityCredential = retry(() -> {
-                try {
-                    assertNotNull(leCredentialId);
-                    return legalEntityClient.credentials().get(leCredentialId)
-                            .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                assertNotNull(leCredentialId);
+                return legalEntityClient.credentials().get(leCredentialId)
+                        .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
             });
             CredentialSad sad = legalEntityCredential.getSad();
             Map<String, Object> aMap = Utils.toMap(sad.getA());
@@ -689,17 +574,13 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Issuer revoke QVI credential", () -> {
-            try {
-                RevokeCredentialResult revokeOperation = issuerClient.credentials().revoke(issuerAid.name, qviCredentialId, null);
-                waitForCompleted(issuerClient, revokeOperation.getOp());
-                Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+            RevokeCredentialResult revokeOperation = issuerClient.credentials().revoke(issuerAid.name, qviCredentialId, null);
+            waitForCompleted(issuerClient, revokeOperation.getOp());
+            Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
 
-                CredentialState status = issuerCredential.getStatus();
+            CredentialState status = issuerCredential.getStatus();
 
-                assertEquals("1", status.getS());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            assertEquals("1", status.getS());
         });
     }
 

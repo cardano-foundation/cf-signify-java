@@ -107,11 +107,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                             "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"))
                     .build();
 
-            try {
-                return MultisigUtils.startMultisigIncept(delegator1Client, startMultisigInceptArgs);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return MultisigUtils.startMultisigIncept(delegator1Client, startMultisigInceptArgs);
         });
 
         Notification ntor;
@@ -153,45 +149,40 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
         //Resolve delegator OOBI
         String delegatorGroupNameOobi = testSteps.step(String.format("Add and resolve delegator OOBI %s(%s)", delegatorGroupName, adelegatorGroupName.getPrefix()), () -> {
             String timestamp = createTimestamp();
-            try {
-                List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisig(delegator1Client,
-                        delegatorGroupName,
-                        delegator1Aid,
-                        List.of(delegator2Aid),
-                        adelegatorGroupName,
-                        timestamp,
-                        true);
+            List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisig(delegator1Client,
+                    delegatorGroupName,
+                    delegator1Aid,
+                    List.of(delegator2Aid),
+                    adelegatorGroupName,
+                    timestamp,
+                    true);
 
-                List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisig(delegator2Client,
-                        delegatorGroupName,
-                        delegator2Aid,
-                        List.of(delegator1Aid),
-                        adelegatorGroupName,
-                        timestamp,
-                        false);
+            List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisig(delegator2Client,
+                    delegatorGroupName,
+                    delegator2Aid,
+                    List.of(delegator1Aid),
+                    adelegatorGroupName,
+                    timestamp,
+                    false);
 
-                List<WaitOperationArgs> waitOperationArgsList = new ArrayList<>();
-                opList1.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator1Client, op)));
-                opList2.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator2Client, op)));
-                waitOperationAsync(waitOperationArgsList.toArray(new WaitOperationArgs[0]));
+            List<WaitOperationArgs> waitOperationArgsList = new ArrayList<>();
+            opList1.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator1Client, op)));
+            opList2.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator2Client, op)));
+            waitOperationAsync(waitOperationArgsList.toArray(new WaitOperationArgs[0]));
 
-                TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
-                TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
+            TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
+            TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
 
-                OOBI odelegatorGroupName1 = delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
-                OOBI odelegatorGroupName2 = delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
+            OOBI odelegatorGroupName1 = delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
+            OOBI odelegatorGroupName2 = delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
 
-                assertEquals(odelegatorGroupName1.getRole(), odelegatorGroupName2.getRole());
+            assertEquals(odelegatorGroupName1.getRole(), odelegatorGroupName2.getRole());
 
-                String stringOobis1 = odelegatorGroupName1.getOobis().get(0);
-                String stringOobis2 = odelegatorGroupName2.getOobis().get(0);
+            String stringOobis1 = odelegatorGroupName1.getOobis().get(0);
+            String stringOobis2 = odelegatorGroupName2.getOobis().get(0);
 
-                assertEquals(stringOobis1, stringOobis2);
-                return stringOobis1;
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            assertEquals(stringOobis1, stringOobis2);
+            return stringOobis1;
         });
 
         String oobiGtor = delegatorGroupNameOobi.split("/agent/")[0];
@@ -216,11 +207,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                             "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
                             "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"))
                     .build();
-            try {
-                return MultisigUtils.startMultisigIncept(delegatee1Client, startMultisigInceptArgs);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return MultisigUtils.startMultisigIncept(delegatee1Client, startMultisigInceptArgs);
         });
 
         // Second member of delegatee check notifications and join the multisig
@@ -255,34 +242,30 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 put("d", teepre);
             }};
 
-            try {
-                DelegatorOperation delApprOp1 = MultisigUtils.delegateMultisig(
-                        delegator1Client,
-                        delegator1Aid,
-                        Collections.singletonList(delegator2Aid),
-                        adelegatorGroupName,
-                        anchor,
-                        true);
+            DelegatorOperation delApprOp1 = MultisigUtils.delegateMultisig(
+                    delegator1Client,
+                    delegator1Aid,
+                    Collections.singletonList(delegator2Aid),
+                    adelegatorGroupName,
+                    anchor,
+                    true);
 
-                DelegatorOperation delApprOp2 = MultisigUtils.delegateMultisig(
-                        delegator2Client,
-                        delegator2Aid,
-                        Collections.singletonList(delegator1Aid),
-                        adelegatorGroupName,
-                        anchor,
-                        false);
+            DelegatorOperation delApprOp2 = MultisigUtils.delegateMultisig(
+                    delegator2Client,
+                    delegator2Aid,
+                    Collections.singletonList(delegator1Aid),
+                    adelegatorGroupName,
+                    anchor,
+                    false);
 
-                CompletedDelegatorOperation dresult1 = waitForCompleted(delegator1Client, delApprOp1, CompletedDelegatorOperation.class);
-                String responseDresult1 = dresult1.getName();
+            CompletedDelegatorOperation dresult1 = waitForCompleted(delegator1Client, delApprOp1, CompletedDelegatorOperation.class);
+            String responseDresult1 = dresult1.getName();
 
-                CompletedDelegatorOperation dresult2 = waitForCompleted(delegator2Client, delApprOp2, CompletedDelegatorOperation.class);
-                String responseDresult2 = dresult2.getName();
+            CompletedDelegatorOperation dresult2 = waitForCompleted(delegator2Client, delApprOp2, CompletedDelegatorOperation.class);
+            String responseDresult2 = dresult2.getName();
 
-                assertEquals(responseDresult1, responseDresult2);
-                waitAndMarkNotification(delegator1Client, "/multisig/ixn");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            assertEquals(responseDresult1, responseDresult2);
+            waitAndMarkNotification(delegator1Client, "/multisig/ixn");
         });
 
         QueryOperation queryOp1 = delegator1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
