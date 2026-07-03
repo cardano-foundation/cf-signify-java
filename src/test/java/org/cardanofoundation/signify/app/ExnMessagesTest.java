@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.app;
 import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
 import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
 import org.cardanofoundation.signify.app.ExnMessages.TypedExchange;
+import org.cardanofoundation.signify.app.exception.MalformedExnException;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
@@ -52,6 +53,7 @@ public class ExnMessagesTest {
         MultisigIcpExchange icp = assertInstanceOf(MultisigIcpExchange.class, typed);
         assertEquals("EGroupId", icp.a().gid());
         assertEquals(List.of("EMember1"), icp.a().smids());
+        assertEquals(List.of(), icp.a().rmids());
         // known fields are lifted; the remainder stays available
         assertEquals(Map.of("extra", "kept"), icp.a().additional());
         assertEquals("icp", icp.e().icp().value().getT());
@@ -83,7 +85,7 @@ public class ExnMessagesTest {
         ExchangeResource badIcp = exchange(MULTISIG_ICP_ROUTE, icpAttributes(),
             Map.of("icp", Map.of("k", Map.of("not", "a list"))));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        MalformedExnException exception = assertThrows(MalformedExnException.class,
             () -> ExnMessages.asTyped(badIcp));
         assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
     }
@@ -104,6 +106,8 @@ public class ExnMessagesTest {
 
         assertTrue(ExnMessages.as(msg, MultisigIcpExchange.class).isPresent());
         assertTrue(ExnMessages.as(msg, IpexGrantExchange.class).isEmpty());
+        // widening to the sealed union always matches
+        assertInstanceOf(MultisigIcpExchange.class, ExnMessages.as(msg, TypedExchange.class).orElseThrow());
     }
 
     @Test
@@ -150,11 +154,47 @@ public class ExnMessagesTest {
     void malformedFailsWithContext() {
         ExchangeResource missingGid = exchange(MULTISIG_ICP_ROUTE, Map.of("smids", List.of("EMember1")), Map.of());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        MalformedExnException exception = assertThrows(MalformedExnException.class,
             () -> ExnMessages.asTyped(missingGid));
         assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
         assertTrue(exception.getMessage().contains("EMessageSaid"));
         assertTrue(exception.getMessage().contains("gid"));
+        assertEquals(MULTISIG_ICP_ROUTE, exception.getRoute());
+        assertEquals("EMessageSaid", exception.getSaid());
+    }
+
+    @Test
+    @DisplayName("as() is empty, not an error, for a malformed message of a different route")
+    void asDoesNotParseOtherRoutes() {
+        ExchangeResource malformedIcp = exchange(MULTISIG_ICP_ROUTE, Map.of(), Map.of());
+
+        assertTrue(ExnMessages.as(malformedIcp, IpexGrantExchange.class).isEmpty());
+        assertThrows(MalformedExnException.class,
+            () -> ExnMessages.as(malformedIcp, MultisigIcpExchange.class));
+    }
+
+    @Test
+    @DisplayName("member lists reject non-string elements and distinguish empty from missing")
+    void memberListsAreStrict() {
+        MalformedExnException nonString = assertThrows(MalformedExnException.class, () -> ExnMessages.asTyped(
+            exchange(MULTISIG_ICP_ROUTE, Map.of("gid", "EGroupId", "smids", List.of(Map.of("not", "an aid"))), Map.of())));
+        assertTrue(nonString.getMessage().contains("non-string"));
+        assertTrue(nonString.getMessage().contains("smids"));
+
+        MalformedExnException notAList = assertThrows(MalformedExnException.class, () -> ExnMessages.asTyped(
+            exchange(MULTISIG_ICP_ROUTE, Map.of("gid", "EGroupId", "smids", "EMember1"), Map.of())));
+        assertTrue(notAList.getMessage().contains("not a list"));
+
+        MalformedExnException empty = assertThrows(MalformedExnException.class, () -> ExnMessages.asTyped(
+            exchange(MULTISIG_ICP_ROUTE, Map.of("gid", "EGroupId", "smids", List.of()), Map.of())));
+        assertTrue(empty.getMessage().contains("empty"));
+        assertTrue(empty.getMessage().contains("smids"));
+
+        MalformedExnException rmids = assertThrows(MalformedExnException.class, () -> ExnMessages.asTyped(
+            exchange(MULTISIG_ICP_ROUTE,
+                Map.of("gid", "EGroupId", "smids", List.of("EMember1"), "rmids", List.of(42)), Map.of())));
+        assertTrue(rmids.getMessage().contains("non-string"));
+        assertTrue(rmids.getMessage().contains("rmids"));
     }
 
     @Test
@@ -162,7 +202,7 @@ public class ExnMessagesTest {
     void missingRequiredEmbedFails() {
         ExchangeResource missingIcp = exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        MalformedExnException exception = assertThrows(MalformedExnException.class,
             () -> ExnMessages.asTyped(missingIcp));
         assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
         assertTrue(exception.getMessage().contains("icp"));

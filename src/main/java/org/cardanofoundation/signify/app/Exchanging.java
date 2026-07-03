@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.app;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.exception.MalformedExnException;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.CounterCodex;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
@@ -176,6 +177,8 @@ public class Exchanging {
          * Fetches an exchange message and types it by its own route; empty when not
          * found or the route is unknown. Use the route-specific getters when the
          * expected type is already known.
+         *
+         * @throws MalformedExnException when the route is known but the payload is malformed
          */
         public Optional<ExnMessages.TypedExchange> getTyped(String said) throws Exception {
             return get(said).flatMap(ExnMessages::asTyped);
@@ -184,6 +187,8 @@ public class Exchanging {
         /**
          * Fetches an exchange message as the given typed form; empty when not found
          * or when its route does not produce that type.
+         *
+         * @throws MalformedExnException when the route matches but the payload is malformed
          */
         public <T extends ExnMessages.TypedExchange> Optional<T> get(String said, Class<T> type) throws Exception {
             return get(said).flatMap(msg -> ExnMessages.as(msg, type));
