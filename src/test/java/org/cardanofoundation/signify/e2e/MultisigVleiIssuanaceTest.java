@@ -1340,7 +1340,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // LE and ECR exchange grant and admit messages.
         // Skip if ECR has already received the credential.
-        Credential ecrCredbyECR1 = TestUtils.getReceivedCredential(clientLAR1, ecrCredSad.getD());
+        Credential ecrCredbyECR1 = TestUtils.getReceivedCredential(clientECR, ecrCredSad.getD());
 
         if (ecrCredbyECR1 == null) {
             TestUtils.admitSinglesig(
@@ -1352,7 +1352,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientLAR2, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientLAR3, "/exn/ipex/admit");
 
-            ecrCredbyECR1 = TestUtils.waitForCredential(clientLAR1, ecrCredSad.getD());
+            ecrCredbyECR1 = TestUtils.waitForCredential(clientECR, ecrCredSad.getD());
         }
         CredentialSad ecrCredbyECR1Sad = ecrCredbyECR1.getSad();
         assertEquals(ecrCredSad.getD(), ecrCredbyECR1Sad.getD());

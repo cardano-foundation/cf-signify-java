@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
+import org.cardanofoundation.signify.app.Exchanging;
 import org.cardanofoundation.signify.app.Notifying.Notifications.NotificationListResponse;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
@@ -12,6 +13,7 @@ import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
+import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
@@ -45,16 +47,20 @@ public class TestUtils {
         }
     }
 
-    public static void sleep(long ms) {
-        try {
-            TimeUnit.MILLISECONDS.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
+    public static void admitSinglesig(SignifyClient client, String aidName, HabState recipientAid) throws Exception {
+        String grantMsgSaid = waitAndMarkNotification(client, "/exn/ipex/grant");
 
-    public static void admitSinglesig(SignifyClient client, String aidName, HabState recipientAid) {
-        // TO-DO
+        IpexAdmitArgs admitArgs = IpexAdmitArgs.builder()
+                .senderName(aidName)
+                .message("")
+                .grantSaid(grantMsgSaid)
+                .recipient(recipientAid.getPrefix())
+                .build();
+
+        Exchanging.ExchangeMessageResult result = client.ipex().admit(admitArgs);
+        ExchangeOperation op = client.ipex().submitAdmit(
+                aidName, result.exn(), result.sigs(), result.atc(), List.of(recipientAid.getPrefix()));
+        waitForCompleted(client, op);
     }
 
     public static void assertOperations(List<SignifyClient> clients) throws IOException, InterruptedException, LibsodiumException {

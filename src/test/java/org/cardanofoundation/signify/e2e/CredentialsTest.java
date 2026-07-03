@@ -300,7 +300,6 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Holder IPEX apply receive and offer", () -> {
-            Thread.sleep(2000);
             List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_APPLY_ROUTE);
             Notification holderApplyNote = holderNotifications.getFirst();
             assertNotNull(holderApplyNote.getA().getD());

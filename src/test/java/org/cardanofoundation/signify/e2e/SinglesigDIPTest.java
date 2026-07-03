@@ -44,7 +44,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
 
     @Test
     public void singlesig_dip() throws Exception {
-        String opResponseName = null, opResponseI = null;
+        String opResponseName, opResponseI;
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setDelpre(name1_id);

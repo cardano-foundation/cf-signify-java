@@ -6,8 +6,6 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.generated.keria.model.*;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -15,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 
 public class ChallengesTest {
-    private static final Logger log = LoggerFactory.getLogger(ChallengesTest.class);
     private final String url = "http://127.0.0.1:3901";
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;

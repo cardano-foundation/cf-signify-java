@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.Retry;
@@ -24,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DelegationMultisigTest extends BaseIntegrationTest {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     TestSteps testSteps = new TestSteps();
     String delegatorGroupName = "delegator_group";
     String delegateeGroupName = "delegatee_group";

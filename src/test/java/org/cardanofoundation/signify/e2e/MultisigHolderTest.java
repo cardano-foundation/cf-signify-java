@@ -22,7 +22,6 @@ import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
-import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.core.Eventing;
@@ -33,36 +32,27 @@ import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.OOBIOperation;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
-import org.cardanofoundation.signify.generated.keria.model.PendingGroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
+import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultisigHolderTest extends BaseIntegrationTest {
     SignifyClient client1, client2, client3;
     HabState aid1, aid2, aid3;
-    Object oobi1, oobi2, oobi3;
     String oobis1, oobis2, oobis3;
-    private List<HashMap<String, Object>> registryList;
 
     ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
-    ArrayList<String> WITNESS_AIDS = new ArrayList<>(Arrays.asList(
-            "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
-            "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
-            "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
-    ));
     String SCHEMA_SAID = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
 
@@ -217,7 +207,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        Exn resp = client1.exchanges().send(
+        client1.exchanges().send(
                 "member1",
                 "multisig",
                 aid1,
@@ -272,7 +262,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        resp = client2.exchanges().send(
+        client2.exchanges().send(
                 "member2",
                 "multisig",
                 aid2,
@@ -320,7 +310,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        resp = client1.exchanges().send(
+        client1.exchanges().send(
                 "member1",
                 "multisig",
                 aid1,
@@ -377,7 +367,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
-        resp = client2.exchanges().send(
+        client2.exchanges().send(
                 "member2",
                 "multisig",
                 aid2,
@@ -476,19 +466,13 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitForCompleted(client2, exop2);
 
         CredentialFilter args = CredentialFilter.builder().build();
-        List<Credential> creds1 = client1.credentials().list(args);
-        System.out.println("Member1 has " + creds1.size() + " credential");
-
-        int retryCount = 0;
-        while (retryCount < 10) {
-            retryCount++;
-            System.out.println(" retry-" + retryCount + ": No credentials yet...");
-
-            creds1 = client1.credentials().list(args);
-            if (!creds1.isEmpty()) break;
-
-            TimeUnit.SECONDS.sleep(1);
-        }
+        List<Credential> creds1 = retry(() -> {
+            List<Credential> creds = client1.credentials().list(args);
+            if (creds.isEmpty()) {
+                throw new IllegalStateException("Member1 has no credentials yet");
+            }
+            return creds;
+        });
         System.out.println("Member1 has " + creds1.size() + " credential : " + Utils.jsonStringify(creds1));
         assertEquals(1, creds1.size());
 

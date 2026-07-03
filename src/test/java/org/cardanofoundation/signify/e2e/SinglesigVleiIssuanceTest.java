@@ -554,7 +554,6 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     }
 
     public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) throws Exception {
-        Thread.sleep(2000);
         List<Notification> notifications = waitForNotifications(senderClient, "/exn/ipex/grant");
         assertEquals(1, notifications.size());
         Notification grantNotification = notifications.getFirst();

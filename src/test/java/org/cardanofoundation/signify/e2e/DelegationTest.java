@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.e2e;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
@@ -24,7 +23,6 @@ public class DelegationTest {
     private final String bootUrl = "http://127.0.0.1:3903";
     private static SignifyClient client1, client2;
     private String opResponseName;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private TestSteps testSteps = new TestSteps();
     String oobi, contactId;
 
