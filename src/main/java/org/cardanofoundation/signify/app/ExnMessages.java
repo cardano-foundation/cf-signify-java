@@ -175,13 +175,13 @@ public final class ExnMessages {
     public record IpexOfferExchange(Exn exn, ExnMultisig request, Map<String, Object> a, IpexOfferEmbeds e) implements TypedExchange {
     }
 
-    public record IpexApplyExchange(Exn exn, ExnMultisig request, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
+    public record IpexApplyExchange(Exn exn, ExnMultisig request, Map<String, Object> a) implements TypedExchange {
     }
 
-    public record IpexAgreeExchange(Exn exn, ExnMultisig request, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
+    public record IpexAgreeExchange(Exn exn, ExnMultisig request, Map<String, Object> a) implements TypedExchange {
     }
 
-    public record IpexAdmitExchange(Exn exn, ExnMultisig request, Map<String, Object> a, Map<String, Object> e) implements TypedExchange {
+    public record IpexAdmitExchange(Exn exn, ExnMultisig request, Map<String, Object> a) implements TypedExchange {
     }
 
     private record RouteParser(Class<? extends TypedExchange> type,
@@ -315,15 +315,15 @@ public final class ExnMessages {
     }
 
     private static IpexApplyExchange toIpexApplyExchange(Exn exn, ExnMultisig request) {
-        return new IpexApplyExchange(exn, request, attributes(exn), embeds(exn));
+        return new IpexApplyExchange(exn, request, attributes(exn));
     }
 
     private static IpexAgreeExchange toIpexAgreeExchange(Exn exn, ExnMultisig request) {
-        return new IpexAgreeExchange(exn, request, attributes(exn), embeds(exn));
+        return new IpexAgreeExchange(exn, request, attributes(exn));
     }
 
     private static IpexAdmitExchange toIpexAdmitExchange(Exn exn, ExnMultisig request) {
-        return new IpexAdmitExchange(exn, request, attributes(exn), embeds(exn));
+        return new IpexAdmitExchange(exn, request, attributes(exn));
     }
 
     private static ParticipantsAttributes participantsAttributes(Map<String, Object> values) {
