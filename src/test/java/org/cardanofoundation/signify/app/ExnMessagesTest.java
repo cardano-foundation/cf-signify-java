@@ -54,7 +54,38 @@ public class ExnMessagesTest {
         assertEquals(List.of("EMember1"), icp.a().smids());
         // known fields are lifted; the remainder stays available
         assertEquals(Map.of("extra", "kept"), icp.a().additional());
-        assertEquals("icp", icp.e().icp().get("t"));
+        assertEquals("icp", icp.e().icp().value().getT());
+        assertEquals("icp", icp.e().icp().sad().get("t"));
+    }
+
+    @Test
+    @DisplayName("embeds pair a typed view with the exact wire sad")
+    void embedsPairTypedViewWithExactSad() {
+        LinkedHashMap<String, Object> icpSad = new LinkedHashMap<>();
+        icpSad.put("v", "KERI10JSON0000fd_");
+        icpSad.put("t", "icp");
+        icpSad.put("d", "EIcpSaid");
+        icpSad.put("unknown", "kept");
+
+        MultisigIcpExchange parsed = ExnMessages
+            .as(exchange(MULTISIG_ICP_ROUTE, icpAttributes(), Map.of("icp", icpSad)), MultisigIcpExchange.class)
+            .orElseThrow();
+
+        assertEquals("icp", parsed.e().icp().value().getT());
+        assertEquals("EIcpSaid", parsed.e().icp().value().getD());
+        // the sad keeps wire order and unknown fields, so re-signing stays byte-exact
+        assertEquals(List.of("v", "t", "d", "unknown"), List.copyOf(parsed.e().icp().sad().keySet()));
+    }
+
+    @Test
+    @DisplayName("an embed that fails typed parsing is reported as malformed")
+    void malformedEmbedFails() {
+        ExchangeResource badIcp = exchange(MULTISIG_ICP_ROUTE, icpAttributes(),
+            Map.of("icp", Map.of("k", Map.of("not", "a list"))));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> ExnMessages.asTyped(badIcp));
+        assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
     }
 
     @Test
@@ -145,7 +176,7 @@ public class ExnMessagesTest {
                 MultisigIcpExchange.class)
             .orElseThrow();
 
-        assertThrows(UnsupportedOperationException.class, () -> icp.e().icp().put("t", "rot"));
+        assertThrows(UnsupportedOperationException.class, () -> icp.e().icp().sad().put("t", "rot"));
         assertThrows(UnsupportedOperationException.class, () -> icp.a().additional().put("x", "y"));
         assertThrows(UnsupportedOperationException.class, () -> icp.a().smids().add("EIntruder"));
     }

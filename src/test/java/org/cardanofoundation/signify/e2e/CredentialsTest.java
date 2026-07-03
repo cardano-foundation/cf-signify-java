@@ -422,9 +422,8 @@ public class CredentialsTest extends BaseIntegrationTest {
                 offerSaid = offer.exn().getD();
                 String p = offer.exn().getP();
 
-                Map<String, Object> acdc = offer.e().acdc();
-                LinkedHashMap<String, Object> a = castObjectToLinkedHashMap(acdc.get("a"));
-                String LEI = a.get("LEI").toString();
+                ACDCAttributes a = offer.e().acdc().value().getA();
+                String LEI = a.getAdditionalProperties().get("LEI").toString();
 
                 assertEquals(applySaid, p);
                 assertEquals("5493001KJTIIGC8Y1R17", LEI);

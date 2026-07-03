@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.cardanofoundation.signify.app.config.Threshold;
+import org.cardanofoundation.signify.generated.keria.model.DIPV1;
+import org.cardanofoundation.signify.generated.keria.model.DIPV2;
 import org.cardanofoundation.signify.generated.keria.model.ICPV1;
 import org.cardanofoundation.signify.generated.keria.model.ICPV2;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -45,7 +47,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   Icp.JSON_PROPERTY_BT,
   Icp.JSON_PROPERTY_B,
   Icp.JSON_PROPERTY_C,
-  Icp.JSON_PROPERTY_A
+  Icp.JSON_PROPERTY_A,
+  Icp.JSON_PROPERTY_DI
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.18.0")
 public class Icp {
@@ -100,6 +103,10 @@ public class Icp {
   public static final String JSON_PROPERTY_A = "a";
   @jakarta.annotation.Nullable
   private Object a = null;
+
+  public static final String JSON_PROPERTY_DI = "di";
+  @jakarta.annotation.Nonnull
+  private String di;
 
   public Icp() {
   }
@@ -461,6 +468,31 @@ public class Icp {
     this.a = a;
   }
 
+  public Icp di(@jakarta.annotation.Nonnull String di) {
+    
+    this.di = di;
+    return this;
+  }
+
+  /**
+   * Get di
+   * @return di
+   */
+  @jakarta.annotation.Nonnull
+  @JsonProperty(value = JSON_PROPERTY_DI, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+
+  public String getDi() {
+    return di;
+  }
+
+
+  @JsonProperty(value = JSON_PROPERTY_DI, required = true)
+  @JsonInclude(value = JsonInclude.Include.ALWAYS)
+  public void setDi(@jakarta.annotation.Nonnull String di) {
+    this.di = di;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -483,12 +515,13 @@ public class Icp {
         Objects.equals(this.bt, icp.bt) &&
         Objects.equals(this.b, icp.b) &&
         Objects.equals(this.c, icp.c) &&
-        Objects.equals(this.a, icp.a);
+        Objects.equals(this.a, icp.a) &&
+        Objects.equals(this.di, icp.di);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(v, t, d, i, s, kt, k, nt, n, bt, b, c, a);
+    return Objects.hash(v, t, d, i, s, kt, k, nt, n, bt, b, c, a, di);
   }
 
   @Override
@@ -508,6 +541,7 @@ public class Icp {
     sb.append("    b: ").append(toIndentedString(b)).append("\n");
     sb.append("    c: ").append(toIndentedString(c)).append("\n");
     sb.append("    a: ").append(toIndentedString(a)).append("\n");
+    sb.append("    di: ").append(toIndentedString(di)).append("\n");
     sb.append("}");
     return sb.toString();
   }

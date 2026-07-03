@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.cardanofoundation.signify.app.config.Threshold;
+import org.cardanofoundation.signify.generated.keria.model.DRTV1;
+import org.cardanofoundation.signify.generated.keria.model.DRTV2;
 import org.cardanofoundation.signify.generated.keria.model.ROTV1;
 import org.cardanofoundation.signify.generated.keria.model.ROTV2;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

@@ -9,9 +9,11 @@ import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
 import org.cardanofoundation.signify.app.ExnMessages.MultisigIxnExchange;
 import static org.cardanofoundation.signify.app.ExnMessages.*;
 import static org.cardanofoundation.signify.app.ExnMessages.as;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.config.Threshold;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
@@ -41,6 +43,7 @@ import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Icp;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
@@ -54,7 +57,7 @@ public class MultisigUtils {
 
         List<ExnMultisig> res = client2.groups().getRequest(args.getMsgSaid()).get();
         MultisigIcpExchange group = as(res.getFirst(), MultisigIcpExchange.class).orElseThrow();
-        Map<String, Object> icp = group.e().icp();
+        Icp icp = group.e().icp().value();
         List<String> smids = group.a().smids();
         List<String> rmids = group.a().rmids();
 
@@ -71,13 +74,13 @@ public class MultisigUtils {
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
         createIdentifierArgs.setAlgo(Manager.Algos.group);
         createIdentifierArgs.setMhab(memberHab);
-        createIdentifierArgs.setIsith(icp.get("kt"));
-        createIdentifierArgs.setNsith(icp.get("nt"));
-        createIdentifierArgs.setToad(Integer.valueOf(icp.get("bt").toString()));
-        createIdentifierArgs.setWits(Utils.toList(icp.get("b")));
+        createIdentifierArgs.setIsith(Threshold.rawOf(icp.getKt()));
+        createIdentifierArgs.setNsith(Threshold.rawOf(icp.getNt()));
+        createIdentifierArgs.setToad(Integer.valueOf(icp.getBt()));
+        createIdentifierArgs.setWits(icp.getB());
         createIdentifierArgs.setStates(states);
         createIdentifierArgs.setRstates(rstates);
-        createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
+        createIdentifierArgs.setDelpre(icp.getDi());
 
         var icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
         KelOperation op2 = icpResult2.op();
@@ -487,12 +490,17 @@ public class MultisigUtils {
         return createRegistryMultisig(client, aid, otherMembersAIDs, multisigAID, registryName, nonce, "registry", isInitiator);
     }
 
+    /** The first seal in an event's anchor payload (`a`); same shape for exn embed sads and keds. */
+    private static Map<String, Object> anchoredSeal(Map<String, Object> event) {
+        return (Map<String, Object>) ((List<Object>) event.get("a")).getFirst();
+    }
+
     public static DelegatorOperation delegateMultisig(
             SignifyClient client,
             HabState aid,
             List<HabState> otherMembersAIDs,
             HabState multisigAID,
-            Map<String, String> anchor,
+            Map<String, ?> anchor,
             boolean isInitiator) throws Exception {
 
         if (!isInitiator) {
@@ -500,8 +508,9 @@ public class MultisigUtils {
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
             List<ExnMultisig> res = client.groups().getRequest(msgSaid).get();
             MultisigIxnExchange group = as(res.getFirst(), MultisigIxnExchange.class).orElseThrow();
-            Map<String, Object> ixn = group.e().ixn();
-            anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
+            // Read from the sad, not the typed view: each member rebuilds and signs the
+            // interaction event from this anchor, so it must stay byte-exact off the wire.
+            anchor = anchoredSeal(group.e().ixn().sad());
         }
 
         var delResult = client.delegations().approve(multisigAID.getName(), anchor);
@@ -509,7 +518,7 @@ public class MultisigUtils {
         System.out.println("Delegator " + aid.getName() + "(" + aid.getPrefix() + ") approved delegation for " +
                 multisigAID.getName() + " with anchor " + anchor);
 
-        assert Utils.jsonStringify(((List<Object>) delResult.serder().getKed().get("a")).get(0)).equals(Utils.jsonStringify(anchor));
+        assertEquals(Utils.jsonStringify(anchor), Utils.jsonStringify(anchoredSeal(delResult.serder().getKed())));
 
         Serder serder = delResult.serder();
         List<String> sigs = delResult.sigs();
