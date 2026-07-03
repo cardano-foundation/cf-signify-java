@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -206,6 +207,25 @@ public class ExnMessagesTest {
             () -> ExnMessages.asTyped(missingIcp));
         assertTrue(exception.getMessage().contains(MULTISIG_ICP_ROUTE));
         assertTrue(exception.getMessage().contains("icp"));
+    }
+
+    @Test
+    @DisplayName("unknown extra embeds do not break parsing and stay reachable via the raw exn (forwards compat)")
+    void grantEmbedsIgnoreUnknownExtras() {
+        Map<String, Object> embeds = Map.of(
+            "acdc", Map.of("d", "EAcdcSaid"),
+            "iss", Map.of("t", "iss"),
+            "anc", Map.of("t", "ixn"),
+            "future", Map.of("t", "new"));
+
+        IpexGrantExchange grant = ExnMessages
+            .as(exchange(IPEX_GRANT_ROUTE, Map.of("i", "ERecipient"), embeds), IpexGrantExchange.class)
+            .orElseThrow();
+
+        assertEquals("EAcdcSaid", grant.e().acdc().value().getD());
+        assertEquals("iss", grant.e().iss().value().getT());
+        // an embed this version doesn't model stays reachable through the raw exn body
+        assertEquals(Map.of("t", "new"), grant.exn().getE().get("future"));
     }
 
     @Test
