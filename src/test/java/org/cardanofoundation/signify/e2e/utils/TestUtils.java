@@ -392,25 +392,20 @@ public class TestUtils {
         waitForCompleted(client, op);
     }
 
-    public static Credential waitForCredential(SignifyClient client, String credSAID) throws Exception {
-        return waitForCredential(client, credSAID, null);
-    }
+    private static final Retry.RetryOptions CREDENTIAL_RETRY_OPTIONS = Retry.RetryOptions.builder()
+            .minSleep(1000)
+            .maxSleep(10000)
+            .timeout(30000)
+            .build();
 
-    public static Credential waitForCredential(SignifyClient client, String credSAID, Integer MAX_RETRIES) throws Exception {
-        if (MAX_RETRIES == null) {
-            MAX_RETRIES = 10;
-        }
-        int retryCount = 0;
-        while (retryCount < MAX_RETRIES) {
+    public static Credential waitForCredential(SignifyClient client, String credSAID) throws InterruptedException {
+        return retry(() -> {
             Credential cred = getReceivedCredential(client, credSAID);
-            if (cred != null) {
-                return cred;
+            if (cred == null) {
+                throw new IllegalStateException("Credential SAID: " + credSAID + " has not been received");
             }
-            Thread.sleep(1000);
-            System.out.println("retry-" + retryCount + ": No credentials yet...");
-            retryCount++;
-        }
-        throw new RuntimeException("Credential SAID: " + credSAID + " has not been received");
+            return cred;
+        }, CREDENTIAL_RETRY_OPTIONS);
     }
 
     public static String waitAndMarkNotification(SignifyClient client, String route) throws Exception {

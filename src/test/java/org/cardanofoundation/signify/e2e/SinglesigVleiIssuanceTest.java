@@ -12,7 +12,6 @@ import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.e2e.utils.IssuerRegistry;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.Retry;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.*;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import java.util.*;
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import org.cardanofoundation.signify.generated.keria.model.Notification;
 
-import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
@@ -112,12 +110,6 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Map<String, Object> OOR_RULES = LE_RULES;
         Map<String, Object> OOR_AUTH_RULES = LE_RULES;
 
-        Retry.RetryOptions CRED_RETRY_DEFAULTS = Retry.RetryOptions.builder()
-                .maxSleep(10000)
-                .minSleep(1000)
-                .maxRetries(null)
-                .timeout(30000)
-                .build();
 
         System.out.println("Created data successfully");
 
@@ -198,11 +190,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendAdmitMessage(qviClient, qviAid, gleifAid);
         }
 
-        qviCredHolder = retry(() -> {
-            Credential cred = getReceivedCredential(qviClient, sadQviCred.getD());
-            if (cred == null) throw new RuntimeException("Credential not yet available");
-            return cred;
-        }, CRED_RETRY_DEFAULTS);
+        qviCredHolder = waitForCredential(qviClient, sadQviCred.getD());
 
         CredentialSad qviCredHolderSad = qviCredHolder.getSad();
 
@@ -240,11 +228,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendGrantMessage(qviClient, qviAid, leAid, leCred);
             sendAdmitMessage(leClient, leAid, qviAid);
 
-            leCredHolder = retry(() -> {
-                Credential cred = getReceivedCredential(leClient, sadLeCred.getD());
-                if (cred == null) throw new RuntimeException("Credential not yet available");
-                return cred;
-            }, CRED_RETRY_DEFAULTS);
+            leCredHolder = waitForCredential(leClient, sadLeCred.getD());
         }
 
         CredentialSad sadLeCredHolder = leCredHolder.getSad();
@@ -289,11 +273,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendGrantMessage(leClient, leAid, roleAid, ecrCred);
             sendAdmitMessage(roleClient, roleAid, leAid);
 
-            ecrCredHolder = retry(() -> {
-                Credential cred = getReceivedCredential(roleClient, sadEcrCred.getD());
-                if (cred == null) throw new RuntimeException("Credential not yet available");
-                return cred;
-            }, CRED_RETRY_DEFAULTS);
+            ecrCredHolder = waitForCredential(roleClient, sadEcrCred.getD());
         }
 
         CredentialSad sadEcrCredHolder = ecrCredHolder.getSad();
@@ -338,11 +318,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendGrantMessage(leClient, leAid, qviAid, ecrAuthCred);
             sendAdmitMessage(qviClient, qviAid, leAid);
 
-            ecrAuthCredHolder = retry(() -> {
-                Credential cred = getReceivedCredential(qviClient, sadEcrAuthCred.getD());
-                if (cred == null) throw new RuntimeException("Credential not yet available");
-                return cred;
-            }, CRED_RETRY_DEFAULTS);
+            ecrAuthCredHolder = waitForCredential(qviClient, sadEcrAuthCred.getD());
         }
 
         CredentialSad sadEcrAuthCredHolder = ecrAuthCredHolder.getSad();
@@ -388,11 +364,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendGrantMessage(qviClient, qviAid, roleAid, ecrCred2);
             sendAdmitMessage(roleClient, roleAid, qviAid);
 
-            ecrCredHolder2 = retry(() -> {
-                Credential cred = getReceivedCredential(roleClient, sadEcrCred2.getD());
-                if (cred == null) throw new RuntimeException("Credential not yet available");
-                return cred;
-            }, CRED_RETRY_DEFAULTS);
+            ecrCredHolder2 = waitForCredential(roleClient, sadEcrCred2.getD());
         }
 
         CredentialSad sadEcrCredHolder2 = ecrCredHolder2.getSad();
@@ -434,11 +406,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendGrantMessage(leClient, leAid, qviAid, oorAuthCred);
             sendAdmitMessage(qviClient, qviAid, leAid);
 
-            oorAuthCredHolder = retry(() -> {
-                Credential cred = getReceivedCredential(qviClient, sadOorAuthCred.getD());
-                if (cred == null) throw new RuntimeException("Credential not yet available");
-                return cred;
-            }, CRED_RETRY_DEFAULTS);
+            oorAuthCredHolder = waitForCredential(qviClient, sadOorAuthCred.getD());
         }
 
         CredentialSad sadOorAuthCredHolder = oorAuthCredHolder.getSad();
@@ -483,11 +451,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             sendGrantMessage(qviClient, qviAid, roleAid, oorCred);
             sendAdmitMessage(roleClient, roleAid, qviAid);
 
-            oorCredHolder = retry(() -> {
-                Credential cred = getReceivedCredential(roleClient, sadOorCred.getD());
-                if (cred == null) throw new RuntimeException("Credential not yet available");
-                return cred;
-            }, CRED_RETRY_DEFAULTS);
+            oorCredHolder = waitForCredential(roleClient, sadOorCred.getD());
         }
 
         CredentialSad sadOorCredHolder = oorCredHolder.getSad();
