@@ -6,10 +6,10 @@ import org.apache.commons.math3.fraction.Fraction;
 import org.cardanofoundation.signify.cesr.Codex.BexCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
+import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.SerializeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;

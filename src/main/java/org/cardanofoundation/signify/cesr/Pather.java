@@ -1,8 +1,8 @@
 package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 
 import java.util.ArrayList;
 import java.util.List;

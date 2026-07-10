@@ -2,8 +2,8 @@ package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

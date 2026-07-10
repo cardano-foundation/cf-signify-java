@@ -5,8 +5,8 @@ import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.Verfer;
 import org.cardanofoundation.signify.cesr.CesrNumber;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.IlkException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.IlkException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.Utils;
 

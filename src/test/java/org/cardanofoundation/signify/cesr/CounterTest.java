@@ -2,8 +2,8 @@ package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.Codex.CounterCodex;
 import org.cardanofoundation.signify.cesr.args.CounterArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exception.ShortageException;
+import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

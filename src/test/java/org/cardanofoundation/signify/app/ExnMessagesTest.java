@@ -3,7 +3,7 @@ package org.cardanofoundation.signify.app;
 import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
 import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
 import org.cardanofoundation.signify.app.ExnMessages.TypedExchange;
-import org.cardanofoundation.signify.app.exception.MalformedExnException;
+import org.cardanofoundation.signify.exception.MalformedExnException;
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
