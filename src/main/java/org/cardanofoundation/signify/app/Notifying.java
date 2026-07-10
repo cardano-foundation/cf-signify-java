@@ -3,12 +3,10 @@ package org.cardanofoundation.signify.app;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.generated.keria.model.Notification;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,7 @@ public class Notifying {
          * @param end End index of list of notifications, defaults to 24
          * @return List of notifications
          */
-        public NotificationListResponse list(int start, int end) throws IOException, InterruptedException, LibsodiumException {
+        public NotificationListResponse list(int start, int end) {
             Map<String, String> extraHeaders = Map.of(
                     "Range", String.format("notes=%d-%d", start, end)
             );
@@ -52,11 +50,11 @@ public class Notifying {
             );
         }
 
-        public NotificationListResponse list() throws IOException, InterruptedException, LibsodiumException {
+        public NotificationListResponse list() {
             return list(0, 24);
         }
 
-        public NotificationListResponse list(int start) throws IOException, InterruptedException, LibsodiumException {
+        public NotificationListResponse list(int start) {
             return list(start, 24);
         }
 
@@ -65,7 +63,7 @@ public class Notifying {
          * @param said SAID of the notification
          * @return Result of the marking
          */
-        public String mark(String said) throws IOException, InterruptedException, LibsodiumException {
+        public String mark(String said) {
             String path = "/notifications/" + said;
             String method = "PUT";
             HttpResponse<String> response = this.client.fetch(path, method, null);
@@ -76,7 +74,7 @@ public class Notifying {
          * Delete a notification
          * @param said SAID of the notification
          */
-        public void delete(String said) throws IOException, InterruptedException, LibsodiumException {
+        public void delete(String said) {
             String path = "/notifications/" + said;
             String method = "DELETE";
             this.client.fetch(path, method, null);

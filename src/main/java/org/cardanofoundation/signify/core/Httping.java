@@ -7,7 +7,6 @@ import org.cardanofoundation.signify.cesr.Signer;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.greenbytes.http.sfv.*;
 import org.greenbytes.http.sfv.Dictionary;
@@ -20,7 +19,7 @@ public class Httping {
         return header.toLowerCase().trim();
     }
 
-    public static SiginputResult siginput(Signer signer, SiginputArgs args) throws LibsodiumException {
+    public static SiginputResult siginput(Signer signer, SiginputArgs args) {
         final List<String> items = new ArrayList<>();
         final List<String> ifields = new ArrayList<>();
         for (String field : args.fields) {

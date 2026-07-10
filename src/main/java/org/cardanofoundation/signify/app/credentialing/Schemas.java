@@ -2,11 +2,9 @@ package org.cardanofoundation.signify.app.credentialing;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Schema;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -29,11 +27,8 @@ public class Schemas {
      *
      * @param said SAID of the schema
      * @return Optional containing the schema if found, or empty if not found
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException   if a Sodium error occurs
      */
-    public Optional<Schema> get(String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Schema> get(String said) {
         String path = "/schema/" + said;
         var method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
@@ -49,11 +44,8 @@ public class Schemas {
      * List schemas
      *
      * @return list of schemas
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException   if a Sodium error occurs
      */
-    public List<Schema> list() throws IOException, InterruptedException, LibsodiumException {
+    public List<Schema> list() {
         String path = "/schema";
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);

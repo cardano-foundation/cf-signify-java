@@ -10,7 +10,6 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.security.DigestException;
 import java.util.List;
 import java.util.Map;
 
@@ -185,7 +184,7 @@ public class EventingTest {
         assertEquals("ff", createRotation(255, keys0, serder));
     }
 
-    private String createRotation(int sn, List<String> keys, Serder serder ) throws DigestException {
+    private String createRotation(int sn, List<String> keys, Serder serder ) {
         return (String) Eventing.rotate(
                 RotateArgs.builder()
                         .keys(keys)

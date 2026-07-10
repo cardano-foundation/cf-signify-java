@@ -9,11 +9,11 @@ import java.util.concurrent.Callable;
 
 public class Retry {
 
-    public static <T> T retry(Callable<T> fn) throws InterruptedException {
+    public static <T> T retry(Callable<T> fn) {
         return retry(fn, RetryOptions.builder().build());
     }
 
-    public static <T> T retry(Callable<T> fn, RetryOptions options) throws InterruptedException {
+    public static <T> T retry(Callable<T> fn, RetryOptions options) {
         long start = System.currentTimeMillis();
         int retries = 0;
         int increaseFactor = 50;
@@ -27,7 +27,12 @@ public class Retry {
                 retries++;
                 int delay = Math.max(options.minSleep,
                         Math.min(options.maxSleep, (int) Math.pow(2, retries) * increaseFactor));
-                Thread.sleep(delay);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(interrupted);
+                }
             }
         }
 

@@ -6,7 +6,6 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.security.DigestException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +16,7 @@ class PrefixerTest {
 
     @Test
     @DisplayName("should create autonomic identifier prefix using derivation as determined by code from ked")
-    void shouldCreateAutonomicIdentifierPrefix() throws DigestException {
+    void shouldCreateAutonomicIdentifierPrefix() {
         // Create verkey byte array (from keripy)
         byte[] verkey = new byte[] {
             (byte)172, (byte)114, (byte)218, (byte)200, (byte)51, (byte)126, (byte)153, (byte)114, 

@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import static org.cardanofoundation.signify.e2e.MultisigJoinTest.getOobisIndexAt0;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.unchecked;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EndRolesByAidTest extends BaseIntegrationTest {
@@ -32,7 +31,7 @@ public class EndRolesByAidTest extends BaseIntegrationTest {
     TestSteps testSteps = new TestSteps();
 
     @Test
-    public void testEndRolesByAid() throws Exception {
+    public void testEndRolesByAid() {
         List<SignifyClient> clients = getOrCreateClientsAsync(3);
         SignifyClient client1 = clients.get(0);
         SignifyClient client2 = clients.get(1);
@@ -109,14 +108,14 @@ public class EndRolesByAidTest extends BaseIntegrationTest {
             String stamp = TestUtils.createTimestamp();
 
             System.out.println("Adding agent end roles in parallel...");
-            CompletableFuture<List<EndRoleOperation>> future1 = CompletableFuture.supplyAsync(unchecked(() ->
+            CompletableFuture<List<EndRoleOperation>> future1 = CompletableFuture.supplyAsync(() ->
                     MultisigUtils.addEndRoleMultisig(client1, groupName, aid1Hab,
                             List.of(aid2Hab), multisigAID, stamp, true)
-            ));
-            CompletableFuture<List<EndRoleOperation>> future2 = CompletableFuture.supplyAsync(unchecked(() ->
+            );
+            CompletableFuture<List<EndRoleOperation>> future2 = CompletableFuture.supplyAsync(() ->
                     MultisigUtils.addEndRoleMultisig(client2, groupName, aid2Hab,
                             List.of(aid1Hab), multisigAID, stamp, false)
-            ));
+            );
 
             List<EndRoleOperation> ops1 = future1.join();
             List<EndRoleOperation> ops2 = future2.join();

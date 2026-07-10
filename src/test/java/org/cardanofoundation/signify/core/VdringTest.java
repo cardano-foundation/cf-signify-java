@@ -4,7 +4,6 @@ import org.cardanofoundation.signify.cesr.Serder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.security.DigestException;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class VdringTest {
 
     @Test
     @DisplayName("should create registry inception events")
-    void shouldCreateRegistryInceptionEvents() throws DigestException {
+    void shouldCreateRegistryInceptionEvents() {
         Vdring.VDRInceptArgs args = Vdring.VDRInceptArgs.builder()
                 .pre("ECJIoBpEcCWMzvquk861dXP8JJZ-vbmJczlDR-NYcE3g")
                 .toad(0)
@@ -87,7 +86,7 @@ public class VdringTest {
 
     @Test
     @DisplayName("should allow optional toad and no backers")
-    void shouldAllowOptionalToadAndNoBackers() throws DigestException {
+    void shouldAllowOptionalToadAndNoBackers() {
         Vdring.VDRInceptArgs args = Vdring.VDRInceptArgs.builder()
                 .pre("ECJIoBpEcCWMzvquk861dXP8JJZ-vbmJczlDR-NYcE3g")
                 .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")
@@ -100,7 +99,7 @@ public class VdringTest {
 
     @Test
     @DisplayName("should allow optional toad and backers")
-    void shouldAllowOptionalToadAndBackers() throws DigestException {
+    void shouldAllowOptionalToadAndBackers() {
         Vdring.VDRInceptArgs args = Vdring.VDRInceptArgs.builder()
                 .pre("ECJIoBpEcCWMzvquk861dXP8JJZ-vbmJczlDR-NYcE3g")
                 .nonce("AHSNDV3ABI6U8OIgKaj3aky91ZpNL54I5_7-qwtC6q2s")

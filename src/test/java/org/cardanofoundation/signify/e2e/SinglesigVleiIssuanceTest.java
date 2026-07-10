@@ -49,7 +49,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
     ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void singlesig_vlei_issuance() throws Exception {
+    public void singlesig_vlei_issuance() {
         Map<String, Object> qviData = new HashMap<>();
         qviData.put("LEI", "254900OPPU84GM83MG36");
 
@@ -109,7 +109,6 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         Map<String, Object> OOR_RULES = LE_RULES;
         Map<String, Object> OOR_AUTH_RULES = LE_RULES;
-
 
         System.out.println("Created data successfully");
 
@@ -475,7 +474,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         warnNotifications(clientList);
     }
 
-    public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) throws Exception {
+    public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) {
         IssuerRegistry registry = IssuerRegistry.builder().build();
         List<Registry> registriesList = client.registries().list(aid.name);
         if (!registriesList.isEmpty()) {
@@ -496,7 +495,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         return registry;
     }
 
-    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) throws Exception {
+    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) {
         IpexGrantArgs grantArgs = IpexGrantArgs.builder()
                 .senderName(senderAid.name)
                 .acdc(new Serder(Utils.toMap(credential.getSad())))
@@ -517,7 +516,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         waitForCompleted(senderClient, op);
     }
 
-    public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) throws Exception {
+    public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) {
         List<Notification> notifications = waitForNotifications(senderClient, "/exn/ipex/grant");
         assertEquals(1, notifications.size());
         Notification grantNotification = notifications.getFirst();

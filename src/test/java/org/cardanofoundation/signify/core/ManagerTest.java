@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.core;
 
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
@@ -14,7 +13,6 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.DigestException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +29,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of random signers")
-    void testRandyCreator() throws LibsodiumException {
+    void testRandyCreator() {
         Manager.RandyCreator randy = new Manager.RandyCreator();
 
         // test default arguments
@@ -67,7 +65,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should create sets of salty signers")
-    void testSaltyCreator() throws LibsodiumException {
+    void testSaltyCreator() {
         Manager manager = new Manager();
         Manager.SaltyCreator salty = new Manager.SaltyCreator();
 
@@ -152,7 +150,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should manage key pairs for identifiers")
-    void testManager_shouldManageKeyPairsForIdentifiers() throws DigestException, LibsodiumException {
+    void testManager_shouldManageKeyPairsForIdentifiers() {
         String raw = "0123456789abcdef";
         Salter salter = new Salter(RawArgs.builder().raw(raw.getBytes()).build());
         String salt = salter.getQb64();
@@ -580,7 +578,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("should support only Salty/Encrypted, Salty/Unencrypted and Randy/Encrypted")
-    void testManager_shouldSupportOnlySaltyEncryptedSaltyUnencryptedRandyEncrypted() throws DigestException, LibsodiumException {
+    void testManager_shouldSupportOnlySaltyEncryptedSaltyUnencryptedRandyEncrypted() {
         // Support Salty/Unencrypted - pass only stretched passcode as Salt.
         String passcode = "0123456789abcdefghijk";
         Salter salter = new Salter(RawArgs.builder().raw(passcode.getBytes()).build());
@@ -690,7 +688,7 @@ class ManagerTest {
 
     @Test
     @DisplayName("Should support creating and getting randy keeper")
-    void testManager_ShouldSupportCreatingAndGettingRandyKeeper() throws DigestException, LibsodiumException {
+    void testManager_ShouldSupportCreatingAndGettingRandyKeeper() {
         String passcode = "0123456789abcdefghijk";
         Salter salter = new Salter(RawArgs.builder().raw(passcode.getBytes()).build());
         Keeping.KeyManager manager = new Keeping.KeyManager(salter, Collections.emptyList());

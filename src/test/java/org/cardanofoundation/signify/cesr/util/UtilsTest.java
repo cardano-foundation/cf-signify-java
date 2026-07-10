@@ -2,19 +2,22 @@ package org.cardanofoundation.signify.cesr.util;
 
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Serder;
+import org.cardanofoundation.signify.exception.SignifySerializationException;
 import org.junit.jupiter.api.Test;
 
-import java.security.DigestException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UtilsTest {
 
     @Test
-    public void testSerializeIssExnAttachment() throws DigestException {
+    public void testSerializeIssExnAttachment() {
         Map<String, Object> sad = new LinkedHashMap<>();
         sad.put("d", "");
         sad.put("v", CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0));
@@ -32,7 +35,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void testSerializeACDCAttachment() throws DigestException {
+    public void testSerializeACDCAttachment() {
         // Prepare data
         Map<String, Object> sad = new LinkedHashMap<>();
         sad.put("i", "EP-hA0w9X5FDonCDxQv32OTCAvcxkZxgDLOnDb3Jcn3a");
@@ -50,6 +53,34 @@ public class UtilsTest {
                 "-IABEP-hA0w9X5FDonCDxQv32OTCAvcxkZxgDLOnDb3Jcn3a0AAAAAAAAAAAAAAAAAAAAAAAEHGU7u7cSMjMcJ1UyN8r-MnoZ3cDw4sMQNYxRLjqGVJI",
                 new String(result)
         );
+    }
+
+    @Test
+    public void testFromJsonFailureThrowsSerializationExceptionWithPayload() {
+        SignifySerializationException exception = assertThrows(
+                SignifySerializationException.class,
+                () -> Utils.fromJson("{not valid json", Map.class)
+        );
+
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getMessage().contains("{not valid json"),
+                "message should include the offending payload");
+    }
+
+    @Test
+    public void testJsonStringifyFailureThrowsSerializationException() {
+        Object unserializable = new Object() {
+            public Object getValue() {
+                throw new IllegalStateException("boom");
+            }
+        };
+
+        SignifySerializationException exception = assertThrows(
+                SignifySerializationException.class,
+                () -> Utils.jsonStringify(unserializable)
+        );
+
+        assertNotNull(exception.getCause());
     }
 
     @Test

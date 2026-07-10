@@ -16,7 +16,6 @@ import org.cardanofoundation.signify.cesr.Tholder;
 import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RotateArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
@@ -24,20 +23,16 @@ import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Httping;
 import org.cardanofoundation.signify.core.Manager.Algos;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
 import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
 import org.cardanofoundation.signify.generated.keria.model.GroupMember;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.KelOperation;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
@@ -62,7 +57,7 @@ public class IdentifierController {
      * @param end   End index of list of notifications, defaults to 24
      * @return A Mono containing the list response
      */
-    public IdentifierListResponse list(Integer start, Integer end) throws InterruptedException, IOException, LibsodiumException {
+    public IdentifierListResponse list(Integer start, Integer end) {
         Map<String, String> extraHeaders = new LinkedHashMap<>();
         extraHeaders.put("Range", String.format("aids=%d-%d", start, end));
 
@@ -84,11 +79,11 @@ public class IdentifierController {
         );
     }
 
-    public IdentifierListResponse list() throws IOException, InterruptedException, LibsodiumException {
+    public IdentifierListResponse list() {
         return this.list(0, 24);
     }
 
-    public IdentifierListResponse list(Integer start) throws IOException, InterruptedException, LibsodiumException {
+    public IdentifierListResponse list(Integer start) {
         return this.list(start, 24);
     }
 
@@ -98,7 +93,7 @@ public class IdentifierController {
      * @param name Prefix or alias of the identifier
      * @return An Optional containing the HabState if found, or empty if not found
      */
-    public Optional<HabState> get(String name) throws InterruptedException, IOException, LibsodiumException {
+    public Optional<HabState> get(String name) {
         final String path = "/identifiers/" + URI.create(name).toASCIIString();
         final String method = "GET";
 
@@ -118,7 +113,7 @@ public class IdentifierController {
      * @param info Information to update for the given identifier
      * @return A HabState to the identifier information after updating
      */
-    public HabState update(String name, IdentifierInfo info) throws InterruptedException, IOException, LibsodiumException {
+    public HabState update(String name, IdentifierInfo info) {
         final String path = "/identifiers/" + name;
         final String method = "PUT";
 
@@ -137,7 +132,7 @@ public class IdentifierController {
      * @param kargs Optional parameters to create the identifier
      * @return An EventResult to the inception result
      */
-    public EventResult<KelOperation> create(String name, CreateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<KelOperation> create(String name, CreateIdentifierArgs kargs) {
         // Assuming kargs is an instance of a class with appropriate getters
         Algos algo = kargs.getAlgo() == null ? Algos.salty : kargs.getAlgo();
 
@@ -297,9 +292,8 @@ public class IdentifierController {
      * @param eid   Optional qb64 of endpoint provider to be authorized
      * @param stamp Optional date-time-stamp RFC-3339 profile of iso8601 datetime. Now is the default if not provided
      * @return An EventResult to the result of the authorization
-     * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public EventResult<EndRoleOperation> addEndRole(String name, String role, String eid, String stamp) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<EndRoleOperation> addEndRole(String name, String role, String eid, String stamp) {
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
@@ -332,7 +326,7 @@ public class IdentifierController {
      * @param stamp Optional date-time-stamp RFC-3339 profile of iso8601 datetime. Now is the default if not provided
      * @return The reply message as a Serder object
      */
-    private Serder makeEndRole(String pre, String role, String eid, String stamp) throws DigestException {
+    private Serder makeEndRole(String pre, String role, String eid, String stamp) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("cid", pre);
         data.put("role", role);
@@ -345,7 +339,7 @@ public class IdentifierController {
         return Eventing.reply(route, data, stamp, null, Serials.JSON);
     }
 
-    public EventResult<KelOperation> interact(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<KelOperation> interact(String name, Object data) {
         InteractionResponse interactionResponse = this.createInteract(name, data);
         HttpResponse<String> response = this.client.fetch(
             "/identifiers/" + name + "/events",
@@ -356,7 +350,7 @@ public class IdentifierController {
         return new EventResult<KelOperation>(interactionResponse.serder(), interactionResponse.sigs(), kelOp);
     }
 
-    public InteractionResponse createInteract(String name, Object data) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public InteractionResponse createInteract(String name, Object data) {
         HabState hab = this.get(name)
             .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         String pre = hab.getPrefix();
@@ -387,11 +381,11 @@ public class IdentifierController {
         return new InteractionResponse(serder, sigs.signatures(), jsondata);
     }
 
-    public EventResult<KelOperation> rotate(String name) throws ExecutionException, InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<KelOperation> rotate(String name) {
         return this.rotate(name, RotateIdentifierArgs.builder().build());
     }
 
-    public EventResult<KelOperation> rotate(String name, RotateIdentifierArgs kargs) throws InterruptedException, DigestException, IOException, LibsodiumException {
+    public EventResult<KelOperation> rotate(String name, RotateIdentifierArgs kargs) {
         boolean transferable = kargs.getTransferable() != null ? kargs.getTransferable() : true;
         String ncode = kargs.getNcode() != null ? kargs.getNcode() : MatterCodex.Ed25519_Seed.getValue();
         int ncount = kargs.getNcount() != null ? kargs.getNcount() : 1;
@@ -484,7 +478,7 @@ public class IdentifierController {
      * @param name Name of the group identifier
      * @return A list of members of the group
      */
-    public GroupMember members(String name) throws LibsodiumException, InterruptedException, IOException {
+    public GroupMember members(String name) {
         HttpResponse<String> response = this.client.fetch(
                 "/identifiers/" + name + "/members",
                 "GET",

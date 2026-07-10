@@ -1,14 +1,12 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateClients;
@@ -22,13 +20,13 @@ public class TestSetupSingleClient {
     private static List<String> brans = Collections.singletonList("0ADF2TpptgqcDE5IQUF1HeTp");
 
     @BeforeAll
-    public static void getClients() throws Exception {
+    public static void getClients() {
         List<SignifyClient> clients = getOrCreateClients(1, brans);
         client = clients.getFirst();
     }
 
     @BeforeEach
-    public void getIdentifier() throws Exception {
+    public void getIdentifier() {
         String[] clients1 = getOrCreateIdentifier(client, "name1", null);
         name1_id = clients1[0];
         name1_oobi = clients1[1];
@@ -41,7 +39,7 @@ public class TestSetupSingleClient {
     }
 
     @Test
-    public void test_setup_single_client_step2() throws IOException, InterruptedException, LibsodiumException {
+    public void test_setup_single_client_step2() {
         ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
         OOBI oobi = client.oobis().get("name1", "witness").get();
         List<String> oobis = oobi.getOobis();

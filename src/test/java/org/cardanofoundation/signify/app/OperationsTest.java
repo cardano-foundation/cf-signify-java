@@ -2,10 +2,10 @@ package org.cardanofoundation.signify.app;
 
 import org.cardanofoundation.signify.app.coring.Operations;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
-import org.cardanofoundation.signify.app.coring.exception.OperationFailedException;
-import org.cardanofoundation.signify.app.coring.exception.OperationNotFoundException;
-import org.cardanofoundation.signify.app.coring.exception.OperationTimeoutException;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.exception.OperationAbortedException;
+import org.cardanofoundation.signify.exception.OperationFailedException;
+import org.cardanofoundation.signify.exception.OperationNotFoundException;
+import org.cardanofoundation.signify.exception.OperationTimeoutException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.CompletedLocSchemeOperation;
 import org.cardanofoundation.signify.generated.keria.model.DoneOperation;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.UUID;
 
@@ -47,7 +46,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("should get operation by name")
-    void canGetOperationByName() throws IOException, InterruptedException, LibsodiumException {
+    void canGetOperationByName() {
         String responseBody = "{\"name\":\"witness.test1\", \"done\": false}";
 
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
@@ -65,7 +64,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Can list operations")
-    void canListOperations() throws IOException, InterruptedException, LibsodiumException {
+    void canListOperations() {
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
         Mockito.when(mockResponse.body()).thenReturn("[{\"name\":\"witness.test1\", \"done\": false}]");
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
@@ -82,7 +81,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Can list operations by type")
-    void canListOperationsByType() throws IOException, InterruptedException, LibsodiumException {
+    void canListOperationsByType() {
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
         Mockito.when(mockResponse.body()).thenReturn("[{\"name\":\"witness.test123\", \"done\": true, \"response\": {}}]");
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
@@ -101,7 +100,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Can delete operation by name")
-    void canDeleteOperationByName() throws IOException, InterruptedException, LibsodiumException {
+    void canDeleteOperationByName() {
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
         Mockito.when(mockResponse.body()).thenReturn("{}");
         Mockito.when(mockResponse.statusCode()).thenReturn(200);
@@ -117,7 +116,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Does not poll when operation is already done")
-    void doesNotWaitForOperationThatIsAlreadyDone() throws IOException, InterruptedException, LibsodiumException {
+    void doesNotWaitForOperationThatIsAlreadyDone() {
         String opName = "locscheme." + UUID.randomUUID();
         String doneJson = doneLocSchemeOpJson(opName);
 
@@ -128,7 +127,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Returns when operation is done after first poll")
-    void returnsWhenOperationIsDoneAfterFirstPoll() throws IOException, InterruptedException, LibsodiumException {
+    void returnsWhenOperationIsDoneAfterFirstPoll() {
         String opName = "locscheme." + UUID.randomUUID();
         String pendingJson = pendingLocSchemeOpJson(opName);
         String doneJson = doneLocSchemeOpJson(opName);
@@ -153,7 +152,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Returns when operation is done after second poll")
-    void returnsWhenOperationIsDoneAfterSecondPoll() throws IOException, InterruptedException, LibsodiumException {
+    void returnsWhenOperationIsDoneAfterSecondPoll() {
         String opName = "locscheme." + UUID.randomUUID();
         String pendingJson = pendingLocSchemeOpJson(opName);
         String doneJson = doneLocSchemeOpJson(opName);
@@ -182,7 +181,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Returns the completed operation as the requested type")
-    void returnsTypedResult() throws IOException, InterruptedException, LibsodiumException {
+    void returnsTypedResult() {
         String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> doneResponse = Mockito.mock(HttpResponse.class);
@@ -216,7 +215,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Throws when the operation disappears while waiting")
-    void throwsWhenOperationNotFoundWhileWaiting() throws IOException, InterruptedException, LibsodiumException {
+    void throwsWhenOperationNotFoundWhileWaiting() {
         String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> notFoundResponse = Mockito.mock(HttpResponse.class);
@@ -231,7 +230,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Returns when child operation is also done")
-    void returnsWhenChildOperationIsAlsoDone() throws IOException, InterruptedException, LibsodiumException {
+    void returnsWhenChildOperationIsAlsoDone() {
         String depName = "done." + UUID.randomUUID();
         String mainName = "registry." + UUID.randomUUID();
 
@@ -263,7 +262,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Throws when a dependent operation fails")
-    void throwsWhenChildOperationFails() throws IOException, InterruptedException, LibsodiumException {
+    void throwsWhenChildOperationFails() {
         String depName = "done." + UUID.randomUUID();
         String mainName = "registry." + UUID.randomUUID();
 
@@ -303,7 +302,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Throws when waiting times out")
-    void throwsWhenWaitTimesOut() throws IOException, InterruptedException, LibsodiumException {
+    void throwsWhenWaitTimesOut() {
         String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
@@ -327,7 +326,7 @@ public class OperationsTest {
 
     @Test
     @DisplayName("Throw if aborting operation")
-    void throwIfAbortingOperation() throws IOException, InterruptedException, LibsodiumException {
+    void throwIfAbortingOperation() {
         String opName = "locscheme." + UUID.randomUUID();
 
         HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
@@ -344,9 +343,10 @@ public class OperationsTest {
 
         Operation abortOp = Utils.fromJson(
             pendingLocSchemeOpJson(opName), Operation.class);
-        Exception exception = assertThrows(InterruptedException.class,
+        OperationAbortedException exception = assertThrows(OperationAbortedException.class,
             () -> operations.wait(abortOp, Operation.class, options));
         assertEquals("Operation aborted: user cancelled", exception.getMessage());
+        assertEquals("user cancelled", exception.getReason());
     }
 
     private String pendingLocSchemeOpJson(String name) {

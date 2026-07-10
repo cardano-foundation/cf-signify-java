@@ -3,16 +3,13 @@ package org.cardanofoundation.signify.app;
 import org.cardanofoundation.signify.app.controlller.Controller;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.cesr.Codex;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.Manager;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.security.DigestException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -21,7 +18,7 @@ public class ControllerTest {
 
     @Test
     @DisplayName("manage account AID signing and agent verification")
-    void controllerTest() throws DigestException, LibsodiumException {
+    void controllerTest() {
         String passcode = "0123456789abcdefghijk";
         Manager mgr = Manager.openManager(passcode, null);
 
@@ -54,7 +51,7 @@ public class ControllerTest {
 
     @Test
     @DisplayName("should generate unique controller AIDs per passcode")
-    void shouldGenerateUniqueControllerAIDsPerPasscode() throws DigestException, LibsodiumException {
+    void shouldGenerateUniqueControllerAIDsPerPasscode() {
         String passcode1 = Coring.randomPasscode();
         String passcode2 = Coring.randomPasscode();
 

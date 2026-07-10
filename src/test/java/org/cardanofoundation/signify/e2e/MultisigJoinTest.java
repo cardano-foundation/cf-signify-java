@@ -49,7 +49,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     private static OOBI oobiGetMultisig;
 
     @BeforeAll
-    public static void getClients() throws Exception {
+    public static void getClients() {
         List<SignifyClient> signifyClients = getOrCreateClientsAsync(3);
         client1 = signifyClients.get(0);
         client2 = signifyClients.get(1);
@@ -73,7 +73,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
     @Test
     @Order(1)
-    public void multisigJoinTest() throws Exception {
+    public void multisigJoinTest() {
         List<HabState> aids = createAidAndGetHabStateAsync(
             new CreateAidArgs(client1, nameMember1),
             new CreateAidArgs(client2, nameMember2)
@@ -176,7 +176,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
     @Test
     @Order(2)
-    public void multisigJoinTestAddMember3() throws Exception {
+    public void multisigJoinTestAddMember3() {
         client3 = getOrCreateClient();
 
         aid3 = createAID(client3, nameMember3, new ArrayList<>());
@@ -305,7 +305,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
     @Test
     @Order(3)
-    public void signingKeysAndJoinTest() throws Exception {
+    public void signingKeysAndJoinTest() {
         var rotateResult1 = client1.identifiers().rotate(nameMember1);
         var rotateResult2 = client2.identifiers().rotate(nameMember2);
         var rotateResult3 = client3.identifiers().rotate(nameMember3);
@@ -435,7 +435,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         waitForCompleted(client3, endRoleOperation.op());
     }
 
-    public static HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {
+    public static HabState createAID(SignifyClient client, String name, List<String> wits) {
         CreateIdentifierArgs iargs = new CreateIdentifierArgs();
         iargs.setWits(wits);
         iargs.setToad(wits.size());

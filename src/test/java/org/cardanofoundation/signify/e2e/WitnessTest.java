@@ -27,7 +27,7 @@ public class WitnessTest {
             "http://witness-demo:5644"));
 
     @Test
-    public void testWitness() throws Exception {
+    public void testWitness() {
         String bran1 = Coring.randomPasscode();
         client1 = new SignifyClient(
                 url,

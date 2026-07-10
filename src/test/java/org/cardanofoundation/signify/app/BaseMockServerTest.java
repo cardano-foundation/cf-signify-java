@@ -5,7 +5,7 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.exception.SignifyCryptoException;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
@@ -63,7 +63,7 @@ public class BaseMockServerTest {
                 } else {
                     try {
                         return mockAllRequests(request);
-                    } catch (LibsodiumException e) {
+                    } catch (SignifyCryptoException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -442,7 +442,7 @@ public class BaseMockServerTest {
             }
         }""";
 
-    public MockResponse mockAllRequests(RecordedRequest req) throws LibsodiumException {
+    public MockResponse mockAllRequests(RecordedRequest req) {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
         headers.put(Httping.HEADER_SIG_TIME, Utils.currentDateTimeString());

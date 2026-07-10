@@ -6,16 +6,13 @@ import org.cardanofoundation.signify.app.habery.TraitCodex;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Vdring;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
@@ -36,11 +33,8 @@ public class Registries {
      *
      * @param name the name or alias of the identifier
      * @return a List<Registry> representing the list of registries
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException   if a sodium exception occurs
      */
-    public List<Registry> list(String name) throws IOException, InterruptedException, LibsodiumException {
+    public List<Registry> list(String name) {
         String path = "/identifiers/" + name + "/registries";
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
@@ -52,11 +46,8 @@ public class Registries {
      *
      * @param args the arguments for creating the registry
      * @return a RegistryResult containing the result of the operation
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException   if a sodium exception occurs
      */
-    public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException {
+    public RegistryResult create(CreateRegistryArgs args) {
         HabState hab = this.client.identifiers().get(args.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getName()));
         String pre = hab.getPrefix();
@@ -120,9 +111,6 @@ public class Registries {
      * @param ixn          the IXN data
      * @param sigs         the signatures
      * @return the raw HTTP response from the registry creation endpoint
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException   if a sodium exception occurs
      */
     private HttpResponse<String> createFromEvents(
         HabState hab,
@@ -131,7 +119,7 @@ public class Registries {
         Map<String, Object> vcp,
         Map<String, Object> ixn,
         List<String> sigs
-    ) throws IOException, InterruptedException, LibsodiumException {
+    ) {
         String path = "/identifiers/" + name + "/registries";
         String method = "POST";
 
@@ -154,11 +142,8 @@ public class Registries {
      * @param registryName the current name of the registry
      * @param newName      the new name for the registry
      * @return the updated Registry record
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Registry rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
+    public Registry rename(String name, String registryName, String newName) {
         String path = "/identifiers/" + name + "/registries/" + registryName;
         String method = "PUT";
 

@@ -5,17 +5,16 @@ import lombok.*;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.NumCodex;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.exception.SignifyCryptoException;
+import org.cardanofoundation.signify.cesr.exception.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidSizeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.security.DigestException;
 import java.util.List;
 
 import static org.cardanofoundation.signify.cesr.util.Utils.intToBytes;
@@ -64,7 +63,7 @@ public class RawArgs {
         return rawArgs;
     }
 
-    public static RawArgs generateBlake3256SeedRaw(RawArgs rawArgs, byte[] ser) throws DigestException {
+    public static RawArgs generateBlake3256SeedRaw(RawArgs rawArgs, byte[] ser) {
         if (rawArgs.getRaw() == null && ser == null) {
             throw new EmptyMaterialException("Empty material");
         }
@@ -148,7 +147,7 @@ public class RawArgs {
         return args;
     }
 
-    public static RawArgs generateEncrypterRaw(RawArgs args, byte[] verkey) throws LibsodiumException {
+    public static RawArgs generateEncrypterRaw(RawArgs args, byte[] verkey) {
         if (args.getCode() == null) {
             args.setCode(MatterCodex.X25519.getValue());
         }
@@ -165,14 +164,14 @@ public class RawArgs {
             byte[] raw = new byte[32];
             boolean success = lazySodium.convertPublicKeyEd25519ToCurve25519(raw, verfer.getRaw());
             if (!success) {
-                throw new LibsodiumException("Failed to convert public key ed25519 to Curve25519");
+                throw new SignifyCryptoException("Failed to convert public key ed25519 to Curve25519");
             }
             args.setRaw(raw);
         }
         return args;
     }
 
-    public static RawArgs generateDecrypterRaw(RawArgs args, byte[] seed) throws LibsodiumException {
+    public static RawArgs generateDecrypterRaw(RawArgs args, byte[] seed) {
         if (args.getCode() == null) {
             args.setCode(MatterCodex.X25519_Private.getValue());
         }
@@ -191,7 +190,7 @@ public class RawArgs {
             byte[] raw = new byte[32];
             boolean success = lazySodium.convertSecretKeyEd25519ToCurve25519(raw, sigKey);
             if (!success) {
-                throw new LibsodiumException("Failed to convert secret key ed25519 to Curve25519");
+                throw new SignifyCryptoException("Failed to convert secret key ed25519 to Curve25519");
             }
             args.setRaw(raw);
         }

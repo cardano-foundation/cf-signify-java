@@ -7,16 +7,13 @@ import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
 import org.cardanofoundation.signify.generated.keria.model.Credential;
@@ -37,7 +34,7 @@ public class Credentials {
      * @param kargs Optional parameters to filter the credentials
      * @return List of credentials
      */
-    public List<Credential> list(CredentialFilter kargs) throws IOException, InterruptedException, LibsodiumException {
+    public List<Credential> list(CredentialFilter kargs) {
         final String path = "/credentials/query";
 
         Map<String, Object> data = new LinkedHashMap<>();
@@ -51,7 +48,7 @@ public class Credentials {
         return Utils.fromJson(response.body(), new TypeReference<List<Credential>>() {});
     }
 
-    public Optional<Credential> get(String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Credential> get(String said) {
         return this.get(said, false);
     }
 
@@ -62,7 +59,7 @@ public class Credentials {
      * @param includeCESR - Optional flag export the credential in CESR format
      * @return Optional containing the credential if found, or empty if not found
      */
-    public Optional<Credential> get(String said, boolean includeCESR) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Credential> get(String said, boolean includeCESR) {
         final String path = "/credentials/" + said;
         final String method = "GET";
 
@@ -89,13 +86,13 @@ public class Credentials {
      *
      * @param said - SAID of the credential
      */
-    public void delete(String said) throws IOException, InterruptedException, LibsodiumException {
+    public void delete(String said) {
         final String path = "/credentials/" + said;
         final String method = "DELETE";
         this.client.fetch(path, method, null);
     }
 
-    public Optional<CredentialState> state(String ri, String said) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<CredentialState> state(String ri, String said) {
         final String path = "/registries/" + ri + "/" + said;
         final String method = "GET";
 
@@ -111,7 +108,7 @@ public class Credentials {
     /**
      * Issue a credential
      */
-    public IssueCredentialResult issue(String name, CredentialData args) throws IOException, InterruptedException, DigestException, LibsodiumException {
+    public IssueCredentialResult issue(String name, CredentialData args) {
         final HabState hab = this.client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
 
@@ -194,7 +191,7 @@ public class Credentials {
      * @param datetime Date time of revocation
      * @return A promise to the long-running operation
      */
-    public RevokeCredentialResult revoke(String name, String said, String datetime) throws IOException, InterruptedException, DigestException, LibsodiumException {
+    public RevokeCredentialResult revoke(String name, String said, String datetime) {
         final HabState hab = this.client.identifiers().get(name)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
         final String pre = hab.getPrefix();

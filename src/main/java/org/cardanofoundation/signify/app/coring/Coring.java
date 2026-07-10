@@ -59,9 +59,8 @@ public class Coring {
          * Retrieve the key state for an identifier
          * @param pre Identifier prefix
          * @return A map representing the key states
-         * @throws Exception if the fetch operation fails
          */
-        public List<KeyEventRecord> get(String pre) throws Exception {
+        public List<KeyEventRecord> get(String pre) {
             String path = "/events?pre=" + pre;
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
@@ -81,7 +80,7 @@ public class Coring {
             this.client = client;
         }
 
-        public AgentConfig get() throws Exception {
+        public AgentConfig get() {
             String path = "/config";
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);

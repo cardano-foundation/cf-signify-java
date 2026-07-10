@@ -33,7 +33,7 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("Delegation Multisig Test")
-    void delegationMultisigTest() throws Exception {
+    void delegationMultisigTest() {
 
         // Boot four clients
         List<SignifyClient> signifyClients = getOrCreateClientsAsync(4);

@@ -3,14 +3,14 @@ package org.cardanofoundation.signify.app.coring;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.*;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
-import org.cardanofoundation.signify.app.coring.exception.OperationFailedException;
-import org.cardanofoundation.signify.app.coring.exception.OperationNotFoundException;
-import org.cardanofoundation.signify.app.coring.exception.OperationTimeoutException;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.exception.OperationAbortedException;
+import org.cardanofoundation.signify.exception.OperationFailedException;
+import org.cardanofoundation.signify.exception.OperationNotFoundException;
+import org.cardanofoundation.signify.exception.OperationTimeoutException;
+import org.cardanofoundation.signify.exception.SignifyInterruptedException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.*;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -31,7 +31,7 @@ public class Operations {
      * @param type The target class to deserialize into (e.g., CredentialOperation.class)
      * @return Optional containing the typed operation if found, or empty if not found
      */
-    public <T extends Operation> Optional<T> get(String name, Class<T> type) throws IOException, InterruptedException, LibsodiumException {
+    public <T extends Operation> Optional<T> get(String name, Class<T> type) {
         String path = "/operations/" + name;
         HttpResponse<String> response = this.client.fetch(path, "GET", null);
 
@@ -48,14 +48,14 @@ public class Operations {
      * @param name Name or ID of the operation to retrieve
      * @return Optional containing the Operation if found, or empty if not found
      */
-    public Optional<Operation> get(String name) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<Operation> get(String name) {
         return get(name, Operation.class);
     }
 
     /**
      * List operations, deserialized into the general Operation union type.
      */
-    public List<Operation> list(String type) throws IOException, InterruptedException, LibsodiumException {
+    public List<Operation> list(String type) {
         String path = "/operations" + (type != null ? "?type=" + type : "");
         HttpResponse<String> response = this.client.fetch(path, "GET", null);
         return Utils.fromJson(response.body(), new TypeReference<>() {});
@@ -64,11 +64,11 @@ public class Operations {
     /**
      * List all operations.
      */
-    public List<Operation> list() throws IOException, InterruptedException, LibsodiumException {
+    public List<Operation> list() {
         return list(null);
     }
 
-    public void delete(String name) throws IOException, InterruptedException, LibsodiumException {
+    public void delete(String name) {
         String path = "/operations/" + name;
         this.client.fetch(path, "DELETE", null);
     }
@@ -78,7 +78,7 @@ public class Operations {
      *
      * @param op The operation instance to wait for
      */
-    public Operation wait(Operation op) throws IOException, InterruptedException, LibsodiumException {
+    public Operation wait(Operation op) {
         return wait(op, Operation.class, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
@@ -90,7 +90,7 @@ public class Operations {
      * @param resultType The expected type of the completed operation (e.g., CredentialOperation.class)
      * @throws IllegalArgumentException if the completed operation is not of the expected type
      */
-    public <T extends Operation> T wait(Operation op, Class<T> resultType) throws IOException, InterruptedException, LibsodiumException {
+    public <T extends Operation> T wait(Operation op, Class<T> resultType) {
         return wait(op, resultType, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
@@ -100,15 +100,15 @@ public class Operations {
      * @param op The operation instance to wait for
      * @param options Polling and timeout options
      */
-    public Operation wait(Operation op, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
+    public Operation wait(Operation op, WaitOptions options) {
         return wait(op, Operation.class, options, System.currentTimeMillis());
     }
 
-    public <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
+    public <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options) {
         return wait(op, resultType, options, System.currentTimeMillis());
     }
 
-    private <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+    private <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options, long startingTime) {
         int minSleep = options.getMinSleep();
         int maxSleep = options.getMaxSleep();
         int increaseFactor = options.getIncreaseFactor();
@@ -146,7 +146,12 @@ public class Operations {
             }
             options.getAbortSignal().throwIfAborted();
 
-            Thread.sleep(delay);
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new SignifyInterruptedException(e);
+            }
         }
     }
 
@@ -175,7 +180,7 @@ public class Operations {
         };
     }
 
-    private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+    private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) {
         KelOperation depOp = dependsOf(operation);
 
         if (depOp != null) {
@@ -223,9 +228,9 @@ public class Operations {
             }
         }
 
-        public void throwIfAborted() throws InterruptedException {
+        public void throwIfAborted() {
             if (isAborted()) {
-                throw new InterruptedException("Operation aborted: " + reason.toString());
+                throw new OperationAbortedException(reason);
             }
         }
     }
