@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cardanofoundation.signify.app.config.GeneratedModelConfig;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.CounterArgs;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidSizeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
+import org.cardanofoundation.signify.exception.SignifySerializationException;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -65,7 +65,7 @@ public class Utils {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            throw new SerializeException("Error while stringify");
+            throw new SignifySerializationException("Unable to serialize to JSON: " + e.getMessage(), e);
         }
     }
 
@@ -77,7 +77,7 @@ public class Utils {
         try {
             return objectMapper.convertValue(obj, new TypeReference<>() {});
         } catch (Exception e) {
-            throw new SerializeException("Unable to create map from object");
+            throw new SignifySerializationException("Unable to create map from object: " + e.getMessage(), e);
         }
     }
 
@@ -85,7 +85,8 @@ public class Utils {
         try {
             return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
-            throw new SerializeException("Error while parsing JSON: " + e.getMessage());
+            throw new SignifySerializationException(
+                    "Error while parsing JSON: " + e.getMessage() + " - payload: " + abbreviate(json), e);
         }
     }
 
@@ -93,8 +94,16 @@ public class Utils {
         try {
             return objectMapper.readValue(json, type);
         } catch (Exception e) {
-            throw new SerializeException("Error while parsing JSON: " + e.getMessage());
+            throw new SignifySerializationException(
+                    "Error while parsing JSON: " + e.getMessage() + " - payload: " + abbreviate(json), e);
         }
+    }
+
+    private static String abbreviate(String payload) {
+        if (payload == null) {
+            return "null";
+        }
+        return payload.length() <= 1000 ? payload : payload.substring(0, 1000) + "...";
     }
 
     public static List<String> toList(Object obj) {
