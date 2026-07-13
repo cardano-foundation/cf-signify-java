@@ -287,20 +287,24 @@ public class Credentials {
      * @return Operation containing the verification result
      */
     public Operation<?> verify(CredentialVerifyOptions options) throws IOException, InterruptedException, LibsodiumException {
-        final String path = "/credentials/verify";
+        final String path = "/verify";
         final String method = "POST";
         
+        // Ingest the issuance (iss) TEL event first so the ACDC can be verified against its
+        // registry state; /verify dispatches iss to a credential op keyed on the ACDC SAID.
+        Map<String, Object> issBody = new LinkedHashMap<>();
+        issBody.put("serder", options.getIss().getRaw());
+        issBody.put("atc", options.getIssAtc() != null ? options.getIssAtc() : "");
+        this.client.fetch(path, method, issBody);
+
+        // Then verify the ACDC. Its attachment is the seal source triple referencing the iss event.
+        String acdcAtc = (options.getAcdcAtc() != null && !options.getAcdcAtc().isEmpty())
+                ? options.getAcdcAtc()
+                : new String(Utils.serializeACDCAttachment(options.getIss()));
+
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("acdc", options.getAcdc().getKed());
-        body.put("iss", options.getIss().getKed());
-
-        if (options.getAcdcAtc() != null && !options.getAcdcAtc().isEmpty()) {
-            body.put("acdcAtc", options.getAcdcAtc());
-        }
-
-        if (options.getIssAtc() != null && !options.getIssAtc().isEmpty()) {
-            body.put("issAtc", options.getIssAtc());
-        }
+        body.put("serder", options.getAcdc().getRaw());
+        body.put("atc", acdcAtc);
         
         HttpResponse<String> response = this.client.fetch(path, method, body);
         return Operation.fromObject(Utils.fromJson(response.body(), Map.class));

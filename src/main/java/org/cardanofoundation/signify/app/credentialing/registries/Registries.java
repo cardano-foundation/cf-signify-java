@@ -177,14 +177,12 @@ public class Registries {
      * @throws LibsodiumException   if a sodium exception occurs
      */
     public Operation<?> verify(RegistryVerifyOptions options) throws IOException, InterruptedException, LibsodiumException {
-        final String path = "/registries/verify";
+        final String path = "/verify";
         final String method = "POST";
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("vcp", options.getVcp().getKed());
-        if (options.getAtc() != null && !options.getAtc().isEmpty()) {
-            body.put("atc", options.getAtc());
-        }
+        body.put("serder", options.getVcp().getRaw());
+        body.put("atc", options.getAtc() != null ? options.getAtc() : "");
 
         HttpResponse<String> response = this.client.fetch(path, method, body);
         return Operation.fromObject(Utils.fromJson(response.body(), Map.class));
