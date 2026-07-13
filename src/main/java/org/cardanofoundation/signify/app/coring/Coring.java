@@ -10,7 +10,12 @@ import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.net.http.HttpResponse;
+import java.util.List;
+import org.cardanofoundation.signify.generated.keria.model.AgentConfig;
+import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 public class Coring {
     public static String randomPasscode() {
@@ -20,7 +25,7 @@ public class Coring {
             .raw(raw)
             .code(Codex.MatterCodex.Salt_128.getValue())
             .build();
-        final Salter salter = new Salter(args, Salter.Tier.low);
+        final Salter salter = new Salter(args, Tier.LOW);
 
         // https://github.com/WebOfTrust/signify-ts/issues/242
         return salter.getQb64().substring(2, 23);
@@ -56,11 +61,11 @@ public class Coring {
          * @return A map representing the key states
          * @throws Exception if the fetch operation fails
          */
-        public Object get(String pre) throws Exception {
+        public List<KeyEventRecord> get(String pre) throws Exception {
             String path = "/events?pre=" + pre;
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
-            return Utils.fromJson(res.body(), Object.class);
+            return Utils.fromJson(res.body(), new TypeReference<List<KeyEventRecord>>() {});
         }
     }
 
@@ -76,11 +81,11 @@ public class Coring {
             this.client = client;
         }
 
-        public Object get() throws Exception {
+        public AgentConfig get() throws Exception {
             String path = "/config";
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
-            return Utils.fromJson(res.body(), Object.class);
+            return Utils.fromJson(res.body(), AgentConfig.class);
         }
     }
 }

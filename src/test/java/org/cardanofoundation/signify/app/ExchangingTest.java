@@ -2,16 +2,21 @@ package org.cardanofoundation.signify.app;
 
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.cardanofoundation.signify.app.Exchanging.exchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexApplyExchange;
+import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.routeOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.DigestException;
@@ -37,8 +42,8 @@ public class ExchangingTest extends BaseMockServerTest {
         byte[] end = result.end();
         
         Map<String, Object> expectedKed = new LinkedHashMap<>();
-        expectedKed.put("a", Map.of("i", ""));
-        expectedKed.put("d", "EPWm8LWxxQXmXlB8gbTZKDy7NIwXxpx49N_ZYTa5QkJV");
+        expectedKed.put("a", new HashMap<>());
+        expectedKed.put("d", "EKxDkCyDQzcC9DG8-CyvAPCndUsC_XQ70rmqEcGsLA4-");
         expectedKed.put("dt", "2023-08-30T17:22:54.183Z");
         expectedKed.put("e", new HashMap<>());
         expectedKed.put("i", "test");
@@ -47,7 +52,7 @@ public class ExchangingTest extends BaseMockServerTest {
         expectedKed.put("r", "/multisig/vcp");
         expectedKed.put("rp", "");
         expectedKed.put("t", "exn");
-        expectedKed.put("v", "KERI10JSON0000bf_");
+        expectedKed.put("v", "KERI10JSON0000b9_");
 
         assertEquals(expectedKed, exn.getKed());
         assertArrayEquals(new byte[0], end);
@@ -67,7 +72,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "A",
-            Tier.low,
+            Tier.LOW,
             true
         );
         List<String> keys = Collections.singletonList(skp0.getVerfer().getQb64());
@@ -76,7 +81,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "N",
-            Tier.low,
+            Tier.LOW,
             true
         );
         
@@ -161,16 +166,16 @@ public class ExchangingTest extends BaseMockServerTest {
         embeddedData.put("icp", icpData);
         embeddedData.put("vcp", vcpData);
 
-        expectedFinalKed.put("v", "KERI10JSON00021b_");
+        expectedFinalKed.put("v", "KERI10JSON000215_");
         expectedFinalKed.put("t", "exn");
-        expectedFinalKed.put("d", "EOK2xNjB5xlSvizCUrkFKbdF4j1nsGpvt6TR1HL0wvaY");
+        expectedFinalKed.put("d", "EBov2eDqMMfnQ2ubdM795wt6FA9TUw6iHLSEHVzL1wTL");
         expectedFinalKed.put("i", "test");
         expectedFinalKed.put("rp", "");
         expectedFinalKed.put("p", "");
         expectedFinalKed.put("dt", "2023-08-30T17:22:54.183Z");
         expectedFinalKed.put("r", "/multisig/vcp");
         expectedFinalKed.put("q", new LinkedHashMap<>());
-        expectedFinalKed.put("a", Map.of("i", ""));
+        expectedFinalKed.put("a", new HashMap<>());
         expectedFinalKed.put("e", embeddedData);
 
         assertEquals(expectedFinalKed, exn.getKed());
@@ -184,7 +189,7 @@ public class ExchangingTest extends BaseMockServerTest {
     @DisplayName("Send from events")
     void sendFromEvents() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -205,7 +210,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "A",
-            Tier.low,
+            Tier.LOW,
             true
         );
         List<String> keys = Collections.singletonList(skp0.getVerfer().getQb64());
@@ -214,7 +219,7 @@ public class ExchangingTest extends BaseMockServerTest {
             MatterCodex.Ed25519_Seed.getValue(),
             true,
             "N",
-            Tier.low,
+            Tier.LOW,
             true
         );
 
@@ -251,7 +256,7 @@ public class ExchangingTest extends BaseMockServerTest {
     @DisplayName("Get exchange")
     void getExchange() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();
@@ -259,10 +264,38 @@ public class ExchangingTest extends BaseMockServerTest {
         Exchanging.Exchanges exchanges = client.exchanges();
         String exchangeId = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
-        exchanges.get(exchangeId);
+        assertTrue(exchanges.get(exchangeId).isPresent());
 
         RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("GET", request.getMethod());
         assertEquals("/exchanges/" + exchangeId, request.getPath());
+
+        // Mock returns /ipex/apply route — getIpexApply should resolve to typed model
+        var apply = exchanges.get(exchangeId, IpexApplyExchange.class);
+        request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+        assertTrue(apply.isPresent());
+        assertEquals(IPEX_APPLY_ROUTE, routeOf(apply.orElseThrow().exn()));
+
+        // Route mismatch — getIpexGrant should return empty
+        assertTrue(exchanges.get(exchangeId, IpexGrantExchange.class).isEmpty());
+        request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+
+        // Route mismatch — getMultisigIcp should return empty
+        assertTrue(exchanges.get(exchangeId, MultisigIcpExchange.class).isEmpty());
+        request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+
+        // getTyped dispatches on the exn's own route
+        var typed = exchanges.getTyped(exchangeId);
+        request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals("/exchanges/" + exchangeId, request.getPath());
+        assertTrue(typed.isPresent());
+        assertTrue(typed.orElseThrow() instanceof ExnMessages.IpexApplyExchange);
     }
 }

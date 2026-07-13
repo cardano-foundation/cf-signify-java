@@ -5,19 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
 
 public class Retry {
 
-    public static <T> T retry(Supplier<T> fn) {
-        try {
-            return retry(fn, RetryOptions.builder().build());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static <T> T retry(Callable<T> fn) throws InterruptedException {
+        return retry(fn, RetryOptions.builder().build());
     }
 
-    public static <T> T retry(Supplier<T> fn, RetryOptions options) throws InterruptedException {
+    public static <T> T retry(Callable<T> fn, RetryOptions options) throws InterruptedException {
         long start = System.currentTimeMillis();
         int retries = 0;
         int increaseFactor = 50;
@@ -25,7 +21,7 @@ public class Retry {
 
         while (System.currentTimeMillis() - start < options.timeout && (options.maxRetries == null || retries < options.maxRetries)) {
             try {
-                return fn.get();
+                return fn.call();
             } catch (Exception e) {
                 cause = e;
                 retries++;

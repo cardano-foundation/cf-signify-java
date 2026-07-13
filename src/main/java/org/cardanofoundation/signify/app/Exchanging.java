@@ -2,6 +2,7 @@ package org.cardanofoundation.signify.app;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import org.cardanofoundation.signify.app.exception.MalformedExnException;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.CounterCodex;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
@@ -11,7 +12,6 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.States.HabState;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -19,6 +19,10 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+
+import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
+import org.cardanofoundation.signify.generated.keria.model.Exn;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Exchanging {
     @Getter
@@ -86,7 +90,7 @@ public class Exchanging {
          * @param recipients the recipients
          * @return response from server
          */
-        public Object send(
+        public Exn send(
             String name,
             String topic,
             HabState sender,
@@ -130,7 +134,7 @@ public class Exchanging {
          * @param recipients the recipients
          * @return response from server
          */
-        public Object sendFromEvents(
+        public Exn sendFromEvents(
             String name,
             String topic,
             Serder exn,
@@ -148,7 +152,7 @@ public class Exchanging {
             data.put("rec", recipients);
 
             HttpResponse<String> res = this.client.fetch(path, method, data);
-            return Utils.fromJson(res.body(), Object.class);
+            return Utils.fromJson(res.body(), Exn.class);
         }
 
         /**
@@ -157,7 +161,7 @@ public class Exchanging {
          * @param said The said of the exn message
          * @return Optional containing the exn message if found, or empty if not found
          */
-        public Optional<Object> get(String said) throws Exception {
+        public Optional<ExchangeResource> get(String said) throws Exception {
             String path = String.format("/exchanges/%s", said);
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
@@ -166,8 +170,30 @@ public class Exchanging {
                 return Optional.empty();
             }
             
-            return Optional.of(Utils.fromJson(res.body(), Object.class));
+            return Optional.of(Utils.fromJson(res.body(), ExchangeResource.class));
         }
+
+        /**
+         * Fetches an exchange message and types it by its own route; empty when not
+         * found or the route is unknown. Use the route-specific getters when the
+         * expected type is already known.
+         *
+         * @throws MalformedExnException when the route is known but the payload is malformed
+         */
+        public Optional<ExnMessages.TypedExchange> getTyped(String said) throws Exception {
+            return get(said).flatMap(ExnMessages::asTyped);
+        }
+
+        /**
+         * Fetches an exchange message as the given typed form; empty when not found
+         * or when its route does not produce that type.
+         *
+         * @throws MalformedExnException when the route matches but the payload is malformed
+         */
+        public <T extends ExnMessages.TypedExchange> Optional<T> get(String said, Class<T> type) throws Exception {
+            return get(said).flatMap(msg -> ExnMessages.as(msg, type));
+        }
+
     }
 
     public static ExchangeResult exchange(
@@ -182,8 +208,7 @@ public class Exchanging {
     ) throws DigestException {
         String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         String ilk = CoreUtil.Ilks.EXN.getValue();
-        String dt = date != null ? date :
-                new Date().toInstant().toString().replace("Z", "000+00:00");
+        String dt = date != null ? date : Utils.currentDateTimeString();
         String p = dig != null ? dig : "";
         Map<String, Object> q = modifiers != null ? modifiers : new LinkedHashMap<>();
         Map<String, List<Object>> ems = embeds != null ? embeds : new LinkedHashMap<>();
@@ -225,10 +250,6 @@ public class Exchanging {
             e = Saider.saidify(e).sad();
         }
 
-        Map<String, Object> attrs = new LinkedHashMap<>();
-        attrs.put("i", recipient);
-        attrs.putAll(payload);
-
         Map<String, Object> _ked = new LinkedHashMap<>();
         _ked.put("v", vs);
         _ked.put("t", ilk);
@@ -239,7 +260,7 @@ public class Exchanging {
         _ked.put("dt", dt);
         _ked.put("r", route);
         _ked.put("q", q);
-        _ked.put("a", attrs);
+        _ked.put("a", payload);
         _ked.put("e", e);
 
         Map<String, Object> ked = Saider.saidify(_ked).sad();

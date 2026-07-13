@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.*;
-import org.cardanofoundation.signify.app.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.IdentifierController;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.KeyStates;
@@ -15,9 +15,9 @@ import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
 import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -34,14 +34,14 @@ public class ClientingTest extends BaseMockServerTest {
     void testSignifyClientInitialization() throws Exception {
         InvalidValueException exception = assertThrows(
                 InvalidValueException.class,
-                () -> new SignifyClient(url, "short", Tier.low, bootUrl, null)
+                () -> new SignifyClient(url, "short", Tier.LOW, bootUrl, null)
         );
         assertEquals("bran must be 21 characters", exception.getMessage());
 
         SignifyClient client = new SignifyClient(
                 url,
                 bran,
-                Tier.low,
+                Tier.LOW,
                 bootUrl,
                 null
         );
@@ -49,14 +49,14 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(bran, client.getBran());
         assertEquals(url, client.getUrl());
         assertEquals(bootUrl, client.getBootUrl());
-        assertEquals(Tier.low, client.getTier());
+        assertEquals(Tier.LOW, client.getTier());
         assertEquals(0, client.getPidx());
         assertEquals(
                 "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
                 client.getController().getPre()
         );
         assertEquals("signify:controller", client.getController().getStem());
-        assertEquals(Tier.low, client.getController().getTier());
+        assertEquals(Tier.LOW, client.getController().getTier());
 
         String expectedSerderRaw = """
                 {"v":"KERI10JSON00012b_","t":"icp",\
@@ -140,7 +140,7 @@ public class ClientingTest extends BaseMockServerTest {
         assertEquals(bran, data[1]);
 
         // Validate service instances
-        assertInstanceOf(Identifier.class, client.identifiers());
+        assertInstanceOf(IdentifierController.class, client.identifiers());
         assertInstanceOf(Operations.class, client.operations());
         assertInstanceOf(Coring.KeyEvents.class, client.keyEvents());
         assertInstanceOf(KeyStates.class, client.keyStates());
@@ -164,7 +164,7 @@ public class ClientingTest extends BaseMockServerTest {
     void testSignedFetch() throws Exception {
         // Siged fetch
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
 
         client.connect();
         cleanUpRequest();
@@ -216,7 +216,7 @@ public class ClientingTest extends BaseMockServerTest {
         data.put("sig", "AACJwsJ0mvb4VgxD87H4jIsiT1QtlzznUy9zrX3lGdd48jjQRTv8FxlJ8ClDsGtkvK4Eekg5p-oPYiPvK_1eTXEG");
         data.put("stem", "signify:controller");
         data.put("pidx", 1);
-        data.put("tier", Salter.Tier.low);
+        data.put("tier", Tier.LOW);
 
         String expectedData = "{\"icp\":{\"v\":\"KERI10JSON00012b_\",\"t\":\"icp\",\"d\":\"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose\",\"i\":\"ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose\",\"s\":\"0\",\"kt\":\"1\",\"k\":[\"DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc\"],\"nt\":\"1\",\"n\":[\"EIFG_uqfr1yN560LoHYHfvPAhxQ5sN6xZZT_E3h7d2tL\"],\"bt\":\"0\",\"b\":[],\"c\":[],\"a\":[]},\"sig\":\"AACJwsJ0mvb4VgxD87H4jIsiT1QtlzznUy9zrX3lGdd48jjQRTv8FxlJ8ClDsGtkvK4Eekg5p-oPYiPvK_1eTXEG\",\"stem\":\"signify:controller\",\"pidx\":1,\"tier\":\"low\"}";
         assertEquals(obj.writeValueAsString(data), expectedData);

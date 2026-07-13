@@ -1,29 +1,30 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
 import org.cardanofoundation.signify.e2e.utils.TestSteps;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import org.cardanofoundation.signify.generated.keria.model.Notification;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
 import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitOperation;
+import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitForCompleted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MultisigInceptionTest extends BaseIntegrationTest {
     SignifyClient client1, client2;
     String aid1, aid2;
-    Object oobi1, oobi2;
+    OOBI oobi1, oobi2;
     TestSteps testSteps = new TestSteps();
 
     @Test
@@ -39,14 +40,14 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
             oobi1 = client1.oobis().get("member1", "agent").get();
             oobi2 = client2.oobis().get("member2", "agent").get();
 
-            TestUtils.resolveOobi(client1, Utils.toList(Utils.toMap(oobi2).get("oobis")).getFirst(), "member2");
-            TestUtils.resolveOobi(client2, Utils.toList(Utils.toMap(oobi1).get("oobis")).getFirst(), "member1");
+            TestUtils.resolveOobi(client1, oobi2.getOobis().getFirst(), "member2");
+            TestUtils.resolveOobi(client2, oobi1.getOobis().getFirst(), "member1");
             return null;
         });
 
         testSteps.step("Create multisig group", () -> {
             String groupName = "multisig";
-            Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+            KelOperation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                 .groupName(groupName)
                 .localMemberName("member1")
                 .participants(Arrays.asList(aid1, aid2))
@@ -69,7 +70,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
             String msgSaid = notifications.getLast().getA().getD();
             assertNotNull(msgSaid, "msgSaid not defined");
-            Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+            KelOperation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                 .localMemberName("member2")
                 .groupName(groupName)
                 .msgSaid(msgSaid)
@@ -83,26 +84,23 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
             );
             System.out.println("Multisig created!");
 
-            States.HabState multisig1 = client1.identifiers().get(groupName).get();
-            States.HabState multisig2 = client2.identifiers().get(groupName).get();
+            HabState multisig1 = client1.identifiers().get(groupName).get();
+            HabState multisig2 = client2.identifiers().get(groupName).get();
             assertEquals(multisig1.getPrefix(), multisig2.getPrefix());
-            Object members = client1.identifiers().members(groupName);
-            Map<String, Object> membersMap = Utils.toMap(members);
-            List<?> signing = (List<?>) membersMap.get("signing");
-            List<?> rotation = (List<?>) membersMap.get("rotation");
+            GroupMember members = client1.identifiers().members(groupName);
 
-            assertEquals(2, signing.size());
-            assertEquals(2, rotation.size());
-            assertEquals(aid1, Utils.toMap(signing.get(0)).get("aid"));
-            assertEquals(aid2, Utils.toMap(signing.get(1)).get("aid"));
-            assertEquals(aid1, Utils.toMap(rotation.get(0)).get("aid"));
-            assertEquals(aid2, Utils.toMap(rotation.get(1)).get("aid"));
+            assertEquals(2, members.getSigning().size());
+            assertEquals(2, members.getRotation().size());
+            assertEquals(aid1, members.getSigning().get(0).getAid());
+            assertEquals(aid2, members.getSigning().get(1).getAid());
+            assertEquals(aid1, members.getRotation().get(0).getAid());
+            assertEquals(aid2, members.getRotation().get(1).getAid());
             return null;
         });
 
         testSteps.step("Test creating another group", () -> {
             String groupName = "multisig2";
-            Object op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+            KelOperation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
                 .groupName(groupName)
                 .localMemberName("member1")
                 .participants(List.of(aid1, aid2))
@@ -122,15 +120,15 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
 
             String msgSaid = notifications.getLast().getA().getD();
             assertNotNull(msgSaid, "msgSaid not defined");
-            Object op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+            KelOperation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
                 .localMemberName("member2")
                 .groupName(groupName)
                 .msgSaid(msgSaid)
                 .build()
             );
 
-            op1 = waitOperation(client1, op1);
-            op2 = waitOperation(client2, op2);
+            waitForCompleted(client1, op1);
+            waitForCompleted(client2, op2);
 
             // TODO: https://github.com/WebOfTrust/keria/issues/189
             // const members = await client1.identifiers().members(groupName);

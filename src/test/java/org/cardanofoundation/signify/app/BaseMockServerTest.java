@@ -9,7 +9,9 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
+import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -204,6 +206,218 @@ public class BaseMockServerTest {
             "et": "iss"
         }""";
 
+    public static final String MOCK_KEY_STATE = """
+        {
+            "vn": [1, 0],
+            "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+            "s": "0",
+            "p": "",
+            "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+            "f": "0",
+            "dt": "2023-08-21T22:30:46.473545+00:00",
+            "et": "icp",
+            "kt": "1",
+            "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+            "nt": "1",
+            "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+            "bt": "0",
+            "b": [],
+            "c": [],
+            "ee": {
+                "s": "0",
+                "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "br": [],
+                "ba": []
+            },
+            "di": ""
+        }""";
+
+    public static final String MOCK_KEY_STATES_ARRAY = """
+        [
+            {
+                "vn": [1, 0],
+                "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "s": "0",
+                "p": "",
+                "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "f": "0",
+                "dt": "2023-08-21T22:30:46.473545+00:00",
+                "et": "icp",
+                "kt": "1",
+                "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+                "nt": "1",
+                "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+                "bt": "0",
+                "b": [],
+                "c": [],
+                "ee": {
+                    "s": "0",
+                    "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                    "br": [],
+                    "ba": []
+                },
+                "di": ""
+            },
+            {
+                "vn": [1, 0],
+                "i": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "s": "0",
+                "p": "",
+                "d": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "f": "0",
+                "dt": "2023-08-21T22:30:46.473545+00:00",
+                "et": "icp",
+                "kt": "1",
+                "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+                "nt": "1",
+                "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+                "bt": "0",
+                "b": [],
+                "c": [],
+                "ee": {
+                    "s": "0",
+                    "d": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                    "br": [],
+                    "ba": []
+                },
+                "di": ""
+            }
+        ]""";
+
+    public static final String MOCK_KEY_EVENT = """
+        [{
+            "ked": {
+                "v": "KERI10JSON00012b_",
+                "t": "icp",
+                "d": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "i": "EP10ooRj0DJF0HWZePEYMLPl-arMV-MAoTKK-o3DXbgX",
+                "s": "0",
+                "kt": "1",
+                "k": ["DPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9"],
+                "nt": "1",
+                "n": ["EAORnRtObOgNiOlMolji-KijC_isa3lRDpHCsol79cOc"],
+                "bt": "0",
+                "b": [],
+                "c": [],
+                "a": []
+            },
+            "atc": ""
+        }]""";
+
+    public static final String MOCK_EXN = """
+        {
+            "v": "KERI10JSON000070_",
+            "t": "exn",
+            "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+            "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+            "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+            "p": "",
+            "dt": "2023-08-23T15:16:07.553000+00:00",
+            "r": "/multisig/iss",
+            "q": {},
+            "a": {},
+            "e": {}
+        }""";
+
+    public static final String MOCK_EXCHANGE_RESOURCE = """
+        {
+            "exn": {
+                "v": "KERI10JSON000120_",
+                "t": "exn",
+                "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+                "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "p": "",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": "/ipex/apply",
+                "q": {},
+                "a": {
+                    "m": "Applying"
+                },
+                "e": {
+                    "d": "EMockEmbed"
+                }
+            },
+            "pathed": {}
+        }""";
+
+    public static final String MOCK_EXCHANGE_RESOURCE_NEUTRAL = """
+        {
+            "exn": {
+                "v": "KERI10JSON000120_",
+                "t": "exn",
+                "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+                "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "p": "",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": "/multisig/icp",
+                "q": {},
+                "a": {},
+                "e": {}
+            },
+            "pathed": {}
+        }""";
+
+    protected String exchangeResourceBody() {
+        return MOCK_EXCHANGE_RESOURCE;
+    }
+
+    public static final String MOCK_NOTIFICATIONS_LIST = """
+        [
+            {
+                "i": "ENote001",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": false,
+                "a": {
+                    "r": "/exn/ipex/apply",
+                    "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                    "m": "new exn"
+                }
+            }
+        ]
+        """;
+
+    public static final String MOCK_EXN_MULTISIG_LIST = """
+        [{
+            "exn": {
+                "v": "KERI10JSON000070_",
+                "t": "exn",
+                "d": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei",
+                "i": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose",
+                "rp": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "p": "",
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "r": "/multisig/iss",
+                "q": {},
+                "a": {"gid": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose"},
+                "e": {
+                    "acdc": {"d": "EAcdcSaid"},
+                    "iss": {"d": "EIssSaid"},
+                    "anc": {"d": "EAncSaid"},
+                    "d": "EEmbedsSaid"
+                }
+            },
+            "paths": {},
+            "groupName": "multisig",
+            "memberName": "member1",
+            "sender": "ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose"
+        }]""";
+
+    public static final String MOCK_ENDROLES = """
+        [
+            {
+                "cid": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "role": "agent",
+                "eid": "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei"
+            },
+            {
+                "cid": "ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK",
+                "role": "witness",
+                "eid": "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
+            }
+        ]""";
+
     public static final String MOCK_CREDENTIAL = """
         {
             "sad": {
@@ -247,7 +461,7 @@ public class BaseMockServerTest {
     public MockResponse mockAllRequests(RecordedRequest req) throws LibsodiumException {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
-        headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put(Httping.HEADER_SIG_TIME, Utils.currentDateTimeString());
         headers.put("content-type", "application/json");
 
         String reqUrl = req.getRequestUrl().toString();
@@ -256,7 +470,7 @@ public class BaseMockServerTest {
                 "A",
                 true,
                 "agentagent-ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
-                Salter.Tier.low,
+                Tier.LOW,
                 false
         );
 
@@ -268,9 +482,29 @@ public class BaseMockServerTest {
                 null
         );
 
-        String body = reqUrl.startsWith(url + "/identifiers/aid1/credentials")
-                ? MOCK_CREDENTIAL
-                : MOCK_GET_AID;
+        String body;
+        if (reqUrl.startsWith(url + "/endroles/")) {
+            body = MOCK_ENDROLES;
+        } else if (reqUrl.startsWith(url + "/identifiers/aid1/credentials")) {
+            body = MOCK_CREDENTIAL;
+        } else if (reqUrl.startsWith(url + "/events")) {
+            body = MOCK_KEY_EVENT;
+        } else if (reqUrl.startsWith(url + "/states")) {
+            // KERIA always returns an array (at least empty array, or array with items)
+            String query = req.getRequestUrl().query();
+            long preCount = query != null ? query.split("pre=").length - 1 : 0;
+            body = preCount > 1 ? MOCK_KEY_STATES_ARRAY : "[" + MOCK_KEY_STATE + "]";
+        } else if (reqUrl.startsWith(url + "/notifications")) {
+            body = MOCK_NOTIFICATIONS_LIST;
+        } else if (reqUrl.startsWith(url + "/exchanges/")) {
+            body = exchangeResourceBody();
+        } else if (reqUrl.startsWith(url + "/multisig/request")) {
+            body = MOCK_EXN_MULTISIG_LIST;
+        } else if (reqUrl.contains("/multisig/request")) {
+            body = MOCK_EXN;
+        } else {
+            body = MOCK_GET_AID;
+        }
 
         MockResponse mockResponse = new MockResponse()
                 .setResponseCode(202)

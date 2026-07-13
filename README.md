@@ -39,6 +39,21 @@ Unit tests are an essential part of the development process. To run the unit tes
 ```
 This command will run all the tests in the project and provide a summary of the results.
 
+## Generate Keria models from OpenAPI
+The Gradle `openApiGenerate` task can build Java model classes directly from the Keria OpenAPI spec.
+
+By default it uses `http://localhost:3902/spec.yaml` (or the `SPEC_URL` you set):
+```bash
+./gradlew openApiGenerate
+```
+
+To point at another Keria instance, override `SPEC_URL`:
+```bash
+SPEC_URL=http://localhost:3902/spec.yaml ./gradlew openApiGenerate
+```
+
+The generated sources are placed under `build/generated/src/main/java` and are automatically added to the `main` source set.
+
 ## Build Docker when run E2E tests
 The integration tests depends on a local instance of KERIA, vLEI-Server and Witness Demo. These are specified in the [Docker Compose](./docker-compose.yaml) file. To start the dependencies, use docker compose:
 

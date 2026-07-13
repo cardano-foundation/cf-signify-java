@@ -12,6 +12,7 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.core.Httping;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ public class CredentialingTest extends BaseMockServerTest {
     public MockResponse mockAllRequests(RecordedRequest req) throws LibsodiumException {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
-        headers.put(Httping.HEADER_SIG_TIME, new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put(Httping.HEADER_SIG_TIME, Utils.currentDateTimeString());
         headers.put("content-type", "application/json");
 
         String reqUrl = req.getRequestUrl().toString();
@@ -35,7 +36,7 @@ public class CredentialingTest extends BaseMockServerTest {
                 "A",
                 true,
                 "agentagent-ELI7pg979AdhmvrjDeam2eAO2SR5niCgnjAJXJHtJose00",
-                Salter.Tier.low,
+                Tier.LOW,
                 false
         );
 
@@ -48,8 +49,14 @@ public class CredentialingTest extends BaseMockServerTest {
         );
 
         String body;
-        if (reqUrl.startsWith(url + "/credentials")) {
+        if (reqUrl.startsWith(url + "/credentials/query")) {
+            body = "[" + MOCK_CREDENTIAL + "]";
+        } else if (reqUrl.startsWith(url + "/credentials/")) {
             body = MOCK_CREDENTIAL;
+        } else if (reqUrl.contains("/identifiers/aid1/credentials")) {
+            body = "DELETE".equals(req.getMethod())
+                    ? "{\"name\": \"witness.EJ5EZpC_NjBKAPz8jzVUgRMQtyxpqsCKVefAFPSAVdSp\", \"done\": false, \"metadata\": {\"sn\": 2}}"
+                    : "{\"name\": \"credential.EI6gHFuoUyqyB1MOJxBhab2EVUEt_3IYg2DqFI4Q/Ya5\", \"done\": false, \"metadata\": {\"ced\": {}}}";
         } else if (reqUrl.startsWith(url + "/registries")) {
             body = MOCK_REGISTRY_STATE;
         } else {
@@ -68,7 +75,7 @@ public class CredentialingTest extends BaseMockServerTest {
     @DisplayName("Test Credentialing")
     void testCredentialing() throws Exception {
         String bran = "0123456789abcdefghijk";
-        SignifyClient client = new SignifyClient(url, bran, Salter.Tier.low, bootUrl, null);
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
         cleanUpRequest();

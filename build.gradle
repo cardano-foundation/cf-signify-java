@@ -4,6 +4,7 @@ plugins {
     id 'io.qameta.allure' version '2.11.2'
     id 'org.ajoberstar.grgit' version '5.2.0'
     id 'org.jreleaser' version '1.19.0'
+    id("org.openapi.generator") version "7.18.0"
 }
 
 repositories {
@@ -36,6 +37,8 @@ def jacksonVersion = '2.18.1'
 def bouncycastleVersion = '1.79'
 def jsonVersion = '20240303'
 def structuredFieldsVersion = '0.4'
+def jakartaAnnotationVersion = '2.1.1'
+def jacksonNullableVersion = '0.2.6'
 
 // test dependencies
 def testngVersion = '7.7.0'
@@ -56,6 +59,8 @@ dependencies {
     implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}"
     implementation "org.json:json:${jsonVersion}"
     implementation "org.greenbytes.http:structured-fields:${structuredFieldsVersion}"
+    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
+    implementation "org.openapitools:jackson-databind-nullable:${jacksonNullableVersion}"
 
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
@@ -96,6 +101,13 @@ tasks.register('testE2E', Test) {
     }
     filter {
         includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+    }
+
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+        showCauses = true
+        showStackTraces = true
     }
 
     beforeTest { descriptor ->
@@ -186,4 +198,190 @@ tasks.register('allureE2ETestReport') {
 // Disable the default allureReport task if custom tasks are used
 tasks.named('allureReport') {
     enabled = false
+}
+
+tasks.openApiGenerate {
+    generatorName.set("java")
+    def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+    inputSpec.set(generatedSpec.map { it.asFile.absolutePath })
+    outputDir.set("$rootDir".toString())
+    validateSpec.set(false)
+    skipValidateSpec.set(true)
+    modelPackage.set("org.cardanofoundation.signify.generated.keria.model")
+    invokerPackage.set("org.cardanofoundation.signify.generated.keria.model")
+
+    globalProperties.set([
+        models        : "",   // generate models only
+        modelDocs     : "false",
+        modelTests    : "false",
+    ])
+
+    configOptions = [
+            library                  : "restclient",
+            serializationLibrary     : "jackson",
+            useJakartaEe             : "true",
+            dateLibrary              : "java21",
+            sourceFolder             : "src/main/java",
+            hideGenerationTimestamp  : "true",
+            openApiNullable          : "false",
+            containerDefaultToNull   : "true"
+    ]
+
+    nameMappings.put("A", "AUpper")
+
+    // @TODO - foconnor: interim unification of the polymorphic kt/nt threshold.
+    //    The OpenAPI spec should define a named schema instead of the anonymous
+    //    inline `oneOf` schemas.
+    schemaMappings.putAll([
+        "ICP_V_1_kt"        : "Threshold",
+        "ICP_V_1_nt"        : "Threshold",
+        "KeyStateRecord_kt" : "Threshold",
+        "KeyStateRecord_nt" : "Threshold",
+    ])
+    importMappings.putAll([
+        "Threshold" : "org.cardanofoundation.signify.app.config.Threshold",
+    ])
+}
+
+tasks.register("prepareOpenApiSpec") {
+    group = "openapi"
+    description = "Fetches keria OpenAPI spec from SPEC_URL"
+
+    def generatedSpec = layout.buildDirectory.file("generated/spec/keria-openapi.yaml")
+    outputs.file(generatedSpec)
+
+    doLast {
+        def specUrl = System.getenv("SPEC_URL") ?: "http://localhost:3902/spec.yaml"
+        def target = generatedSpec.get().asFile
+        target.parentFile.mkdirs()
+
+        logger.lifecycle("Downloading OpenAPI spec from ${specUrl}")
+        try {
+            target.withOutputStream { out ->
+                new URL(specUrl).withInputStream { input -> out << input }
+            }
+        } catch (Exception ex) {
+            throw new GradleException("Failed to download spec from ${specUrl}. Set SPEC_URL to a reachable spec endpoint.", ex)
+        }
+        logger.lifecycle("Spec available at ${target}")
+    }
+}
+
+tasks.named("openApiGenerate") {
+    dependsOn("prepareOpenApiSpec")
+
+    // Rewrites the generated operation oneOf models into a sealed interface hierarchy:
+    //   Operation
+    //   |-- <Domain>Operation (ChallengeOperation, ...) - sealed over the three state variants
+    //   |-- KelOperation - sealed group of the domains that append a KEL event
+    //   |-- Pending/Completed/FailedOperation - sealed state markers across all domains
+    // Every rewrite is validated: if the generator's output shape changes, the build fails
+    // here instead of producing a silently broken hierarchy.
+    doLast {
+        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def kelOps = ["Delegation", "Done", "Group", "Witness"] as Set
+        def states = ["Pending", "Completed", "Failed"]
+        def stateDocs = [
+            Pending  : "that have not yet completed",
+            Completed: "that completed successfully",
+            Failed   : "that failed",
+        ]
+        def stateMethods = [
+            Pending  : "",
+            Completed: "",
+            Failed   : "\n    OperationStatus getError();\n",
+        ]
+
+        def ops = modelDir.list()
+                .findAll { it ==~ /Pending\w+Operation\.java/ }
+                .collect { (it =~ /Pending(\w+)Operation\.java/)[0][1] }
+                .sort()
+        if (ops.isEmpty()) {
+            throw new GradleException("Post-generation: no Pending*Operation models found in ${modelDir} - generator output or spec changed?")
+        }
+
+        def missingKel = kelOps.findAll { !(it in ops) }
+        if (!missingKel.isEmpty()) {
+            throw new GradleException("Post-generation: KEL operation domains ${missingKel} not present in generated models ${ops}")
+        }
+
+        def rewrite = { File f, String from, String to ->
+            if (!f.text.contains(from)) {
+                throw new GradleException("Post-generation: expected '${from}' in ${f.name} - generator output changed, update this script")
+            }
+            f.text = f.text.replace(from, to)
+        }
+
+        ops.each { op ->
+            def pendingFile = new File(modelDir, "Pending${op}Operation.java")
+            def metadataMatcher = (pendingFile.text =~ /private\s+(\w+)\s+metadata;/)
+            def metadataType = metadataMatcher ? metadataMatcher[0][1] : null
+
+            states.each { state ->
+                def f = new File(modelDir, "${state}${op}Operation.java")
+                if (!f.exists()) {
+                    throw new GradleException("Post-generation: ${f.name} missing while ${pendingFile.name} exists - incomplete oneOf in spec?")
+                }
+                def className = "${state}${op}Operation"
+                rewrite(f,
+                    "public class ${className} {",
+                    "@com.fasterxml.jackson.databind.annotation.JsonDeserialize\npublic final class ${className} implements ${op}Operation, ${state}Operation {")
+            }
+
+            // Replace the generator's merged oneOf class with a sealed domain interface
+            def extendsClause = (op in kelOps) ? "extends KelOperation" : "extends Operation"
+            def metadataMethod = metadataType ? "\n    ${metadataType} getMetadata();\n" : ""
+            new File(modelDir, "${op}Operation.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+public sealed interface ${op}Operation ${extendsClause} permits
+        Pending${op}Operation,
+        Completed${op}Operation,
+        Failed${op}Operation {
+${metadataMethod}}
+"""
+        }
+
+        // The general Operation union: every domain interface (KEL domains via KelOperation)
+        // plus the cross-domain state markers.
+        def operationPermits = (ops.findAll { !(it in kelOps) }.collect { "${it}Operation" } + ["KelOperation"]).sort() +
+                states.collect { "${it}Operation" }
+        new File(modelDir, "Operation.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.cardanofoundation.signify.app.coring.OperationDeserializer;
+
+@JsonDeserialize(using = OperationDeserializer.class)
+public sealed interface Operation permits
+${operationPermits.collect { "        ${it}" }.join(",\n")} {
+
+    String getName();
+}
+"""
+
+        new File(modelDir, "KelOperation.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+/**
+ * Marker interface for operations that result from appending a KEL event.
+ */
+public sealed interface KelOperation extends Operation permits
+${kelOps.sort().collect { "        ${it}Operation" }.join(",\n")} {
+}
+"""
+
+        states.each { state ->
+            new File(modelDir, "${state}Operation.java").text = """\
+package org.cardanofoundation.signify.generated.keria.model;
+
+/**
+ * Marker interface for operations ${stateDocs[state]}.
+ */
+public sealed interface ${state}Operation extends Operation permits
+${ops.collect { "        ${state}${it}Operation" }.join(",\n")} {
+${stateMethods[state]}}
+"""
+        }
+    }
 }

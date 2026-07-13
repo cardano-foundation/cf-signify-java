@@ -2,7 +2,7 @@ package org.cardanofoundation.signify.app.credentialing.registries;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.app.habery.TraitCodex;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
@@ -11,7 +11,6 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.core.Vdring;
 
 import java.io.IOException;
@@ -19,7 +18,10 @@ import java.math.BigInteger;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
-
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Registry;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
+import com.fasterxml.jackson.core.type.TypeReference;
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
 
 public class Registries {
@@ -34,16 +36,16 @@ public class Registries {
      * Lists all registries associated with the specified identifier name.
      *
      * @param name the name or alias of the identifier
-     * @return an Object representing the list of registries
+     * @return a List<Registry> representing the list of registries
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object list(String name) throws IOException, InterruptedException, LibsodiumException {
+    public List<Registry> list(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries";
         String method = "GET";
         HttpResponse<String> response = this.client.fetch(path, method, null);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), new TypeReference<List<Registry>>() {});
     }
 
     /**
@@ -56,7 +58,7 @@ public class Registries {
      * @throws LibsodiumException   if a sodium exception occurs
      */
     public RegistryResult create(CreateRegistryArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException {
-        States.HabState hab = this.client.identifiers().get(args.getName())
+        HabState hab = this.client.identifiers().get(args.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getName()));
         String pre = hab.getPrefix();
 
@@ -104,7 +106,8 @@ public class Registries {
             List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
 
             HttpResponse<String> res = this.createFromEvents(hab, args.getName(), args.getRegistryName(), regser.getKed(), serder.getKed(), sigs);
-            return new RegistryResult(regser, serder, sigs, res);
+            RegistryOperation op = Utils.fromJson(res.body(), RegistryOperation.class);
+            return new RegistryResult(regser, serder, sigs, op);
         }
     }
 
@@ -117,13 +120,13 @@ public class Registries {
      * @param vcp          the VCP data
      * @param ixn          the IXN data
      * @param sigs         the signatures
-     * @return an Object representing the result of the operation
+     * @return the raw HTTP response from the registry creation endpoint
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
     private HttpResponse<String> createFromEvents(
-        States.HabState hab,
+        HabState hab,
         String name,
         String registryName,
         Map<String, Object> vcp,
@@ -151,12 +154,12 @@ public class Registries {
      * @param name         the name or alias of the identifier
      * @param registryName the current name of the registry
      * @param newName      the new name for the registry
-     * @return an Object representing the updated registry record
+     * @return the updated Registry record
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Object rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
+    public Registry rename(String name, String registryName, String newName) throws IOException, InterruptedException, LibsodiumException {
         String path = "/identifiers/" + name + "/registries/" + registryName;
         String method = "PUT";
 
@@ -164,7 +167,7 @@ public class Registries {
         data.put("name", newName);
 
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), Registry.class);
     }
 
     /**
@@ -176,7 +179,7 @@ public class Registries {
      * @throws InterruptedException if the operation is interrupted
      * @throws LibsodiumException   if a sodium exception occurs
      */
-    public Operation<?> verify(RegistryVerifyOptions options) throws IOException, InterruptedException, LibsodiumException {
+    public Operation verify(RegistryVerifyOptions options) throws IOException, InterruptedException, LibsodiumException {
         final String path = "/verify";
         final String method = "POST";
 
@@ -185,6 +188,6 @@ public class Registries {
         body.put("atc", options.getAtc() != null ? options.getAtc() : "");
 
         HttpResponse<String> response = this.client.fetch(path, method, body);
-        return Operation.fromObject(Utils.fromJson(response.body(), Map.class));
+        return Utils.fromJson(response.body(), Operation.class);
     }
 }

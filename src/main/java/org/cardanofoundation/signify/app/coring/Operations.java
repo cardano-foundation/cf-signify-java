@@ -3,8 +3,12 @@ package org.cardanofoundation.signify.app.coring;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.*;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
+import org.cardanofoundation.signify.app.coring.exception.OperationFailedException;
+import org.cardanofoundation.signify.app.coring.exception.OperationNotFoundException;
+import org.cardanofoundation.signify.app.coring.exception.OperationTimeoutException;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.*;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -21,82 +25,164 @@ public class Operations {
     }
 
     /**
-     * Get operation by name
+     * Get operation by name, deserialized into a specific type.
      *
      * @param name Name or ID of the operation to retrieve
-     * @return Optional containing the operation if found, or empty if not found
-     * @throws IOException if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     * @throws LibsodiumException if a Sodium error occurs
+     * @param type The target class to deserialize into (e.g., CredentialOperation.class)
+     * @return Optional containing the typed operation if found, or empty if not found
      */
-    public <T> Optional<Operation<T>> get(String name) throws IOException, InterruptedException, LibsodiumException {
+    public <T extends Operation> Optional<T> get(String name, Class<T> type) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations/" + name;
-        String method = "GET";
-        HttpResponse<String> response = this.client.fetch(path, method, null);
-        
+        HttpResponse<String> response = this.client.fetch(path, "GET", null);
+
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             return Optional.empty();
         }
-        
-        return Optional.of(Utils.fromJson(response.body(), new TypeReference<>() {}));
+
+        return Optional.of(Utils.fromJson(response.body(), type));
     }
 
-    public List<Operation<?>> list(String type) throws IOException, InterruptedException, LibsodiumException {
+    /**
+     * Get operation by name, deserialized into the general Operation union type.
+     *
+     * @param name Name or ID of the operation to retrieve
+     * @return Optional containing the Operation if found, or empty if not found
+     */
+    public Optional<Operation> get(String name) throws IOException, InterruptedException, LibsodiumException {
+        return get(name, Operation.class);
+    }
+
+    /**
+     * List operations, deserialized into the general Operation union type.
+     */
+    public List<Operation> list(String type) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations" + (type != null ? "?type=" + type : "");
-        String method = "GET";
-        HttpResponse<String> response = this.client.fetch(path, method, null);
+        HttpResponse<String> response = this.client.fetch(path, "GET", null);
         return Utils.fromJson(response.body(), new TypeReference<>() {});
+    }
+
+    /**
+     * List all operations.
+     */
+    public List<Operation> list() throws IOException, InterruptedException, LibsodiumException {
+        return list(null);
     }
 
     public void delete(String name) throws IOException, InterruptedException, LibsodiumException {
         String path = "/operations/" + name;
-        String method = "DELETE";
-        this.client.fetch(path, method, null);
+        this.client.fetch(path, "DELETE", null);
     }
 
-    public <T> Operation<T> wait(Operation<T> op) throws IOException, InterruptedException, LibsodiumException {
-        return wait(op, WaitOptions.builder().build(), System.currentTimeMillis());
+    /**
+     * Wait for an operation to complete, returning the result as the general Operation union type.
+     *
+     * @param op The operation instance to wait for
+     */
+    public Operation wait(Operation op) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, Operation.class, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
-        return wait(op, options, System.currentTimeMillis());
+    /**
+     * Wait for an operation to complete, returning the result as the given type.
+     * Handles dependent operations automatically; fails if a dependent operation fails.
+     *
+     * @param op The operation instance to wait for
+     * @param resultType The expected type of the completed operation (e.g., CredentialOperation.class)
+     * @throws IllegalArgumentException if the completed operation is not of the expected type
+     */
+    public <T extends Operation> T wait(Operation op, Class<T> resultType) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, resultType, WaitOptions.builder().build(), System.currentTimeMillis());
     }
 
-    public <T> Operation<T> wait(Operation<T> op, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+    /**
+     * Wait for an operation to complete, returning the result as the general Operation union type.
+     *
+     * @param op The operation instance to wait for
+     * @param options Polling and timeout options
+     */
+    public Operation wait(Operation op, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, Operation.class, options, System.currentTimeMillis());
+    }
+
+    public <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options) throws IOException, InterruptedException, LibsodiumException {
+        return wait(op, resultType, options, System.currentTimeMillis());
+    }
+
+    private <T extends Operation> T wait(Operation op, Class<T> resultType, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
         int minSleep = options.getMinSleep();
         int maxSleep = options.getMaxSleep();
         int increaseFactor = options.getIncreaseFactor();
 
-        if (op.getMetadata() != null && op.getMetadata().getDepends() != null && !op.getMetadata().getDepends().isDone()) {
-            wait(op.getMetadata().getDepends(), options, startingTime);
-        }
+        String operationName = op.getName();
 
-        if (op.isDone()) {
-            return op;
+        waitOnDepends(op, options, startingTime);
+
+        if (isDone(op)) {
+            return castResult(op, resultType);
         }
 
         int retries = 0;
 
         while (true) {
-            String opName = op.getName();
-            op = this.<T>get(opName).orElseThrow(() -> new IllegalArgumentException("Operation not found: " + opName));
+            Operation current = get(operationName, Operation.class)
+                    .orElseThrow(() -> new OperationNotFoundException(operationName));
 
-            int delay = Math.max(minSleep, Math.min(maxSleep, (int) Math.pow(2, retries) * increaseFactor));
+            if (isDone(current)) {
+                return castResult(current, resultType);
+            }
+
+            long delay = Math.max(minSleep, Math.min(maxSleep, (long) Math.pow(2, retries) * increaseFactor));
             retries++;
 
-            if (op.isDone()) {
-                return op;
-            }
-            Thread.sleep(delay);
-
-            if (options.getAbortSignal().getTimeout() != null) {
-                long currentTime = System.currentTimeMillis();
-                if (currentTime - startingTime > options.getAbortSignal().getTimeout()) {
-                    options.getAbortSignal().abort("Timeout");
+            Long timeout = options.getAbortSignal().getTimeout();
+            if (timeout != null) {
+                long remaining = timeout - (System.currentTimeMillis() - startingTime);
+                if (remaining <= 0) {
+                    throw new OperationTimeoutException(operationName, timeout);
                 }
+                // clamp so the timeout is honored to within one poll, then give
+                // the operation a final fetch before timing out on the next pass
+                delay = Math.min(delay, remaining);
             }
-
             options.getAbortSignal().throwIfAborted();
+
+            Thread.sleep(delay);
+        }
+    }
+
+    private static <T extends Operation> T castResult(Operation op, Class<T> resultType) {
+        if (!resultType.isInstance(op)) {
+            throw new IllegalArgumentException("Operation " + op.getName() + " is a "
+                    + op.getClass().getSimpleName() + ", not the requested " + resultType.getSimpleName());
+        }
+        return resultType.cast(op);
+    }
+
+    private static boolean isDone(Operation op) {
+        return !(op instanceof PendingOperation);
+    }
+
+    /**
+     * Returns the dependent operation embedded in the given operation's metadata,
+     * or null if the operation has none.
+     */
+    public static KelOperation dependsOf(Operation operation) {
+        return switch (operation) {
+            case DelegatorOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
+            case RegistryOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
+            case CredentialOperation op when op.getMetadata() != null -> op.getMetadata().getDepends();
+            default -> null;
+        };
+    }
+
+    private void waitOnDepends(Operation operation, WaitOptions options, long startingTime) throws IOException, InterruptedException, LibsodiumException {
+        KelOperation depOp = dependsOf(operation);
+
+        if (depOp != null) {
+            KelOperation depResult = isDone(depOp) ? depOp : wait(depOp, KelOperation.class, options, startingTime);
+            if (depResult instanceof FailedOperation failedDep) {
+                throw new OperationFailedException(failedDep);
+            }
         }
     }
 

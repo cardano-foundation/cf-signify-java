@@ -6,6 +6,7 @@ import org.cardanofoundation.signify.cesr.args.RawArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 public class Salter extends Matter {
     @Getter
@@ -17,44 +18,29 @@ public class Salter extends Matter {
         this(RawArgs.builder()
                 .code(Codex.MatterCodex.Salt_128.getValue())
                 .build(), 
-            Tier.low);
+            Tier.LOW);
     }
 
     public Salter(RawArgs args) {
-        this(args, Tier.low);
+        this(args, Tier.LOW);
     }
 
     public Salter(String qb64) {
-        this(qb64, Tier.low);
+        this(qb64, Tier.LOW);
     }
 
     public Salter(RawArgs args, Tier tier) {
         super(RawArgs.generateSalt128Raw(args));
-        this.tier = tier == null ? Tier.low : tier;
+        this.tier = tier == null ? Tier.LOW : tier;
     }
 
     public Salter(String qb64, Tier tier) {
         super(qb64);
-        this.tier = tier == null ? Tier.low : tier;
+        this.tier = tier == null ? Tier.LOW : tier;
     }
 
     public Salter(byte[] qb64b) {
         super(qb64b);
-    }
-
-    public enum Tier {
-        low,
-        med,
-        high;
-
-        public static Tier fromString(String tier) {
-            return switch (tier) {
-                case "low" -> Tier.low;
-                case "med" -> Tier.med;
-                case "high" -> Tier.high;
-                default -> null;
-            };
-        }
     }
 
     public byte[] stretch() throws LibsodiumException {
@@ -83,15 +69,15 @@ public class Salter extends Matter {
             memlimit = 8192; //libsodium.crypto_pwhash_MEMLIMIT_MIN
         } else {
             memlimit = switch (tier) {
-                case Tier.low -> {
+                case Tier.LOW -> {
                     opslimit = 2; // libsodium.crypto_pwhash_OPSLIMIT_INTERACTIVE
                     yield 67108864;
                 }
-                case Tier.med -> {
+                case Tier.MED -> {
                     opslimit = 3; // libsodium.crypto_pwhash_OPSLIMIT_MODERATE
                     yield 268435456;
                 }
-                case Tier.high -> {
+                case Tier.HIGH -> {
                     opslimit = 4; // libsodium.crypto_pwhash_OPSLIMIT_SENSITIVE
                     yield 1073741824;
                 }

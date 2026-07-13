@@ -16,7 +16,7 @@ import org.cardanofoundation.signify.app.Escrowing.Escrows;
 import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
-import org.cardanofoundation.signify.app.aiding.Identifier;
+import org.cardanofoundation.signify.app.aiding.IdentifierController;
 import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
 import org.cardanofoundation.signify.app.coring.KeyStates;
@@ -31,7 +31,6 @@ import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.app.aiding.IdentifierDeps;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
 import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
@@ -44,7 +43,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.DigestException;
+import java.time.Duration;
 import java.util.*;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 @Getter
 @Setter
@@ -57,11 +58,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private Agent agent;
     private Authenticater authn;
     private Keeping.KeyManager manager;
-    private Salter.Tier tier;
+    private Tier tier;
     private String bootUrl;
     private List<ExternalModule> externalModules;
 
-    private Identifier identifierInstance = new Identifier(this);
+    private IdentifierController identifierControllerInstance = new IdentifierController(this);
     private Oobis oobisInstance = new Oobis(this);
     private Operations operationsInstance = new Operations(this);
     private KeyEvents keyEventsInstance = new KeyEvents(this);
@@ -80,6 +81,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     private Config configInstance = new Config(this);
 
     private static final String DEFAULT_BOOT_URL = "http://localhost:3903";
+    private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(30);
+
+    private final HttpClient httpClient = HttpClient.newBuilder()
+        .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
+        .build();
 
     /**
      * SignifyClient constructor
@@ -93,11 +99,11 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     public SignifyClient(
         String url,
         String bran,
-        Salter.Tier tier,
+        Tier tier,
         String bootUrl,
         List<ExternalModule> externalModules
     ) throws DigestException, LibsodiumException {
-        tier = tier != null ? tier : Salter.Tier.low;
+        tier = tier != null ? tier : Tier.LOW;
         this.url = url;
         if (bran.length() < 21) {
             throw new InvalidValueException("bran must be 21 characters");
@@ -139,9 +145,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             .POST(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
             .build();
 
-        HttpClient client = HttpClient.newBuilder().build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
             throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
@@ -162,9 +166,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             .GET()
             .build();
 
-        HttpClient client = HttpClient.newBuilder().build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             throw new IllegalArgumentException("Agent does not exist for controller " + caid);
@@ -248,7 +250,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
         headers.put("signify-resource", this.controller.getPre());
-        headers.put("signify-timestamp", new Date().toInstant().toString().replace("Z", "000+00:00"));
+        headers.put("signify-timestamp", Utils.currentDateTimeString());
         headers.put("content-type", "application/json");
 
         Object _body = method.equals("GET") ? null : Utils.jsonStringify(data);
@@ -277,15 +279,14 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Map<String, String> responseHeaders = new LinkedHashMap<>();
 
         try {
-            HttpClient client = HttpClient.newBuilder().build();
-            response = client.send(requestBuilder.build(),
+            response = httpClient.send(requestBuilder.build(),
                     HttpResponse.BodyHandlers.ofString());
 
             if ("GET".equals(method) && response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 return response;
             }
 
-            if (200 < response.statusCode() && response.statusCode() > 300) {
+            if (response.statusCode() < 200 || response.statusCode() > 299) {
                 throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
                         method, path, response.statusCode(), response.body()));
             }
@@ -351,8 +352,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
                     .PUT(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
                     .build();
 
-            HttpClient client = HttpClient.newBuilder().build();
-            client.send(request, HttpResponse.BodyHandlers.ofString());
+            httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException exception) {
             if(exception.getMessage().contains("unexpected content length header with 204 response")) {
                 /**
@@ -374,8 +374,8 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      *
      * @return {Identifier}
      */
-    public Identifier identifiers() {
-        return identifierInstance;
+    public IdentifierController identifiers() {
+        return identifierControllerInstance;
     }
 
     /**

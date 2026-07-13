@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
+import org.cardanofoundation.signify.generated.keria.model.EndRole;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.OOBIOperation;
 
 public class Oobis {
     private final SignifyClient client;
@@ -28,7 +33,7 @@ public class Oobis {
      * @throws JsonProcessingException if there is an error processing the JSON
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Optional<Object> get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<OOBI> get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
         if (role == null) {
             role = "agent";
         }
@@ -40,7 +45,7 @@ public class Oobis {
             return Optional.empty();
         }
         
-        return Optional.of(Utils.fromJson(response.body(), Object.class));
+        return Optional.of(Utils.fromJson(response.body(), OOBI.class));
     }
 
     /**
@@ -52,7 +57,7 @@ public class Oobis {
      * @throws JsonProcessingException if there is an error processing the JSON
      * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Object resolve(String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
+    public OOBIOperation resolve(String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
         String path = "/oobis";
         String method = "POST";
 
@@ -62,6 +67,21 @@ public class Oobis {
             data.put("oobialias", alias);
         }
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), OOBIOperation.class);
+    }
+
+    /**
+     * Get end roles for an AID by prefix
+     *
+     * @param aid  AID prefix
+     * @param role Optional role to filter by
+     * @return List of end roles
+     */
+    public List<EndRole> endroles(String aid, String role) throws IOException, InterruptedException, LibsodiumException {
+        String path = (role != null)
+                ? "/endroles/" + aid + "/" + role
+                : "/endroles/" + aid;
+        HttpResponse<String> response = this.client.fetch(path, "GET", null);
+        return Utils.fromJson(response.body(), new TypeReference<List<EndRole>>() {});
     }
 }

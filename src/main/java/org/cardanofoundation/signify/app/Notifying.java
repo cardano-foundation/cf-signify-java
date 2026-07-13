@@ -1,21 +1,22 @@
 package org.cardanofoundation.signify.app;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Httping;
+import org.cardanofoundation.signify.generated.keria.model.Notification;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 
 public class Notifying {
     @Getter
     public static class Notifications {
         private final SignifyClient client;
-        private final ObjectMapper objectMapper = new ObjectMapper();
 
         /**
          * Notifications
@@ -47,7 +48,7 @@ public class Notifying {
                     range.start(),
                     range.end(),
                     range.total(),
-                    res.body()
+                    Utils.fromJson(res.body(), new TypeReference<>() {})
             );
         }
 
@@ -81,7 +82,8 @@ public class Notifying {
             this.client.fetch(path, method, null);
         }
 
-        public record NotificationListResponse(int start, int end, int total, String notes) {
+        public record NotificationListResponse(int start, int end, int total, List<Notification> notes) {
         }
+
     }
 }

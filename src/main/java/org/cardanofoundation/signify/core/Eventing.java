@@ -329,7 +329,7 @@ public class Eventing {
         _sad.put("v", vs);
         _sad.put("t", Ilks.RPY.getValue());
         _sad.put("d", "");
-        _sad.put("dt", stamp != null ? stamp : new Date().toInstant().toString().replace("Z", "000+00:00"));
+        _sad.put("dt", stamp != null ? stamp : Utils.currentDateTimeString());
         _sad.put("r", route);
         _sad.put("a", data);
 

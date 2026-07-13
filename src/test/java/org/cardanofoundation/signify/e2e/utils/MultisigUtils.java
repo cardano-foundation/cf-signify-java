@@ -5,11 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.signify.app.Exchanging;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigIxnExchange;
+import static org.cardanofoundation.signify.app.ExnMessages.*;
+import static org.cardanofoundation.signify.app.ExnMessages.as;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
+import org.cardanofoundation.signify.app.config.Threshold;
 import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
 import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
 import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
@@ -23,7 +27,6 @@ import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
 
 import java.io.IOException;
 import java.security.DigestException;
@@ -31,35 +34,56 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.cardanofoundation.signify.generated.keria.model.AidRecord;
+import org.cardanofoundation.signify.generated.keria.model.Credential;
+import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
+import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
+import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Icp;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
+
+@SuppressWarnings("unchecked")
 public class MultisigUtils {
 
-    public static Object acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
-        final States.HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
+    public static KelOperation acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
+        final HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
-        List<Object> res = (List<Object>) client2.groups().getRequest(args.getMsgSaid()).get();
-        Map<String, Object> responseMap = (Map<String, Object>) res.get(0);
-        Map<String, Object> exn = (Map<String, Object>) responseMap.get("exn");
-        Map<String, Object> icp = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("icp");
-        List<String> smids = (List<String>) ((Map<String, Object>) exn.get("a")).get("smids");
-        List<String> rmids = (List<String>) ((Map<String, Object>) exn.get("a")).get("rmids");
+        List<ExnMultisig> res = client2.groups().getRequest(args.getMsgSaid()).get();
+        MultisigIcpExchange group = as(res.getFirst(), MultisigIcpExchange.class).orElseThrow();
+        Icp icp = group.e().icp().value();
+        List<String> smids = group.a().smids();
+        List<String> rmids = group.a().rmids();
 
-        List<Object> states = TestUtils.getStates(client2, smids);
-        List<Object> rstates = TestUtils.getStates(client2, rmids);
+        List<KeyStateRecord> states = TestUtils.getStates(client2, smids)
+            .stream()
+            .map(rawState -> Utils.fromJson(Utils.jsonStringify(rawState), KeyStateRecord.class))
+            .collect(Collectors.toList());
+
+        List<KeyStateRecord> rstates = TestUtils.getStates(client2, rmids)
+            .stream()
+            .map(rawState -> Utils.fromJson(Utils.jsonStringify(rawState), KeyStateRecord.class))
+            .collect(Collectors.toList());
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
         createIdentifierArgs.setAlgo(Manager.Algos.group);
         createIdentifierArgs.setMhab(memberHab);
-        createIdentifierArgs.setIsith(icp.get("kt"));
-        createIdentifierArgs.setNsith(icp.get("nt"));
-        createIdentifierArgs.setToad(Integer.valueOf(icp.get("bt").toString()));
-        createIdentifierArgs.setWits((List<String>) icp.get("b"));
+        createIdentifierArgs.setIsith(Threshold.rawOf(icp.getKt()));
+        createIdentifierArgs.setNsith(Threshold.rawOf(icp.getNt()));
+        createIdentifierArgs.setToad(Integer.valueOf(icp.getBt()));
+        createIdentifierArgs.setWits(icp.getB());
         createIdentifierArgs.setStates(states);
         createIdentifierArgs.setRstates(rstates);
-        createIdentifierArgs.setDelpre(icp.get("di") != null ? icp.get("di").toString() : null);
+        createIdentifierArgs.setDelpre(icp.getDi());
 
-        EventResult icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
-        Object op2 = icpResult2.op();
+        var icpResult2 = client2.identifiers().create(args.getGroupName(), createIdentifierArgs);
+        KelOperation op2 = icpResult2.op();
         Serder serder = icpResult2.serder();
         List<String> sigs = icpResult2.sigs();
         List<Siger> sigers = sigs.stream().map(Siger::new).toList();
@@ -78,21 +102,21 @@ public class MultisigUtils {
         payload.put("rmids", rmids);
 
         client2.exchanges()
-                .send(args.localMemberName, args.groupName, memberHab, "/multisig/icp", payload, embeds, recipients);
+                .send(args.localMemberName, args.groupName, memberHab, MULTISIG_ICP_ROUTE, payload, embeds, recipients);
 
         return op2;
     }
 
-    public static Object interactMultisig(SignifyClient client, String groupName, States.HabState aid,
-                                          List<States.HabState> otherMemberAIDs,
+    public static KelOperation interactMultisig(SignifyClient client, String groupName, HabState aid,
+                                          List<HabState> otherMemberAIDs,
                                           Object data,
-                                          List<Object> states,
+                                          List<KeyStateRecord> states,
                                           boolean isInitiator) throws Exception {
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_IXN_ROUTE);
         }
 
-        EventResult interactResult = client
+        var interactResult = client
                 .identifiers()
                 .interact(groupName, data);
 
@@ -106,15 +130,8 @@ public class MultisigUtils {
         Map<String, List<Object>> xembeds = new LinkedHashMap<>();
         xembeds.put("ixn", List.of(serder, atc));
 
-        List<String> smids = states.stream().map(state -> {
-            if (state instanceof Map<?, ?> stateMap) {
-                return stateMap.get("i").toString();
-            } else if (state instanceof States.State stateHab) {
-                return stateHab.getI();
-            }
-            return null;
-        }).toList();
-        List<String> recp = otherMemberAIDs.stream().map(States.HabState::getPrefix).toList();
+        List<String> smids = states.stream().map(KeyStateRecord::getI).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -126,7 +143,7 @@ public class MultisigUtils {
                 aid.getName(),
                 groupName,
                 aid,
-                "/multisig/ixn",
+                MULTISIG_IXN_ROUTE,
                 payload,
                 xembeds,
                 recp
@@ -135,16 +152,16 @@ public class MultisigUtils {
         return interactResult.op();
     }
 
-    public static Object rotateMultisig(SignifyClient client, String groupName, States.HabState aid,
-                                          List<States.HabState> otherMemberAIDs,
+    public static KelOperation rotateMultisig(SignifyClient client, String groupName, HabState aid,
+                                          List<HabState> otherMemberAIDs,
                                           RotateIdentifierArgs kargs,
                                           String route,
                                           boolean isInitiator) throws Exception {
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/rot");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_ROT_ROUTE);
         }
 
-        EventResult interactResult = client
+        var interactResult = client
                 .identifiers()
                 .rotate(groupName, kargs);
 
@@ -161,12 +178,12 @@ public class MultisigUtils {
         List<String> smids = kargs.getStates().stream().map(state -> {
             if (state instanceof Map<?, ?> stateMap) {
                 return stateMap.get("i").toString();
-            } else if (state instanceof States.State stateHab) {
+            } else if (state instanceof KeyStateRecord stateHab) {
                 return stateHab.getI();
             }
             return null;
         }).toList();
-        List<String> recp = otherMemberAIDs.stream().map(States.HabState::getPrefix).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -187,25 +204,20 @@ public class MultisigUtils {
         return interactResult.op();
     }
 
-    public static List<Object> addEndRoleMultisig(SignifyClient client, String groupName, States.HabState aid,
-                                            List<States.HabState> otherMemberAIDs, States.HabState multisigAID,
+    public static List<EndRoleOperation> addEndRoleMultisig(SignifyClient client, String groupName, HabState aid,
+                                            List<HabState> otherMemberAIDs, HabState multisigAID,
                                             String timestamp,
                                             boolean isInitiator) throws Exception {
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_RPY_ROUTE);
         }
 
-        List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
-        List<Object> signings = (List<Object>) members.get("signing");
+        List<EndRoleOperation> opList = new ArrayList<>();
+        GroupMember members = client.identifiers().members(groupName);
 
-        for (Object signing : signings) {
-            Map<String, Object> signingMap = (Map<String, Object>) signing;
-            Map<String, Object> ends = (Map<String, Object>) signingMap.get("ends");
-            LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.get("agent");
-
-            String eid = agent.firstEntry().getKey();
-            EventResult endRoleResult = client
+        for (AidRecord signing : members.getSigning()) {
+            String eid = signing.getEnds().getAgent().keySet().iterator().next();
+            var endRoleResult = client
                     .identifiers()
                     .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
@@ -213,7 +225,7 @@ public class MultisigUtils {
 
             Serder rpy = endRoleResult.serder();
             List<String> sigs = endRoleResult.sigs();
-            States.State ghapState1 = multisigAID.getState();
+            KeyStateRecord ghapState1 = multisigAID.getState();
 
             Map<String, Object> seal2 = new LinkedHashMap<>();
             seal2.put("i", multisigAID.getPrefix());
@@ -227,7 +239,7 @@ public class MultisigUtils {
             Map<String, List<Object>> roleEmbeds = new LinkedHashMap<>();
             roleEmbeds.put("rpy", List.of(rpy, atc));
 
-            List<String> recp = otherMemberAIDs.stream().map(States.HabState::getPrefix).toList();
+            List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("gid", multisigAID.getPrefix());
@@ -236,7 +248,7 @@ public class MultisigUtils {
                     aid.getName(),
                     groupName,
                     aid,
-                    "/multisig/rpy",
+                    MULTISIG_RPY_ROUTE,
                     payload,
                     roleEmbeds,
                     recp
@@ -246,24 +258,19 @@ public class MultisigUtils {
         return opList;
     }
 
-    public static List<Object> addEndRoleMultisigs(SignifyClient client, String groupName, States.HabState aid,
-                                                  List<States.HabState> otherMemberAIDs, States.HabState multisigAID,
+    public static List<EndRoleOperation> addEndRoleMultisigs(SignifyClient client, String groupName, HabState aid,
+                                                  List<HabState> otherMemberAIDs, HabState multisigAID,
                                                   String timestamp,
                                                   boolean isInitiator) throws Exception {
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/rpy");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_RPY_ROUTE);
         }
 
-        List<Object> opList = new ArrayList<>();
-        Map<String, Object> members = (Map<String, Object>) client.identifiers().members(groupName);
-        List<Object> signings = (List<Object>) members.get("signing");
+        List<EndRoleOperation> opList = new ArrayList<>();
+        GroupMember members = client.identifiers().members(groupName);
 
-        Map<String, Object> signingMap = TestUtils.castObjectToListMap(signings).get(0);
-        Map<String, Object> ends = (Map<String, Object>) signingMap.get("ends");
-        LinkedHashMap<String, Object> agent = (LinkedHashMap<String, Object>) ends.get("agent");
-
-        String eid = agent.firstEntry().getKey();
-        EventResult endRoleResult = client
+        String eid = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
+        var endRoleResult = client
                 .identifiers()
                 .addEndRole(multisigAID.getName(), "agent", eid, timestamp);
 
@@ -271,7 +278,7 @@ public class MultisigUtils {
 
         Serder rpy = endRoleResult.serder();
         List<String> sigs = endRoleResult.sigs();
-        States.State ghapState1 = multisigAID.getState();
+        KeyStateRecord ghapState1 = multisigAID.getState();
 
         Map<String, Object> seal2 = new LinkedHashMap<>();
         seal2.put("i", multisigAID.getPrefix());
@@ -285,7 +292,7 @@ public class MultisigUtils {
         Map<String, List<Object>> roleEmbeds = new LinkedHashMap<>();
         roleEmbeds.put("rpy", List.of(rpy, atc));
 
-        List<String> recp = otherMemberAIDs.stream().map(States.HabState::getPrefix).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("gid", multisigAID.getPrefix());
@@ -294,7 +301,7 @@ public class MultisigUtils {
                 aid.getName(),
                 groupName,
                 aid,
-                "/multisig/rpy",
+                MULTISIG_RPY_ROUTE,
                 payload,
                 roleEmbeds,
                 recp
@@ -304,13 +311,13 @@ public class MultisigUtils {
 
     public static void admitMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMemberAIDs,
-            States.HabState multisigAID,
-            States.HabState recipientAID,
+            HabState aid,
+            List<HabState> otherMemberAIDs,
+            HabState multisigAID,
+            HabState recipientAID,
             String timestamp
     ) throws Exception {
-        String grantMsgSaid = TestUtils.waitAndMarkNotification(client, "/exn/ipex/grant");
+        String grantMsgSaid = TestUtils.waitAndMarkNotification(client, "/exn" + IPEX_GRANT_ROUTE);
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
                 .builder()
@@ -334,7 +341,7 @@ public class MultisigUtils {
                 List.of(recipientAID.getPrefix())
         );
 
-        States.State mstate = multisigAID.getState();
+        KeyStateRecord mstate = multisigAID.getState();
 
         Map<String, Object> sealMap = new LinkedHashMap<>();
         sealMap.put("i", multisigAID.getPrefix());
@@ -349,7 +356,7 @@ public class MultisigUtils {
         Map<String, List<Object>> gembeds = new LinkedHashMap<>();
         gembeds.put("exn", List.of(admit, atc));
 
-        List<String> recp = otherMemberAIDs.stream().map(States.HabState::getPrefix).toList();
+        List<String> recp = otherMemberAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("gid", multisigAID.getPrefix());
@@ -357,27 +364,30 @@ public class MultisigUtils {
                 .send(aid.getName(),
                         "multisig",
                         aid,
-                        "/multisig/exn",
+                        MULTISIG_EXN_ROUTE,
                         payload,
                         gembeds,
                         recp
                 );
     }
 
-    public static Object createAIDMultisig(
+    public static GroupOperation createAIDMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
+            HabState aid,
+            List<HabState> otherMembersAIDs,
             String groupName,
             CreateIdentifierArgs kargs,
             boolean isInitiator) throws Exception {
 
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/icp");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_ICP_ROUTE);
         }
 
-        EventResult icpResult = client.identifiers().create(groupName, kargs);
-        Object op = icpResult.op();
+        var icpResult = client.identifiers().create(groupName, kargs);
+        if (!(icpResult.op() instanceof GroupOperation op)) {
+            throw new AssertionError("Expected group inception to return a GroupOperation but got "
+                    + icpResult.op().getClass().getSimpleName());
+        }
 
         Serder serder = icpResult.serder();
         List<String> sigs = icpResult.sigs();
@@ -387,15 +397,8 @@ public class MultisigUtils {
         String atc = ims.substring(serder.getSize());
 
         Map<String, List<Object>> embeds = Map.of("icp", List.of(serder, atc));
-        List<String> smids = kargs.getStates().stream().map(state -> {
-                    if (state instanceof Map<?, ?> stateMap) {
-                        return stateMap.get("i").toString();
-                    } else if (state instanceof States.State stateHab) {
-                        return stateHab.getI();
-                    }
-                    return null;
-                }).toList();
-        List<String> recp = otherMembersAIDs.stream().map(States.HabState::getPrefix).toList();
+        List<String> smids = kargs.getStates().stream().map(KeyStateRecord::getI).toList();
+        List<String> recp = otherMembersAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -407,7 +410,7 @@ public class MultisigUtils {
                 aid.getName(),
                 "multisig",
                 aid,
-                "/multisig/icp",
+                MULTISIG_ICP_ROUTE,
                 payload,
                 embeds,
                 recp
@@ -416,18 +419,24 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Object createRegistryMultisig(
+    /**
+     * The created registry: the operation to wait on and the registry identifier (regk).
+     */
+    public record RegistryCreation(RegistryOperation op, String regk) {
+    }
+
+    public static RegistryCreation createRegistryMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
-            States.HabState multisigAID,
+            HabState aid,
+            List<HabState> otherMembersAIDs,
+            HabState multisigAID,
             String registryName,
             String nonce,
             String topic,
             boolean isInitiator) throws Exception {
 
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_VCP_ROUTE);
         }
 
         CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
@@ -437,11 +446,11 @@ public class MultisigUtils {
                 .nonce(nonce)
                 .build();
         RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        Object op = vcpResult.op();
+        RegistryOperation op = vcpResult.op();
 
-        Serder serder = vcpResult.getRegser();
-        Serder anc = vcpResult.getSerder();
-        List<String> sigs = vcpResult.getSigs();
+        Serder serder = vcpResult.regser();
+        Serder anc = vcpResult.serder();
+        List<String> sigs = vcpResult.sigs();
         List<Siger> sigers = sigs.stream().map(Siger::new).toList();
 
         String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
@@ -453,27 +462,27 @@ public class MultisigUtils {
         }};
 
         List<String> recp = otherMembersAIDs.stream()
-                .map(States.HabState::getPrefix)
+                .map(HabState::getPrefix)
                 .toList();
 
         client.exchanges().send(
                 aid.getName(),
                 topic,
                 aid,
-                "/multisig/vcp",
+                MULTISIG_VCP_ROUTE,
                 Map.of("gid", multisigAID.getPrefix()),
                 regbeds,
                 recp
         );
 
-        return op;
+        return new RegistryCreation(op, serder.getPre());
     }
 
-    public static Object createRegistryMultisig(
+    public static RegistryCreation createRegistryMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
-            States.HabState multisigAID,
+            HabState aid,
+            List<HabState> otherMembersAIDs,
+            HabState multisigAID,
             String registryName,
             String nonce,
             boolean isInitiator) throws Exception {
@@ -481,82 +490,35 @@ public class MultisigUtils {
         return createRegistryMultisig(client, aid, otherMembersAIDs, multisigAID, registryName, nonce, "registry", isInitiator);
     }
 
-    public static Object createMultisig(
-            SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
-            States.HabState multisigAID,
-            String registryName,
-            String nonce,
-            boolean isInitiator) throws Exception {
-
-        if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/vcp");
-        }
-
-        CreateRegistryArgs createRegistryArgs = CreateRegistryArgs
-                .builder()
-                .name(multisigAID.getName())
-                .registryName(registryName)
-                .nonce(nonce)
-                .build();
-        RegistryResult vcpResult = client.registries().create(createRegistryArgs);
-        Object op = vcpResult.op();
-
-        Serder serder = vcpResult.getRegser();
-        Serder anc = vcpResult.getSerder();
-        List<String> sigs = vcpResult.getSigs();
-        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
-
-        String ims = new String(Eventing.messagize(anc, sigers, null, null, null, false));
-        String atc = ims.substring(anc.getSize());
-
-        Map<String, List<Object>> regbeds = new LinkedHashMap<>() {{
-            put("vcp", List.of(serder, ""));
-            put("anc", List.of(anc, atc));
-        }};
-
-        List<String> recp = otherMembersAIDs.stream()
-                .map(States.HabState::getPrefix)
-                .toList();
-
-        client.exchanges().send(
-                aid.getName(),
-                "multisig",
-                aid,
-                "/multisig/vcp",
-                Map.of("gid", multisigAID.getPrefix()),
-                regbeds,
-                recp
-        );
-        return op;
+    /** The first seal in an event's anchor payload (`a`); same shape for exn embed sads and keds. */
+    private static Map<String, Object> anchoredSeal(Map<String, Object> event) {
+        return (Map<String, Object>) ((List<Object>) event.get("a")).getFirst();
     }
 
-
-
-    public static Object delegateMultisig(
+    public static DelegatorOperation delegateMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
-            States.HabState multisigAID,
-            Map<String, String> anchor,
+            HabState aid,
+            List<HabState> otherMembersAIDs,
+            HabState multisigAID,
+            Map<String, ?> anchor,
             boolean isInitiator) throws Exception {
 
         if (!isInitiator) {
-            String msgSaid = TestUtils.waitAndMarkNotification(client, "/multisig/ixn");
+            String msgSaid = TestUtils.waitAndMarkNotification(client, MULTISIG_IXN_ROUTE);
             System.out.println(aid.getName() + "(" + aid.getPrefix() + ") received exchange message to join the interaction event");
-            List<Object> res = (List<Object>) client.groups().getRequest(msgSaid).get();
-            Map<String, Object> exn = (Map<String, Object>) ((Map<String, Object>) res.get(0)).get("exn");
-            Map<String, Object> ixn = (Map<String, Object>) ((Map<String, Object>) exn.get("e")).get("ixn");
-            anchor = (Map<String, String>) ((List<Object>) ixn.get("a")).get(0);
+            List<ExnMultisig> res = client.groups().getRequest(msgSaid).get();
+            MultisigIxnExchange group = as(res.getFirst(), MultisigIxnExchange.class).orElseThrow();
+            // Read from the sad, not the typed view: each member rebuilds and signs the
+            // interaction event from this anchor, so it must stay byte-exact off the wire.
+            anchor = anchoredSeal(group.e().ixn().sad());
         }
 
-        EventResult delResult = client.delegations().approve(multisigAID.getName(), anchor);
-        Object appOp = delResult.op();
+        var delResult = client.delegations().approve(multisigAID.getName(), anchor);
+        DelegatorOperation appOp = delResult.op();
         System.out.println("Delegator " + aid.getName() + "(" + aid.getPrefix() + ") approved delegation for " +
                 multisigAID.getName() + " with anchor " + anchor);
 
-        assert Utils.jsonStringify(((List<Object>) delResult.serder().getKed().get("a")).get(0)).equals(Utils.jsonStringify(anchor));
+        assertEquals(Utils.jsonStringify(anchor), Utils.jsonStringify(anchoredSeal(delResult.serder().getKed())));
 
         Serder serder = delResult.serder();
         List<String> sigs = delResult.sigs();
@@ -566,9 +528,9 @@ public class MultisigUtils {
         Map<String, List<Object>> xembeds = Map.of("ixn", List.of(serder, atc));
         List<String> smids = new ArrayList<>();
         smids.add(aid.getPrefix());
-        smids.addAll(otherMembersAIDs.stream().map(States.HabState::getPrefix).toList());
+        smids.addAll(otherMembersAIDs.stream().map(HabState::getPrefix).toList());
 
-        List<String> recp = otherMembersAIDs.stream().map(States.HabState::getPrefix).toList();
+        List<String> recp = otherMembersAIDs.stream().map(HabState::getPrefix).toList();
 
         Map<String, Object> payload = new LinkedHashMap<>() {{
             put("gid", serder.getPre());
@@ -579,7 +541,7 @@ public class MultisigUtils {
                 aid.getName(),
                 multisigAID.getName(),
                 aid,
-                "/multisig/ixn",
+                MULTISIG_IXN_ROUTE,
                 payload,
                 xembeds,
                 recp
@@ -596,27 +558,24 @@ public class MultisigUtils {
 
     public static void grantMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
-            States.HabState multisigAID,
-            States.HabState recipientAID,
-            Object credential,
+            HabState aid,
+            List<HabState> otherMembersAIDs,
+            HabState multisigAID,
+            HabState recipientAID,
+            Credential credential,
             String timestamp,
             boolean isInitiator) throws Exception {
 
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/exn");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_EXN_ROUTE);
         }
 
-        Map<String, Object> sad = (Map<String, Object>) ((Map<String, Object>) credential).get("sad");
-        Map<String, Object> anc = (Map<String, Object>) ((Map<String, Object>) credential).get("anc");
-        Map<String, Object> iss = (Map<String, Object>) ((Map<String, Object>) credential).get("iss");
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
                 .senderName(multisigAID.getName())
-                .acdc(new Serder(sad))
-                .anc(new Serder(anc))
-                .iss(new Serder(iss))
+            .acdc(new Serder(Utils.toMap(credential.getSad())))
+            .anc(new Serder(Utils.toMap(credential.getAnc())))
+            .iss(new Serder(Utils.toMap(credential.getIss())))
                 .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();
@@ -635,7 +594,7 @@ public class MultisigUtils {
                 List.of(recipientAID.getPrefix())
         );
 
-        States.State mstate = multisigAID.getState();
+        KeyStateRecord mstate = multisigAID.getState();
         Map<String, Object> sealMap = new LinkedHashMap<>() {{
             put("i", multisigAID.getPrefix());
             put("s", mstate.getEe().getS());
@@ -649,35 +608,35 @@ public class MultisigUtils {
         String atc = gims.substring(grant.getSize()) + end;
 
         Map<String, List<Object>> gembeds = Map.of("exn", List.of(grant, atc));
-        List<String> recp = otherMembersAIDs.stream().map(States.HabState::getPrefix).collect(Collectors.toList());
+        List<String> recp = otherMembersAIDs.stream().map(HabState::getPrefix).collect(Collectors.toList());
 
         client.exchanges().send(
                 aid.getName(),
                 "multisig",
                 aid,
-                "/multisig/exn",
+                MULTISIG_EXN_ROUTE,
                 Map.of("gid", multisigAID.getPrefix()),
                 gembeds,
                 recp
         );
     }
 
-    public static Object issueCredentialMultisig(
+    public static CredentialOperation issueCredentialMultisig(
             SignifyClient client,
-            States.HabState aid,
-            List<States.HabState> otherMembersAIDs,
+            HabState aid,
+            List<HabState> otherMembersAIDs,
             String multisigAIDName,
             CredentialData kargsIss,
             boolean isInitiator) throws Exception {
 
         if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, "/multisig/iss");
+            TestUtils.waitAndMarkNotification(client, MULTISIG_ISS_ROUTE);
         }
 
         IssueCredentialResult credResult = client.credentials().issue(multisigAIDName, kargsIss);
-        Operation op = credResult.getOp();
+        CredentialOperation op = credResult.getOp();
 
-        States.HabState multisigAID = client.identifiers().get(multisigAIDName)
+        HabState multisigAID = client.identifiers().get(multisigAIDName)
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + multisigAIDName));
         Keeping.Keeper keeper = client.getManager().get(multisigAID);
         List<String> sigs = keeper.sign(credResult.getAnc().getRaw().getBytes()).signatures();
@@ -693,14 +652,14 @@ public class MultisigUtils {
 
 
         List<String> recp = otherMembersAIDs.stream()
-                .map(States.HabState::getPrefix)
+                .map(HabState::getPrefix)
                 .collect(Collectors.toList());
 
         client.exchanges().send(
                 aid.getName(),
                 "multisig",
                 aid,
-                "/multisig/iss",
+                MULTISIG_ISS_ROUTE,
                 Map.of("gid", multisigAID.getPrefix()),
                 embeds,
                 recp
@@ -709,13 +668,18 @@ public class MultisigUtils {
         return op;
     }
 
-    public static Object startMultisigIncept(
+    public static KelOperation startMultisigIncept(
             SignifyClient client,
             StartMultisigInceptArgs args
     ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
-        States.HabState aid1 = client.identifiers().get(args.getLocalMemberName())
+        HabState aid1 = client.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
-        List<Object> participantStates = TestUtils.getStates(client, args.getParticipants());
+
+        // TODO should update the TestUtils.getStates to return the KeyStateRecord[]
+        List<KeyStateRecord> participantStates = TestUtils.getStates(client, args.getParticipants())
+            .stream()
+            .map(rawState -> Utils.fromJson(Utils.jsonStringify(rawState), KeyStateRecord.class))
+            .collect(Collectors.toList());
 
         CreateIdentifierArgs createIdentifierArgs = new CreateIdentifierArgs();
         createIdentifierArgs.setAlgo(Manager.Algos.group);
@@ -728,8 +692,8 @@ public class MultisigUtils {
         createIdentifierArgs.setStates(participantStates);
         createIdentifierArgs.setRstates(participantStates);
 
-        EventResult icpResult1 = client.identifiers().create(args.getGroupName(), createIdentifierArgs);
-        Object op1 = icpResult1.op();
+        var icpResult1 = client.identifiers().create(args.getGroupName(), createIdentifierArgs);
+        KelOperation op1 = icpResult1.op();
         Serder serder = icpResult1.serder();
 
         List<String> sigs = icpResult1.sigs();
@@ -741,7 +705,7 @@ public class MultisigUtils {
         embeds.put("icp", List.of(serder, atc));
 
         List<String> smids = participantStates.stream()
-                .map(state -> ((Map<String, Object>) state).get("i").toString())
+                .map(KeyStateRecord::getI)
                 .collect(Collectors.toList());
 
         Map<String, Object> payload = new LinkedHashMap<>();
@@ -761,7 +725,6 @@ public class MultisigUtils {
 
         return op1;
     }
-
 
     @Getter
     @Setter

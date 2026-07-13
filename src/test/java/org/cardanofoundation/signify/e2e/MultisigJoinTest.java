@@ -1,18 +1,32 @@
 package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
+import org.cardanofoundation.signify.app.ExnMessages.MultisigRotExchange;
+import static org.cardanofoundation.signify.app.ExnMessages.as;
+import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ROT_ROUTE;
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.States;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import org.cardanofoundation.signify.app.config.Threshold;
+import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import org.cardanofoundation.signify.generated.keria.model.Icp;
+import org.cardanofoundation.signify.generated.keria.model.GroupMember;
+import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KelOperation;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
+import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
+import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -21,19 +35,18 @@ import java.util.stream.Stream;
 
 import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MultisigJoinTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2, client3;
 
-    States.HabState aid1, aid2, aid3;
+    HabState aid1, aid2, aid3;
     static String nameMember1 = "member1";
     static String nameMember2 = "member2";
     static String nameMember3 = "member3";
     static String nameMultisig = "multisigGroup";
     static String oobi1, oobi2, oobi3, oobiMultisig;
-    private static Map<String, Object> oobiGetMultisig;
+    private static OOBI oobiGetMultisig;
 
     @BeforeAll
     public static void getClients() throws Exception {
@@ -45,7 +58,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         createAID(client1, nameMember1, new ArrayList<>());
         createAID(client2, nameMember2, new ArrayList<>());
 
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
             new GetOobisArgs(client1, nameMember1, "agent"),
             new GetOobisArgs(client2, nameMember2, "agent")
         );
@@ -61,14 +74,14 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     @Test
     @Order(1)
     public void multisigJoinTest() throws Exception {
-        List<States.HabState> aids = createAidAndGetHabStateAsync(
+        List<HabState> aids = createAidAndGetHabStateAsync(
             new CreateAidArgs(client1, nameMember1),
             new CreateAidArgs(client2, nameMember2)
         );
         aid1 = aids.get(0);
         aid2 = aids.get(1);
 
-        List<Object> states = Arrays.asList(aid1.getState(), aid2.getState());
+        List<KeyStateRecord> states = Arrays.asList(aid1.getState(), aid2.getState());
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();
         kargs.setAlgo(Manager.Algos.group);
         kargs.setMhab(aid1);
@@ -79,9 +92,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         kargs.setStates(states);
         kargs.setRstates(states);
 
-        EventResult icpResult = client1.identifiers().create(nameMultisig, kargs);
+        var icpResult = client1.identifiers().create(nameMultisig, kargs);
 
-        Object createMultisig1 = icpResult.op();
+        KelOperation createMultisig1 = icpResult.op();
         Serder serder = icpResult.serder();
         List<String> sigs = icpResult.sigs();
         List<Siger> sigers = sigs.stream()
@@ -106,67 +119,54 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             nameMember1,
             nameMultisig,
             aid1,
-            "/multisig/icp",
+            MULTISIG_ICP_ROUTE,
             payload,
             embeds,
             recipients
         );
 
-        String msgSaid = TestUtils.waitAndMarkNotification(client2, "/multisig/icp");
-        Object response = client2.groups().getRequest(msgSaid).get();
-        Map<String, Object> exn = castObjectToLinkedHashMap(
-            castObjectToListMap(response).getFirst().get("exn")
-        );
-        Map<String, Object> icp = castObjectToLinkedHashMap(
-            castObjectToLinkedHashMap(exn.get("e")).get("icp")
-        );
+        String msgSaid = TestUtils.waitAndMarkNotification(client2, MULTISIG_ICP_ROUTE);
+        List<ExnMultisig> response = client2.groups().getRequest(msgSaid).get();
+        MultisigIcpExchange group = as(response.getFirst(), MultisigIcpExchange.class).orElseThrow();
+        Icp icp = group.e().icp().value();
 
         CreateIdentifierArgs iargs2 = new CreateIdentifierArgs();
         iargs2.setAlgo(Manager.Algos.group);
         iargs2.setMhab(aid2);
-        iargs2.setIsith(icp.get("kt"));
-        iargs2.setNsith(icp.get("nt"));
-        iargs2.setToad(Integer.parseInt(icp.get("bt").toString()));
-        iargs2.setWits(Utils.toList(icp.get("b")));
+        iargs2.setIsith(Threshold.rawOf(icp.getKt()));
+        iargs2.setNsith(Threshold.rawOf(icp.getNt()));
+        iargs2.setToad(Integer.parseInt(icp.getBt()));
+        iargs2.setWits(icp.getB());
         iargs2.setStates(states);
         iargs2.setRstates(states);
 
-        EventResult icpResult2 = client2.identifiers().create(nameMultisig, iargs2);
+        var icpResult2 = client2.identifiers().create(nameMultisig, iargs2);
 
-        Object createMultisig2 = icpResult2.op();
+        KelOperation createMultisig2 = icpResult2.op();
 
-        List<Operation> op = waitOperationAsync(
+        waitOperationAsync(
             new WaitOperationArgs(client1, createMultisig1),
             new WaitOperationArgs(client2, createMultisig2)
         );
 
-        createMultisig1 = op.get(0);
-        createMultisig2 = op.get(1);
+        HabState multisig1 = client1.identifiers().get(nameMultisig).get();
+        HabState multisig2 = client2.identifiers().get(nameMultisig).get();
 
-        Map<String, Object> multisigRes1 = castObjectToLinkedHashMap(
-            Utils.toMap(createMultisig1).get("response"));
-        Map<String, Object> multisigRes2 = castObjectToLinkedHashMap(
-            Utils.toMap(createMultisig2).get("response"));
+        assertEquals(aid1.getState().getK().getFirst(), multisig1.getState().getK().getFirst());
+        assertEquals(aid2.getState().getK().getFirst(), multisig1.getState().getK().get(1));
+        assertEquals(aid1.getState().getK().getFirst(), multisig2.getState().getK().getFirst());
+        assertEquals(aid2.getState().getK().getFirst(), multisig2.getState().getK().get(1));
 
-        assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes1.get("k")).getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes1.get("k")).get(1));
-        assertEquals(aid1.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).getFirst());
-        assertEquals(aid2.getState().getK().getFirst(), Utils.toList(multisigRes2.get("k")).get(1));
+        GroupMember membersAgent1 = client1.identifiers().members(nameMultisig);
+        GroupMember membersAgent2 = client2.identifiers().members(nameMultisig);
 
-        Map<String, Object> membersAgent1 = (Map<String, Object>) client1.identifiers().members(nameMultisig);
-        Map<String, Object> membersAgent2 = (Map<String, Object>) client2.identifiers().members(nameMultisig);
+        String eid1 = membersAgent1.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
+        String eid2 = membersAgent2.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
 
-        List<Map<String, Object>> signing1 = castObjectToListMap(Utils.toMap(membersAgent1).get("signing"));
-        String eid1 = Utils.toList(Utils.toMap(Utils.toMap(signing1.getFirst().get("ends")).get("agent")).keySet()).getFirst();
+        var endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
+        var endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
 
-        List<Map<String, Object>> signing2 = castObjectToListMap(Utils.toMap(membersAgent2).get("signing"));
-        String eid2 = Utils.toList(Utils.toMap(Utils.toMap(signing2.getFirst().get("ends")).get("agent")).keySet()).getFirst();
-
-        EventResult endRoleOperation1 = client1.identifiers().addEndRole(nameMultisig, "agent", eid1, null);
-        EventResult endRoleOperation2 = client2.identifiers().addEndRole(nameMultisig, "agent", eid2, null);
-
-        oobiGetMultisig = new LinkedHashMap<>();
-        oobiGetMultisig = (Map<String, Object>) client1.oobis().get(nameMultisig, "agent").get();
+        oobiGetMultisig = client1.oobis().get(nameMultisig, "agent").get();
 
         waitOperationAsync(
             new WaitOperationArgs(client1, endRoleOperation1.op()),
@@ -181,7 +181,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
 
         aid3 = createAID(client3, nameMember3, new ArrayList<>());
 
-        List<Object> oobis = getOobisAsync(
+        List<OOBI> oobis = getOobisAsync(
             new GetOobisArgs(client1, nameMember1, "agent"),
             new GetOobisArgs(client2, nameMember2, "agent"),
             new GetOobisArgs(client3, nameMember3, "agent")
@@ -198,8 +198,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new ResolveOobisArgs(client3, oobiMultisig, nameMultisig)
         );
 
-        EventResult rotateResult1 = client1.identifiers().rotate(nameMember1);
-        EventResult rotateResult2 = client2.identifiers().rotate(nameMember2);
+        var rotateResult1 = client1.identifiers().rotate(nameMember1);
+        var rotateResult2 = client2.identifiers().rotate(nameMember2);
 
         waitOperationAsync(
             new WaitOperationArgs(client1, rotateResult1.op()),
@@ -209,7 +209,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid1 = client1.identifiers().get(nameMember1).get();
         aid2 = client2.identifiers().get(nameMember2).get();
 
-        List<Object> updates = getKeyStateQuerAsync(
+        List<QueryOperation> updates = getKeyStateQuerAsync(
             new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "1"),
             new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "0"),
             new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "1"),
@@ -227,19 +227,25 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client3, updates.get(4)),
             new WaitOperationArgs(client3, updates.get(5))
         );
-        Object aid2States = statesUpdate.get(0);
-        Object aid1States = statesUpdate.get(2);
-        Object aid3States = statesUpdate.get(1);
 
-        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
-        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
-        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
+        KeyStateRecord aid2State = switch (statesUpdate.get(0)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid3State = switch (statesUpdate.get(1)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid1State = switch (statesUpdate.get(2)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
-        List<States.State> states = Arrays.asList(aid1State, aid2State);
-        List<States.State> rstates = new ArrayList<>(states);
+        List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State);
+        List<KeyStateRecord> rstates = new ArrayList<>(states);
         rstates.add(aid3State);
 
-        EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
+        var rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
             .states(states)
             .rstates(rstates)
             .build());
@@ -264,7 +270,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             .collect(Collectors.toList());
 
         List<String> recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
+            .map(KeyStateRecord::getI)
             .collect(Collectors.toList());
 
         Map<String, Object> payload1 = new LinkedHashMap<>();
@@ -285,7 +291,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         TestUtils.waitAndMarkNotification(client2, "/multisig/rot");
         TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
 
-        States.HabState multiSigAid = client1.identifiers().get(nameMultisig).get();
+        HabState multiSigAid = client1.identifiers().get(nameMultisig).get();
 
         assertEquals(2, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -300,9 +306,9 @@ public class MultisigJoinTest extends BaseIntegrationTest {
     @Test
     @Order(3)
     public void signingKeysAndJoinTest() throws Exception {
-        EventResult rotateResult1 = client1.identifiers().rotate(nameMember1);
-        EventResult rotateResult2 = client2.identifiers().rotate(nameMember2);
-        EventResult rotateResult3 = client3.identifiers().rotate(nameMember3);
+        var rotateResult1 = client1.identifiers().rotate(nameMember1);
+        var rotateResult2 = client2.identifiers().rotate(nameMember2);
+        var rotateResult3 = client3.identifiers().rotate(nameMember3);
 
         waitOperationAsync(
             new WaitOperationArgs(client1, rotateResult1.op()),
@@ -314,7 +320,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         aid2 = client2.identifiers().get(nameMember2).get();
         aid3 = client3.identifiers().get(nameMember3).get();
 
-        List<Object> updates = getKeyStateQuerAsync(
+        List<QueryOperation> updates = getKeyStateQuerAsync(
             new GetKeyStateQueryArgs(client1, aid2.getPrefix(), "2"),
             new GetKeyStateQueryArgs(client1, aid3.getPrefix(), "1"),
             new GetKeyStateQueryArgs(client2, aid1.getPrefix(), "2"),
@@ -332,17 +338,23 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             new WaitOperationArgs(client3, updates.get(4)),
             new WaitOperationArgs(client3, updates.get(5))
         );
-        Object aid2States = statesUpdate.get(0);
-        Object aid1States = statesUpdate.get(2);
-        Object aid3States = statesUpdate.get(1);
 
-        States.State aid2State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid2States).getResponse()), States.State.class);
-        States.State aid1State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid1States).getResponse()), States.State.class);
-        States.State aid3State = Utils.fromJson(Utils.jsonStringify(Operation.fromObject(aid3States).getResponse()), States.State.class);
+        KeyStateRecord aid2State = switch (statesUpdate.get(0)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid3State = switch (statesUpdate.get(1)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
+        KeyStateRecord aid1State = switch (statesUpdate.get(2)) {
+            case CompletedQueryOperation op -> op.getResponse();
+            default -> throw new IllegalStateException("Unexpected operation state");
+        };
 
-        List<States.State> states = Arrays.asList(aid1State, aid2State, aid3State);
+        List<KeyStateRecord> states = Arrays.asList(aid1State, aid2State, aid3State);
 
-        EventResult rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
+        var rotateOperation1 = client1.identifiers().rotate(nameMultisig, RotateIdentifierArgs.builder()
             .states(states)
             .rstates(states)
             .build());
@@ -367,7 +379,7 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             .collect(Collectors.toList());
 
         List<String> recp = Stream.of(aid2.getState(), aid3.getState())
-            .map(States.State::getI)
+            .map(KeyStateRecord::getI)
             .collect(Collectors.toList());
 
         Map<String, Object> payload1 = new LinkedHashMap<>();
@@ -379,38 +391,32 @@ public class MultisigJoinTest extends BaseIntegrationTest {
             nameMember1,
             nameMultisig,
             aid1,
-            "/multisig/rot",
+            MULTISIG_ROT_ROUTE,
             payload1,
             rembeds,
             recp
         );
 
-        String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, "/multisig/rot");
-        Object response = client3.groups().getRequest(rotationNotification3).get();
-
-        Map<String, Object> exn3 = castObjectToLinkedHashMap(
-            castObjectToListMap(response).getFirst().get("exn")
-        );
-        Map<String, Object> op1Response = Utils.toMap(exn3.get("e"));
-        Map<String, Object> exnValue = Utils.toMap(op1Response.get("rot"));
-        Serder serder3 = new Serder(exnValue);
+        String rotationNotification3 = TestUtils.waitAndMarkNotification(client3, MULTISIG_ROT_ROUTE);
+        List<ExnMultisig> response = client3.groups().getRequest(rotationNotification3).get();
+        MultisigRotExchange group = as(response.getFirst(), MultisigRotExchange.class).orElseThrow();
+        Serder serder3 = group.e().rot().toSerder();
 
         Keeping.Keeper<?> keeper3 = client3.getManager().get(aid3);
         List<String> sig3 = keeper3.sign(serder3.getRaw().getBytes()).signatures();
 
-        Object joinOperation = client3.groups()
+        GroupOperation joinOperation = Utils.fromJson(Utils.jsonStringify(client3.groups()
             .join(
                 nameMultisig,
                 serder3,
                 sig3,
-                Utils.toMap(exn3.get("a")).get("gid").toString(),
+                group.a().gid(),
                 smids,
                 rmids
-            );
+            )), GroupOperation.class);
+        waitForCompleted(client3, joinOperation);
 
-        waitOperation(client3, joinOperation);
-
-        States.HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
+        HabState multiSigAid = client3.identifiers().get(nameMultisig).get();
 
         assertEquals(3, multiSigAid.getState().getK().size());
         assertEquals(aid1.getState().getK().getFirst(), multiSigAid.getState().getK().getFirst());
@@ -422,18 +428,14 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         assertEquals(aid2.getState().getN().getFirst(), multiSigAid.getState().getN().get(1));
         assertEquals(aid3.getState().getN().getFirst(), multiSigAid.getState().getN().get(2));
 
-        Object members = client3.identifiers().members(nameMultisig);
-        List<Map<String, Object>> signing3 = castObjectToListMap(Utils.toMap(members).get("signing"));
-        String eid = Utils.toList(Utils.toMap(Utils.toMap(signing3.get(2).get("ends")).get("agent")).keySet()).getFirst();
+        GroupMember members = client3.identifiers().members(nameMultisig);
+        String eid = members.getSigning().get(2).getEnds().getAgent().keySet().iterator().next();
 
-        EventResult endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
-        Object endRoleResult = waitOperation(client3, endRoleOperation.op());
-
-        assertEquals("true", Utils.toMap(endRoleResult).get("done").toString());
-        assertNull(Utils.toMap(endRoleResult).get("error"));
+        var endRoleOperation = client3.identifiers().addEndRole(nameMultisig, "agent", eid, null);
+        waitForCompleted(client3, endRoleOperation.op());
     }
 
-    public static States.HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {
+    public static HabState createAID(SignifyClient client, String name, List<String> wits) throws Exception {
         CreateIdentifierArgs iargs = new CreateIdentifierArgs();
         iargs.setWits(wits);
         iargs.setToad(wits.size());
@@ -441,9 +443,8 @@ public class MultisigJoinTest extends BaseIntegrationTest {
         return client.identifiers().get(name).get();
     }
 
-    public static String getOobisIndexAt0(Object oobi) {
-        Map<String, Object> oobiBody = Utils.toMap(oobi);
-        ArrayList<String> oobisResponse = (ArrayList<String>) oobiBody.get("oobis");
-        return oobisResponse.getFirst();
+    public static String getOobisIndexAt0(OOBI oobi) {
+        List<String> oobisResponse = oobi.getOobis();
+        return oobisResponse.get(0);
     }
 }

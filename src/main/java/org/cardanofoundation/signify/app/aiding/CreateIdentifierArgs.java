@@ -3,9 +3,10 @@ package org.cardanofoundation.signify.app.aiding;
 import java.util.List;
 
 import lombok.*;
-import org.cardanofoundation.signify.cesr.Salter.Tier;
 import org.cardanofoundation.signify.core.Manager.Algos;
-import org.cardanofoundation.signify.core.States.HabState;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 @Getter
 @Setter
@@ -24,8 +25,8 @@ public class CreateIdentifierArgs {
     private Object data;
     private Algos algo;
     private String pre;
-    private List<Object> states;
-    private List<Object> rstates;
+    private List<KeyStateRecord> states;
+    private List<KeyStateRecord> rstates;
     private List<Object> prxs;
     private List<Object> nxts;
     private HabState mhab;

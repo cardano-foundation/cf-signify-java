@@ -1,13 +1,17 @@
 package org.cardanofoundation.signify.app.credentialing.ipex;
 
 import org.cardanofoundation.signify.app.Exchanging;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
+import static org.cardanofoundation.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.States.HabState;
 import org.cardanofoundation.signify.cesr.Siger;
 
 import java.io.IOException;
@@ -16,6 +20,8 @@ import java.security.DigestException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
+import org.cardanofoundation.signify.generated.keria.model.HabState;
 
 public class Ipex {
     private final SignifyClient client;
@@ -36,7 +42,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/apply",
+                IPEX_APPLY_ROUTE,
                 data,
                 new LinkedHashMap<>(),
                 args.getRecipient(),
@@ -45,18 +51,18 @@ public class Ipex {
         );
     }
 
-    public Object submitApply(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitApply(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/apply",
+            "/identifiers/" + name + IPEX_APPLY_ROUTE,
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -75,7 +81,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/offer",
+                IPEX_OFFER_ROUTE,
                 data,
                 embeds,
                 args.getRecipient(),
@@ -84,7 +90,7 @@ public class Ipex {
         );
     }
 
-    public Object submitOffer(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitOffer(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
@@ -92,11 +98,11 @@ public class Ipex {
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/offer",
+            "/identifiers/" + name + IPEX_OFFER_ROUTE,
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -112,7 +118,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/agree",
+                IPEX_AGREE_ROUTE,
                 data,
                 Map.of(),
                 args.getRecipient(),
@@ -121,18 +127,18 @@ public class Ipex {
         );
     }
 
-    public Object submitAgree(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitAgree(String name, Serder exn, List<String> sigs, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/agree",
+            "/identifiers/" + name + IPEX_AGREE_ROUTE,
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -166,7 +172,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/grant",
+                IPEX_GRANT_ROUTE,
                 data,
                 embeds,
                 args.getRecipient(),
@@ -175,7 +181,7 @@ public class Ipex {
         );
     }
 
-    public Object submitGrant(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitGrant(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = Map.of(
                 "exn", exn.getKed(),
                 "sigs", sigs,
@@ -184,11 +190,11 @@ public class Ipex {
         );
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/grant",
+            "/identifiers/" + name + IPEX_GRANT_ROUTE,
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
 
     /**
@@ -204,7 +210,7 @@ public class Ipex {
             .exchanges()
             .createExchangeMessage(
                 hab,
-                "/ipex/admit",
+                IPEX_ADMIT_ROUTE,
                 data,
                 Map.of(),
                 args.getRecipient(),
@@ -213,7 +219,7 @@ public class Ipex {
         );
     }
 
-    public Object submitAdmit(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
+    public ExchangeOperation submitAdmit(String name, Serder exn, List<String> sigs, String atc, List<String> recp) throws IOException, InterruptedException, LibsodiumException {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("exn", exn.getKed());
         body.put("sigs", sigs);
@@ -221,10 +227,11 @@ public class Ipex {
         body.put("rec", recp);
 
         HttpResponse<String> response = this.client.fetch(
-            "/identifiers/" + name + "/ipex/admit",
+            "/identifiers/" + name + IPEX_ADMIT_ROUTE,
             "POST",
             body
         );
-        return Utils.fromJson(response.body(), Object.class);
+        return Utils.fromJson(response.body(), ExchangeOperation.class);
     }
+
 }
