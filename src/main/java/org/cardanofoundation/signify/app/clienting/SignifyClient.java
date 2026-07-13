@@ -145,7 +145,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             .POST(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
             .build();
 
-        HttpResponse<String> response = send(request, "POST", "/boot");
+        HttpResponse<String> response = send(request);
 
         if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
             throw SignifyAgentException.from("POST", "/boot", response.statusCode(), response.body());
@@ -170,7 +170,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             .GET()
             .build();
 
-        HttpResponse<String> response = send(request, "GET", path);
+        HttpResponse<String> response = send(request);
 
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
             throw SignifyAgentException.from("GET", path, response.statusCode(), response.body(),
@@ -282,7 +282,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         finalHeaders.forEach(requestBuilder::header);
 
-        HttpResponse<String> response = send(requestBuilder.build(), method, path);
+        HttpResponse<String> response = send(requestBuilder.build());
         if (response == null) {
             return null;
         }
@@ -340,14 +340,14 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
                 .PUT(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
                 .build();
 
-        send(request, "PUT", path);
+        send(request);
     }
 
     /**
      * @return the response, or {@code null} when the exchange succeeded as a 204 but
      *         the JDK HttpClient discarded it (see {@link #isKeria204ContentLengthViolation})
      */
-    private HttpResponse<String> send(HttpRequest request, String method, String path) {
+    private HttpResponse<String> send(HttpRequest request) {
         try {
             return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException exception) {
@@ -355,7 +355,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
                 return null;
             }
             throw new SignifyTransportException(
-                    String.format("HTTP %s %s failed without a response", method, path), exception);
+                    String.format("HTTP %s %s failed without a response", request.method(), request.uri().getPath()), exception);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new SignifyInterruptedException(exception);

@@ -1,7 +1,6 @@
 package org.cardanofoundation.signify.app;
 
 import org.cardanofoundation.signify.exception.MalformedExnException;
-import org.cardanofoundation.signify.cesr.exception.SerializeException;
 import org.cardanofoundation.signify.exception.SignifySerializationException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
@@ -260,7 +259,7 @@ public final class ExnMessages {
     private static TypedExchange parse(RouteParser parser, Exn exn, ExnMultisig request) {
         try {
             return parser.parser().apply(exn, request);
-        } catch (IllegalArgumentException | SerializeException | SignifySerializationException e) {
+        } catch (IllegalArgumentException | SignifySerializationException e) {
             throw new MalformedExnException(exn.getR(), exn.getD(), e);
         }
     }
