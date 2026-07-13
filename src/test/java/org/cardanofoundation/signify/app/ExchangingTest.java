@@ -185,7 +185,7 @@ public class ExchangingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Send from events")
-    void sendFromEvents() throws Exception {
+    void sendFromEvents() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
@@ -252,7 +252,7 @@ public class ExchangingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Get exchange")
-    void getExchange() throws Exception {
+    void getExchange() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();

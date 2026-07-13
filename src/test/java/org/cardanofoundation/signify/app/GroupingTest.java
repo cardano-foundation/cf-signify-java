@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GroupingTest extends BaseMockServerTest {
 
     @Test
-    void testGroups() throws Exception {
+    void testGroups() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();

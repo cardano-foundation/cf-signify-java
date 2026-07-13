@@ -35,7 +35,7 @@ public class SinglesigIXNTest extends BaseIntegrationTest {
     }
 
     @BeforeEach
-    public void getContact() throws IOException, InterruptedException {
+    public void getContact() {
         contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
     }
 

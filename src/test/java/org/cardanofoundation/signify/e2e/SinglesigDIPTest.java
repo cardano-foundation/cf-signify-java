@@ -37,7 +37,7 @@ class SinglesigDIPTest extends BaseIntegrationTest {
     }
 
     @BeforeEach
-    public void getContact() throws IOException, InterruptedException {
+    public void getContact() {
         TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
     }
 

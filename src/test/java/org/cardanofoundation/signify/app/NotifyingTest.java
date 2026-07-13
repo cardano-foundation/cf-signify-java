@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class NotifyingTest extends BaseMockServerTest {
 
     @Test
-    void testNotifications() throws Exception {
+    void testNotifications() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();

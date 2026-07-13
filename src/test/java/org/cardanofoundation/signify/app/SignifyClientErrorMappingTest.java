@@ -41,7 +41,7 @@ public class SignifyClientErrorMappingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("4xx maps to SignifyAgentException with parsed KERIA error body")
-    void testAgentErrorParsesStructuredBody() throws Exception {
+    void testAgentErrorParsesStructuredBody() throws InterruptedException {
         SignifyClient client = connectedClient();
         setUpErrorDispatcher(400, "{\"title\": \"400 Bad Request\", \"description\": \"name is required\"}");
 
@@ -61,7 +61,7 @@ public class SignifyClientErrorMappingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("5xx maps to SignifyServerException")
-    void testServerErrorMapsToServerException() throws Exception {
+    void testServerErrorMapsToServerException() throws InterruptedException {
         SignifyClient client = connectedClient();
         setUpErrorDispatcher(500, "{\"description\": \"database is locked\"}");
 
@@ -76,7 +76,7 @@ public class SignifyClientErrorMappingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Non-JSON error body is kept raw")
-    void testNonJsonErrorBodyKeptRaw() throws Exception {
+    void testNonJsonErrorBodyKeptRaw() throws InterruptedException {
         SignifyClient client = connectedClient();
         setUpErrorDispatcher(400, "plain text failure");
 
@@ -93,7 +93,7 @@ public class SignifyClientErrorMappingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("GET 404 is an expected outcome, returned rather than thrown")
-    void testGet404IsReturnedNotThrown() throws Exception {
+    void testGet404IsReturnedNotThrown() throws InterruptedException {
         SignifyClient client = connectedClient();
         setUpErrorDispatcher(404, "");
 
@@ -104,7 +104,7 @@ public class SignifyClientErrorMappingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("I/O failure without a response maps to SignifyTransportException")
-    void testTransportFailure() throws Exception {
+    void testTransportFailure() throws InterruptedException, IOException {
         SignifyClient client = connectedClient();
         mockWebServer.shutdown();
 
@@ -118,7 +118,7 @@ public class SignifyClientErrorMappingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Interruption maps to SignifyInterruptedException and restores the interrupt flag")
-    void testInterruptionRestoresFlag() throws Exception {
+    void testInterruptionRestoresFlag() throws InterruptedException {
         SignifyClient client = connectedClient();
 
         Thread.currentThread().interrupt();

@@ -1,10 +1,10 @@
 package org.cardanofoundation.signify.app;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.coring.Oobis;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.generated.keria.model.EndRole;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +20,7 @@ public class OobisTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Test Oobis")
-    void testOobis() throws Exception {
+    void testOobis() throws InterruptedException, JsonProcessingException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
@@ -59,7 +59,7 @@ public class OobisTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Test endroles without role filter")
-    void testEndroles_withoutRole() throws Exception {
+    void testEndroles_withoutRole() throws InterruptedException {
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();
@@ -81,7 +81,7 @@ public class OobisTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Test endroles with role filter")
-    void testEndroles_withRole() throws Exception {
+    void testEndroles_withRole() throws InterruptedException {
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
         client.connect();

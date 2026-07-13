@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +28,7 @@ public class BaseMockServerTest {
     public final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         bootUrl = mockWebServer.url("/").toString().replaceAll("/$", "");
@@ -72,7 +73,7 @@ public class BaseMockServerTest {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() throws IOException {
         mockWebServer.shutdown();
     }
 

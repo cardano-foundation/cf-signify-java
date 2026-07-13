@@ -42,7 +42,7 @@ public class SinglesigDRTTest extends BaseIntegrationTest {
     }
 
     @BeforeEach
-    public void getContact() throws IOException, InterruptedException {
+    public void getContact() {
         TestUtils.getOrCreateContact(delegate, "contact1", name1_oobi);
     }
 

@@ -1,9 +1,9 @@
 package org.cardanofoundation.signify.app;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ChallengesTest extends BaseMockServerTest {
     @Test
     @DisplayName("Test Challenges")
-    void testChallenges() throws Exception {
+    void testChallenges() throws InterruptedException, JsonProcessingException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();

@@ -33,7 +33,7 @@ public class ContactingTest {
     }
 
     @Test
-    void testGetListContacts() throws Exception {
+    void testGetListContacts() {
         HttpResponse<String> httpResponse = mockHttpResponse("[]");
         when(client.fetch(anyString(), anyString(), isNull()))
             .thenReturn(httpResponse);
@@ -45,7 +45,7 @@ public class ContactingTest {
     }
 
     @Test
-    void testGetContact() throws Exception {
+    void testGetContact() {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
         HttpResponse<String> httpResponse = mockHttpResponse("{}");
@@ -59,7 +59,7 @@ public class ContactingTest {
     }
 
     @Test
-    void testAddContact() throws Exception {
+    void testAddContact() {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
         Map<String, Object> info = new HashMap<>();
@@ -78,7 +78,7 @@ public class ContactingTest {
     }
 
     @Test
-    void testUpdateContact() throws Exception {
+    void testUpdateContact() {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
         Map<String, Object> info = new HashMap<>();
@@ -97,7 +97,7 @@ public class ContactingTest {
     }
 
     @Test
-    void testDeleteContact() throws Exception {
+    void testDeleteContact() {
         String prefix = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
 
         HttpResponse<String> httpResponse = mockHttpResponse("{}");

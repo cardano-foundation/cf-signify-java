@@ -70,7 +70,7 @@ public class CredentialingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Test Credentialing")
-    void testCredentialing() throws Exception {
+    void testCredentialing() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
