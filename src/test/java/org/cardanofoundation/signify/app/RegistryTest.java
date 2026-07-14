@@ -44,7 +44,7 @@ public class RegistryTest {
 
     @Test
     @DisplayName("should create a registry")
-    void shouldCreateRegistry() throws Exception {
+    void shouldCreateRegistry() {
         HabState hab = new HabState().prefix("hab prefix");
 
         KeyStateRecord keyStateRecord = new KeyStateRecord();
@@ -80,7 +80,7 @@ public class RegistryTest {
 
     @Test
     @DisplayName("should fail on establishment only for now")
-    void shouldFailOnEstablishmentOnly() throws Exception {
+    void shouldFailOnEstablishmentOnly() {
         KeyStateRecord keyStateRecord = new KeyStateRecord()
             .s("0")
             .d("a digest")

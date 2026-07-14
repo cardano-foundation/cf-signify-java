@@ -60,7 +60,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("Multisig Holder Test")
-    void multisigHolderTest() throws Exception {
+    void multisigHolderTest() {
         // Boot four clients
         List<SignifyClient> signifyClients = getOrCreateClientsAsync(3);
         client1 = signifyClients.get(0);
@@ -481,14 +481,14 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         warnNotifications(clientList);
     }
 
-    public HabState createAid(SignifyClient client, String name, List<String> wits) throws Exception {
+    public HabState createAid(SignifyClient client, String name, List<String> wits) {
         getOrCreateIdentifier(client, name, null);
         HabState aid = client.identifiers().get(name).get();
         System.out.println(name + "AID:" + aid.getPrefix());
         return aid;
     }
 
-    public Object createRegistry(SignifyClient client, String name, String registryName) throws Exception {
+    public Object createRegistry(SignifyClient client, String name, String registryName) {
         CreateRegistryArgs args = CreateRegistryArgs.builder()
                 .name(name)
                 .registryName(registryName)
@@ -510,7 +510,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             SignifyClient client,
             String name,
             CredentialData data
-    ) throws Exception {
+    ) {
         IssueCredentialResult result = client.credentials().issue(name, data);
         waitForCompleted(client, result.getOp());
 
@@ -557,7 +557,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             String grantSaid,
             String issuerPrefix,
             List<String> recipients
-    ) throws Exception {
+    ) {
         HabState mhab = client.identifiers().get(memberAlias).get();
         HabState ghab = client.identifiers().get(groupName).get();
 

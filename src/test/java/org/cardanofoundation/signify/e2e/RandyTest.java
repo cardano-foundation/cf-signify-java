@@ -28,7 +28,7 @@ public class RandyTest {
     private String opResponseName, opResponsePrefix;
 
     @Test
-    void randyTest() throws Exception {
+    void randyTest() {
         String bran = Coring.randomPasscode();
         client1 = new SignifyClient(
                 url,

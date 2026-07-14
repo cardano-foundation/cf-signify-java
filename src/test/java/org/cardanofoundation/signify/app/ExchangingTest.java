@@ -5,7 +5,6 @@ import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
@@ -19,14 +18,13 @@ import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
 import static org.cardanofoundation.signify.app.ExnMessages.routeOf;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.DigestException;
 import java.util.*;
 
 public class ExchangingTest extends BaseMockServerTest {
     
     @Test
     @DisplayName("should create an exchange message with no transposed attachments")
-    public void shouldCreateExchangeMessageWithNoTransposedAttachments() throws DigestException, LibsodiumException {
+    public void shouldCreateExchangeMessageWithNoTransposedAttachments() {
         String dt = "2023-08-30T17:22:54.183Z";
         
         Exchanging.ExchangeResult result = exchange(
@@ -187,7 +185,7 @@ public class ExchangingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Send from events")
-    void sendFromEvents() throws Exception {
+    void sendFromEvents() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
@@ -254,7 +252,7 @@ public class ExchangingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Get exchange")
-    void getExchange() throws Exception {
+    void getExchange() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();

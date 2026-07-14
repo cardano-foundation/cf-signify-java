@@ -9,7 +9,7 @@ public class TestSteps {
         void run() throws Exception;
     }
 
-    public <T> T step(String description, Callable<T> fn) throws Exception {
+    public <T> T step(String description, Callable<T> fn) {
         long start = System.currentTimeMillis();
 
         try {
@@ -18,7 +18,7 @@ public class TestSteps {
                     "Step - " + description + " - finished (" + (System.currentTimeMillis() - start) + "ms)");
             return response;
         } catch (Exception e) {
-            throw new Exception("Step - " + description + " - failed", e);
+            throw new RuntimeException("Step - " + description + " - failed", e);
         }
     }
 
@@ -35,7 +35,7 @@ public class TestSteps {
         }
     }
 
-    public void step(String description, ThrowingRunnable action) throws Exception {
+    public void step(String description, ThrowingRunnable action) {
         long start = System.currentTimeMillis();
 
         try {
@@ -44,7 +44,7 @@ public class TestSteps {
             System.out.println("Step - " + description + " - finished (" + (System.currentTimeMillis() - start) + "ms)");
         } catch (Exception e) {
             System.err.println("Step - " + description + " - failed");
-            throw new Exception("Step - " + description + " - failed", e);
+            throw new RuntimeException("Step - " + description + " - failed", e);
         }
     }
 }

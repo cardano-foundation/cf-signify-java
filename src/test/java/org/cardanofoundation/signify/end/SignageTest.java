@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.end;
 
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,7 @@ class SignageTest {
     String digest;
 
     @BeforeEach
-    void setUp() throws LibsodiumException {
+    void setUp() {
         final String name = "Hilga";
         final Signer signer0 = createSigner(name + "00");
         final Signer signer1 = createSigner(name + "01");
@@ -247,7 +246,7 @@ class SignageTest {
         });
     }
 
-    private Signer createSigner(String name) throws LibsodiumException {
+    private Signer createSigner(String name) {
         final boolean temp = true;
         final byte[] raw = "0123456789abcdef".getBytes();
         final Salter salter = new Salter(RawArgs.builder().raw(raw).build());

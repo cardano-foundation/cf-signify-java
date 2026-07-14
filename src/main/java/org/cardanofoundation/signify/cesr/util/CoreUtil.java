@@ -2,10 +2,11 @@ package org.cardanofoundation.signify.cesr.util;
 
 import lombok.Getter;
 import org.bouncycastle.jcajce.provider.digest.Blake3;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.KindException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ProtocolException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.VersionException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.KindException;
+import org.cardanofoundation.signify.cesr.exception.ProtocolException;
+import org.cardanofoundation.signify.cesr.exception.VersionException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
+import org.cardanofoundation.signify.exception.SignifyCryptoException;
 
 import java.security.DigestException;
 import java.util.HashMap;
@@ -298,11 +299,15 @@ public class CoreUtil {
         String string
     ) {}
 
-    public static byte[] blake3_256(byte[] ser, int hashLen) throws DigestException {
+    public static byte[] blake3_256(byte[] ser, int hashLen) {
         Blake3.Blake3_256 blake3 = new Blake3.Blake3_256();
         blake3.update(ser);
         byte[] result = new byte[hashLen];
-        blake3.digest(result, 0, hashLen);
+        try {
+            blake3.digest(result, 0, hashLen);
+        } catch (DigestException e) {
+            throw new SignifyCryptoException(e);
+        }
         return result;
     }
 }

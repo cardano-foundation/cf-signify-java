@@ -9,16 +9,14 @@ import org.cardanofoundation.signify.cesr.args.InceptArgs;
 import org.cardanofoundation.signify.cesr.args.InteractArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.args.RotateArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.exceptions.validation.ValidationException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.ValidationException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 
 import java.math.BigInteger;
-import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
@@ -42,15 +40,15 @@ public class Controller {
     private List<String> keys;
     public List<String> ndigs;
 
-    public Controller(String bran, Tier tier) throws DigestException, LibsodiumException {
+    public Controller(String bran, Tier tier) {
         this(bran, tier, 0, null);
     }
 
-    public Controller(String bran, Tier tier, Integer ridx) throws DigestException, LibsodiumException {
+    public Controller(String bran, Tier tier, Integer ridx) {
         this(bran, tier, ridx, null);
     }
 
-    public Controller(String bran, Tier tier, Integer ridx, Object state) throws DigestException, LibsodiumException {
+    public Controller(String bran, Tier tier, Integer ridx, Object state) {
         this.bran = MatterCodex.Salt_128.getValue() + "A" + bran.substring(0, 21); // qb64 salt for seed
         this.stem = "signify:controller";
         this.tier = tier;
@@ -116,7 +114,7 @@ public class Controller {
         }
     }
 
-    public Object approveDelegation(Agent agent) throws DigestException, LibsodiumException {
+    public Object approveDelegation(Agent agent) {
         Seqner seqner = new Seqner(agent.getSn());
 
         Map<String, String> anchor = new LinkedHashMap<>();
@@ -146,7 +144,7 @@ public class Controller {
         return this.serder.getPre();
     }
 
-    public EventResult getEvent() throws Exception {
+    public EventResult getEvent() {
         Siger siger = (Siger) this.signer.sign(
             this.serder.getRaw().getBytes(),
             0);
@@ -157,7 +155,7 @@ public class Controller {
         return new Verfer[]{this.signer.getVerfer()};
     }
 
-    public Serder derive(Object state) throws DigestException {
+    public Serder derive(Object state) {
         if (state != null && ((KeyStateRecord) state).getEe().getS().equals("0")) {
             return Eventing.incept(InceptArgs.builder()
                 .keys(this.keys)
@@ -174,7 +172,7 @@ public class Controller {
         }
     }
 
-    public Map<String, Object> rotate(String bran, List<Map<String, Object>> aids) throws DigestException, LibsodiumException {
+    public Map<String, Object> rotate(String bran, List<Map<String, Object>> aids) {
         String nbran = MatterCodex.Salt_128.getValue() + "A" + bran.substring(0, 21); // qb64 salt for seed
         Salter nsalter = new Salter(nbran, this.tier);
         Signer nsigner = this.salter.signer(null, false);
@@ -331,7 +329,7 @@ public class Controller {
         return data;
     }
 
-    public String recrypt(String enc, Decrypter decrypter, Encrypter encrypter) throws LibsodiumException {
+    public String recrypt(String enc, Decrypter decrypter, Encrypter encrypter) {
         Cipher cipher = new Cipher(enc);
         String dnxt = ((Salter) decrypter.decrypt(null, cipher)).getQb64();
         return encrypter.encrypt(dnxt.getBytes()).getQb64();

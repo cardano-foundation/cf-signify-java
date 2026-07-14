@@ -2,7 +2,7 @@ package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;

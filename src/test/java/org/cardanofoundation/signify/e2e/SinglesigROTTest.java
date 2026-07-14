@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
@@ -22,26 +21,26 @@ public class SinglesigROTTest extends BaseIntegrationTest {
     static String name1_id, name1_oobi;
 
     @BeforeAll
-    public static void getClients() throws Exception {
+    public static void getClients() {
         List<SignifyClient> clients = getOrCreateClientsAsync(2);
         client1 = clients.get(0);
         client2 = clients.get(1);
     }
 
     @BeforeEach
-    public void getIdentifier() throws Exception {
+    public void getIdentifier() {
         String[] clients = getOrCreateIdentifier(client1, "name1", null);
         name1_id = clients[0];
         name1_oobi = clients[1];
     }
 
     @BeforeEach
-    public void getContact() throws IOException, InterruptedException, LibsodiumException {
+    public void getContact() {
         contact1_id = getOrCreateContact(client2, "contact1", name1_oobi);
     }
 
     @Test
-    public void singlesig_rot_step1() throws Exception {
+    public void singlesig_rot_step1() {
         assertEquals(name1_id, contact1_id);
 
         KeyStateRecord keyState1 = client1.keyStates().get(name1_id).get();
@@ -52,7 +51,7 @@ public class SinglesigROTTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void singlesig_rot_rot1() throws Exception {
+    public void singlesig_rot_rot1() {
         // local keystate before rot
         KeyStateRecord keyStateRecord0 = client1.keyStates().get(name1_id).get();
 

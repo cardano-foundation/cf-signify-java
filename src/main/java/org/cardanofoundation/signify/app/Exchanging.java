@@ -2,23 +2,19 @@ package org.cardanofoundation.signify.app;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.exception.MalformedExnException;
+import org.cardanofoundation.signify.exception.MalformedExnException;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.CounterCodex;
 import org.cardanofoundation.signify.cesr.Keeping.Keeper;
 import org.cardanofoundation.signify.cesr.args.CounterArgs;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.params.KeeperParams;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
@@ -57,7 +53,7 @@ public class Exchanging {
             String recipient,
             String datetime,
             String dig
-        ) throws DigestException, LibsodiumException {
+        ) {
 
             Keeper<? extends KeeperParams> keeper = client.getManager().get(sender);
             ExchangeResult result = exchange(
@@ -98,7 +94,7 @@ public class Exchanging {
             Map<String, Object> payload,
             Map<String, List<Object>> embeds,
             List<String> recipients
-        ) throws ExecutionException, InterruptedException, IOException, DigestException, LibsodiumException {
+        ) {
 
             for (String recipient : recipients) {
                 ExchangeMessageResult result = createExchangeMessage(
@@ -141,7 +137,7 @@ public class Exchanging {
             List<String> sigs,
             String atc,
             List<String> recipients
-        ) throws IOException, InterruptedException, LibsodiumException {
+        ) {
             String path = String.format("/identifiers/%s/exchanges", name);
             String method = "POST";
             LinkedHashMap<String, Object> data = new LinkedHashMap<>();
@@ -161,7 +157,7 @@ public class Exchanging {
          * @param said The said of the exn message
          * @return Optional containing the exn message if found, or empty if not found
          */
-        public Optional<ExchangeResource> get(String said) throws Exception {
+        public Optional<ExchangeResource> get(String said) {
             String path = String.format("/exchanges/%s", said);
             String method = "GET";
             HttpResponse<String> res = this.client.fetch(path, method, null);
@@ -180,7 +176,7 @@ public class Exchanging {
          *
          * @throws MalformedExnException when the route is known but the payload is malformed
          */
-        public Optional<ExnMessages.TypedExchange> getTyped(String said) throws Exception {
+        public Optional<ExnMessages.TypedExchange> getTyped(String said) {
             return get(said).flatMap(ExnMessages::asTyped);
         }
 
@@ -190,7 +186,7 @@ public class Exchanging {
          *
          * @throws MalformedExnException when the route matches but the payload is malformed
          */
-        public <T extends ExnMessages.TypedExchange> Optional<T> get(String said, Class<T> type) throws Exception {
+        public <T extends ExnMessages.TypedExchange> Optional<T> get(String said, Class<T> type) {
             return get(said).flatMap(msg -> ExnMessages.as(msg, type));
         }
 
@@ -205,7 +201,7 @@ public class Exchanging {
         String dig,
         Map<String, Object> modifiers,
         Map<String, List<Object>> embeds
-    ) throws DigestException {
+    ) {
         String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         String ilk = CoreUtil.Ilks.EXN.getValue();
         String dt = date != null ? date : Utils.currentDateTimeString();

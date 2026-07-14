@@ -27,7 +27,7 @@ public class DelegationTest {
     String oobi, contactId;
 
     @Test
-    void delegationTest() throws Exception {
+    void delegationTest() {
         String bran1 = Coring.randomPasscode();
         String bran2 = Coring.randomPasscode();
         client1 = new SignifyClient(

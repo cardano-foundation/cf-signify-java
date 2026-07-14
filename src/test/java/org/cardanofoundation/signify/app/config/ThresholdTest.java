@@ -1,5 +1,6 @@
 package org.cardanofoundation.signify.app.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -26,7 +27,7 @@ public class ThresholdTest {
 
     @Test
     @DisplayName("kt/nt deserialize to Threshold carrying the raw threshold")
-    void deserializeThresholds() throws Exception {
+    void deserializeThresholds() throws JsonProcessingException {
         KeyStateRecord state = mapper().readValue(
             "{\"kt\":\"1\",\"nt\":[\"1/2\",\"1/2\"]}", KeyStateRecord.class);
 
@@ -36,7 +37,7 @@ public class ThresholdTest {
 
     @Test
     @DisplayName("integer thresholds (keripy intive events) keep integer form; hex strings stay hex")
-    void deserializeIntegerThreshold() throws Exception {
+    void deserializeIntegerThreshold() throws JsonProcessingException {
         ObjectMapper mapper = mapper();
         // unweighted string thresholds are hex, so JSON 10 (ten) and "10" (sixteen) differ
         Icp icp = mapper.readValue("{\"kt\":10,\"nt\":\"10\"}", Icp.class);
@@ -55,7 +56,7 @@ public class ThresholdTest {
 
     @Test
     @DisplayName("KEL event models share the same threshold representation")
-    void deserializeEventThresholds() throws Exception {
+    void deserializeEventThresholds() throws JsonProcessingException {
         Icp icp = mapper().readValue("{\"kt\":\"1\",\"nt\":[\"1/2\",\"1/2\"]}", Icp.class);
         Rot rot = mapper().readValue("{\"kt\":[[\"1/2\",\"1/2\"],[\"1\"]],\"nt\":\"2\"}", Rot.class);
 
@@ -67,7 +68,7 @@ public class ThresholdTest {
 
     @Test
     @DisplayName("nested multi-clause weighted thresholds are preserved")
-    void deserializeNestedWeightedThreshold() throws Exception {
+    void deserializeNestedWeightedThreshold() throws JsonProcessingException {
         KeyStateRecord state = mapper().readValue(
             "{\"kt\":[[\"1/2\",\"1/2\"],[\"1\"]],\"nt\":\"2\"}", KeyStateRecord.class);
 
@@ -77,7 +78,7 @@ public class ThresholdTest {
 
     @Test
     @DisplayName("distinct records keep distinct thresholds")
-    void noCrossInstanceAliasing() throws Exception {
+    void noCrossInstanceAliasing() throws JsonProcessingException {
         ObjectMapper mapper = mapper();
         KeyStateRecord first = mapper.readValue("{\"kt\":\"1\",\"nt\":\"2\"}", KeyStateRecord.class);
         KeyStateRecord second = mapper.readValue("{\"kt\":\"3\",\"nt\":\"4\"}", KeyStateRecord.class);
@@ -90,7 +91,7 @@ public class ThresholdTest {
 
     @Test
     @DisplayName("serialization round-trips the original kt/nt JSON")
-    void serializeRoundTrip() throws Exception {
+    void serializeRoundTrip() throws JsonProcessingException {
         ObjectMapper mapper = mapper();
         KeyStateRecord state = mapper.readValue(
             "{\"kt\":\"1\",\"nt\":[\"1/2\",\"1/2\"]}", KeyStateRecord.class);
@@ -104,7 +105,7 @@ public class ThresholdTest {
 
     @Test
     @DisplayName("weighted and unweighted thresholds discriminate via exhaustive switch")
-    void discriminateViaSwitch() throws Exception {
+    void discriminateViaSwitch() throws JsonProcessingException {
         KeyStateRecord state = mapper().readValue(
             "{\"kt\":\"2\",\"nt\":[\"1/2\",\"1/2\"]}", KeyStateRecord.class);
 

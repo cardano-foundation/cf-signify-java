@@ -2,7 +2,6 @@ package org.cardanofoundation.signify.e2e;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
 import org.cardanofoundation.signify.e2e.utils.TestUtils;
 import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperation;
@@ -24,26 +23,26 @@ class SinglesigDIPTest extends BaseIntegrationTest {
     private static String name1_id, name1_oobi;
 
     @BeforeAll
-    public static void getClients() throws Exception {
+    public static void getClients() {
         List<SignifyClient> clients = getOrCreateClientsAsync(2);
         client1 = clients.get(0);
         client2 = clients.get(1);
     }
 
     @BeforeEach
-    public void getIdentifier() throws Exception {
+    public void getIdentifier() {
         String[] clients = getOrCreateIdentifier(client1, "name1", null);
         name1_id = clients[0];
         name1_oobi = clients[1];
     }
 
     @BeforeEach
-    public void getContact() throws IOException, InterruptedException, LibsodiumException {
+    public void getContact() {
         TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
     }
 
     @Test
-    public void singlesig_dip() throws Exception {
+    public void singlesig_dip() {
         String opResponseName, opResponseI;
 
         CreateIdentifierArgs kargs = new CreateIdentifierArgs();

@@ -61,7 +61,7 @@ public class MultisigTest extends BaseIntegrationTest {
     String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
 
     @Test
-    public void multisig() throws Exception {
+    public void multisig() {
         // Boot Four clients
         List<SignifyClient> signifyClients = getOrCreateClientsAsync(4);
         SignifyClient client1 = signifyClients.get(0);
@@ -835,7 +835,7 @@ public class MultisigTest extends BaseIntegrationTest {
             String memberName,
             String groupName,
             IssueCredentialResult result
-    ) throws Exception {
+    ) {
         HabState leaderHab = client.identifiers().get(memberName).get();
         HabState groupHab = client.identifiers().get(groupName).get();
         GroupMember members = client.identifiers().members(groupName);
@@ -876,7 +876,7 @@ public class MultisigTest extends BaseIntegrationTest {
             String groupName,
             Serder rev,
             Serder anc
-    ) throws Exception {
+    ) {
         HabState leaderHab = client.identifiers().get(memberName).get();
         HabState groupHab = client.identifiers().get(groupName).get();
         GroupMember members = client.identifiers().members(groupName);

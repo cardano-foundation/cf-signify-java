@@ -26,7 +26,7 @@ class SaltyTests {
     private final String bootUrl = "http://127.0.0.1:3903";
 
     @Test
-    void saltyTest() throws Exception {
+    void saltyTest() {
         String bran1 = Coring.randomPasscode();
         SignifyClient client = new SignifyClient(
                 url,

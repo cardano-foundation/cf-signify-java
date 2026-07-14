@@ -1,6 +1,5 @@
 package org.cardanofoundation.signify.app.coring;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
@@ -8,10 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.EndRole;
 import org.cardanofoundation.signify.generated.keria.model.OOBI;
@@ -30,10 +27,8 @@ public class Oobis {
      * @param name Name or alias of the identifier
      * @param role Authorized role
      * @return Optional containing the OOBI(s) if found, or empty if not found
-     * @throws JsonProcessingException if there is an error processing the JSON
-     * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public Optional<OOBI> get(String name, String role) throws IOException, InterruptedException, LibsodiumException {
+    public Optional<OOBI> get(String name, String role) {
         if (role == null) {
             role = "agent";
         }
@@ -54,10 +49,8 @@ public class Oobis {
      * @param oobi  The OOBI to be resolved
      * @param alias Optional name or alias to link the OOBI resolution to a contact
      * @return A promise to the long-running operation
-     * @throws JsonProcessingException if there is an error processing the JSON
-     * @throws LibsodiumException if there is an error in the cryptographic operations
      */
-    public OOBIOperation resolve(String oobi, String alias) throws IOException, InterruptedException, LibsodiumException {
+    public OOBIOperation resolve(String oobi, String alias) {
         String path = "/oobis";
         String method = "POST";
 
@@ -77,7 +70,7 @@ public class Oobis {
      * @param role Optional role to filter by
      * @return List of end roles
      */
-    public List<EndRole> endroles(String aid, String role) throws IOException, InterruptedException, LibsodiumException {
+    public List<EndRole> endroles(String aid, String role) {
         String path = (role != null)
                 ? "/endroles/" + aid + "/" + role
                 : "/endroles/" + aid;

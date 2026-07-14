@@ -1,11 +1,11 @@
 package org.cardanofoundation.signify.app;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.coring.KeyStates;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ public class CoringTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Events and States")
-    void testEventsAndStates() throws Exception {
+    void testEventsAndStates() throws InterruptedException, JsonProcessingException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
@@ -86,7 +86,7 @@ public class CoringTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Agent configuration")
-    void testAgentConfiguration() throws Exception {
+    void testAgentConfiguration() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();

@@ -5,7 +5,7 @@ import com.sun.jna.NativeLong;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import org.cardanofoundation.signify.exception.SignifyCryptoException;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 
 public class Salter extends Matter {
@@ -43,23 +43,23 @@ public class Salter extends Matter {
         super(qb64b);
     }
 
-    public byte[] stretch() throws LibsodiumException {
+    public byte[] stretch() {
         return stretch(32);
     }
 
-    public byte[] stretch(int size) throws LibsodiumException {
+    public byte[] stretch(int size) {
         return stretch(size, "");
     }
 
-    public byte[] stretch(int size, String path) throws LibsodiumException {
+    public byte[] stretch(int size, String path) {
         return stretch(size, path, null);
     }
 
-    public byte[] stretch(int size, String path, Tier tier) throws LibsodiumException {
+    public byte[] stretch(int size, String path, Tier tier) {
         return stretch(size, path, tier, false);
     }
 
-    public byte[] stretch(int size, String path, Tier tier, boolean temp) throws LibsodiumException {
+    public byte[] stretch(int size, String path, Tier tier, boolean temp) {
         tier = tier == null ? this.tier : tier;
         int opslimit, memlimit;
 
@@ -87,7 +87,7 @@ public class Salter extends Matter {
         return this.cryptoPwHash(size, path.getBytes(), opslimit, memlimit);
     }
 
-    private byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) throws LibsodiumException {
+    private byte[] cryptoPwHash(int size, byte[] path, long opslimit, long memlimit) {
         byte[] stretch = new byte[size];
         boolean success = lazySodium.cryptoPwHash(
                 stretch,
@@ -101,29 +101,29 @@ public class Salter extends Matter {
         );
 
         if (!success) {
-            throw new LibsodiumException("Failed to stretch salt using given path");
+            throw new SignifyCryptoException("Failed to stretch salt using given path");
         }
 
         return stretch;
     }
 
-    public Signer signer() throws LibsodiumException {
+    public Signer signer() {
         return signer(Codex.MatterCodex.Ed25519_Seed.getValue());
     }
 
-    public Signer signer(String code) throws LibsodiumException {
+    public Signer signer(String code) {
         return signer(code, true);
     }
 
-    public Signer signer(String code, Boolean transferable) throws LibsodiumException {
+    public Signer signer(String code, Boolean transferable) {
         return signer(code, transferable, "");
     }
 
-    public Signer signer(String code, Boolean transferable, String path) throws LibsodiumException {
+    public Signer signer(String code, Boolean transferable, String path) {
         return signer(code, transferable, path, null);
     }
 
-    public Signer signer(String code, Boolean transferable, String path, Tier tier) throws LibsodiumException {
+    public Signer signer(String code, Boolean transferable, String path, Tier tier) {
         return signer(code, transferable, path, tier, false);
     }
 
@@ -133,7 +133,7 @@ public class Salter extends Matter {
         String path,
         Tier tier,
         Boolean temp
-    ) throws LibsodiumException {
+    ) {
         transferable = transferable == null || transferable;
         temp = temp != null && temp;
         path = path == null ? "" : path;

@@ -16,11 +16,10 @@ import org.cardanofoundation.signify.generated.keria.model.OOBI;
 import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.unchecked;
 
 public class BaseIntegrationTest {
 
-    public static List<SignifyClient> getOrCreateClientsAsync(int count) throws Exception {
+    public static List<SignifyClient> getOrCreateClientsAsync(int count) {
         List<CompletableFuture<SignifyClient>> bootFutures = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             bootFutures.add(bootClientFuture());
@@ -94,58 +93,58 @@ public class BaseIntegrationTest {
     }
 
     CompletableFuture<String> getOrCreateContactFuture(SignifyClient client, String name, String oobi) {
-        return CompletableFuture.supplyAsync(unchecked(() ->
+        return CompletableFuture.supplyAsync(() ->
             TestUtils.getOrCreateContact(client, name, oobi)
-        ));
+        );
     }
 
     static CompletableFuture<SignifyClient> bootClientFuture() {
-        return CompletableFuture.supplyAsync(unchecked(() -> 
+        return CompletableFuture.supplyAsync(() -> 
             TestUtils.getOrCreateClient()
-        ));
+        );
     }
 
     static CompletableFuture<HabState> createAidAndGetHabStateFuture(SignifyClient client, String name) {
-        return CompletableFuture.supplyAsync(unchecked(() -> 
+        return CompletableFuture.supplyAsync(() -> 
             TestUtils.createAidAndGetHabState(client, name)
-        ));
+        );
     }
 
     static CompletableFuture<OOBI> getOobisFuture(SignifyClient client, String name, String role) {
-        return CompletableFuture.supplyAsync(unchecked(() -> 
+        return CompletableFuture.supplyAsync(() -> 
             client.oobis().get(name, role).get()
-        ));
+        );
     }
 
     static CompletableFuture<QueryOperation> getKeyStateFuture(SignifyClient client, String pre, String sn) {
-        return CompletableFuture.supplyAsync(unchecked(() -> 
+        return CompletableFuture.supplyAsync(() -> 
             client.keyStates().query(pre, sn)
-        ));
+        );
     }
 
     static CompletableFuture<Void> resolveOobisFuture(SignifyClient signifyClient, String oobi, String alias) {
-        return CompletableFuture.supplyAsync(unchecked(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             TestUtils.resolveOobi(signifyClient, oobi, alias);
             return null;
-        }));
+        });
     }
 
     static CompletableFuture<Operation> waitOperationFuture(SignifyClient client, Operation op) {
-        return CompletableFuture.supplyAsync(unchecked(() ->
+        return CompletableFuture.supplyAsync(() ->
             TestUtils.waitForCompleted(client, op)
-        ));
+        );
     }
 
     CompletableFuture<TestUtils.Aid> createAidFuture(SignifyClient client, String name) {
-        return CompletableFuture.supplyAsync(unchecked(() -> 
+        return CompletableFuture.supplyAsync(() -> 
             TestUtils.createAid(client, name)
-        ));
+        );
     }
 
     static CompletableFuture<HabState> getOrCreateAIDFuture(SignifyClient client, String name, CreateIdentifierArgs args) {
-        return CompletableFuture.supplyAsync(unchecked(() -> 
+        return CompletableFuture.supplyAsync(() -> 
             TestUtils.getOrCreateAID(client, name, args)
-        ));
+        );
     }
 
     @Getter

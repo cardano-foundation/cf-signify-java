@@ -2,7 +2,7 @@ package org.cardanofoundation.signify.cesr.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -14,9 +14,9 @@ import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.Codex.SmallVarRawSizeCodex;
 import org.cardanofoundation.signify.cesr.Matter.Sizage;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ConversionException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
-import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
+import org.cardanofoundation.signify.cesr.exception.ConversionException;
+import org.cardanofoundation.signify.cesr.exception.ShortageException;
+import org.cardanofoundation.signify.cesr.exception.RawMaterialException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 

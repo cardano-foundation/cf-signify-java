@@ -3,8 +3,8 @@ package org.cardanofoundation.signify.core;
 import org.cardanofoundation.signify.cesr.*;
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.*;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
@@ -12,7 +12,6 @@ import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
-import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
 public class Eventing {
     private static final int MaxIntThold = (int) (Math.pow(2, 32) - 1);
 
-    public static Serder interact(InteractArgs args) throws DigestException {
+    public static Serder interact(InteractArgs args) {
         String vs = versify(
                 Ident.KERI,
                 args.getVersion(),
@@ -54,7 +53,7 @@ public class Eventing {
         return new Serder(result.sad());
     }
 
-    public static Serder incept(InceptArgs args) throws DigestException {
+    public static Serder incept(InceptArgs args) {
         if (args.getIntive() == null) {
             args.setIntive(false);
         }
@@ -314,7 +313,7 @@ public class Eventing {
             String stamp,
             CoreUtil.Version version,
             CoreUtil.Serials kind
-    ) throws DigestException {
+    ) {
         if (route == null) {
             route = "";
         }
@@ -343,7 +342,7 @@ public class Eventing {
         return new Serder(sad);
     }
 
-    public static Serder rotate(RotateArgs args) throws DigestException {
+    public static Serder rotate(RotateArgs args) {
         if (args.getSn() == null) {
             args.setSn(1);
         }

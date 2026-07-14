@@ -4,11 +4,11 @@ import org.cardanofoundation.signify.cesr.Matter.Sizage;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.cesr.args.CounterArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.ShortageException;
+import org.cardanofoundation.signify.cesr.exception.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
+import org.cardanofoundation.signify.cesr.exception.InvalidCodeSizeException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
 import java.util.ArrayList;

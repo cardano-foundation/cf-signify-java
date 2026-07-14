@@ -49,7 +49,7 @@ public class CredentialsTest extends BaseIntegrationTest {
     private String applySaid, offerSaid, agreeSaid;
 
     @BeforeAll
-    public static void getClients() throws Exception {
+    public static void getClients() {
         List<SignifyClient> clients = getOrCreateClientsAsync(4);
         issuerClient = clients.get(0);
         holderClient = clients.get(1);
@@ -58,7 +58,7 @@ public class CredentialsTest extends BaseIntegrationTest {
     }
 
     @BeforeEach
-    public void getAid() throws Exception {
+    public void getAid() {
         List<TestUtils.Aid> aids = createAidAsync(
                 new CreateAidArgs(issuerClient, "issuer"),
                 new CreateAidArgs(holderClient, "holder"),
@@ -87,7 +87,7 @@ public class CredentialsTest extends BaseIntegrationTest {
     }
 
     @AfterAll
-    public static void cleanup() throws Exception {
+    public static void cleanup() {
         List<SignifyClient> clients = Arrays.asList(
                 issuerClient,
                 holderClient,
@@ -99,7 +99,7 @@ public class CredentialsTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void single_signature_credentials() throws Exception {
+    public void single_signature_credentials() {
         testSteps.step("Resolve schema oobis", () -> {
             resolveOobisAsync(
                     new ResolveOobisArgs(issuerClient, QVI_SCHEMA_URL, null),

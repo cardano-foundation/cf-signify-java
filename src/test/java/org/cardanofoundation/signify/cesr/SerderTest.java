@@ -30,7 +30,7 @@ class SerderTest {
 
     @Test
     @DisplayName("should create KERI events from dicts")
-    void shouldCreateKeriEventsFromDicts() throws Exception {
+    void shouldCreateKeriEventsFromDicts() {
         int sith = 1;
         int nsith = 1;
         int sn = 0;

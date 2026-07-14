@@ -31,7 +31,7 @@ public class IpexTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("IPEX - grant-admit flow initiated by discloser")
-    void testIpexGrantAdmitFlow() throws Exception {
+    void testIpexGrantAdmitFlow() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
@@ -140,7 +140,7 @@ public class IpexTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("IPEX - apply-admit flow initiated by disclosee")
-    void testIpexApplyAdmitFlow() throws Exception {
+    void testIpexApplyAdmitFlow() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();
@@ -320,7 +320,7 @@ public class IpexTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("IPEX - discloser can create an offer without apply")
-    void testIpexDiscloser() throws Exception {
+    void testIpexDiscloser() throws InterruptedException {
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
         client.boot();

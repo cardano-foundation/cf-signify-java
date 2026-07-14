@@ -2,8 +2,7 @@ package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
+import org.cardanofoundation.signify.cesr.exception.ShortageException;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ class SalterTest {
 
     @Test
     @DisplayName("Test the support functionality for salter subclass of crymat")
-    void testSalterInstance() throws LibsodiumException {
+    void testSalterInstance() {
         Salter salter = new Salter();  // defaults to CryTwoDex.Salt_128
         assertEquals(salter.getCode(), MatterCodex.Salt_128.getValue());
         assertEquals(salter.getRaw().length, Matter.getRawSize(salter.getCode()));
@@ -75,7 +74,7 @@ class SalterTest {
 
     @Test
     @DisplayName("Salter.signer Should return a Signer")
-    void shouldReturnASigner() throws LibsodiumException {
+    void shouldReturnASigner() {
         Salter salter = new Salter("0ACSTo66vU2CA-j4usUIAEm2");
         Signer signer = salter.signer();
         assertNotNull(signer);

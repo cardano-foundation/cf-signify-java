@@ -28,7 +28,7 @@ public class MultisigInceptionTest extends BaseIntegrationTest {
     TestSteps testSteps = new TestSteps();
 
     @Test
-    public void testMultisigInception() throws Exception {
+    public void testMultisigInception() {
         List<SignifyClient> clients = getOrCreateClientsAsync(2);
         client1 = clients.get(0);
         client2 = clients.get(1);

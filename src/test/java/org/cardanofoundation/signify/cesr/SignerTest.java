@@ -1,8 +1,7 @@
 package org.cardanofoundation.signify.cesr;
 
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import org.cardanofoundation.signify.cesr.exception.UnexpectedCodeException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +11,7 @@ public class SignerTest {
 
     @Test
     @DisplayName("Test Signer instance")
-    void testSignerInstance() throws LibsodiumException {
+    void testSignerInstance() {
 
         // defaults provide Ed25519 signer Ed25519 verfer
         Signer signer = new Signer();

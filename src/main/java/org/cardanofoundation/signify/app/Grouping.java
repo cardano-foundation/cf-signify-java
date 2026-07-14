@@ -2,14 +2,12 @@ package org.cardanofoundation.signify.app;
 
 import lombok.Getter;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.generated.keria.model.Exn;
 import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
@@ -34,11 +32,8 @@ public class Grouping {
          * Get group request messages
          * @param said SAID of exn message to load
          * @return Optional containing the replay messages if found, or empty if not found
-         * @throws LibsodiumException if a Sodium error occurs
-         * @throws IOException if an I/O error occurs
-         * @throws InterruptedException if the operation is interrupted
          */
-        public Optional<List<ExnMultisig>> getRequest(String said) throws LibsodiumException, IOException, InterruptedException {
+        public Optional<List<ExnMultisig>> getRequest(String said) {
             String path = "/multisig/request/" + said;
             String method = "GET";
             HttpResponse<String> response = this.client.fetch(path, method, null);
@@ -57,14 +52,13 @@ public class Grouping {
          * @param sigs signature of the participant over the exn
          * @param atc  additional attachments from embedded events in exn
          * @return The list of replay messages
-         * @throws Exception if the fetch operation fails
          */
         public Exn sendRequest(
             String name,
             Exn exn,
             List<String> sigs,
             String atc
-        ) throws LibsodiumException, IOException, InterruptedException {
+        ) {
             String path = "/identifiers/" + name + "/multisig/request";
             String method = "POST";
             Map<String, Object> data = new LinkedHashMap<>();
@@ -86,7 +80,6 @@ public class Grouping {
          * @param smids array of participants
          * @param rmids array of participants
          * @return The list of replay messages
-         * @throws Exception if the fetch operation fails
          */
         public Object join(
             String name,
@@ -95,7 +88,7 @@ public class Grouping {
             String gid,
             List<String> smids,
             List<String> rmids
-        ) throws LibsodiumException, IOException, InterruptedException {
+        ) {
             String path = "/identifiers/" + name + "/multisig/join";
             String method = "POST";
             Map<String, Object> data = new LinkedHashMap<>();

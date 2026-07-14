@@ -4,7 +4,6 @@ import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.utils.KeyPair;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +14,7 @@ public class DecrypterTest {
 
     @Test
     @DisplayName("should decrypt stuff")
-    void shouldDecryptStuff() throws LibsodiumException, SodiumException {
+    void shouldDecryptStuff() throws SodiumException {
         // (b'\x18;0\xc4\x0f*vF\xfa\xe3\xa2Eee\x1f\x96o\xce)G\x85\xe3X\x86\xda\x04\xf0\xdc\xde\x06\xc0+')
         byte[] seed = new byte[]{
             24, 59, 48, (byte) 196, 15, 42, 118, 70, (byte) 250, (byte) 227, (byte) 162, 69, 101, 101, 31,

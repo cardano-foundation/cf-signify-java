@@ -17,8 +17,10 @@ import org.cardanofoundation.signify.app.Exchanging.Exchanges;
 import org.cardanofoundation.signify.app.Grouping.Groups;
 import org.cardanofoundation.signify.app.Notifying.Notifications;
 import org.cardanofoundation.signify.app.aiding.IdentifierController;
-import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
-import org.cardanofoundation.signify.app.clienting.exception.UnexpectedResponseStatusException;
+import org.cardanofoundation.signify.exception.HeaderVerificationException;
+import org.cardanofoundation.signify.exception.SignifyAgentException;
+import org.cardanofoundation.signify.exception.SignifyInterruptedException;
+import org.cardanofoundation.signify.exception.SignifyTransportException;
 import org.cardanofoundation.signify.app.coring.KeyStates;
 import org.cardanofoundation.signify.app.coring.Oobis;
 import org.cardanofoundation.signify.app.coring.Operations;
@@ -26,15 +28,14 @@ import org.cardanofoundation.signify.app.credentialing.Schemas;
 import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Authenticater;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Keeping.ExternalModule;
 import org.cardanofoundation.signify.app.aiding.IdentifierDeps;
 import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ExtractionException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.ExtractionException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -42,7 +43,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.security.DigestException;
 import java.time.Duration;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
@@ -102,7 +102,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         Tier tier,
         String bootUrl,
         List<ExternalModule> externalModules
-    ) throws DigestException, LibsodiumException {
+    ) {
         tier = tier != null ? tier : Tier.LOW;
         this.url = url;
         if (bran.length() < 21) {
@@ -126,7 +126,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     /**
      * Boot a KERIA agent
      */
-    public void boot() throws Exception {
+    public void boot() {
         Controller.EventResult eventData = controller != null ? controller.getEvent() : null;
         if (eventData == null) {
             throw new ExtractionException("Error getting event data");
@@ -145,36 +145,41 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
             .POST(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
             .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = send(request);
 
         if (response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
+            throw SignifyAgentException.from("POST", "/boot", response.statusCode(), response.body());
         }
     }
 
     /**
      * Get state of the agent and the client
+     *
+     * @throws SignifyAgentException on any agent error; a 404 status means no agent
+     *         exists for this controller yet and the client should {@link #boot()} first
      */
-    public State state() throws Exception {
+    public State state() {
         String caid = controller != null ? controller.getPre() : null;
         if (caid == null) {
-            throw new IllegalArgumentException("Controller not initialized");
+            throw new IllegalStateException("Controller not initialized");
         }
 
+        String path = "/agent/" + caid;
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.url + "/agent/" + caid))
+            .uri(URI.create(this.url + path))
             .GET()
             .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = send(request);
 
         if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-            throw new IllegalArgumentException("Agent does not exist for controller " + caid);
+            throw SignifyAgentException.from("GET", path, response.statusCode(), response.body(),
+                    "Agent does not exist for controller " + caid);
         }
 
         if (response.statusCode() != HttpURLConnection.HTTP_OK
                 && response.statusCode() != HttpURLConnection.HTTP_ACCEPTED) {
-            throw new UnexpectedResponseStatusException("Unexpected response code: " + response.statusCode());
+            throw SignifyAgentException.from("GET", path, response.statusCode(), response.body());
         }
 
         Map<String, Object> data = Utils.fromJson(response.body(), new TypeReference<>() {});
@@ -190,10 +195,10 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     /**
      * Connect to a KERIA agent
      */
-    public void connect() throws Exception {
+    public void connect() {
         State state = state();
         if (state == null) {
-            throw new RuntimeException("State not initialized");
+            throw new IllegalStateException("State not initialized");
         }
         this.pidx = state.getPidx();
 
@@ -238,7 +243,9 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
      * @param method       HTTP method
      * @param data         Data to be sent in the body of the resource
      * @param extraHeaders Optional extra headers to be sent with the request
-     * @return A Mono of ClientResponse
+     * @return the verified agent response; GET 404s are returned unmapped (callers own
+     *         404 semantics), and {@code null} stands for a 204 the JDK HttpClient
+     *         discarded due to KERIA's Transfer-Encoding quirk (see {@link #send})
      */
     @Override
     public HttpResponse<String> fetch(
@@ -246,7 +253,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         String method,
         Object data,
         Map<String, String> extraHeaders
-    ) throws LibsodiumException, InterruptedException, IOException {
+    ) {
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> signedHeaders;
         headers.put("signify-resource", this.controller.getPre());
@@ -275,69 +282,50 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
 
         finalHeaders.forEach(requestBuilder::header);
 
-        HttpResponse<String> response = null;
-        Map<String, String> responseHeaders = new LinkedHashMap<>();
-
-        try {
-            response = httpClient.send(requestBuilder.build(),
-                    HttpResponse.BodyHandlers.ofString());
-
-            if ("GET".equals(method) && response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                return response;
-            }
-
-            if (response.statusCode() < 200 || response.statusCode() > 299) {
-                throw new UnexpectedResponseStatusException(String.format("HTTP %s %s - %d - %s",
-                        method, path, response.statusCode(), response.body()));
-            }
-
-            response.headers().map().forEach((key, values) ->
-                    responseHeaders.put(key, values.getFirst()));
-
-            boolean isSameAgent = this.agent != null &&
-                    this.agent.getPre().equals(responseHeaders.get("signify-resource"));
-            if (!isSameAgent) {
-                throw new HeaderVerificationException("Message from a different remote agent");
-            }
-
-            boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
-            if (verification) {
-                return response;
-            } else {
-                throw new HeaderVerificationException("Response verification failed");
-            }
-
-        } catch (IOException exception) {
-            if(exception.getMessage().contains("unexpected content length header with 204 response")) {
-                /**
-                 * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230
-                 * A server MUST NOT send a Transfer-Encoding header field in any 2xx (Successful) response to a CONNECT
-                 * request (Section 4.3.6 of [RFC7231]).
-                 * <br>
-                 * Keria now returns a Transfer-Encoding header field in a 204 response so we need to ignore this exception.
-                 */
-            } else {
-                throw exception;
-            }
+        HttpResponse<String> response = send(requestBuilder.build());
+        if (response == null) {
+            return null;
         }
 
-       return response;
+        if ("GET".equals(method) && response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return response;
+        }
+
+        if (response.statusCode() < 200 || response.statusCode() > 299) {
+            throw SignifyAgentException.from(method, path, response.statusCode(), response.body());
+        }
+
+        Map<String, String> responseHeaders = new LinkedHashMap<>();
+        response.headers().map().forEach((key, values) ->
+                responseHeaders.put(key, values.getFirst()));
+
+        boolean isSameAgent = this.agent != null &&
+                this.agent.getPre().equals(responseHeaders.get("signify-resource"));
+        if (!isSameAgent) {
+            throw new HeaderVerificationException("Message from a different remote agent");
+        }
+
+        boolean verification = this.authn.verify(responseHeaders, method, path.split("\\?")[0]);
+        if (!verification) {
+            throw new HeaderVerificationException("Response verification failed");
+        }
+        return response;
     }
 
     public HttpResponse<String> fetch(
         String path,
         String method,
         Object data
-    ) throws LibsodiumException, InterruptedException, IOException {
+    ) {
         return this.fetch(path, method, data, null);
     }
 
     /**
      * Approve the delegation of the client AID to the KERIA agent
      */
-    public void approveDelegation() throws DigestException, IOException, InterruptedException, LibsodiumException {
+    public void approveDelegation() {
         if (this.agent == null) {
-            throw new RuntimeException("Agent not initialized");
+            throw new IllegalStateException("Agent not initialized");
         }
 
         Object sigs = this.controller.approveDelegation(this.agent);
@@ -345,28 +333,44 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
         data.put(SignifyFields.IXN.getValue(), this.controller.getSerder().getKed());
         data.put(SignifyFields.SIGS.getValue(), sigs);
 
+        String path = "/agent/" + this.controller.getPre();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(this.url + path + "?type=ixn"))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
+                .build();
+
+        send(request);
+    }
+
+    /**
+     * @return the response, or {@code null} when the exchange succeeded as a 204 but
+     *         the JDK HttpClient discarded it (see {@link #isKeria204ContentLengthViolation})
+     */
+    private HttpResponse<String> send(HttpRequest request) {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(this.url + "/agent/" + this.controller.getPre() + "?type=ixn"))
-                    .header("Content-Type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.ofString(Utils.jsonStringify(data)))
-                    .build();
-
-            httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException exception) {
-            if(exception.getMessage().contains("unexpected content length header with 204 response")) {
-                /**
-                 * According to RFC 7230 [1]: [1] https://tools.ietf.org/html/rfc7230
-                 * A server MUST NOT send a Transfer-Encoding header field in any 2xx (Successful) response to a CONNECT
-                 * request (Section 4.3.6 of [RFC7231]).
-                 * <br>
-                 * Keria now returns a Transfer-Encoding header field in a 204 response so we need to ignore this exception.
-                 */
-
-            } else {
-                throw exception;
+            return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException exception) {
+            if (isKeria204ContentLengthViolation(exception)) {
+                return null;
             }
+            throw new SignifyTransportException(
+                    String.format("HTTP %s %s failed without a response", request.method(), request.uri().getPath()), exception);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new SignifyInterruptedException(exception);
         }
+    }
+
+    /**
+     * KERIA violates RFC 7230 by sending a Transfer-Encoding header on 204 responses,
+     * which the JDK HttpClient rejects after the exchange has already succeeded.
+     * @TODO - foconor: fix upstream in KERIA (drop the header on 204s), then remove this special
+     *   case and the null return from {@link #send}.
+     */
+    private static boolean isKeria204ContentLengthViolation(IOException exception) {
+        return exception.getMessage() != null
+                && exception.getMessage().contains("unexpected content length header with 204 response");
     }
 
     /**

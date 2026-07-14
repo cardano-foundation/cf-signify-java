@@ -8,11 +8,9 @@ import org.cardanofoundation.signify.cesr.Codex;
 import org.cardanofoundation.signify.cesr.Salter;
 import org.cardanofoundation.signify.cesr.Signer;
 import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.security.DigestException;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,7 +19,7 @@ public class HaberyTest {
 
     @Test
     @DisplayName("should manage AID creation and rotation")
-    void shouldManageAIDCreationAndRotation() throws DigestException, LibsodiumException {
+    void shouldManageAIDCreationAndRotation() {
         String passcode = "0123456789abcdef";
         String salt = new Salter(RawArgs.builder().raw(passcode.getBytes()).build()).getQb64();
 
@@ -46,7 +44,7 @@ public class HaberyTest {
 
     @Test
     @DisplayName("should use passcode as salt")
-    void shouldUsePasscodeAsSalt() throws DigestException, LibsodiumException {
+    void shouldUsePasscodeAsSalt() {
         String passcode = "0123456789abcdefghijk";
         String bran = Codex.MatterCodex.Salt_128.getValue() + "A" + passcode.substring(0, 21);
         Salter salter = new Salter(bran);

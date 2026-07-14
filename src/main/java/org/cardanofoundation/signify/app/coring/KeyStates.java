@@ -1,12 +1,10 @@
 package org.cardanofoundation.signify.app.coring;
 
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
 import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
 import java.util.*;
@@ -29,9 +27,8 @@ public class KeyStates {
      *
      * @param pre Identifier prefix
      * @return Optional containing a map representing the key states, or empty if not found
-     * @throws Exception if the fetch operation fails
      */
-    public Optional<KeyStateRecord> get(String pre) throws LibsodiumException, IOException, InterruptedException {
+    public Optional<KeyStateRecord> get(String pre) {
         String path = "/states?pre=" + pre;
         String method = "GET";
         HttpResponse<String> res = this.client.fetch(path, method, null);
@@ -51,7 +48,7 @@ public class KeyStates {
     /**
      * Retrieve the key state for a list of identifiers
      */
-    public List<KeyStateRecord> list(List<String> pres) throws LibsodiumException, IOException, InterruptedException {
+    public List<KeyStateRecord> list(List<String> pres) {
         String path = "/states?" + String.join("&", pres.stream().map(pre -> "pre=" + pre).toArray(String[]::new));
         String method = "GET";
         HttpResponse<String> res = this.client.fetch(path, method, null);
@@ -66,9 +63,8 @@ public class KeyStates {
      * @param sn     Optional sequence number
      * @param anchor Optional anchor
      * @return A map representing the long-running operation
-     * @throws Exception if the fetch operation fails
      */
-    public QueryOperation query(String pre, String sn, Object anchor) throws LibsodiumException, IOException, InterruptedException {
+    public QueryOperation query(String pre, String sn, Object anchor) {
         String path = "/queries";
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("pre", pre);
@@ -83,7 +79,7 @@ public class KeyStates {
         return Utils.fromJson(res.body(), QueryOperation.class);
     }
 
-    public QueryOperation query(String pre, String sn) throws LibsodiumException, IOException, InterruptedException {
+    public QueryOperation query(String pre, String sn) {
         return query(pre, sn, null);
     }
 }

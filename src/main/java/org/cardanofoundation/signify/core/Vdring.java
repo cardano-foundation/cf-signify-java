@@ -10,7 +10,6 @@ import org.cardanofoundation.signify.cesr.Prefixer;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.util.CoreUtil;
 
-import java.security.DigestException;
 import java.util.*;
 
 import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
@@ -19,7 +18,7 @@ import static org.cardanofoundation.signify.core.Eventing.ample;
 
 public class Vdring {
 
-    public static Serder incept(VDRInceptArgs args) throws DigestException {
+    public static Serder incept(VDRInceptArgs args) {
         String vs = versify(CoreUtil.Ident.KERI, args.version, args.kind, 0);
         int isn = 0;
         String ilk = CoreUtil.Ilks.VCP.getValue();

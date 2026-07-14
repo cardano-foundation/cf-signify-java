@@ -23,13 +23,11 @@ import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Serder;
 import org.cardanofoundation.signify.cesr.Siger;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.core.Eventing;
 import org.cardanofoundation.signify.core.Manager;
 
 import java.io.IOException;
-import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -51,7 +49,7 @@ import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 @SuppressWarnings("unchecked")
 public class MultisigUtils {
 
-    public static KelOperation acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
+    public static KelOperation acceptMultisigIncept(SignifyClient client2, AcceptMultisigInceptArgs args) {
         final HabState memberHab = client2.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 
@@ -111,7 +109,7 @@ public class MultisigUtils {
                                           List<HabState> otherMemberAIDs,
                                           Object data,
                                           List<KeyStateRecord> states,
-                                          boolean isInitiator) throws Exception {
+                                          boolean isInitiator) {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_IXN_ROUTE);
         }
@@ -156,7 +154,7 @@ public class MultisigUtils {
                                           List<HabState> otherMemberAIDs,
                                           RotateIdentifierArgs kargs,
                                           String route,
-                                          boolean isInitiator) throws Exception {
+                                          boolean isInitiator) {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_ROT_ROUTE);
         }
@@ -207,7 +205,7 @@ public class MultisigUtils {
     public static List<EndRoleOperation> addEndRoleMultisig(SignifyClient client, String groupName, HabState aid,
                                             List<HabState> otherMemberAIDs, HabState multisigAID,
                                             String timestamp,
-                                            boolean isInitiator) throws Exception {
+                                            boolean isInitiator) {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_RPY_ROUTE);
         }
@@ -261,7 +259,7 @@ public class MultisigUtils {
     public static List<EndRoleOperation> addEndRoleMultisigs(SignifyClient client, String groupName, HabState aid,
                                                   List<HabState> otherMemberAIDs, HabState multisigAID,
                                                   String timestamp,
-                                                  boolean isInitiator) throws Exception {
+                                                  boolean isInitiator) {
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_RPY_ROUTE);
         }
@@ -316,7 +314,7 @@ public class MultisigUtils {
             HabState multisigAID,
             HabState recipientAID,
             String timestamp
-    ) throws Exception {
+    ) {
         String grantMsgSaid = TestUtils.waitAndMarkNotification(client, "/exn" + IPEX_GRANT_ROUTE);
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
@@ -377,7 +375,7 @@ public class MultisigUtils {
             List<HabState> otherMembersAIDs,
             String groupName,
             CreateIdentifierArgs kargs,
-            boolean isInitiator) throws Exception {
+            boolean isInitiator) {
 
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_ICP_ROUTE);
@@ -433,7 +431,7 @@ public class MultisigUtils {
             String registryName,
             String nonce,
             String topic,
-            boolean isInitiator) throws Exception {
+            boolean isInitiator) {
 
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_VCP_ROUTE);
@@ -485,7 +483,7 @@ public class MultisigUtils {
             HabState multisigAID,
             String registryName,
             String nonce,
-            boolean isInitiator) throws Exception {
+            boolean isInitiator) {
 
         return createRegistryMultisig(client, aid, otherMembersAIDs, multisigAID, registryName, nonce, "registry", isInitiator);
     }
@@ -501,7 +499,7 @@ public class MultisigUtils {
             List<HabState> otherMembersAIDs,
             HabState multisigAID,
             Map<String, ?> anchor,
-            boolean isInitiator) throws Exception {
+            boolean isInitiator) {
 
         if (!isInitiator) {
             String msgSaid = TestUtils.waitAndMarkNotification(client, MULTISIG_IXN_ROUTE);
@@ -564,7 +562,7 @@ public class MultisigUtils {
             HabState recipientAID,
             Credential credential,
             String timestamp,
-            boolean isInitiator) throws Exception {
+            boolean isInitiator) {
 
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_EXN_ROUTE);
@@ -627,7 +625,7 @@ public class MultisigUtils {
             List<HabState> otherMembersAIDs,
             String multisigAIDName,
             CredentialData kargsIss,
-            boolean isInitiator) throws Exception {
+            boolean isInitiator) {
 
         if (!isInitiator) {
             TestUtils.waitAndMarkNotification(client, MULTISIG_ISS_ROUTE);
@@ -671,7 +669,7 @@ public class MultisigUtils {
     public static KelOperation startMultisigIncept(
             SignifyClient client,
             StartMultisigInceptArgs args
-    ) throws IOException, InterruptedException, DigestException, LibsodiumException, ExecutionException {
+    ) {
         HabState aid1 = client.identifiers().get(args.getLocalMemberName())
                 .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getLocalMemberName()));
 

@@ -25,7 +25,6 @@ import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.security.DigestException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,12 +89,12 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             }}
     ).sad();
 
-    public MultisigVleiIssuanaceTest() throws DigestException {
+    public MultisigVleiIssuanaceTest() {
     }
 
     @Test
     @DisplayName("Multisig VLEI issuance")
-    void testMultisigVleiIssuance() throws Exception {
+    void testMultisigVleiIssuance() {
         /**
          * The abbreviations used in this script follows GLEIF vLEI
          * ecosystem governance framework (EGF).

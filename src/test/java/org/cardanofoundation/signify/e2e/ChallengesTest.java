@@ -19,7 +19,7 @@ public class ChallengesTest {
     private String aid1Prefix, aid2Prefix;
 
     @Test
-    void ChallengeTest() throws Exception {
+    void ChallengeTest() {
         String bran1 = Coring.randomPasscode();
         String bran2 = Coring.randomPasscode();
         client1 = new SignifyClient(

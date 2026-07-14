@@ -1,11 +1,12 @@
 package org.cardanofoundation.signify.app;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.RecordedRequest;
 import org.cardanofoundation.signify.app.clienting.*;
 import org.cardanofoundation.signify.app.aiding.IdentifierController;
-import org.cardanofoundation.signify.app.clienting.exception.HeaderVerificationException;
+import org.cardanofoundation.signify.exception.HeaderVerificationException;
 import org.cardanofoundation.signify.app.coring.Coring;
 import org.cardanofoundation.signify.app.coring.KeyStates;
 import org.cardanofoundation.signify.app.coring.Oobis;
@@ -14,8 +15,7 @@ import org.cardanofoundation.signify.app.credentialing.Schemas;
 import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
 import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
 import org.cardanofoundation.signify.app.credentialing.registries.Registries;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
+import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
 import org.cardanofoundation.signify.cesr.util.Utils;
 import org.cardanofoundation.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +31,7 @@ public class ClientingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("SignifyClient initialization")
-    void testSignifyClientInitialization() throws Exception {
+    void testSignifyClientInitialization() throws InterruptedException, JsonProcessingException {
         InvalidValueException exception = assertThrows(
                 InvalidValueException.class,
                 () -> new SignifyClient(url, "short", Tier.LOW, bootUrl, null)
@@ -161,7 +161,7 @@ public class ClientingTest extends BaseMockServerTest {
 
     @Test
     @DisplayName("Signed Fetch")
-    void testSignedFetch() throws Exception {
+    void testSignedFetch() throws InterruptedException {
         // Siged fetch
         String bran = "0123456789abcdefghijk";
         SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
@@ -193,7 +193,7 @@ public class ClientingTest extends BaseMockServerTest {
     }
 
     @Test
-    public void testJsonObject() throws Exception {
+    public void testJsonObject() throws JsonProcessingException {
         final ObjectMapper obj = new ObjectMapper();
         final Map<String, Object> ICP_EVENT_OBJ = new LinkedHashMap<>() {{
             put("v", "KERI10JSON00012b_");
