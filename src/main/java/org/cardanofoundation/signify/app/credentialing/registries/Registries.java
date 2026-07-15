@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.net.http.HttpResponse;
 import java.util.*;
 import org.cardanofoundation.signify.generated.keria.model.HabState;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.generated.keria.model.Registry;
 import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -152,5 +153,23 @@ public class Registries {
 
         HttpResponse<String> response = this.client.fetch(path, method, data);
         return Utils.fromJson(response.body(), Registry.class);
+    }
+
+    /**
+     * Verify a registry by ingesting its inception (vcp) event through {@code POST /verify}.
+     *
+     * @param options the vcp Serder and its CESR attachment
+     * @return the long-running verification operation
+     */
+    public Operation verify(RegistryVerifyOptions options) {
+        final String path = "/verify";
+        final String method = "POST";
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("serder", options.vcp().getRaw());
+        body.put("atc", options.atc() != null ? options.atc() : "");
+
+        HttpResponse<String> response = this.client.fetch(path, method, body);
+        return Utils.fromJson(response.body(), Operation.class);
     }
 }
