@@ -166,7 +166,7 @@ public class Registries {
         final String method = "POST";
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("serder", options.vcp().getRaw());
+        body.put("serder", options.vcp().getKed());
         body.put("atc", options.atc() != null ? options.atc() : "");
 
         HttpResponse<String> response = this.client.fetch(path, method, body);

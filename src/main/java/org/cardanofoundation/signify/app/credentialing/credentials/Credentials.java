@@ -275,7 +275,7 @@ public class Credentials {
         final String method = "POST";
 
         Map<String, Object> issBody = new LinkedHashMap<>();
-        issBody.put("serder", options.iss().getRaw());
+        issBody.put("serder", options.iss().getKed());
         issBody.put("atc", options.issAtc() != null ? options.issAtc() : "");
         this.client.fetch(path, method, issBody);
 
@@ -284,7 +284,7 @@ public class Credentials {
                 : new String(Utils.serializeACDCAttachment(options.iss()));
 
         Map<String, Object> acdcBody = new LinkedHashMap<>();
-        acdcBody.put("serder", options.acdc().getRaw());
+        acdcBody.put("serder", options.acdc().getKed());
         acdcBody.put("atc", acdcAtc);
 
         HttpResponse<String> response = this.client.fetch(path, method, acdcBody);
