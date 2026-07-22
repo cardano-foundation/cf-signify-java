@@ -53,6 +53,7 @@ public class OperationDeserializer extends JsonDeserializer<Operation> implement
             Map.entry("query", OperationType.QUERY),
             Map.entry("registry", OperationType.REGISTRY),
             Map.entry("submit", OperationType.SUBMIT),
+            Map.entry("verifycredential", OperationType.CREDENTIAL),
             Map.entry("witness", OperationType.WITNESS)
     );
 

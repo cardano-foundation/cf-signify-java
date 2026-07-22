@@ -3,6 +3,7 @@ package org.cardanofoundation.signify.app.credentialing.credentials;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.cardanofoundation.signify.app.clienting.SignifyClient;
 import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
+import org.cardanofoundation.signify.generated.keria.model.Operation;
 import org.cardanofoundation.signify.cesr.Keeping;
 import org.cardanofoundation.signify.cesr.Saider;
 import org.cardanofoundation.signify.cesr.Serder;
@@ -258,5 +259,35 @@ public class Credentials {
         KelOperation op = Utils.fromJson(response.body(), KelOperation.class);
 
         return new RevokeCredentialResult(new Serder(ixn), new Serder(rev), op);
+    }
+
+    /**
+     * Verify a credential by ingesting its issuance (iss) and ACDC events through {@code POST /verify}.
+     * The iss event is posted first so the TEL/registry state is ingested before the ACDC is verified
+     * against it; both dispatch to the same credential operation keyed on the ACDC SAID, which is
+     * returned so the caller can await completion.
+     *
+     * @param options the ACDC/iss Serders and their CESR attachments
+     * @return the long-running verification operation
+     */
+    public Operation verify(CredentialVerifyOptions options) {
+        final String path = "/verify";
+        final String method = "POST";
+
+        Map<String, Object> issBody = new LinkedHashMap<>();
+        issBody.put("serder", options.iss().getKed());
+        issBody.put("atc", options.issAtc() != null ? options.issAtc() : "");
+        this.client.fetch(path, method, issBody);
+
+        String acdcAtc = (options.acdcAtc() != null && !options.acdcAtc().isEmpty())
+                ? options.acdcAtc()
+                : new String(Utils.serializeACDCAttachment(options.iss()));
+
+        Map<String, Object> acdcBody = new LinkedHashMap<>();
+        acdcBody.put("serder", options.acdc().getKed());
+        acdcBody.put("atc", acdcAtc);
+
+        HttpResponse<String> response = this.client.fetch(path, method, acdcBody);
+        return Utils.fromJson(response.body(), Operation.class);
     }
 }
