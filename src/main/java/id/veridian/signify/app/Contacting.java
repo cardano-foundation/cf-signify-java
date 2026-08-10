@@ -1,0 +1,211 @@
+package id.veridian.signify.app;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Getter;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.ChallengeOperation;
+import id.veridian.signify.generated.keria.model.Challenge;
+import id.veridian.signify.generated.keria.model.Contact;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.HabState;
+
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.net.http.HttpResponse;
+import java.util.Optional;
+
+public class Contacting {
+
+    @Getter
+    public static class Challenges {
+        public final SignifyClient client;
+
+        /**
+         * Challenges
+         * @param client {SignifyClient}
+         */
+        public Challenges(SignifyClient client) {
+            this.client = client;
+        }
+
+        /**
+         * Retrieve the key state for an identifier
+         * @param strength Integer representing the strength of the challenge. Typically, 128 or 256
+         * @return A list of random words
+         */
+        public Challenge generate(Integer strength) {
+            String path = "/challenges?strength=" + strength.toString();
+            String method = "GET";
+
+            HttpResponse<String> response = this.client.fetch(path, method, null);
+            return Utils.fromJson(response.body(), Challenge.class);
+        }
+
+        public Challenge generate() {
+            return generate(128);
+        }
+
+        /**
+         * Respond to a challenge by signing a message with the list of words
+         * @param name Name or alias of the identifier
+         * @param recipient Prefix of the recipient of the response
+         * @param words List of words to embed in the signed response
+         * @return The sent exn message
+         */
+        public Exn respond(String name, String recipient, List<String> words) {
+            HabState hab = this.client.identifiers().get(name)
+                    .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
+            Exchanging.Exchanges exchanges = this.client.exchanges();
+
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("words", words);
+
+            Map<String, List<Object>> embeds = new LinkedHashMap<>();
+
+            return exchanges.send(
+                name,
+                "challenge",
+                hab,
+                "/challenge/response",
+                payload,
+                embeds,
+                List.of(recipient)
+            );
+        }
+
+        /**
+         * Ask Agent to verify a given sender signed the provided words
+         * @param source Prefix of the identifier that was challenged
+         * @param words List of challenge words to check for
+         * @return The long-running operation
+         */
+        public ChallengeOperation verify(String source, List<String> words) {
+            String path = "/challenges_verify/" + source;
+            String method = "POST";
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("words", words);
+
+            HttpResponse<String> response = this.client.fetch(path, method, data);
+            return Utils.fromJson(response.body(), ChallengeOperation.class);
+        }
+
+        /**
+         * Mark challenge response as signed and accepted
+         * @param source Prefix of the identifier that was challenged
+         * @param said qb64 AID of exn message representing the signed response
+         * @return The result
+         */
+        public Object responded(String source, String said) {
+            String path = "/challenges_verify/" + source;
+            String method = "PUT";
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("said", said);
+
+            return this.client.fetch(path, method, data);
+        }
+    }
+
+    @Getter
+    public static class Contacts {
+        private final SignifyClient client;
+
+        /**
+         * Contacts
+         * @param client {SignifyClient}
+         */
+        public Contacts(SignifyClient client) {
+            this.client = client;
+        }
+
+        /**
+         * List contacts
+         * @param group Optional group name to filter contacts
+         * @param filterField Optional field name to filter contacts
+         * @param filterValue Optional field value to filter contacts
+         * @return A list of contacts
+         */
+        public List<Contact> list(
+            String group,
+            String filterField,
+            String filterValue
+        ) {
+            StringBuilder path = new StringBuilder("/contacts");
+            boolean hasQuery = false;
+
+            if (group != null) {
+                path.append("?group=").append(group);
+                hasQuery = true;
+            }
+            if (filterField != null && filterValue != null) {
+                path.append(hasQuery ? "&" : "?")
+                    .append("filter_field=").append(filterField)
+                    .append("&filter_value=").append(URLEncoder.encode(filterValue, StandardCharsets.UTF_8));
+            }
+            String method = "GET";
+            HttpResponse<String> response = this.client.fetch(path.toString(), method, null);
+            return Utils.fromJson(response.body(), new TypeReference<List<Contact>>() {});
+        }
+
+        public List<Contact> list() {
+            return list(null, null, null);
+        }
+
+        /**
+         * Get a contact
+         * @param pre Prefix of the contact
+         * @return Optional containing the contact if found, or empty if not found
+         */
+        public Optional<Contact> get(String pre) {
+            String path = "/contacts/" + pre;
+            String method = "GET";
+            HttpResponse<String> response = this.client.fetch(path, method, null);
+
+            if (response.statusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                return Optional.empty();
+            }
+
+            return Optional.of(Utils.fromJson(response.body(), Contact.class));
+        }
+
+        /**
+         * Add a contact
+         * @param pre Prefix of the contact
+         * @param info Information about the contact
+         * @return The created contact
+         */
+        public Contact add(String pre, Map<String, Object> info) {
+            String path = "/contacts/" + pre;
+            String method = "POST";
+            HttpResponse<String> response = this.client.fetch(path, method, info);
+            return Utils.fromJson(response.body(), Contact.class);
+        }
+
+        /**
+         * Delete a contact
+         * @param pre Prefix of the contact
+         */
+        public void delete(String pre) {
+            String path = "/contacts/" + pre;
+            String method = "DELETE";
+            this.client.fetch(path, method, null);
+        }
+
+        /**
+         * Update a contact
+         * @param pre Prefix of the contact
+         * @param info Updated information about the contact
+         * @return The updated contact
+         */
+        public Contact update(String pre, Map<String, Object> info) {
+            String path = "/contacts/" + pre;
+            String method = "PUT";
+            HttpResponse<String> response = this.client.fetch(path, method, info);
+            return Utils.fromJson(response.body(), Contact.class);
+        }
+    }
+}

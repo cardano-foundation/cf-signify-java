@@ -1,0 +1,301 @@
+package id.veridian.signify.e2e;
+
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.e2e.utils.MultisigUtils;
+import id.veridian.signify.e2e.utils.Retry;
+import id.veridian.signify.e2e.utils.TestSteps;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.Notification;
+import id.veridian.signify.generated.keria.model.CompletedDelegatorOperation;
+import id.veridian.signify.generated.keria.model.DelegatorOperation;
+import id.veridian.signify.generated.keria.model.EndRoleOperation;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.generated.keria.model.OOBI;
+import id.veridian.signify.generated.keria.model.QueryOperation;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.*;
+
+import static id.veridian.signify.e2e.utils.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class DelegationMultisigTest extends BaseIntegrationTest {
+    TestSteps testSteps = new TestSteps();
+    String delegatorGroupName = "delegator_group";
+    String delegateeGroupName = "delegatee_group";
+    String delegator1Name = "delegator1";
+    String delegator2Name = "delegator2";
+    String delegatee1Name = "delegatee1";
+    String delegatee2Name = "delegatee2";
+
+    @Test
+    @DisplayName("Delegation Multisig Test")
+    void delegationMultisigTest() {
+
+        // Boot four clients
+        List<SignifyClient> signifyClients = getOrCreateClientsAsync(4);
+        SignifyClient delegator1Client = signifyClients.get(0);
+        SignifyClient delegator2Client = signifyClients.get(1);
+        SignifyClient delegatee1Client = signifyClients.get(2);
+        SignifyClient delegatee2Client = signifyClients.get(3);
+
+        // Create delegator and delegatee identifiers clients
+        List<HabState> aids = testSteps.step("Creating single sig aids", () ->
+                createAidAndGetHabStateAsync(
+                        new CreateAidArgs(delegator1Client, delegator1Name),
+                        new CreateAidArgs(delegator2Client, delegator2Name),
+                        new CreateAidArgs(delegatee1Client, delegatee1Name),
+                        new CreateAidArgs(delegatee2Client, delegatee2Name))
+        );
+
+        HabState delegator1Aid = aids.get(0);
+        HabState delegator2Aid = aids.get(1);
+        HabState delegatee1Aid = aids.get(2);
+        HabState delegatee2Aid = aids.get(3);
+
+        // Exchange OOBIs
+        List<OOBI> oobis = testSteps.step("Exchanging OOBIs", () ->
+                getOobisAsync(
+                        new GetOobisArgs(delegator1Client, delegator1Name, "agent"),
+                        new GetOobisArgs(delegator2Client, delegator2Name, "agent"),
+                        new GetOobisArgs(delegatee1Client, delegatee1Name, "agent"),
+                        new GetOobisArgs(delegatee2Client, delegatee2Name, "agent")
+                ));
+
+        OOBI delegator1Oobi = oobis.get(0);
+        OOBI delegator2Oobi = oobis.get(1);
+        OOBI delegatee1Oobi = oobis.get(2);
+        OOBI delegatee2Oobi = oobis.get(3);
+
+        // Resolve OOBIs
+        testSteps.step("Resolving OOBIs", () -> {
+            resolveOobisAsync(
+                    new ResolveOobisArgs(delegator1Client, ((List<String>) delegator2Oobi.getOobis()).get(0), delegator2Name),
+                    new ResolveOobisArgs(delegator2Client, ((List<String>) delegator1Oobi.getOobis()).get(0), delegator1Name),
+                    new ResolveOobisArgs(delegatee1Client, ((List<String>) delegatee2Oobi.getOobis()).get(0), delegatee2Name),
+                    new ResolveOobisArgs(delegatee2Client, ((List<String>) delegatee1Oobi.getOobis()).get(0), delegatee1Name)
+            );
+        });
+        System.out.println(
+                delegator1Name + "(" + delegator1Aid.getPrefix() + ") and " +
+                        delegatee1Name + "(" + delegatee1Aid.getPrefix() + ") resolved " +
+                        delegator2Name + "(" + delegator2Aid.getPrefix() + ") and " +
+                        delegatee2Name + "(" + delegatee2Aid.getPrefix() + ") OOBIs and vice versa"
+        );
+
+        // First member start the creation of a multisig identifier
+        // Create a multisig AID for the GEDA.
+        // Skip if a GEDA AID has already been incepted.
+        KelOperation otor1 = testSteps.step(String.format("%s(%s) initiated delegator multisig, waiting for %s(%s) to join...",
+                delegator1Name, delegator1Aid.getPrefix(), delegator2Name, delegator2Aid.getPrefix()), () -> {
+
+            MultisigUtils.StartMultisigInceptArgs startMultisigInceptArgs = MultisigUtils.StartMultisigInceptArgs
+                    .builder()
+                    .groupName(delegatorGroupName)
+                    .localMemberName(delegator1Aid.getName())
+                    .participants(List.of(delegator1Aid.getPrefix(), delegator2Aid.getPrefix()))
+                    .isith(2)
+                    .nsith(2)
+                    .toad(2)
+                    .wits(List.of("BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
+                            "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
+                            "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"))
+                    .build();
+
+            return MultisigUtils.startMultisigIncept(delegator1Client, startMultisigInceptArgs);
+        });
+
+        Notification ntor;
+        Retry.RetryOptions options = Retry.RetryOptions.builder()
+                .maxSleep(10000)
+                .minSleep(1000)
+                .timeout(30000)
+                .build();
+        ntor = TestUtils.waitForNotifications(delegator2Client, "/multisig/icp", options).getFirst();
+        markAndRemoveNotification(delegator2Client, ntor);
+
+        assertNotNull(ntor.getA().getD());
+
+        MultisigUtils.AcceptMultisigInceptArgs acceptMultisigInceptArgs =
+                MultisigUtils.AcceptMultisigInceptArgs
+                        .builder()
+                        .localMemberName(delegator2Aid.getName())
+                        .groupName(delegatorGroupName)
+                        .msgSaid(ntor.getA().getD())
+                        .build();
+
+        KelOperation otor2 = MultisigUtils.acceptMultisigIncept(delegator2Client, acceptMultisigInceptArgs);
+
+        String torpre = otor1.getName().split("\\.")[1];
+
+        waitOperationAsync(
+                new WaitOperationArgs(delegator1Client, otor1),
+                new WaitOperationArgs(delegator2Client, otor2)
+        );
+
+        HabState adelegatorGroupName1 = delegator1Client.identifiers().get(delegatorGroupName).get();
+        HabState adelegatorGroupName2 = delegator2Client.identifiers().get(delegatorGroupName).get();
+
+        assertEquals(adelegatorGroupName1.getPrefix(), adelegatorGroupName2.getPrefix());
+        assertEquals(adelegatorGroupName1.getName(), adelegatorGroupName2.getName());
+
+        HabState adelegatorGroupName = adelegatorGroupName1;
+
+        //Resolve delegator OOBI
+        String delegatorGroupNameOobi = testSteps.step(String.format("Add and resolve delegator OOBI %s(%s)", delegatorGroupName, adelegatorGroupName.getPrefix()), () -> {
+            String timestamp = createTimestamp();
+            List<EndRoleOperation> opList1 = MultisigUtils.addEndRoleMultisig(delegator1Client,
+                    delegatorGroupName,
+                    delegator1Aid,
+                    List.of(delegator2Aid),
+                    adelegatorGroupName,
+                    timestamp,
+                    true);
+
+            List<EndRoleOperation> opList2 = MultisigUtils.addEndRoleMultisig(delegator2Client,
+                    delegatorGroupName,
+                    delegator2Aid,
+                    List.of(delegator1Aid),
+                    adelegatorGroupName,
+                    timestamp,
+                    false);
+
+            List<WaitOperationArgs> waitOperationArgsList = new ArrayList<>();
+            opList1.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator1Client, op)));
+            opList2.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator2Client, op)));
+            waitOperationAsync(waitOperationArgsList.toArray(new WaitOperationArgs[0]));
+
+            TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
+            TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
+
+            OOBI odelegatorGroupName1 = delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
+            OOBI odelegatorGroupName2 = delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
+
+            assertEquals(odelegatorGroupName1.getRole(), odelegatorGroupName2.getRole());
+
+            String stringOobis1 = odelegatorGroupName1.getOobis().get(0);
+            String stringOobis2 = odelegatorGroupName2.getOobis().get(0);
+
+            assertEquals(stringOobis1, stringOobis2);
+            return stringOobis1;
+        });
+
+        String oobiGtor = delegatorGroupNameOobi.split("/agent/")[0];
+
+        getOrCreateContactAsync(
+                new GetOrCreateContactArgs(delegatee1Client, delegateeGroupName, oobiGtor),
+                new GetOrCreateContactArgs(delegatee2Client, delegateeGroupName, oobiGtor)
+        );
+
+        KelOperation opDelegatee1 = testSteps.step(delegatee1Name + "(" + delegatee1Aid.getPrefix() + ") initiated delegatee multisig, waiting for "
+                + delegatee2Name + "(" + delegatee2Aid.getPrefix() + ") to join...", () -> {
+            MultisigUtils.StartMultisigInceptArgs startMultisigInceptArgs = MultisigUtils.StartMultisigInceptArgs
+                    .builder()
+                    .groupName(delegateeGroupName)
+                    .localMemberName(delegatee1Aid.getName())
+                    .participants(List.of(delegatee1Aid.getPrefix(), delegatee2Aid.getPrefix()))
+                    .isith(2)
+                    .nsith(2)
+                    .toad(2)
+                    .delpre(torpre)
+                    .wits(List.of("BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
+                            "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
+                            "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"))
+                    .build();
+            return MultisigUtils.startMultisigIncept(delegatee1Client, startMultisigInceptArgs);
+        });
+
+        // Second member of delegatee check notifications and join the multisig
+        Notification ntee = TestUtils.waitForNotifications(delegatee2Client, "/multisig/icp").get(0);
+        markAndRemoveNotification(delegatee2Client, ntee);
+
+        assertNotNull(ntee.getA().getD());
+        acceptMultisigInceptArgs =
+                MultisigUtils.AcceptMultisigInceptArgs
+                        .builder()
+                        .localMemberName(delegatee2Aid.getName())
+                        .groupName(delegateeGroupName)
+                        .msgSaid(ntee.getA().getD())
+                        .build();
+        KelOperation opDelegatee2 = MultisigUtils.acceptMultisigIncept(delegatee2Client, acceptMultisigInceptArgs);
+        System.out.println(delegatee2Name + " joined multisig, waiting for delegator...");
+
+        HabState agtee1 = delegatee1Client.identifiers().get(delegateeGroupName).get();
+        HabState agtee2 = delegatee2Client.identifiers().get(delegateeGroupName).get();
+
+        assertEquals(agtee1.getPrefix(), agtee2.getPrefix());
+        assertEquals(agtee1.getName(), agtee2.getName());
+
+        String teepre = opDelegatee1.getName().split("\\.")[1];
+        assertEquals(teepre, opDelegatee2.getName().split("\\.")[1]);
+
+        testSteps.step("delegator anchors/approves delegation", () -> {
+            // GEDA anchors delegation with an interaction event.
+            Map<String, String> anchor = new LinkedHashMap<>() {{
+                put("i", teepre);
+                put("s", "0");
+                put("d", teepre);
+            }};
+
+            DelegatorOperation delApprOp1 = MultisigUtils.delegateMultisig(
+                    delegator1Client,
+                    delegator1Aid,
+                    Collections.singletonList(delegator2Aid),
+                    adelegatorGroupName,
+                    anchor,
+                    true);
+
+            DelegatorOperation delApprOp2 = MultisigUtils.delegateMultisig(
+                    delegator2Client,
+                    delegator2Aid,
+                    Collections.singletonList(delegator1Aid),
+                    adelegatorGroupName,
+                    anchor,
+                    false);
+
+            CompletedDelegatorOperation dresult1 = waitForCompleted(delegator1Client, delApprOp1, CompletedDelegatorOperation.class);
+            String responseDresult1 = dresult1.getName();
+
+            CompletedDelegatorOperation dresult2 = waitForCompleted(delegator2Client, delApprOp2, CompletedDelegatorOperation.class);
+            String responseDresult2 = dresult2.getName();
+
+            assertEquals(responseDresult1, responseDresult2);
+            waitAndMarkNotification(delegator1Client, "/multisig/ixn");
+        });
+
+        QueryOperation queryOp1 = delegator1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        QueryOperation queryOp2 = delegator2Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+
+        waitOperationAsync(
+                new WaitOperationArgs(delegator1Client, queryOp1),
+                new WaitOperationArgs(delegator2Client, queryOp2)
+        );
+
+        // QARs query the GEDA's key state
+        QueryOperation ksteetor1 = delegatee1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+        QueryOperation ksteetor2 = delegatee2Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
+
+        waitOperationAsync(
+                new WaitOperationArgs(delegatee1Client, ksteetor1),
+                new WaitOperationArgs(delegatee2Client, ksteetor2),
+                new WaitOperationArgs(delegatee1Client, opDelegatee1),
+                new WaitOperationArgs(delegatee2Client, opDelegatee2)
+        );
+        System.out.println("Delegated multisig created!");
+
+        HabState agtee = delegatee1Client.identifiers().get(delegateeGroupName).get();
+        assertEquals(agtee.getPrefix(), teepre);
+
+        List<SignifyClient> clients = Arrays.asList(
+                delegator1Client,
+                delegator2Client,
+                delegatee1Client,
+                delegatee2Client
+        );
+        assertOperations(clients);
+        assertNotifications(clients);
+    }
+}

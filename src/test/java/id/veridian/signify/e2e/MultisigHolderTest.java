@@ -1,0 +1,618 @@
+package id.veridian.signify.e2e;
+
+import id.veridian.signify.app.Exchanging;
+import id.veridian.signify.app.aiding.IdentifierListResponse;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.app.credentialing.credentials.CredentialFilter;
+import id.veridian.signify.app.credentialing.credentials.IssueCredentialResult;
+import id.veridian.signify.app.credentialing.ipex.IpexAdmitArgs;
+import id.veridian.signify.app.credentialing.ipex.IpexGrantArgs;
+import id.veridian.signify.app.credentialing.registries.CreateRegistryArgs;
+import id.veridian.signify.app.credentialing.registries.RegistryResult;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.Siger;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.Credential;
+import id.veridian.signify.generated.keria.model.CredentialSad;
+import id.veridian.signify.generated.keria.model.CredentialState;
+import id.veridian.signify.generated.keria.model.EndRoleOperation;
+import id.veridian.signify.generated.keria.model.ExchangeResource;
+import id.veridian.signify.generated.keria.model.ExchangeOperation;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.ExnMultisig;
+import id.veridian.signify.generated.keria.model.GroupMember;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.e2e.utils.MultisigUtils.AcceptMultisigInceptArgs;
+import id.veridian.signify.e2e.utils.MultisigUtils.StartMultisigInceptArgs;
+import id.veridian.signify.app.credentialing.credentials.CredentialData.CredentialSubject;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.OOBI;
+import id.veridian.signify.generated.keria.model.OOBIOperation;
+import id.veridian.signify.generated.keria.model.Registry;
+import id.veridian.signify.generated.keria.model.RegistryOperation;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static id.veridian.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
+import static id.veridian.signify.e2e.utils.MultisigUtils.startMultisigIncept;
+import static id.veridian.signify.e2e.utils.Retry.retry;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class MultisigHolderTest extends BaseIntegrationTest {
+    SignifyClient client1, client2, client3;
+    HabState aid1, aid2, aid3;
+    String oobis1, oobis2, oobis3;
+
+    ResolveEnv.EnvironmentConfig env = ResolveEnv.resolveEnvironment(null);
+    String SCHEMA_SAID = "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao";
+    String SCHEMA_OOBI = env.vleiServerUrl() + "/oobi/" + SCHEMA_SAID;
+
+    String TIME = createTimestamp();
+
+    @Test
+    @DisplayName("Multisig Holder Test")
+    void multisigHolderTest() {
+        // Boot four clients
+        List<SignifyClient> signifyClients = getOrCreateClientsAsync(3);
+        client1 = signifyClients.get(0);
+        client2 = signifyClients.get(1);
+        client3 = signifyClients.get(2);
+
+        // Create four identifiers, one for each client
+        List<HabState> aids = createAidAndGetHabStateAsync(
+                new CreateAidArgs(client1, "member1"),
+                new CreateAidArgs(client2, "member2"),
+                new CreateAidArgs(client3, "issuer")
+        );
+        aid1 = aids.get(0);
+        aid2 = aids.get(1);
+        aid3 = aids.get(2);
+
+        createRegistry(client3, "issuer", "issuer-reg");
+
+        // Exchange OOBIs
+        System.out.println("Resolving OOBIs");
+        List<OOBI> oobis = getOobisAsync(
+                new GetOobisArgs(client1, "member1", "agent"),
+                new GetOobisArgs(client2, "member2", "agent"),
+                new GetOobisArgs(client3, "issuer", "agent")
+        );
+
+        oobis1 = getOobisIndexAt0(oobis.get(0));
+        oobis2 = getOobisIndexAt0(oobis.get(1));
+        oobis3 = getOobisIndexAt0(oobis.get(2));
+
+        OOBIOperation op1 = client1.oobis().resolve(oobis2, "member2");
+        waitForCompleted(client1, op1);
+        op1 = client1.oobis().resolve(oobis3, "member3");
+        waitForCompleted(client1, op1);
+        op1 = client1.oobis().resolve(SCHEMA_OOBI, "schema");
+        waitForCompleted(client1, op1);
+        System.out.println("Member1 resolved 3 OOBIs");
+
+        OOBIOperation op2 = client2.oobis().resolve(oobis1, "member1");
+        waitForCompleted(client2, op2);
+        op2 = client2.oobis().resolve(oobis3, "member3");
+        waitForCompleted(client2, op2);
+        op2 = client2.oobis().resolve(SCHEMA_OOBI, "schema");
+        waitForCompleted(client2, op2);
+        System.out.println("Member2 resolved 3 OOBIs");
+
+        OOBIOperation op3 = client3.oobis().resolve(oobis1, "member1");
+        waitForCompleted(client3, op3);
+        op3 = client3.oobis().resolve(oobis2, "member2");
+        waitForCompleted(client3, op3);
+        op3 = client3.oobis().resolve(SCHEMA_OOBI, "schema");
+        waitForCompleted(client3, op3);
+        System.out.println("Member3 resolved 3 OOBIs");
+
+        // First member start the creation of a multisig identifier
+        KelOperation gop1 = startMultisigIncept(client1, new StartMultisigInceptArgs(
+                "holder",
+                aid1.getName(),
+                Arrays.asList(aid1.getPrefix(), aid2.getPrefix()),
+                2,
+                2,
+                aid1.getState().getB().size(),
+                aid1.getState().getB(),
+                null
+        ));
+        System.out.println("Member1 initiated multisig, waiting for others to join...");
+
+        // Second member check notifications and join the multisig
+        String msgSaid = waitAndMarkNotification(client2, "/multisig/icp");
+        System.out.println("Member2 received exchange message to join multisig");
+        KelOperation gop2 = acceptMultisigIncept(client2, new AcceptMultisigInceptArgs(
+                "holder",
+                aid2.getName(),
+                msgSaid
+        ));
+        System.out.println("Member2 joined multisig, waiting for others...");
+
+        // Check for completion
+        waitForCompleted(client1, gop1);
+        waitForCompleted(client2, gop2);
+        System.out.println("Multisig created!");
+
+        IdentifierListResponse identifiers1 = client1.identifiers().list();
+        List<HabState> aids1 = identifiers1.aids();
+        assertEquals(2, aids1.size());
+
+        IdentifierListResponse identifiers2 = client1.identifiers().list();
+        List<HabState> aids2 = identifiers2.aids();
+        assertEquals(2, aids2.size());
+
+        System.out.printf(
+                "Client 1 managed AIDs:\n%s [%s]\n%s [%s]%n",
+                aids1.get(0).getName(),
+                aids1.get(0).getPrefix(),
+                aids1.get(1).getName(),
+                aids1.get(1).getPrefix()
+        );
+
+        System.out.printf(
+                "Client 2 managed AIDs:\n%s [%s]\n%s [%s]%n",
+                aids2.get(0).getName(),
+                aids2.get(0).getPrefix(),
+                aids2.get(1).getName(),
+                aids2.get(1).getPrefix()
+        );
+
+        // Multisig end role
+        aid1 = client1.identifiers().get("member1").get();
+        aid2 = client2.identifiers().get("member2").get();
+        GroupMember members = client1.identifiers().members("holder");
+        HabState ghab1 = client1.identifiers().get("holder").get();
+        String eid1 = members.getSigning().getFirst().getEnds().getAgent().keySet().iterator().next();
+        String eid2 = members.getSigning().get(1).getEnds().getAgent().keySet().iterator().next();
+
+        System.out.println("Starting multisig end role authorization for agent " + eid1);
+
+        String timestamp = createTimestamp();
+
+        var endRoleRes = client1.identifiers().addEndRole("holder", "agent", eid1, timestamp);
+        EndRoleOperation eop1 = endRoleRes.op();
+        Serder rpy = endRoleRes.serder();
+        List<String> sigs = endRoleRes.sigs();
+
+        Map<String, Object> ghabState1 = Utils.toMap(ghab1.getState());
+        List<Object> seal = Arrays.asList(
+                "SealEvent",
+                Map.of(
+                        "i", ghab1.getPrefix(),
+                        "s", Utils.toMap(ghabState1.get("ee")).get("s"),
+                        "d", Utils.toMap(ghabState1.get("ee")).get("d")
+                )
+        );
+        List<Siger> sigers = sigs.stream()
+                .map(Siger::new)
+                .toList();
+
+        String roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
+        String atc = roleims.substring(rpy.getSize());
+
+        Map<String, List<Object>> roleembeds = new LinkedHashMap<>();
+        roleembeds.put("rpy", Arrays.asList(rpy, atc));
+
+        List<String> recp = Stream.of(aid2.getState())
+                .map(KeyStateRecord::getI)
+                .collect(Collectors.toList());
+
+        client1.exchanges().send(
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/rpy",
+                Map.of("gid", ghab1.getPrefix()),
+                roleembeds,
+                recp
+        );
+        System.out.println("Member1 authorized agent role to " + eid1 + ", waiting for others to authorize...");
+
+        //Member2 check for notifications and join the authorization
+        msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
+        System.out.println("Member2 received exchange message to join the end role authorization");
+
+        List<ExnMultisig> listRes = client2.groups().getRequest(msgSaid).get();
+        Exn exn = listRes.getFirst().getExn();
+
+        // stamp, eid and role are provided in the exn message
+        String rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        String rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        String rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
+
+        endRoleRes = client2.
+                identifiers().
+                addEndRole("holder", rpyrole, rpyeid, rpystamp);
+        EndRoleOperation eop2 = endRoleRes.op();
+        rpy = endRoleRes.serder();
+        sigs = endRoleRes.sigs();
+
+        HabState ghab2 = client2.identifiers().get("holder").get();
+        Map<String, Object> ghabState2 = Utils.toMap(ghab2.getState());
+        seal = Arrays.asList(
+                "SealEvent",
+                Map.of(
+                        "i", ghab2.getPrefix(),
+                        "s", Utils.toMap(ghabState2.get("ee")).get("s"),
+                        "d", Utils.toMap(ghabState2.get("ee")).get("d")
+                )
+        );
+
+        sigers = sigs.stream()
+                .map(Siger::new)
+                .toList();
+
+        roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
+        atc = roleims.substring(rpy.getSize());
+
+        roleembeds = new LinkedHashMap<>();
+        roleembeds.put("rpy", Arrays.asList(rpy, atc));
+
+        recp = Stream.of(aid1.getState())
+                .map(KeyStateRecord::getI)
+                .collect(Collectors.toList());
+
+        client2.exchanges().send(
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/rpy",
+                Map.of("gid", ghab2.getPrefix()),
+                roleembeds,
+                recp
+        );
+        System.out.println("Member2 authorized agent role to %s, waiting for others to authorize..." + eid1);
+
+        // Check for completion
+        waitForCompleted(client1, eop1);
+        waitForCompleted(client2, eop2);
+        System.out.println("End role authorization for agent " + eid1 + " completed!");
+
+        System.out.println("Starting multisig end role authorization for agent " + eid2);
+
+        endRoleRes = client1.identifiers()
+                .addEndRole("holder", "agent", eid2, timestamp);
+        eop1 = endRoleRes.op();
+        rpy = endRoleRes.serder();
+        sigs = endRoleRes.sigs();
+
+        ghab1 = client1.identifiers().get("holder").get();
+        ghabState1 = Utils.toMap(ghab1.getState());
+        seal = Arrays.asList(
+                "SealEvent",
+                Map.of(
+                        "i", ghab1.getPrefix(),
+                        "s", Utils.toMap(ghabState1.get("ee")).get("s"),
+                        "d", Utils.toMap(ghabState1.get("ee")).get("d")
+                )
+        );
+
+        sigers = sigs.stream()
+                .map(Siger::new)
+                .toList();
+        roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
+        atc = roleims.substring(rpy.getSize());
+
+        roleembeds = new LinkedHashMap<>();
+        roleembeds.put("rpy", Arrays.asList(rpy, atc));
+
+        recp = Stream.of(aid2.getState())
+                .map(KeyStateRecord::getI)
+                .collect(Collectors.toList());
+
+        client1.exchanges().send(
+                "member1",
+                "multisig",
+                aid1,
+                "/multisig/rpy",
+                Map.of("gid", ghab1.getPrefix()),
+                roleembeds,
+                recp
+        );
+
+        System.out.println("Member1 authorized agent role to " + eid2 + ", waiting for others to authorize...");
+
+        //Member2 check for notifications and join the authorization
+        msgSaid = waitAndMarkNotification(client2, "/multisig/rpy");
+        System.out.println("Member2 received exchange message to join the end role authorization");
+
+        listRes = client2.groups().getRequest(msgSaid).get();
+        exn = listRes.getFirst().getExn();
+
+        // stamp, eid and role are provided in the exn message
+        rpystamp = Utils.toMap(exn.getE().get("rpy")).get("dt").toString();
+        rpyrole = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("role").toString();
+        rpyeid = Utils.toMap(Utils.toMap(exn.getE().get("rpy")).get("a")).get("eid").toString();
+
+        endRoleRes = client2.
+            identifiers().
+            addEndRole("holder", rpyrole, rpyeid, rpystamp);
+        eop2 = endRoleRes.op();
+
+        rpy = endRoleRes.serder();
+        sigs = endRoleRes.sigs();
+
+        ghab2 = client2.identifiers().get("holder").get();
+        ghabState2 = Utils.toMap(ghab2.getState());
+        seal = Arrays.asList(
+                "SealEvent",
+                Map.of(
+                        "i", ghab2.getPrefix(),
+                        "s", Utils.toMap(ghabState2.get("ee")).get("s"),
+                        "d", Utils.toMap(ghabState2.get("ee")).get("d")
+                )
+        );
+
+        sigers = sigs.stream()
+                .map(Siger::new)
+                .toList();
+
+        roleims = new String(Eventing.messagize(rpy, sigers, seal, null, null, false));
+        atc = roleims.substring(rpy.getSize());
+
+        roleembeds = new LinkedHashMap<>();
+        roleembeds.put("rpy", Arrays.asList(rpy, atc));
+
+        recp = Stream.of(aid1.getState())
+                .map(KeyStateRecord::getI)
+                .collect(Collectors.toList());
+
+        client2.exchanges().send(
+                "member2",
+                "multisig",
+                aid2,
+                "/multisig/rpy",
+                Map.of("gid", ghab2.getPrefix()),
+                roleembeds,
+                recp
+        );
+        System.out.println("Member2 authorized agent role to %s, waiting for others to authorize..." + eid1);
+
+        // Check for completion
+        waitForCompleted(client1, eop1);
+        waitForCompleted(client2, eop2);
+        System.out.println("End role authorization for agent " + eid2 + " completed!");
+
+        // Holder resolve multisig OOBI
+        OOBI oobisRes = client1.oobis().get("holder", "agent").get();
+        List<String> oobisResponse = oobisRes.getOobis();
+
+        String oobiMultisig = oobisResponse.get(0).split("/agent/")[0];
+        OOBIOperation oop3 = client3.oobis().resolve(oobiMultisig, "holder");
+        waitForCompleted(client3, oop3);
+        System.out.println("Issuer resolved multisig holder OOBI");
+
+        HabState holderAid = client1.identifiers().get("holder").get();
+        aid1 = client1.identifiers().get("member1").get();
+        aid2 = client2.identifiers().get("member2").get();
+
+        System.out.println("Issuer starting credential issuance to holder...");
+
+        List<Registry> registires = client3.registries().list("issuer");
+        Registry registry = registires.get(0);
+        String regk = registry.getRegk();
+
+        CredentialSubject subject = CredentialSubject.builder()
+                .i(holderAid.getPrefix())
+                .additionalProperties(new HashMap<>() {{
+                    put("LEI", "5493001KJTIIGC8Y1R17");
+                }})
+                .build();
+
+        CredentialData credentialData = CredentialData.builder()
+                .ri(regk)
+                .s(SCHEMA_SAID)
+                .a(subject)
+                .build();
+
+        issueCredential(client3, "issuer", credentialData);
+
+        System.out.println("Issuer sent credential grant to holder.");
+
+        String grantMsgSaid = waitAndMarkNotification(client1, "/exn/ipex/grant");
+        System.out.println("Member1 received /exn/ipex/grant msg with SAID: " + grantMsgSaid);
+
+        ExchangeResource exnRes = client1.exchanges().get(grantMsgSaid).get();
+        recp = Stream.of(aid2.getState())
+                .map(KeyStateRecord::getI)
+                .collect(Collectors.toList());
+
+        Exn getExn = exnRes.getExn();
+
+        ExchangeOperation exop1 = multisigAdmitCredential(client1,
+                "holder",
+                "member1",
+                getExn.getD(),
+                getExn.getI(),
+                recp
+        );
+
+        LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.getE());
+        LinkedHashMap<String, Object> exnGetAcdc = castObjectToLinkedHashMap(exnGetE.get("acdc"));
+
+        System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
+
+        String grantMsgSaid2 = waitAndMarkNotification(client2, "/exn/ipex/grant");
+        System.out.println("Member2 received /exn/ipex/grant msg with SAID: " + grantMsgSaid2);
+
+        ExchangeResource exnRes2 = client2.exchanges().get(grantMsgSaid2).get();
+        assertEquals(grantMsgSaid2, grantMsgSaid);
+        System.out.println("Member2 /exn/ipex/grant msg : " + Utils.jsonStringify(exnRes2));
+
+        List<String> recp2 = Stream.of(aid1.getState())
+                .map(KeyStateRecord::getI)
+                .toList();
+
+        ExchangeOperation exop2 = multisigAdmitCredential(client2,
+                "holder",
+                "member2",
+                getExn.getD(),
+                getExn.getI(),
+                recp2
+        );
+        System.out.println("Member1 admitted credential with SAID : " + exnGetAcdc.get("d"));
+
+        waitForCompleted(client1, exop1);
+        waitForCompleted(client2, exop2);
+
+        CredentialFilter args = CredentialFilter.builder().build();
+        List<Credential> creds1 = retry(() -> {
+            List<Credential> creds = client1.credentials().list(args);
+            if (creds.isEmpty()) {
+                throw new IllegalStateException("Member1 has no credentials yet");
+            }
+            return creds;
+        });
+        System.out.println("Member1 has " + creds1.size() + " credential : " + Utils.jsonStringify(creds1));
+        assertEquals(1, creds1.size());
+
+        List<SignifyClient> clientList = Arrays.asList(client1, client2, client3);
+        assertOperations(clientList);
+        warnNotifications(clientList);
+    }
+
+    public HabState createAid(SignifyClient client, String name, List<String> wits) {
+        getOrCreateIdentifier(client, name, null);
+        HabState aid = client.identifiers().get(name).get();
+        System.out.println(name + "AID:" + aid.getPrefix());
+        return aid;
+    }
+
+    public Object createRegistry(SignifyClient client, String name, String registryName) {
+        CreateRegistryArgs args = CreateRegistryArgs.builder()
+                .name(name)
+                .registryName(registryName)
+                .build();
+
+        RegistryResult result = client.registries().create(args);
+        RegistryOperation op = result.op();
+        waitForCompleted(client, op);
+
+        List<Registry> registryList = client.registries().list(name);
+        Registry opResponseName = registryList.get(0);
+
+        assertEquals(1, registryList.size());
+        assertEquals(registryName, opResponseName.getName());
+        return opResponseName;
+    }
+
+    public Object issueCredential(
+            SignifyClient client,
+            String name,
+            CredentialData data
+    ) {
+        IssueCredentialResult result = client.credentials().issue(name, data);
+        waitForCompleted(client, result.getOp());
+
+        List<Credential> listCreds = client.credentials().list(CredentialFilter.builder().build());
+        Credential cred = listCreds.getFirst();
+        CredentialSad credSad = cred.getSad();
+        CredentialState credStatus = cred.getStatus();
+
+        assertEquals(1, listCreds.size());
+        assertEquals(data.getS(), credSad.getS());
+        assertEquals("0", credStatus.getS());
+
+        String dt = createTimestamp();
+
+        if (!data.getA().getI().isEmpty()) {
+            Exchanging.ExchangeMessageResult grantResult = client.ipex().grant(IpexGrantArgs.builder()
+                    .senderName(name)
+                    .recipient(data.getA().getI())
+                    .datetime(dt)
+                    .acdc(result.getAcdc())
+                    .anc(result.getAnc())
+                    .iss(result.getIss())
+                    .build()
+            );
+
+            Serder grant = grantResult.exn();
+            List<String> gsigs = grantResult.sigs();
+            String end = grantResult.atc();
+
+            ExchangeOperation op = client
+                    .ipex()
+                    .submitGrant(name, grant, gsigs, end, List.of(data.getA().getI()));
+            waitForCompleted(client, op);
+        }
+
+        System.out.println("Grant message sent");
+        return cred;
+    }
+
+    public ExchangeOperation multisigAdmitCredential(
+            SignifyClient client,
+            String groupName,
+            String memberAlias,
+            String grantSaid,
+            String issuerPrefix,
+            List<String> recipients
+    ) {
+        HabState mhab = client.identifiers().get(memberAlias).get();
+        HabState ghab = client.identifiers().get(groupName).get();
+
+        IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs
+                .builder()
+                .senderName(groupName)
+                .message("")
+                .grantSaid(grantSaid)
+                .recipient(issuerPrefix)
+                .datetime(TIME)
+                .build();
+        Exchanging.ExchangeMessageResult exchangeMessageResult = client.ipex().admit(ipexAdmitArgs);
+        Serder admit = exchangeMessageResult.exn();
+        List<String> sigs = exchangeMessageResult.sigs();
+        String end = exchangeMessageResult.atc();
+
+        ExchangeOperation op = client.ipex().submitAdmit(
+                groupName,
+                admit,
+                sigs,
+                end,
+                List.of(issuerPrefix)
+        );
+
+        KeyStateRecord mstate = ghab.getState();
+
+        Map<String, Object> sealMap = new LinkedHashMap<>();
+        sealMap.put("i", ghab.getPrefix());
+        sealMap.put("s", mstate.getEe().getS());
+        sealMap.put("d", mstate.getEe().getD());
+
+        List<Object> seal = List.of("SealEvent", sealMap);
+        List<Siger> sigers = sigs.stream().map(Siger::new).toList();
+        String ims = new String(Eventing.messagize(admit, sigers, seal, null, null, false));
+        String atc = ims.substring(admit.getSize());
+        atc = atc.concat(end);
+
+        Map<String, List<Object>> gembeds = new LinkedHashMap<>();
+        gembeds.put("exn", List.of(admit, atc));
+
+        client.exchanges()
+                .send(mhab.getName(),
+                        "multisig",
+                        mhab,
+                        "/multisig/exn",
+                        Map.of("gid", ghab.getPrefix()),
+                        gembeds,
+                        recipients
+                );
+        return op;
+    }
+
+    public String getOobisIndexAt0(OOBI oobi) {
+        List<String> oobisResponse = oobi.getOobis();
+        return oobisResponse.get(0);
+    }
+
+}

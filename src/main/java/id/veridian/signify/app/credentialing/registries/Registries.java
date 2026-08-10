@@ -1,0 +1,156 @@
+package id.veridian.signify.app.credentialing.registries;
+
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.habery.TraitCodex;
+import id.veridian.signify.cesr.Keeping;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.args.InteractArgs;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.core.Vdring;
+
+import java.math.BigInteger;
+import java.net.http.HttpResponse;
+import java.util.*;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.Registry;
+import id.veridian.signify.generated.keria.model.RegistryOperation;
+import com.fasterxml.jackson.core.type.TypeReference;
+import static id.veridian.signify.cesr.util.CoreUtil.Versionage;
+
+public class Registries {
+
+    public final SignifyClient client;
+
+    public Registries(SignifyClient client) {
+        this.client = client;
+    }
+
+    /**
+     * Lists all registries associated with the specified identifier name.
+     *
+     * @param name the name or alias of the identifier
+     * @return a List<Registry> representing the list of registries
+     */
+    public List<Registry> list(String name) {
+        String path = "/identifiers/" + name + "/registries";
+        String method = "GET";
+        HttpResponse<String> response = this.client.fetch(path, method, null);
+        return Utils.fromJson(response.body(), new TypeReference<List<Registry>>() {});
+    }
+
+    /**
+     * Creates a new registry with the specified arguments.
+     *
+     * @param args the arguments for creating the registry
+     * @return a RegistryResult containing the result of the operation
+     */
+    public RegistryResult create(CreateRegistryArgs args) {
+        HabState hab = this.client.identifiers().get(args.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + args.getName()));
+        String pre = hab.getPrefix();
+
+        List<String> cnfg = new ArrayList<>();
+        if (Boolean.TRUE.equals(args.getNoBackers())) {
+            cnfg.add(TraitCodex.NoBackers.getValue());
+        }
+
+        boolean estOnly = hab.getState().getC() != null && hab.getState().getC().contains("EO");
+        if (estOnly) {
+            cnfg.add(TraitCodex.EstOnly.getValue());
+        }
+
+        Vdring.VDRInceptArgs vdrInceptArgs = Vdring.VDRInceptArgs.builder()
+                .pre(pre)
+                .baks(args.getBaks())
+                .toad(args.getToad())
+                .nonce(args.getNonce() != null ? args.getNonce() : Coring.randomNonce())
+                .cnfg(cnfg)
+                .build();
+        Serder regser = Vdring.incept(vdrInceptArgs);
+
+        if (estOnly) {
+            throw new UnsupportedOperationException("Establishment only not implemented");
+        } else {
+            int sn = Integer.parseInt(hab.getState().getS(), 16);
+            String dig = hab.getState().getD();
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("i", regser.getPre());
+            data.put("s", "0");
+            data.put("d", regser.getPre());
+
+            InteractArgs interactArgs = InteractArgs.builder()
+                    .pre(pre)
+                    .sn(BigInteger.valueOf(sn + 1))
+                    .data(Collections.singletonList(data))
+                    .dig(dig)
+                    .version(Versionage)
+                    .kind(CoreUtil.Serials.JSON)
+                    .build();
+
+            Serder serder = Eventing.interact(interactArgs);
+            Keeping.Keeper keeper = this.client.getManager().get(hab);
+            List<String> sigs = keeper.sign(serder.getRaw().getBytes()).signatures();
+
+            HttpResponse<String> res = this.createFromEvents(hab, args.getName(), args.getRegistryName(), regser.getKed(), serder.getKed(), sigs);
+            RegistryOperation op = Utils.fromJson(res.body(), RegistryOperation.class);
+            return new RegistryResult(regser, serder, sigs, op);
+        }
+    }
+
+    /**
+     * Creates a registry from events.
+     *
+     * @param hab          the HabState of the identifier
+     * @param name         the name or alias of the identifier
+     * @param registryName the name of the registry
+     * @param vcp          the VCP data
+     * @param ixn          the IXN data
+     * @param sigs         the signatures
+     * @return the raw HTTP response from the registry creation endpoint
+     */
+    private HttpResponse<String> createFromEvents(
+        HabState hab,
+        String name,
+        String registryName,
+        Map<String, Object> vcp,
+        Map<String, Object> ixn,
+        List<String> sigs
+    ) {
+        String path = "/identifiers/" + name + "/registries";
+        String method = "POST";
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("name", registryName);
+        data.put("vcp", vcp);
+        data.put("ixn", ixn);
+        data.put("sigs", sigs);
+
+        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
+        data.put(keeper.getAlgo().getValue(), keeper.getParams().toMap());
+
+        return this.client.fetch(path, method, data);
+    }
+
+    /**
+     * Renames an existing registry.
+     *
+     * @param name         the name or alias of the identifier
+     * @param registryName the current name of the registry
+     * @param newName      the new name for the registry
+     * @return the updated Registry record
+     */
+    public Registry rename(String name, String registryName, String newName) {
+        String path = "/identifiers/" + name + "/registries/" + registryName;
+        String method = "PUT";
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("name", newName);
+
+        HttpResponse<String> response = this.client.fetch(path, method, data);
+        return Utils.fromJson(response.body(), Registry.class);
+    }
+}

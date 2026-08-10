@@ -1,0 +1,89 @@
+package id.veridian.signify.e2e;
+
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.CompletedQueryOperation;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.QueryOperation;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.List;
+
+import static id.veridian.signify.e2e.utils.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class SinglesigIXNTest extends BaseIntegrationTest {
+    static SignifyClient client1, client2;
+    static String name1_id, name1_oobi;
+    static String contact1_id;
+
+    @BeforeAll
+    public static void getClients() {
+        List<SignifyClient> clients = getOrCreateClientsAsync(2);
+        client1 = clients.get(0);
+        client2 = clients.get(1);
+    }
+
+    @BeforeEach
+    public void getIdentifier() {
+        String[] clients = getOrCreateIdentifier(client1, "name1", null);
+        name1_id = clients[0];
+        name1_oobi = clients[1];
+    }
+
+    @BeforeEach
+    public void getContact() {
+        contact1_id = TestUtils.getOrCreateContact(client2, "contact1", name1_oobi);
+    }
+
+    @Test
+    public void singlesig_ixn_step1() {
+        assertEquals(name1_id, contact1_id);
+
+        KeyStateRecord keyState1 = client1.keyStates().get(name1_id).get();
+        KeyStateRecord keyState2  = client1.keyStates().get(contact1_id).get();
+        assertEquals(keyState1.getS(), keyState2.getS());
+    }
+
+    @Test
+    public void singlesig_ixn_ixn1() {
+        // local keystate before rot
+        KeyStateRecord keyStateRecord0 = client1.keyStates().get(name1_id).get();
+        assertNotNull(keyStateRecord0);
+
+        // ixn
+        var result = client1.identifiers().interact("name1", null);
+        waitForCompleted(client1, result.op());
+
+        // local keystate after rot
+        KeyStateRecord keyStateRecord1 = client1.keyStates().get(name1_id).get();
+
+        assertTrue(parseInteger(keyStateRecord1.getS()) > 0);
+
+        // sequence has incremented
+        assertEquals(parseInteger(keyStateRecord1.getS()),
+                parseInteger(keyStateRecord0.getS()) + 1
+        );
+
+        // remote keystate after ixn
+        KeyStateRecord keyStateRecord2 = client2.keyStates().get(contact1_id).get();
+        // remote keystate is one behind
+        assertEquals(parseInteger(keyStateRecord2.getS()),
+                parseInteger(keyStateRecord1.getS()) - 1
+        );
+
+        // refresh remote keystate
+        String sn = keyStateRecord1.getS();
+        QueryOperation op = client2.keyStates().query(contact1_id, sn, null);
+        CompletedQueryOperation completedOp = waitForCompleted(client2, op, CompletedQueryOperation.class);
+
+        KeyStateRecord keyState3 = completedOp.getResponse();
+
+        // local and remote keystate match
+        assertEquals(keyState3.getS(),
+                keyStateRecord1.getS());
+    }
+}

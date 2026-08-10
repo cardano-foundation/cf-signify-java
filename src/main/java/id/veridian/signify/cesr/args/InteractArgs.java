@@ -1,0 +1,24 @@
+package id.veridian.signify.cesr.args;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import id.veridian.signify.cesr.util.CoreUtil.Serials;
+import id.veridian.signify.cesr.util.CoreUtil.Version;
+
+import java.math.BigInteger;
+import java.util.List;
+
+@Builder
+@AllArgsConstructor
+@Getter
+@Setter
+public class InteractArgs {
+    String pre;
+    String dig;
+    BigInteger sn;
+    List<Object> data;
+    Version version;
+    Serials kind;
+}

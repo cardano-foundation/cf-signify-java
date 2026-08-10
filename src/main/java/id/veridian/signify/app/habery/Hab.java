@@ -1,0 +1,20 @@
+package id.veridian.signify.app.habery;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import id.veridian.signify.cesr.Serder;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+public class Hab {
+    String name;
+    Serder serder;
+
+    public String pre() {
+        return this.serder.getPre();
+    }
+}

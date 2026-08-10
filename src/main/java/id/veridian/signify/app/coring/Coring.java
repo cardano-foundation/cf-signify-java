@@ -1,0 +1,90 @@
+package id.veridian.signify.app.coring;
+
+import com.goterl.lazysodium.LazySodiumJava;
+import lombok.Getter;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.Codex;
+import id.veridian.signify.cesr.LazySodiumInstance;
+import id.veridian.signify.cesr.Matter;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.util.Utils;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.net.http.HttpResponse;
+import java.util.List;
+import id.veridian.signify.generated.keria.model.AgentConfig;
+import id.veridian.signify.generated.keria.model.KeyEventRecord;
+import id.veridian.signify.generated.keria.model.Tier;
+
+public class Coring {
+    public static String randomPasscode() {
+        final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
+        final byte[] raw = lazySodium.randomBytesBuf(16);
+        RawArgs args = RawArgs.builder()
+            .raw(raw)
+            .code(Codex.MatterCodex.Salt_128.getValue())
+            .build();
+        final Salter salter = new Salter(args, Tier.LOW);
+
+        // https://github.com/WebOfTrust/signify-ts/issues/242
+        return salter.getQb64().substring(2, 23);
+    }
+
+    public static String randomNonce() {
+        final LazySodiumJava lazySodium = LazySodiumInstance.getInstance();
+        final byte[] seed = lazySodium.randomBytesBuf(32);
+        RawArgs rawArgs = RawArgs.builder()
+                .raw(seed)
+                .code(Codex.MatterCodex.Ed25519_Seed.getValue())
+                .build();
+
+        final Matter matter = new Matter(rawArgs);
+        return matter.getQb64();
+    }
+
+    @Getter
+    public static class KeyEvents {
+        public final SignifyClient client;
+
+        /**
+         * KeyEvents
+         * @param client {SignifyClient}
+         */
+        public KeyEvents(SignifyClient client) {
+            this.client = client;
+        }
+
+        /**
+         * Retrieve the key state for an identifier
+         * @param pre Identifier prefix
+         * @return A map representing the key states
+         */
+        public List<KeyEventRecord> get(String pre) {
+            String path = "/events?pre=" + pre;
+            String method = "GET";
+            HttpResponse<String> res = this.client.fetch(path, method, null);
+            return Utils.fromJson(res.body(), new TypeReference<List<KeyEventRecord>>() {});
+        }
+    }
+
+    @Getter
+    public static class Config {
+        public final SignifyClient client;
+
+        /**
+         * KeyEvents
+         * @param client {SignifyClient}
+         */
+        public Config(SignifyClient client) {
+            this.client = client;
+        }
+
+        public AgentConfig get() {
+            String path = "/config";
+            String method = "GET";
+            HttpResponse<String> res = this.client.fetch(path, method, null);
+            return Utils.fromJson(res.body(), AgentConfig.class);
+        }
+    }
+}

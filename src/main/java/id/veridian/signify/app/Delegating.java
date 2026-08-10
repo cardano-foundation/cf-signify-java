@@ -1,0 +1,49 @@
+package id.veridian.signify.app;
+
+import lombok.Getter;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.aiding.InteractionResponse;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.DelegatorOperation;
+
+import java.net.http.HttpResponse;
+
+public class Delegating {
+    @Getter
+    public static class Delegations {
+        public final SignifyClient client;
+
+        /**
+         * Delegations
+         * @param client {SignifyClient}
+         */
+        public Delegations(SignifyClient client) {
+            this.client = client;
+        }
+
+        /**
+         * Approve the delegation via interaction event
+         * @param name Name or alias of the identifier
+         * @param data The anchoring interaction event
+         * @return The delegated approval result
+         */
+        public EventResult<DelegatorOperation> approve(String name, Object data) {
+            InteractionResponse interactionResponse = this.client
+                .identifiers()
+                .createInteract(name, data);
+
+            HttpResponse<String> res = this.client.fetch(
+                "/identifiers/" + name + "/delegation",
+                "POST",
+                interactionResponse.jsondata()
+            );
+            DelegatorOperation op = Utils.fromJson(res.body(), DelegatorOperation.class);
+            return new EventResult<>(interactionResponse.serder(), interactionResponse.sigs(), op);
+        }
+
+        public EventResult<DelegatorOperation> approve(String name) {
+            return this.approve(name, null);
+        }
+    }
+}

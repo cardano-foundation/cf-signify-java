@@ -22,7 +22,7 @@ if (!name.equalsIgnoreCase("components")) {
                 pom {
                     name = 'signify'
                     description = 'Signify is an edge client for the KERI and ACDC identity protocols.'
-                    url = 'https://github.com/cardano-foundation/cf-signify-java'
+                    url = 'https://github.com/veridian-id/signify-jvm'
                     licenses {
                         license {
                             name = 'Apache License 2.0'
@@ -31,14 +31,14 @@ if (!name.equalsIgnoreCase("components")) {
                     }
                     developers {
                         developer {
-                           id = 'CF'
-                           name = 'Cardano Foundation'
+                           id = 'VID'
+                           name = 'Veridian ID'
                         }
                     }
                     scm {
-                        connection = 'scm:git:git://github.com/cardano-foundation/cf-signify-java'
-                        developerConnection = 'scm:git:ssh://git@github.com/cardano-foundation/cf-signify-java'
-                        url = 'https://github.com/cardano-foundation/cf-signify-java'
+                        connection = 'scm:git:git://github.com/veridian-id/signify-jvm.git'
+                        developerConnection = 'scm:git:ssh://git@github.com/veridian-id/signify-jvm'
+                        url = 'https://github.com/veridian-id/signify-jvm'
                     }
                 }
             }
@@ -48,6 +48,15 @@ if (!name.equalsIgnoreCase("components")) {
             maven {
                 name = 'build'
                 url = rootProject.projectDir.path + '/build/staging-deploy'
+            }
+
+            maven {
+                name = 'GitHubPackages'
+                url = uri('https://maven.pkg.github.com/veridian-id/signify-jvm')
+                credentials {
+                    username = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user')
+                    password = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key')
+                }
             }
 
             if (version.endsWith('SNAPSHOT')) {

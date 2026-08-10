@@ -1,0 +1,140 @@
+package id.veridian.signify.e2e;
+
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.e2e.utils.MultisigUtils;
+import id.veridian.signify.e2e.utils.TestSteps;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.Notification;
+import id.veridian.signify.generated.keria.model.GroupMember;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.generated.keria.model.OOBI;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static id.veridian.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
+import static id.veridian.signify.e2e.utils.MultisigUtils.startMultisigIncept;
+import static id.veridian.signify.e2e.utils.TestUtils.waitForCompleted;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class MultisigInceptionTest extends BaseIntegrationTest {
+    SignifyClient client1, client2;
+    String aid1, aid2;
+    OOBI oobi1, oobi2;
+    TestSteps testSteps = new TestSteps();
+
+    @Test
+    public void testMultisigInception() {
+        List<SignifyClient> clients = getOrCreateClientsAsync(2);
+        client1 = clients.get(0);
+        client2 = clients.get(1);
+
+        aid1 = TestUtils.getOrCreateIdentifier(client1, "member1", null)[0];
+        aid2 = TestUtils.getOrCreateIdentifier(client2, "member2", null)[0];
+
+        testSteps.step("Resolve oobis", () -> {
+            oobi1 = client1.oobis().get("member1", "agent").get();
+            oobi2 = client2.oobis().get("member2", "agent").get();
+
+            TestUtils.resolveOobi(client1, oobi2.getOobis().getFirst(), "member2");
+            TestUtils.resolveOobi(client2, oobi1.getOobis().getFirst(), "member1");
+            return null;
+        });
+
+        testSteps.step("Create multisig group", () -> {
+            String groupName = "multisig";
+            KelOperation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+                .groupName(groupName)
+                .localMemberName("member1")
+                .participants(Arrays.asList(aid1, aid2))
+                .toad(2)
+                .isith(2)
+                .nsith(2)
+                .wits(Arrays.asList(
+                    "BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha",
+                    "BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM",
+                    "BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX"
+                ))
+                .build());
+            System.out.println("Member1 initiated multisig, waiting for others to join...");
+
+            // Second member check notifications and join the multisig
+            List<Notification> notifications = TestUtils.waitForNotifications(client2, "/multisig/icp");
+            for (Notification note : notifications) {
+                client2.notifications().mark(note.getI());
+            }
+
+            String msgSaid = notifications.getLast().getA().getD();
+            assertNotNull(msgSaid, "msgSaid not defined");
+            KelOperation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+                .localMemberName("member2")
+                .groupName(groupName)
+                .msgSaid(msgSaid)
+                .build());
+            System.out.println("Member2 joined multisig, waiting for others...");
+
+            // Check for completion
+            waitOperationAsync(
+                    new WaitOperationArgs(client1, op1),
+                    new WaitOperationArgs(client2, op2)
+            );
+            System.out.println("Multisig created!");
+
+            HabState multisig1 = client1.identifiers().get(groupName).get();
+            HabState multisig2 = client2.identifiers().get(groupName).get();
+            assertEquals(multisig1.getPrefix(), multisig2.getPrefix());
+            GroupMember members = client1.identifiers().members(groupName);
+
+            assertEquals(2, members.getSigning().size());
+            assertEquals(2, members.getRotation().size());
+            assertEquals(aid1, members.getSigning().get(0).getAid());
+            assertEquals(aid2, members.getSigning().get(1).getAid());
+            assertEquals(aid1, members.getRotation().get(0).getAid());
+            assertEquals(aid2, members.getRotation().get(1).getAid());
+            return null;
+        });
+
+        testSteps.step("Test creating another group", () -> {
+            String groupName = "multisig2";
+            KelOperation op1 = startMultisigIncept(client1, MultisigUtils.StartMultisigInceptArgs.builder()
+                .groupName(groupName)
+                .localMemberName("member1")
+                .participants(List.of(aid1, aid2))
+                .toad(0)
+                .isith(2)
+                .nsith(2)
+                .wits(new ArrayList<>())
+                .build()
+            );
+            System.out.println("Member1 initiated multisig, waiting for others to join...");
+
+            // Second member check notifications and join the multisig
+            List<Notification> notifications = TestUtils.waitForNotifications(client2, "/multisig/icp");
+            for (Notification note : notifications) {
+                client2.notifications().mark(note.getI());
+            }
+
+            String msgSaid = notifications.getLast().getA().getD();
+            assertNotNull(msgSaid, "msgSaid not defined");
+            KelOperation op2 = acceptMultisigIncept(client2, MultisigUtils.AcceptMultisigInceptArgs.builder()
+                .localMemberName("member2")
+                .groupName(groupName)
+                .msgSaid(msgSaid)
+                .build()
+            );
+
+            waitForCompleted(client1, op1);
+            waitForCompleted(client2, op2);
+
+            // TODO: https://github.com/WebOfTrust/keria/issues/189
+            // const members = await client1.identifiers().members(groupName);
+            // assert.strictEqual(members.signing.length, 2);
+            // assert.strictEqual(members.rotating.length, 2);
+            return null;
+        });
+    }
+}
