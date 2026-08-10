@@ -1,14 +1,14 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.IdentifierController;
-import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
-import org.cardanofoundation.signify.app.credentialing.registries.Registries;
-import org.cardanofoundation.signify.cesr.Keeping;
-import org.cardanofoundation.signify.cesr.params.SaltyParams;
-import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.IdentifierController;
+import id.veridian.signify.app.credentialing.registries.CreateRegistryArgs;
+import id.veridian.signify.app.credentialing.registries.Registries;
+import id.veridian.signify.cesr.Keeping;
+import id.veridian.signify.cesr.params.SaltyParams;
+import id.veridian.signify.core.Manager;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

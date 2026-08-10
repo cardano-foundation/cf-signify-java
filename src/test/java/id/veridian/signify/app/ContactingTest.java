@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.clienting.SignifyClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

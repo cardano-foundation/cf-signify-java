@@ -1,23 +1,23 @@
-package org.cardanofoundation.signify.cesr.args;
+package id.veridian.signify.cesr.args;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import lombok.*;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.Codex.NumCodex;
-import org.cardanofoundation.signify.exception.SignifyCryptoException;
-import org.cardanofoundation.signify.cesr.exception.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exception.InvalidSizeException;
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.Codex.NumCodex;
+import id.veridian.signify.exception.SignifyCryptoException;
+import id.veridian.signify.cesr.exception.UnexpectedCodeException;
+import id.veridian.signify.cesr.exception.EmptyMaterialException;
+import id.veridian.signify.cesr.exception.InvalidCodeException;
+import id.veridian.signify.cesr.exception.InvalidSizeException;
+import id.veridian.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.cesr.util.CoreUtil;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import static org.cardanofoundation.signify.cesr.util.Utils.intToBytes;
+import static id.veridian.signify.cesr.util.Utils.intToBytes;
 
 @Builder
 @AllArgsConstructor

@@ -1,14 +1,14 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.exception.SignifyAgentException;
-import org.cardanofoundation.signify.exception.SignifyInterruptedException;
-import org.cardanofoundation.signify.exception.SignifyServerException;
-import org.cardanofoundation.signify.exception.SignifyTransportException;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.exception.SignifyAgentException;
+import id.veridian.signify.exception.SignifyInterruptedException;
+import id.veridian.signify.exception.SignifyServerException;
+import id.veridian.signify.exception.SignifyTransportException;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

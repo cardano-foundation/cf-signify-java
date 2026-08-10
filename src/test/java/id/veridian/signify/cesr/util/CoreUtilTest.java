@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.cesr.util;
+package id.veridian.signify.cesr.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.cesr.exception.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

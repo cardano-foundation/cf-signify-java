@@ -1,16 +1,16 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateClients;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
+import static id.veridian.signify.e2e.utils.TestUtils.getOrCreateClients;
+import static id.veridian.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSetupSingleClient {

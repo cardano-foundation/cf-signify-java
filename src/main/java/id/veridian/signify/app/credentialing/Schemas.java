@@ -1,9 +1,9 @@
-package org.cardanofoundation.signify.app.credentialing;
+package id.veridian.signify.app.credentialing;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.Schema;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.Schema;
 
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;

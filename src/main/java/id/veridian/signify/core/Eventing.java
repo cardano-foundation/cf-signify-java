@@ -1,21 +1,21 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.*;
-import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.args.*;
+import id.veridian.signify.cesr.exception.InvalidCodeException;
+import id.veridian.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.cesr.util.CoreUtil.Ilks;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.CoreUtil.Ident;
+import id.veridian.signify.cesr.util.CoreUtil.Serials;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
+import static id.veridian.signify.cesr.util.CoreUtil.versify;
 
 public class Eventing {
     private static final int MaxIntThold = (int) (Math.pow(2, 32) - 1);

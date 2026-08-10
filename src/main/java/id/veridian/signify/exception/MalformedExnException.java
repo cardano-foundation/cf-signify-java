@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * Thrown when an exchange (exn) message matches a known route but its payload does not

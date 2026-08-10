@@ -1,9 +1,9 @@
-package org.cardanofoundation.signify.app.coring;
+package id.veridian.signify.app.coring;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.QueryOperation;
 
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;

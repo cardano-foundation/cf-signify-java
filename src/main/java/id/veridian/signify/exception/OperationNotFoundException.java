@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * Thrown when a long-running operation disappears from the agent while being waited on.

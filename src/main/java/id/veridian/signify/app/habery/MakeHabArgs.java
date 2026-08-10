@@ -1,9 +1,9 @@
-package org.cardanofoundation.signify.app.habery;
+package id.veridian.signify.app.habery;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.Codex;
+import id.veridian.signify.cesr.Codex;
 
 import java.util.List;
 

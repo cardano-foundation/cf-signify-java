@@ -1,23 +1,23 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.*;
-import org.cardanofoundation.signify.app.aiding.IdentifierController;
-import org.cardanofoundation.signify.exception.HeaderVerificationException;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.KeyStates;
-import org.cardanofoundation.signify.app.coring.Oobis;
-import org.cardanofoundation.signify.app.coring.Operations;
-import org.cardanofoundation.signify.app.credentialing.Schemas;
-import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
-import org.cardanofoundation.signify.app.credentialing.ipex.Ipex;
-import org.cardanofoundation.signify.app.credentialing.registries.Registries;
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.*;
+import id.veridian.signify.app.aiding.IdentifierController;
+import id.veridian.signify.exception.HeaderVerificationException;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.coring.KeyStates;
+import id.veridian.signify.app.coring.Oobis;
+import id.veridian.signify.app.coring.Operations;
+import id.veridian.signify.app.credentialing.Schemas;
+import id.veridian.signify.app.credentialing.credentials.Credentials;
+import id.veridian.signify.app.credentialing.ipex.Ipex;
+import id.veridian.signify.app.credentialing.registries.Registries;
+import id.veridian.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

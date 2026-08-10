@@ -1,17 +1,17 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exception.ConversionException;
-import org.cardanofoundation.signify.cesr.exception.ShortageException;
-import org.cardanofoundation.signify.cesr.exception.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exception.UnexpectedCountCodeException;
-import org.cardanofoundation.signify.cesr.exception.UnexpectedOpCodeException;
-import org.cardanofoundation.signify.cesr.exception.InvalidCodeSizeException;
-import org.cardanofoundation.signify.cesr.exception.InvalidVarIndexException;
-import org.cardanofoundation.signify.cesr.exception.RawMaterialException;
-import org.cardanofoundation.signify.cesr.Codex.IndexedBothSigCodex;
-import org.cardanofoundation.signify.cesr.Codex.IndexedCurrentSigCodex;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exception.ConversionException;
+import id.veridian.signify.cesr.exception.ShortageException;
+import id.veridian.signify.cesr.exception.UnexpectedCodeException;
+import id.veridian.signify.cesr.exception.UnexpectedCountCodeException;
+import id.veridian.signify.cesr.exception.UnexpectedOpCodeException;
+import id.veridian.signify.cesr.exception.InvalidCodeSizeException;
+import id.veridian.signify.cesr.exception.InvalidVarIndexException;
+import id.veridian.signify.cesr.exception.RawMaterialException;
+import id.veridian.signify.cesr.Codex.IndexedBothSigCodex;
+import id.veridian.signify.cesr.Codex.IndexedCurrentSigCodex;
+import id.veridian.signify.cesr.util.CoreUtil;
 import lombok.Getter;
 
 import java.util.Arrays;

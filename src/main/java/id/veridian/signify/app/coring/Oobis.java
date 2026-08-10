@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.coring;
+package id.veridian.signify.app.coring;
 
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;
@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.EndRole;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.OOBIOperation;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.EndRole;
+import id.veridian.signify.generated.keria.model.OOBI;
+import id.veridian.signify.generated.keria.model.OOBIOperation;
 
 public class Oobis {
     private final SignifyClient client;

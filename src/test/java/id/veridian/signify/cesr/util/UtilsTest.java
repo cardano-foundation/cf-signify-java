@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.cesr.util;
+package id.veridian.signify.cesr.util;
 
-import org.cardanofoundation.signify.cesr.Saider;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.exception.SignifySerializationException;
+import id.veridian.signify.cesr.Saider;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.exception.SignifySerializationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;

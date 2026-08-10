@@ -1,19 +1,19 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
-import org.cardanofoundation.signify.exception.MalformedExnException;
-import org.cardanofoundation.signify.exception.SignifySerializationException;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
-import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
-import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
-import org.cardanofoundation.signify.generated.keria.model.ISSV1;
-import org.cardanofoundation.signify.generated.keria.model.Icp;
-import org.cardanofoundation.signify.generated.keria.model.Ixn;
-import org.cardanofoundation.signify.generated.keria.model.REVV1;
-import org.cardanofoundation.signify.generated.keria.model.Rot;
-import org.cardanofoundation.signify.generated.keria.model.Rpy;
-import org.cardanofoundation.signify.generated.keria.model.VCPV1;
+import id.veridian.signify.exception.MalformedExnException;
+import id.veridian.signify.exception.SignifySerializationException;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.CredentialSad;
+import id.veridian.signify.generated.keria.model.ExchangeResource;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.ExnMultisig;
+import id.veridian.signify.generated.keria.model.ISSV1;
+import id.veridian.signify.generated.keria.model.Icp;
+import id.veridian.signify.generated.keria.model.Ixn;
+import id.veridian.signify.generated.keria.model.REVV1;
+import id.veridian.signify.generated.keria.model.Rot;
+import id.veridian.signify.generated.keria.model.Rpy;
+import id.veridian.signify.generated.keria.model.VCPV1;
 
 import java.util.ArrayList;
 import java.util.Collections;

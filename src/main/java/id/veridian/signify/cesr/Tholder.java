@@ -1,16 +1,16 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.apache.commons.math3.fraction.Fraction;
-import org.cardanofoundation.signify.cesr.Codex.BexCodex;
-import org.cardanofoundation.signify.cesr.Codex.NumCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
-import org.cardanofoundation.signify.cesr.exception.SerializeException;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.Codex.BexCodex;
+import id.veridian.signify.cesr.Codex.NumCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exception.EmptyMaterialException;
+import id.veridian.signify.cesr.exception.InvalidCodeException;
+import id.veridian.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.cesr.exception.SerializeException;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
 import java.util.*;

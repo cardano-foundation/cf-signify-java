@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.cesr.params;
+package id.veridian.signify.cesr.params;
 
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.util.Map;
 

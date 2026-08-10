@@ -1,12 +1,12 @@
-package org.cardanofoundation.signify.app.config;
+package id.veridian.signify.app.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import org.cardanofoundation.signify.generated.keria.model.Icp;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.Rot;
+import id.veridian.signify.generated.keria.model.Icp;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.Rot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

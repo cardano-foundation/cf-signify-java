@@ -1,7 +1,7 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
-import org.cardanofoundation.signify.app.coring.deps.BaseDeps;
-import org.cardanofoundation.signify.cesr.Keeping;
+import id.veridian.signify.app.coring.deps.BaseDeps;
+import id.veridian.signify.cesr.Keeping;
 
 public interface IdentifierDeps extends BaseDeps {
     int getPidx();

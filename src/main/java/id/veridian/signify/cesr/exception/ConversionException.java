@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exception;
+package id.veridian.signify.cesr.exception;
 
 /**
  * Base64 to binary conversion failed during extraction.

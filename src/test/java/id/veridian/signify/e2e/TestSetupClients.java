@@ -1,14 +1,14 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.clienting.SignifyClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateContact;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
+import static id.veridian.signify.e2e.utils.TestUtils.getOrCreateContact;
+import static id.veridian.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSetupClients extends BaseIntegrationTest {

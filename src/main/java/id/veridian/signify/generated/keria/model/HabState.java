@@ -11,7 +11,7 @@
  */
 
 
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
@@ -23,15 +23,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.ExternState;
-import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
-import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf;
-import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf1;
-import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf2;
-import org.cardanofoundation.signify.generated.keria.model.HabStateOneOf3;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
-import org.cardanofoundation.signify.generated.keria.model.SaltyState;
+import id.veridian.signify.generated.keria.model.ExternState;
+import id.veridian.signify.generated.keria.model.GroupKeyState;
+import id.veridian.signify.generated.keria.model.HabStateOneOf;
+import id.veridian.signify.generated.keria.model.HabStateOneOf1;
+import id.veridian.signify.generated.keria.model.HabStateOneOf2;
+import id.veridian.signify.generated.keria.model.HabStateOneOf3;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.RandyKeyState;
+import id.veridian.signify.generated.keria.model.SaltyState;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 

@@ -1,19 +1,19 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.RotateIdentifierArgs;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.resolveOobi;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitForCompleted;
+import static id.veridian.signify.e2e.utils.TestUtils.resolveOobi;
+import static id.veridian.signify.e2e.utils.TestUtils.waitForCompleted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WitnessTest {

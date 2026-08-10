@@ -1,29 +1,29 @@
-package org.cardanofoundation.signify.e2e.utils;
+package id.veridian.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 
-import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.Notifying.Notifications.NotificationListResponse;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operations;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
-import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.*;
+import id.veridian.signify.app.Exchanging;
+import id.veridian.signify.app.Notifying.Notifications.NotificationListResponse;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.IdentifierListResponse;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Operations;
+import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.app.credentialing.credentials.CredentialFilter;
+import id.veridian.signify.app.credentialing.credentials.IssueCredentialResult;
+import id.veridian.signify.app.credentialing.ipex.IpexAdmitArgs;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.*;
 
 import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
-import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
+import static id.veridian.signify.app.coring.Coring.randomPasscode;
+import static id.veridian.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j

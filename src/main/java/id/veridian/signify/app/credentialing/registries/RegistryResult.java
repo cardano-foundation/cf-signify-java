@@ -1,7 +1,7 @@
-package org.cardanofoundation.signify.app.credentialing.registries;
+package id.veridian.signify.app.credentialing.registries;
 
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.generated.keria.model.RegistryOperation;
 
 import java.util.List;
 

@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

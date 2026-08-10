@@ -1,12 +1,12 @@
-package org.cardanofoundation.signify.cesr.util;
+package id.veridian.signify.cesr.util;
 
 import lombok.Getter;
 import org.bouncycastle.jcajce.provider.digest.Blake3;
-import org.cardanofoundation.signify.cesr.exception.KindException;
-import org.cardanofoundation.signify.cesr.exception.ProtocolException;
-import org.cardanofoundation.signify.cesr.exception.VersionException;
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
-import org.cardanofoundation.signify.exception.SignifyCryptoException;
+import id.veridian.signify.cesr.exception.KindException;
+import id.veridian.signify.cesr.exception.ProtocolException;
+import id.veridian.signify.cesr.exception.VersionException;
+import id.veridian.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.exception.SignifyCryptoException;
 
 import java.security.DigestException;
 import java.util.HashMap;

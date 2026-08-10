@@ -1,14 +1,14 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.exceptions.SodiumException;
 import com.goterl.lazysodium.utils.KeyPair;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.exception.SignifyCryptoException;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.exception.SignifyCryptoException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.cardanofoundation.signify.cesr.util.Utils.CRYPTO_BOX_SEAL_BYTES;
+import static id.veridian.signify.cesr.util.Utils.CRYPTO_BOX_SEAL_BYTES;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EncrypterTest {

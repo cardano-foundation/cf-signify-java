@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.aiding.InteractionResponse;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.DelegatorOperation;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.aiding.InteractionResponse;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.DelegatorOperation;
 
 import java.net.http.HttpResponse;
 

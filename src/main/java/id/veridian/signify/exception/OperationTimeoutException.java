@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * Thrown when a long-running operation does not complete within the configured timeout.

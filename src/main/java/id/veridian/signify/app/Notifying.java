@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.generated.keria.model.Notification;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Httping;
+import id.veridian.signify.generated.keria.model.Notification;
 
 import java.net.http.HttpResponse;
 import java.util.List;

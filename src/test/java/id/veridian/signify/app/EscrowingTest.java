@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

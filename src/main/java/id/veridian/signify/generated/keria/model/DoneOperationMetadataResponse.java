@@ -11,7 +11,7 @@
  */
 
 
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
@@ -25,13 +25,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.cardanofoundation.signify.app.config.Threshold;
-import org.cardanofoundation.signify.generated.keria.model.EXNV1;
-import org.cardanofoundation.signify.generated.keria.model.EXNV2;
-import org.cardanofoundation.signify.generated.keria.model.ICPV1;
-import org.cardanofoundation.signify.generated.keria.model.ICPV2;
-import org.cardanofoundation.signify.generated.keria.model.ROTV1;
-import org.cardanofoundation.signify.generated.keria.model.ROTV2;
+import id.veridian.signify.app.config.Threshold;
+import id.veridian.signify.generated.keria.model.EXNV1;
+import id.veridian.signify.generated.keria.model.EXNV2;
+import id.veridian.signify.generated.keria.model.ICPV1;
+import id.veridian.signify.generated.keria.model.ICPV2;
+import id.veridian.signify.generated.keria.model.ROTV1;
+import id.veridian.signify.generated.keria.model.ROTV2;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 

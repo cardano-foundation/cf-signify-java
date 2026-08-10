@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.end;
+package id.veridian.signify.end;
 
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

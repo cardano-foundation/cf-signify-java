@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * Thrown when waiting on a long-running operation is aborted via its

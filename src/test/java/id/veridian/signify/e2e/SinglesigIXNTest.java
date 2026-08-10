@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.CompletedQueryOperation;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.CompletedQueryOperation;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SinglesigIXNTest extends BaseIntegrationTest {

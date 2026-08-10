@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.clienting;
+package id.veridian.signify.app.clienting;
 
 import lombok.Builder;
 import lombok.Getter;

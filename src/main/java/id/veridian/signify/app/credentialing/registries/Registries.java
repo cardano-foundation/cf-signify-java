@@ -1,24 +1,24 @@
-package org.cardanofoundation.signify.app.credentialing.registries;
+package id.veridian.signify.app.credentialing.registries;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.habery.TraitCodex;
-import org.cardanofoundation.signify.cesr.Keeping;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.args.InteractArgs;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.Vdring;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.habery.TraitCodex;
+import id.veridian.signify.cesr.Keeping;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.args.InteractArgs;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.core.Vdring;
 
 import java.math.BigInteger;
 import java.net.http.HttpResponse;
 import java.util.*;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.Registry;
-import org.cardanofoundation.signify.generated.keria.model.RegistryOperation;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.Registry;
+import id.veridian.signify.generated.keria.model.RegistryOperation;
 import com.fasterxml.jackson.core.type.TypeReference;
-import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
+import static id.veridian.signify.cesr.util.CoreUtil.Versionage;
 
 public class Registries {
 

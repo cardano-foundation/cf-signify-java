@@ -1,24 +1,24 @@
-package org.cardanofoundation.signify.app.credentialing.ipex;
+package id.veridian.signify.app.credentialing.ipex;
 
-import org.cardanofoundation.signify.app.Exchanging;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.Keeping.Keeper;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.cesr.Siger;
+import id.veridian.signify.app.Exchanging;
+import static id.veridian.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.Keeping.Keeper;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.cesr.Siger;
 
 import java.net.http.HttpResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.cardanofoundation.signify.generated.keria.model.ExchangeOperation;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.ExchangeOperation;
+import id.veridian.signify.generated.keria.model.HabState;
 
 public class Ipex {
     private final SignifyClient client;

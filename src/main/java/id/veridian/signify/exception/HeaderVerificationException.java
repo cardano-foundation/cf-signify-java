@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * The signed headers of an agent response failed verification, or the response came

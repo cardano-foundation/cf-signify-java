@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * The calling thread was interrupted while waiting on the agent (an HTTP round-trip or

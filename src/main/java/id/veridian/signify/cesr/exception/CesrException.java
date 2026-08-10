@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.cesr.exception;
+package id.veridian.signify.cesr.exception;
 
-import org.cardanofoundation.signify.exception.SignifyException;
+import id.veridian.signify.exception.SignifyException;
 
 /**
  * Base class for protocol errors raised by the CESR layer: primitive/material

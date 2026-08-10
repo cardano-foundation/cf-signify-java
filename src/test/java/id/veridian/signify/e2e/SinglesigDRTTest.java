@@ -1,15 +1,15 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperation;
-import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperationResponse;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KelOperation;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
-import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.RotateIdentifierArgs;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.CompletedDelegationOperation;
+import id.veridian.signify.generated.keria.model.CompletedDelegationOperationResponse;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.generated.keria.model.Operation;
+import id.veridian.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
+import static id.veridian.signify.e2e.utils.TestUtils.getOrCreateIdentifier;
 
 public class SinglesigDRTTest extends BaseIntegrationTest {
     private static SignifyClient delegator, delegate;

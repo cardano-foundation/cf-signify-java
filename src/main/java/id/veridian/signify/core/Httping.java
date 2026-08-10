@@ -1,13 +1,13 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.cardanofoundation.signify.cesr.Signer;
+import id.veridian.signify.cesr.Signer;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.util.Utils;
 import org.greenbytes.http.sfv.*;
 import org.greenbytes.http.sfv.Dictionary;
 

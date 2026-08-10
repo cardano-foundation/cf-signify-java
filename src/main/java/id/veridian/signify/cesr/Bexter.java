@@ -1,17 +1,17 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.exception.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.exception.EmptyMaterialException;
+import id.veridian.signify.cesr.exception.InvalidCodeException;
+import id.veridian.signify.cesr.exception.InvalidValueException;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.cardanofoundation.signify.cesr.util.CoreUtil.decodeBase64Url;
-import static org.cardanofoundation.signify.cesr.util.CoreUtil.encodeBase64Url;
+import static id.veridian.signify.cesr.util.CoreUtil.decodeBase64Url;
+import static id.veridian.signify.cesr.util.CoreUtil.encodeBase64Url;
 
 /*
     Bexter is subclass of Matter, cryptographic material, for variable length

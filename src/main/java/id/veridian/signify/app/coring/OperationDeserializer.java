@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app.coring;
+package id.veridian.signify.app.coring;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.cardanofoundation.signify.generated.keria.model.*;
+import id.veridian.signify.generated.keria.model.*;
 
 import java.io.IOException;
 import java.util.Map;

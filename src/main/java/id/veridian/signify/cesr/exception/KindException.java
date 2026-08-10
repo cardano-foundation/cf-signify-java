@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exception;
+package id.veridian.signify.cesr.exception;
 
 /**
  * Bad or unsupported serialization kind.

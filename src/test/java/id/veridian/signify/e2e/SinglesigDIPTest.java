@@ -1,14 +1,14 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.CompletedDelegationOperation;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KelOperation;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
-import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.CompletedDelegationOperation;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.generated.keria.model.Operation;
+import id.veridian.signify.generated.keria.model.QueryOperation;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
 
 class SinglesigDIPTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2;

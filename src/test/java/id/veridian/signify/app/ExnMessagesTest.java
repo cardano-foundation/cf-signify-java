@@ -1,12 +1,12 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
-import org.cardanofoundation.signify.app.ExnMessages.MultisigIcpExchange;
-import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
-import org.cardanofoundation.signify.app.ExnMessages.TypedExchange;
-import org.cardanofoundation.signify.exception.MalformedExnException;
-import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
-import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
+import id.veridian.signify.app.ExnMessages.MultisigIcpExchange;
+import id.veridian.signify.app.ExnMessages.IpexGrantExchange;
+import id.veridian.signify.app.ExnMessages.TypedExchange;
+import id.veridian.signify.exception.MalformedExnException;
+import id.veridian.signify.generated.keria.model.ExchangeResource;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.ExnMultisig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,8 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
+import static id.veridian.signify.app.ExnMessages.MULTISIG_ICP_ROUTE;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ExnMessagesTest {

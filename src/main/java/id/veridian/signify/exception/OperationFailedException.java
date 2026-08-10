@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
-import org.cardanofoundation.signify.generated.keria.model.FailedOperation;
+import id.veridian.signify.generated.keria.model.FailedOperation;
 
 /**
  * Thrown when a long-running operation, or a dependent operation it relies on,

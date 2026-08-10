@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.Codex.IndexedSigCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exception.InvalidCodeException;
+import id.veridian.signify.cesr.Codex.IndexedSigCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exception.InvalidCodeException;
 
 /**
  * Siger is subclass of Indexer, indexed signature material,

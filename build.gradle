@@ -14,7 +14,7 @@ repositories {
     }
 }
 
-group = 'org.cardanofoundation'
+group = 'id.veridian'
 version = '0.1.2-SNAPSHOT'
 
 def commit_id = getCheckedOutGitCommitHash()
@@ -77,10 +77,10 @@ allure {
 tasks.test {
     useJUnitPlatform()  // Use JUnit 5 platform
     filter {
-        includeTestsMatching "org.cardanofoundation.signify.app.*"
-        includeTestsMatching "org.cardanofoundation.signify.cesr.*"
-        includeTestsMatching "org.cardanofoundation.signify.core.*"
-        includeTestsMatching "org.cardanofoundation.signify.end.*"
+        includeTestsMatching "id.veridian.signify.app.*"
+        includeTestsMatching "id.veridian.signify.cesr.*"
+        includeTestsMatching "id.veridian.signify.core.*"
+        includeTestsMatching "id.veridian.signify.end.*"
     }
     finalizedBy 'allureReport'
 }
@@ -100,7 +100,7 @@ tasks.register('testE2E', Test) {
         suiteStartTime = System.nanoTime()
     }
     filter {
-        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+        includeTestsMatching "id.veridian.signify.e2e.*"
     }
 
     testLogging {
@@ -207,8 +207,8 @@ tasks.openApiGenerate {
     outputDir.set("$rootDir".toString())
     validateSpec.set(false)
     skipValidateSpec.set(true)
-    modelPackage.set("org.cardanofoundation.signify.generated.keria.model")
-    invokerPackage.set("org.cardanofoundation.signify.generated.keria.model")
+    modelPackage.set("id.veridian.signify.generated.keria.model")
+    invokerPackage.set("id.veridian.signify.generated.keria.model")
 
     globalProperties.set([
         models        : "",   // generate models only
@@ -239,7 +239,7 @@ tasks.openApiGenerate {
         "KeyStateRecord_nt" : "Threshold",
     ])
     importMappings.putAll([
-        "Threshold" : "org.cardanofoundation.signify.app.config.Threshold",
+        "Threshold" : "id.veridian.signify.app.config.Threshold",
     ])
 }
 
@@ -332,7 +332,7 @@ tasks.named("openApiGenerate") {
             def extendsClause = (op in kelOps) ? "extends KelOperation" : "extends Operation"
             def metadataMethod = metadataType ? "\n    ${metadataType} getMetadata();\n" : ""
             new File(modelDir, "${op}Operation.java").text = """\
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 public sealed interface ${op}Operation ${extendsClause} permits
         Pending${op}Operation,
@@ -347,10 +347,10 @@ ${metadataMethod}}
         def operationPermits = (ops.findAll { !(it in kelOps) }.collect { "${it}Operation" } + ["KelOperation"]).sort() +
                 states.collect { "${it}Operation" }
         new File(modelDir, "Operation.java").text = """\
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.cardanofoundation.signify.app.coring.OperationDeserializer;
+import id.veridian.signify.app.coring.OperationDeserializer;
 
 @JsonDeserialize(using = OperationDeserializer.class)
 public sealed interface Operation permits
@@ -361,7 +361,7 @@ ${operationPermits.collect { "        ${it}" }.join(",\n")} {
 """
 
         new File(modelDir, "KelOperation.java").text = """\
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 /**
  * Marker interface for operations that result from appending a KEL event.
@@ -373,7 +373,7 @@ ${kelOps.sort().collect { "        ${it}Operation" }.join(",\n")} {
 
         states.each { state ->
             new File(modelDir, "${state}Operation.java").text = """\
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 /**
  * Marker interface for operations ${stateDocs[state]}.

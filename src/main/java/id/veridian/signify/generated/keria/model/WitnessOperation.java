@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 public sealed interface WitnessOperation extends KelOperation permits
         PendingWitnessOperation,

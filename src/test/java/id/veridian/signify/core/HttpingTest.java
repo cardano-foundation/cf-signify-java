@@ -1,14 +1,14 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
-import org.cardanofoundation.signify.cesr.Cigar;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.Cigar;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.cesr.Signer;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.util.Utils;
 import org.junit.jupiter.api.DisplayName;
 
 import org.junit.jupiter.api.Test;

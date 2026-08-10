@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
-import org.cardanofoundation.signify.cesr.Serder;
+import id.veridian.signify.cesr.Serder;
 
 import java.util.List;
 

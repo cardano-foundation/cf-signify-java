@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import java.util.Map;
 

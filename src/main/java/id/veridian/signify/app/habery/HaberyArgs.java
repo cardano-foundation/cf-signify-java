@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.habery;
+package id.veridian.signify.app.habery;
 
 import lombok.Builder;
 import lombok.Getter;

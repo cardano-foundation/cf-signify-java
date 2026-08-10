@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * A cryptographic operation failed (signing, encryption/decryption, digest computation).

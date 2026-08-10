@@ -1,12 +1,12 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.InceptArgs;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.args.RotateArgs;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.args.InceptArgs;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.args.RotateArgs;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.Utils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;

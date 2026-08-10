@@ -1,15 +1,15 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.RandyKeyState;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.Codex.MatterCodex;
 
 import static org.junit.jupiter.api.Assertions.*;
 

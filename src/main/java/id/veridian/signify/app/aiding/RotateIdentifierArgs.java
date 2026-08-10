@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
 
 @Builder
 @Getter

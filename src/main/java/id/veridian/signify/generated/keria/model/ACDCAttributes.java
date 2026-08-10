@@ -11,7 +11,7 @@
  */
 
 
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 import java.util.Map;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exception;
+package id.veridian.signify.cesr.exception;
 
 /**
  * Unexpected, unknown, or unsupported derivation code during extraction.

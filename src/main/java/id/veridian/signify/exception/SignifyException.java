@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * Root of the Signify exception hierarchy. Every runtime failure this library raises —

@@ -11,7 +11,7 @@
  */
 
 
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
@@ -20,14 +20,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.DelegationOperation;
-import org.cardanofoundation.signify.generated.keria.model.DoneOperation;
-import org.cardanofoundation.signify.generated.keria.model.GroupOperation;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.OperationStatus;
-import org.cardanofoundation.signify.generated.keria.model.SubmitOperation;
-import org.cardanofoundation.signify.generated.keria.model.SubmitOperationMetadata;
-import org.cardanofoundation.signify.generated.keria.model.WitnessOperation;
+import id.veridian.signify.generated.keria.model.DelegationOperation;
+import id.veridian.signify.generated.keria.model.DoneOperation;
+import id.veridian.signify.generated.keria.model.GroupOperation;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.OperationStatus;
+import id.veridian.signify.generated.keria.model.SubmitOperation;
+import id.veridian.signify.generated.keria.model.SubmitOperationMetadata;
+import id.veridian.signify.generated.keria.model.WitnessOperation;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 

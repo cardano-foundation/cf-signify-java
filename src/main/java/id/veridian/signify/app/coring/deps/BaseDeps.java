@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.coring.deps;
+package id.veridian.signify.app.coring.deps;
 
 import java.net.http.HttpResponse;
 import java.util.Map;

@@ -1,24 +1,24 @@
-package org.cardanofoundation.signify.app.credentialing.credentials;
+package id.veridian.signify.app.credentialing.credentials;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.generated.keria.model.CredentialOperation;
-import org.cardanofoundation.signify.cesr.Keeping;
-import org.cardanofoundation.signify.cesr.Saider;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.args.InteractArgs;
-import org.cardanofoundation.signify.cesr.params.KeeperParams;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Eventing;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.generated.keria.model.CredentialOperation;
+import id.veridian.signify.cesr.Keeping;
+import id.veridian.signify.cesr.Saider;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.args.InteractArgs;
+import id.veridian.signify.cesr.params.KeeperParams;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Eventing;
 
 import java.math.BigInteger;
 import java.net.http.HttpResponse;
 import java.util.*;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.Credential;
-import org.cardanofoundation.signify.generated.keria.model.CredentialState;
-import org.cardanofoundation.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.Credential;
+import id.veridian.signify.generated.keria.model.CredentialState;
+import id.veridian.signify.generated.keria.model.KelOperation;
 
 public class Credentials {
 

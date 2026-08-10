@@ -1,7 +1,7 @@
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.cardanofoundation.signify.app.coring.OperationDeserializer;
+import id.veridian.signify.app.coring.OperationDeserializer;
 
 @JsonDeserialize(using = OperationDeserializer.class)
 public sealed interface Operation permits

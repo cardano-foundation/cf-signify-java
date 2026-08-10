@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exception;
+package id.veridian.signify.cesr.exception;
 
 /**
  * Not enough bytes in the buffer for a complete message or primitive.

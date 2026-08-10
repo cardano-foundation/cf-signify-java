@@ -1,28 +1,28 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
-import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.TestSteps;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Notification;
-import org.cardanofoundation.signify.generated.keria.model.AidRecord;
-import org.cardanofoundation.signify.generated.keria.model.EndRole;
-import org.cardanofoundation.signify.generated.keria.model.EndRoleOperation;
-import org.cardanofoundation.signify.generated.keria.model.GroupMember;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KelOperation;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.e2e.utils.MultisigUtils;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.e2e.utils.TestSteps;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.Notification;
+import id.veridian.signify.generated.keria.model.AidRecord;
+import id.veridian.signify.generated.keria.model.EndRole;
+import id.veridian.signify.generated.keria.model.EndRoleOperation;
+import id.veridian.signify.generated.keria.model.GroupMember;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.generated.keria.model.OOBI;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.cardanofoundation.signify.e2e.MultisigJoinTest.getOobisIndexAt0;
-import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
-import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
+import static id.veridian.signify.e2e.MultisigJoinTest.getOobisIndexAt0;
+import static id.veridian.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
+import static id.veridian.signify.e2e.utils.MultisigUtils.startMultisigIncept;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EndRolesByAidTest extends BaseIntegrationTest {

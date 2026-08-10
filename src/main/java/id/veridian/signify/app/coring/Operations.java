@@ -1,15 +1,15 @@
-package org.cardanofoundation.signify.app.coring;
+package id.veridian.signify.app.coring;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.*;
-import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
-import org.cardanofoundation.signify.exception.OperationAbortedException;
-import org.cardanofoundation.signify.exception.OperationFailedException;
-import org.cardanofoundation.signify.exception.OperationNotFoundException;
-import org.cardanofoundation.signify.exception.OperationTimeoutException;
-import org.cardanofoundation.signify.exception.SignifyInterruptedException;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.generated.keria.model.*;
+import id.veridian.signify.app.coring.deps.OperationsDeps;
+import id.veridian.signify.exception.OperationAbortedException;
+import id.veridian.signify.exception.OperationFailedException;
+import id.veridian.signify.exception.OperationNotFoundException;
+import id.veridian.signify.exception.OperationTimeoutException;
+import id.veridian.signify.exception.SignifyInterruptedException;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.generated.keria.model.*;
 
 import java.net.HttpURLConnection;
 import java.net.http.HttpResponse;

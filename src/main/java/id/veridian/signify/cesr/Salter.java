@@ -1,12 +1,12 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.sun.jna.NativeLong;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.args.RawArgs;
 import com.goterl.lazysodium.interfaces.PwHash.Alg;
 import lombok.Getter;
-import org.cardanofoundation.signify.exception.SignifyCryptoException;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.exception.SignifyCryptoException;
+import id.veridian.signify.generated.keria.model.Tier;
 
 public class Salter extends Matter {
     @Getter

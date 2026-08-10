@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.HabState;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.end;
+package id.veridian.signify.end;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cardanofoundation.signify.cesr.Cigar;
-import org.cardanofoundation.signify.cesr.Siger;
+import id.veridian.signify.cesr.Cigar;
+import id.veridian.signify.cesr.Siger;
 
 import lombok.Getter;
 import lombok.Setter;

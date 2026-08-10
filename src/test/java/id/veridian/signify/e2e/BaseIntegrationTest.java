@@ -1,20 +1,20 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.e2e.utils.TestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.Operation;
-import org.cardanofoundation.signify.generated.keria.model.QueryOperation;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.OOBI;
+import id.veridian.signify.generated.keria.model.Operation;
+import id.veridian.signify.generated.keria.model.QueryOperation;
 
 
 public class BaseIntegrationTest {

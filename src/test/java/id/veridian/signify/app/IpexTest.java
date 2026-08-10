@@ -1,15 +1,15 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.credentialing.ipex.*;
-import org.cardanofoundation.signify.cesr.Saider;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.args.InteractArgs;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.credentialing.ipex.*;
+import id.veridian.signify.cesr.Saider;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.args.InteractArgs;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

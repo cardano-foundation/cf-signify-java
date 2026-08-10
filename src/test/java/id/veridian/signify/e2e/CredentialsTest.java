@@ -1,29 +1,29 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.ExnMessages.IpexAgreeExchange;
-import org.cardanofoundation.signify.app.ExnMessages.IpexApplyExchange;
-import org.cardanofoundation.signify.app.ExnMessages.IpexGrantExchange;
-import org.cardanofoundation.signify.app.ExnMessages.IpexOfferExchange;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
-import static org.cardanofoundation.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.credentialing.credentials.*;
-import org.cardanofoundation.signify.app.credentialing.ipex.*;
-import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
-import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.Retry;
-import org.cardanofoundation.signify.e2e.utils.TestSteps;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Notification;
-import org.cardanofoundation.signify.generated.keria.model.*;
+import id.veridian.signify.app.Exchanging;
+import id.veridian.signify.app.ExnMessages.IpexAgreeExchange;
+import id.veridian.signify.app.ExnMessages.IpexApplyExchange;
+import id.veridian.signify.app.ExnMessages.IpexGrantExchange;
+import id.veridian.signify.app.ExnMessages.IpexOfferExchange;
+import static id.veridian.signify.app.ExnMessages.IPEX_ADMIT_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_AGREE_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_APPLY_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_GRANT_ROUTE;
+import static id.veridian.signify.app.ExnMessages.IPEX_OFFER_ROUTE;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.credentialing.credentials.*;
+import id.veridian.signify.app.credentialing.ipex.*;
+import id.veridian.signify.app.credentialing.registries.CreateRegistryArgs;
+import id.veridian.signify.app.credentialing.registries.RegistryResult;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.e2e.utils.Retry;
+import id.veridian.signify.e2e.utils.TestSteps;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.Notification;
+import id.veridian.signify.generated.keria.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
+import static id.veridian.signify.e2e.utils.Retry.retry;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CredentialsTest extends BaseIntegrationTest {

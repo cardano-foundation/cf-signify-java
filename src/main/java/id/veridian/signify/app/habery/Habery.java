@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app.habery;
+package id.veridian.signify.app.habery;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.args.InceptArgs;
-import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.Manager;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.args.InceptArgs;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.core.Manager;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

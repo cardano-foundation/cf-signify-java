@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.app.config;
+package id.veridian.signify.app.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.cardanofoundation.signify.generated.keria.model.CredentialState;
+import id.veridian.signify.generated.keria.model.CredentialState;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 
 /**

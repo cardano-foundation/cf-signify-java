@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
 import lombok.Getter;
 import lombok.Setter;

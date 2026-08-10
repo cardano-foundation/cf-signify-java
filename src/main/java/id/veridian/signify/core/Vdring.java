@@ -1,20 +1,20 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.habery.TraitCodex;
-import org.cardanofoundation.signify.cesr.Codex;
-import org.cardanofoundation.signify.cesr.Prefixer;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.habery.TraitCodex;
+import id.veridian.signify.cesr.Codex;
+import id.veridian.signify.cesr.Prefixer;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.util.CoreUtil;
 
 import java.util.*;
 
-import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
-import static org.cardanofoundation.signify.cesr.util.CoreUtil.versify;
-import static org.cardanofoundation.signify.core.Eventing.ample;
+import static id.veridian.signify.cesr.util.CoreUtil.Versionage;
+import static id.veridian.signify.cesr.util.CoreUtil.versify;
+import static id.veridian.signify.core.Eventing.ample;
 
 public class Vdring {
 

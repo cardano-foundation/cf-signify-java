@@ -1,12 +1,12 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.Matter;
-import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.Verfer;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Httping.SiginputArgs;
-import org.cardanofoundation.signify.end.Signage;
+import id.veridian.signify.cesr.Matter;
+import id.veridian.signify.cesr.Signer;
+import id.veridian.signify.cesr.Verfer;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Httping.SiginputArgs;
+import id.veridian.signify.end.Signage;
 
 import java.util.*;
 

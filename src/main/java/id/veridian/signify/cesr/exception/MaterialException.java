@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exception;
+package id.veridian.signify.cesr.exception;
 
 /**
  * Base class for errors initializing a cryptographic material primitive.

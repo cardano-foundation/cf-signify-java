@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.exception;
+package id.veridian.signify.exception;
 
 /**
  * The agent answered with a 5xx status: the request reached the agent but failed on the

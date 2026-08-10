@@ -1,7 +1,7 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import org.apache.commons.math3.fraction.Fraction;
-import org.cardanofoundation.signify.cesr.exception.InvalidValueException;
+import id.veridian.signify.cesr.exception.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
