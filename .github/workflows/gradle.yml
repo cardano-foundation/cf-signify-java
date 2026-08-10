@@ -16,16 +16,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: 'temurin'
           java-version: '21'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
       - name: Run Unit Tests
         run: ./gradlew test
@@ -34,7 +34,7 @@ jobs:
         run: ./gradlew allureReport
 
       - name: Upload Unit Test Reports (Allure)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: allure-unit-test-report
           path: build/reports/allure-report/allureReport
@@ -44,16 +44,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: 'temurin'
           java-version: '21'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
       - name: Run Docker Compose (Spin up services)
         run: docker compose up -d
@@ -65,12 +65,15 @@ jobs:
         run: ./gradlew allureReport
 
       - name: Upload Unit Test Reports (Allure)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: allure-e2e-test-report
           path: build/reports/allure-report/allureReport
 
-  publish-to-maven:
+  publish-to-pkg-repos:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     needs:
       - unit-tests
@@ -78,16 +81,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: 'temurin'
           java-version: '21'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
       - name: GPG checks
         run: |
@@ -99,16 +102,24 @@ jobs:
           echo "${{secrets.MAVEN_CENTRAL_GPG_KEY_BASE64}}" > ~/.gradle/secring.gpg.b64
           base64 -d ~/.gradle/secring.gpg.b64 > ~/.gradle/secring.gpg
           echo "${{secrets.MAVEN_CENTRAL_GPG_PASSPHRASE}}" | gpg --batch --yes --passphrase-fd 0 --import ~/.gradle/secring.gpg
-          gpg --keyserver hkps://keys.openpgp.org --send-key BEFB6B63A980310BB92A65365E362818AF79A015
+          gpg --keyserver hkps://keys.openpgp.org --send-key 3B36C37F3005FE8BB8B30DC26B12ADFA0BE0D092
 
       - name: Build package
         run: ./gradlew build
 
-      - name: Publish package
+      - name: Publish package to GitHub Packages
+        run: ./gradlew publishMavenJavaPublicationToGitHubPackagesRepository
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish package Maven Central
         run: |
           ./gradlew publish jreleaserDeploy
         env:
-          JRELEASER_GPG_KEYNAME: "BEFB6B63A980310BB92A65365E362818AF79A015"
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_GPG_KEYNAME: "3B36C37F3005FE8BB8B30DC26B12ADFA0BE0D092"
           JRELEASER_GPG_PASSPHRASE: "${{ secrets.MAVEN_CENTRAL_GPG_PASSPHRASE }}"
           JRELEASER_MAVENCENTRAL_USERNAME: "${{ secrets.MAVEN_CENTRAL_OSSRH_USERNAME }}"
           JRELEASER_MAVENCENTRAL_PASSWORD: "${{ secrets.MAVEN_CENTRAL_OSSRH_TOKEN }}"
