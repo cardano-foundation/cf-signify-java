@@ -278,7 +278,7 @@ tasks.named("openApiGenerate") {
     // Every rewrite is validated: if the generator's output shape changes, the build fails
     // here instead of producing a silently broken hierarchy.
     doLast {
-        def modelDir = file("src/main/java/org/cardanofoundation/signify/generated/keria/model")
+        def modelDir = file("src/main/java/id/veridian/signify/generated/keria/model")
         def kelOps = ["Delegation", "Done", "Group", "Witness"] as Set
         def states = ["Pending", "Completed", "Failed"]
         def stateDocs = [
