@@ -1,32 +1,32 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.params.GroupParams;
-import org.cardanofoundation.signify.cesr.params.KeeperParams;
-import org.cardanofoundation.signify.cesr.params.RandyParams;
-import org.cardanofoundation.signify.cesr.params.SaltyParams;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.core.Manager.RandyCreator;
-import org.cardanofoundation.signify.core.Manager.SaltyCreator;
-import org.cardanofoundation.signify.core.Manager.Algos;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import id.veridian.signify.cesr.exceptions.material.InvalidValueException;
+import id.veridian.signify.cesr.params.GroupParams;
+import id.veridian.signify.cesr.params.KeeperParams;
+import id.veridian.signify.cesr.params.RandyParams;
+import id.veridian.signify.cesr.params.SaltyParams;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Manager;
+import id.veridian.signify.core.Manager.RandyCreator;
+import id.veridian.signify.core.Manager.SaltyCreator;
+import id.veridian.signify.core.Manager.Algos;
+import id.veridian.signify.cesr.Codex.MatterCodex;
 
 import java.security.DigestException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.cardanofoundation.signify.generated.keria.model.GroupKeyState;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.RandyKeyState;
-import org.cardanofoundation.signify.generated.keria.model.SaltyState;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.generated.keria.model.GroupKeyState;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.RandyKeyState;
+import id.veridian.signify.generated.keria.model.SaltyState;
+import id.veridian.signify.generated.keria.model.Tier;
 
 public class Keeping {
     // External module interface

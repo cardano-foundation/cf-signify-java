@@ -1,25 +1,25 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.aiding.IdentifierListResponse;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.coring.Operation;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.core.Manager;
+import id.veridian.signify.generated.keria.model.KeyEventRecord;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 

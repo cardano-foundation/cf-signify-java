@@ -1,13 +1,13 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.coring.Operation;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.HabState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.*;
 
@@ -17,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
 
 class SinglesigDIPTest extends BaseIntegrationTest {
     private static SignifyClient client1, client2;

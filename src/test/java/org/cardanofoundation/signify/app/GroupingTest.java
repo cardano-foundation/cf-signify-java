@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
-import org.cardanofoundation.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.Exn;
 
 import java.util.HashMap;
 import java.util.List;

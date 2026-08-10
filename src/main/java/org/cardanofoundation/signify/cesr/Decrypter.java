@@ -1,13 +1,13 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import com.goterl.lazysodium.utils.Key;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import id.veridian.signify.cesr.exceptions.material.EmptyMaterialException;
 
-import static org.cardanofoundation.signify.cesr.util.Utils.CRYPTO_BOX_SEAL_BYTES;
+import static id.veridian.signify.cesr.util.Utils.CRYPTO_BOX_SEAL_BYTES;
 
 public class Decrypter extends Matter {
     private DecrypterFunction decrypter;

@@ -1,21 +1,21 @@
-package org.cardanofoundation.signify.app.coring;
+package id.veridian.signify.app.coring;
 
 import com.goterl.lazysodium.LazySodiumJava;
 import lombok.Getter;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Codex;
-import org.cardanofoundation.signify.cesr.LazySodiumInstance;
-import org.cardanofoundation.signify.cesr.Matter;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.Codex;
+import id.veridian.signify.cesr.LazySodiumInstance;
+import id.veridian.signify.cesr.Matter;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.util.Utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.net.http.HttpResponse;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.AgentConfig;
-import org.cardanofoundation.signify.generated.keria.model.KeyEventRecord;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.generated.keria.model.AgentConfig;
+import id.veridian.signify.generated.keria.model.KeyEventRecord;
+import id.veridian.signify.generated.keria.model.Tier;
 
 public class Coring {
     public static String randomPasscode() {

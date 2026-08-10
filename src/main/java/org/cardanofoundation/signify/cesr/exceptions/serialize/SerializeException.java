@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.cesr.exceptions.serialize;
+package id.veridian.signify.cesr.exceptions.serialize;
 
-import org.cardanofoundation.signify.cesr.exceptions.KeriException;
+import id.veridian.signify.cesr.exceptions.KeriException;
 
 /**
  * Message creation and serialization errors

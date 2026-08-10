@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.params;
+package id.veridian.signify.cesr.params;
 
 import lombok.Getter;
 import lombok.Setter;

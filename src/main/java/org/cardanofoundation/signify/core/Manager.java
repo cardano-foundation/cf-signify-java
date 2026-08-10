@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
 import java.security.DigestException;
 import java.util.*;
@@ -6,12 +6,12 @@ import java.util.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.exceptions.material.InvalidSizeException;
+import id.veridian.signify.generated.keria.model.Tier;
 
 @Getter
 public class Manager {

@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.config;
+package id.veridian.signify.app.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

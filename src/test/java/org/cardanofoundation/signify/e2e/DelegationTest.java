@@ -1,22 +1,22 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.e2e.utils.TestSteps;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.coring.Operation;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.e2e.utils.TestSteps;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.OOBI;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
+import static id.veridian.signify.e2e.utils.Retry.retry;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exceptions.extraction;
+package id.veridian.signify.cesr.exceptions.extraction;
 
 /**
  * Derivation Code crypto material conversion errors

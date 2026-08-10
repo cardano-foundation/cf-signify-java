@@ -1,14 +1,14 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
-import org.cardanofoundation.signify.app.habery.Hab;
-import org.cardanofoundation.signify.app.habery.Habery;
-import org.cardanofoundation.signify.app.habery.HaberyArgs;
-import org.cardanofoundation.signify.app.habery.MakeHabArgs;
-import org.cardanofoundation.signify.cesr.Codex;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.app.habery.Hab;
+import id.veridian.signify.app.habery.Habery;
+import id.veridian.signify.app.habery.HaberyArgs;
+import id.veridian.signify.app.habery.MakeHabArgs;
+import id.veridian.signify.cesr.Codex;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.cesr.Signer;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,12 +1,12 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
 import java.util.List;
 
 import lombok.*;
-import org.cardanofoundation.signify.core.Manager.Algos;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.core.Manager.Algos;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.Tier;
 
 @Getter
 @Setter

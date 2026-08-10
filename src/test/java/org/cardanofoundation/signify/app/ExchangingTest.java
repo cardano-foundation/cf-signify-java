@@ -1,17 +1,17 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.CoreUtil.Ilks;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.cardanofoundation.signify.app.Exchanging.exchange;
+import static id.veridian.signify.app.Exchanging.exchange;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.DigestException;

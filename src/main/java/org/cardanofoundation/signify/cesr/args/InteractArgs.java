@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.cesr.args;
+package id.veridian.signify.cesr.args;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
+import id.veridian.signify.cesr.util.CoreUtil.Serials;
+import id.veridian.signify.cesr.util.CoreUtil.Version;
 
 import java.math.BigInteger;
 import java.util.List;

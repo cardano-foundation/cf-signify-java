@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.core;
+package id.veridian.signify.core;
 
-import org.cardanofoundation.signify.cesr.Serder;
+import id.veridian.signify.cesr.Serder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

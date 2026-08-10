@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,22 +6,22 @@ import java.util.Arrays;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.Codex.NonTransCodex;
-import org.cardanofoundation.signify.cesr.Codex.DigiCodex;
-import org.cardanofoundation.signify.cesr.Codex.SmallVarRawSizeCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ConversionException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCountCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedOpCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarRawSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidVarSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.RawMaterialException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.Codex.LargeVarRawSizeCodex;
+import id.veridian.signify.cesr.Codex.NonTransCodex;
+import id.veridian.signify.cesr.Codex.DigiCodex;
+import id.veridian.signify.cesr.Codex.SmallVarRawSizeCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.extraction.ConversionException;
+import id.veridian.signify.cesr.exceptions.extraction.ShortageException;
+import id.veridian.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import id.veridian.signify.cesr.exceptions.extraction.UnexpectedCountCodeException;
+import id.veridian.signify.cesr.exceptions.extraction.UnexpectedOpCodeException;
+import id.veridian.signify.cesr.exceptions.material.EmptyMaterialException;
+import id.veridian.signify.cesr.exceptions.material.InvalidCodeSizeException;
+import id.veridian.signify.cesr.exceptions.material.InvalidVarRawSizeException;
+import id.veridian.signify.cesr.exceptions.material.InvalidVarSizeException;
+import id.veridian.signify.cesr.exceptions.material.RawMaterialException;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.Codex.LargeVarRawSizeCodex;
 
 @Getter
 public class Matter {

@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.cesr.args;
+package id.veridian.signify.cesr.args;
 
 import lombok.*;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
+import id.veridian.signify.cesr.util.CoreUtil.Serials;
+import id.veridian.signify.cesr.util.CoreUtil.Version;
 
 import java.util.List;
 

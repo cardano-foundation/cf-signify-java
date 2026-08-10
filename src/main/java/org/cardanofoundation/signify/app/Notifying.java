@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Httping;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Httping;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;

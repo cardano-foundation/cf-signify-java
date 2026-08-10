@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import id.veridian.signify.cesr.exceptions.material.EmptyMaterialException;
+import id.veridian.signify.cesr.util.CoreUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;

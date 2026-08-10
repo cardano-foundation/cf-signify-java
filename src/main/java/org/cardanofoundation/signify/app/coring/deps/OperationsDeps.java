@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.coring.deps;
+package id.veridian.signify.app.coring.deps;
 
 public interface OperationsDeps extends BaseDeps {
 }

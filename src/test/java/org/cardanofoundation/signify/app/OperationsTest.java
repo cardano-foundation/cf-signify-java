@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.app.coring.Operations;
-import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.app.coring.Operation;
+import id.veridian.signify.app.coring.Operations;
+import id.veridian.signify.app.coring.deps.OperationsDeps;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

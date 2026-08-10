@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exceptions;
+package id.veridian.signify.cesr.exceptions;
 
 /**
  *  Used to re-throw SodiumException("Error: message")

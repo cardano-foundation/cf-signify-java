@@ -1,18 +1,18 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
-import org.cardanofoundation.signify.app.credentialing.credentials.Credentials;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.Signer;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Authenticater;
-import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.app.credentialing.credentials.CredentialFilter;
+import id.veridian.signify.app.credentialing.credentials.Credentials;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.cesr.Signer;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Authenticater;
+import id.veridian.signify.core.Httping;
+import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

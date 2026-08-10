@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exceptions;
+package id.veridian.signify.cesr.exceptions;
 
 /**
  *  Base Class for keri exceptions

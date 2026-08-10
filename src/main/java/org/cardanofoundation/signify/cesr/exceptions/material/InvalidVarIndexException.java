@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exceptions.material;
+package id.veridian.signify.cesr.exceptions.material;
 
 /**
  * Invalid code index encountered during crypto material init

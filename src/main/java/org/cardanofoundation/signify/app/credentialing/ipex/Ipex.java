@@ -1,13 +1,13 @@
-package org.cardanofoundation.signify.app.credentialing.ipex;
+package id.veridian.signify.app.credentialing.ipex;
 
-import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.Keeping.Keeper;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.cesr.Siger;
+import id.veridian.signify.app.Exchanging;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.Keeping.Keeper;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.cesr.Siger;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -15,7 +15,7 @@ import java.security.DigestException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.HabState;
 
 public class Ipex {
     private final SignifyClient client;

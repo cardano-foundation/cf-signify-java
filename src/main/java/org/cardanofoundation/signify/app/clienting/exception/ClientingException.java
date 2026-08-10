@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.clienting.exception;
+package id.veridian.signify.app.clienting.exception;
 
 /**
  *  Base Class for clienting exceptions

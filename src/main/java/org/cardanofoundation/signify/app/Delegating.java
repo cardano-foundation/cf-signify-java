@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.aiding.InteractionResponse;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.aiding.InteractionResponse;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;

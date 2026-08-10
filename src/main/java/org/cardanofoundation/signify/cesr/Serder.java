@@ -1,16 +1,16 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.VersionException;
-import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Ident;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Version;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.DeversifyResult;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.extraction.VersionException;
+import id.veridian.signify.cesr.exceptions.serialize.SerializeException;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.CoreUtil.Serials;
+import id.veridian.signify.cesr.util.CoreUtil.Ident;
+import id.veridian.signify.cesr.util.CoreUtil.Version;
+import id.veridian.signify.cesr.util.CoreUtil.DeversifyResult;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

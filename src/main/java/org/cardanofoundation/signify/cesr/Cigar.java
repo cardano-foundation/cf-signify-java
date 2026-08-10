@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.args.RawArgs;
 
 @Getter
 @Setter

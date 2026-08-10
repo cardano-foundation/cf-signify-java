@@ -1,28 +1,28 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
-import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
-import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.e2e.utils.IssuerRegistry;
-import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.Retry;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.*;
+import id.veridian.signify.app.Exchanging;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.credentialing.ipex.IpexAdmitArgs;
+import id.veridian.signify.app.credentialing.ipex.IpexGrantArgs;
+import id.veridian.signify.app.credentialing.registries.CreateRegistryArgs;
+import id.veridian.signify.app.credentialing.registries.RegistryResult;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.e2e.utils.IssuerRegistry;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.e2e.utils.Retry;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.*;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
+import static id.veridian.signify.e2e.utils.TestUtils.*;
+import static id.veridian.signify.e2e.utils.TestUtils.Notification;
 
-import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
+import static id.veridian.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {

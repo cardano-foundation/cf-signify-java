@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.Codex.NumCodex;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeException;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.Codex.NumCodex;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.material.InvalidCodeException;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.math.BigInteger;
 

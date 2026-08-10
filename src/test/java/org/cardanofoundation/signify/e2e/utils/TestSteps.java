@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.e2e.utils;
+package id.veridian.signify.e2e.utils;
 
 import java.util.concurrent.Callable;
 

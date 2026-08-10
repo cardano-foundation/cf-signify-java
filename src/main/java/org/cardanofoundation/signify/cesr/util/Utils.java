@@ -1,15 +1,15 @@
-package org.cardanofoundation.signify.cesr.util;
+package id.veridian.signify.cesr.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cardanofoundation.signify.app.config.GeneratedModelConfig;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.args.CounterArgs;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.exceptions.serialize.SerializeException;
+import id.veridian.signify.app.config.GeneratedModelConfig;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.args.CounterArgs;
+import id.veridian.signify.cesr.exceptions.material.InvalidSizeException;
+import id.veridian.signify.cesr.exceptions.material.InvalidValueException;
+import id.veridian.signify.cesr.exceptions.serialize.SerializeException;
 
 import java.math.BigInteger;
 import java.util.*;

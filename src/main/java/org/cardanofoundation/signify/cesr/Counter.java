@@ -1,15 +1,15 @@
-package org.cardanofoundation.signify.cesr;
+package id.veridian.signify.cesr;
 
-import org.cardanofoundation.signify.cesr.Matter.Sizage;
+import id.veridian.signify.cesr.Matter.Sizage;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.cesr.args.CounterArgs;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.ShortageException;
-import org.cardanofoundation.signify.cesr.exceptions.extraction.UnexpectedCodeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.EmptyMaterialException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidCodeSizeException;
-import org.cardanofoundation.signify.cesr.exceptions.material.InvalidValueException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.args.CounterArgs;
+import id.veridian.signify.cesr.exceptions.extraction.ShortageException;
+import id.veridian.signify.cesr.exceptions.extraction.UnexpectedCodeException;
+import id.veridian.signify.cesr.exceptions.material.EmptyMaterialException;
+import id.veridian.signify.cesr.exceptions.material.InvalidCodeSizeException;
+import id.veridian.signify.cesr.exceptions.material.InvalidValueException;
+import id.veridian.signify.cesr.util.CoreUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;

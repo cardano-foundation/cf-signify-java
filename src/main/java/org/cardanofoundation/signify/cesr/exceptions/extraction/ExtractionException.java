@@ -1,7 +1,7 @@
 
-package org.cardanofoundation.signify.cesr.exceptions.extraction;
+package id.veridian.signify.cesr.exceptions.extraction;
 
-import org.cardanofoundation.signify.cesr.exceptions.KeriException;
+import id.veridian.signify.cesr.exceptions.KeriException;
 
 /**
  * Base class for errors related to extracting messages and attachments

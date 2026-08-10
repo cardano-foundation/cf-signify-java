@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.exceptions.material;
+package id.veridian.signify.cesr.exceptions.material;
 
 /**
  * Invalid variable size encountered during crypto material init

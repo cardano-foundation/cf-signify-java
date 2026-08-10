@@ -1,28 +1,28 @@
-package org.cardanofoundation.signify.e2e.utils;
+package id.veridian.signify.e2e.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.app.Exchanging;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.aiding.RotateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
-import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexAdmitArgs;
-import org.cardanofoundation.signify.app.credentialing.ipex.IpexGrantArgs;
-import org.cardanofoundation.signify.app.credentialing.registries.CreateRegistryArgs;
-import org.cardanofoundation.signify.app.credentialing.registries.RegistryResult;
-import org.cardanofoundation.signify.cesr.Keeping;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.Siger;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.Manager;
+import id.veridian.signify.app.Exchanging;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.aiding.RotateIdentifierArgs;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Operation;
+import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.app.credentialing.credentials.IssueCredentialResult;
+import id.veridian.signify.app.credentialing.ipex.IpexAdmitArgs;
+import id.veridian.signify.app.credentialing.ipex.IpexGrantArgs;
+import id.veridian.signify.app.credentialing.registries.CreateRegistryArgs;
+import id.veridian.signify.app.credentialing.registries.RegistryResult;
+import id.veridian.signify.cesr.Keeping;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.Siger;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.core.Manager;
 
 import java.io.IOException;
 import java.security.DigestException;
@@ -30,13 +30,13 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.cardanofoundation.signify.generated.keria.model.AidRecord;
-import org.cardanofoundation.signify.generated.keria.model.Credential;
-import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.cardanofoundation.signify.generated.keria.model.ExnMultisig;
-import org.cardanofoundation.signify.generated.keria.model.GroupMember;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.AidRecord;
+import id.veridian.signify.generated.keria.model.Credential;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.ExnMultisig;
+import id.veridian.signify.generated.keria.model.GroupMember;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
 
 @SuppressWarnings("unchecked")
 public class MultisigUtils {

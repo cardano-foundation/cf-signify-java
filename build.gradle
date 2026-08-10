@@ -77,10 +77,10 @@ allure {
 tasks.test {
     useJUnitPlatform()  // Use JUnit 5 platform
     filter {
-        includeTestsMatching "org.cardanofoundation.signify.app.*"
-        includeTestsMatching "org.cardanofoundation.signify.cesr.*"
-        includeTestsMatching "org.cardanofoundation.signify.core.*"
-        includeTestsMatching "org.cardanofoundation.signify.end.*"
+        includeTestsMatching "id.veridian.signify.app.*"
+        includeTestsMatching "id.veridian.signify.cesr.*"
+        includeTestsMatching "id.veridian.signify.core.*"
+        includeTestsMatching "id.veridian.signify.end.*"
     }
     finalizedBy 'allureReport'
 }
@@ -100,7 +100,7 @@ tasks.register('testE2E', Test) {
         suiteStartTime = System.nanoTime()
     }
     filter {
-        includeTestsMatching "org.cardanofoundation.signify.e2e.*"
+        includeTestsMatching "id.veridian.signify.e2e.*"
     }
 
     beforeTest { descriptor ->
@@ -200,8 +200,8 @@ tasks.openApiGenerate {
     outputDir.set("$rootDir".toString())
     validateSpec.set(false)
     skipValidateSpec.set(true)
-    modelPackage.set("org.cardanofoundation.signify.generated.keria.model")
-    invokerPackage.set("org.cardanofoundation.signify.generated.keria.model")
+    modelPackage.set("id.veridian.signify.generated.keria.model")
+    invokerPackage.set("id.veridian.signify.generated.keria.model")
 
     globalProperties.set([
         models        : "",   // generate models only

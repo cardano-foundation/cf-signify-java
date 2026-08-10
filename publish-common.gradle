@@ -22,7 +22,7 @@ if (!name.equalsIgnoreCase("components")) {
                 pom {
                     name = 'signify'
                     description = 'Signify is an edge client for the KERI and ACDC identity protocols.'
-                    url = 'https://github.com/cardano-foundation/cf-signify-java'
+                    url = 'https://github.com/veridian-id/signify-jvm'
                     licenses {
                         license {
                             name = 'Apache License 2.0'
@@ -36,9 +36,9 @@ if (!name.equalsIgnoreCase("components")) {
                         }
                     }
                     scm {
-                        connection = 'scm:git:git://github.com/cardano-foundation/cf-signify-java'
-                        developerConnection = 'scm:git:ssh://git@github.com/cardano-foundation/cf-signify-java'
-                        url = 'https://github.com/cardano-foundation/cf-signify-java'
+                        connection = 'scm:git:git://github.com/veridian-id/signify-jvm'
+                        developerConnection = 'scm:git:ssh://git@github.com/veridian-id/signify-jvm'
+                        url = 'https://github.com/veridian-id/signify-jvm'
                     }
                 }
             }

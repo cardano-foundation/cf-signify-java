@@ -1,16 +1,16 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import lombok.Getter;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.*;
-import org.cardanofoundation.signify.cesr.Codex.CounterCodex;
-import org.cardanofoundation.signify.cesr.Keeping.Keeper;
-import org.cardanofoundation.signify.cesr.args.CounterArgs;
-import org.cardanofoundation.signify.cesr.args.RawArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.params.KeeperParams;
-import org.cardanofoundation.signify.cesr.util.CoreUtil;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.*;
+import id.veridian.signify.cesr.Codex.CounterCodex;
+import id.veridian.signify.cesr.Keeping.Keeper;
+import id.veridian.signify.cesr.args.CounterArgs;
+import id.veridian.signify.cesr.args.RawArgs;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.params.KeeperParams;
+import id.veridian.signify.cesr.util.CoreUtil;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -19,9 +19,9 @@ import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import org.cardanofoundation.signify.generated.keria.model.ExchangeResource;
-import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.ExchangeResource;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.HabState;
 
 public class Exchanging {
     @Getter

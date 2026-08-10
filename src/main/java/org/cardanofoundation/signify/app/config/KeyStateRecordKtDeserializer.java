@@ -1,11 +1,11 @@
-package org.cardanofoundation.signify.app.config;
+package id.veridian.signify.app.config;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecordKt;
-import org.cardanofoundation.signify.generated.keria.model.KtValue;
+import id.veridian.signify.generated.keria.model.KeyStateRecordKt;
+import id.veridian.signify.generated.keria.model.KtValue;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.cesr.params;
+package id.veridian.signify.cesr.params;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import java.util.List;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.generated.keria.model.Tier;
 
 @Getter
 @Setter

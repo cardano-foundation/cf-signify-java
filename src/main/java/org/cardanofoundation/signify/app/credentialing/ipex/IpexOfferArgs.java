@@ -1,9 +1,9 @@
-package org.cardanofoundation.signify.app.credentialing.ipex;
+package id.veridian.signify.app.credentialing.ipex;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.Serder;
+import id.veridian.signify.cesr.Serder;
 
 @Getter
 @Setter

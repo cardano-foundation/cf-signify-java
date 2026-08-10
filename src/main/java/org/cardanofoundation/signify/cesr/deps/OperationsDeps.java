@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.cesr.deps;
+package id.veridian.signify.cesr.deps;
 
 public interface OperationsDeps extends BaseDeps {
 }

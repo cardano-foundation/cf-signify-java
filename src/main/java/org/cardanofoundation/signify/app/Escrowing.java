@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app;
+package id.veridian.signify.app;
 
 import lombok.Getter;
 
@@ -7,9 +7,9 @@ import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.Utils;
 
 public class Escrowing {
     @Getter

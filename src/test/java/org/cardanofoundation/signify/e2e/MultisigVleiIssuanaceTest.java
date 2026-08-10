@@ -1,22 +1,22 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Coring;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
-import org.cardanofoundation.signify.cesr.Saider;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.core.Manager;
-import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
-import org.cardanofoundation.signify.e2e.utils.ResolveEnv;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.generated.keria.model.Credential;
-import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.Registry;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Coring;
+import id.veridian.signify.app.coring.Operation;
+import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.cesr.Saider;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.core.Manager;
+import id.veridian.signify.e2e.utils.MultisigUtils;
+import id.veridian.signify.e2e.utils.ResolveEnv;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.generated.keria.model.Credential;
+import id.veridian.signify.generated.keria.model.CredentialSad;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.OOBI;
+import id.veridian.signify.generated.keria.model.Registry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitAndMarkNotification;
+import static id.veridian.signify.e2e.utils.TestUtils.waitAndMarkNotification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

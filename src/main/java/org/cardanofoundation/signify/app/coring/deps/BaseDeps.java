@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.app.coring.deps;
+package id.veridian.signify.app.coring.deps;
 
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;

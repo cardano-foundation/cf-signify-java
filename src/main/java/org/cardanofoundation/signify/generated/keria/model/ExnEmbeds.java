@@ -11,7 +11,7 @@
  */
 
 
-package org.cardanofoundation.signify.generated.keria.model;
+package id.veridian.signify.generated.keria.model;
 
 import java.util.Objects;
 import java.util.Arrays;
@@ -21,23 +21,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.cardanofoundation.signify.generated.keria.model.CredentialSad;
-import org.cardanofoundation.signify.generated.keria.model.Exn;
-import org.cardanofoundation.signify.generated.keria.model.ISSV1;
-import org.cardanofoundation.signify.generated.keria.model.Icp;
-import org.cardanofoundation.signify.generated.keria.model.Ixn;
-import org.cardanofoundation.signify.generated.keria.model.MultisigExnEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.MultisigInceptEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.MultisigInteractEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.MultisigIssueEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.MultisigRegistryInceptEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.MultisigRevokeEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.MultisigRotateEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.MultisigRpyEmbeds;
-import org.cardanofoundation.signify.generated.keria.model.REVV1;
-import org.cardanofoundation.signify.generated.keria.model.Rot;
-import org.cardanofoundation.signify.generated.keria.model.Rpy;
-import org.cardanofoundation.signify.generated.keria.model.VCPV1;
+import id.veridian.signify.generated.keria.model.CredentialSad;
+import id.veridian.signify.generated.keria.model.Exn;
+import id.veridian.signify.generated.keria.model.ISSV1;
+import id.veridian.signify.generated.keria.model.Icp;
+import id.veridian.signify.generated.keria.model.Ixn;
+import id.veridian.signify.generated.keria.model.MultisigExnEmbeds;
+import id.veridian.signify.generated.keria.model.MultisigInceptEmbeds;
+import id.veridian.signify.generated.keria.model.MultisigInteractEmbeds;
+import id.veridian.signify.generated.keria.model.MultisigIssueEmbeds;
+import id.veridian.signify.generated.keria.model.MultisigRegistryInceptEmbeds;
+import id.veridian.signify.generated.keria.model.MultisigRevokeEmbeds;
+import id.veridian.signify.generated.keria.model.MultisigRotateEmbeds;
+import id.veridian.signify.generated.keria.model.MultisigRpyEmbeds;
+import id.veridian.signify.generated.keria.model.REVV1;
+import id.veridian.signify.generated.keria.model.Rot;
+import id.veridian.signify.generated.keria.model.Rpy;
+import id.veridian.signify.generated.keria.model.VCPV1;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 

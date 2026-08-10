@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.e2e.utils;
+package id.veridian.signify.e2e.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,20 +8,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.signify.generated.keria.model.Contact;
-import org.cardanofoundation.signify.app.Notifying;
-import org.cardanofoundation.signify.app.aiding.CreateIdentifierArgs;
-import org.cardanofoundation.signify.app.aiding.EventResult;
-import org.cardanofoundation.signify.app.aiding.IdentifierListResponse;
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.app.coring.Operation;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialData;
-import org.cardanofoundation.signify.app.credentialing.credentials.CredentialFilter;
-import org.cardanofoundation.signify.app.credentialing.credentials.IssueCredentialResult;
-import org.cardanofoundation.signify.cesr.Salter;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.generated.keria.model.*;
+import id.veridian.signify.generated.keria.model.Contact;
+import id.veridian.signify.app.Notifying;
+import id.veridian.signify.app.aiding.CreateIdentifierArgs;
+import id.veridian.signify.app.aiding.EventResult;
+import id.veridian.signify.app.aiding.IdentifierListResponse;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.app.coring.Operation;
+import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.app.credentialing.credentials.CredentialFilter;
+import id.veridian.signify.app.credentialing.credentials.IssueCredentialResult;
+import id.veridian.signify.cesr.Salter;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.generated.keria.model.*;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -31,12 +31,12 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.OOBI;
-import org.cardanofoundation.signify.generated.keria.model.Tier;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.OOBI;
+import id.veridian.signify.generated.keria.model.Tier;
 
-import static org.cardanofoundation.signify.app.coring.Coring.randomPasscode;
-import static org.cardanofoundation.signify.e2e.utils.Retry.retry;
+import static id.veridian.signify.app.coring.Coring.randomPasscode;
+import static id.veridian.signify.e2e.utils.Retry.retry;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j

@@ -1,10 +1,10 @@
-package org.cardanofoundation.signify.app.coring;
+package id.veridian.signify.app.coring;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.*;
-import org.cardanofoundation.signify.app.coring.deps.OperationsDeps;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.app.coring.deps.OperationsDeps;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

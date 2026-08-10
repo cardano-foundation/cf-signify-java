@@ -1,9 +1,9 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
 import java.net.http.HttpResponse;
 import java.util.List;
 
-import org.cardanofoundation.signify.cesr.Serder;
+import id.veridian.signify.cesr.Serder;
 
 public record EventResult(Serder serder, List<String> sigs, HttpResponse<String> response) {
 

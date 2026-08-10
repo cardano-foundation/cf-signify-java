@@ -1,22 +1,22 @@
-package org.cardanofoundation.signify.e2e;
+package id.veridian.signify.e2e;
 
-import org.cardanofoundation.signify.app.clienting.SignifyClient;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.e2e.utils.MultisigUtils;
-import org.cardanofoundation.signify.e2e.utils.TestSteps;
-import org.cardanofoundation.signify.e2e.utils.TestUtils;
-import org.cardanofoundation.signify.e2e.utils.TestUtils.Notification;
-import org.cardanofoundation.signify.generated.keria.model.GroupMember;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
+import id.veridian.signify.app.clienting.SignifyClient;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.e2e.utils.MultisigUtils;
+import id.veridian.signify.e2e.utils.TestSteps;
+import id.veridian.signify.e2e.utils.TestUtils;
+import id.veridian.signify.e2e.utils.TestUtils.Notification;
+import id.veridian.signify.generated.keria.model.GroupMember;
+import id.veridian.signify.generated.keria.model.HabState;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
-import static org.cardanofoundation.signify.e2e.utils.MultisigUtils.startMultisigIncept;
-import static org.cardanofoundation.signify.e2e.utils.TestUtils.waitOperation;
+import static id.veridian.signify.e2e.utils.MultisigUtils.acceptMultisigIncept;
+import static id.veridian.signify.e2e.utils.MultisigUtils.startMultisigIncept;
+import static id.veridian.signify.e2e.utils.TestUtils.waitOperation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

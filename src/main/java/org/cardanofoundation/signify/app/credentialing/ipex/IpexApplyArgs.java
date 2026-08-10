@@ -1,4 +1,4 @@
-package org.cardanofoundation.signify.app.credentialing.ipex;
+package id.veridian.signify.app.credentialing.ipex;
 
 import lombok.Builder;
 import lombok.Getter;

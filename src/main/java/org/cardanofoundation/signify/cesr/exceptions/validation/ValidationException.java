@@ -1,6 +1,6 @@
-package org.cardanofoundation.signify.cesr.exceptions.validation;
+package id.veridian.signify.cesr.exceptions.validation;
 
-import org.cardanofoundation.signify.cesr.exceptions.KeriException;
+import id.veridian.signify.cesr.exceptions.KeriException;
 
 /**
  * Validation related errors

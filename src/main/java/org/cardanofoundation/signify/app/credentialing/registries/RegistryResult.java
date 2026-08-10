@@ -1,8 +1,8 @@
-package org.cardanofoundation.signify.app.credentialing.registries;
+package id.veridian.signify.app.credentialing.registries;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.signify.cesr.Serder;
+import id.veridian.signify.cesr.Serder;
 
 import java.net.http.HttpResponse;
 import java.util.List;

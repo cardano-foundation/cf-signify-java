@@ -1,22 +1,22 @@
-package org.cardanofoundation.signify.app.aiding;
+package id.veridian.signify.app.aiding;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.cardanofoundation.signify.cesr.Keeping;
-import org.cardanofoundation.signify.cesr.Serder;
-import org.cardanofoundation.signify.cesr.Codex.MatterCodex;
-import org.cardanofoundation.signify.cesr.Keeping.Keeper;
-import org.cardanofoundation.signify.cesr.Keeping.KeeperResult;
-import org.cardanofoundation.signify.cesr.Tholder;
-import org.cardanofoundation.signify.cesr.args.InceptArgs;
-import org.cardanofoundation.signify.cesr.args.InteractArgs;
-import org.cardanofoundation.signify.cesr.args.RotateArgs;
-import org.cardanofoundation.signify.cesr.exceptions.LibsodiumException;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Ilks;
-import org.cardanofoundation.signify.cesr.util.Utils;
-import org.cardanofoundation.signify.cesr.util.CoreUtil.Serials;
-import org.cardanofoundation.signify.core.Eventing;
-import org.cardanofoundation.signify.core.Httping;
-import org.cardanofoundation.signify.core.Manager.Algos;
+import id.veridian.signify.cesr.Keeping;
+import id.veridian.signify.cesr.Serder;
+import id.veridian.signify.cesr.Codex.MatterCodex;
+import id.veridian.signify.cesr.Keeping.Keeper;
+import id.veridian.signify.cesr.Keeping.KeeperResult;
+import id.veridian.signify.cesr.Tholder;
+import id.veridian.signify.cesr.args.InceptArgs;
+import id.veridian.signify.cesr.args.InteractArgs;
+import id.veridian.signify.cesr.args.RotateArgs;
+import id.veridian.signify.cesr.exceptions.LibsodiumException;
+import id.veridian.signify.cesr.util.CoreUtil.Ilks;
+import id.veridian.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.util.CoreUtil.Serials;
+import id.veridian.signify.core.Eventing;
+import id.veridian.signify.core.Httping;
+import id.veridian.signify.core.Manager.Algos;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -26,14 +26,14 @@ import java.net.http.HttpResponse;
 import java.security.DigestException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import org.cardanofoundation.signify.generated.keria.model.EndrolesAidPostRequest;
-import org.cardanofoundation.signify.generated.keria.model.GroupMember;
-import org.cardanofoundation.signify.generated.keria.model.HabState;
-import org.cardanofoundation.signify.generated.keria.model.KeyStateRecord;
-import org.cardanofoundation.signify.generated.keria.model.KtValue;
+import id.veridian.signify.generated.keria.model.EndrolesAidPostRequest;
+import id.veridian.signify.generated.keria.model.GroupMember;
+import id.veridian.signify.generated.keria.model.HabState;
+import id.veridian.signify.generated.keria.model.KeyStateRecord;
+import id.veridian.signify.generated.keria.model.KtValue;
 
-import static org.cardanofoundation.signify.cesr.util.CoreUtil.Versionage;
-import static org.cardanofoundation.signify.core.Httping.parseRangeHeaders;
+import static id.veridian.signify.cesr.util.CoreUtil.Versionage;
+import static id.veridian.signify.core.Httping.parseRangeHeaders;
 
 public class IdentifierController {
     public final IdentifierDeps client;

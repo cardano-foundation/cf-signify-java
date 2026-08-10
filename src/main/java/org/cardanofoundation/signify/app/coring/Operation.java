@@ -1,7 +1,7 @@
-package org.cardanofoundation.signify.app.coring;
+package id.veridian.signify.app.coring;
 
 import lombok.*;
-import org.cardanofoundation.signify.cesr.util.Utils;
+import id.veridian.signify.cesr.util.Utils;
 
 import java.util.Map;
 
