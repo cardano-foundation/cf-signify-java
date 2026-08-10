@@ -117,6 +117,8 @@ jobs:
         run: |
           ./gradlew publish jreleaserDeploy
         env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_GPG_KEYNAME: "BEFB6B63A980310BB92A65365E362818AF79A015"
           JRELEASER_GPG_PASSPHRASE: "${{ secrets.MAVEN_CENTRAL_GPG_PASSPHRASE }}"
           JRELEASER_MAVENCENTRAL_USERNAME: "${{ secrets.MAVEN_CENTRAL_OSSRH_USERNAME }}"
