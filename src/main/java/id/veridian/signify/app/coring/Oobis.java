@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import id.veridian.signify.app.clienting.SignifyClient;
 import id.veridian.signify.cesr.util.Utils;
 import id.veridian.signify.generated.keria.model.EndRole;
+import id.veridian.signify.generated.keria.model.LocSchemeMetadata;
 import id.veridian.signify.generated.keria.model.OOBI;
 import id.veridian.signify.generated.keria.model.OOBIOperation;
 
@@ -76,5 +77,17 @@ public class Oobis {
                 : "/endroles/" + aid;
         HttpResponse<String> response = this.client.fetch(path, "GET", null);
         return Utils.fromJson(response.body(), new TypeReference<List<EndRole>>() {});
+    }
+
+    /**
+     * Get approved location schemes for a given EID
+     *
+     * @param eid Endpoint identifier
+     * @return List of location schemes; KERIA returns scheme/url pairs only, so the eid is never populated
+     */
+    public List<LocSchemeMetadata> locschemes(String eid) {
+        String path = "/locschemes/" + eid;
+        HttpResponse<String> response = this.client.fetch(path, "GET", null);
+        return Utils.fromJson(response.body(), new TypeReference<List<LocSchemeMetadata>>() {});
     }
 }

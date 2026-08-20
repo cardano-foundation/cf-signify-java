@@ -6,6 +6,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import id.veridian.signify.app.coring.Oobis;
 import id.veridian.signify.app.clienting.SignifyClient;
 import id.veridian.signify.generated.keria.model.EndRole;
+import id.veridian.signify.generated.keria.model.LocSchemeMetadata;
 import id.veridian.signify.generated.keria.model.Tier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,29 @@ public class OobisTest extends BaseMockServerTest {
         assertEquals("GET", request.getMethod());
         assertEquals(url + "/endroles/" + aid + "/agent", request.getRequestUrl().toString());
         assertEquals(2, result.size());
+    }
+
+    @Test
+    @DisplayName("Test locschemes by eid")
+    void testLocschemes() throws InterruptedException {
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
+        client.boot();
+        client.connect();
+        cleanUpRequest();
+
+        Oobis oobis = client.oobis();
+        String eid = "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei";
+
+        List<LocSchemeMetadata> result = oobis.locschemes(eid);
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertEquals(url + "/locschemes/" + eid, request.getRequestUrl().toString());
+        assertEquals(2, result.size());
+        assertEquals("http", result.get(0).getScheme());
+        assertEquals("http://indexer.example.com", result.get(0).getUrl());
+        assertEquals("https", result.get(1).getScheme());
+        assertEquals("https://indexer.example.com", result.get(1).getUrl());
     }
 
 }
