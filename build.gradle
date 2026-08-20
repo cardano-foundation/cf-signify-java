@@ -35,7 +35,6 @@ def junitVersion = '5.10.0'
 def math3Version = '3.6.1'
 def jacksonVersion = '2.18.1'
 def bouncycastleVersion = '1.79'
-def jsonVersion = '20240303'
 def structuredFieldsVersion = '0.4'
 def jakartaAnnotationVersion = '2.1.1'
 def jacksonNullableVersion = '0.2.6'
@@ -59,7 +58,6 @@ dependencies {
     api "com.fasterxml.jackson.core:jackson-annotations"
     // TODO: consider a smaller blake-only package, so long as it's well used and safe of vulnerabilities.
     implementation "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}"
-    implementation "org.json:json:${jsonVersion}"
     implementation "org.greenbytes.http:structured-fields:${structuredFieldsVersion}"
     implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
     implementation "org.openapitools:jackson-databind-nullable:${jacksonNullableVersion}"
