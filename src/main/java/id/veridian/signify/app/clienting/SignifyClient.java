@@ -153,7 +153,7 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     }
 
     /**
-     * Get state of the agent and the client
+     * {@return the state of the agent and the client}
      *
      * @throws SignifyAgentException on any agent error; a 404 status means no agent
      *         exists for this controller yet and the client should {@link #boot()} first
@@ -374,153 +374,119 @@ public class SignifyClient implements IdentifierDeps, OperationsDeps {
     }
 
     /**
-     * Get identifiers resource
-     *
-     * @return {Identifier}
+     * {@return the identifiers resource}
      */
     public IdentifierController identifiers() {
         return identifierControllerInstance;
     }
 
     /**
-     * Get OOBIs resource
-     *
-     * @return {Oobis}
+     * {@return the OOBIs resource}
      */
     public Oobis oobis() {
         return oobisInstance;
     }
 
     /**
-     * Get operations resource
-     *
-     * @return {Operations}
+     * {@return the operations resource}
      */
     public Operations operations() {
         return operationsInstance;
     }
 
     /**
-     * Get keyEvents resource
-     *
-     * @return {KeyEvents}
+     * {@return the keyEvents resource}
      */
     public KeyEvents keyEvents() {
         return keyEventsInstance;
     }
 
     /**
-     * Get keyEvents resource
-     *
-     * @return {KeyStates}
+     * {@return the keyEvents resource}
      */
     public KeyStates keyStates() {
         return keyStatesInstance;
     }
 
     /**
-     * Get credentials resource
-     *
-     * @return {Credentials}
+     * {@return the credentials resource}
      */
     public Credentials credentials() {
         return credentialsInstance;
     }
 
     /**
-     * Get IPEX resource
-     *
-     * @return {Ipex}
+     * {@return the IPEX resource}
      */
     public Ipex ipex() {
         return ipexInstance;
     }
 
     /**
-     * Get registries resource
-     *
-     * @return {Registries}
+     * {@return the registries resource}
      */
     public Registries registries() {
         return registriesInstance;
     }
 
     /**
-     * Get schemas resource
-     *
-     * @return {Schemas}
+     * {@return the schemas resource}
      */
     public Schemas schemas() {
         return schemasInstance;
     }
 
     /**
-     * Get challenges resource
-     *
-     * @return {Challenges}
+     * {@return the challenges resource}
      */
     public Challenges challenges() {
         return challengesInstance;
     }
 
     /**
-     * Get contacts resource
-     *
-     * @return {Contacts}
+     * {@return the contacts resource}
      */
     public Contacts contacts() {
         return contactsInstance;
     }
 
     /**
-     * Get notifications resource
-     *
-     * @return {Notifications}
+     * {@return the notifications resource}
      */
     public Notifications notifications() {
         return notificationsInstance;
     }
 
     /**
-     * Get escrows resource
-     *
-     * @return {Escrows}
+     * {@return the escrows resource}
      */
     public Escrows escrows() {
         return escrowsInstance;
     }
 
     /**
-     * Get groups resource
-     *
-     * @return {Groups}
+     * {@return the groups resource}
      */
     public Groups groups() {
         return groupsInstance;
     }
 
     /**
-     * Get exchange resource
-     *
-     * @return {Exchanges}
+     * {@return the exchange resource}
      */
     public Exchanges exchanges() {
         return exchangesInstance;
     }
 
     /**
-     * Get delegations resource
-     *
-     * @return {Delegations}
+     * {@return the delegations resource}
      */
     public Delegations delegations() {
         return delegationsInstance;
     }
 
     /**
-     * Get config resource
-     *
-     * @return {Config}
+     * {@return the config resource}
      */
     public Config config() {
         return configInstance;
