@@ -33,6 +33,7 @@ import id.veridian.signify.generated.keria.model.EndRoleOperation;
 import id.veridian.signify.generated.keria.model.GroupMember;
 import id.veridian.signify.generated.keria.model.HabState;
 import id.veridian.signify.generated.keria.model.KelOperation;
+import id.veridian.signify.generated.keria.model.LocSchemeOperation;
 import id.veridian.signify.generated.keria.model.KeyStateRecord;
 
 import static id.veridian.signify.cesr.util.CoreUtil.Versionage;
@@ -337,6 +338,41 @@ public class IdentifierController {
 
         String route = "/end/role/add";
         return Eventing.reply(route, data, stamp, null, Serials.JSON);
+    }
+
+    /**
+     * Authorize a new location scheme (endpoint) for a particular endpoint identifier
+     *
+     * @param name Name or alias of the identifier to sign the reply message
+     * @param args Arguments to create the authorizing reply message from
+     * @return An EventResult to the result of the authorization
+     */
+    public EventResult<LocSchemeOperation> addLocScheme(String name, LocSchemeArgs args) {
+        HabState hab = this.get(name)
+            .orElseThrow(() -> new IllegalArgumentException("Identifier not found: " + name));
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("eid", args.eid() != null ? args.eid() : hab.getPrefix());
+        data.put("url", args.url());
+        data.put("scheme", args.scheme() != null ? args.scheme() : "http");
+
+        Serder rpy = Eventing.reply("/loc/scheme", data, args.stamp(), null, Serials.JSON);
+
+        Keeping.Keeper<?> keeper = this.client.getManager().get(hab);
+        Keeping.SignResult signResult = keeper.sign(rpy.getRaw().getBytes());
+        List<String> sigs = signResult.signatures();
+
+        EndrolesAidPostRequest request = new EndrolesAidPostRequest()
+            .rpy(rpy.getKed())
+            .sigs(sigs);
+
+        HttpResponse<String> res = this.client.fetch(
+                "/identifiers/" + name + "/locschemes",
+                "POST",
+                request
+        );
+        LocSchemeOperation op = Utils.fromJson(res.body(), LocSchemeOperation.class);
+        return new EventResult<>(rpy, sigs, op);
     }
 
     public EventResult<KelOperation> interact(String name, Object data) {
