@@ -98,11 +98,12 @@ public class CoreUtil {
     private static final String VEREX = "(KERI|ACDC)([0-9a-f])([0-9a-f])([A-Z]{4})([0-9a-f]{6})_";
 
     /**
-     * @description This function is used to deversify the version
-     * Here we will use regex to validate and extract serialization kind,size and version
-     * @param {string} versionString   version string
-     * @return {Object}  containing protocol (KERI or ACDC), kind of serialization like cbor, json, mgpk
-     *                    version = version of object, size = raw size integer
+     * Deversifies a version string, using a regex to validate it and extract the
+     * serialization kind, size and version.
+     *
+     * @param versionString the version string to parse
+     * @return the protocol (KERI or ACDC), the kind of serialization (cbor, json, mgpk),
+     *         the version of the object and the raw size
      */
     public static DeversifyResult deversify(String versionString) {
         Pattern pattern = Pattern.compile(VEREX);

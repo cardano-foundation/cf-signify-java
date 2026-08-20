@@ -32,7 +32,7 @@ public class Registries {
      * Lists all registries associated with the specified identifier name.
      *
      * @param name the name or alias of the identifier
-     * @return a List<Registry> representing the list of registries
+     * @return a {@code List<Registry>} representing the list of registries
      */
     public List<Registry> list(String name) {
         String path = "/identifiers/" + name + "/registries";
