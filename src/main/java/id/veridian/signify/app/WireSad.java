@@ -15,7 +15,7 @@ import java.util.Map;
  * projection for reading only and is never re-serialized: a typed round-trip could
  * reorder fields, drop unknown ones, or re-type scalars and change the computed SAID.</p>
  */
-public record Embed<T>(T value, Map<String, Object> sad) {
+public record WireSad<T>(T value, Map<String, Object> sad) {
 
     public Serder toSerder() {
         return new Serder(sad);

@@ -48,7 +48,7 @@ import java.util.function.BiFunction;
  * the route matches but the payload is malformed. {@link #as} checks the route before
  * parsing, so it never fails on (or pays for) messages of some other route.</p>
  *
- * <p>Embedded events are exposed as {@link Embed} views: read through {@code value()},
+ * <p>Embedded events are exposed as {@link WireSad} views: read through {@code value()},
  * re-sign through {@code sad()}/{@code toSerder()} — never by re-serializing the typed value.</p>
  */
 public final class ExnMessages {
@@ -113,34 +113,34 @@ public final class ExnMessages {
 
     // The `anc` embeds below stay raw maps: the anchoring KEL event is an ixn or a rot
     // depending on the AID's configuration, and the KERIA spec does not model that union yet.
-    public record MultisigIcpEmbeds(Embed<Icp> icp, String d) {
+    public record MultisigIcpEmbeds(WireSad<Icp> icp, String d) {
     }
 
-    public record MultisigRotEmbeds(Embed<Rot> rot, String d) {
+    public record MultisigRotEmbeds(WireSad<Rot> rot, String d) {
     }
 
-    public record MultisigIxnEmbeds(Embed<Ixn> ixn, String d) {
+    public record MultisigIxnEmbeds(WireSad<Ixn> ixn, String d) {
     }
 
-    public record MultisigRpyEmbeds(Embed<Rpy> rpy, String d) {
+    public record MultisigRpyEmbeds(WireSad<Rpy> rpy, String d) {
     }
 
-    public record MultisigVcpEmbeds(Embed<VCPV1> vcp, Map<String, Object> anc, String d) {
+    public record MultisigVcpEmbeds(WireSad<VCPV1> vcp, Map<String, Object> anc, String d) {
     }
 
-    public record MultisigIssEmbeds(Embed<CredentialSad> acdc, Embed<ISSV1> iss, Map<String, Object> anc, String d) {
+    public record MultisigIssEmbeds(WireSad<CredentialSad> acdc, WireSad<ISSV1> iss, Map<String, Object> anc, String d) {
     }
 
-    public record MultisigExnEmbeds(Embed<Exn> exn, String d) {
+    public record MultisigExnEmbeds(WireSad<Exn> exn, String d) {
     }
 
-    public record MultisigRevEmbeds(Embed<REVV1> rev, String d) {
+    public record MultisigRevEmbeds(WireSad<REVV1> rev, String d) {
     }
 
-    public record IpexGrantEmbeds(Embed<CredentialSad> acdc, Embed<ISSV1> iss, Map<String, Object> anc, String d) {
+    public record IpexGrantEmbeds(WireSad<CredentialSad> acdc, WireSad<ISSV1> iss, Map<String, Object> anc, String d) {
     }
 
-    public record IpexOfferEmbeds(Embed<CredentialSad> acdc, String d) {
+    public record IpexOfferEmbeds(WireSad<CredentialSad> acdc, String d) {
     }
 
     public record MultisigIcpExchange(Exn exn, ExnMultisig request, ParticipantsAttributes a, MultisigIcpEmbeds e) implements TypedExchange {
@@ -411,9 +411,9 @@ public final class ExnMessages {
         throw new IllegalArgumentException("Missing required object field: " + key);
     }
 
-    private static <T> Embed<T> requiredEmbed(Map<String, Object> values, String key, Class<T> type) {
+    private static <T> WireSad<T> requiredEmbed(Map<String, Object> values, String key, Class<T> type) {
         Map<String, Object> sad = requiredMap(values, key);
-        return new Embed<>(Utils.fromJson(Utils.jsonStringify(sad), type), sad);
+        return new WireSad<>(Utils.fromJson(Utils.jsonStringify(sad), type), sad);
     }
 
     private static Map<String, Object> attributes(Exn exn) {

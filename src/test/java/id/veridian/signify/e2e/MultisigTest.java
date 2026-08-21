@@ -1,5 +1,6 @@
 package id.veridian.signify.e2e;
 
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import id.veridian.signify.app.Exchanging;
 import id.veridian.signify.app.aiding.CreateIdentifierArgs;
 import id.veridian.signify.app.aiding.IdentifierListResponse;
@@ -20,7 +21,6 @@ import id.veridian.signify.core.Eventing;
 import id.veridian.signify.core.Manager;
 import id.veridian.signify.generated.keria.model.AidRecord;
 import id.veridian.signify.generated.keria.model.ChallengeOperation;
-import id.veridian.signify.generated.keria.model.Credential;
 import id.veridian.signify.generated.keria.model.CredentialOperation;
 import id.veridian.signify.generated.keria.model.EndRoleOperation;
 import id.veridian.signify.generated.keria.model.ExchangeOperation;
@@ -780,7 +780,7 @@ public class MultisigTest extends BaseIntegrationTest {
 
         waitAndMarkNotification(client1, "/exn/ipex/admit");
         System.out.println("Member1 received exchange message with the admit response");
-        List<Credential> creds = client4.credentials().list(CredentialFilter.builder().build());
+        List<CredentialRecord> creds = client4.credentials().list(CredentialFilter.builder().build());
         System.out.println("Holder holds " + creds.size() + " credential");
 
         assertOperations(List.of(client1, client2, client3, client4));

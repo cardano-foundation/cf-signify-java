@@ -10,6 +10,7 @@ import id.veridian.signify.app.aiding.IdentifierListResponse;
 import id.veridian.signify.app.clienting.SignifyClient;
 import id.veridian.signify.app.coring.Operations;
 import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import id.veridian.signify.app.credentialing.credentials.CredentialFilter;
 import id.veridian.signify.app.credentialing.credentials.IssueCredentialResult;
 import id.veridian.signify.app.credentialing.ipex.IpexAdmitArgs;
@@ -101,7 +102,7 @@ public class TestUtils {
         return Utils.fromJson(response.body(), new TypeReference<>() {});
     }
 
-    public static Credential getIssuedCredential(
+    public static CredentialRecord getIssuedCredential(
             SignifyClient issuerClient,
             HabState issuerAid,
             HabState recipientAid,
@@ -115,7 +116,7 @@ public class TestUtils {
         CredentialFilter credentialFilter = CredentialFilter.builder()
                 .filter(filter)
                 .build();
-        List<Credential> credentialList = issuerClient.credentials().list(credentialFilter);
+        List<CredentialRecord> credentialList = issuerClient.credentials().list(credentialFilter);
         assert credentialList.size() <= 1;
         return credentialList.isEmpty() ? null : credentialList.get(0);
     }
@@ -253,7 +254,7 @@ public class TestUtils {
         return getOrCreateContact(client, name, oobi);
     }
 
-    public static Credential getOrIssueCredential(
+    public static CredentialRecord getOrIssueCredential(
             SignifyClient issuerClient,
             Aid issuerAid,
             Aid recipientAid,
@@ -266,7 +267,7 @@ public class TestUtils {
         return getOrIssueCredential(issuerClient, issuerAid, recipientAid, regk, credData, schema, rules, source, false);
     }
 
-    public static Credential getOrIssueCredential(
+    public static CredentialRecord getOrIssueCredential(
             SignifyClient issuerClient,
             Aid issuerAid,
             Aid recipientAid,
@@ -279,11 +280,11 @@ public class TestUtils {
     ) {
         CredentialFilter credentialFilter = CredentialFilter.builder().build();
 
-        List<Credential> credentialList = issuerClient.credentials().list(credentialFilter);
+        List<CredentialRecord> credentialList = issuerClient.credentials().list(credentialFilter);
         if (credentialList != null && !credentialList.isEmpty()) {
-            Optional<Credential> credential = credentialList.stream()
+            Optional<CredentialRecord> credential = credentialList.stream()
                     .filter(cred -> {
-                        CredentialSad sad = cred.getSad();
+                        CredentialSad sad = cred.value().getSad();
                         return schema.equals(sad.getS()) &&
                                 issuerAid.prefix.equals(sad.getI()) &&
                                 recipientAid.prefix.equals(sad.getA().getI());
@@ -354,7 +355,7 @@ public class TestUtils {
         client.operations().delete(op.getName());
     }
 
-    public static Credential getReceivedCredential(SignifyClient client, String credID) {
+    public static CredentialRecord getReceivedCredential(SignifyClient client, String credID) {
         // @TODO - focnnor: Refactor calling functions to expect Optional, not null - probably remove indirection too.
         return client.credentials().get(credID).orElse(null);
     }
@@ -388,9 +389,9 @@ public class TestUtils {
             .timeout(30000)
             .build();
 
-    public static Credential waitForCredential(SignifyClient client, String credSAID) {
+    public static CredentialRecord waitForCredential(SignifyClient client, String credSAID) {
         return retry(() -> {
-            Credential cred = getReceivedCredential(client, credSAID);
+            CredentialRecord cred = getReceivedCredential(client, credSAID);
             if (cred == null) {
                 throw new IllegalStateException("Credential SAID: " + credSAID + " has not been received");
             }

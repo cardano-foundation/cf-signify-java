@@ -1,9 +1,12 @@
 package id.veridian.signify.app;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
 import id.veridian.signify.app.clienting.SignifyClient;
 import id.veridian.signify.app.credentialing.credentials.CredentialData;
+import id.veridian.signify.exception.SignifySerializationException;
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import id.veridian.signify.app.credentialing.credentials.CredentialFilter;
 import id.veridian.signify.app.credentialing.credentials.Credentials;
 import id.veridian.signify.cesr.Salter;
@@ -18,9 +21,87 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CredentialingTest extends BaseMockServerTest {
 
+    private String credentialBody = MOCK_CREDENTIAL;
+
+    private static final String WIRE_ORDER_CREDENTIAL = """
+        {
+            "sad": {
+                "v": "ACDC10JSON000197_",
+                "d": "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo",
+                "s": "EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao",
+                "i": "EMQQpnSkgfUOgWdzQTWfrgiVHKIDAhvAZIPQ6z3EAfz1",
+                "ri": "EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df",
+                "a": {
+                    "d": "EK0GOjijKd8_RLYz9qDuuG29YbbXjU8yJuTQanf07b6P",
+                    "i": "EKvn1M6shPLnXTb47bugVJblKMuWC0TcLIePP8p98Bby",
+                    "dt": "2023-08-23T15:16:07.553000+00:00",
+                    "LEI": "5493001KJTIIGC8Y1R17"
+                },
+                "xtra": "kept"
+            },
+            "pre": "EMQQpnSkgfUOgWdzQTWfrgiVHKIDAhvAZIPQ6z3EAfz1",
+            "atc": "-ATC-acdc",
+            "issatc": "-ATC-iss",
+            "ancatc": ["-ATC-anc-first", "-ATC-anc-second"],
+            "iss": {
+                "v": "KERI10JSON0000ed_",
+                "t": "iss",
+                "d": "ENf3IEYwYtFmlq5ZzoI-zFzeR7E3ZNRN2YH_0KAFbdJW",
+                "i": "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo",
+                "s": "0",
+                "ri": "EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df",
+                "dt": "2023-08-23T15:16:07.553000+00:00"
+            },
+            "anc": {
+                "v": "KERI10JSON000160_",
+                "t": "rot",
+                "d": "EAncSaidRotationEventForWireOrderTestXXXXXXXX",
+                "i": "EMQQpnSkgfUOgWdzQTWfrgiVHKIDAhvAZIPQ6z3EAfz1",
+                "s": "1",
+                "p": "EPrevDigestXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "kt": "1",
+                "k": ["DKey1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"],
+                "nt": "1",
+                "n": ["ENext1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"],
+                "bt": "0",
+                "br": [],
+                "ba": [],
+                "a": [{
+                    "i": "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo",
+                    "s": "0",
+                    "d": "ENf3IEYwYtFmlq5ZzoI-zFzeR7E3ZNRN2YH_0KAFbdJW"
+                }]
+            },
+            "chains": [],
+            "rev": {
+                "v": "KERI10JSON000120_",
+                "t": "rev",
+                "d": "ERevSaidXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "i": "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo",
+                "s": "1",
+                "ri": "EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df",
+                "p": "ENf3IEYwYtFmlq5ZzoI-zFzeR7E3ZNRN2YH_0KAFbdJW",
+                "dt": "2023-08-24T15:16:07.553000+00:00"
+            },
+            "revatc": "-ATC-rev",
+            "status": {
+                "v": "KERI10JSON000135_",
+                "i": "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo",
+                "s": "0",
+                "d": "ENf3IEYwYtFmlq5ZzoI-zFzeR7E3ZNRN2YH_0KAFbdJW",
+                "ri": "EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df",
+                "ra": {},
+                "dt": "2023-08-23T15:16:07.553000+00:00",
+                "et": "iss"
+            }
+        }""";
 
     @Override
     public MockResponse mockAllRequests(RecordedRequest req) {
@@ -49,9 +130,9 @@ public class CredentialingTest extends BaseMockServerTest {
 
                 String body;
                 if (reqUrl.startsWith(url + "/credentials/query")) {
-                        body = "[" + MOCK_CREDENTIAL + "]";
+                        body = "[" + credentialBody + "]";
                 } else if (reqUrl.startsWith(url + "/credentials/")) {
-                        body = MOCK_CREDENTIAL;
+                        body = credentialBody;
                 } else if (reqUrl.contains("/identifiers/aid1/credentials")) {
                         body = "DELETE".equals(req.getMethod())
                                 ? "{\"name\": \"witness.EJ5EZpC_NjBKAPz8jzVUgRMQtyxpqsCKVefAFPSAVdSp\", \"done\": false, \"metadata\": {\"sn\": 2}}"
@@ -184,5 +265,87 @@ public class CredentialingTest extends BaseMockServerTest {
         assertEquals("GET", lastCall.getMethod());
         assertEquals(url + "/registries/EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df/EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo", lastCall.getRequestUrl().toString());
         assertEquals(lastCall.getBody().readUtf8(), "");
+    }
+
+    @Test
+    @DisplayName("get() keeps the credential's wire sad")
+    void credentialGetKeepsWireSad() throws InterruptedException {
+        CredentialRecord cred = fetchCredential(WIRE_ORDER_CREDENTIAL);
+
+        assertEquals("EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo", cred.value().getSad().getD());
+
+        List<String> wire = List.of("v", "d", "s", "i", "ri", "a", "xtra");
+        Map<String, Object> acdcSad = (Map<String, Object>) cred.body().get("sad");
+        assertEquals(wire, List.copyOf(acdcSad.keySet()));
+        assertEquals("kept", acdcSad.get("xtra"));
+        assertEquals(wire, topLevelKeyOrder(cred.acdc().getRaw()));
+
+        assertEquals(
+                List.of("v", "d", "i", "ri", "s", "a"),
+                List.copyOf(Utils.toMap(cred.value().getSad()).keySet()));
+        assertEquals("iss", cred.iss().getKed().get("t"));
+
+        assertThrows(UnsupportedOperationException.class, () -> cred.body().put("pre", "x"));
+    }
+
+    @Test
+    @DisplayName("a rotation-anchored anc keeps 'a' last, where the typed model would move it")
+    void rotationAnchorKeepsWireOrder() throws InterruptedException {
+        CredentialRecord cred = fetchCredential(WIRE_ORDER_CREDENTIAL);
+
+        List<String> wire = List.of("v", "t", "d", "i", "s", "p", "kt", "k", "nt", "n", "bt", "br", "ba", "a");
+        assertEquals(wire, topLevelKeyOrder(cred.anc().getRaw()));
+
+        List<String> roundTripped = List.copyOf(Utils.toMap(cred.value().getAnc()).keySet());
+        assertEquals(6, roundTripped.indexOf("a"));
+        assertEquals(13, wire.indexOf("a"));
+    }
+
+    @Test
+    @DisplayName("body keeps blocks the generated model has no field for")
+    void bodyKeepsUnmodelledBlocks() throws InterruptedException {
+        CredentialRecord cred = fetchCredential(WIRE_ORDER_CREDENTIAL);
+
+        assertEquals("rev", ((Map<String, Object>) cred.body().get("rev")).get("t"));
+        assertTrue(cred.body().containsKey("revatc"));
+        assertFalse(Utils.toMap(cred.value()).containsKey("rev"));
+    }
+
+    @Test
+    @DisplayName("attachments are reachable without going through the typed view")
+    void credentialExposesAttachments() throws InterruptedException {
+        CredentialRecord cred = fetchCredential(WIRE_ORDER_CREDENTIAL);
+
+        assertEquals("-ATC-acdc", cred.acdcAttachment());
+        assertEquals("-ATC-iss", cred.issAttachment());
+        assertEquals("-ATC-anc-first", cred.ancAttachment());
+    }
+
+    @Test
+    @DisplayName("a missing embed block names the field it could not find")
+    void credentialMissingBlockFails() throws InterruptedException {
+        CredentialRecord cred = fetchCredential(MOCK_CREDENTIAL);
+
+        SignifySerializationException e = assertThrows(SignifySerializationException.class, cred::anc);
+        assertTrue(e.getMessage().contains("'anc'"));
+
+        assertNull(cred.acdcAttachment());
+        assertNull(cred.issAttachment());
+        assertNull(cred.ancAttachment());
+    }
+
+    private CredentialRecord fetchCredential(String body) throws InterruptedException {
+        credentialBody = body;
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
+        client.boot();
+        client.connect();
+        cleanUpRequest();
+        return client.credentials()
+                .get("EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo")
+                .orElseThrow();
+    }
+
+    private static List<String> topLevelKeyOrder(String json) {
+        return List.copyOf(Utils.fromJson(json, new TypeReference<Map<String, Object>>() {}).keySet());
     }
 }
