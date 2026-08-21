@@ -1,5 +1,6 @@
 package id.veridian.signify.e2e;
 
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import id.veridian.signify.app.Exchanging;
 import id.veridian.signify.app.ExnMessages.IpexAgreeExchange;
 import id.veridian.signify.app.ExnMessages.IpexApplyExchange;
@@ -171,9 +172,9 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer list credentials", () -> {
             CredentialFilter credentialFilter = CredentialFilter.builder().build();
-            List<Credential> issuerCredentials = issuerClient.credentials().list(credentialFilter);
-            CredentialSad sad = issuerCredentials.getFirst().getSad();
-            CredentialState status = issuerCredentials.getFirst().getStatus();
+            List<CredentialRecord> issuerCredentials = issuerClient.credentials().list(credentialFilter);
+            CredentialSad sad = issuerCredentials.getFirst().value().getSad();
+            CredentialState status = issuerCredentials.getFirst().value().getStatus();
 
             assertTrue(!issuerCredentials.isEmpty());
             assertEquals(QVI_SCHEMA_SAID, sad.getS().toString());
@@ -186,7 +187,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             filterData.put("-i", issuerAid.prefix);
             CredentialFilter credentialFilter = CredentialFilter.builder().build();
             credentialFilter.setFilter(filterData);
-            List<Credential> list = issuerClient.credentials().list(credentialFilter);
+            List<CredentialRecord> list = issuerClient.credentials().list(credentialFilter);
             assertEquals(1, list.size());
 
             filterData.remove("-i");
@@ -214,9 +215,9 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Issuer get credential by id", () -> {
-            Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
-            CredentialSad sad = issuerCredential.getSad();
-            CredentialState status = issuerCredential.getStatus();
+            CredentialRecord issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+            CredentialSad sad = issuerCredential.value().getSad();
+            CredentialState status = issuerCredential.value().getStatus();
 
             assertEquals(QVI_SCHEMA_SAID, sad.getS().toString());
             assertEquals(issuerAid.prefix, sad.getI().toString());
@@ -225,13 +226,13 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("Issuer IPEX grant", () -> {
             String dt = createTimestamp();
-            Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+            CredentialRecord issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
 
             IpexGrantArgs gArgs = IpexGrantArgs.builder().build();
             gArgs.setSenderName(issuerAid.name);
-            gArgs.setAcdc(new Serder(Utils.toMap(issuerCredential.getSad())));
-            gArgs.setAnc(new Serder(Utils.toMap(issuerCredential.getAnc())));
-            gArgs.setIss(new Serder(Utils.toMap(issuerCredential.getIss())));
+            gArgs.setAcdc(issuerCredential.acdc());
+            gArgs.setAnc(issuerCredential.anc());
+            gArgs.setIss(issuerCredential.iss());
             gArgs.setAncAttachment(null);
             gArgs.setRecipient(holderAid.prefix);
             gArgs.setDatetime(dt);
@@ -277,11 +278,11 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Holder has credential", () -> {
-            Credential holderCredential = holderClient.credentials().get(qviCredentialId).get();
-            assertEquals(QVI_SCHEMA_SAID, holderCredential.getSad().getS());
-            assertEquals(issuerAid.prefix, holderCredential.getSad().getI());
-            assertEquals("0", holderCredential.getStatus().getS());
-            assertNotNull(holderCredential.getAtc());
+            CredentialRecord holderCredential = holderClient.credentials().get(qviCredentialId).get();
+            assertEquals(QVI_SCHEMA_SAID, holderCredential.value().getSad().getS());
+            assertEquals(issuerAid.prefix, holderCredential.value().getSad().getI());
+            assertEquals("0", holderCredential.value().getStatus().getS());
+            assertNotNull(holderCredential.acdcAttachment());
         });
 
         testSteps.step("Verifier IPEX apply", () -> {
@@ -321,7 +322,7 @@ public class CredentialsTest extends BaseIntegrationTest {
 
             CredentialFilter cFilter = CredentialFilter.builder().build();
             cFilter.setFilter(filter);
-            List<Credential> matchingCreds = holderClient.credentials().list(cFilter);
+            List<CredentialRecord> matchingCreds = holderClient.credentials().list(cFilter);
             assertEquals(1, matchingCreds.size());
 
             markAndRemoveNotification(holderClient, holderNotifications.getFirst());
@@ -329,7 +330,7 @@ public class CredentialsTest extends BaseIntegrationTest {
             IpexOfferArgs offerArgs = IpexOfferArgs.builder().build();
             offerArgs.setSenderName(holderAid.name);
             offerArgs.setRecipient(verifierAid.prefix);
-            offerArgs.setAcdc(new Serder(Utils.toMap(matchingCreds.get(0).getSad())));
+            offerArgs.setAcdc(matchingCreds.get(0).acdc());
             offerArgs.setApplySaid(applySaid);
             offerArgs.setDatetime(createTimestamp());
 
@@ -382,21 +383,17 @@ public class CredentialsTest extends BaseIntegrationTest {
 
             markAndRemoveNotification(holderClient, holderAgreeNote);
 
-            Credential holderCredential = holderClient.credentials().get(qviCredentialId).get();
-
-            String atc = holderCredential.getAtc();
-            List<String> ancatc = holderCredential.getAncatc();
-            String issAtc = holderCredential.getIssatc();
+            CredentialRecord holderCredential = holderClient.credentials().get(qviCredentialId).get();
 
             IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
             grantArgs.setSenderName(holderAid.name);
             grantArgs.setRecipient(verifierAid.prefix);
-            grantArgs.setAcdc(new Serder(Utils.toMap(holderCredential.getSad())));
-            grantArgs.setAnc(new Serder(Utils.toMap(holderCredential.getAnc())));
-            grantArgs.setIss(new Serder(Utils.toMap(holderCredential.getIss())));
-            grantArgs.setAcdcAttachment(atc);
-            grantArgs.setAncAttachment(ancatc.getFirst());
-            grantArgs.setIssAttachment(issAtc);
+            grantArgs.setAcdc(holderCredential.acdc());
+            grantArgs.setAnc(holderCredential.anc());
+            grantArgs.setIss(holderCredential.iss());
+            grantArgs.setAcdcAttachment(holderCredential.acdcAttachment());
+            grantArgs.setAncAttachment(holderCredential.ancAttachment());
+            grantArgs.setIssAttachment(holderCredential.issAttachment());
             grantArgs.setAgreeSaid(agreeSaid);
             grantArgs.setDatetime(createTimestamp());
 
@@ -431,10 +428,10 @@ public class CredentialsTest extends BaseIntegrationTest {
             );
             waitForCompleted(verifierClient, op);
             markAndRemoveNotification(verifierClient, verifierGrantNote);
-            Credential verifierCredential = verifierClient.credentials().get(qviCredentialId).get();
+            CredentialRecord verifierCredential = verifierClient.credentials().get(qviCredentialId).get();
 
-            CredentialSad sadObj = verifierCredential.getSad();
-            CredentialState status = verifierCredential.getStatus();
+            CredentialSad sadObj = verifierCredential.value().getSad();
+            CredentialState status = verifierCredential.value().getStatus();
             String s = sadObj.getS();
             String i = sadObj.getI();
             String sStatus = status.getS();
@@ -465,8 +462,8 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         String leCredentialId = testSteps.step("Holder create LE (chained) credential", () -> {
-            Credential qviCredential = holderClient.credentials().get(qviCredentialId).get();
-            CredentialSad sadBody = qviCredential.getSad();
+            CredentialRecord qviCredential = holderClient.credentials().get(qviCredentialId).get();
+            CredentialSad sadBody = qviCredential.value().getSad();
 
             Map<String, Object> additionalProperties = new LinkedHashMap<>();
             additionalProperties.put("LEI", "5493001KJTIIGC8Y1R17");
@@ -507,14 +504,14 @@ public class CredentialsTest extends BaseIntegrationTest {
 
         testSteps.step("LE credential IPEX grant", () -> {
             String dt = createTimestamp();
-            Credential leCredential = holderClient.credentials().get(leCredentialId)
+            CredentialRecord leCredential = holderClient.credentials().get(leCredentialId)
                 .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
 
             IpexGrantArgs grantArgs = IpexGrantArgs.builder().build();
             grantArgs.setSenderName(holderAid.name);
-            grantArgs.setAcdc(new Serder(Utils.toMap(leCredential.getSad())));
-            grantArgs.setAnc(new Serder(Utils.toMap(leCredential.getAnc())));
-            grantArgs.setIss(new Serder(Utils.toMap(leCredential.getIss())));
+            grantArgs.setAcdc(leCredential.acdc());
+            grantArgs.setAnc(leCredential.anc());
+            grantArgs.setIss(leCredential.iss());
             grantArgs.setAncAttachment(null);
             grantArgs.setRecipient(legalEntityAid.prefix);
             grantArgs.setDatetime(dt);
@@ -551,18 +548,18 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("Legal Entity has chained credential", () -> {
-            Credential legalEntityCredential = retry(() -> {
+            CredentialRecord legalEntityCredential = retry(() -> {
                 assertNotNull(leCredentialId);
                 return legalEntityClient.credentials().get(leCredentialId)
                         .orElseThrow(() -> new IllegalStateException("LE credential not found: " + leCredentialId));
             });
-            CredentialSad sad = legalEntityCredential.getSad();
+            CredentialSad sad = legalEntityCredential.value().getSad();
             Map<String, Object> aMap = Utils.toMap(sad.getA());
-            CredentialState status = legalEntityCredential.getStatus();
-            List<Map<String, Object>> chains = legalEntityCredential.getChains();
+            CredentialState status = legalEntityCredential.value().getStatus();
+            List<Map<String, Object>> chains = legalEntityCredential.value().getChains();
             LinkedHashMap<String, Object> chainsBody = castObjectToLinkedHashMap(chains.getFirst());
             LinkedHashMap<String, Object> sadInChains = castObjectToLinkedHashMap(chainsBody.get("sad"));
-            String atc = legalEntityCredential.getAtc();
+            String atc = legalEntityCredential.acdcAttachment();
 
             assertEquals(LE_SCHEMA_SAID, sad.getS());
             assertEquals(holderAid.prefix, sad.getI());
@@ -575,9 +572,9 @@ public class CredentialsTest extends BaseIntegrationTest {
         testSteps.step("Issuer revoke QVI credential", () -> {
             RevokeCredentialResult revokeOperation = issuerClient.credentials().revoke(issuerAid.name, qviCredentialId, null);
             waitForCompleted(issuerClient, revokeOperation.getOp());
-            Credential issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
+            CredentialRecord issuerCredential = issuerClient.credentials().get(qviCredentialId).get();
 
-            CredentialState status = issuerCredential.getStatus();
+            CredentialState status = issuerCredential.value().getStatus();
 
             assertEquals("1", status.getS());
         });

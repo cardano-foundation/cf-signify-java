@@ -1,5 +1,6 @@
 package id.veridian.signify.e2e.utils;
 
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,7 +34,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import id.veridian.signify.generated.keria.model.AidRecord;
-import id.veridian.signify.generated.keria.model.Credential;
 import id.veridian.signify.generated.keria.model.CredentialOperation;
 import id.veridian.signify.generated.keria.model.DelegatorOperation;
 import id.veridian.signify.generated.keria.model.EndRoleOperation;
@@ -560,7 +560,7 @@ public class MultisigUtils {
             List<HabState> otherMembersAIDs,
             HabState multisigAID,
             HabState recipientAID,
-            Credential credential,
+            CredentialRecord credential,
             String timestamp,
             boolean isInitiator) {
 
@@ -571,9 +571,9 @@ public class MultisigUtils {
         IpexGrantArgs ipexGrantArgs = IpexGrantArgs
                 .builder()
                 .senderName(multisigAID.getName())
-            .acdc(new Serder(Utils.toMap(credential.getSad())))
-            .anc(new Serder(Utils.toMap(credential.getAnc())))
-            .iss(new Serder(Utils.toMap(credential.getIss())))
+            .acdc(credential.acdc())
+            .anc(credential.anc())
+            .iss(credential.iss())
                 .recipient(recipientAID.getPrefix())
                 .datetime(timestamp)
                 .build();

@@ -1,5 +1,6 @@
 package id.veridian.signify.e2e;
 
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import id.veridian.signify.app.Exchanging;
 import id.veridian.signify.app.aiding.IdentifierListResponse;
 import id.veridian.signify.app.clienting.SignifyClient;
@@ -13,7 +14,6 @@ import id.veridian.signify.app.credentialing.registries.RegistryResult;
 import id.veridian.signify.cesr.Serder;
 import id.veridian.signify.cesr.Siger;
 import id.veridian.signify.cesr.util.Utils;
-import id.veridian.signify.generated.keria.model.Credential;
 import id.veridian.signify.generated.keria.model.CredentialSad;
 import id.veridian.signify.generated.keria.model.CredentialState;
 import id.veridian.signify.generated.keria.model.EndRoleOperation;
@@ -466,8 +466,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitForCompleted(client2, exop2);
 
         CredentialFilter args = CredentialFilter.builder().build();
-        List<Credential> creds1 = retry(() -> {
-            List<Credential> creds = client1.credentials().list(args);
+        List<CredentialRecord> creds1 = retry(() -> {
+            List<CredentialRecord> creds = client1.credentials().list(args);
             if (creds.isEmpty()) {
                 throw new IllegalStateException("Member1 has no credentials yet");
             }
@@ -514,10 +514,10 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         IssueCredentialResult result = client.credentials().issue(name, data);
         waitForCompleted(client, result.getOp());
 
-        List<Credential> listCreds = client.credentials().list(CredentialFilter.builder().build());
-        Credential cred = listCreds.getFirst();
-        CredentialSad credSad = cred.getSad();
-        CredentialState credStatus = cred.getStatus();
+        List<CredentialRecord> listCreds = client.credentials().list(CredentialFilter.builder().build());
+        CredentialRecord cred = listCreds.getFirst();
+        CredentialSad credSad = cred.value().getSad();
+        CredentialState credStatus = cred.value().getStatus();
 
         assertEquals(1, listCreds.size());
         assertEquals(data.getS(), credSad.getS());

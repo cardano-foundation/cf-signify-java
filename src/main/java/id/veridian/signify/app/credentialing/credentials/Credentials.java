@@ -34,7 +34,7 @@ public class Credentials {
      * @param kargs Optional parameters to filter the credentials
      * @return List of credentials
      */
-    public List<Credential> list(CredentialFilter kargs) {
+    public List<CredentialRecord> list(CredentialFilter kargs) {
         final String path = "/credentials/query";
 
         Map<String, Object> data = new LinkedHashMap<>();
@@ -45,10 +45,12 @@ public class Credentials {
 
         final String method = "POST";
         HttpResponse<String> response = this.client.fetch(path, method, data);
-        return Utils.fromJson(response.body(), new TypeReference<List<Credential>>() {});
+        List<Map<String, Object>> bodies =
+                Utils.fromJson(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+        return bodies.stream().map(Credentials::toRecord).toList();
     }
 
-    public Optional<Credential> get(String said) {
+    public Optional<CredentialRecord> get(String said) {
         return this.get(said, false);
     }
 
@@ -59,7 +61,7 @@ public class Credentials {
      * @param includeCESR - Optional flag export the credential in CESR format
      * @return Optional containing the credential if found, or empty if not found
      */
-    public Optional<Credential> get(String said, boolean includeCESR) {
+    public Optional<CredentialRecord> get(String said, boolean includeCESR) {
         final String path = "/credentials/" + said;
         final String method = "GET";
 
@@ -75,8 +77,13 @@ public class Credentials {
             return Optional.empty();
         }
 
-        Credential cred = Utils.fromJson(response.body(), Credential.class);
-        return Optional.of(cred);
+        return Optional.of(toRecord(
+                Utils.fromJson(response.body(), new TypeReference<Map<String, Object>>() {})));
+    }
+
+    private static CredentialRecord toRecord(Map<String, Object> body) {
+        Credential value = Utils.fromJson(Utils.jsonStringify(body), Credential.class);
+        return new CredentialRecord(value, Collections.unmodifiableMap(body));
     }
 
 
@@ -199,8 +206,9 @@ public class Credentials {
         final String vs = CoreUtil.versify(CoreUtil.Ident.KERI, null, CoreUtil.Serials.JSON, 0);
         final String dt = datetime != null ? datetime : Utils.currentDateTimeString();
 
-        Map<String, Object> cred = Utils.toMap(this.get(said)
-                .orElseThrow(() -> new IllegalArgumentException("Credential not found: " + said)));
+        Credential cred = this.get(said)
+                .orElseThrow(() -> new IllegalArgumentException("Credential not found: " + said))
+                .value();
 
         // Create rev
         Map<String, Object> _rev = new LinkedHashMap<>();
@@ -209,8 +217,8 @@ public class Credentials {
         _rev.put("d", "");
         _rev.put("i", said);
         _rev.put("s", "1");
-        _rev.put("ri", (Utils.toMap(cred.get("sad"))).get("ri"));
-        _rev.put("p", (Utils.toMap(cred.get("status"))).get("d"));
+        _rev.put("ri", cred.getSad().getRi());
+        _rev.put("p", cred.getStatus().getD());
         _rev.put("dt", dt);
 
         Map<String, Object> rev = Saider.saidify(_rev).sad();

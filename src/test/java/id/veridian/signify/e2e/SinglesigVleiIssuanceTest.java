@@ -1,5 +1,6 @@
 package id.veridian.signify.e2e;
 
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.veridian.signify.app.Exchanging;
@@ -170,7 +171,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         System.out.println("Issuing QVI vLEI Credential");
 
-        Credential qviCred = getOrIssueCredential(
+        CredentialRecord qviCred = getOrIssueCredential(
                 gleifClient,
                 gleifAid,
                 qviAid,
@@ -181,8 +182,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 null
         );
 
-        CredentialSad sadQviCred = qviCred.getSad();
-        Credential qviCredHolder = getReceivedCredential(qviClient, sadQviCred.getD());
+        CredentialSad sadQviCred = qviCred.value().getSad();
+        CredentialRecord qviCredHolder = getReceivedCredential(qviClient, sadQviCred.getD());
 
         if (qviCredHolder == null) {
             sendGrantMessage(gleifClient, gleifAid, qviAid, qviCred);
@@ -191,14 +192,14 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
 
         qviCredHolder = waitForCredential(qviClient, sadQviCred.getD());
 
-        CredentialSad qviCredHolderSad = qviCredHolder.getSad();
+        CredentialSad qviCredHolderSad = qviCredHolder.value().getSad();
 
         assertEquals(qviCredHolderSad.getD(), sadQviCred.getD());
         assertEquals(qviCredHolderSad.getS(), QVI_SCHEMA_SAID);
         assertEquals(qviCredHolderSad.getI(), gleifAid.prefix);
         assertEquals(qviCredHolderSad.getA().getI(), qviAid.prefix);
-        assertEquals("0", qviCredHolder.getStatus().getS());
-        assertNotNull(qviCredHolder.getAtc());
+        assertEquals("0", qviCredHolder.value().getStatus().getS());
+        assertNotNull(qviCredHolder.acdcAttachment());
 
         System.out.println("Issuing LE vLEI Credential");
 
@@ -210,7 +211,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         leCredSource.put("d", "");
         leCredSource.put("qvi", qvi);
 
-        Credential leCred = getOrIssueCredential(
+        CredentialRecord leCred = getOrIssueCredential(
                 qviClient,
                 qviAid,
                 leAid,
@@ -220,8 +221,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 LE_RULES,
                 leCredSource
         );
-        CredentialSad sadLeCred = leCred.getSad();
-        Credential leCredHolder = getReceivedCredential(leClient, sadLeCred.getD());
+        CredentialSad sadLeCred = leCred.value().getSad();
+        CredentialRecord leCredHolder = getReceivedCredential(leClient, sadLeCred.getD());
 
         if (leCredHolder == null) {
             sendGrantMessage(qviClient, qviAid, leAid, leCred);
@@ -230,8 +231,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             leCredHolder = waitForCredential(leClient, sadLeCred.getD());
         }
 
-        CredentialSad sadLeCredHolder = leCredHolder.getSad();
-        CredentialState statusLeCredHolder = leCredHolder.getStatus();
+        CredentialSad sadLeCredHolder = leCredHolder.value().getSad();
+        CredentialState statusLeCredHolder = leCredHolder.value().getStatus();
         JsonNode leQviEdge = mapper.convertValue(sadLeCredHolder.getE(), JsonNode.class);
 
         assertEquals(sadLeCred.getD(), sadLeCredHolder.getD());
@@ -241,7 +242,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         assertEquals(sadQviCred.getD(), leQviEdge.at("/qvi/n").asText());
 
         assertEquals("0", statusLeCredHolder.getS());
-        assertNotNull(leCredHolder.getAtc());
+        assertNotNull(leCredHolder.acdcAttachment());
 
         System.out.println("Issuing ECR vLEI Credential from LE");
 
@@ -253,7 +254,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         ecrCredSource.put("d", "");
         ecrCredSource.put("le", le);
 
-        Credential ecrCred = getOrIssueCredential(
+        CredentialRecord ecrCred = getOrIssueCredential(
                 leClient,
                 leAid,
                 roleAid,
@@ -265,8 +266,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 true
         );
 
-        CredentialSad sadEcrCred = ecrCred.getSad();
-        Credential ecrCredHolder = getReceivedCredential(roleClient, sadEcrCred.getD());
+        CredentialSad sadEcrCred = ecrCred.value().getSad();
+        CredentialRecord ecrCredHolder = getReceivedCredential(roleClient, sadEcrCred.getD());
 
         if (ecrCredHolder == null) {
             sendGrantMessage(leClient, leAid, roleAid, ecrCred);
@@ -275,10 +276,10 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             ecrCredHolder = waitForCredential(roleClient, sadEcrCred.getD());
         }
 
-        CredentialSad sadEcrCredHolder = ecrCredHolder.getSad();
+        CredentialSad sadEcrCredHolder = ecrCredHolder.value().getSad();
         ACDCAttributes aEcrCredHolder = sadEcrCredHolder.getA();
         JsonNode ecrLeEdge = mapper.convertValue(sadEcrCredHolder.getE(), JsonNode.class);
-        CredentialState statusEcrCredHolder = ecrCredHolder.getStatus();
+        CredentialState statusEcrCredHolder = ecrCredHolder.value().getStatus();
 
         assertEquals(sadEcrCred.getD(), sadEcrCredHolder.getD());
         assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder.getS());
@@ -286,7 +287,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         assertEquals(roleAid.prefix, aEcrCredHolder.getI());
         assertEquals(sadLeCred.getD(), ecrLeEdge.at("/le/n").asText());
         assertEquals("0", statusEcrCredHolder.getS());
-        assertNotNull(ecrCredHolder.getAtc());
+        assertNotNull(ecrCredHolder.acdcAttachment());
 
         System.out.println("Issuing ECR AUTH vLEI Credential");
 
@@ -300,7 +301,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         ecrAuthCredSource.put("d", "");
         ecrAuthCredSource.put("le", leErc);
 
-        Credential ecrAuthCred = getOrIssueCredential(
+        CredentialRecord ecrAuthCred = getOrIssueCredential(
                 leClient,
                 leAid,
                 qviAid,
@@ -310,8 +311,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 ECR_AUTH_RULES,
                 ecrAuthCredSource
         );
-        CredentialSad sadEcrAuthCred = ecrAuthCred.getSad();
-        Credential ecrAuthCredHolder = getReceivedCredential(roleClient, sadEcrAuthCred.getD());
+        CredentialSad sadEcrAuthCred = ecrAuthCred.value().getSad();
+        CredentialRecord ecrAuthCredHolder = getReceivedCredential(roleClient, sadEcrAuthCred.getD());
 
         if (ecrAuthCredHolder == null) {
             sendGrantMessage(leClient, leAid, qviAid, ecrAuthCred);
@@ -320,10 +321,10 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             ecrAuthCredHolder = waitForCredential(qviClient, sadEcrAuthCred.getD());
         }
 
-        CredentialSad sadEcrAuthCredHolder = ecrAuthCredHolder.getSad();
+        CredentialSad sadEcrAuthCredHolder = ecrAuthCredHolder.value().getSad();
         ACDCAttributes aEcrAuthCredHolder = sadEcrAuthCredHolder.getA();
         JsonNode ecrAuthLeEdge = mapper.convertValue(sadEcrAuthCredHolder.getE(), JsonNode.class);
-        CredentialState statusEcrAuthCredHolder = ecrAuthCredHolder.getStatus();
+        CredentialState statusEcrAuthCredHolder = ecrAuthCredHolder.value().getStatus();
 
         assertEquals(sadEcrAuthCred.getD(), sadEcrAuthCredHolder.getD());
         assertEquals(ECR_AUTH_SCHEMA_SAID, sadEcrAuthCredHolder.getS());
@@ -332,7 +333,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         assertEquals(roleAid.prefix, aEcrAuthCredHolder.getAdditionalProperties().get("AID").toString());
         assertEquals(sadLeCred.getD(), ecrAuthLeEdge.at("/le/n").asText());
         assertEquals("0", statusEcrAuthCredHolder.getS());
-        assertNotNull(ecrAuthCredHolder.getAtc());
+        assertNotNull(ecrAuthCredHolder.acdcAttachment());
 
         System.out.println("Issuing ECR vLEI Credential from ECR AUTH");
 
@@ -345,7 +346,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         ecrCredSource2.put("d", "");
         ecrCredSource2.put("auth", auth);
 
-        Credential ecrCred2 = getOrIssueCredential(
+        CredentialRecord ecrCred2 = getOrIssueCredential(
                 qviClient,
                 qviAid,
                 roleAid,
@@ -356,8 +357,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 ecrCredSource2,
                 true
         );
-        CredentialSad sadEcrCred2 = ecrCred2.getSad();
-        Credential ecrCredHolder2 = getReceivedCredential(roleClient, sadEcrCred2.getD());
+        CredentialSad sadEcrCred2 = ecrCred2.value().getSad();
+        CredentialRecord ecrCredHolder2 = getReceivedCredential(roleClient, sadEcrCred2.getD());
 
         if (ecrCredHolder2 == null) {
             sendGrantMessage(qviClient, qviAid, roleAid, ecrCred2);
@@ -366,16 +367,16 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             ecrCredHolder2 = waitForCredential(roleClient, sadEcrCred2.getD());
         }
 
-        CredentialSad sadEcrCredHolder2 = ecrCredHolder2.getSad();
+        CredentialSad sadEcrCredHolder2 = ecrCredHolder2.value().getSad();
         JsonNode ecrEcrAuthEdges2 = mapper.convertValue(sadEcrCredHolder2.getE(), JsonNode.class);
-        CredentialState statusEcrCredHolder2 = ecrCredHolder2.getStatus();
+        CredentialState statusEcrCredHolder2 = ecrCredHolder2.value().getStatus();
 
         assertEquals(sadEcrCred2.getD(), sadEcrCredHolder2.getD());
         assertEquals(ECR_SCHEMA_SAID, sadEcrCredHolder2.getS());
         assertEquals(qviAid.prefix, sadEcrCredHolder2.getI());
         assertEquals(sadEcrAuthCred.getD(), ecrEcrAuthEdges2.at("/auth/n").asText());
         assertEquals("0", statusEcrCredHolder2.getS());
-        assertNotNull(ecrCredHolder2.getAtc());
+        assertNotNull(ecrCredHolder2.acdcAttachment());
 
         System.out.println("Issuing OOR AUTH vLEI Credential");
         oorAuthData.put("AID", roleAid.prefix);
@@ -388,7 +389,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         oorAuthCredSource.put("d", "");
         oorAuthCredSource.put("le", le);
 
-        Credential oorAuthCred = getOrIssueCredential(
+        CredentialRecord oorAuthCred = getOrIssueCredential(
                 leClient,
                 leAid,
                 qviAid,
@@ -398,8 +399,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 OOR_AUTH_RULES,
                 oorAuthCredSource
         );
-        CredentialSad sadOorAuthCred = oorAuthCred.getSad();
-        Credential oorAuthCredHolder = getReceivedCredential(qviClient, sadOorAuthCred.getD());
+        CredentialSad sadOorAuthCred = oorAuthCred.value().getSad();
+        CredentialRecord oorAuthCredHolder = getReceivedCredential(qviClient, sadOorAuthCred.getD());
 
         if (oorAuthCredHolder == null) {
             sendGrantMessage(leClient, leAid, qviAid, oorAuthCred);
@@ -408,10 +409,10 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             oorAuthCredHolder = waitForCredential(qviClient, sadOorAuthCred.getD());
         }
 
-        CredentialSad sadOorAuthCredHolder = oorAuthCredHolder.getSad();
+        CredentialSad sadOorAuthCredHolder = oorAuthCredHolder.value().getSad();
         ACDCAttributes aOorAuthCredHolder = sadOorAuthCredHolder.getA();
         JsonNode oorAuthLeEdge = mapper.convertValue(sadOorAuthCredHolder.getE(), JsonNode.class);
-        CredentialState statusOorAuthCredHolder = oorAuthCredHolder.getStatus();
+        CredentialState statusOorAuthCredHolder = oorAuthCredHolder.value().getStatus();
 
         assertEquals(sadOorAuthCred.getD(), sadOorAuthCredHolder.getD());
         assertEquals(OOR_AUTH_SCHEMA_SAID, sadOorAuthCredHolder.getS());
@@ -420,7 +421,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         assertEquals(roleAid.prefix, aOorAuthCredHolder.getAdditionalProperties().get("AID").toString());
         assertEquals(sadLeCred.getD(), oorAuthLeEdge.at("/le/n").asText());
         assertEquals("0", statusOorAuthCredHolder.getS());
-        assertNotNull(oorAuthCredHolder.getAtc());
+        assertNotNull(oorAuthCredHolder.acdcAttachment());
 
         System.out.println("Issuing OOR vLEI Credential from OOR AUTH");
 
@@ -433,7 +434,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         oorCredSource.put("d", "");
         oorCredSource.put("auth", auth);
 
-        Credential oorCred = getOrIssueCredential(
+        CredentialRecord oorCred = getOrIssueCredential(
                 qviClient,
                 qviAid,
                 roleAid,
@@ -443,8 +444,8 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 OOR_RULES,
                 oorCredSource
         );
-        CredentialSad sadOorCred = oorCred.getSad();
-        Credential oorCredHolder = getReceivedCredential(qviClient, sadOorCred.getD());
+        CredentialSad sadOorCred = oorCred.value().getSad();
+        CredentialRecord oorCredHolder = getReceivedCredential(qviClient, sadOorCred.getD());
 
         if (oorCredHolder == null) {
             sendGrantMessage(qviClient, qviAid, roleAid, oorCred);
@@ -453,16 +454,16 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
             oorCredHolder = waitForCredential(roleClient, sadOorCred.getD());
         }
 
-        CredentialSad sadOorCredHolder = oorCredHolder.getSad();
+        CredentialSad sadOorCredHolder = oorCredHolder.value().getSad();
         JsonNode oorOorAuthEdge = mapper.convertValue(sadOorCredHolder.getE(), JsonNode.class);
-        CredentialState statusOorCredHolder = oorCredHolder.getStatus();
+        CredentialState statusOorCredHolder = oorCredHolder.value().getStatus();
 
         assertEquals(sadOorCred.getD(), sadOorCredHolder.getD());
         assertEquals(OOR_SCHEMA_SAID, sadOorCredHolder.getS());
         assertEquals(qviAid.prefix, sadOorCredHolder.getI());
         assertEquals(sadOorAuthCred.getD(), oorOorAuthEdge.at("/auth/n").asText());
         assertEquals("0", statusOorCredHolder.getS());
-        assertNotNull(oorCredHolder.getAtc());
+        assertNotNull(oorCredHolder.acdcAttachment());
 
         List<SignifyClient> clientList = Arrays.asList(
                 gleifClient,
@@ -495,12 +496,12 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         return registry;
     }
 
-    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) {
+    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, CredentialRecord credential) {
         IpexGrantArgs grantArgs = IpexGrantArgs.builder()
                 .senderName(senderAid.name)
-                .acdc(new Serder(Utils.toMap(credential.getSad())))
-                .anc(new Serder(Utils.toMap(credential.getAnc())))
-                .iss(new Serder(Utils.toMap(credential.getIss())))
+                .acdc(credential.acdc())
+                .anc(credential.anc())
+                .iss(credential.iss())
                 .recipient(recipientAid.prefix)
                 .datetime(createTimestamp())
                 .build();

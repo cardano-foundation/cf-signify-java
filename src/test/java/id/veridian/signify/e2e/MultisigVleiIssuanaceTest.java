@@ -1,5 +1,6 @@
 package id.veridian.signify.e2e;
 
+import id.veridian.signify.app.credentialing.credentials.CredentialRecord;
 import id.veridian.signify.app.aiding.CreateIdentifierArgs;
 import id.veridian.signify.app.clienting.SignifyClient;
 import id.veridian.signify.app.coring.Coring;
@@ -10,7 +11,6 @@ import id.veridian.signify.core.Manager;
 import id.veridian.signify.e2e.utils.MultisigUtils;
 import id.veridian.signify.e2e.utils.ResolveEnv;
 import id.veridian.signify.e2e.utils.TestUtils;
-import id.veridian.signify.generated.keria.model.Credential;
 import id.veridian.signify.generated.keria.model.CredentialSad;
 import id.veridian.signify.generated.keria.model.EndRoleOperation;
 import id.veridian.signify.generated.keria.model.HabState;
@@ -555,14 +555,14 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         Registry gedaRegistry = gedaRegistrybyGAR1.get(0);
         // GEDA issues a QVI vLEI credential to the QVI AID.
         // Skip if the credential has already been issued.
-        Credential qviCredbyGAR1 = TestUtils.getIssuedCredential(
+        CredentialRecord qviCredbyGAR1 = TestUtils.getIssuedCredential(
                 clientGAR1,
                 aidGEDA,
                 aidQVI,
                 QVI_SCHEMA_SAID
         );
 
-        Credential qviCredbyGAR2 = TestUtils.getIssuedCredential(
+        CredentialRecord qviCredbyGAR2 = TestUtils.getIssuedCredential(
                 clientGAR2,
                 aidGEDA,
                 aidQVI,
@@ -648,24 +648,24 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/exn");
         }
 
-        CredentialSad qviCredbyGAR1Sad = qviCredbyGAR1.getSad();
-        CredentialSad qviCredbyGAR2Sad = qviCredbyGAR2.getSad();
+        CredentialSad qviCredbyGAR1Sad = qviCredbyGAR1.value().getSad();
+        CredentialSad qviCredbyGAR2Sad = qviCredbyGAR2.value().getSad();
         assertEquals(qviCredbyGAR1Sad.getD(), qviCredbyGAR2Sad.getD());
         assertEquals(qviCredbyGAR1Sad.getS(), QVI_SCHEMA_SAID);
         assertEquals(qviCredbyGAR1Sad.getI(), aidGEDA.getPrefix());
         assertEquals(qviCredbyGAR1Sad.getA().getI(), aidQVI.getPrefix());
-        assertEquals(qviCredbyGAR1.getStatus().getS(), "0");
-        assertNotNull(qviCredbyGAR1.getAtc());
+        assertEquals(qviCredbyGAR1.value().getStatus().getS(), "0");
+        assertNotNull(qviCredbyGAR1.acdcAttachment());
 
-        Credential qviCred = qviCredbyGAR1;
-        CredentialSad qviCredSad = qviCred.getSad();
+        CredentialRecord qviCred = qviCredbyGAR1;
+        CredentialSad qviCredSad = qviCred.value().getSad();
         System.out.println("GEDA has issued a QVI vLEI credential with SAID: " + qviCredSad.getD());
 
         // GEDA and QVI exchange grant and admit messages.
         // Skip if QVI has already received the credential.
-        Credential qviCredbyQAR1 = TestUtils.getReceivedCredential(clientGAR1, qviCredSad.getD());
-        Credential qviCredbyQAR2 = TestUtils.getReceivedCredential(clientGAR2, qviCredSad.getD());
-        Credential qviCredbyQAR3 = TestUtils.getReceivedCredential(clientQAR3, qviCredSad.getD());
+        CredentialRecord qviCredbyQAR1 = TestUtils.getReceivedCredential(clientGAR1, qviCredSad.getD());
+        CredentialRecord qviCredbyQAR2 = TestUtils.getReceivedCredential(clientGAR2, qviCredSad.getD());
+        CredentialRecord qviCredbyQAR3 = TestUtils.getReceivedCredential(clientQAR3, qviCredSad.getD());
 
 
         if (qviCredbyQAR1 == null || qviCredbyQAR2 == null || qviCredbyQAR3 == null) {
@@ -710,9 +710,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             qviCredbyQAR2 = TestUtils.waitForCredential(clientQAR2, qviCredSad.getD());
             qviCredbyQAR3 = TestUtils.waitForCredential(clientQAR3, qviCredSad.getD());
         }
-        CredentialSad qviCredbyQAR1Sad = qviCredbyQAR1.getSad();
-        CredentialSad qviCredbyQAR2Sad = qviCredbyQAR2.getSad();
-        CredentialSad qviCredbyQAR3Sad = qviCredbyQAR3.getSad();
+        CredentialSad qviCredbyQAR1Sad = qviCredbyQAR1.value().getSad();
+        CredentialSad qviCredbyQAR2Sad = qviCredbyQAR2.value().getSad();
+        CredentialSad qviCredbyQAR3Sad = qviCredbyQAR3.value().getSad();
 
         assertEquals(qviCredSad.getD(), qviCredbyQAR1Sad.getD());
         assertEquals(qviCredSad.getD(), qviCredbyQAR2Sad.getD());
@@ -926,21 +926,21 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
         // QVI issues a LE vLEI credential to the LE.
         // Skip if the credential has already been issued.
-        Credential leCredbyQAR1 = TestUtils.getIssuedCredential(
+        CredentialRecord leCredbyQAR1 = TestUtils.getIssuedCredential(
                 clientQAR1,
                 aidQVI,
                 aidLE,
                 LE_SCHEMA_SAID
         );
 
-        Credential leCredbyQAR2 = TestUtils.getIssuedCredential(
+        CredentialRecord leCredbyQAR2 = TestUtils.getIssuedCredential(
                 clientQAR2,
                 aidQVI,
                 aidLE,
                 LE_SCHEMA_SAID
         );
 
-        Credential leCredbyQAR3 = TestUtils.getIssuedCredential(
+        CredentialRecord leCredbyQAR3 = TestUtils.getIssuedCredential(
                 clientQAR3,
                 aidQVI,
                 aidLE,
@@ -1062,26 +1062,26 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/exn");
         }
-        CredentialSad leCredbyQAR1Sad = leCredbyQAR1.getSad();
-        CredentialSad leCredbyQAR2Sad = leCredbyQAR2.getSad();
-        CredentialSad leCredbyQAR3Sad = leCredbyQAR3.getSad();
+        CredentialSad leCredbyQAR1Sad = leCredbyQAR1.value().getSad();
+        CredentialSad leCredbyQAR2Sad = leCredbyQAR2.value().getSad();
+        CredentialSad leCredbyQAR3Sad = leCredbyQAR3.value().getSad();
         assertEquals(leCredbyQAR1Sad.getD(), leCredbyQAR2Sad.getD());
         assertEquals(leCredbyQAR1Sad.getD(), leCredbyQAR3Sad.getD());
         assertEquals(leCredbyQAR1Sad.getS(), LE_SCHEMA_SAID);
         assertEquals(leCredbyQAR1Sad.getI(), aidQVI.getPrefix());
         assertEquals(leCredbyQAR1Sad.getA().getI(), aidLE.getPrefix());
-        assertEquals(leCredbyQAR1.getStatus().getS(), "0");
-        assertNotNull(leCredbyQAR1.getAtc());
+        assertEquals(leCredbyQAR1.value().getStatus().getS(), "0");
+        assertNotNull(leCredbyQAR1.acdcAttachment());
 
-        Credential leCred = leCredbyQAR1;
-        CredentialSad leCredSad = leCred.getSad();
+        CredentialRecord leCred = leCredbyQAR1;
+        CredentialSad leCredSad = leCred.value().getSad();
         System.out.println("QVI has issued a LE vLEI credential with SAID: " + leCredSad.getD());
 
         // QVI and LE exchange grant and admit messages.
         // Skip if LE has already received the credential.
-        Credential leCredbyLAR1 = TestUtils.getReceivedCredential(clientLAR1, leCredSad.getD());
-        Credential leCredbyLAR2 = TestUtils.getReceivedCredential(clientLAR2, leCredSad.getD());
-        Credential leCredbyLAR3 = TestUtils.getReceivedCredential(clientLAR3, leCredSad.getD());
+        CredentialRecord leCredbyLAR1 = TestUtils.getReceivedCredential(clientLAR1, leCredSad.getD());
+        CredentialRecord leCredbyLAR2 = TestUtils.getReceivedCredential(clientLAR2, leCredSad.getD());
+        CredentialRecord leCredbyLAR3 = TestUtils.getReceivedCredential(clientLAR3, leCredSad.getD());
 
         if (leCredbyLAR1 == null || leCredbyLAR2 == null || leCredbyLAR3 == null) {
             String admitTime = TestUtils.createTimestamp();
@@ -1126,9 +1126,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             leCredbyLAR2 = TestUtils.waitForCredential(clientLAR2, leCredSad.getD());
             leCredbyLAR3 = TestUtils.waitForCredential(clientLAR3, leCredSad.getD());
         }
-        CredentialSad leCredbyLAR1Sad = leCredbyLAR1.getSad();
-        CredentialSad leCredbyLAR2Sad = leCredbyLAR2.getSad();
-        CredentialSad leCredbyLAR3Sad = leCredbyLAR3.getSad();
+        CredentialSad leCredbyLAR1Sad = leCredbyLAR1.value().getSad();
+        CredentialSad leCredbyLAR2Sad = leCredbyLAR2.value().getSad();
+        CredentialSad leCredbyLAR3Sad = leCredbyLAR3.value().getSad();
         assertEquals(leCredSad.getD(), leCredbyLAR1Sad.getD());
         assertEquals(leCredSad.getD(), leCredbyLAR2Sad.getD());
         assertEquals(leCredSad.getD(), leCredbyLAR3Sad.getD());
@@ -1190,19 +1190,19 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
         Registry leRegistry = leRegistrybyLAR1.get(0);
         // LE issues a ECR vLEI credential to the ECR Person.
         // Skip if the credential has already been issued.
-        Credential ecrCredbyLAR1 = TestUtils.getIssuedCredential(
+        CredentialRecord ecrCredbyLAR1 = TestUtils.getIssuedCredential(
                 clientLAR1,
                 aidLE,
                 aidECR,
                 ECR_SCHEMA_SAID
         );
-        Credential ecrCredbyLAR2 = TestUtils.getIssuedCredential(
+        CredentialRecord ecrCredbyLAR2 = TestUtils.getIssuedCredential(
                 clientLAR2,
                 aidLE,
                 aidECR,
                 ECR_SCHEMA_SAID
         );
-        Credential ecrCredbyLAR3 = TestUtils.getIssuedCredential(
+        CredentialRecord ecrCredbyLAR3 = TestUtils.getIssuedCredential(
                 clientLAR3,
                 aidLE,
                 aidECR,
@@ -1323,23 +1323,23 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             );
             TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/exn");
         }
-        CredentialSad ecrCredbyLAR1Sad = ecrCredbyLAR1.getSad();
-        CredentialSad ecrCredbyLAR2Sad = ecrCredbyLAR2.getSad();
-        CredentialSad ecrCredbyLAR3Sad = ecrCredbyLAR3.getSad();
+        CredentialSad ecrCredbyLAR1Sad = ecrCredbyLAR1.value().getSad();
+        CredentialSad ecrCredbyLAR2Sad = ecrCredbyLAR2.value().getSad();
+        CredentialSad ecrCredbyLAR3Sad = ecrCredbyLAR3.value().getSad();
         assertEquals(ecrCredbyLAR1Sad.getD(), ecrCredbyLAR2Sad.getD());
         assertEquals(ecrCredbyLAR1Sad.getD(), ecrCredbyLAR3Sad.getD());
         assertEquals(ecrCredbyLAR1Sad.getS(), ECR_SCHEMA_SAID);
         assertEquals(ecrCredbyLAR1Sad.getI(), aidLE.getPrefix());
         assertEquals(ecrCredbyLAR1Sad.getA().getI(), aidECR.getPrefix());
-        assertEquals(ecrCredbyLAR1.getStatus().getS(), "0");
-        assertNotNull(ecrCredbyLAR1.getAtc());
-        Credential ecrCred = ecrCredbyLAR1;
-        CredentialSad ecrCredSad = ecrCred.getSad();
+        assertEquals(ecrCredbyLAR1.value().getStatus().getS(), "0");
+        assertNotNull(ecrCredbyLAR1.acdcAttachment());
+        CredentialRecord ecrCred = ecrCredbyLAR1;
+        CredentialSad ecrCredSad = ecrCred.value().getSad();
         System.out.println("LE has issued an ECR vLEI credential with SAID: " + ecrCredSad.getD());
 
         // LE and ECR exchange grant and admit messages.
         // Skip if ECR has already received the credential.
-        Credential ecrCredbyECR1 = TestUtils.getReceivedCredential(clientECR, ecrCredSad.getD());
+        CredentialRecord ecrCredbyECR1 = TestUtils.getReceivedCredential(clientECR, ecrCredSad.getD());
 
         if (ecrCredbyECR1 == null) {
             TestUtils.admitSinglesig(
@@ -1353,7 +1353,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             ecrCredbyECR1 = TestUtils.waitForCredential(clientECR, ecrCredSad.getD());
         }
-        CredentialSad ecrCredbyECR1Sad = ecrCredbyECR1.getSad();
+        CredentialSad ecrCredbyECR1Sad = ecrCredbyECR1.value().getSad();
         assertEquals(ecrCredSad.getD(), ecrCredbyECR1Sad.getD());
     }
 
