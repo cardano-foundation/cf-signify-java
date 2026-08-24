@@ -11,19 +11,66 @@ import id.veridian.signify.cesr.Signer;
 import id.veridian.signify.cesr.util.Utils;
 import id.veridian.signify.core.Authenticater;
 import id.veridian.signify.core.Httping;
+import id.veridian.signify.generated.keria.model.Credential;
 import id.veridian.signify.generated.keria.model.Tier;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CredentialingTest extends BaseMockServerTest {
+
+    private static final String CESR_SAID = "EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo";
+    private static final String MISSING_SAID = "EAbsentAbsentAbsentAbsentAbsentAbsentAbsentA";
+
+    private static final String ISSUER_ICP = """
+        {"v":"KERI10JSON0000fd_","t":"icp","d":"EMQQpnSkgfUOgWdzQTWfrgiVHKIDAhvAZIPQ6z3EAfz1",\
+        "i":"EMQQpnSkgfUOgWdzQTWfrgiVHKIDAhvAZIPQ6z3EAfz1","s":"0","kt":"1",\
+        "k":["DAbWjobbaLqRB94KiAutAHb_qzPpOHm3LURA_ksxetVc"],"nt":"1",\
+        "n":["EIf-ENw7PrM52w4H-S7NGU2qVIfraXVIlV9hEAaMHg7W"],"bt":"0","b":[],"c":[],"a":[]}""";
+
+    private static final String ISSUER_ICP_ATTACHMENT =
+        "-VAn-AABAAB6P97kZ3al3V3z3VusdI-QsHDvOnJRXBH0aBLcgMYtIzJlDtR1KrqfgnBmDlBpXNCwlv6L6RtOxbxDXoBSTZUL";
+
+    private static final String ACDC = """
+        {"v":"ACDC10JSON000197_","d":"EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo",\
+        "i":"EMQQpnSkgfUOgWdzQTWfrgiVHKIDAhvAZIPQ6z3EAfz1",\
+        "ri":"EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df",\
+        "s":"EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao",\
+        "a":{"d":"EK0GOjijKd8_RLYz9qDuuG29YbbXjU8yJuTQanf07b6P",\
+        "i":"EKvn1M6shPLnXTb47bugVJblKMuWC0TcLIePP8p98Bby",\
+        "dt":"2023-08-23T15:16:07.553000+00:00","LEI":"5493001KJTIIGC8Y1R17"}}""";
+
+    private static final String ACDC_ATTACHMENT =
+        "-IABEMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo0AAAAAAAAAAAAAAAAAAAAAAAENf3IEYwYtFmlq5ZzoI-zFzeR7E3ZNRN2YH_0KAFbdJW";
+
+    private static final String CESR_STREAM =
+        ISSUER_ICP + ISSUER_ICP_ATTACHMENT + ACDC + ACDC_ATTACHMENT;
+
+    private Credentials connect() throws IOException, InterruptedException {
+        SignifyClient client = new SignifyClient(url, bran, Tier.LOW, bootUrl, null);
+        client.boot();
+        client.connect();
+        cleanUpRequest();
+        return client.credentials();
+    }
 
 
     @Override
     public MockResponse mockAllRequests(RecordedRequest req) {
+        if (req.getRequestUrl().toString().startsWith(url + "/credentials/" + MISSING_SAID)) {
+            return new MockResponse().setResponseCode(404).setBody("");
+        }
+
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("signify-resource", "EEXekkGu9IAzav6pZVJhkLnjtjM5v3AcyA-pdKUcaGei");
         headers.put(Httping.HEADER_SIG_TIME, Utils.currentDateTimeString());
@@ -51,7 +98,9 @@ public class CredentialingTest extends BaseMockServerTest {
                 if (reqUrl.startsWith(url + "/credentials/query")) {
                         body = "[" + MOCK_CREDENTIAL + "]";
                 } else if (reqUrl.startsWith(url + "/credentials/")) {
-                        body = MOCK_CREDENTIAL;
+                        body = "application/json+cesr".equals(req.getHeader("Accept"))
+                                ? CESR_STREAM
+                                : MOCK_CREDENTIAL;
                 } else if (reqUrl.contains("/identifiers/aid1/credentials")) {
                         body = "DELETE".equals(req.getMethod())
                                 ? "{\"name\": \"witness.EJ5EZpC_NjBKAPz8jzVUgRMQtyxpqsCKVefAFPSAVdSp\", \"done\": false, \"metadata\": {\"sn\": 2}}"
@@ -98,7 +147,7 @@ public class CredentialingTest extends BaseMockServerTest {
         assertEquals(Utils.jsonStringify(kargs), lastCall.getBody().readUtf8());
 
 
-        credentials.get("EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao", true);
+        credentials.getCESR("EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao");
         lastCall = mockWebServer.takeRequest();
         assertEquals("GET", lastCall.getMethod());
         assertEquals(url + "/credentials/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao", lastCall.getRequestUrl().toString());
@@ -184,5 +233,104 @@ public class CredentialingTest extends BaseMockServerTest {
         assertEquals("GET", lastCall.getMethod());
         assertEquals(url + "/registries/EGK216v1yguLfex4YRFnG7k1sXRjh3OKY7QqzdKsx7df/EMwcsEMUEruPXVwPCW7zmqmN8m0I3CihxolBm-RDrsJo", lastCall.getRequestUrl().toString());
         assertEquals(lastCall.getBody().readUtf8(), "");
+    }
+
+    @Test
+    @DisplayName("getCESR returns the whole stream, not just its first object")
+    void getCESRReturnsWholeStream() throws IOException, InterruptedException {
+        Credentials credentials = connect();
+
+        Optional<String> cesr = credentials.getCESR(CESR_SAID);
+
+        assertTrue(cesr.isPresent());
+        assertEquals(CESR_STREAM, cesr.get());
+        assertTrue(cesr.get().endsWith(ACDC_ATTACHMENT));
+
+        RecordedRequest lastCall = mockWebServer.takeRequest();
+        assertEquals("GET", lastCall.getMethod());
+        assertEquals(url + "/credentials/" + CESR_SAID, lastCall.getRequestUrl().toString());
+        assertEquals("application/json+cesr", lastCall.getHeader("Accept"));
+    }
+
+    @Test
+    @DisplayName("get asks for JSON and returns the typed credential")
+    void getSendsJsonAcceptHeader() throws IOException, InterruptedException {
+        Credentials credentials = connect();
+
+        Optional<Credential> cred = credentials.get(CESR_SAID);
+
+        assertTrue(cred.isPresent());
+        assertEquals(CESR_SAID, cred.get().getSad().getD());
+
+        RecordedRequest lastCall = mockWebServer.takeRequest();
+        assertEquals("application/json", lastCall.getHeader("Accept"));
+    }
+
+    @Test
+    @DisplayName("The deprecated overload still serves the JSON branch on false")
+    @SuppressWarnings("deprecation")
+    void deprecatedOverloadServesJsonOnFalse() throws IOException, InterruptedException {
+        Credentials credentials = connect();
+
+        Optional<Credential> cred = credentials.get(CESR_SAID, false);
+
+        assertTrue(cred.isPresent());
+        assertEquals(CESR_SAID, cred.get().getSad().getD());
+        assertNotNull(cred.get().getStatus());
+
+        RecordedRequest lastCall = mockWebServer.takeRequest();
+        assertEquals("application/json", lastCall.getHeader("Accept"));
+    }
+
+    // true asks for a different body, not a different encoding: the CESR stream carries the
+    // issuer/subject KELs and the registry/credential TELs that the JSON branch omits. Answering
+    // with the JSON branch would silently return less than was asked for.
+    @Test
+    @DisplayName("The deprecated overload refuses true instead of quietly serving JSON")
+    @SuppressWarnings("deprecation")
+    void deprecatedOverloadRejectsIncludeCesr() throws IOException, InterruptedException {
+        Credentials credentials = connect();
+        int before = mockWebServer.getRequestCount();
+
+        UnsupportedOperationException thrown = assertThrows(
+            UnsupportedOperationException.class,
+            () -> credentials.get(CESR_SAID, true)
+        );
+
+        assertTrue(thrown.getMessage().contains("getCESR"));
+        assertEquals(before, mockWebServer.getRequestCount());
+    }
+
+    @Test
+    @DisplayName("getCESR maps a 404 to an empty Optional")
+    void getCESRReturnsEmptyOn404() throws IOException, InterruptedException {
+        Credentials credentials = connect();
+
+        assertTrue(credentials.getCESR(MISSING_SAID).isEmpty());
+    }
+
+    // Pins the defect #118 describes: parsing the stream as a Credential neither throws nor
+    // yields anything usable, so the CESR path must stay a separate, string-returning method.
+    @Test
+    @DisplayName("Parsing a CESR stream as a Credential silently keeps only the first object")
+    void jsonParseOfCesrStreamKeepsOnlyFirstObject() {
+        Credential parsed = Utils.fromJson(CESR_STREAM, Credential.class);
+
+        assertNotNull(parsed);
+        assertAll(
+            () -> assertNull(parsed.getSad()),
+            () -> assertNull(parsed.getIss()),
+            () -> assertNull(parsed.getAnc()),
+            () -> assertNull(parsed.getStatus()),
+            () -> assertNull(parsed.getPre()),
+            () -> assertNull(parsed.getSchema()),
+            () -> assertNull(parsed.getAtc())
+        );
+
+        Map<String, Object> firstObject = Utils.fromJson(
+            CESR_STREAM.substring(0, CESR_STREAM.indexOf(ISSUER_ICP_ATTACHMENT)),
+            new TypeReference<Map<String, Object>>() {}
+        );
+        assertEquals("icp", firstObject.get("t"));
     }
 }

@@ -48,27 +48,18 @@ public class Credentials {
         return Utils.fromJson(response.body(), new TypeReference<List<Credential>>() {});
     }
 
-    public Optional<Credential> get(String said) {
-        return this.get(said, false);
-    }
-
     /**
      * Get a credential
      *
-     * @param said        - SAID of the credential
-     * @param includeCESR - Optional flag export the credential in CESR format
+     * @param said - SAID of the credential
      * @return Optional containing the credential if found, or empty if not found
      */
-    public Optional<Credential> get(String said, boolean includeCESR) {
+    public Optional<Credential> get(String said) {
         final String path = "/credentials/" + said;
         final String method = "GET";
 
         Map<String, String> extraHeaders = new LinkedHashMap<>();
-        if (includeCESR) {
-            extraHeaders.put("Accept", "application/json+cesr");
-        } else {
-            extraHeaders.put("Accept", "application/json");
-        }
+        extraHeaders.put("Accept", "application/json");
 
         HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
         if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
@@ -77,6 +68,47 @@ public class Credentials {
 
         Credential cred = Utils.fromJson(response.body(), Credential.class);
         return Optional.of(cred);
+    }
+
+    /**
+     * Get a credential
+     *
+     * @param said        - SAID of the credential
+     * @param includeCESR - must be false; see the deprecation note
+     * @return Optional containing the credential if found, or empty if not found
+     * @throws UnsupportedOperationException if includeCESR is true
+     * @deprecated use {@link #get(String)}, or {@link #getCESR(String)} for the CESR stream.
+     */
+    @Deprecated
+    public Optional<Credential> get(String said, boolean includeCESR) {
+        if (includeCESR) {
+            throw new UnsupportedOperationException(
+                    "includeCESR returns a CESR stream carrying the issuer and subject KELs, the "
+                            + "registry and credential TELs and every chained credential, which "
+                            + "cannot be represented as a Credential; use getCESR(said)");
+        }
+        return this.get(said);
+    }
+
+    /**
+     * Get a credential as a raw CESR stream.
+     *
+     * @param said - SAID of the credential
+     * @return Optional containing the CESR stream if found, or empty if not found
+     */
+    public Optional<String> getCESR(String said) {
+        final String path = "/credentials/" + said;
+        final String method = "GET";
+
+        Map<String, String> extraHeaders = new LinkedHashMap<>();
+        extraHeaders.put("Accept", "application/json+cesr");
+
+        HttpResponse<String> response = this.client.fetch(path, method, null, extraHeaders);
+        if (response.statusCode() == java.net.HttpURLConnection.HTTP_NOT_FOUND) {
+            return Optional.empty();
+        }
+
+        return Optional.of(response.body());
     }
 
 
