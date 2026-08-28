@@ -185,8 +185,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Credential qviCredHolder = getReceivedCredential(qviClient, sadQviCred.getD());
 
         if (qviCredHolder == null) {
-            sendGrantMessage(gleifClient, gleifAid, qviAid, qviCred);
-            sendAdmitMessage(qviClient, qviAid, gleifAid);
+            String grantSaid0 = sendGrantMessage(gleifClient, gleifAid, qviAid, qviCred);
+            String admitSaid0 = sendAdmitMessage(qviClient, qviAid, gleifAid, grantSaid0);
+            waitAndMarkNotification(gleifClient, "/exn/ipex/admit", admitSaid0);
         }
 
         qviCredHolder = waitForCredential(qviClient, sadQviCred.getD());
@@ -224,8 +225,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Credential leCredHolder = getReceivedCredential(leClient, sadLeCred.getD());
 
         if (leCredHolder == null) {
-            sendGrantMessage(qviClient, qviAid, leAid, leCred);
-            sendAdmitMessage(leClient, leAid, qviAid);
+            String grantSaid1 = sendGrantMessage(qviClient, qviAid, leAid, leCred);
+            String admitSaid1 = sendAdmitMessage(leClient, leAid, qviAid, grantSaid1);
+            waitAndMarkNotification(qviClient, "/exn/ipex/admit", admitSaid1);
 
             leCredHolder = waitForCredential(leClient, sadLeCred.getD());
         }
@@ -269,8 +271,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Credential ecrCredHolder = getReceivedCredential(roleClient, sadEcrCred.getD());
 
         if (ecrCredHolder == null) {
-            sendGrantMessage(leClient, leAid, roleAid, ecrCred);
-            sendAdmitMessage(roleClient, roleAid, leAid);
+            String grantSaid2 = sendGrantMessage(leClient, leAid, roleAid, ecrCred);
+            String admitSaid2 = sendAdmitMessage(roleClient, roleAid, leAid, grantSaid2);
+            waitAndMarkNotification(leClient, "/exn/ipex/admit", admitSaid2);
 
             ecrCredHolder = waitForCredential(roleClient, sadEcrCred.getD());
         }
@@ -314,8 +317,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Credential ecrAuthCredHolder = getReceivedCredential(roleClient, sadEcrAuthCred.getD());
 
         if (ecrAuthCredHolder == null) {
-            sendGrantMessage(leClient, leAid, qviAid, ecrAuthCred);
-            sendAdmitMessage(qviClient, qviAid, leAid);
+            String grantSaid3 = sendGrantMessage(leClient, leAid, qviAid, ecrAuthCred);
+            String admitSaid3 = sendAdmitMessage(qviClient, qviAid, leAid, grantSaid3);
+            waitAndMarkNotification(leClient, "/exn/ipex/admit", admitSaid3);
 
             ecrAuthCredHolder = waitForCredential(qviClient, sadEcrAuthCred.getD());
         }
@@ -360,8 +364,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Credential ecrCredHolder2 = getReceivedCredential(roleClient, sadEcrCred2.getD());
 
         if (ecrCredHolder2 == null) {
-            sendGrantMessage(qviClient, qviAid, roleAid, ecrCred2);
-            sendAdmitMessage(roleClient, roleAid, qviAid);
+            String grantSaid4 = sendGrantMessage(qviClient, qviAid, roleAid, ecrCred2);
+            String admitSaid4 = sendAdmitMessage(roleClient, roleAid, qviAid, grantSaid4);
+            waitAndMarkNotification(qviClient, "/exn/ipex/admit", admitSaid4);
 
             ecrCredHolder2 = waitForCredential(roleClient, sadEcrCred2.getD());
         }
@@ -402,8 +407,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Credential oorAuthCredHolder = getReceivedCredential(qviClient, sadOorAuthCred.getD());
 
         if (oorAuthCredHolder == null) {
-            sendGrantMessage(leClient, leAid, qviAid, oorAuthCred);
-            sendAdmitMessage(qviClient, qviAid, leAid);
+            String grantSaid5 = sendGrantMessage(leClient, leAid, qviAid, oorAuthCred);
+            String admitSaid5 = sendAdmitMessage(qviClient, qviAid, leAid, grantSaid5);
+            waitAndMarkNotification(leClient, "/exn/ipex/admit", admitSaid5);
 
             oorAuthCredHolder = waitForCredential(qviClient, sadOorAuthCred.getD());
         }
@@ -447,8 +453,9 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         Credential oorCredHolder = getReceivedCredential(qviClient, sadOorCred.getD());
 
         if (oorCredHolder == null) {
-            sendGrantMessage(qviClient, qviAid, roleAid, oorCred);
-            sendAdmitMessage(roleClient, roleAid, qviAid);
+            String grantSaid6 = sendGrantMessage(qviClient, qviAid, roleAid, oorCred);
+            String admitSaid6 = sendAdmitMessage(roleClient, roleAid, qviAid, grantSaid6);
+            waitAndMarkNotification(qviClient, "/exn/ipex/admit", admitSaid6);
 
             oorCredHolder = waitForCredential(roleClient, sadOorCred.getD());
         }
@@ -471,7 +478,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 roleClient
         );
         assertOperations(clientList);
-        warnNotifications(clientList);
+        assertNotifications(clientList);
     }
 
     public IssuerRegistry getOrCreateRegistry(SignifyClient client, Aid aid, String registryName) {
@@ -495,7 +502,7 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         return registry;
     }
 
-    public void sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) {
+    public String sendGrantMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, Credential credential) {
         IpexGrantArgs grantArgs = IpexGrantArgs.builder()
                 .senderName(senderAid.name)
                 .acdc(new Serder(Utils.toMap(credential.getSad())))
@@ -514,10 +521,14 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
                 Collections.singletonList(recipientAid.prefix)
         );
         waitForCompleted(senderClient, op);
+
+        String grantSaid = result.exn().getKed().get("d").toString();
+        waitAndMarkNotification(senderClient, "/exn/ipex/grant", grantSaid);
+        return grantSaid;
     }
 
-    public void sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid) {
-        List<Notification> notifications = waitForNotifications(senderClient, "/exn/ipex/grant");
+    public String sendAdmitMessage(SignifyClient senderClient, Aid senderAid, Aid recipientAid, String grantSaid) {
+        List<Notification> notifications = waitForNotifications(senderClient, "/exn/ipex/grant", grantSaid);
         assertEquals(1, notifications.size());
         Notification grantNotification = notifications.getFirst();
 
@@ -539,6 +550,10 @@ public class SinglesigVleiIssuanceTest extends BaseIntegrationTest {
         );
         waitForCompleted(senderClient, op);
         markAndRemoveNotification(senderClient, grantNotification);
+
+        String admitSaid = result.exn().getKed().get("d").toString();
+        waitAndMarkNotification(senderClient, "/exn/ipex/admit", admitSaid);
+        return admitSaid;
     }
 
     public static class DataString {

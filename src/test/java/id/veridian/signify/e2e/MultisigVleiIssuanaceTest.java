@@ -254,7 +254,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientGAR2, multisigAIDOp2)
             );
 
-            TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/icp");
+            TestUtils.assertNoNotifications(clientGAR1, "/multisig/icp");
 
             aidGEDAbyGAR1 = clientGAR1.identifiers().get("GEDA").get();
             aidGEDAbyGAR2 = clientGAR2.identifiers().get("GEDA").get();
@@ -297,7 +297,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     ).toList();
             waitOperationAsync(waitOperationArgs.toArray(new WaitOperationArgs[0]));
 
-            TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/rpy");
+            TestUtils.assertNoNotifications(clientGAR1, "/multisig/rpy");
 
             oobiGEDAbyGAR1 = clientGAR1.oobis().get(aidGEDA.getName(), "agent").get();
             oobiGEDAbyGAR2 = clientGAR2.oobis().get(aidGEDA.getName(), "agent").get();
@@ -403,7 +403,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientGAR2, ixnOp2)
             );
 
-            TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/ixn");
+            TestUtils.assertNoNotifications(clientGAR1, "/multisig/ixn");
 
             // QARs query the GEDA's key state
             QueryOperation queryOp1 = clientQAR1.keyStates().query(aidGEDA.getPrefix(), "1");
@@ -419,7 +419,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientQAR3, queryOp3)
             );
 
-            TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/icp");
+            TestUtils.assertNoNotifications(clientQAR1, "/multisig/icp");
 
             aidQVIbyQAR1 = clientQAR1.identifiers().get("QVI").get();
             aidQVIbyQAR2 = clientQAR2.identifiers().get("QVI").get();
@@ -485,8 +485,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     ).toList();
 
             waitOperationAsync(waitOperationArgs.toArray(new WaitOperationArgs[0]));
-            TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/rpy");
-            TestUtils.waitAndMarkNotification(clientQAR2, "/multisig/rpy");
+            TestUtils.assertNoNotifications(clientQAR1, "/multisig/rpy");
+            TestUtils.assertNoNotifications(clientQAR2, "/multisig/rpy");
 
             oobiLst = getOobisAsync(
                     new GetOobisArgs(clientQAR1, aidQVI.getName(), "agent"),
@@ -545,7 +545,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientGAR2, registryOp2)
             );
 
-            TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/vcp");
+            TestUtils.assertNoNotifications(clientGAR1, "/multisig/vcp");
             gedaRegistrybyGAR1 = clientGAR1.registries().list(aidGEDA.getName());
             gedaRegistrybyGAR2 = clientGAR2.registries().list(aidGEDA.getName());
         }
@@ -606,7 +606,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientGAR2, IssOp2)
             );
 
-            TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/iss");
+            TestUtils.assertNoNotifications(clientGAR1, "/multisig/iss");
 
             qviCredbyGAR1 = TestUtils.getIssuedCredential(
                     clientGAR1,
@@ -645,7 +645,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            TestUtils.waitAndMarkNotification(clientGAR1, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientGAR1, "/multisig/exn");
         }
 
         CredentialSad qviCredbyGAR1Sad = qviCredbyGAR1.getSad();
@@ -676,7 +676,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     List.of(aidQAR2, aidQAR3),
                     aidQVI,
                     aidGEDA,
-                    admitTime
+                    admitTime,
+                    true
             );
 
             MultisigUtils.admitMultisig(
@@ -699,9 +700,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
 
             TestUtils.waitAndMarkNotification(clientGAR1, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientGAR2, "/exn/ipex/admit");
-            TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/exn");
-            TestUtils.waitAndMarkNotification(clientQAR2, "/multisig/exn");
-            TestUtils.waitAndMarkNotification(clientQAR3, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientQAR1, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientQAR2, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientQAR3, "/multisig/exn");
             TestUtils.waitAndMarkNotification(clientQAR1, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientQAR2, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientQAR3, "/exn/ipex/admit");
@@ -776,7 +777,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientLAR3, multisigAIDOp3)
             );
 
-            TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/icp");
+            TestUtils.assertNoNotifications(clientLAR1, "/multisig/icp");
 
             aidLEbyLAR1 = clientLAR1.identifiers().get("LE").get();
             aidLEbyLAR2 = clientLAR2.identifiers().get("LE").get();
@@ -843,8 +844,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     ).toList();
 
             waitOperationAsync(waitOperationArgs.toArray(new WaitOperationArgs[0]));
-            TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/rpy");
-            TestUtils.waitAndMarkNotification(clientLAR2, "/multisig/rpy");
+            TestUtils.assertNoNotifications(clientLAR1, "/multisig/rpy");
+            TestUtils.assertNoNotifications(clientLAR2, "/multisig/rpy");
 
             oobiLst = getOobisAsync(
                     new GetOobisArgs(clientLAR1, aidLE.getName(), "agent"),
@@ -912,7 +913,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientQAR3, registryOp3)
             );
 
-            TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/vcp");
+            TestUtils.assertNoNotifications(clientQAR1, "/multisig/vcp");
             qviRegistrybyQAR1 = clientQAR1.registries().list(aidQVI.getName());
             qviRegistrybyQAR2 = clientQAR2.registries().list(aidQVI.getName());
             qviRegistrybyQAR3 = clientQAR3.registries().list(aidQVI.getName());
@@ -1005,7 +1006,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientQAR2, IssOp2),
                     new WaitOperationArgs(clientQAR3, IssOp3)
             );
-            waitAndMarkNotification(clientQAR1, "/multisig/iss");
+            TestUtils.assertNoNotifications(clientQAR1, "/multisig/iss");
 
             leCredbyQAR1 = TestUtils.getIssuedCredential(
                     clientQAR1,
@@ -1060,7 +1061,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     false
             );
 
-            TestUtils.waitAndMarkNotification(clientQAR1, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientQAR1, "/multisig/exn");
         }
         CredentialSad leCredbyQAR1Sad = leCredbyQAR1.getSad();
         CredentialSad leCredbyQAR2Sad = leCredbyQAR2.getSad();
@@ -1091,7 +1092,8 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     List.of(aidLAR2, aidLAR3),
                     aidLE,
                     aidQVI,
-                    admitTime
+                    admitTime,
+                    true
             );
 
             MultisigUtils.admitMultisig(
@@ -1115,9 +1117,9 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
             TestUtils.waitAndMarkNotification(clientQAR1, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientQAR2, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientQAR3, "/exn/ipex/admit");
-            TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/exn");
-            TestUtils.waitAndMarkNotification(clientLAR2, "/multisig/exn");
-            TestUtils.waitAndMarkNotification(clientLAR3, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientLAR1, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientLAR2, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientLAR3, "/multisig/exn");
             TestUtils.waitAndMarkNotification(clientLAR1, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientLAR2, "/exn/ipex/admit");
             TestUtils.waitAndMarkNotification(clientLAR3, "/exn/ipex/admit");
@@ -1177,7 +1179,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientLAR3, registryOp3)
             );
 
-            TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/vcp");
+            TestUtils.assertNoNotifications(clientLAR1, "/multisig/vcp");
             leRegistrybyLAR1 = clientLAR1.registries().list(aidLE.getName());
             leRegistrybyLAR2 = clientLAR2.registries().list(aidLE.getName());
             leRegistrybyLAR3 = clientLAR3.registries().list(aidLE.getName());
@@ -1269,7 +1271,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     new WaitOperationArgs(clientLAR2, IssOp2),
                     new WaitOperationArgs(clientLAR3, IssOp3)
             );
-            waitAndMarkNotification(clientLAR1, "/multisig/iss");
+            TestUtils.assertNoNotifications(clientLAR1, "/multisig/iss");
 
             ecrCredbyLAR1 = TestUtils.getIssuedCredential(
                     clientLAR1,
@@ -1321,7 +1323,7 @@ public class MultisigVleiIssuanaceTest extends BaseIntegrationTest {
                     grantTime,
                     false
             );
-            TestUtils.waitAndMarkNotification(clientLAR1, "/multisig/exn");
+            TestUtils.assertNoNotifications(clientLAR1, "/multisig/exn");
         }
         CredentialSad ecrCredbyLAR1Sad = ecrCredbyLAR1.getSad();
         CredentialSad ecrCredbyLAR2Sad = ecrCredbyLAR2.getSad();

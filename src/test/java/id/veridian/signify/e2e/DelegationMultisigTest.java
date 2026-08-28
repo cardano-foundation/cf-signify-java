@@ -20,6 +20,7 @@ import java.util.*;
 
 import static id.veridian.signify.e2e.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DelegationMultisigTest extends BaseIntegrationTest {
@@ -168,8 +169,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
             opList2.forEach(op -> waitOperationArgsList.add(new WaitOperationArgs(delegator2Client, op)));
             waitOperationAsync(waitOperationArgsList.toArray(new WaitOperationArgs[0]));
 
-            TestUtils.waitAndMarkNotification(delegator1Client, "/multisig/rpy");
-            TestUtils.waitAndMarkNotification(delegator2Client, "/multisig/rpy");
+            TestUtils.assertNoNotifications(delegator1Client, "/multisig/rpy");
+            TestUtils.assertNoNotifications(delegator2Client, "/multisig/rpy");
 
             OOBI odelegatorGroupName1 = delegator1Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
             OOBI odelegatorGroupName2 = delegator2Client.oobis().get(adelegatorGroupName.getName(), "agent").get();
@@ -263,7 +264,8 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
             String responseDresult2 = dresult2.getName();
 
             assertEquals(responseDresult1, responseDresult2);
-            waitAndMarkNotification(delegator1Client, "/multisig/ixn");
+            TestUtils.assertNoNotifications(delegator1Client, "/multisig/ixn");
+            TestUtils.assertNoNotifications(delegator2Client, "/multisig/ixn");
         });
 
         QueryOperation queryOp1 = delegator1Client.keyStates().query(adelegatorGroupName.getPrefix(), "1", null);
@@ -295,6 +297,24 @@ public class DelegationMultisigTest extends BaseIntegrationTest {
                 delegatee1Client,
                 delegatee2Client
         );
+        List<Notification> delegateRequests = Retry.retry(() -> {
+            List<Notification> seen = new ArrayList<>();
+            for (SignifyClient cl : List.of(delegator1Client, delegator2Client)) {
+                cl.notifications().list().notes().stream()
+                        .filter(n -> n.getA() != null && "/delegate/request".equals(n.getA().getR())
+                                && !Boolean.TRUE.equals(n.getR()))
+                        .forEach(n -> {
+                            TestUtils.markNotification(cl, n);
+                            seen.add(n);
+                        });
+            }
+            if (seen.isEmpty()) {
+                throw new IllegalStateException("delegator never received /delegate/request");
+            }
+            return seen;
+        }, Retry.RetryOptions.builder().timeout(15000).build());
+        assertFalse(delegateRequests.isEmpty());
+
         assertOperations(clients);
         assertNotifications(clients);
     }
