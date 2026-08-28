@@ -206,12 +206,12 @@ public class MultisigUtils {
                                             List<HabState> otherMemberAIDs, HabState multisigAID,
                                             String timestamp,
                                             boolean isInitiator) {
-        if (!isInitiator) {
-            TestUtils.waitAndMarkNotification(client, MULTISIG_RPY_ROUTE);
-        }
-
         List<EndRoleOperation> opList = new ArrayList<>();
         GroupMember members = client.identifiers().members(groupName);
+
+        if (!isInitiator) {
+            TestUtils.waitAndMarkNotification(client, MULTISIG_RPY_ROUTE, members.getSigning().size());
+        }
 
         for (AidRecord signing : members.getSigning()) {
             String eid = signing.getEnds().getAgent().keySet().iterator().next();
@@ -315,6 +315,22 @@ public class MultisigUtils {
             HabState recipientAID,
             String timestamp
     ) {
+        admitMultisig(client, aid, otherMemberAIDs, multisigAID, recipientAID, timestamp, false);
+    }
+
+    public static void admitMultisig(
+            SignifyClient client,
+            HabState aid,
+            List<HabState> otherMemberAIDs,
+            HabState multisigAID,
+            HabState recipientAID,
+            String timestamp,
+            boolean isInitiator
+    ) {
+        if (!isInitiator) {
+            TestUtils.waitAndMarkNotification(client, MULTISIG_EXN_ROUTE);
+        }
+
         String grantMsgSaid = TestUtils.waitAndMarkNotification(client, "/exn" + IPEX_GRANT_ROUTE);
 
         IpexAdmitArgs ipexAdmitArgs = IpexAdmitArgs

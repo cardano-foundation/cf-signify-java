@@ -66,13 +66,22 @@ public class TestUtils {
     }
 
     public static void assertNotifications(List<SignifyClient> clients) {
-        for (SignifyClient client : clients) {
+        for (int i = 0; i < clients.size(); i++) {
+            SignifyClient client = clients.get(i);
             NotificationListResponse res = client.notifications().list();
             filteredNotes = res.notes().stream()
                     .filter(note -> !Boolean.TRUE.equals(note.getR()))
                     .collect(Collectors.toList());
-            assertEquals(0, filteredNotes.size());
+            assertEquals(0, filteredNotes.size(),
+                    "Unread notifications remain for client " + i + ": " + describe(filteredNotes));
         }
+    }
+
+    private static String describe(List<Notification> notes) {
+        return notes.stream()
+                .map(n -> (n.getA() == null ? "?" : n.getA().getR())
+                        + "(" + (n.getA() == null ? "?" : n.getA().getD()) + ")")
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 
     public static Aid createAid(SignifyClient client, String name) {
@@ -331,19 +340,6 @@ public class TestUtils {
         return false;
     }
 
-    public static void warnNotifications(List<SignifyClient> clients) {
-        int count = 0;
-        for (SignifyClient client : clients) {
-            NotificationListResponse res = client.notifications().list();
-            List<Notification> notes = res.notes();
-            if (!notes.isEmpty()) {
-                count += notes.size();
-                log.warn("notifications", notes);
-            }
-        }
-        assertTrue(count > 0);
-    }
-
     public static void deleteOperations(SignifyClient client, Operation op) {
         KelOperation dep = Operations.dependsOf(op);
 
@@ -398,9 +394,55 @@ public class TestUtils {
         }, CREDENTIAL_RETRY_OPTIONS);
     }
 
-    public static String waitAndMarkNotification(SignifyClient client, String route) {
-        List<Notification> notes = waitForNotifications(client, route);
+    private static boolean matchesNotification(Notification note, String route, String said) {
+        return note.getA() != null
+                && Objects.equals(route, note.getA().getR())
+                && !Boolean.TRUE.equals(note.getR())
+                && (said == null || Objects.equals(said, note.getA().getD()));
+    }
 
+    public static void drainNotifications(SignifyClient client, String route, String said) {
+        retry(() -> {
+            List<Notification> notes = client.notifications().list().notes().stream()
+                    .filter(note -> matchesNotification(note, route, said))
+                    .toList();
+            if (!notes.isEmpty()) {
+                markAll(client, notes);
+                throw new IllegalStateException("marked " + notes.size() + " on " + route + ", re-checking");
+            }
+            return true;
+        }, Retry.RetryOptions.builder().timeout(10000).build());
+    }
+
+    public static void assertNoNotifications(SignifyClient client, String route) {
+        assertNoNotifications(client, route, null);
+    }
+
+    public static void assertNoNotifications(SignifyClient client, String route, String said) {
+        NotificationListResponse res = client.notifications().list();
+        List<Notification> notes = res.notes().stream()
+                .filter(note -> matchesNotification(note, route, said))
+                .toList();
+        assertEquals(0, notes.size(),
+                "Unexpected unread notifications on route " + route + ": " + describe(notes));
+    }
+
+    public static String waitAndMarkNotification(SignifyClient client, String route) {
+        return waitAndMarkNotification(client, route, 1);
+    }
+
+    public static String waitAndMarkNotification(SignifyClient client, String route, String said) {
+        List<Notification> notes = waitForNotifications(
+                client, route, Retry.RetryOptions.builder().build(), 1, said);
+        return markAll(client, notes);
+    }
+
+    public static String waitAndMarkNotification(SignifyClient client, String route, int minCount) {
+        List<Notification> notes = waitForNotifications(client, route, minCount);
+        return markAll(client, notes);
+    }
+
+    private static String markAll(SignifyClient client, List<Notification> notes) {
         List<CompletableFuture<Void>> markOperationFutures = new ArrayList<>();
         for (Notification note : notes) {
             markOperationFutures.add(CompletableFuture.runAsync(() -> {
@@ -423,17 +465,37 @@ public class TestUtils {
         return waitForNotifications(client, route, Retry.RetryOptions.builder().build());
     }
 
+    public static List<Notification> waitForNotifications(SignifyClient client, String route, String said) {
+        return waitForNotifications(client, route, Retry.RetryOptions.builder().build(), 1, said);
+    }
+
+    public static List<Notification> waitForNotifications(SignifyClient client, String route, int minCount) {
+        return waitForNotifications(client, route, Retry.RetryOptions.builder().build(), minCount);
+    }
+
     public static List<Notification> waitForNotifications(SignifyClient client, String route, Retry.RetryOptions retryOptions) {
+        return waitForNotifications(client, route, retryOptions, 1);
+    }
+
+    public static List<Notification> waitForNotifications(SignifyClient client, String route,
+                                                          Retry.RetryOptions retryOptions, int minCount) {
+        return waitForNotifications(client, route, retryOptions, minCount, null);
+    }
+
+    public static List<Notification> waitForNotifications(SignifyClient client, String route,
+                                                          Retry.RetryOptions retryOptions, int minCount,
+                                                          String said) {
         return retry(() -> {
             NotificationListResponse response = client.notifications().list();
 
             filteredNotes = response.notes().stream()
-                    .filter(note -> note.getA() != null && Objects.equals(route, note.getA().getR())
-                            && !Boolean.TRUE.equals(note.getR()))
+                    .filter(note -> matchesNotification(note, route, said))
                     .toList();
 
-            if (filteredNotes.isEmpty()) {
-                throw new IllegalStateException("No notifications with route " + route);
+            if (filteredNotes.size() < minCount) {
+                throw new IllegalStateException("No notifications with route " + route
+                        + (said == null ? "" : " and SAID " + said)
+                        + "; expected at least " + minCount + ", got " + filteredNotes.size());
             }
             return filteredNotes;
         }, retryOptions);

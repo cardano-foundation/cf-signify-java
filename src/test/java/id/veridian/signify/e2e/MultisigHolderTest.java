@@ -420,6 +420,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         System.out.println("Issuer sent credential grant to holder.");
 
         String grantMsgSaid = waitAndMarkNotification(client1, "/exn/ipex/grant");
+        waitAndMarkNotification(client3, "/exn/ipex/grant", grantMsgSaid);
         System.out.println("Member1 received /exn/ipex/grant msg with SAID: " + grantMsgSaid);
 
         ExchangeResource exnRes = client1.exchanges().get(grantMsgSaid).get();
@@ -434,7 +435,8 @@ public class MultisigHolderTest extends BaseIntegrationTest {
                 "member1",
                 getExn.getD(),
                 getExn.getI(),
-                recp
+                recp,
+                true
         );
 
         LinkedHashMap<String, Object> exnGetE = castObjectToLinkedHashMap(getExn.getE());
@@ -465,6 +467,11 @@ public class MultisigHolderTest extends BaseIntegrationTest {
         waitForCompleted(client1, exop1);
         waitForCompleted(client2, exop2);
 
+        waitAndMarkNotification(client1, "/exn/ipex/admit");
+        waitAndMarkNotification(client2, "/exn/ipex/admit");
+        waitAndMarkNotification(client3, "/exn/ipex/admit");
+        drainNotifications(client3, "/exn/ipex/admit", null);
+
         CredentialFilter args = CredentialFilter.builder().build();
         List<Credential> creds1 = retry(() -> {
             List<Credential> creds = client1.credentials().list(args);
@@ -478,7 +485,7 @@ public class MultisigHolderTest extends BaseIntegrationTest {
 
         List<SignifyClient> clientList = Arrays.asList(client1, client2, client3);
         assertOperations(clientList);
-        warnNotifications(clientList);
+        assertNotifications(clientList);
     }
 
     public HabState createAid(SignifyClient client, String name, List<String> wits) {
@@ -558,6 +565,21 @@ public class MultisigHolderTest extends BaseIntegrationTest {
             String issuerPrefix,
             List<String> recipients
     ) {
+        return multisigAdmitCredential(client, groupName, memberAlias, grantSaid, issuerPrefix, recipients, false);
+    }
+
+    public ExchangeOperation multisigAdmitCredential(
+            SignifyClient client,
+            String groupName,
+            String memberAlias,
+            String grantSaid,
+            String issuerPrefix,
+            List<String> recipients,
+            boolean isInitiator
+    ) {
+        if (!isInitiator) {
+            waitAndMarkNotification(client, "/multisig/exn");
+        }
         HabState mhab = client.identifiers().get(memberAlias).get();
         HabState ghab = client.identifiers().get(groupName).get();
 

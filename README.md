@@ -72,10 +72,10 @@ $ docker compose up --wait
  ✔ Container signify-ts-witness-demo-1  Healthy                                           6.2s
 ```
 
-It is possible to change the keria image by using environment variables. For example, to use weboftrust/keria:0.1.3, do:
+It is possible to change the keria image by using environment variables. For example, to use gleif/keria:0.4.1-dev1, do:
 
 ```bash
-export KERIA_IMAGE_TAG=0.1.3
+export KERIA_IMAGE_TAG=0.4.1-dev1
 docker compose pull
 docker compose up --wait
 ```
@@ -83,7 +83,7 @@ docker compose up --wait
 To use another repository, you can do:
 
 ```bash
-export KERIA_IMAGE=gleif/keria
+export KERIA_IMAGE=weboftrust/keria
 docker compose pull
 docker compose up --wait
 ```

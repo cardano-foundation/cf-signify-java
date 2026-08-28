@@ -47,6 +47,8 @@ public class CredentialsTest extends BaseIntegrationTest {
     private static SignifyClient issuerClient, holderClient, verifierClient, legalEntityClient;
     private TestUtils.Aid issuerAid, holderAid, verifierAid, legalEntityAid;
     private String applySaid, offerSaid, agreeSaid;
+    private String qviGrantSaid, qviAdmitSaid, presentationGrantSaid, presentationAdmitSaid;
+    private String leGrantSaid, leAdmitSaid;
 
     @BeforeAll
     public static void getClients() {
@@ -237,9 +239,11 @@ public class CredentialsTest extends BaseIntegrationTest {
             gArgs.setDatetime(dt);
 
             Exchanging.ExchangeMessageResult result = issuerClient.ipex().grant(gArgs);
+            qviGrantSaid = result.exn().getKed().get("d").toString();
             List<String> holderAidPrefix = Collections.singletonList(holderAid.prefix);
             ExchangeOperation op = issuerClient.ipex().submitGrant(issuerAid.name, result.exn(), result.sigs(), result.atc(), holderAidPrefix);
             waitForCompleted(issuerClient, op);
+            waitAndMarkNotification(issuerClient, "/exn" + IPEX_GRANT_ROUTE, qviGrantSaid);
         });
 
         testSteps.step("Holder can get the credential status before or without holding", () -> {
@@ -253,8 +257,11 @@ public class CredentialsTest extends BaseIntegrationTest {
         });
 
         testSteps.step("holder IPEX admit", () -> {
-            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_GRANT_ROUTE);
+            List<Notification> holderNotifications =
+                    waitForNotifications(holderClient, "/exn" + IPEX_GRANT_ROUTE, qviGrantSaid);
+            assertEquals(1, holderNotifications.size());
             Notification grantNotification = holderNotifications.getFirst();
+            assertNotNull(grantNotification.getA().getD());
 
             IpexAdmitArgs iargs = IpexAdmitArgs.builder().build();
             iargs.setSenderName(holderAid.name);
@@ -264,15 +271,19 @@ public class CredentialsTest extends BaseIntegrationTest {
             iargs.setDatetime(createTimestamp());
 
             Exchanging.ExchangeMessageResult result = holderClient.ipex().admit(iargs);
+            qviAdmitSaid = result.exn().getKed().get("d").toString();
             ExchangeOperation op = holderClient.ipex().submitAdmit(
                     holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(issuerAid.prefix)
             );
             waitForCompleted(holderClient, op);
+            waitAndMarkNotification(holderClient, "/exn" + IPEX_ADMIT_ROUTE, qviAdmitSaid);
             markAndRemoveNotification(holderClient, grantNotification);
         });
 
         testSteps.step("Issuer IPEX grant response", () -> {
-            List<Notification> issuerNotifications = waitForNotifications(issuerClient, "/exn" + IPEX_ADMIT_ROUTE);
+            List<Notification> issuerNotifications =
+                    waitForNotifications(issuerClient, "/exn" + IPEX_ADMIT_ROUTE, qviAdmitSaid);
+            assertEquals(1, issuerNotifications.size());
             markAndRemoveNotification(issuerClient, issuerNotifications.getFirst());
         });
 
@@ -282,6 +293,8 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertEquals(issuerAid.prefix, holderCredential.getSad().getI());
             assertEquals("0", holderCredential.getStatus().getS());
             assertNotNull(holderCredential.getAtc());
+
+            assertNoNotifications(holderClient, "/exn" + IPEX_GRANT_ROUTE, qviGrantSaid);
         });
 
         testSteps.step("Verifier IPEX apply", () -> {
@@ -293,19 +306,23 @@ public class CredentialsTest extends BaseIntegrationTest {
             args.setDatetime(createTimestamp());
 
             Exchanging.ExchangeMessageResult result = verifierClient.ipex().apply(args);
+            applySaid = result.exn().getKed().get("d").toString();
             ExchangeOperation op = verifierClient.ipex().submitApply(
                     verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
             );
             waitForCompleted(verifierClient, op);
+            waitAndMarkNotification(verifierClient, "/exn" + IPEX_APPLY_ROUTE, applySaid);
         });
 
         testSteps.step("Holder IPEX apply receive and offer", () -> {
-            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_APPLY_ROUTE);
+            List<Notification> holderNotifications =
+                    waitForNotifications(holderClient, "/exn" + IPEX_APPLY_ROUTE, applySaid);
+            assertEquals(1, holderNotifications.size());
             Notification holderApplyNote = holderNotifications.getFirst();
             assertNotNull(holderApplyNote.getA().getD());
 
             IpexApplyExchange apply = holderClient.exchanges().get(holderApplyNote.getA().getD(), IpexApplyExchange.class).orElseThrow();
-            applySaid = apply.exn().getD();
+            assertEquals(applySaid, apply.exn().getD());
 
             Map<String, Object> aBody = apply.a();
 
@@ -324,28 +341,32 @@ public class CredentialsTest extends BaseIntegrationTest {
             List<Credential> matchingCreds = holderClient.credentials().list(cFilter);
             assertEquals(1, matchingCreds.size());
 
-            markAndRemoveNotification(holderClient, holderNotifications.getFirst());
+            markAndRemoveNotification(holderClient, holderApplyNote);
 
             IpexOfferArgs offerArgs = IpexOfferArgs.builder().build();
             offerArgs.setSenderName(holderAid.name);
             offerArgs.setRecipient(verifierAid.prefix);
             offerArgs.setAcdc(new Serder(Utils.toMap(matchingCreds.get(0).getSad())));
-            offerArgs.setApplySaid(applySaid);
+            offerArgs.setApplySaid(holderApplyNote.getA().getD());
             offerArgs.setDatetime(createTimestamp());
 
             Exchanging.ExchangeMessageResult result = holderClient.ipex().offer(offerArgs);
+            offerSaid = result.exn().getKed().get("d").toString();
             ExchangeOperation op = holderClient.ipex().submitOffer(holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix));
             waitForCompleted(holderClient, op);
+            waitAndMarkNotification(holderClient, "/exn" + IPEX_OFFER_ROUTE, offerSaid);
         });
 
         testSteps.step("Verifier receive offer and agree", () -> {
-            List<Notification> verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_OFFER_ROUTE);
+            List<Notification> verifierNotifications =
+                    waitForNotifications(verifierClient, "/exn" + IPEX_OFFER_ROUTE, offerSaid);
+            assertEquals(1, verifierNotifications.size());
             Notification verifierOfferNote = verifierNotifications.getFirst();
             assertNotNull(verifierOfferNote.getA().getD());
 
             IpexOfferExchange offer = verifierClient.exchanges().get(verifierOfferNote.getA().getD(), IpexOfferExchange.class).orElseThrow();
 
-            offerSaid = offer.exn().getD();
+            assertEquals(offerSaid, offer.exn().getD());
             String p = offer.exn().getP();
 
             ACDCAttributes a = offer.e().acdc().value().getA();
@@ -359,23 +380,27 @@ public class CredentialsTest extends BaseIntegrationTest {
             IpexAgreeArgs agreeArgs = IpexAgreeArgs.builder().build();
             agreeArgs.setSenderName(verifierAid.name);
             agreeArgs.setRecipient(holderAid.prefix);
-            agreeArgs.setOfferSaid(offerSaid);
+            agreeArgs.setOfferSaid(verifierOfferNote.getA().getD());
             agreeArgs.setDatetime(createTimestamp());
 
             Exchanging.ExchangeMessageResult result = verifierClient.ipex().agree(agreeArgs);
+            agreeSaid = result.exn().getKed().get("d").toString();
             ExchangeOperation op = verifierClient.ipex().submitAgree(
                     verifierAid.name, result.exn(), result.sigs(), Collections.singletonList(holderAid.prefix)
             );
             waitForCompleted(verifierClient, op);
+            waitAndMarkNotification(verifierClient, "/exn" + IPEX_AGREE_ROUTE, agreeSaid);
         });
 
         testSteps.step("Holder IPEX receive agree and grant/present", () -> {
-            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_AGREE_ROUTE);
+            List<Notification> holderNotifications =
+                    waitForNotifications(holderClient, "/exn" + IPEX_AGREE_ROUTE, agreeSaid);
+            assertEquals(1, holderNotifications.size());
             Notification holderAgreeNote = holderNotifications.getFirst();
             assertNotNull(holderAgreeNote.getA().getD());
 
             IpexAgreeExchange agree = verifierClient.exchanges().get(holderAgreeNote.getA().getD(), IpexAgreeExchange.class).orElseThrow();
-            agreeSaid = agree.exn().getD();
+            assertEquals(agreeSaid, agree.exn().getD());
             String agreeP = agree.exn().getP();
 
             assertEquals(offerSaid, agreeP);
@@ -397,23 +422,27 @@ public class CredentialsTest extends BaseIntegrationTest {
             grantArgs.setAcdcAttachment(atc);
             grantArgs.setAncAttachment(ancatc.getFirst());
             grantArgs.setIssAttachment(issAtc);
-            grantArgs.setAgreeSaid(agreeSaid);
+            grantArgs.setAgreeSaid(holderAgreeNote.getA().getD());
             grantArgs.setDatetime(createTimestamp());
 
             Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
+            presentationGrantSaid = result.exn().getKed().get("d").toString();
 
             ExchangeOperation op = holderClient.ipex().submitGrant(
                     holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(verifierAid.prefix)
             );
             waitForCompleted(holderClient, op);
+            waitAndMarkNotification(holderClient, "/exn" + IPEX_GRANT_ROUTE, presentationGrantSaid);
         });
 
         testSteps.step("Verifier receives IPEX grant", () -> {
-            List<Notification> verifierNotifications = waitForNotifications(verifierClient, "/exn" + IPEX_GRANT_ROUTE);
+            List<Notification> verifierNotifications =
+                    waitForNotifications(verifierClient, "/exn" + IPEX_GRANT_ROUTE, presentationGrantSaid);
+            assertEquals(1, verifierNotifications.size());
             Notification verifierGrantNote = verifierNotifications.getFirst();
             assertNotNull(verifierGrantNote.getA().getD());
 
-            IpexGrantExchange grant = holderClient.exchanges().get(verifierGrantNote.getA().getD(), IpexGrantExchange.class).orElseThrow();
+            IpexGrantExchange grant = verifierClient.exchanges().get(verifierGrantNote.getA().getD(), IpexGrantExchange.class).orElseThrow();
             String p = grant.exn().getP();
 
             assertEquals(agreeSaid, p);
@@ -426,10 +455,12 @@ public class CredentialsTest extends BaseIntegrationTest {
             admitArgs.setDatetime(createTimestamp());
 
             Exchanging.ExchangeMessageResult result = verifierClient.ipex().admit(admitArgs);
+            presentationAdmitSaid = result.exn().getKed().get("d").toString();
             ExchangeOperation op = verifierClient.ipex().submitAdmit(
                     verifierAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
             );
             waitForCompleted(verifierClient, op);
+            waitAndMarkNotification(verifierClient, "/exn" + IPEX_ADMIT_ROUTE, presentationAdmitSaid);
             markAndRemoveNotification(verifierClient, verifierGrantNote);
             Credential verifierCredential = verifierClient.credentials().get(qviCredentialId).get();
 
@@ -442,10 +473,14 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertEquals(QVI_SCHEMA_SAID, s);
             assertEquals(issuerAid.prefix, i);
             assertEquals("0", sStatus);
+
+            assertNoNotifications(verifierClient, "/exn" + IPEX_GRANT_ROUTE, presentationGrantSaid);
         });
 
         testSteps.step("Holder IPEX present response", () -> {
-            List<Notification> holderNotifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
+            List<Notification> holderNotifications =
+                    waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE, presentationAdmitSaid);
+            assertEquals(1, holderNotifications.size());
             markAndRemoveNotification(holderClient, holderNotifications.getFirst());
         });
 
@@ -520,15 +555,20 @@ public class CredentialsTest extends BaseIntegrationTest {
             grantArgs.setDatetime(dt);
 
             Exchanging.ExchangeMessageResult result = holderClient.ipex().grant(grantArgs);
+            leGrantSaid = result.exn().getKed().get("d").toString();
             ExchangeOperation op = holderClient.ipex().submitGrant(
                     holderAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(legalEntityAid.prefix)
             );
             waitForCompleted(holderClient, op);
+            waitAndMarkNotification(holderClient, "/exn" + IPEX_GRANT_ROUTE, leGrantSaid);
         });
 
         testSteps.step("Legal Entity IPEX admit", () -> {
-            List<Notification> notifications = waitForNotifications(legalEntityClient, "/exn" + IPEX_GRANT_ROUTE);
+            List<Notification> notifications =
+                    waitForNotifications(legalEntityClient, "/exn" + IPEX_GRANT_ROUTE, leGrantSaid);
+            assertEquals(1, notifications.size());
             Notification grantNotification = notifications.getFirst();
+            assertNotNull(grantNotification.getA().getD());
 
             IpexAdmitArgs admitArgs = IpexAdmitArgs.builder().build();
             admitArgs.setSenderName(legalEntityAid.name);
@@ -538,15 +578,19 @@ public class CredentialsTest extends BaseIntegrationTest {
             admitArgs.setDatetime(createTimestamp());
 
             Exchanging.ExchangeMessageResult result = legalEntityClient.ipex().admit(admitArgs);
+            leAdmitSaid = result.exn().getKed().get("d").toString();
             ExchangeOperation op = legalEntityClient.ipex().submitAdmit(
                     legalEntityAid.name, result.exn(), result.sigs(), result.atc(), Collections.singletonList(holderAid.prefix)
             );
             waitForCompleted(legalEntityClient, op);
+            waitAndMarkNotification(legalEntityClient, "/exn" + IPEX_ADMIT_ROUTE, leAdmitSaid);
             markAndRemoveNotification(legalEntityClient, grantNotification);
         });
 
         testSteps.step("LE credential IPEX grant response", () -> {
-            List<Notification> notifications = waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE);
+            List<Notification> notifications =
+                    waitForNotifications(holderClient, "/exn" + IPEX_ADMIT_ROUTE, leAdmitSaid);
+            assertEquals(1, notifications.size());
             markAndRemoveNotification(holderClient, notifications.getFirst());
         });
 
@@ -570,6 +614,8 @@ public class CredentialsTest extends BaseIntegrationTest {
             assertEquals("0", status.getS());
             assertEquals(qviCredentialId, sadInChains.get("d").toString());
             assertNotNull(atc);
+
+            assertNoNotifications(legalEntityClient, "/exn" + IPEX_GRANT_ROUTE, leGrantSaid);
         });
 
         testSteps.step("Issuer revoke QVI credential", () -> {

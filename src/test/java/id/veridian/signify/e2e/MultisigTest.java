@@ -754,6 +754,10 @@ public class MultisigTest extends BaseIntegrationTest {
         System.out.println("Member3 joined grant message, waiting for others to join...");
 
         msgSaid = waitAndMarkNotification(client4, "/exn/ipex/grant");
+        String groupGrantSaid = msgSaid;
+        waitAndMarkNotification(client1, "/exn/ipex/grant", groupGrantSaid);
+        waitAndMarkNotification(client2, "/exn/ipex/grant", groupGrantSaid);
+        waitAndMarkNotification(client3, "/exn/ipex/grant", groupGrantSaid);
         System.out.println("Holder received exchange message with the grant message");
         ExchangeResource exnRes = client4.exchanges().get(msgSaid).get();
 
@@ -778,13 +782,15 @@ public class MultisigTest extends BaseIntegrationTest {
         );
         System.out.println("Holder creates and sends admit message");
 
+        waitAndMarkNotification(client4, "/exn/ipex/admit", admit.getKed().get("d").toString());
+        drainNotifications(client4, "/exn/ipex/grant", groupGrantSaid);
         waitAndMarkNotification(client1, "/exn/ipex/admit");
         System.out.println("Member1 received exchange message with the admit response");
         List<Credential> creds = client4.credentials().list(CredentialFilter.builder().build());
         System.out.println("Holder holds " + creds.size() + " credential");
 
         assertOperations(List.of(client1, client2, client3, client4));
-        warnNotifications(List.of(client1, client2, client3, client4));
+        assertNotifications(List.of(client1, client2, client3, client4));
 
         System.out.println("Revoking credential...");
         String REVTIME = Utils.currentDateTimeString();
